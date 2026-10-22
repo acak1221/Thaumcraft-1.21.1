@@ -12,10 +12,15 @@ OUT.mkdir(parents=True, exist_ok=True)
 ledger = json.loads((ROOT / 'docs/porting/scope-ledger.json').read_text())
 units = ledger['units']
 corpus = {str(p.relative_to(ORACLE)): p.read_text() for p in sorted(ORACLE.rglob('*.java'))}
+identifier_index = collections.defaultdict(list)
+for path, text in corpus.items():
+    for line_number, line in enumerate(text.splitlines(), 1):
+        record = (path, line_number, line.strip())
+        for identifier in set(re.findall(r'\b[A-Za-z_]\w*\b', line)):
+            identifier_index[identifier].append(record)
 
 def hits(term):
-    pattern = re.compile(r'\b' + re.escape(term) + r'\b')
-    return [(p, i, s.strip()) for p, t in corpus.items() for i, s in enumerate(t.splitlines(), 1) if pattern.search(s)]
+    return identifier_index.get(term, [])
 
 counts = dict(original_units=sum(bool(u['original']) for u in units),
               legacy_units=sum(bool(u['legacy']) for u in units), union_rows=len(units),

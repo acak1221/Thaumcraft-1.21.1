@@ -4459,7 +4459,7 @@
           "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 the native bootstrap that registers the entity renderers, block entity renderers, screens, render types and item colours",
           "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87 renderHud, common/src/main/java/thaumcraft/client/fx/particles/ResourceParticle.java:79 the particle-count gate",
           "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 replaces the single FML proxy with the native bootstrap and the purpose specific Thaumcraft*Client classes",
-          "the two facade effects that the earlier audit named as missing are in the native tree: the smoke spiral (ClientSetup.java:86/93), the arc lightning (ThaumcraftEldritchClient.java:51), the beam of the excavation focus (ThaumcraftExcavationClient.java:35), the beam of the arcane bore (TileArcaneBoreRenderer.java:31) and the beam of the relay (TileVisRelayRenderer.java:39)",
+          "the earlier missing-facade claims are superseded: native common/src/main/java/thaumcraft/client/ClientSetup.java:98,105 calls the smoke spirals, common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:25 installs the golem arc hook, and common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:42 draws the relay beam",
           "the three facade effects that the earlier audit named as missing are dead in the original: the generic beam (oracle thaumcraft/client/ClientProxy.java:696-698 has no caller), the soul trail (ClientProxy.java:773, no caller) and the fire scorch (thaumcraft/client/lib/UtilsFX.java:110, no caller)",
           "oracle thaumcraft/client/ClientProxy.java:464-517 setupEntityRenderers registers a renderer for every entity the original adds; the native mirror is common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java with the 56 entity types of the port and the 56 (entity type, renderer) bindings, registered by ClientSetup.init()",
           "the seven entity types the client smoke found without a renderer (bottle_taint, golem_orb, primal_arrow, taint_crawler, taint_seed, taint_seed_prime, taintacle_giant) now have one: the native table binds them to the vanilla ThrownItemRenderer, to RenderGolemOrb, to RenderPrimalArrowEntity, to RenderTaintCrawler, to RenderTaintSeed and to RenderTaintacle(1.0F,14) (oracle ClientProxy.java:476,488,494,513 and the 1.12.2 backport ProxyEntities.java:199-201)",
@@ -4778,11 +4778,11 @@
           "oracle thaumcraft/client/ClientProxy.java:1152-1159 arcLightning() creates the FXArc and adds it to the effect list",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302 calls Thaumcraft.proxy.arcLightning(...) during the arcing phase",
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:64 calls Thaumcraft.proxy.arcLightning(...)",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:51 renders the golem arc; the old no-reader claim was superseded by the client FX port",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:25 installs the golem arc hook; the old no-reader claim was superseded by the client FX port",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:40-42 keeps the half width 0.25 and the alpha 0.8 of the original FXArc:87/95",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:63 keeps the arc points of the original FXArc:41-61 (gravity 0.115, noise 0.25, at most fifty steps)",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:106 keeps the original UV quirk of FXArc:113 (the index of the point over the length of the arc)",
-          "native common/src/main/java/thaumcraft/client/fx/BlockFxClientEffects.java:62 and common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:51 call the arc, the two callers of the original (oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302 and thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:64)"
+          "native common/src/main/java/thaumcraft/client/fx/BlockFxClientEffects.java:63 calls FXArc.arc and common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:25 installs the golem arc hook; these serve the original block-arc and golem effects"
         ],
         "notes": [
           "Historical no-ribbon claim withdrawn: common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:86 creates the native FXArc.",
@@ -6131,7 +6131,7 @@
           "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:79 creates the smoke spiral; the client callers are cited below, not in the server entity/item classes",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:103-118 keeps the turn of 720 degrees, the polar angle of 90 to -90 degrees and the radius of the original FXSmokeSpiral:46-53",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:39/59 keeps the alpha of 0.66 and the half size of 0.15 of the original FXSmokeSpiral:44/58",
-          "native common/src/main/java/thaumcraft/client/ClientSetup.java:86/93 calls the spiral, the two callers of the original (oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:191 and thaumcraft/common/items/equipment/ItemElementalSword.java:133)"
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:98,105 calls the elemental-sword and warden smoke spirals"
         ],
         "notes": [
           "Historical missing-spiral claim withdrawn: common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:79 creates the native effect, with the client callers cited below.",
@@ -25288,7 +25288,7 @@
           "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:142 the native mirror drops a plain BlockItem and keeps the link of a linked mirror in the CustomData component"
         ],
         "notes": [
-          "The legacy ItemBlocks package is a relocation, not proof of no original behavior: the counterpart is oracle thaumcraft/common/blocks/BlockMirrorItem.java:40, tracked by its own canonical ledger row.",
+          "The legacy ItemBlocks package is a relocation, not proof of no original behavior: the counterpart is oracle thaumcraft/common/blocks/BlockMirrorItem.java:51-59, tracked by its own canonical ledger row.",
           "This duplicate legacy path is excluded only as a duplicate; the original mirror item remains in scope under thaumcraft/common/blocks/BlockMirrorItem.java.",
           "Native mirror links use a data component; this does not erase the original item behavior obligation."
         ],

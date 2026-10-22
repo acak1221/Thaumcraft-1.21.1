@@ -1,0 +1,2422 @@
+[
+  {
+    "number": 1,
+    "unit": "thaumcraft/client/fx/particles/FXBoreSparkle.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/ClientProxy.java:866 boreDigFx spawns FXBoreSparkle in one of ten digs",
+    "citations": [
+      "oracle thaumcraft/client/ClientProxy.java:866"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 2,
+    "unit": "thaumcraft/client/fx/particles/FXBoreSparkle.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 6,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:673 the native client tick calls the dig effect when the dig target of the server arrives with the block entity update",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:673"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 3,
+    "unit": "thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:25 the 1.7 renderer draws the retained thaumatorium.obj model",
+    "citations": [
+      "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:25"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 4,
+    "unit": "thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:23 the native OBJ loader reads the retained asset and is never referenced",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:23"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 5,
+    "unit": "thaumcraft/common/container/ContainerThaumatorium.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/container/ContainerThaumatorium.java:96 the quick move of the catalyst slot",
+    "citations": [
+      "oracle thaumcraft/common/container/ContainerThaumatorium.java:96"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 6,
+    "unit": "thaumcraft/common/container/ContainerThaumatorium.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:199 thaumatoriumQuickMove(...) keeps the original range",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:199"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 7,
+    "unit": "thaumcraft/common/tiles/TileArcaneBoreBase.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileArcaneBoreBase.java:1 the 1.7 stockless Perditio suction endpoint of the bore base",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileArcaneBoreBase.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 8,
+    "unit": "thaumcraft/common/tiles/TileArcaneBoreBase.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBoreBase.java:11 the native base is a stockless suction endpoint",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBoreBase.java:11"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 9,
+    "unit": "thaumcraft/common/tiles/TileMagicBox.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileMagicBox.java:45 the size of the box is 27 * (linkedBoxes + 1)",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileMagicBox.java:45"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 10,
+    "unit": "thaumcraft/common/tiles/TileMagicBox.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:669 magicBoxSize(...) keeps the 27 per box rule",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:669"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 11,
+    "unit": "thaumcraft/common/tiles/TileWarded.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileWarded.java:1 the 1.7 warded tile that keeps the remembered block and owner",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileWarded.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 12,
+    "unit": "thaumcraft/common/tiles/TileWarded.java",
+    "family": "advanced_devices_and_visnet",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileWarded.java:1 the native tile keeps the block state and the owner",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileWarded.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 13,
+    "unit": "thaumcraft/api/crafting/CrucibleRecipe.java",
+    "family": "alchemy_and_essentia",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/crafting/CrucibleRecipe.java:31-47 matches(): catalyst test first, then per-aspect cost >= recipe cost",
+    "citations": [
+      "oracle thaumcraft/api/crafting/CrucibleRecipe.java:31-47"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 14,
+    "unit": "thaumcraft/api/crafting/CrucibleRecipe.java",
+    "family": "alchemy_and_essentia",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java:48-59 matches()/removeMatching() implement the same two rules",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java:48-59"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 15,
+    "unit": "thaumcraft/client/renderers/tile/TileBellowsRenderer.java",
+    "family": "alchemy_and_essentia",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/renderers/tile/TileBellowsRenderer.java:30-84 six-way orientation transforms and the asymmetric inflation",
+    "citations": [
+      "oracle thaumcraft/client/renderers/tile/TileBellowsRenderer.java:30-84"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 16,
+    "unit": "thaumcraft/client/renderers/tile/TileBellowsRenderer.java",
+    "family": "alchemy_and_essentia",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/tile/TileBellowsRenderer.java:24-37 reproduces the six orientations and the (0.125+scale*0.875)/2-0.5 displacement",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileBellowsRenderer.java:24-37"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 17,
+    "unit": "thaumcraft/common/blocks/ItemJarNode.java",
+    "family": "alchemy_and_essentia",
+    "index": 1,
+    "claim": "oracle thaumcraft/common/blocks/BlockJar.java:184-193 the drop of the node jar carries them",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockJar.java:184-193"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 18,
+    "unit": "thaumcraft/common/blocks/ItemJarNode.java",
+    "family": "alchemy_and_essentia",
+    "index": 4,
+    "claim": "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:525-538 the drop of the node jar carries the block entity data of the tile",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:525-538"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 19,
+    "unit": "thaumcraft/common/tiles/TileAlembic.java",
+    "family": "alchemy_and_essentia",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileAlembic.java:44 maxAmount 32, aspect + amount container, aspectFilter label",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileAlembic.java:44"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 20,
+    "unit": "thaumcraft/common/tiles/TileAlembic.java",
+    "family": "alchemy_and_essentia",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileAlembic.java:25 CAPACITY = 32 and :75-93 the same add/take rules",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileAlembic.java:25"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 21,
+    "unit": "thaumcraft/common/tiles/TileJarBrain.java",
+    "family": "alchemy_and_essentia",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileJarBrain.java:13-14 xp and xpMax 2000",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileJarBrain.java:13-14"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 22,
+    "unit": "thaumcraft/common/tiles/TileJarBrain.java",
+    "family": "alchemy_and_essentia",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:38-66 keeps the radius 7, the pull factors and the 2000 cap",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:38-66"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 23,
+    "unit": "thaumcraft/common/tiles/TileJarNode.java",
+    "family": "alchemy_and_essentia",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileJarNode.java:99-144 the node jar keeps the aspects, the base aspects, the node type, the modifier and the node id",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileJarNode.java:99-144"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 24,
+    "unit": "thaumcraft/common/tiles/TileJarNode.java",
+    "family": "alchemy_and_essentia",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:110-133 stores the same five pieces of data",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:110-133"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 25,
+    "unit": "thaumcraft/api/aspects/AspectSourceHelper.java",
+    "family": "aspect_contracts_and_data",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/aspects/AspectSourceHelper.java:21 drainEssentia(TileEntity, Aspect, ForgeDirection, int)",
+    "citations": [
+      "oracle thaumcraft/api/aspects/AspectSourceHelper.java:21"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 26,
+    "unit": "thaumcraft/api/aspects/AspectSourceHelper.java",
+    "family": "aspect_contracts_and_data",
+    "index": 4,
+    "claim": "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:19 drainEssentia(BlockEntity, Aspect, Direction, int)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:19"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 27,
+    "unit": "thaumcraft/api/aspects/IAspectContainer.java",
+    "family": "aspect_contracts_and_data",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/aspects/IAspectContainer.java:10-28 the nine methods including the two deprecated ones",
+    "citations": [
+      "oracle thaumcraft/api/aspects/IAspectContainer.java:10-28"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 28,
+    "unit": "thaumcraft/api/aspects/IAspectContainer.java",
+    "family": "aspect_contracts_and_data",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/aspects/IAspectContainer.java:5-13 the same nine methods, the deprecated ones kept",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/aspects/IAspectContainer.java:5-13"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 29,
+    "unit": "thaumcraft/api/aspects/IAspectSource.java",
+    "family": "aspect_contracts_and_data",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/aspects/IAspectSource.java:8 public interface IAspectSource extends IAspectContainer",
+    "citations": [
+      "oracle thaumcraft/api/aspects/IAspectSource.java:8"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 30,
+    "unit": "thaumcraft/api/aspects/IAspectSource.java",
+    "family": "aspect_contracts_and_data",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/aspects/IAspectSource.java:4 public interface IAspectSource extends IAspectContainer {}",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/aspects/IAspectSource.java:4"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 31,
+    "unit": "thaumcraft/api/aspects/IEssentiaContainerItem.java",
+    "family": "aspect_contracts_and_data",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/aspects/IEssentiaContainerItem.java:13 getAspects(ItemStack) / :15 setAspects(ItemStack, AspectList)",
+    "citations": [
+      "oracle thaumcraft/api/aspects/IEssentiaContainerItem.java:13"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 32,
+    "unit": "thaumcraft/api/aspects/IEssentiaContainerItem.java",
+    "family": "aspect_contracts_and_data",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/aspects/IEssentiaContainerItem.java:7 getAspects(ItemStack stack) / :8 setAspects(ItemStack stack, AspectList aspects)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/aspects/IEssentiaContainerItem.java:7"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 33,
+    "unit": "thaumcraft/common/blocks/BlockAiry.java",
+    "family": "base_content_and_small_interactions",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/blocks/BlockAiry.java:115-155 the per metadata hardness (2, 100, -1), explosion resistance (200, 50, MAX_VALUE) and light (15, 0, 8)",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockAiry.java:115-155"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 34,
+    "unit": "thaumcraft/common/blocks/BlockAiry.java",
+    "family": "base_content_and_small_interactions",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:405-416 AIRY_GROUP_HARDNESS {0,2,100,-1} and AIRY_GROUP_RESISTANCE {0,200,50,MAX}",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:405-416"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 35,
+    "unit": "thaumcraft/common/blocks/BlockCosmeticWoodSlab.java",
+    "family": "base_content_and_small_interactions",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/blocks/BlockCosmeticWoodSlab.java:22-46 the slab of the magical wood family",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticWoodSlab.java:22-46"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 36,
+    "unit": "thaumcraft/common/blocks/BlockCosmeticWoodSlab.java",
+    "family": "base_content_and_small_interactions",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:43 registers greatwood and silverwood slabs with strength(2,3)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:43"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 37,
+    "unit": "thaumcraft/common/blocks/BlockFluxGasItem.java",
+    "family": "base_content_and_small_interactions",
+    "index": 2,
+    "claim": "oracle thaumcraft/common/config/ConfigBlocks.java:296 the flux gas is registered with the item class BlockFluxGasItem",
+    "citations": [
+      "oracle thaumcraft/common/config/ConfigBlocks.java:296"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 38,
+    "unit": "thaumcraft/common/blocks/BlockFluxGasItem.java",
+    "family": "base_content_and_small_interactions",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:30 the native gas block",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:30"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 39,
+    "unit": "thaumcraft/common/blocks/BlockMetalDevice.java",
+    "family": "base_content_and_small_interactions",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/blocks/BlockMetalDevice.java:101 setHardness(3.0f)",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockMetalDevice.java:101"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 40,
+    "unit": "thaumcraft/common/blocks/BlockMetalDevice.java",
+    "family": "base_content_and_small_interactions",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:572 the hardness 3.0",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:572"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 41,
+    "unit": "thaumcraft/common/items/ItemKey.java",
+    "family": "base_content_and_small_interactions",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/items/ItemKey.java:62-72 the iron and the gold key with the metadata suffix name and the uncommon rarity",
+    "citations": [
+      "oracle thaumcraft/common/items/ItemKey.java:62-72"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 42,
+    "unit": "thaumcraft/common/items/ItemKey.java",
+    "family": "base_content_and_small_interactions",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/items/ItemKey.java:30-95 keeps the two key types, the KEY_LINK component and the access grant",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/ItemKey.java:30-95"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 43,
+    "unit": "thaumcraft/common/items/relics/ItemSanityChecker.java",
+    "family": "base_content_and_small_interactions",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/items/relics/ItemSanityChecker.java:16-40 the stack limit 1 and the uncommon rarity",
+    "citations": [
+      "oracle thaumcraft/common/items/relics/ItemSanityChecker.java:16-40"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 44,
+    "unit": "thaumcraft/common/items/relics/ItemSanityChecker.java",
+    "family": "base_content_and_small_interactions",
+    "index": 6,
+    "claim": "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java:21-40 the native relic and the reading of the warp",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java:21-40"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 45,
+    "unit": "thaumcraft/client/ClientProxy.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/ClientProxy.java:371-377 registerHandlers, :385-439 getClientGuiElement (gui ids 0..20), :453-462 setupItemRenderers, :464-517 setupEntityRenderers, :519-571 setupTileRenderers, :573-616 setupBlockRenderers",
+    "citations": [
+      "oracle thaumcraft/client/ClientProxy.java:371-377"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 46,
+    "unit": "thaumcraft/client/ClientProxy.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 the native bootstrap that registers the entity renderers, block entity renderers, screens, render types and item colours",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 47,
+    "unit": "thaumcraft/client/fx/particles/FXBurst.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/fx/particles/FXBurst.java:32-34,44-45 the size scaling, the 31 tick lifetime, the node strip texture and glColor4f alpha 0.75",
+    "citations": [
+      "oracle thaumcraft/client/fx/particles/FXBurst.java:32-34,44-45"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 48,
+    "unit": "thaumcraft/client/fx/particles/FXBurst.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:39-40 'Exact FXBurst constructor entry, shared by the original Wisp/ShockOrb clients.'",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:39-40"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 49,
+    "unit": "thaumcraft/client/lib/PlayerNotifications.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/lib/PlayerNotifications.java:24-31 addNotification stores (text,image,expire=now+delay+bonus,created=now+delay/4,color)",
+    "citations": [
+      "oracle thaumcraft/client/lib/PlayerNotifications.java:24-31"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 50,
+    "unit": "thaumcraft/client/lib/PlayerNotifications.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:20-24 the same delay/2 first-entry bonus and the same queue",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:20-24"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 51,
+    "unit": "thaumcraft/client/renderers/entity/RenderElectricOrb.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/renderers/entity/RenderElectricOrb.java:1-78 the electric orb renderer shared by the golem orb and the shock orb",
+    "citations": [
+      "oracle thaumcraft/client/renderers/entity/RenderElectricOrb.java:1-78"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 52,
+    "unit": "thaumcraft/client/renderers/entity/RenderElectricOrb.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java:40-43 keeps the strip start (1 + ticks % 6) / 8, the step 0.125, the rows 0.875 and 0.75 of the red golem orb and the bob sin(ticks / 5) * 0.2 + 0.2 of the original RenderElectricOrb:29-44",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java:40-43"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 53,
+    "unit": "thaumcraft/client/renderers/models/ModelVoidRobe.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/renderers/models/ModelVoidRobe.java:25-... a second robe model with hood, chest plate, belt and cloth parts",
+    "citations": [
+      "oracle thaumcraft/client/renderers/models/ModelVoidRobe.java:25"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 54,
+    "unit": "thaumcraft/client/renderers/models/ModelVoidRobe.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelRobe.java:8-16 'Original ModelRobe86-411 ... the taumaturge robe of the cultists and of the void thaumaturge'",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelRobe.java:8-16"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 55,
+    "unit": "thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:1-98 the relay with the RingBase/RingFloat/Crystal OBJ parts and the power beam",
+    "citations": [
+      "oracle thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:1-98"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 56,
+    "unit": "thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
+    "family": "client_rendering_fx_input_and_gui",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39 the beam, and common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java the bounded OBJ adapter",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 57,
+    "unit": "thaumcraft/common/entities/EntityAspectOrb.java",
+    "family": "creatures_and_projectiles",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/entities/EntityAspectOrb.java:45 orbMaxAge 150, :47 orbHealth 5",
+    "citations": [
+      "oracle thaumcraft/common/entities/EntityAspectOrb.java:45"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 58,
+    "unit": "thaumcraft/common/entities/EntityAspectOrb.java",
+    "family": "creatures_and_projectiles",
+    "index": 4,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/research/AspectOrbRules.java:10 EMISSION_INTERVAL = 100, MAX_AGE = 150, STABILITY_ROLL = 42; RANGE = 8D; GRAVITY = .03F",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/research/AspectOrbRules.java:10"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 59,
+    "unit": "thaumcraft/common/container/ContainerDeconstructionTable.java",
+    "family": "device_and_menu_routing_review",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/container/ContainerDeconstructionTable.java:82 the quick move ranges of the table",
+    "citations": [
+      "oracle thaumcraft/common/container/ContainerDeconstructionTable.java:82"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 60,
+    "unit": "thaumcraft/common/container/ContainerDeconstructionTable.java",
+    "family": "device_and_menu_routing_review",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:177 deconstructionQuickMove(...) keeps the original ranges",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:177"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 61,
+    "unit": "thaumcraft/common/container/SlotGhostFluid.java",
+    "family": "device_and_menu_routing_review",
+    "index": 2,
+    "claim": "oracle thaumcraft/common/container/SlotGhostFluid.java:30 isItemValid asks the Forge FluidContainerRegistry",
+    "citations": [
+      "oracle thaumcraft/common/container/SlotGhostFluid.java:30"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 62,
+    "unit": "thaumcraft/common/container/SlotGhostFluid.java",
+    "family": "device_and_menu_routing_review",
+    "index": 5,
+    "claim": "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java:33-40 the slot accepts every native fluid container, a bucket of the vanilla or the item of an add-on that carries the bucket entity data, and never gives the container back",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java:33-40"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 63,
+    "unit": "thaumcraft/common/tiles/TileBrainbox.java",
+    "family": "device_and_menu_routing_review",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileBrainbox.java:1 the 1.7 brainbox that points at the machine half it serves",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileBrainbox.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 64,
+    "unit": "thaumcraft/common/tiles/TileBrainbox.java",
+    "family": "device_and_menu_routing_review",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileBrainbox.java:1 the native brainbox keeps the face of the machine half",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileBrainbox.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 65,
+    "unit": "thaumcraft/common/tiles/TileHole.java",
+    "family": "device_and_menu_routing_review",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileHole.java:1 the 1.7 hole that replaces a block and restores it later",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileHole.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 66,
+    "unit": "thaumcraft/common/tiles/TileHole.java",
+    "family": "device_and_menu_routing_review",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileHole.java:1 the native hole keeps the replaced block, the lifetime and the chain",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileHole.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 67,
+    "unit": "thaumcraft/common/tiles/TileNitor.java",
+    "family": "device_and_menu_routing_review",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileNitor.java:18 the 1.7 nitor draws fire essentia from the vis network",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileNitor.java:18"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 68,
+    "unit": "thaumcraft/common/tiles/TileNitor.java",
+    "family": "device_and_menu_routing_review",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileNitor.java:1 the native nitor exists as a source",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileNitor.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 69,
+    "unit": "thaumcraft/common/tiles/TileWardingStoneFence.java",
+    "family": "device_and_menu_routing_review",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileWardingStoneFence.java:18 the fence needs a warding stone below it",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileWardingStoneFence.java:18"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 70,
+    "unit": "thaumcraft/common/tiles/TileWardingStoneFence.java",
+    "family": "device_and_menu_routing_review",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileWardingStoneFence.java:1 the native fence keeps that rule",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileWardingStoneFence.java:1"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 71,
+    "unit": "thaumcraft/api/entities/IEldritchMob.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/entities/IEldritchMob.java:8-9 empty marker interface",
+    "citations": [
+      "oracle thaumcraft/api/entities/IEldritchMob.java:8-9"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 72,
+    "unit": "thaumcraft/api/entities/IEldritchMob.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/entities/IEldritchMob.java:3 empty marker interface",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/entities/IEldritchMob.java:3"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 73,
+    "unit": "thaumcraft/client/renderers/models/ModelEldritchCrystal.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 2,
+    "claim": "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:27 and :37 the crystal is the Crystal and the Base group of the wavefront file thaumcraft/textures/models/vcrystal.obj",
+    "citations": [
+      "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:27"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 74,
+    "unit": "thaumcraft/client/renderers/models/ModelEldritchCrystal.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 the native model of the eldritch crystal",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 75,
+    "unit": "thaumcraft/common/blocks/BlockEldritch.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/blocks/BlockEldritch.java:120-135 the per metadata light 12/5/4/0/8",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockEldritch.java:120-135"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 76,
+    "unit": "thaumcraft/common/blocks/BlockEldritch.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 5,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:43-100 the same light, hardness and resistance tables",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:43-100"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 77,
+    "unit": "thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:27-37 the cleared spawn lists and the two monster rows",
+    "citations": [
+      "oracle thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:27-37"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 78,
+    "unit": "thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:84 the two monster rows with weight one",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:84"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 79,
+    "unit": "thaumcraft/common/lib/world/dim/MapBossData.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/world/dim/MapBossData.java:1-29 the shared boss room data",
+    "citations": [
+      "oracle thaumcraft/common/lib/world/dim/MapBossData.java:1-29"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 80,
+    "unit": "thaumcraft/common/lib/world/dim/MapBossData.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1027-1073 the native boss room generation",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1027-1073"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 81,
+    "unit": "thaumcraft/common/tiles/TileEldritchTrap.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileEldritchTrap.java:1-45 the runed eldritch trap",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileEldritchTrap.java:1-45"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 82,
+    "unit": "thaumcraft/common/tiles/TileEldritchTrap.java",
+    "family": "eldritch_and_outer_lands",
+    "index": 3,
+    "claim": "port common/src/main/java/thaumcraft/common/tiles/TileEldritchTrap.java:27-58 now draws the warp of the original after the damage and searches the sphere of the original",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileEldritchTrap.java:27-58"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 83,
+    "unit": "thaumcraft/codechicken/lib/math/MathHelper.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/entities/projectile/EntityShockOrb.java:23 imports thaumcraft.codechicken.lib.math.MathHelper and :54-56 calls MathHelper.floor_double",
+    "citations": [
+      "oracle thaumcraft/common/entities/projectile/EntityShockOrb.java:23"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 84,
+    "unit": "thaumcraft/codechicken/lib/math/MathHelper.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/entities/projectile/EntityShockOrb.java:95-98 the same floor computation with Mth.floor",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/entities/projectile/EntityShockOrb.java:95-98"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 85,
+    "unit": "thaumcraft/codechicken/lib/raytracer/IndexedCuboid6.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileTube.java:372-393 six per-direction IndexedCuboid6 arms plus the 0.34375..0.65625 core",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileTube.java:372-393"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 86,
+    "unit": "thaumcraft/codechicken/lib/raytracer/IndexedCuboid6.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:12-19 the same six ARMS boxes and the CORE box",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:12-19"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 87,
+    "unit": "thaumcraft/codechicken/lib/raytracer/RayTracer.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileTube.java:316 RayTracer.retraceBlock(world, player, x, y, z) and :372-393 addTraceableCuboids",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileTube.java:316"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 88,
+    "unit": "thaumcraft/codechicken/lib/raytracer/RayTracer.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:38-58 trace()/retrace() reimplement the indexed cuboid ray trace with native AABB.clip",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:38-58"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 89,
+    "unit": "thaumcraft/codechicken/lib/vec/BlockCoord.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/blocks/BlockTube.java:64,370 new BlockCoord(x, y, z) is the ray trace origin block",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockTube.java:64,370"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 90,
+    "unit": "thaumcraft/codechicken/lib/vec/BlockCoord.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:38-58 the trace takes a native BlockPos",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:38-58"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 91,
+    "unit": "thaumcraft/codechicken/lib/vec/Cuboid6.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileTube.java:35 and :376-393 the Cuboid6 arm/core boxes",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileTube.java:35"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 92,
+    "unit": "thaumcraft/codechicken/lib/vec/Cuboid6.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:12-19 the same boxes as native AABBs",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:12-19"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 93,
+    "unit": "thaumcraft/codechicken/lib/vec/Vector3.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/blocks/BlockTube.java:65,370 new Vector3(start)/new Vector3(end) are the ray trace endpoints",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockTube.java:65,370"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 94,
+    "unit": "thaumcraft/codechicken/lib/vec/Vector3.java",
+    "family": "embedded_support_and_dependencies",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:59 the native Vec3 start/end",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:59"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 95,
+    "unit": "thaumcraft/api/aspects/IEssentiaTransport.java",
+    "family": "essentia_transport",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/aspects/IEssentiaTransport.java:13-35 isConnectable, canInputFrom, canOutputTo, setSuction, getSuctionType, getSuctionAmount, takeEssentia, addEssentia, getEssentiaType, getEssentiaAmount, getMinimumSuction, renderExtendedTube",
+    "citations": [
+      "oracle thaumcraft/api/aspects/IEssentiaTransport.java:13-35"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 96,
+    "unit": "thaumcraft/api/aspects/IEssentiaTransport.java",
+    "family": "essentia_transport",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/aspects/IEssentiaTransport.java:7-18 the same twelve methods",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/aspects/IEssentiaTransport.java:7-18"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 97,
+    "unit": "thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java",
+    "family": "essentia_transport",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java:46 renderTileEntityAt draws the reservoir body and :57 this.renderLiquid(...) draws the stored essentia",
+    "citations": [
+      "oracle thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java:46"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 98,
+    "unit": "thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java",
+    "family": "essentia_transport",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java:47 display aspect / colour state is kept on the tile",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java:47"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 99,
+    "unit": "thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+    "family": "essentia_transport",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/blocks/BlockEssentiaReservoir.java:40 hardness 2.0f, :41 resistance 17.0f, :72 light value 1",
+    "citations": [
+      "oracle thaumcraft/common/blocks/BlockEssentiaReservoir.java:40"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 100,
+    "unit": "thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+    "family": "essentia_transport",
+    "index": 4,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:23 public static int comparator(int units) {{ return (int) Math.floor(ratio * 14.0F) + (units > 0 ? 1 : 0); }}",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:23"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 101,
+    "unit": "thaumcraft/common/tiles/TileEssentiaReservoir.java",
+    "family": "essentia_transport",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/tiles/TileEssentiaReservoir.java:35 maxAmount 256, :164 getMinimumSuction 24, :174 getSuctionAmount 24 while not full",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileEssentiaReservoir.java:35"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 102,
+    "unit": "thaumcraft/common/tiles/TileEssentiaReservoir.java",
+    "family": "essentia_transport",
+    "index": 4,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:9 CAPACITY = 256, SUCTION = 24, PULL_INTERVAL = 5",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:9"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 103,
+    "unit": "thaumcraft/common/tiles/TileTubeFilter.java",
+    "family": "essentia_transport",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/tiles/TileTubeFilter.java:42 getAspects() returns new AspectList().add(this.aspectFilter, -1)",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileTubeFilter.java:42"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 104,
+    "unit": "thaumcraft/common/tiles/TileTubeFilter.java",
+    "family": "essentia_transport",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileTubeFilter.java:16 @Override public AspectList getAspects() {{ return getFilter() == null ? null : new AspectList().add(getFilter(), -1); }}",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileTubeFilter.java:16"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 105,
+    "unit": "thaumcraft/common/tiles/TileTubeValve.java",
+    "family": "essentia_transport",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/tiles/TileTubeValve.java:110 isConnectable returns face != this.facing",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileTubeValve.java:110"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 106,
+    "unit": "thaumcraft/common/tiles/TileTubeValve.java",
+    "family": "essentia_transport",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileTube.java:240 @Override public boolean isConnectable(Direction face) {{ return isSideOpen(face) && (!isValve() || face != facing); }}",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileTube.java:240"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 107,
+    "unit": "thaumcraft/api/IRepairable.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/IRepairable.java:6 empty marker interface",
+    "citations": [
+      "oracle thaumcraft/api/IRepairable.java:6"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 108,
+    "unit": "thaumcraft/api/IRepairable.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/IRepairable.java:4 empty marker interface",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/IRepairable.java:4"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 109,
+    "unit": "thaumcraft/common/container/ContainerFocusPouch.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/container/ContainerFocusPouch.java:47 the eighteen focus slots at 37+slot%6*18, 51+slot/6*18",
+    "citations": [
+      "oracle thaumcraft/common/container/ContainerFocusPouch.java:47"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 110,
+    "unit": "thaumcraft/common/container/ContainerFocusPouch.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/container/ContainerFocusPouch.java:37 the same eighteen slot coordinates",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/container/ContainerFocusPouch.java:37"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 111,
+    "unit": "thaumcraft/common/items/armor/RecipesVoidRobeArmorDyes.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/items/armor/RecipesVoidRobeArmorDyes.java:37-110 the void robe dye recipe (identical to the enchanted robe recipe)",
+    "citations": [
+      "oracle thaumcraft/common/items/armor/RecipesVoidRobeArmorDyes.java:37-110"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 112,
+    "unit": "thaumcraft/common/items/armor/RecipesVoidRobeArmorDyes.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/items/armor/RecipesRobeArmorDyes.java:46 the DyedRobe marker accepts both robe families",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/armor/RecipesRobeArmorDyes.java:46"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 113,
+    "unit": "thaumcraft/common/items/equipment/ItemVoidAxe.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/items/equipment/ItemVoidAxe.java:85-89 the wither of 80 ticks on a left click",
+    "citations": [
+      "oracle thaumcraft/common/items/equipment/ItemVoidAxe.java:85-89"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 114,
+    "unit": "thaumcraft/common/items/equipment/ItemVoidAxe.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidAxe.java:30 the wither through VoidMetal.wither",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidAxe.java:30"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 115,
+    "unit": "thaumcraft/common/items/wands/foci/ItemFocusPrimal.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:89-90 the six clocked costs 50 + random(5)*50",
+    "citations": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:89-90"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 116,
+    "unit": "thaumcraft/common/items/wands/foci/ItemFocusPrimal.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/primal/PrimalFocusRules.java:10-14 the same clock",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/primal/PrimalFocusRules.java:10-14"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 117,
+    "unit": "thaumcraft/common/tiles/TileFocalManipulator.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileFocalManipulator.java:124-172 startCraft (the rank*8 xp, the 200*2^(rank-1) price and the research free admission)",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileFocalManipulator.java:124-172"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 118,
+    "unit": "thaumcraft/common/tiles/TileFocalManipulator.java",
+    "family": "foci_equipment_and_enchantments",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileFocalManipulator.java:110-142 the same admission",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileFocalManipulator.java:110-142"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 119,
+    "unit": "thaumcraft/api/entities/GolemIds.java",
+    "family": "golems_and_tasks",
+    "index": 1,
+    "claim": "oracle thaumcraft/common/entities/golems/ItemGolemCore.java:45-56 the original core metadata 0..11 (fill, empty, gather, harvest, guard, liquid, essentia, lumber, use, butcher, sorting, fish)",
+    "citations": [
+      "oracle thaumcraft/common/entities/golems/ItemGolemCore.java:45-56"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 120,
+    "unit": "thaumcraft/api/entities/GolemIds.java",
+    "family": "golems_and_tasks",
+    "index": 5,
+    "claim": "native common/src/main/java/thaumcraft/common/items/golems/GolemData.java:40-52 the same core ids (NO_CORE=-1, FILL=0 .. FISHING=11)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/golems/GolemData.java:40-52"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 121,
+    "unit": "thaumcraft/common/entities/ai/combat/AIDartAttack.java",
+    "family": "golems_and_tasks",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/entities/ai/combat/AIDartAttack.java:25-27 interval 30 - 8*Air, first delay half, distance 9.0",
+    "citations": [
+      "oracle thaumcraft/common/entities/ai/combat/AIDartAttack.java:25-27"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 122,
+    "unit": "thaumcraft/common/entities/ai/combat/AIDartAttack.java",
+    "family": "golems_and_tasks",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/items/golems/GolemDartRules.java:24-46 interval 30-8*air, firstDelay interval/2, MIN_DISTANCE_SQ 9.0, REACH_FACTOR 0.8",
+    "citations": [
+      "native common/src/main/java/thaumcraft/items/golems/GolemDartRules.java:24-46"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 123,
+    "unit": "thaumcraft/common/entities/ai/interact/AIFish.java",
+    "family": "golems_and_tasks",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/entities/ai/interact/AIFish.java:71 work radius ceil(range/2), :118-120 one catch plus one for every Air upgrade",
+    "citations": [
+      "oracle thaumcraft/common/entities/ai/interact/AIFish.java:71"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 124,
+    "unit": "thaumcraft/common/entities/ai/interact/AIFish.java",
+    "family": "golems_and_tasks",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/items/golems/GolemUpgrades.java:211-231 fishJunkBase/fishTreasureBase/fishCategory/fishCatches",
+    "citations": [
+      "native common/src/main/java/thaumcraft/items/golems/GolemUpgrades.java:211-231"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 125,
+    "unit": "thaumcraft/common/entities/ai/inventory/AIItemPickup.java",
+    "family": "golems_and_tasks",
+    "index": 1,
+    "claim": "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
+    "citations": [
+      "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 126,
+    "unit": "thaumcraft/common/entities/ai/inventory/AIItemPickup.java",
+    "family": "golems_and_tasks",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:79-91 the native route goals (Fill 4, Empty 3, Sorting 3)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:79-91"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 127,
+    "unit": "thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+    "family": "golems_and_tasks",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/entities/golems/EntityTravelingTrunk.java:89-94 health 75, damage 4",
+    "citations": [
+      "oracle thaumcraft/common/entities/golems/EntityTravelingTrunk.java:89-94"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 128,
+    "unit": "thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+    "family": "golems_and_tasks",
+    "index": 6,
+    "claim": "native common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java:8-52 every one of those numbers",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java:8-52"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 129,
+    "unit": "thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java",
+    "family": "golems_and_tasks",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:36-88 the message carries two entity ids and draws the two client beams (0.07/0.376/0.325 and 1.0/0.5/0.5, age 20, blendmode 1)",
+    "citations": [
+      "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:36-88"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 130,
+    "unit": "thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java",
+    "family": "golems_and_tasks",
+    "index": 5,
+    "claim": "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:247-260 the native shot with the same numbers and the same order",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:247-260"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 131,
+    "unit": "thaumcraft/api/crafting/IInfusionStabiliser.java",
+    "family": "infusion",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/crafting/IInfusionStabiliser.java:12 canStabaliseInfusion(World, int, int, int)",
+    "citations": [
+      "oracle thaumcraft/api/crafting/IInfusionStabiliser.java:12"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 132,
+    "unit": "thaumcraft/api/crafting/IInfusionStabiliser.java",
+    "family": "infusion",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/crafting/IInfusionStabiliser.java:8 canStabaliseInfusion(Level, BlockPos)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/crafting/IInfusionStabiliser.java:8"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 133,
+    "unit": "thaumcraft/api/crafting/InfusionRecipe.java",
+    "family": "infusion",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/crafting/InfusionRecipe.java:37 matches(ArrayList, ItemStack, World, EntityPlayer)",
+    "citations": [
+      "oracle thaumcraft/api/crafting/InfusionRecipe.java:37"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 134,
+    "unit": "thaumcraft/api/crafting/InfusionRecipe.java",
+    "family": "infusion",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/crafting/InfusionRecipe.java:54 matches delegates to InfusionStackRecipe",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/crafting/InfusionRecipe.java:54"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 135,
+    "unit": "thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java",
+    "family": "infusion",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java:33 the matrix, the offset and the colour",
+    "citations": [
+      "oracle thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java:33"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 136,
+    "unit": "thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java",
+    "family": "infusion",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/network/InfusionFxPayload.java:11 the native payload (dimension, matrix, event, target, data)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/network/InfusionFxPayload.java:11"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 137,
+    "unit": "thaumcraft/common/tiles/TileInfusionPillar.java",
+    "family": "infusion",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileInfusionPillar.java:18-39 the orientation byte and the render bounding box",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileInfusionPillar.java:18-39"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 138,
+    "unit": "thaumcraft/common/tiles/TileInfusionPillar.java",
+    "family": "infusion",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileInfusionPillar.java:12-20 the native facing and half",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileInfusionPillar.java:12-20"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 139,
+    "unit": "thaumcraft/common/tiles/TilePedestal.java",
+    "family": "infusion",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TilePedestal.java:83-91 the ordinary setter clamps the stack size to one",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TilePedestal.java:83-91"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 140,
+    "unit": "thaumcraft/common/tiles/TilePedestal.java",
+    "family": "infusion",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:60-66 the same clamp",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:60-66"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 141,
+    "unit": "thaumcraft/common/tiles/TileWandPedestal.java",
+    "family": "infusion",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileWandPedestal.java:194-211 the draw every fifth tick and the one vis reserve",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileWandPedestal.java:194-211"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 142,
+    "unit": "thaumcraft/common/tiles/TileWandPedestal.java",
+    "family": "infusion",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java:94-97 and :103-127 the same draw",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java:94-97"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 143,
+    "unit": "thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java",
+    "family": "natural_resources_and_worldgen",
+    "index": 1,
+    "claim": "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:189-215 the wild node pass of the original: the rarity of Config.nodeRarity, the place of the node inside the chunk, the height of Utils.getFirstUncoveredY and the call of createRandomNodeAt",
+    "citations": [
+      "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:189-215"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 144,
+    "unit": "thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java",
+    "family": "natural_resources_and_worldgen",
+    "index": 0,
+    "claim": "CLOSED IN CODE 2026-10-23 (w8world): oracle ThaumcraftWorldGenerator.java:130-132,548-555 Nether branch restored in common/src/main/java/thaumcraft/common/lib/world/ThaumcraftNormalNodeFeature.java:33-50,126-138,160-165 and AuraDimensionRules.java:9-14; data/thaumcraft/tags/worldgen/biome/normal_aura_node_biomes.json:5 schedules it in Nether on both loaders. Nether invokes only wild nodes, never the surface temple branch. Rechecked AuraGenRules.java:61-115,130-144 and ThaumcraftNormalNodeFeature.java:64-78 against oracle :413-419: one native temple centre, surface+3, scattered flag overwritten by wild pass and wild/totem exclusivity remain implemented. Whole common/main javac proof; pure gates/biome wiring tests authored NOT executed; real-world acceptance in docs/analysis/2026-10-23-agent-w8world.md. Supersedes historical remaining claims below.",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftNormalNodeFeature.java:33-50,126-138,160-165"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 145,
+    "unit": "thaumcraft/common/lib/world/biomes/BiomeHandler.java",
+    "family": "natural_resources_and_worldgen",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/world/biomes/BiomeHandler.java:1-67 the biome dictionary membership",
+    "citations": [
+      "oracle thaumcraft/common/lib/world/biomes/BiomeHandler.java:1-67"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 146,
+    "unit": "thaumcraft/common/lib/world/biomes/BiomeHandler.java",
+    "family": "natural_resources_and_worldgen",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:37-45 the biome type vote table",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:37-45"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 147,
+    "unit": "thaumcraft/api/BlockCoordinates.java",
+    "family": "public_api_and_compatibility",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/BlockCoordinates.java:13 the mutable x/y/z holder with equals, hashCode and compareWorldCoordinate",
+    "citations": [
+      "oracle thaumcraft/api/BlockCoordinates.java:13"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 148,
+    "unit": "thaumcraft/api/BlockCoordinates.java",
+    "family": "public_api_and_compatibility",
+    "index": 6,
+    "claim": "native common/src/main/java/thaumcraft/api/IArchitect.java:7,9 the native focus surface (max area size and axis modes) instead of a block list",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/IArchitect.java:7,9"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 149,
+    "unit": "thaumcraft/api/IGoggles.java",
+    "family": "public_api_and_compatibility",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/IGoggles.java:14 boolean showIngamePopups(ItemStack, EntityLivingBase)",
+    "citations": [
+      "oracle thaumcraft/api/IGoggles.java:14"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 150,
+    "unit": "thaumcraft/api/IGoggles.java",
+    "family": "public_api_and_compatibility",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/IGoggles.java:8 boolean showIngamePopups(ItemStack stack, LivingEntity wearer)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/IGoggles.java:8"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 151,
+    "unit": "thaumcraft/api/IVisDiscountGear.java",
+    "family": "public_api_and_compatibility",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/IVisDiscountGear.java:15 int getVisDiscount(ItemStack, EntityPlayer, Aspect)",
+    "citations": [
+      "oracle thaumcraft/api/IVisDiscountGear.java:15"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 152,
+    "unit": "thaumcraft/api/IVisDiscountGear.java",
+    "family": "public_api_and_compatibility",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/IVisDiscountGear.java:9 int getVisDiscount(ItemStack stack, Player player, Aspect aspect)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/IVisDiscountGear.java:9"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 153,
+    "unit": "thaumcraft/api/ThaumcraftApiHelper.java",
+    "family": "public_api_and_compatibility",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/ThaumcraftApiHelper.java:40 cullTags / :83 areItemsEqual / :90 isResearchComplete / :94 hasDiscoveredAspect / :98 getDiscoveredAspects / :102 getStackInRowAndColumn / :106 getObjectAspects / :110 getBonusObjectTags / :114 generateTags / :118 containsMatch / :128 areItemStackTagsEqualForCrafting / :148 itemMatches / :155,:163 getConnectableTile / :171 getAllAspects / :182 getAllCompoundAspects / :193,:197,:201 consumeVis* / :205,:209 addWarp* / :213 rayTraceIgnoringSource (24 methods)",
+    "citations": [
+      "oracle thaumcraft/api/ThaumcraftApiHelper.java:40"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 154,
+    "unit": "thaumcraft/api/ThaumcraftApiHelper.java",
+    "family": "public_api_and_compatibility",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/ThaumcraftApiHelper.java:39 cullTags / :75 areItemsEqual / :81,:86 isResearchComplete / :91 hasDiscoveredAspect / :95 getDiscoveredAspects / :100 getStackInRowAndColumn / :104,:110 getObjectAspects / :115 getBonusObjectTags / :120 generateTags / :125 containsMatch / :136 areItemStackTagsEqualForCrafting / :148 itemMatches / :156,:160 getConnectableTile / :167 getAllAspects / :176 getAllCompoundAspects / :185,:189,:193 consumeVis* / :197,:201 addWarp* / :211 rayTraceIgnoringSource",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/ThaumcraftApiHelper.java:39"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 155,
+    "unit": "thaumcraft/api/WorldCoordinates.java",
+    "family": "public_api_and_compatibility",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/WorldCoordinates.java:18 public int dim (a numeric dimension id)",
+    "citations": [
+      "oracle thaumcraft/api/WorldCoordinates.java:18"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 156,
+    "unit": "thaumcraft/api/WorldCoordinates.java",
+    "family": "public_api_and_compatibility",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/api/WorldCoordinates.java:18 public final ResourceKey<Level> dimension",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/WorldCoordinates.java:18"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 157,
+    "unit": "thaumcraft/api/damagesource/DamageSourceThaumcraft.java",
+    "family": "public_api_and_compatibility",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:19 the taint source, bypasses armour and magic damage",
+    "citations": [
+      "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:19"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 158,
+    "unit": "thaumcraft/api/damagesource/DamageSourceThaumcraft.java",
+    "family": "public_api_and_compatibility",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java:22-25 the four damage type keys",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java:22-25"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 159,
+    "unit": "thaumcraft/api/crafting/IArcaneRecipe.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/crafting/IArcaneRecipe.java:19-31 the seven methods",
+    "citations": [
+      "oracle thaumcraft/api/crafting/IArcaneRecipe.java:19-31"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 160,
+    "unit": "thaumcraft/api/crafting/IArcaneRecipe.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/crafting/IArcaneRecipe.java:16-28 the same seven methods",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/crafting/IArcaneRecipe.java:16-28"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 161,
+    "unit": "thaumcraft/api/crafting/ShapedArcaneRecipe.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/crafting/ShapedArcaneRecipe.java:48-112 the constructor: the mirrored flag, the shape rows, the ingredient map and the size check",
+    "citations": [
+      "oracle thaumcraft/api/crafting/ShapedArcaneRecipe.java:48-112"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 162,
+    "unit": "thaumcraft/api/crafting/ShapedArcaneRecipe.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/api/crafting/ShapedArcaneRecipe.java:48-96 the same constructor, including the mirrored flag and the unequal row check",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/crafting/ShapedArcaneRecipe.java:48-96"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 163,
+    "unit": "thaumcraft/client/integration/jei/JeiRecipeData.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 5,
+    "claim": "oracle grep 'mezz.jei' / IRecipeCategory / IRecipeWrapper / IRecipeLayout: 0 hits; the only recipe-viewer line of the original is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+    "citations": [
+      "oracle thaumcraft/client/ClientProxy.java:444"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 164,
+    "unit": "thaumcraft/client/integration/jei/JeiRecipeData.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 9,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:41 the coverage map of all 308 original recipe keys of the oracle ConfigRecipes.java; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:41"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 165,
+    "unit": "thaumcraft/client/integration/jei/ThaumcraftRecipeWrapper.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 5,
+    "claim": "oracle grep 'mezz.jei' / IRecipeWrapper / IGuiItemStackGroup: 0 hits; the only recipe-viewer line of the original is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+    "citations": [
+      "oracle thaumcraft/client/ClientProxy.java:444"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 166,
+    "unit": "thaumcraft/client/integration/jei/ThaumcraftRecipeWrapper.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 9,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:41 the coverage map of all 308 original recipe keys of the oracle ConfigRecipes.java; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:41"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 167,
+    "unit": "thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java:68 writes the \"sceptre\" NBT byte tag on the crafted wand",
+    "citations": [
+      "oracle thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java:68"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 168,
+    "unit": "thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java:110 output.set(ThaumcraftWandEnchantments.WAND_SCEPTRE.get(), Boolean.TRUE);",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java:110"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 169,
+    "unit": "thaumcraft/common/tiles/TileArcaneWorkbench.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/tiles/TileArcaneWorkbench.java:20 public String func_145825_b() { return \"container.arcaneworkbench\"; }",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileArcaneWorkbench.java:20"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 170,
+    "unit": "thaumcraft/common/tiles/TileArcaneWorkbench.java",
+    "family": "recipes_and_arcane_crafting",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileArcaneWorkbench.java:114 @Override public Component getDisplayName() {{ return Component.translatable(\"container.arcaneworkbench\"); }}",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileArcaneWorkbench.java:114"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 171,
+    "unit": "thaumcraft/api/IScribeTools.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/IScribeTools.java:6 public interface IScribeTools {}",
+    "citations": [
+      "oracle thaumcraft/api/IScribeTools.java:6"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 172,
+    "unit": "thaumcraft/api/IScribeTools.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/IScribeTools.java:4 public interface IScribeTools {}",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/IScribeTools.java:4"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 173,
+    "unit": "thaumcraft/client/gui/GuiResearchBrowser.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/gui/GuiResearchBrowser.java:75-76 protected int paneWidth = 256; protected int paneHeight = 230",
+    "citations": [
+      "oracle thaumcraft/client/gui/GuiResearchBrowser.java:75-76"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 174,
+    "unit": "thaumcraft/client/gui/GuiResearchBrowser.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:51 panelWidth = Math.min(510, width-16); panelHeight = Math.min(300, height-16)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:51"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 175,
+    "unit": "thaumcraft/client/renderers/tile/TileResearchTableRenderer.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 0,
+    "claim": "oracle thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:48-62 translate (0.5,1,0.5), rotate X 180 and the md 2/3/4 -> 270/90/180 rotation",
+    "citations": [
+      "oracle thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:48-62"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 176,
+    "unit": "thaumcraft/client/renderers/tile/TileResearchTableRenderer.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:30-33 the identical transform chain",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:30-33"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 177,
+    "unit": "thaumcraft/common/items/relics/ItemThaumometer.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/items/relics/ItemThaumometer.java:79-81 getMaxItemUseDuration returns 25",
+    "citations": [
+      "oracle thaumcraft/common/items/relics/ItemThaumometer.java:79-81"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 178,
+    "unit": "thaumcraft/common/items/relics/ItemThaumometer.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:31 getUseDuration returns 25",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:31"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 179,
+    "unit": "thaumcraft/common/lib/network/playerdata/PacketSyncScannedItems.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/network/playerdata/PacketSyncScannedItems.java:37-39 the scanned object list of the player",
+    "citations": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketSyncScannedItems.java:37-39"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 180,
+    "unit": "thaumcraft/common/lib/network/playerdata/PacketSyncScannedItems.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:167 writeSet(tag, \"scannedItems\", scannedItems)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:167"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 181,
+    "unit": "thaumcraft/common/tiles/TileResearchTable.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/tiles/TileResearchTable.java:64 public ItemStack[] contents = new ItemStack[2]",
+    "citations": [
+      "oracle thaumcraft/common/tiles/TileResearchTable.java:64"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 182,
+    "unit": "thaumcraft/common/tiles/TileResearchTable.java",
+    "family": "research_scanning_and_knowledge",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:68 public static final int SIZE = 2 and :84 the NonNullList inventory",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:68"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 183,
+    "unit": "thaumcraft/common/CommonProxy.java",
+    "family": "shared_infrastructure",
+    "index": 3,
+    "claim": "oracle thaumcraft/common/CommonProxy.java:74-152 the proxy with the player knowledge, the research manager and the numeric window routing of the server",
+    "citations": [
+      "oracle thaumcraft/common/CommonProxy.java:74-152"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 184,
+    "unit": "thaumcraft/common/CommonProxy.java",
+    "family": "shared_infrastructure",
+    "index": 5,
+    "claim": "native common/src/main/java/thaumcraft/common/Thaumcraft.java:57-238 the native bootstrap and the per-domain registries that replaced the static proxy fields",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/Thaumcraft.java:57-238"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 185,
+    "unit": "thaumcraft/common/lib/events/CommandThaumcraft.java",
+    "family": "shared_infrastructure",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/events/CommandThaumcraft.java:1-274 the /thaumcraft command with the aliases /thaum and /tc and the research, aspect and warp actions",
+    "citations": [
+      "oracle thaumcraft/common/lib/events/CommandThaumcraft.java:1-274"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 186,
+    "unit": "thaumcraft/common/lib/events/CommandThaumcraft.java",
+    "family": "shared_infrastructure",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/events/ThaumcraftCommands.java:28-95 the native Brigadier command tree with the same three aliases",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/events/ThaumcraftCommands.java:28-95"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 187,
+    "unit": "thaumcraft/common/lib/events/ServerTickEventsFML.java",
+    "family": "shared_infrastructure",
+    "index": 1,
+    "claim": "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java:83-104 the chunk regeneration queue: the chunks whose saved data carries no Thaumcraft marker and whose regeneration options are enabled are regenerated with the TC4 world generation, ten chunks per world tick",
+    "citations": [
+      "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java:83-104"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 188,
+    "unit": "thaumcraft/common/lib/events/ServerTickEventsFML.java",
+    "family": "shared_infrastructure",
+    "index": 0,
+    "claim": "CLOSED IN CODE 2026-10-23 (w8world): oracle ServerTickEventsFML.java:83-104 and ThaumcraftWorldGenerator.java:130-136,548-555 now replay Nether wild aura directly in common/src/main/java/thaumcraft/common/lib/events/ChunkRegeneration.java:189-195, before all surface random draws; End is skipped. Native node factory accepts Nether. Existing :131-154 ten-chunk drain/original seed and :236-243 SAME-random placeSelected structure calls were inspected and retained. No new structure reseeding; no totem on replay (oracle :149 requires newGen and rejects Nether). Whole common/main javac proof; NetherAuraParityTest and biome-wiring assertion authored NOT executed. Real-world marker/11-chunk/Nether acceptance in docs/analysis/2026-10-23-agent-w8world.md. Supersedes historical impossible/remaining notes below.",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/events/ChunkRegeneration.java:189-195"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 189,
+    "unit": "thaumcraft/common/lib/network/fx/PacketFXSonic.java",
+    "family": "shared_infrastructure",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/network/fx/PacketFXSonic.java:1-59 the sonic effect",
+    "citations": [
+      "oracle thaumcraft/common/lib/network/fx/PacketFXSonic.java:1-59"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 190,
+    "unit": "thaumcraft/common/lib/network/fx/PacketFXSonic.java",
+    "family": "shared_infrastructure",
+    "index": 5,
+    "claim": "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java:496 the native sender",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java:496"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 191,
+    "unit": "thaumcraft/common/lib/network/playerdata/PacketAspectPlaceToServer.java",
+    "family": "shared_infrastructure",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/network/playerdata/PacketAspectPlaceToServer.java:1-95 the aspect placement",
+    "citations": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketAspectPlaceToServer.java:1-95"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 192,
+    "unit": "thaumcraft/common/lib/network/playerdata/PacketAspectPlaceToServer.java",
+    "family": "shared_infrastructure",
+    "index": 5,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:101-183 the native preflight of the note, the ink, the cell kind, the opened aspect and the payment",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:101-183"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 193,
+    "unit": "thaumcraft/common/lib/utils/Utils.java",
+    "family": "shared_infrastructure",
+    "index": 2,
+    "claim": "oracle thaumcraft/common/lib/utils/Utils.java:65-86 the original useBonemealAtLoc refuses a crop that cannot grow any further with its IGrowable.canGrow test",
+    "citations": [
+      "oracle thaumcraft/common/lib/utils/Utils.java:65-86"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 194,
+    "unit": "thaumcraft/common/lib/utils/Utils.java",
+    "family": "shared_infrastructure",
+    "index": 3,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java:281-303 the native useBonemealAtLoc keeps the canGrow refusal",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java:281-303"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 195,
+    "unit": "thaumcraft/api/nodes/INode.java",
+    "family": "wands_nodes_and_vis",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/nodes/INode.java:12-29 the nine members of the contract",
+    "citations": [
+      "oracle thaumcraft/api/nodes/INode.java:12-29"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 196,
+    "unit": "thaumcraft/api/nodes/INode.java",
+    "family": "wands_nodes_and_vis",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/nodes/INode.java:13-29 the nine members of the contract",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/nodes/INode.java:13-29"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 197,
+    "unit": "thaumcraft/api/wands/IWandRodOnUpdate.java",
+    "family": "wands_nodes_and_vis",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/wands/IWandRodOnUpdate.java:14 void onUpdate(ItemStack, EntityPlayer)",
+    "citations": [
+      "oracle thaumcraft/api/wands/IWandRodOnUpdate.java:14"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 198,
+    "unit": "thaumcraft/api/wands/IWandRodOnUpdate.java",
+    "family": "wands_nodes_and_vis",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/wands/IWandRodOnUpdate.java:12 void onUpdate(ItemStack stack, Player player)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/wands/IWandRodOnUpdate.java:12"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 199,
+    "unit": "thaumcraft/api/wands/WandCap.java",
+    "family": "wands_nodes_and_vis",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/wands/WandCap.java:26-45 the two constructors, the caps registry, the base and special cost modifiers",
+    "citations": [
+      "oracle thaumcraft/api/wands/WandCap.java:26-45"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 200,
+    "unit": "thaumcraft/api/wands/WandCap.java",
+    "family": "wands_nodes_and_vis",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/api/wands/WandCap.java:27-59 the same constructors plus a catalogue constructor",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/wands/WandCap.java:27-59"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 201,
+    "unit": "thaumcraft/client/fx/beams/WandEffectOrigin.java",
+    "family": "wands_nodes_and_vis",
+    "index": 6,
+    "claim": "oracle thaumcraft/client/fx/beams/FXBeamWand.java:37,58-62 the beam of the original starts at the player itself: the offset field is 0 for the local player and height/2 + 0.25 for a remote one",
+    "citations": [
+      "oracle thaumcraft/client/fx/beams/FXBeamWand.java:37,58-62"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 202,
+    "unit": "thaumcraft/client/fx/beams/WandEffectOrigin.java",
+    "family": "wands_nodes_and_vis",
+    "index": 8,
+    "claim": "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:162-163 the native origin of the beam is the very same one (the eye, the yaw, the pitch and the look times 0.3)",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:162-163"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 203,
+    "unit": "thaumcraft/client/renderers/tile/ItemNodeRenderer.java",
+    "family": "wands_nodes_and_vis",
+    "index": 0,
+    "claim": "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/tile/ItemNodeRenderer.java:172 the item form of the node (the block that drops a node item)",
+    "citations": [
+      "oracle thaumcraft/client/renderers/tile/ItemNodeRenderer.java:172"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 204,
+    "unit": "thaumcraft/client/renderers/tile/ItemNodeRenderer.java",
+    "family": "wands_nodes_and_vis",
+    "index": 6,
+    "claim": "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:38,197-206 the shared node atlas and the quad of the node strips",
+    "citations": [
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:38,197-206"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 205,
+    "unit": "thaumcraft/common/world/aura/AuraHandler.java",
+    "family": "wands_nodes_and_vis",
+    "index": 8,
+    "claim": "oracle thaumcraft/api/visnet/VisNetHandler.java:29 the original publishes the aspect drain only; the aspect-less form of the 1.12 tree is a later addition",
+    "citations": [
+      "oracle thaumcraft/api/visnet/VisNetHandler.java:29"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 206,
+    "unit": "thaumcraft/common/world/aura/AuraHandler.java",
+    "family": "wands_nodes_and_vis",
+    "index": 2,
+    "claim": "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 the native drainVis(level, pos, amount, simulate) over the essence of the node",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 207,
+    "unit": "thaumcraft/api/IWarpingGear.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 0,
+    "claim": "oracle thaumcraft/api/IWarpingGear.java:13 public int getWarp(ItemStack var1, EntityPlayer var2);",
+    "citations": [
+      "oracle thaumcraft/api/IWarpingGear.java:13"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 208,
+    "unit": "thaumcraft/api/IWarpingGear.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/api/IWarpingGear.java:11 int getWarp(ItemStack stack, Player player);",
+    "citations": [
+      "native common/src/main/java/thaumcraft/api/IWarpingGear.java:11"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 209,
+    "unit": "thaumcraft/common/config/MaterialTaint.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/config/MaterialTaint.java:9-42 the taint material is not solid, not replaceable, does not block grass and carries the mobility flag one",
+    "citations": [
+      "oracle thaumcraft/common/config/MaterialTaint.java:9-42"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 210,
+    "unit": "thaumcraft/common/config/MaterialTaint.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 4,
+    "claim": "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:72 the taint family with the push reaction BLOCK, the counterpart of the mobility flag one",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:72"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 211,
+    "unit": "thaumcraft/common/entities/monster/EntityTaintSheep.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/entities/monster/EntityTaintSheep.java:84-86 health 20, damage 3, speed 0.25",
+    "citations": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintSheep.java:84-86"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 212,
+    "unit": "thaumcraft/common/entities/monster/EntityTaintSheep.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/taint/TaintAnimalRules.java:36-57 the tainted sheep row",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/taint/TaintAnimalRules.java:36-57"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 213,
+    "unit": "thaumcraft/common/entities/monster/mods/ChampionModGrim.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/entities/monster/mods/ChampionModGrim.java:26-30 nextFloat() < 0.4 -> Potion.field_82731_v (wither) for 200 ticks",
+    "citations": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModGrim.java:26-30"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 214,
+    "unit": "thaumcraft/common/entities/monster/mods/ChampionModGrim.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModGrim.java:11 Status.WEAKNESS for 200 ticks",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModGrim.java:11"
+    ],
+    "verdict": "wrong / corrected"
+  },
+  {
+    "number": 215,
+    "unit": "thaumcraft/common/entities/projectile/EntityPechBlast.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/entities/projectile/EntityPechBlast.java:1-134 the pech curse blast",
+    "citations": [
+      "oracle thaumcraft/common/entities/projectile/EntityPechBlast.java:1-134"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 216,
+    "unit": "thaumcraft/common/entities/projectile/EntityPechBlast.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/entities/projectile/EntityPechBlast.java:1-112 the native blast",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/entities/projectile/EntityPechBlast.java:1-112"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 217,
+    "unit": "thaumcraft/common/lib/world/biomes/BiomeGenTaint.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/world/biomes/BiomeGenTaint.java:36-53 the biome id, the -999 flower and reed counters, the grass colour and the taintacle spawn",
+    "citations": [
+      "oracle thaumcraft/common/lib/world/biomes/BiomeGenTaint.java:36-53"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 218,
+    "unit": "thaumcraft/common/lib/world/biomes/BiomeGenTaint.java",
+    "family": "warp_creatures_and_ecology",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenTaint.java:27-78 the same generator facts",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenTaint.java:27-78"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 219,
+    "unit": "thaumcraft/common/lib/world/VillageBankerManager.java",
+    "family": "world_structures_and_ecology",
+    "index": 0,
+    "claim": "oracle thaumcraft/common/lib/world/VillageBankerManager.java:59 the piece weight 25 and the profession id 191",
+    "citations": [
+      "oracle thaumcraft/common/lib/world/VillageBankerManager.java:59"
+    ],
+    "verdict": "no defect identified in spot-check"
+  },
+  {
+    "number": 220,
+    "unit": "thaumcraft/common/lib/world/VillageBankerManager.java",
+    "family": "world_structures_and_ecology",
+    "index": 1,
+    "claim": "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerManager.java:20-30 the piece weight and the profession id",
+    "citations": [
+      "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerManager.java:20-30"
+    ],
+    "verdict": "no defect identified in spot-check"
+  }
+]

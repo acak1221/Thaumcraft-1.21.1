@@ -1559,10 +1559,10 @@ public class EntityGolemBase extends AbstractGolem {
     }
     private boolean useEyesOn(GolemMarker marker) {
         if (!(level() instanceof ServerLevel server) || !loadedNavigationArea(marker.pos())) return false;
-        BlockHitResult hit = server.clip(new ClipContext(getEyePosition(), Vec3.atCenterOf(marker.pos()),
+        BlockHitResult hit = server.clip(new ClipContext(getEyePosition(), UseGolemGoals.sightTarget(marker, useOptions.emptySpace()),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-        // Thin lever/button shapes need not intersect their cell center; any earlier solid still denies sight.
-        return hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(marker.pos());
+        // Thin shapes may miss the face point; any earlier solid still denies sight.
+        return hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(UseGolemGoals.clickPos(marker, useOptions.emptySpace()));
     }
     /** Root's native BEFORE hook may ask again while the real hand is DETACHED, never outside this exact goal. */
     public boolean canUseMarkedBlock(GolemMarker marker, BlockState expectedTarget, BlockState expectedAdjacent,

@@ -289,21 +289,22 @@ public final class GolemUsePlatform {
 
     private static boolean sight(Context context) {
         Vec3 eyes = context.worker.getEyePosition();
-        Vec3 end = Vec3.atCenterOf(context.marker.pos());
+        Vec3 end = UseGolemGoals.sightTarget(context.marker, context.emptySpace);
         if (!Double.isFinite(eyes.x) || !Double.isFinite(eyes.y) || !Double.isFinite(eyes.z)) return false;
         BlockPos start = BlockPos.containing(eyes);
         // The worker is already <=2 blocks away. Check only the ray's finite
         // chunk footprint, so Level.clip cannot demand an unloaded source chunk.
-        int minX = Math.min(start.getX(), context.marker.pos().getX()) >> 4;
-        int maxX = Math.max(start.getX(), context.marker.pos().getX()) >> 4;
-        int minZ = Math.min(start.getZ(), context.marker.pos().getZ()) >> 4;
-        int maxZ = Math.max(start.getZ(), context.marker.pos().getZ()) >> 4;
+        BlockPos finish = BlockPos.containing(end);
+        int minX = Math.min(start.getX(), finish.getX()) >> 4;
+        int maxX = Math.max(start.getX(), finish.getX()) >> 4;
+        int minZ = Math.min(start.getZ(), finish.getZ()) >> 4;
+        int maxZ = Math.max(start.getZ(), finish.getZ()) >> 4;
         if (context.level.isOutsideBuildHeight(start) || !context.level.getWorldBorder().isWithinBounds(start)) return false;
         for (int x = minX; x <= maxX; x++) for (int z = minZ; z <= maxZ; z++) {
             if (context.level.getChunkSource().getChunkNow(x, z) == null) return false;
         }
         BlockHitResult hit = context.level.clip(new ClipContext(eyes, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, context.worker));
-        return hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(context.marker.pos());
+        return hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(context.clickPos);
     }
 
     private static boolean validUse(Context context) {
@@ -493,7 +494,7 @@ public final class GolemUsePlatform {
         final Saved saved;
         final BlockHitResult hit;
         final BlockPos clickPos;
-        final boolean sneaking, leftClick;
+        final boolean sneaking, leftClick, emptySpace;
         Phase phase = Phase.PREPARING;
         boolean workerActive = true, detachStarted, detached, handInstalled, returned, stockSettled, contaminated;
         ItemStack hand;
@@ -510,7 +511,8 @@ public final class GolemUsePlatform {
             GolemUseOptions options = worker.getUseOptions();
             this.sneaking = options != null && options.sneaking();
             this.leftClick = options != null && options.leftClick();
-            this.clickPos = UseGolemGoals.clickPos(marker, options != null && options.emptySpace());
+            this.emptySpace = options != null && options.emptySpace();
+            this.clickPos = UseGolemGoals.clickPos(marker, emptySpace);
             this.hit = new BlockHitResult(Vec3.atCenterOf(clickPos), marker.face(), clickPos, false);
         }
     }

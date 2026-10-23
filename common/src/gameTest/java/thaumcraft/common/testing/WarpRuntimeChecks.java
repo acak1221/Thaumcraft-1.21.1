@@ -92,6 +92,19 @@ public final class WarpRuntimeChecks {
         } catch (Throwable failure) { fixture.close(); throw failure; }
     }
 
+    /** G27: declared recipes/research prerequisites, real connected player and registered callbacks. */
+    public static void audit(GameTestHelper test, String mode) {
+        var fixture = new Fixture(test);
+        try {
+            fixture.start();
+            if (mode.equals("sources")) fixture.auditSources();
+            if (mode.equals("craft")) fixture.auditCraftRegistration();
+            if (mode.equals("research")) fixture.auditResearchRegistration();
+            if (mode.equals("rules")) fixture.auditRules();
+            fixture.close(); test.succeed();
+        } catch (Throwable failure) { fixture.close(); throw failure; }
+    }
+
     private static final class Fixture {
         private final GameTestHelper test;
         private final ServerLevel level;
@@ -123,6 +136,109 @@ public final class WarpRuntimeChecks {
             test.assertTrue(player.level() == level && player.connection != null, "native connected player and loaded supported event floor");
         }
         PlayerKnowledge knowledge() { return KnowledgeAccess.get(player); }
+        void auditSources() {
+            String[] crafts = {"focus_hellbat", "compass_stone", "jar_brain", "bucket_death", "bottle_taint", "golem_flesh", "focus_primal", "staff_rod_primal"};
+            int failures = 0;
+            for (String id : crafts) {
+                clean();
+                var stack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.parse("thaumcraft:" + id)), 3);
+                test.assertTrue(!stack.isEmpty(), "native source exists: " + id);
+                int api = thaumcraft.api.ThaumcraftApi.getWarp(stack);
+                PlayerEvent.CRAFT_ITEM.invoker().craft(player, stack, new SimpleContainer(0));
+                System.out.println("G27 SOURCE craft " + id + " api=" + api + " pools=" + knowledge().getWarpPerm() + "," + knowledge().getWarpSticky() + "," + knowledge().getWarpTemp());
+                if (api != 1 || knowledge().getWarpSticky() != 1 || knowledge().getWarpPerm() != 0 || knowledge().getWarpTemp() != 0) failures++;
+            }
+            String[] keys = {"FOCUSHELLBAT", "ROD_bone", "ROD_bone_staff", "SINSTONE", "INFERNALFURNACE", "JARBRAIN", "MASKANGRYGHOST", "MASKSIPPINGFIEND", "LIQUIDDEATH", "BOTTLETAINT", "GOLEMFLESH", "COREBUTCHER", "ADVANCEDGOLEM", "RESEARCHER2", "CRIMSON", "OCULUS", "PRIMNODE", "CAP_void", "FOCUSPRIMAL", "ROD_primal_staff"};
+            int[] amounts = {2, 1, 1, 2, 2, 3, 1, 1, 3, 2, 3, 1, 5, 1, 3, 6, 1, 1, 2, 3};
+            for (int i = 0; i < keys.length; i++) {
+                clean();
+                // Isolate this command completion: all other parents/siblings are declared completed inputs.
+                for (var definition : thaumcraft.common.lib.research.ResearchCatalog.all()) if (!definition.key().equals(keys[i])) knowledge().addResearch(definition.key());
+                int api = thaumcraft.api.ThaumcraftApi.getWarp(keys[i]);
+                thaumcraft.common.lib.research.ResearchAdministration.grant(knowledge(), keys[i]);
+                System.out.println("G27 SOURCE research " + keys[i] + " api=" + api + " pools=" + knowledge().getWarpPerm() + "," + knowledge().getWarpSticky() + "," + knowledge().getWarpTemp());
+                if (api != amounts[i] || knowledge().getWarpPerm() != amounts[i] - amounts[i] / 2 || knowledge().getWarpSticky() != amounts[i] / 2 || knowledge().getWarpTemp() != 0 || knowledge().getWarpCounter() != amounts[i]) failures++;
+            }
+            test.assertTrue(failures == 0, "28 original sources: public registry and native award mismatches=" + failures);
+        }
+        void auditCraftRegistration() {
+            clean(); var stack = new ItemStack(Items.DIAMOND, 4);
+            int old = thaumcraft.api.ThaumcraftApi.getWarp(stack);
+            try {
+                thaumcraft.api.ThaumcraftApi.addWarpToItem(stack, 7);
+                PlayerEvent.CRAFT_ITEM.invoker().craft(player, stack, new SimpleContainer(0));
+                test.assertTrue(knowledge().getWarpSticky() == 7 && knowledge().getWarpPerm() == 0 && knowledge().getWarpTemp() == 0 && knowledge().getWarpCounter() == 7,
+                        "registered output adds seven sticky once, regardless of count4; actual=" + knowledge().getWarpSticky());
+                thaumcraft.api.ThaumcraftApi.addWarpToItem(stack, 0);
+                PlayerEvent.CRAFT_ITEM.invoker().craft(player, stack, new SimpleContainer(0));
+                test.assertTrue(knowledge().getWarpSticky() == 7, "zero override disables craft warp");
+            } finally { thaumcraft.api.ThaumcraftApi.addWarpToItem(stack, old); }
+        }
+        void auditResearchRegistration() {
+            clean(); String key = "FOCUSHELLBAT";
+            for (var definition : thaumcraft.common.lib.research.ResearchCatalog.all()) if (!definition.key().equals(key)) knowledge().addResearch(definition.key());
+            int old = thaumcraft.api.ThaumcraftApi.getWarp(key);
+            try {
+                thaumcraft.api.ThaumcraftApi.addWarpToResearch(key, 7);
+                var note = new thaumcraft.common.lib.research.ResearchNoteData(key, 0, true, 0,
+                        List.of(new thaumcraft.common.lib.research.ResearchNoteData.Cell(0, 0, 1, "aer")));
+                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, thaumcraft.common.items.ItemResearchNotes.create(note, false));
+                player.getMainHandItem().use(level, player, net.minecraft.world.InteractionHand.MAIN_HAND);
+                test.assertTrue(knowledge().getWarpPerm() == 4 && knowledge().getWarpSticky() == 3 && knowledge().getWarpCounter() == 7,
+                        "real solved-note use honors API7 split4/3, actual=" + knowledge().getWarpPerm() + "/" + knowledge().getWarpSticky());
+            } finally { thaumcraft.api.ThaumcraftApi.addWarpToResearch(key, old); }
+        }
+        void auditRules() {
+            clean();
+            thaumcraft.api.ThaumcraftApiHelper.addWarpToPlayer(player, 7, false);
+            thaumcraft.api.ThaumcraftApiHelper.addStickyWarpToPlayer(player, 5);
+            thaumcraft.api.ThaumcraftApiHelper.addWarpToPlayer(player, 12, true);
+            // A 40,000-age-tick dispatcher sweep; explicitly driven age, not 40,000 wall-clock server ticks.
+            knowledge().setWarpCounter(0);
+            for (int age = 1; age <= 40000; age++) {
+                player.tickCount = age; WarpEvents.playerTick(player);
+                test.assertTrue(knowledge().getWarpTemp() == Math.max(0, 12 - age / 2000) && knowledge().getWarpPerm() == 7 && knowledge().getWarpSticky() == 5,
+                        "decay curve at age=" + age + " temporary=" + knowledge().getWarpTemp());
+            }
+            System.out.println("G27 RULE decay age0/2000/12000/24000/40000 temp12/11/6/0/0 perm7 sticky5");
+            knowledge().setWarpTemp(150); knowledge().setWarpCounter(10000);
+            var decision = WarpEvents.checkWarpEvent(player, new Draws(99, 53));
+            test.assertTrue(decision.triggered() && decision.effectiveWarp() == 100 && knowledge().getWarpCounter() == 9800, "cap100 applies to effective warp, not counter10000");
+            effect(ThaumcraftWarp.effect(ThaumcraftWarp.DEATH_GAZE), 6000, 3, true);
+            int counter = knowledge().getWarpCounter(), temporary = knowledge().getWarpTemp();
+            for (int age = 40001; age < 42000; age++) { player.tickCount = age; WarpEvents.playerTick(player); }
+            test.assertTrue(knowledge().getWarpCounter() == counter && knowledge().getWarpTemp() == temporary, "event/decay not repeated between scheduled checks");
+            CompoundTag savedPlayer = new CompoundTag(); player.saveWithoutId(savedPlayer);
+            var loaded = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "g27-loaded"), ClientInformation.createDefault());
+            loaded.load(savedPlayer);
+            test.assertTrue(KnowledgeAccess.get(loaded).getWarpPerm() == knowledge().getWarpPerm() && KnowledgeAccess.get(loaded).getWarpSticky() == knowledge().getWarpSticky()
+                    && KnowledgeAccess.get(loaded).getWarpTemp() == temporary && KnowledgeAccess.get(loaded).getWarpCounter() == counter, "real player NBT includes all four warp fields");
+            var respawn = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "g27-clone"), ClientInformation.createDefault());
+            PlayerEvent.PLAYER_CLONE.invoker().clone(player, respawn, false);
+            test.assertTrue(KnowledgeAccess.get(respawn).getWarpPerm() == knowledge().getWarpPerm() && KnowledgeAccess.get(respawn).getWarpSticky() == knowledge().getWarpSticky()
+                    && KnowledgeAccess.get(respawn).getWarpTemp() == temporary && KnowledgeAccess.get(respawn).getWarpCounter() == counter, "registered death-clone listener retains all four fields");
+            // Exercise the actual disk logout/login boundary, then real survival death and PlayerList respawn.
+            var expected = knowledge().copy();
+            var profile = player.getGameProfile();
+            level.getServer().getPlayerList().remove(player);
+            ServerPlayer current = new ServerPlayer(level.getServer(), level, profile, ClientInformation.createDefault());
+            var relogConnection = new Connection(PacketFlow.SERVERBOUND);
+            var relogChannel = new EmbeddedChannel(relogConnection);
+            try {
+                level.getServer().getPlayerList().placeNewPlayer(relogConnection, current, CommonListenerCookie.createInitial(profile, false));
+                assertWarp(expected, KnowledgeAccess.get(current), "actual playerdata disk relogin");
+                current.setRespawnPosition(level.dimension(), origin.below(), 0, true, false);
+                test.assertTrue(current.hurt(level.damageSources().fellOutOfWorld(), Float.MAX_VALUE) && !current.isAlive(), "actual survival death precedes respawn");
+                current = level.getServer().getPlayerList().respawn(current, false, Entity.RemovalReason.KILLED);
+                assertWarp(expected, KnowledgeAccess.get(current), "actual death and PlayerList respawn");
+            } finally {
+                level.getServer().getPlayerList().remove(current); current.discard(); relogChannel.finishAndReleaseAll();
+            }
+        }
+        void assertWarp(PlayerKnowledge expected, PlayerKnowledge actual, String boundary) {
+            test.assertTrue(expected.getWarpPerm() == actual.getWarpPerm() && expected.getWarpSticky() == actual.getWarpSticky()
+                    && expected.getWarpTemp() == actual.getWarpTemp() && expected.getWarpCounter() == actual.getWarpCounter(), "all four warp fields survive " + boundary);
+        }
         void clean() {
             player.removeAllEffects(); player.getInventory().clearContent(); knowledge().reset();
             for (Entity entity : level.getEntities((Entity) null, bounds, e -> e instanceof EntityMindSpider || e instanceof EntityEldritchGuardian || e instanceof EntityEldritchOrb)) entity.discard();

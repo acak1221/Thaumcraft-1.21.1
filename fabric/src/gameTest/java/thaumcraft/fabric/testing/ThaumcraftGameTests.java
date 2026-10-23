@@ -1318,6 +1318,18 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.WarpRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g27_warp_sources")
+    public void g27WarpOriginalSources(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "sources"); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g27_warp_craft")
+    public void g27WarpRegisteredCraft(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "craft"); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g27_warp_research")
+    public void g27WarpRegisteredResearch(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "research"); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g27_warp_rules")
+    public void g27WarpDecayCapAndPersistence(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "rules"); }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m11_brainy_zombies")
     public void brainyZombiesFightRageCureAndDropOriginalLoot(GameTestHelper test) {
         thaumcraft.common.testing.BrainyZombieRuntimeChecks.run(test);

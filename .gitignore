@@ -12,6 +12,7 @@ logs
 .gradle-t1/
 .gradle-visualrun/
 .gradle-shimmer/
+.gradle-uifix/
 .gradle-e1/
 .gradle-c5fix/
 .gradle-g32/

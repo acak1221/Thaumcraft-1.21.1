@@ -32,7 +32,7 @@ public final class TileWardedGlassRenderer implements BlockEntityRenderer<TileOw
 
     static {
         for (int index = 0; index < TEXTURES.length; index++) {
-            TEXTURES[index] = "thaumcraft:textures/blocks/warded_glass_" + (index + 1);
+            TEXTURES[index] = "thaumcraft:textures/blocks/warded_glass_" + (index + 1) + ".png";
         }
     }
 

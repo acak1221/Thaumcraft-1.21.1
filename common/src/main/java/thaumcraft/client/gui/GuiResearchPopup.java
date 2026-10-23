@@ -46,7 +46,7 @@ public final class GuiResearchPopup {
                 var match=TEXTURE.matcher(research.iconExpression()==null?"":research.iconExpression());
                 var texture=match.matches()?ResourceLocation.fromNamespaceAndPath("thaumcraft",match.group(1).toLowerCase(java.util.Locale.ROOT)):
                         ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/items/thaumonomicon.png");
-                if(client.getResourceManager().getResource(texture).isEmpty())return;
+                if(!thaumcraft.client.lib.MissingResourceDiagnostics.isPresent(client.getResourceManager(),texture))return;
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 graphics.blit(texture,8,frame.y()+8,16,16,0,0,256,256,256,256);

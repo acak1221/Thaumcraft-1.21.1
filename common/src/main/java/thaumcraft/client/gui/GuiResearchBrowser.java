@@ -121,7 +121,7 @@ public final class GuiResearchBrowser extends Screen {
                 var expression = TEXTURE.matcher(node.research.iconExpression() == null ? "" : node.research.iconExpression());
                 if (expression.matches()) {
                     ResourceLocation icon = texture(expression.group(1).toLowerCase(java.util.Locale.ROOT));
-                    if (!minecraft.getResourceManager().getResource(icon).isEmpty()) {
+                    if (thaumcraft.client.lib.MissingResourceDiagnostics.isPresent(minecraft.getResourceManager(), icon)) {
                         graphics.blit(icon, node.x + 3, node.y + 3, 16, 16, 0, 0, 256, 256, 256, 256);
                     }
                 }

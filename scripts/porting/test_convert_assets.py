@@ -652,7 +652,7 @@ class FoundationAssetsTest(unittest.TestCase):
             for name, state in blockstates.items():
                 (assets / f"blockstates/{name}.json").write_text(json.dumps(state))
             with patch.object(converter, "ASSETS", assets), patch.object(converter, "block_atlas_sprites", return_value={}):
-                return converter.validate_resources()
+                return converter.validate_resources(include_composed=False)
 
     def test_blockstate_validation_resolves_variant_and_multipart_weighted_model_lists(self) -> None:
         checks = self._validate_blockstate_fixture({

@@ -17,6 +17,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+import composed_resources
+
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "src/main/resources/assets/thaumcraft"
 ORIGINAL = ROOT / "thaumcraft_src/assets/thaumcraft"
@@ -647,7 +649,8 @@ def blockstate_models(data: dict[str, Any], context: str) -> list[str]:
     return result
 
 
-def validate_resources() -> dict[str, int]:
+def validate_resources(*, include_composed: bool = True) -> dict[str, int]:
+    """Validate output; tiny model-only test fixtures may omit the Java contract."""
     missing: list[str] = []
     texture_refs = 0
     atlas_refs = 0
@@ -735,11 +738,14 @@ def validate_resources() -> dict[str, int]:
                 missing.append(f"Sound {name}")
     if missing:
         raise ValueError("Resource validation failed:\n" + "\n".join(missing))
-    return {"checked_model_texture_refs": texture_refs, "checked_local_model_refs": model_refs,
+    checks = {"checked_model_texture_refs": texture_refs, "checked_local_model_refs": model_refs,
             "checked_atlas_sprite_refs": atlas_refs, "atlas_sprites_available": len(sprites),
             "atlas_mipmap_level_guard": 4,
             "checked_sound_refs": sound_refs, "checked_sound_event_ids": len(sound_events),
             "checked_sound_event_refs": sound_event_refs, "missing_references": 0}
+    if include_composed:
+        checks.update(composed_resources.validate(ROOT, RESOURCE_ROOT, sprites))
+    return checks
 
 
 def main() -> None:

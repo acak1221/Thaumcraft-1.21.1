@@ -137,9 +137,9 @@ public final class ObjectAspectResolver {
         result.add(base);
         AspectList bonus = bonusTags(stack);
         for (Aspect aspect : bonus.getAspects()) result.merge(aspect, bonus.getAmount(aspect));
-        // Oracle ThaumcraftCraftingManager.getBonusTags ends with capAspects(aspects, 64):
-        // every aspect of the finished bonus list is capped at 64 before the culling.
-        return cull(cap(result));
+        // Original getObjectTags caps only the base. getBonusTags:362-481 adds
+        // contained essentia/bonuses, then cullTags selects six WITHOUT recapping amounts.
+        return cull(result);
     }
 
     /**

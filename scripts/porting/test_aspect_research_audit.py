@@ -85,6 +85,8 @@ def fixture():
                              for r in aspects if r["components"]}}
 
 
+@unittest.skipUnless((Path(os.environ.get("TC4_ORACLE", "/home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle")) / "thaumcraft").is_dir(),
+                     "the private TC4 oracle is not present; this audit compares against it")
 class AspectResearchAudit(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -204,9 +204,8 @@ public final class GuiResearchBrowser extends Screen {
      * blurry.</p>
      *
      * <p>This keeps the original window and the original density. The graph of the port is wider
-     * than one 224 px window, so the window is repeated on its own grid, which is how the original
-     * paper continues when the map is panned: every tile samples the same 112x98 texels, so the
-     * texel density never changes.</p>
+     * than one 224 px window, so adjacent windows continue sampling the sheet rather than
+     * repeating the same crop. This preserves both the original density and continuity.</p>
      */
     private void drawCategoryBackground(GuiGraphics graphics, String category, int left, int top, int width, int height) {
         ResourceLocation sheet = texture("textures/gui/"
@@ -226,7 +225,7 @@ public final class GuiResearchBrowser extends Screen {
                 // A partial tile samples only the texels it covers, so the density stays 1:2.
                 int texWidth = Math.max(1, (drawWidth + 1) / 2);
                 int texHeight = Math.max(1, (drawHeight + 1) / 2);
-                graphics.blit(sheet, left + x, top + y, offsetX, offsetY, drawWidth, drawHeight,
+                graphics.blit(sheet, left + x, top + y, drawWidth, drawHeight, (float) (offsetX + x / 2), (float) (offsetY + y / 2),
                         texWidth, texHeight, BACKGROUND_SHEET_SIZE, BACKGROUND_SHEET_SIZE);
             }
         }

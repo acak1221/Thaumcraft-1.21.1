@@ -26,6 +26,7 @@ final class MirrorVisualClientSequence {
         if (++ticks > 1200) throw new IllegalStateException("Mirror visual timeout at " + step);
         switch (step) {
             case 0 -> {
+                client.player.getInventory().selected = 0;
                 action = EldritchVisualClientSequence.onServer(client, player -> {
                     var level = player.serverLevel();
                     level.setBlockAndUpdate(FIRST.north(), Blocks.QUARTZ_BLOCK.defaultBlockState());

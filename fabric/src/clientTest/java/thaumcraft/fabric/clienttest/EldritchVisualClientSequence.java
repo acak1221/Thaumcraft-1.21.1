@@ -9,8 +9,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import thaumcraft.common.blocks.BlockEldritch;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.world.FamilyVariant;
 import thaumcraft.common.lib.world.OuterLandsDimension;
 import thaumcraft.common.tiles.TileEldritchObelisk;
 
@@ -33,10 +33,10 @@ final class EldritchVisualClientSequence {
                     player.setInvulnerable(true);
                     for (BlockPos pos : BlockPos.betweenClosed(0, 160, 0, 20, 167, 20))
                         outer.setBlockAndUpdate(pos, pos.getY() == 160 ? Blocks.SMOOTH_STONE.defaultBlockState() : Blocks.AIR.defaultBlockState());
-                    outer.setBlockAndUpdate(OBELISK, ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState().setValue(BlockEldritch.VARIANT, 1));
+                    outer.setBlockAndUpdate(OBELISK, FamilyVariant.with(ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState(), 1));
                     // Same five-block tower as the native Outer Lands arena fixture.
                     for (int y = 1; y <= 4; y++)
-                        outer.setBlockAndUpdate(OBELISK.above(y), ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState().setValue(BlockEldritch.VARIANT, 2));
+                        outer.setBlockAndUpdate(OBELISK.above(y), FamilyVariant.with(ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState(), 2));
                     if (!(outer.getBlockEntity(OBELISK) instanceof TileEldritchObelisk))
                         throw new IllegalStateException("Fixture did not create the real obelisk tile");
                     player.teleportTo(outer, 14.5, 161, 16.5, 0, 0);

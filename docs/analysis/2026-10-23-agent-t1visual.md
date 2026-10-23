@@ -28,6 +28,10 @@ One-time seed creation if absent: start `:fabric:runServer` with the owned `fabr
 
 Pending execution and image inspection. A passing capture count is not visual acceptance.
 
+Follow-up execution, fixes, opened-image findings and remaining defects are in
+[`2026-10-23-agent-visualrun.md`](2026-10-23-agent-visualrun.md). The statement
+above records the original WIP author's boundary, not the follow-up result.
+
 ## Not reached
 
 Thaumometer scanning/readout, excavation beam, architect overlay, radial focus menu. NeoForge and survival progression are outside this scope. Still frames do not establish animation continuity or original pixel parity.

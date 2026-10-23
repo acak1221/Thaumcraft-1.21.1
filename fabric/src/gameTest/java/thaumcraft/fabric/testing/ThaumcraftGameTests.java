@@ -2128,6 +2128,26 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.OuterLandsRuntimeChecks.labyrinth(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "g30_maze")
+    public void mazeAuditGeneratesRealRegionAndReloadsMap(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.generation(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g30_return")
+    public void mazeAuditReturnsThroughNearestHomeGate(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.nearestReturnGate(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "g30_unexplored")
+    public void mazeAuditFindsUnexploredDestinationGate(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.unexploredGate(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "g30_bounds")
+    public void mazeAuditReturnSearchUsesExactOracleBounds(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.returnGateBounds(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m13_outer_lands")
     public void outerLandsIsARealRegisteredDimension(GameTestHelper test) {
         thaumcraft.common.testing.OuterLandsRuntimeChecks.levelStemKeepsTheOriginalValues(test);

@@ -24,6 +24,26 @@ class MazeFidelityTest {
     /** The number of seeds of the comparison. */
     private static final int SEEDS = 40;
 
+    @Test void runtimeAuditSeedMatchesTheOracleIncludingItsOccupiedExtent() {
+        var oracle = new OracleMazeGenerator(15, 15, 20261021L);
+        var nativeMaze = new MazeGenerator(15, 15, 20261021L);
+        assertTrue(oracle.generate());
+        assertTrue(nativeMaze.generate());
+        int occupied = 0, minX = 15, minZ = 15, maxX = 0, maxZ = 0;
+        for (int z = 0; z < 15; z++) for (int x = 0; x < 15; x++) {
+            assertEquals(oracle.grid[z][x], nativeMaze.grid[z][x], "audit cell " + x + "," + z);
+            if (oracle.grid[z][x] <= 0) continue;
+            occupied++;
+            minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+            minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z);
+        }
+        assertEquals(153, occupied);
+        assertEquals(1, minX); assertEquals(14, maxX);
+        assertEquals(0, minZ); assertEquals(13, maxZ);
+        assertEquals(1, oracle.grid[8][8] >> 8);
+        assertEquals(2, oracle.grid[0][13] >> 8);
+    }
+
     @Test void theNativeLabyrinthIsByteIdenticalToTheOracle() {
         int cells = 0;
         int expectedCells = 0;

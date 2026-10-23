@@ -96,7 +96,7 @@ public final class TileEldritchPortal extends BlockEntity {
         ServerLevel outer = player.getServer().getLevel(OuterLandsProvider.DIMENSION);
         ServerLevel target = player.level() == outer ? player.getServer().overworld() : outer;
         if (target == null) return;
-        BlockPos destination = findGate(target, player.blockPosition());
+        BlockPos destination = findGate(target, player.position());
         double x;
         double y;
         double z;
@@ -120,39 +120,39 @@ public final class TileEldritchPortal extends BlockEntity {
      * The nearest eldritch gate of a dimension.
      *
      * <p>Oracle {@code TeleporterThaumcraft:57-112} walks a square of one hundred and twenty
-     * eight blocks around the player and keeps the closest gate. The native port walks the
-     * chunks of the same square and reads the gate from the block entities of the chunk, and
-     * it only loads a chunk that is not there yet when the chunk is next to the player.
+     * eight blocks around the player and keeps the closest gate. Walk every chunk intersecting
+     * that inclusive square, including unexplored chunks, and compare all gate centres. A chunk
+     * ring is not a distance bound: a gate just across its edge can be closer than one inside it.
      */
-    private static BlockPos findGate(ServerLevel level, BlockPos from) {
-        int chunkRadius = OuterLandsWiringRules.PORTAL_SEARCH_RADIUS >> 4;
-        int originX = from.getX() >> 4;
-        int originZ = from.getZ() >> 4;
+    private static BlockPos findGate(ServerLevel level, Vec3 from) {
+        int radius = OuterLandsWiringRules.PORTAL_SEARCH_RADIUS;
+        BlockPos origin = BlockPos.containing(from);
+        int minX = origin.getX() - radius, maxX = origin.getX() + radius;
+        int minZ = origin.getZ() - radius, maxZ = origin.getZ() + radius;
         BlockPos best = null;
         double bestDistance = Double.MAX_VALUE;
-        for (int ring = 0; ring <= chunkRadius; ++ring) {
-            for (int dx = -ring; dx <= ring; ++dx) {
-                for (int dz = -ring; dz <= ring; ++dz) {
-                    if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) continue;
-                    int chunkX = originX + dx;
-                    int chunkZ = originZ + dz;
-                    if (!level.hasChunk(chunkX, chunkZ)) {
-                        if (ring > 1) continue;
-                        level.getChunk(chunkX, chunkZ);
-                    }
-                    for (BlockEntity entity : level.getChunk(chunkX, chunkZ).getBlockEntities().values()) {
-                        if (!(entity instanceof TileEldritchPortal)) continue;
-                        BlockPos pos = entity.getBlockPos();
-                        double distance = pos.distSqr(from);
-                        if (distance >= bestDistance) continue;
-                        bestDistance = distance;
-                        best = pos;
-                    }
+        for (int chunkX = minX >> 4; chunkX <= maxX >> 4; ++chunkX) {
+            for (int chunkZ = minZ >> 4; chunkZ <= maxZ >> 4; ++chunkZ) {
+                var chunk = level.getChunk(chunkX, chunkZ);
+                // Fresh feature chunks can still hold packed block entities. Resolve those too,
+                // rather than overlooking the portal until its chunk has been promoted/ticked.
+                for (BlockPos candidate : chunk.getBlockEntitiesPos()) {
+                    BlockEntity entity = chunk.getBlockEntity(candidate);
+                    if (!(entity instanceof TileEldritchPortal)) continue;
+                    BlockPos pos = entity.getBlockPos();
+                    if (pos.getX() < minX || pos.getX() > maxX || pos.getZ() < minZ || pos.getZ() > maxZ) continue;
+                    double distance = pos.distToCenterSqr(from);
+                    if (distance > bestDistance) continue;
+                    // Original scan order breaks equal-distance ties by X, then Z, then descending Y.
+                    if (distance == bestDistance && best != null
+                            && (pos.getX() > best.getX() || pos.getX() == best.getX()
+                            && (pos.getZ() > best.getZ() || pos.getZ() == best.getZ() && pos.getY() <= best.getY()))) continue;
+                    bestDistance = distance;
+                    best = pos;
                 }
             }
-            if (best != null) return best;
         }
-        return null;
+        return best;
     }
 
     /**

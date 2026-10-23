@@ -662,12 +662,11 @@ public final class DungeonRooms {
         for (int a = 2; a <= 14; ++a) {
             for (int b = 2; b <= 14; ++b) {
                 for (int c = 1; c < 12; ++c) {
-                    if (a != 2 && a != 14 && b != 2 && b != 14) {
-                        if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
-                        if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
-                        if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
-                        if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
-                    }
+                    if (a != 2 && a != 14 && b != 2 && b != 14) continue;
+                    if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
+                    if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
+                    if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
+                    if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
                     place(out, view, worldRandom, x + a, y + c, z + b, 8, -1, cell);
                 }
             }
@@ -778,12 +777,11 @@ public final class DungeonRooms {
         for (int a = 2; a <= 14; ++a) {
             for (int b = 2; b <= 14; ++b) {
                 for (int c = 1; c < 12; ++c) {
-                    if (a != 2 && a != 14 && b != 2 && b != 14) {
-                        if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
-                        if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
-                        if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
-                        if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
-                    }
+                    if (a != 2 && a != 14 && b != 2 && b != 14) continue;
+                    if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
+                    if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
+                    if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
+                    if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
                     place(out, view, worldRandom, x + a, y + c, z + b, 8, -1, cell);
                 }
             }
@@ -863,12 +861,11 @@ public final class DungeonRooms {
         for (int a = 2; a <= 14; ++a) {
             for (int b = 2; b <= 14; ++b) {
                 for (int c = 1; c < 10; ++c) {
-                    if (a != 2 && a != 14 && b != 2 && b != 14) {
-                        if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
-                        if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
-                        if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
-                        if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
-                    }
+                    if (a != 2 && a != 14 && b != 2 && b != 14) continue;
+                    if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
+                    if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
+                    if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
+                    if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
                     place(out, view, worldRandom, x + a, y + c, z + b, 8, -1, cell);
                 }
             }
@@ -960,12 +957,11 @@ public final class DungeonRooms {
         for (int a = 2; a <= 14; ++a) {
             for (int b = 2; b <= 14; ++b) {
                 for (int c = 1; c < 12; ++c) {
-                    if (a != 2 && a != 14 && b != 2 && b != 14) {
-                        if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
-                        if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
-                        if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
-                        if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
-                    }
+                    if (a != 2 && a != 14 && b != 2 && b != 14) continue;
+                    if (a == 2 && b > 3 && b < 12 && cell.west && c < 10) continue;
+                    if (a == 14 && b > 3 && b < 12 && cell.east && c < 10) continue;
+                    if (b == 2 && a > 3 && a < 12 && cell.north && c < 10) continue;
+                    if (b == 14 && a > 3 && a < 12 && cell.south && c < 10) continue;
                     place(out, view, worldRandom, x + a, y + c, z + b, 8, -1, cell);
                 }
             }

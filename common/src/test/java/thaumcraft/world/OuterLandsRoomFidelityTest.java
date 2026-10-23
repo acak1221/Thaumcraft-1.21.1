@@ -57,6 +57,26 @@ class OuterLandsRoomFidelityTest {
         Bootstrap.bootStrap();
     }
 
+    @Test void roomVoidLiningNeverFillsTheWalkableInterior() {
+        assertAll(java.util.stream.IntStream.of(1, 6, 7, 8).mapToObj(feature ->
+                (org.junit.jupiter.api.function.Executable) () -> {
+                    var cell = new MazeGenerator.Cell((short) (feature << 8));
+                    cell.north = true;
+                    var builder = new DungeonRooms.Builder();
+                    var random = RandomSource.create(173L);
+                    var decoration = RandomSource.create(19L);
+                    switch (feature) {
+                        case 1 -> DungeonRooms.generatePortal(builder, emptyView(), random, decoration, 0, 0, BASE, cell);
+                        case 6 -> DungeonRooms.generateKeyRoom(builder, emptyView(), random, decoration, 0, 0, BASE, cell, 2);
+                        case 7 -> DungeonRooms.generateNestRoom(builder, emptyView(), random, decoration, 0, 0, BASE, cell);
+                        case 8 -> DungeonRooms.generateLibraryRoom(builder, emptyView(), random, decoration, 0, 0, BASE, cell);
+                    }
+                    assertFalse(builder.placements.stream().anyMatch(p -> p.kind() == DungeonRooms.Kind.ELDRITCH_NOTHING
+                                    && p.x() == 7 && p.z() == 7 && p.y() == BASE + 5),
+                            "oracle perimeter-only void lining, feature " + feature);
+                }));
+    }
+
     @Test void theTrappedPassageDrawsTheBuriedStoneOfTheFloorAndOfTheCeiling() {
         // Oracle GenPassage:54-55 - the floor and the ceiling each draw their own
         // "random.nextInt(3) == 0" roll, so the two halves of a column may differ.

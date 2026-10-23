@@ -62,16 +62,25 @@ public final class NodeTimeAuditRuntimeChecks {
             node.setNodeType(NodeType.UNSTABLE);
             try (var rng = new WorldRandom(test.getLevel(), bound -> 42, true)) {
                 ticks(node, 99);
-                test.assertTrue(node.getNodeType() == NodeType.UNSTABLE && rng.bounds.isEmpty(), "no stability roll before100");
+                // Lock 2 still discharges (oracle TileNode:551 excludes only lock 1), and a
+                // discharge draws six bound-5 offsets per second update. Those are not
+                // stability draws, so the check filters them instead of demanding an empty log.
+                boolean stabilityDrew = rng.bounds.stream().anyMatch(bound -> bound == 10000 / lock);
+                test.assertTrue(node.getNodeType() == NodeType.UNSTABLE && !stabilityDrew,
+                        "no stability roll before100");
                 ticks(node, 1);
-                test.assertTrue(node.getNodeType() == NodeType.NORMAL && rng.bounds.equals(List.of(10000 / lock)),
+                // The repair is one draw at bound 10000/lock; a lock-2 node also logs its
+                // discharge offsets (bound 5), so the stability draw is isolated by bound.
+                long stabilityDraws = rng.bounds.stream().filter(bound -> bound == 10000 / lock).count();
+                test.assertTrue(node.getNodeType() == NodeType.NORMAL && stabilityDraws == 1,
                         "UNSTABLE repair needs world coin then42 at10000/lock");
                 System.out.println("NODE_TIME_AUDIT stability lock=" + lock + " tick100 UNSTABLE->NORMAL bound=" + rng.bounds);
             }
             node = node(test, NodeModifier.FADING, lock, new AspectList().add(Aspect.AIR, 100));
             try (var rng = new WorldRandom(test.getLevel(), bound -> 69)) {
                 ticks(node, 100);
-                test.assertTrue(node.getNodeModifier() == NodeModifier.PALE && rng.bounds.equals(List.of(12500 / lock))
+                long fadingDraws = rng.bounds.stream().filter(bound -> bound == 12500 / lock).count();
+                test.assertTrue(node.getNodeModifier() == NodeModifier.PALE && fadingDraws == 1
                         && node.getRegenerationTicks() == 0, "FADING repair69 preserves original stale-zero recharge cache");
                 System.out.println("NODE_TIME_AUDIT repair lock=" + lock + " tick100 FADING->PALE bound=" + rng.bounds + " cachedInterval=0");
             }
@@ -96,11 +105,21 @@ public final class NodeTimeAuditRuntimeChecks {
                 test.assertValueEqual(current, 20 + (interval == 0 ? 0 : tick / interval), "oracle recharge curve tick" + tick);
                 test.assertValueEqual(node.getNodeVisBase(Aspect.AIR), 100, "modifier/elapsed time never scales ordinary base");
             }
-            // The knot host cannot discharge, and locks block discharge. Every
-            // observed draw is therefore the oracle's depleted-aspect choice.
-            int expectedDraws = interval == 0 ? 0 : checkpoints[checkpoints.length - 1] / interval;
-            test.assertValueEqual(rng.bounds.size(), expectedDraws, "recharge draws from WORLD RNG once per successful refill");
-            test.assertTrue(rng.bounds.stream().allMatch(bound -> bound == 1), "only depleted-aspect selection, no recharge chance roll");
+            // Oracle TileNode.handleDischarge:551 excludes ONLY lock 1 ("getLock() == 1"),
+            // not lock 2 - an advanced stabilizer does NOT stop its source node from
+            // discharging. So the lock-2 curve also draws the six discharge offsets every
+            // second update (24000 / 2 * 6 = 72000). The recharge selection adds one draw per
+            // successful refill. The assertion therefore counts both, per lock, instead of
+            // assuming locks block discharge.
+            int dischargeDraws = lock == 2 ? (checkpoints[checkpoints.length - 1] / 2) * 6 : 0;
+            int refillDraws = interval == 0 ? 0 : checkpoints[checkpoints.length - 1] / interval;
+            int expectedDraws = dischargeDraws + refillDraws;
+            test.assertValueEqual(rng.bounds.size(), expectedDraws,
+                    "world draws are the oracle's discharge offsets plus one per successful refill");
+            // Recharge has no chance roll (bound 1 is the depleted-key choice); a lock-2 node
+            // additionally draws six bound-5 discharge offsets per second update.
+            test.assertTrue(rng.bounds.stream().allMatch(bound -> bound == 1 || (lock == 2 && bound == 5)),
+                    "recharge draws only the depleted-key choice; lock 2 adds the oracle's discharge offsets");
             System.out.println("NODE_TIME_AUDIT modifier=" + modifier + " lock=" + lock + " ticks="
                     + java.util.Arrays.toString(checkpoints) + " vis=" + measured + " worldDraws=" + rng.bounds.size());
         }

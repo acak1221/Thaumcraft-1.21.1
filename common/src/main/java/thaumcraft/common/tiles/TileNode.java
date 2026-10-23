@@ -779,8 +779,12 @@ public final class TileNode extends BlockEntity implements INode {
     }
 
     private void decreaseBase(Aspect aspect) {
-        // Original setNodeVisBase takes a short, including its narrowing quirk.
-        aspectsBase.aspects.put(aspect, (int)(short)(getNodeVisBase(aspect) - 1));
+        // Oracle TileNode:589 calls setNodeVisBase(aspect, (short)(base - 1)), and the
+        // original's AspectList.reduce REFUSES an overdraw, so a base of 0 is never written
+        // as -1. Writing the tag directly bypassed that refusal and persisted a negative
+        // capacity, which the node then could not recover from. Route through the setter,
+        // which reproduces the original's merge/reduce behaviour including its refusal.
+        setNodeVisBase(aspect, (short) (getNodeVisBase(aspect) - 1));
     }
 
     private boolean restoreOne() {

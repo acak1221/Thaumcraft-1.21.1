@@ -379,11 +379,22 @@ public final class ThaumcraftApi {
         if (in == null) return 0;
         if (in instanceof ItemStack stack) {
             Integer value = warpMap.get(List.of(stack.getItem(), stack.getDamageValue()));
-            return value == null ? 0 : value;
+            if (value != null) return value;
+            // ConfigResearch's eight metadata outputs were flattened into distinct native item ids.
+            // Explicit registrations (including zero) override this original catalogue.
+            if (stack.isEmpty() || stack.getDamageValue() != 0) return 0;
+            var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            if (!id.getNamespace().equals("thaumcraft")) return 0;
+            return switch (id.getPath()) {
+                case "focus_hellbat", "compass_stone", "jar_brain", "bucket_death", "bottle_taint", "golem_flesh", "focus_primal", "staff_rod_primal" -> 1;
+                default -> 0;
+            };
         }
         if (in instanceof String research) {
             Integer value = warpMap.get(research);
-            return value == null ? 0 : value;
+            if (value != null) return value;
+            var definition = ResearchCatalog.get(research);
+            return definition == null ? 0 : definition.warp();
         }
         return 0;
     }

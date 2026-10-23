@@ -1,10 +1,13 @@
 package thaumcraft.common.testing;
 
+import com.mojang.authlib.GameProfile;
+import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -12,6 +15,11 @@ import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.GameTestListener;
 import net.minecraft.gametest.framework.GameTestRunner;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -21,6 +29,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -119,17 +128,35 @@ public final class GolemEndToEndRuntimeChecks {
         var sinks = new ArrayList<ChestBlockEntity>();
         var cutters = new ArrayList<EntityGolemBase>();
         boolean[] walked = new boolean[2];
+        boolean[] collecting = {false};
         for (int i = 0; i < 2; i++) {
             BlockPos home = f.home(i), resource = home.south(4);
             sinks.add(f.chest(home.west()));
             cutters.add(f.worker(i == 0 ? GolemData.HARVEST : GolemData.LUMBER, home, List.of(), List.of(), null, 0));
-            var collector = f.worker(GolemData.GATHER, home.east(), List.of(), List.of(), i == 0 ? Items.MELON_SLICE : Items.OAK_LOG, 1);
-            collector.setHome(home, Direction.EAST);
             if (i == 0) f.level.setBlock(resource, Blocks.MELON.defaultBlockState(), Fixture.QUIET);
             else for (int y = 0; y < 3; y++) f.level.setBlock(resource.above(y), Blocks.OAK_LOG.defaultBlockState(), Fixture.QUIET);
         }
         f.poll(1500, () -> {
             for (int i = 0; i < 2; i++) walked[i] |= cutters.get(i).position().distanceToSqr(Vec3.atBottomCenterOf(f.home(i))) > 1;
+            // Isolate production from collection rather than making the workers compete for one path.
+            // Only observed native removals start collection; no drops or outcomes are supplied.
+            if (!collecting[0] && f.level.getBlockState(f.home(0).south(4)).isAir()
+                    && f.level.getBlockState(f.home(1).south(4)).isAir()
+                    && f.level.getBlockState(f.home(1).south(4).above()).isAir()
+                    && f.level.getBlockState(f.home(1).south(4).above(2)).isAir()) {
+                for (int i = 0; i < 2; i++) {
+                    BlockPos home = f.home(i);
+                    var collector = f.worker(GolemData.GATHER, home.east(), List.of(), List.of(), i == 0 ? Items.MELON_SLICE : Items.OAK_LOG, 1);
+                    collector.setHome(home, Direction.EAST);
+                }
+                collecting[0] = true;
+            }
+            if (test.getTick() == 1490) Thaumcraft.LOG.info("G21 harvest/lumber deadline diagnostic: melon={}, slices={}, logs={}, trunk={}/{}/{}, loose={}",
+                    f.level.getBlockState(f.home(0).south(4)), count(sinks.get(0), Items.MELON_SLICE), count(sinks.get(1), Items.OAK_LOG),
+                    f.level.getBlockState(f.home(1).south(4)), f.level.getBlockState(f.home(1).south(4).above()),
+                    f.level.getBlockState(f.home(1).south(4).above(2)), f.level.getEntitiesOfClass(ItemEntity.class,
+                            new AABB(Vec3.atLowerCornerOf(f.base.offset(-3, -2, -2)), Vec3.atLowerCornerOf(f.base.offset(6, 14, 26))))
+                            .stream().map(e -> e.getItem() + " at " + e.position()).toList());
             if (count(sinks.get(0), Items.MELON_SLICE) == 0 || count(sinks.get(1), Items.OAK_LOG) < 3) return false;
             test.assertTrue(walked[0] && walked[1], "both cutters physically walked away from home to their resources");
             test.assertTrue(count(sinks.get(1), Items.OAK_LOG) == 3, "exactly three real logs arrive, no duplicated trunk drops");
@@ -141,7 +168,42 @@ public final class GolemEndToEndRuntimeChecks {
         });
     }
 
+    public static void measuredWaterPickupRadius(GameTestHelper test) {
+        var f = new Fixture(test, 4);
+        double[] distances = {15.9, 16.1, 19.9, 20.1};
+        Item[] kinds = {Items.COBBLESTONE, Items.DIAMOND, Items.EMERALD, Items.GOLD_INGOT};
+        var workers = new ArrayList<EntityGolemBase>();
+        var sinks = new ArrayList<ChestBlockEntity>();
+        var items = new ArrayList<ItemEntity>();
+        for (int i = 0; i < 4; i++) {
+            BlockPos home = f.home(i);
+            sinks.add(f.chest(home.west()));
+            workers.add(f.worker(GolemData.GATHER, home, i >= 2 ? List.of(GolemUpgrade.WATER.id) : List.of(), List.of(), kinds[i], 1));
+            var item = f.loose(home.south(20), new ItemStack(kinds[i]));
+            item.setNoGravity(true);
+            item.setPos(Vec3.atCenterOf(home).add(0, 0, distances[i]));
+            items.add(item);
+        }
+        f.poll(1100, () -> {
+            for (int i : new int[] {1, 3}) test.assertTrue(items.get(i).isAlive() && items.get(i).getItem().getCount() == 1
+                    && workers.get(i).getCarriedItem().isEmpty() && count(sinks.get(i), kinds[i]) == 0,
+                    "real resource outside the measured radius stays untouched at " + distances[i]);
+            if (test.getTick() < 800 || count(sinks.get(0), kinds[0]) != 1 || count(sinks.get(2), kinds[2]) != 1) return false;
+            test.assertTrue(!items.get(0).isAlive() && !items.get(2).isAlive(), "in-range resources were picked and delivered, not copied");
+            Thaumcraft.LOG.info("G21 measured Gather pickup radius: plain includes 15.9, excludes 16.1; Water includes 19.9, excludes 20.1");
+            return true;
+        });
+    }
+
     public static void usePlantsExactlyOneSeed(GameTestHelper test) {
+        usePlants(test, false);
+    }
+
+    public static void useEmptySpacePlantsExactlyOneSeed(GameTestHelper test) {
+        usePlants(test, true);
+    }
+
+    private static void usePlants(GameTestHelper test, boolean emptySpace) {
         var f = new Fixture(test, 1);
         BlockPos home = f.home(0), farmland = home.south(6).below();
         var source = f.chest(home.west());
@@ -149,13 +211,11 @@ public final class GolemEndToEndRuntimeChecks {
         f.level.setBlock(farmland, Blocks.FARMLAND.defaultBlockState(), Fixture.QUIET);
         f.level.setBlock(farmland.east(), Blocks.WATER.defaultBlockState(), Fixture.QUIET);
         var worker = f.worker(GolemData.USE, home, List.of(),
-                List.of(new GolemMarker(f.level.dimension().location(), farmland, Direction.UP, GolemMarker.ANY)), Items.WHEAT_SEEDS, 1);
+                List.of(new GolemMarker(f.level.dimension().location(), emptySpace ? farmland.above() : farmland, Direction.UP, GolemMarker.ANY)), Items.WHEAT_SEEDS, 1);
+        worker.setUseOptions(new GolemUseOptions(emptySpace, false, false));
         boolean[] walked = {false};
         f.poll(700, () -> {
             walked[0] |= worker.position().distanceToSqr(Vec3.atBottomCenterOf(home)) > 4;
-            if (test.getTick() % 50 == 0) Thaumcraft.LOG.info("G21 Use tick={} distance={} navDone={} cargo={} actor={}",
-                    test.getTick(), worker.distanceToSqr(Vec3.atCenterOf(farmland)), worker.getNavigation().isDone(),
-                    worker.getCarriedItem(), useActorState(f.level));
             int remaining = count(source, Items.WHEAT_SEEDS) + worker.getCarriedItem().getCount();
             test.assertTrue(remaining >= 7 && remaining <= 8, "one marked block cannot consume multiple seeds: " + remaining);
             if (test.getTick() < 400) return false;
@@ -180,6 +240,8 @@ public final class GolemEndToEndRuntimeChecks {
             }
         }
         var worker = f.worker(GolemData.BUTCHER, home, List.of(), List.of(), null, 0);
+        var owner = f.player(home.north());
+        worker.setOwnerName(owner.getGameProfile().getName());
         var herd = new ArrayList<Pig>();
         for (int i = 0; i < 3; i++) {
             var pig = EntityType.PIG.create(f.level);
@@ -192,6 +254,7 @@ public final class GolemEndToEndRuntimeChecks {
         boolean[] walked = {false};
         f.poll(1300, () -> {
             walked[0] |= worker.position().distanceToSqr(Vec3.atBottomCenterOf(home)) > 1;
+            test.assertTrue(owner.isAlive() && owner.getHealth() == owner.getMaxHealth(), "Butcher never attacks its real connected survival owner");
             test.assertTrue(bystander.getHealth() == bystander.getMaxHealth(), "Butcher never attacks the single cow bystander");
             test.assertTrue(herd.get(1).getHealth() == herd.get(1).getMaxHealth() && herd.get(2).getHealth() == herd.get(2).getMaxHealth(),
                     "Butcher leaves two younger pigs completely unharmed");
@@ -207,22 +270,6 @@ public final class GolemEndToEndRuntimeChecks {
         return total;
     }
 
-    /** Read-only diagnostics: never admits a use, sets actor state or supplies a target. */
-    private static String useActorState(ServerLevel level) {
-        try {
-            Class<?> type = thaumcraft.common.entities.golems.GolemUsePlatform.class;
-            var field = type.getDeclaredField("bridge"); field.setAccessible(true);
-            var bridge = (thaumcraft.common.entities.golems.GolemUsePlatform.Bridge) field.get(null);
-            var actor = bridge.actor(level);
-            var nativeActor = type.getDeclaredMethod("nativeActor", thaumcraft.common.entities.golems.GolemUsePlatform.Bridge.class,
-                    ServerLevel.class, net.minecraft.server.level.ServerPlayer.class);
-            nativeActor.setAccessible(true);
-            var empty = type.getDeclaredMethod("emptyActor", net.minecraft.server.level.ServerPlayer.class); empty.setAccessible(true);
-            return "native=" + nativeActor.invoke(null, bridge, level, actor) + ", empty=" + empty.invoke(null, actor)
-                    + ", mode=" + actor.gameMode.getGameModeForPlayer() + ", modeClass=" + actor.gameMode.getClass().getName();
-        } catch (ReflectiveOperationException failure) { throw new IllegalStateException(failure); }
-    }
-
     private static final class Fixture {
         static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
         final GameTestHelper test;
@@ -230,6 +277,8 @@ public final class GolemEndToEndRuntimeChecks {
         final BlockPos base;
         final Map<BlockPos, BlockState> original = new LinkedHashMap<>();
         final List<Entity> entities = new ArrayList<>();
+        final List<ServerPlayer> players = new ArrayList<>();
+        final List<EmbeddedChannel> channels = new ArrayList<>();
         final List<ChunkPos> chunks;
         boolean closed;
 
@@ -237,7 +286,7 @@ public final class GolemEndToEndRuntimeChecks {
             this.test = test; level = test.getLevel(); base = test.absolutePos(new BlockPos(3, 5, 3));
             for (int lane = 0; lane < lanes; lane++) {
                 BlockPos home = home(lane);
-                for (BlockPos pos : BlockPos.betweenClosed(home.offset(-3, -2, -2), home.offset(5, 4, 15))) original.put(pos.immutable(), level.getBlockState(pos));
+                for (BlockPos pos : BlockPos.betweenClosed(home.offset(-3, -2, -2), home.offset(5, 4, 25))) original.put(pos.immutable(), level.getBlockState(pos));
             }
             chunks = GolemChunks.hold(level, original.keySet());
             original.keySet().forEach(pos -> level.setBlock(pos, (pos.getY() - base.getY() + 1) % 8 == 0 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET));
@@ -266,6 +315,16 @@ public final class GolemEndToEndRuntimeChecks {
             var item = new ItemEntity(level, pos.getX() + .5, pos.getY() + .1, pos.getZ() + .5, stack);
             item.setDeltaMovement(Vec3.ZERO); item.setPickUpDelay(0); item.setUnlimitedLifetime(); add(item); return item;
         }
+        ServerPlayer player(BlockPos pos) {
+            var connection = new Connection(PacketFlow.SERVERBOUND);
+            channels.add(new EmbeddedChannel(connection));
+            var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "g21-" + UUID.randomUUID().toString().substring(0, 8)),
+                    ClientInformation.createDefault());
+            players.add(player);
+            level.getServer().getPlayerList().placeNewPlayer(connection, player, CommonListenerCookie.createInitial(player.getGameProfile(), false));
+            player.setGameMode(GameType.SURVIVAL); player.setPos(Vec3.atBottomCenterOf(pos));
+            return player;
+        }
         void poll(int deadline, java.util.function.BooleanSupplier check) {
             test.onEachTick(() -> {
                 if (closed) return;
@@ -285,7 +344,12 @@ public final class GolemEndToEndRuntimeChecks {
         void close() {
             if (closed) return; closed = true;
             entities.forEach(Entity::discard);
-            var box = new AABB(Vec3.atLowerCornerOf(base.offset(-4, -3, -3)), Vec3.atLowerCornerOf(base.offset(7, 52, 17)));
+            for (ServerPlayer player : players) {
+                if (level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player);
+                player.discard();
+            }
+            channels.forEach(EmbeddedChannel::finishAndReleaseAll);
+            var box = new AABB(Vec3.atLowerCornerOf(base.offset(-4, -3, -3)), Vec3.atLowerCornerOf(base.offset(7, 52, 27)));
             level.getEntitiesOfClass(ItemEntity.class, box).forEach(Entity::discard);
             original.forEach((pos, state) -> level.setBlock(pos, state, QUIET));
             chunks.forEach(chunk -> level.setChunkForced(chunk.x, chunk.z, false));

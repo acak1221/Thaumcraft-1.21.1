@@ -98,6 +98,12 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 750, batch = "g21_use")
     public void g21UsePlantsExactlyOneSeed(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.usePlantsExactlyOneSeed(test); }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 750, batch = "g21_use_empty_space")
+    public void g21UseEmptySpacePlantsExactlyOneSeed(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.useEmptySpacePlantsExactlyOneSeed(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1150, batch = "g21_water_measurement")
+    public void g21MeasuredWaterPickupRadius(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.measuredWaterPickupRadius(test); }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1350, batch = "g21_butcher")
     public void g21ButcherLeavesBreedingPair(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.butcherLeavesBreedingPair(test); }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

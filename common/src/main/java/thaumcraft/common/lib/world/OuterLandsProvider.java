@@ -1,6 +1,8 @@
 package thaumcraft.common.lib.world;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -81,6 +83,8 @@ public final class OuterLandsProvider {
                 MazeSavedData::new, MazeSavedData::load, DataFixTypes.LEVEL);
         private final Map<Long, Short> cells = new java.util.concurrent.ConcurrentHashMap<>();
         private CompoundTag rejected;
+        private String rejectionReason;
+        private final AtomicBoolean generationWarningLogged = new AtomicBoolean();
 
         public MazeSavedData() {
         }
@@ -100,6 +104,7 @@ public final class OuterLandsProvider {
                 }
             } catch (RuntimeException malformed) {
                 data.rejected=tag.copy(); data.cells.clear();
+                data.rejectionReason = malformed.getMessage();
                 com.mojang.logging.LogUtils.getLogger().error("Retaining unread {} world map; room/generation operations disabled: {}", ID, malformed.toString());
             }
             return data;
@@ -152,6 +157,20 @@ public final class OuterLandsProvider {
         private void requireReadable() {
             if (rejected!=null) throw new IllegalStateException("Unread "+ID+" map: back up and repair cells offline before room/generation operations");
         }
+
+        /** Explicit generation admission; never treat a quarantined map as an empty, writable map. */
+        public Optional<MazeSavedData> forGeneration(BlockPos position) {
+            if (rejected == null) return Optional.of(this);
+            if (generationWarningLogged.compareAndSet(false, true)) {
+                com.mojang.logging.LogUtils.getLogger().error(
+                        "Skipping maze generation at {}: unread {} map ({}); rejected NBT retained; back up and repair cells offline",
+                        position, ID, rejectionReason);
+            }
+            return Optional.empty();
+        }
+
+        /** Read-only preflight does not consume the actual placement's one-time diagnostic. */
+        public boolean availableForGeneration() { return rejected == null; }
     }
 
     /** The saved data of the world, created on demand. */
@@ -177,7 +196,9 @@ public final class OuterLandsProvider {
             int chunkX = context.origin().getX() >> 4;
             int chunkZ = context.origin().getZ() >> 4;
             if (!(level.getLevel() instanceof ServerLevel server)) return false;
-            MazeSavedData maze = maze(server);
+            var available = maze(server).forGeneration(context.origin());
+            if (available.isEmpty()) return false;
+            MazeSavedData maze = available.get();
             short packed = maze.cell(chunkX, chunkZ);
             if (packed == 0) return false;
             MazeGenerator.Cell cell = new MazeGenerator.Cell(packed);

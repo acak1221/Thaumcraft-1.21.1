@@ -2131,6 +2131,26 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.OuterLandsRuntimeChecks.labyrinth(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "worldgen_crash_biome")
+    public void worldgenCrashMissingBiomeRefusesFeature(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.missingBiomeFeature(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "worldgen_crash_column")
+    public void worldgenCrashMissingBiomeRefusesColumn(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.missingBiomeColumn(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "worldgen_crash_rooms")
+    public void worldgenCrashMalformedMazeSkipsRooms(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.malformedMazeRooms(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "worldgen_crash_ring")
+    public void worldgenCrashMalformedMazeSkipsRing(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.malformedMazeRing(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "g30_maze")
     public void mazeAuditGeneratesRealRegionAndReloadsMap(GameTestHelper test) {
         thaumcraft.common.testing.MazeAuditRuntimeChecks.generation(test);

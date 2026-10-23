@@ -91,12 +91,38 @@ finding them.
 These are not differences — they are things **nobody has looked at on a real frame or a real
 world**. They must not be reported as verified until someone does:
 
-* All client visuals added by waves 4–8: the thaumometer screen and readout, the research graph
-  background, the void-robe layers, the node item, the excavation beam, the architect overlay, the
-  essence flow, the sparkles, the candles, the gas surface, the crust join, the eldritch stairs,
-  the mirror, the bone bow glint, the radial focus menu.
+* The thaumometer screen and readout, the excavation beam, the architect overlay, the essence flow,
+  the sparkles, the bone bow glint.
 * Runtime mixin injection on both loaders.
 * The projective mirror shader compiling in the shader driver.
 * Nether wild nodes in a freshly generated Nether.
 * The chunk regeneration queue on a real saved world.
 * Two physical clients plus a dedicated server (the last accepted run predates waves 4–8).
+
+### 7.1 Now seen on a real frame (2026-10-23)
+
+These were in the list above and have now actually been looked at. What the frames show is
+recorded here so the claim is bounded by what was seen, not by a test count:
+
+* **Research graph background** — the category sheet is the original purple nebula, not parchment,
+  and it now covers the pane continuously with no crop seams. The 1:2 texel density was verified
+  numerically: four source texels match the captured PNG at exactly 2×2 GUI pixels. See
+  `docs/analysis/2026-10-23-agent-visualrun.md`.
+* **Void robe** — worn on the body in third person, front and back: black-faced purple hood, layered
+  pointed shoulder plates, long robe, split side panels, diagonal back accessory and belt pouches.
+  No missing-texture checkerboard. Both frames are dark, and the floor shows hard rectangular black
+  regions whose cause is **not** established; not patched speculatively.
+* **Node item and jar node** — the stabilizer draws as a held gold-rimmed 3D item; the placed jar
+  shows its glowing contents; the aura node draws as a bounded orb within the view.
+* **Candles, gas surface, crust, eldritch stairs** — one frame carries all four: a lit candle with
+  smoke, a purple crust block, dark two-step eldritch stairs and a lavender gas cell in glass.
+* **The mirror** — a real native bind and place produced authoritative reciprocal links, and both
+  faces show the dark purple speckled projected field with its inset border, not a blank plane.
+  Static frames do not establish projective motion parity.
+* **Radial focus menu** — opens on held F with the focus list, the wand label and Remove/Cancel.
+* **Eldritch obelisk** — renders coherently (coherent housing, pointed caps) and no longer crashes
+  the client. The tunnel effect inside it is **not** readable as a receding passage; it reads as
+  faint cyan marks on dark inset faces. Left open as a real rendering gap.
+* **Shimmerleaf and cinderpearl** — both decorative plants draw their crossed-quad models, the
+  shimmerleaf emits its blue wisp and the cinderpearl its flame/smoke while standing on sand.
+

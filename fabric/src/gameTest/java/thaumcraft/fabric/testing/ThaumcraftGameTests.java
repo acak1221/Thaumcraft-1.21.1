@@ -86,6 +86,9 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "nugget_ownership")
+    public void nuggetOwnership(GameTestHelper test) { thaumcraft.common.testing.NuggetOwnershipRuntimeChecks.run(test); }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_golem")
     public void g23BossGolemFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "golem", false, false); }
 

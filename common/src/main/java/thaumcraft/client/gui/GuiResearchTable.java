@@ -77,9 +77,12 @@ public final class GuiResearchTable extends ThaumcraftContainerScreen<ContainerR
         if (draggedAspect != null) {
             Aspect aspect = Aspect.getAspect(draggedAspect);
             graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 300);
-            tinted(graphics, aspect.getImage(), mouseX - 8, mouseY - 8, aspect.getColor(), 1);
-            graphics.pose().popPose();
+            try {
+                graphics.pose().translate(0, 0, 300);
+                tinted(graphics, aspect.getImage(), mouseX - 8, mouseY - 8, aspect.getColor(), 1);
+            } finally {
+                graphics.pose().popPose();
+            }
             return;
         }
         renderTooltip(graphics, mouseX, mouseY);
@@ -264,25 +267,34 @@ public final class GuiResearchTable extends ThaumcraftContainerScreen<ContainerR
         if (aspect.isPrimal() || !KnowledgeAccess.get(minecraft.player).isResearchComplete("RESEARCHER1")) return;
         Aspect[] components = aspect.getComponents();
         graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 400);
-        for (int i = 0; i < 2; i++) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(x + 6 + i * 18, y + 6, 0);
-            graphics.pose().scale(1.25F, 1.25F, 1);
-            tinted(graphics, ASPECT_BACK, 0, 0, 0xFFFFFF, 1);
+        try {
+            graphics.pose().translate(0, 0, 400);
+            for (int i = 0; i < 2; i++) {
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(x + 6 + i * 18, y + 6, 0);
+                    graphics.pose().scale(1.25F, 1.25F, 1);
+                    tinted(graphics, ASPECT_BACK, 0, 0, 0xFFFFFF, 1);
+                } finally {
+                    graphics.pose().popPose();
+                }
+                tinted(graphics, components[i].getImage(), x + 8 + i * 18, y + 8, components[i].getColor(), 1);
+            }
+        } finally {
             graphics.pose().popPose();
-            tinted(graphics, components[i].getImage(), x + 8 + i * 18, y + 8, components[i].getColor(), 1);
         }
-        graphics.pose().popPose();
     }
 
     private void smallNumber(GuiGraphics graphics, int amount, int right, int y) {
         String text = Integer.toString(amount);
         graphics.pose().pushPose();
-        graphics.pose().translate(right, y, 0);
-        graphics.pose().scale(.5F, .5F, 1);
-        graphics.drawString(font, text, -font.width(text), 0, 0xFFFFFF, true);
-        graphics.pose().popPose();
+        try {
+            graphics.pose().translate(right, y, 0);
+            graphics.pose().scale(.5F, .5F, 1);
+            graphics.drawString(font, text, -font.width(text), 0, 0xFFFFFF, true);
+        } finally {
+            graphics.pose().popPose();
+        }
     }
 
     private ArrayList<Component> aspectTooltip(String tag) {
@@ -551,10 +563,13 @@ public final class GuiResearchTable extends ThaumcraftContainerScreen<ContainerR
      */
     private void drawRune(GuiGraphics graphics, double x, double y, int sprite, float alpha) {
         graphics.pose().pushPose();
-        graphics.pose().translate(x, y, 0);
-        graphics.pose().mulPose(Axis.ZP.rotationDegrees(90));
-        blitAlpha(graphics, SCRIPT, -5, -5, sprite * 16, 0, 10, 10, 256, 16, 0, 0, 0, alpha);
-        graphics.pose().popPose();
+        try {
+            graphics.pose().translate(x, y, 0);
+            graphics.pose().mulPose(Axis.ZP.rotationDegrees(90));
+            blitAlpha(graphics, SCRIPT, -5, -5, sprite * 16, 0, 10, 10, 256, 16, 0, 0, 0, alpha);
+        } finally {
+            graphics.pose().popPose();
+        }
     }
 
     private static void visit(ResearchNoteData note, Cell source, Set<String> known, Set<String> connected) {
@@ -580,17 +595,20 @@ public final class GuiResearchTable extends ThaumcraftContainerScreen<ContainerR
         float alpha = 0.3F + (float) Math.sin(count + x) * 0.3F + 0.3F;
         var pose = graphics.pose();
         pose.pushPose();
-        pose.translate(x, y, 0);
-        pose.mulPose(Axis.ZP.rotation((float) Math.atan2(endY - y, endX - x)));
-        graphics.flush();
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
-        int color = ((int) Math.round(Math.max(0F, Math.min(1F, alpha)) * 255F) << 24) | 0x0099CC;
-        graphics.fill(0, -1, (int) Math.round(Math.hypot(endX - x, endY - y)), 2, color);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-        pose.popPose();
+        try {
+            pose.translate(x, y, 0);
+            pose.mulPose(Axis.ZP.rotation((float) Math.atan2(endY - y, endX - x)));
+            graphics.flush();
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
+                    com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+            int color = ((int) Math.round(Math.max(0F, Math.min(1F, alpha)) * 255F) << 24) | 0x0099CC;
+            graphics.fill(0, -1, (int) Math.round(Math.hypot(endX - x, endY - y)), 2, color);
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.disableBlend();
+        } finally {
+            pose.popPose();
+        }
     }
 
     private static void tinted(GuiGraphics graphics, ResourceLocation texture, int x, int y, int color, float alpha) {

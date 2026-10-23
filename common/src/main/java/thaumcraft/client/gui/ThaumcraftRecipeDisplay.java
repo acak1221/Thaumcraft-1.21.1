@@ -702,54 +702,57 @@ public final class ThaumcraftRecipeDisplay {
         float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        RenderSystem.enableBlend();
-        graphics.blit(OVERLAY, 4, arcane ? 54 : 64, 104, 104, arcane ? 224 : 120, 30, 104, 104, 512, 512);
-        graphics.blit(OVERLAY, 40, arcane ? 14 : 24, 32, 32, 40, 6, 32, 32, 512, 512);
-        RenderSystem.disableBlend();
-        String type = arcane ? "recipe.type.arcane" : shapeless ? "recipe.type.workbenchshapeless" : "recipe.type.workbench";
-        drawCenteredFit(graphics, font, Component.translatable(type), 56, 0, 112, 0xFF505050);
-        ItemStack result = recipe.value().getResultItem(level.registryAccess()).copy();
-        int resultY = arcane ? 22 : 32;
-        drawItem(graphics, font, result, 48, resultY);
-        if (inside(mx, my, 48, resultY, 16, 16)) hover = new Hover(result, List.of());
-        for (int i = 0; i < ingredients.size(); i++) {
-            Ingredient ingredient = ingredients.get(i);
-            if (ingredient.isEmpty()) continue;
-            // Never reduce an Ingredient to an item ID: alternatives retain all
-            // their components and tags cycle once per second, as in TC4.
-            ItemStack[] choices = ingredient.getItems();
-            var enabled = java.util.Arrays.stream(choices).filter(stack -> !stack.isEmpty() && stack.isItemEnabled(level.enabledFeatures())).toList();
-            if (enabled.isEmpty()) continue;
-            ItemStack stack = enabled.get((int) Math.floorMod(cycle, (long) enabled.size())).copy();
-            int sx = 16 + i % gridWidth * 32, sy = (arcane ? 66 : 76) + i / gridWidth * 32;
-            drawItem(graphics, font, stack, sx, sy);
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
-        }
-        if (arcane) {
-            NativeArcaneRecipe nativeRecipe = (NativeArcaneRecipe) recipe.value();
-            Map<String, Integer> vis = nativeRecipe.vis();
-            // Stable descending amount, with the original primal insertion order
-            // for ties in the currently ported fabric/jar recipes.
-            List<String> tags = WandData.PRIMALS.stream().filter(tag -> vis.getOrDefault(tag, 0) > 0)
-                    .sorted(Comparator.<String>comparingInt(vis::get).reversed()).toList();
-            drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.base_vis"), 56, 162, 112, 0xFF505050);
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
             RenderSystem.enableBlend();
-            for (int i = 0; i < tags.size(); i++) {
-                String tag = tags.get(i);
-                Aspect aspect = Aspect.getAspect(tag);
-                int sx = (112 - (tags.size() * 18 - 2)) / 2 + i * 18;
-                int color = aspect.getColor();
-                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-                graphics.blit(aspect.getImage(), sx, 174, 0, 0, 16, 16, 16, 16);
-                graphics.setColor(1, 1, 1, 1);
-                drawCenteredFit(graphics, font, Component.literal(Integer.toString(vis.get(tag))), sx + 8, 190, 18, 0xFF43301F);
-                if (inside(mx, my, sx, 174, 16, 25)) hover = visHover(nativeRecipe, tag, player);
-            }
+            graphics.blit(OVERLAY, 4, arcane ? 54 : 64, 104, 104, arcane ? 224 : 120, 30, 104, 104, 512, 512);
+            graphics.blit(OVERLAY, 40, arcane ? 14 : 24, 32, 32, 40, 6, 32, 32, 512, 512);
             RenderSystem.disableBlend();
+            String type = arcane ? "recipe.type.arcane" : shapeless ? "recipe.type.workbenchshapeless" : "recipe.type.workbench";
+            drawCenteredFit(graphics, font, Component.translatable(type), 56, 0, 112, 0xFF505050);
+            ItemStack result = recipe.value().getResultItem(level.registryAccess()).copy();
+            int resultY = arcane ? 22 : 32;
+            drawItem(graphics, font, result, 48, resultY);
+            if (inside(mx, my, 48, resultY, 16, 16)) hover = new Hover(result, List.of());
+            for (int i = 0; i < ingredients.size(); i++) {
+                Ingredient ingredient = ingredients.get(i);
+                if (ingredient.isEmpty()) continue;
+                // Never reduce an Ingredient to an item ID: alternatives retain all
+                // their components and tags cycle once per second, as in TC4.
+                ItemStack[] choices = ingredient.getItems();
+                var enabled = java.util.Arrays.stream(choices).filter(stack -> !stack.isEmpty() && stack.isItemEnabled(level.enabledFeatures())).toList();
+                if (enabled.isEmpty()) continue;
+                ItemStack stack = enabled.get((int) Math.floorMod(cycle, (long) enabled.size())).copy();
+                int sx = 16 + i % gridWidth * 32, sy = (arcane ? 66 : 76) + i / gridWidth * 32;
+                drawItem(graphics, font, stack, sx, sy);
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
+            }
+            if (arcane) {
+                NativeArcaneRecipe nativeRecipe = (NativeArcaneRecipe) recipe.value();
+                Map<String, Integer> vis = nativeRecipe.vis();
+                // Stable descending amount, with the original primal insertion order
+                // for ties in the currently ported fabric/jar recipes.
+                List<String> tags = WandData.PRIMALS.stream().filter(tag -> vis.getOrDefault(tag, 0) > 0)
+                        .sorted(Comparator.<String>comparingInt(vis::get).reversed()).toList();
+                drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.base_vis"), 56, 162, 112, 0xFF505050);
+                RenderSystem.enableBlend();
+                for (int i = 0; i < tags.size(); i++) {
+                    String tag = tags.get(i);
+                    Aspect aspect = Aspect.getAspect(tag);
+                    int sx = (112 - (tags.size() * 18 - 2)) / 2 + i * 18;
+                    int color = aspect.getColor();
+                    graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+                    graphics.blit(aspect.getImage(), sx, 174, 0, 0, 16, 16, 16, 16);
+                    graphics.setColor(1, 1, 1, 1);
+                    drawCenteredFit(graphics, font, Component.literal(Integer.toString(vis.get(tag))), sx + 8, 190, 18, 0xFF43301F);
+                    if (inside(mx, my, sx, 174, 16, 25)) hover = visHover(nativeRecipe, tag, player);
+                }
+                RenderSystem.disableBlend();
+            }
+        } finally {
+            graphics.pose().popPose();
         }
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -774,39 +777,42 @@ public final class ThaumcraftRecipeDisplay {
         float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        RenderSystem.enableBlend();
-        graphics.blit(OVERLAY, 4, 54, 104, 104, 224, 30, 104, 104, 512, 512);
-        graphics.blit(OVERLAY, 40, 14, 32, 32, 40, 6, 32, 32, 512, 512);
-        RenderSystem.disableBlend();
-        drawCenteredFit(graphics, font, Component.translatable("recipe.type.arcane"), 56, 0, 112, 0xFF505050);
-        drawItem(graphics, font, result, 48, 22);
-        if (inside(mx, my, 48, 22, 16, 16)) hover = new Hover(result, List.of());
-        for (int slot = 0; slot < 9; slot++) {
-            ItemStack stack = input.getItem(slot);
-            if (stack.isEmpty()) continue;
-            int sx = 16 + slot % 3 * 32, sy = 66 + slot / 3 * 32;
-            drawItem(graphics, font, stack, sx, sy);
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            RenderSystem.enableBlend();
+            graphics.blit(OVERLAY, 4, 54, 104, 104, 224, 30, 104, 104, 512, 512);
+            graphics.blit(OVERLAY, 40, 14, 32, 32, 40, 6, 32, 32, 512, 512);
+            RenderSystem.disableBlend();
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.arcane"), 56, 0, 112, 0xFF505050);
+            drawItem(graphics, font, result, 48, 22);
+            if (inside(mx, my, 48, 22, 16, 16)) hover = new Hover(result, List.of());
+            for (int slot = 0; slot < 9; slot++) {
+                ItemStack stack = input.getItem(slot);
+                if (stack.isEmpty()) continue;
+                int sx = 16 + slot % 3 * 32, sy = 66 + slot / 3 * 32;
+                drawItem(graphics, font, stack, sx, sy);
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
+            }
+            List<String> tags = WandData.PRIMALS.stream().filter(tag -> vis.getOrDefault(tag, 0) > 0)
+                    .sorted(Comparator.<String>comparingInt(vis::get).reversed()).toList();
+            drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.base_vis"), 56, 162, 112, 0xFF505050);
+            RenderSystem.enableBlend();
+            for (int i = 0; i < tags.size(); i++) {
+                String tag = tags.get(i);
+                Aspect aspect = Aspect.getAspect(tag);
+                int sx = (112 - (tags.size() * 18 - 2)) / 2 + i * 18;
+                int color = aspect.getColor();
+                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+                graphics.blit(aspect.getImage(), sx, 174, 0, 0, 16, 16, 16, 16);
+                graphics.setColor(1, 1, 1, 1);
+                drawCenteredFit(graphics, font, Component.literal(Integer.toString(vis.get(tag))), sx + 8, 190, 18, 0xFF43301F);
+                if (inside(mx, my, sx, 174, 16, 25)) hover = visHover(vis, tag, player);
+            }
+            RenderSystem.disableBlend();
+        } finally {
+            graphics.pose().popPose();
         }
-        List<String> tags = WandData.PRIMALS.stream().filter(tag -> vis.getOrDefault(tag, 0) > 0)
-                .sorted(Comparator.<String>comparingInt(vis::get).reversed()).toList();
-        drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.base_vis"), 56, 162, 112, 0xFF505050);
-        RenderSystem.enableBlend();
-        for (int i = 0; i < tags.size(); i++) {
-            String tag = tags.get(i);
-            Aspect aspect = Aspect.getAspect(tag);
-            int sx = (112 - (tags.size() * 18 - 2)) / 2 + i * 18;
-            int color = aspect.getColor();
-            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-            graphics.blit(aspect.getImage(), sx, 174, 0, 0, 16, 16, 16, 16);
-            graphics.setColor(1, 1, 1, 1);
-            drawCenteredFit(graphics, font, Component.literal(Integer.toString(vis.get(tag))), sx + 8, 190, 18, 0xFF43301F);
-            if (inside(mx, my, sx, 174, 16, 25)) hover = visHover(vis, tag, player);
-        }
-        RenderSystem.disableBlend();
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -825,23 +831,26 @@ public final class ThaumcraftRecipeDisplay {
         float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        RenderSystem.enableBlend();
-        graphics.blit(OVERLAY, 4, 64, 104, 104, 120, 30, 104, 104, 512, 512);
-        graphics.blit(OVERLAY, 40, 24, 32, 32, 40, 6, 32, 32, 512, 512);
-        RenderSystem.disableBlend();
-        drawCenteredFit(graphics, font, Component.translatable("recipe.type.workbenchshapeless"), 56, 0, 112, 0xFF505050);
-        drawItem(graphics, font, syntheticResult, 48, 32);
-        if (inside(mx, my, 48, 32, 16, 16)) hover = new Hover(syntheticResult, List.of());
-        for (int i = 0; i < syntheticInputs.size() && i < 9; i++) {
-            ItemStack stack = syntheticInputs.get(i);
-            if (stack.isEmpty()) continue;
-            int sx = 16 + i % 3 * 32, sy = 76 + i / 3 * 32;
-            drawItem(graphics, font, stack, sx, sy);
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            RenderSystem.enableBlend();
+            graphics.blit(OVERLAY, 4, 64, 104, 104, 120, 30, 104, 104, 512, 512);
+            graphics.blit(OVERLAY, 40, 24, 32, 32, 40, 6, 32, 32, 512, 512);
+            RenderSystem.disableBlend();
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.workbenchshapeless"), 56, 0, 112, 0xFF505050);
+            drawItem(graphics, font, syntheticResult, 48, 32);
+            if (inside(mx, my, 48, 32, 16, 16)) hover = new Hover(syntheticResult, List.of());
+            for (int i = 0; i < syntheticInputs.size() && i < 9; i++) {
+                ItemStack stack = syntheticInputs.get(i);
+                if (stack.isEmpty()) continue;
+                int sx = 16 + i % 3 * 32, sy = 76 + i / 3 * 32;
+                drawItem(graphics, font, stack, sx, sy);
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
+            }
+        } finally {
+            graphics.pose().popPose();
         }
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -853,42 +862,45 @@ public final class ThaumcraftRecipeDisplay {
         float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        drawCenteredFit(graphics, font, Component.translatable("recipe.type.construct"), 60, 0, 116, 0xFF505050);
-        for (int layer = 0; layer < 3; layer++) {
-            int sy = 24 + layer * 54;
-            graphics.drawString(font, Integer.toString(3 - layer), 8, sy + 20, 0xFF505050, false);
-            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                int sx = 36 + (dx + 1) * 16, cellY = sy + (dz + 1) * 16;
-                graphics.fill(sx, cellY, sx + 16, cellY + 16, 0x22634F36);
-                ItemStack stack = ItemStack.EMPTY;
-                if (layer == 0 && dx == 0 && dz == 0) stack = new ItemStack(ThaumcraftInfusion.MATRIX_ITEM.get());
-                else if (layer == 2 && dx == 0 && dz == 0) stack = new ItemStack(ThaumcraftInfusion.PEDESTAL_ITEM.get());
-                else if (layer > 0 && dx != 0 && dz != 0) stack = new ItemStack(layer == 1
-                        ? ThaumcraftMasonry.ARCANE_STONE.get() : ThaumcraftMasonry.ARCANE_STONE_BRICKS.get());
-                if (!stack.isEmpty()) drawItem(graphics, font, stack, sx, cellY);
-                if (inside(mx, my, sx, cellY, 16, 16)) hover = stack.isEmpty()
-                        ? new Hover(ItemStack.EMPTY, List.of(Component.translatable("tc.port.book_recipe.required_air")))
-                        : new Hover(stack, List.of());
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.construct"), 60, 0, 116, 0xFF505050);
+            for (int layer = 0; layer < 3; layer++) {
+                int sy = 24 + layer * 54;
+                graphics.drawString(font, Integer.toString(3 - layer), 8, sy + 20, 0xFF505050, false);
+                for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+                    int sx = 36 + (dx + 1) * 16, cellY = sy + (dz + 1) * 16;
+                    graphics.fill(sx, cellY, sx + 16, cellY + 16, 0x22634F36);
+                    ItemStack stack = ItemStack.EMPTY;
+                    if (layer == 0 && dx == 0 && dz == 0) stack = new ItemStack(ThaumcraftInfusion.MATRIX_ITEM.get());
+                    else if (layer == 2 && dx == 0 && dz == 0) stack = new ItemStack(ThaumcraftInfusion.PEDESTAL_ITEM.get());
+                    else if (layer > 0 && dx != 0 && dz != 0) stack = new ItemStack(layer == 1
+                            ? ThaumcraftMasonry.ARCANE_STONE.get() : ThaumcraftMasonry.ARCANE_STONE_BRICKS.get());
+                    if (!stack.isEmpty()) drawItem(graphics, font, stack, sx, cellY);
+                    if (inside(mx, my, sx, cellY, 16, 16)) hover = stack.isEmpty()
+                            ? new Hover(ItemStack.EMPTY, List.of(Component.translatable("tc.port.book_recipe.required_air")))
+                            : new Hover(stack, List.of());
+                }
             }
+            var vis = InfusionStructure.formationVisCost();
+            int index = 0;
+            for (var cost : vis.entrySet()) {
+                Aspect aspect = Aspect.getAspect(cost.getKey());
+                int sx = 6 + index++ * 18, color = aspect.getColor();
+                graphics.flush();
+                RenderSystem.enableBlend();
+                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+                graphics.blit(aspect.getImage(), sx, 192, 0, 0, 16, 16, 16, 16);
+                graphics.setColor(1, 1, 1, 1);
+                RenderSystem.disableBlend();
+                drawCenteredFit(graphics, font, Component.literal(Integer.toString(cost.getValue())), sx + 8, 210, 18, 0xFF43301F);
+                if (inside(mx, my, sx, 192, 16, 27)) hover = new Hover(ItemStack.EMPTY, List.of(Component.literal(aspect.getName()),
+                        Component.translatable("tc.port.book_recipe.base_vis")));
+            }
+        } finally {
+            graphics.pose().popPose();
         }
-        var vis = InfusionStructure.formationVisCost();
-        int index = 0;
-        for (var cost : vis.entrySet()) {
-            Aspect aspect = Aspect.getAspect(cost.getKey());
-            int sx = 6 + index++ * 18, color = aspect.getColor();
-            graphics.flush();
-            RenderSystem.enableBlend();
-            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-            graphics.blit(aspect.getImage(), sx, 192, 0, 0, 16, 16, 16, 16);
-            graphics.setColor(1, 1, 1, 1);
-            RenderSystem.disableBlend();
-            drawCenteredFit(graphics, font, Component.literal(Integer.toString(cost.getValue())), sx + 8, 210, 18, 0xFF43301F);
-            if (inside(mx, my, sx, 192, 16, 27)) hover = new Hover(ItemStack.EMPTY, List.of(Component.literal(aspect.getName()),
-                    Component.translatable("tc.port.book_recipe.base_vis")));
-        }
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -901,59 +913,65 @@ public final class ThaumcraftRecipeDisplay {
         float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusion"), 56, 0, 112, 0xFF505050);
-        drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
-                .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability() / 2))), 56, 194, 112, 0xFF505050);
-        graphics.flush();
-        RenderSystem.enableBlend();
-        graphics.blit(OVERLAY, 0, 20, 112, 34, 0, 6, 112, 34, 512, 512);
-        graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
-        RenderSystem.disableBlend();
-        ItemStack result = infusion.getResultItem(level.registryAccess()).copy();
-        drawItem(graphics, font, result, 48, 28);
-        if (inside(mx, my, 48, 28, 16, 16)) hover = new Hover(result, List.of());
-        ItemStack center = declaredChoice(infusion.input(), level, cycle);
-        drawItem(graphics, font, center, 48, 94);
-        if (inside(mx, my, 48, 94, 16, 16)) hover = new Hover(center, List.of());
-        int count = infusion.components().size();
-        // Source's 360 / length is integer division before assignment to float.
-        // Seven shards therefore use51-degree increments, not a normalized ring.
-        int slice = count == 0 ? 0 : 360 / count;
-        var selected = infusion.selectedComponents();
-        for (int i = 0; i < count; i++) {
-            double angle = (-90 + i * slice) / 180F * (float) Math.PI;
-            int sx = 56 + (int)(Math.cos(angle) * 40) - 8;
-            int sy = 102 + (int)(Math.sin(angle) * 40) - 8;
-            ItemStack component = selected.get(i).displayStack(declaredChoice(infusion.components().get(i), level, cycle));
-            if (!component.isEmpty()) infusion.componentDamage(i).ifPresent(component::setDamageValue);
-            drawItem(graphics, font, component, sx, sy);
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
-        }
-        var tags = infusion.aspects().keySet().stream().sorted().toList();
-        int rows = (tags.size() - 1) / 5, shift = (5 - tags.size() % 5) * 10;
-        for (int i = 0; i < tags.size(); i++) {
-            Aspect aspect = Aspect.getAspect(tags.get(i));
-            int sx = 8 + i % 5 * 20 + (i / 5 >= rows && (rows > 1 || tags.size() < 5) ? shift : 0);
-            int sy = 164 - 10 * rows + i / 5 * 20;
-            int color = aspect.getColor();
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusion"), 56, 0, 112, 0xFF505050);
+            drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
+                    .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability() / 2))), 56, 194, 112, 0xFF505050);
             graphics.flush();
             RenderSystem.enableBlend();
-            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-            graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
-            graphics.setColor(1, 1, 1, 1);
+            graphics.blit(OVERLAY, 0, 20, 112, 34, 0, 6, 112, 34, 512, 512);
+            graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
             RenderSystem.disableBlend();
-            graphics.pose().pushPose();
-            graphics.pose().translate(sx + 16, sy + 11, 200);
-            graphics.pose().scale(.5F, .5F, 1);
-            String amount = Integer.toString(infusion.aspects().get(aspect.getTag()));
-            graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+            ItemStack result = infusion.getResultItem(level.registryAccess()).copy();
+            drawItem(graphics, font, result, 48, 28);
+            if (inside(mx, my, 48, 28, 16, 16)) hover = new Hover(result, List.of());
+            ItemStack center = declaredChoice(infusion.input(), level, cycle);
+            drawItem(graphics, font, center, 48, 94);
+            if (inside(mx, my, 48, 94, 16, 16)) hover = new Hover(center, List.of());
+            int count = infusion.components().size();
+            // Source's 360 / length is integer division before assignment to float.
+            // Seven shards therefore use51-degree increments, not a normalized ring.
+            int slice = count == 0 ? 0 : 360 / count;
+            var selected = infusion.selectedComponents();
+            for (int i = 0; i < count; i++) {
+                double angle = (-90 + i * slice) / 180F * (float) Math.PI;
+                int sx = 56 + (int)(Math.cos(angle) * 40) - 8;
+                int sy = 102 + (int)(Math.sin(angle) * 40) - 8;
+                ItemStack component = selected.get(i).displayStack(declaredChoice(infusion.components().get(i), level, cycle));
+                if (!component.isEmpty()) infusion.componentDamage(i).ifPresent(component::setDamageValue);
+                drawItem(graphics, font, component, sx, sy);
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
+            }
+            var tags = infusion.aspects().keySet().stream().sorted().toList();
+            int rows = (tags.size() - 1) / 5, shift = (5 - tags.size() % 5) * 10;
+            for (int i = 0; i < tags.size(); i++) {
+                Aspect aspect = Aspect.getAspect(tags.get(i));
+                int sx = 8 + i % 5 * 20 + (i / 5 >= rows && (rows > 1 || tags.size() < 5) ? shift : 0);
+                int sy = 164 - 10 * rows + i / 5 * 20;
+                int color = aspect.getColor();
+                graphics.flush();
+                RenderSystem.enableBlend();
+                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+                graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
+                graphics.setColor(1, 1, 1, 1);
+                RenderSystem.disableBlend();
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(sx + 16, sy + 11, 200);
+                    graphics.pose().scale(.5F, .5F, 1);
+                    String amount = Integer.toString(infusion.aspects().get(aspect.getTag()));
+                    graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+                } finally {
+                    graphics.pose().popPose();
+                }
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
+                        List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + aspect.getTag())));
+            }
+        } finally {
             graphics.pose().popPose();
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
-                    List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + aspect.getTag())));
         }
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -973,49 +991,55 @@ public final class ThaumcraftRecipeDisplay {
         var costs = infusion.aspectCost(prior, level.registryAccess());
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusionenchantment"), 56, 0, 112, 0xFF505050);
-        drawCenteredFit(graphics, font, Enchantment.getFullname(target, nextLevel), 56, 24, 112, 0xFF705090);
-        drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.xp_levels", infusion.xpLevels(prior, level.registryAccess())),
-                56, 40, 112, 0xFF508850);
-        drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
-                .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability() / 2))), 56, 194, 112, 0xFF505050);
-        graphics.flush();
-        RenderSystem.enableBlend();
-        graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
-        RenderSystem.disableBlend();
-        int count = infusion.components().size(), slice = count == 0 ? 0 : 360 / count;
-        var selected = infusion.selectedComponents();
-        for (int i = 0; i < count; i++) {
-            double angle = (-90 + i * slice) / 180F * (float)Math.PI;
-            int sx = 56 + (int)(Math.cos(angle) * 40) - 8, sy = 102 + (int)(Math.sin(angle) * 40) - 8;
-            ItemStack component = selected.get(i).displayStack(declaredChoice(infusion.components().get(i), level, cycle));
-            drawItem(graphics, font, component, sx, sy);
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
-        }
-        var tags = infusion.aspects().keySet().stream().sorted().toList();
-        int rows = (tags.size() - 1) / 5, shift = (5 - tags.size() % 5) * 10;
-        for (int i = 0; i < tags.size(); i++) {
-            Aspect aspect = Aspect.getAspect(tags.get(i));
-            int sx = 8 + i % 5 * 20 + (i / 5 >= rows && (rows > 1 || tags.size() < 5) ? shift : 0);
-            int sy = 164 - 10 * rows + i / 5 * 20, color = aspect.getColor();
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusionenchantment"), 56, 0, 112, 0xFF505050);
+            drawCenteredFit(graphics, font, Enchantment.getFullname(target, nextLevel), 56, 24, 112, 0xFF705090);
+            drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.xp_levels", infusion.xpLevels(prior, level.registryAccess())),
+                    56, 40, 112, 0xFF508850);
+            drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
+                    .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability() / 2))), 56, 194, 112, 0xFF505050);
             graphics.flush();
             RenderSystem.enableBlend();
-            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-            graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
-            graphics.setColor(1, 1, 1, 1);
+            graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
             RenderSystem.disableBlend();
-            graphics.pose().pushPose();
-            graphics.pose().translate(sx + 16, sy + 11, 200);
-            graphics.pose().scale(.5F, .5F, 1);
-            String amount = Integer.toString(costs.getAmount(aspect));
-            graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+            int count = infusion.components().size(), slice = count == 0 ? 0 : 360 / count;
+            var selected = infusion.selectedComponents();
+            for (int i = 0; i < count; i++) {
+                double angle = (-90 + i * slice) / 180F * (float)Math.PI;
+                int sx = 56 + (int)(Math.cos(angle) * 40) - 8, sy = 102 + (int)(Math.sin(angle) * 40) - 8;
+                ItemStack component = selected.get(i).displayStack(declaredChoice(infusion.components().get(i), level, cycle));
+                drawItem(graphics, font, component, sx, sy);
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
+            }
+            var tags = infusion.aspects().keySet().stream().sorted().toList();
+            int rows = (tags.size() - 1) / 5, shift = (5 - tags.size() % 5) * 10;
+            for (int i = 0; i < tags.size(); i++) {
+                Aspect aspect = Aspect.getAspect(tags.get(i));
+                int sx = 8 + i % 5 * 20 + (i / 5 >= rows && (rows > 1 || tags.size() < 5) ? shift : 0);
+                int sy = 164 - 10 * rows + i / 5 * 20, color = aspect.getColor();
+                graphics.flush();
+                RenderSystem.enableBlend();
+                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+                graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
+                graphics.setColor(1, 1, 1, 1);
+                RenderSystem.disableBlend();
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(sx + 16, sy + 11, 200);
+                    graphics.pose().scale(.5F, .5F, 1);
+                    String amount = Integer.toString(costs.getAmount(aspect));
+                    graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+                } finally {
+                    graphics.pose().popPose();
+                }
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
+                        List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + aspect.getTag())));
+            }
+        } finally {
             graphics.pose().popPose();
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
-                    List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + aspect.getTag())));
         }
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -1034,48 +1058,54 @@ public final class ThaumcraftRecipeDisplay {
         float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        drawCenteredFit(graphics, font, Component.translatable("recipe.type.crucible"), 56, 0, 112, 0xFF505050);
-        graphics.flush();
-        RenderSystem.enableBlend();
-        graphics.blit(OVERLAY, 0, 28, 112, 34, 0, 6, 112, 34, 512, 512);
-        graphics.blit(OVERLAY, 0, 92, 112, 96, 0, 40, 112, 96, 512, 512);
-        graphics.blit(OVERLAY, 42, 76, 22, 26, 200, 168, 22, 26, 512, 512);
-        RenderSystem.disableBlend();
-        ItemStack output = crucible.getResultItem(level.registryAccess());
-        drawItem(graphics, font, output, 48, 36);
-        if (inside(mx, my, 48, 36, 16, 16)) hover = new Hover(output, List.of());
-        ItemStack[] choices = crucible.catalyst().getItems();
-        if (choices.length > 0) {
-            ItemStack catalyst = choices[(int) Math.floorMod(cycle, (long) choices.length)].copyWithCount(1);
-            drawItem(graphics, font, catalyst, 26, 72);
-            if (inside(mx, my, 26, 72, 16, 16)) hover = new Hover(catalyst, List.of());
-        }
-        var tags = crucible.aspects().keySet().stream().sorted().toList();
-        int rows = (tags.size() - 1) / 3, shift = (3 - tags.size() % 3) * 10;
-        for (int i = 0; i < tags.size(); i++) {
-            String tag = tags.get(i);
-            Aspect aspect = Aspect.getAspect(tag);
-            int sx = 28 + i % 3 * 20 + (i / 3 >= rows && (rows > 1 || tags.size() < 3) ? shift : 0);
-            int sy = 128 - 10 * rows + i / 3 * 20;
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.crucible"), 56, 0, 112, 0xFF505050);
             graphics.flush();
             RenderSystem.enableBlend();
-            int color = aspect.getColor();
-            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-            graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
-            graphics.setColor(1, 1, 1, 1);
+            graphics.blit(OVERLAY, 0, 28, 112, 34, 0, 6, 112, 34, 512, 512);
+            graphics.blit(OVERLAY, 0, 92, 112, 96, 0, 40, 112, 96, 512, 512);
+            graphics.blit(OVERLAY, 42, 76, 22, 26, 200, 168, 22, 26, 512, 512);
             RenderSystem.disableBlend();
-            graphics.pose().pushPose();
-            graphics.pose().translate(sx + 16, sy + 11, 200);
-            graphics.pose().scale(.5F, .5F, 1);
-            String amount = Integer.toString(crucible.aspects().get(tag));
-            graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+            ItemStack output = crucible.getResultItem(level.registryAccess());
+            drawItem(graphics, font, output, 48, 36);
+            if (inside(mx, my, 48, 36, 16, 16)) hover = new Hover(output, List.of());
+            ItemStack[] choices = crucible.catalyst().getItems();
+            if (choices.length > 0) {
+                ItemStack catalyst = choices[(int) Math.floorMod(cycle, (long) choices.length)].copyWithCount(1);
+                drawItem(graphics, font, catalyst, 26, 72);
+                if (inside(mx, my, 26, 72, 16, 16)) hover = new Hover(catalyst, List.of());
+            }
+            var tags = crucible.aspects().keySet().stream().sorted().toList();
+            int rows = (tags.size() - 1) / 3, shift = (3 - tags.size() % 3) * 10;
+            for (int i = 0; i < tags.size(); i++) {
+                String tag = tags.get(i);
+                Aspect aspect = Aspect.getAspect(tag);
+                int sx = 28 + i % 3 * 20 + (i / 3 >= rows && (rows > 1 || tags.size() < 3) ? shift : 0);
+                int sy = 128 - 10 * rows + i / 3 * 20;
+                graphics.flush();
+                RenderSystem.enableBlend();
+                int color = aspect.getColor();
+                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+                graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
+                graphics.setColor(1, 1, 1, 1);
+                RenderSystem.disableBlend();
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(sx + 16, sy + 11, 200);
+                    graphics.pose().scale(.5F, .5F, 1);
+                    String amount = Integer.toString(crucible.aspects().get(tag));
+                    graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+                } finally {
+                    graphics.pose().popPose();
+                }
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
+                        List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + tag)));
+            }
+        } finally {
             graphics.pose().popPose();
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
-                    List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + tag)));
         }
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -1087,10 +1117,13 @@ public final class ThaumcraftRecipeDisplay {
     private static void drawCenteredFit(GuiGraphics graphics, Font font, Component text, int center, int y, int width, int color) {
         float scale = Math.min(1, width / (float) Math.max(1, font.width(text)));
         graphics.pose().pushPose();
-        graphics.pose().translate(center, y, 0);
-        graphics.pose().scale(scale, scale, 1);
-        graphics.drawString(font, text, -font.width(text) / 2, 0, color, false);
-        graphics.pose().popPose();
+        try {
+            graphics.pose().translate(center, y, 0);
+            graphics.pose().scale(scale, scale, 1);
+            graphics.drawString(font, text, -font.width(text) / 2, 0, color, false);
+        } finally {
+            graphics.pose().popPose();
+        }
     }
 
     private static boolean inside(float mx, float my, int x, int y, int width, int height) {

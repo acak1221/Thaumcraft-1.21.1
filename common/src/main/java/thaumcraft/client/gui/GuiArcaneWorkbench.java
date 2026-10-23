@@ -43,11 +43,14 @@ public final class GuiArcaneWorkbench extends ThaumcraftContainerScreen<Containe
             graphics.blit(aspect.getImage(), x, y, 0, 0, 16, 16, 16, 16);
             graphics.setColor(1, 1, 1, 1);
             graphics.pose().pushPose();
-            graphics.pose().translate(x + 8, y + 12, 200);
-            graphics.pose().scale(.65F, .65F, 1);
-            String amount = amount(cost);
-            graphics.drawString(font, amount, -font.width(amount) / 2, 0, funded ? 0xFFFFFF : 0xEE6E6E, true);
-            graphics.pose().popPose();
+            try {
+                graphics.pose().translate(x + 8, y + 12, 200);
+                graphics.pose().scale(.65F, .65F, 1);
+                String amount = amount(cost);
+                graphics.drawString(font, amount, -font.width(amount) / 2, 0, funded ? 0xFFFFFF : 0xEE6E6E, true);
+            } finally {
+                graphics.pose().popPose();
+            }
         }
         RenderSystem.disableBlend();
     }
@@ -59,12 +62,15 @@ public final class GuiArcaneWorkbench extends ThaumcraftContainerScreen<Containe
         if (menu.getSlot(0).hasItem() && !menu.craftable()) {
             graphics.fill(leftPos + 160, topPos + 64, leftPos + 176, topPos + 80, 0x99000000);
             graphics.pose().pushPose();
-            graphics.pose().translate(leftPos + 168, topPos + 46, 300);
-            graphics.pose().scale(.5F, .5F, 1);
-            Component message = Component.translatable(ArcaneVis.isCraftingWand(menu.getSlot(1).getItem())
-                    ? "tc.port.arcane.insufficient_vis" : "tc.port.arcane.no_wand");
-            graphics.drawString(font, message, -font.width(message) / 2, 0, 0xEE6E6E, false);
-            graphics.pose().popPose();
+            try {
+                graphics.pose().translate(leftPos + 168, topPos + 46, 300);
+                graphics.pose().scale(.5F, .5F, 1);
+                Component message = Component.translatable(ArcaneVis.isCraftingWand(menu.getSlot(1).getItem())
+                        ? "tc.port.arcane.insufficient_vis" : "tc.port.arcane.no_wand");
+                graphics.drawString(font, message, -font.width(message) / 2, 0, 0xEE6E6E, false);
+            } finally {
+                graphics.pose().popPose();
+            }
         }
         renderTooltip(graphics, mouseX, mouseY);
         for (int i = 0; i < WandData.PRIMALS.size(); i++) {

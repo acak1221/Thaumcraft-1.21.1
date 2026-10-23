@@ -100,11 +100,11 @@ public final class HoveredSlotAspectRow {
         graphics.flush();
         boolean depth = org.lwjgl.opengl.GL11.glIsEnabled(org.lwjgl.opengl.GL11.GL_DEPTH_TEST);
         graphics.pose().pushPose();
+        try {
         // Tooltip text lives at z=400 in native GuiGraphics. The original disables depth
         // for the entire row (ClientTickEventsFML:693-724), so it must cover that text too.
         graphics.pose().translate(0, 0, 500);
         RenderSystem.disableDepthTest();
-        try {
         int index = 0;
         for (Aspect aspect : aspects) {
             if (aspect == null) continue;
@@ -124,8 +124,11 @@ public final class HoveredSlotAspectRow {
             index++;
         }
         } finally {
-            graphics.flush();
-            graphics.pose().popPose();
+            try {
+                graphics.flush();
+            } finally {
+                graphics.pose().popPose();
+            }
             if (depth) RenderSystem.enableDepthTest(); else RenderSystem.disableDepthTest();
         }
     }

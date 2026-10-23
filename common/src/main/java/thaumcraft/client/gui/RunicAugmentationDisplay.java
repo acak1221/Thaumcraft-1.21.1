@@ -30,57 +30,63 @@ public final class RunicAugmentationDisplay {
         float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
         Hover hover = null;
         graphics.pose().pushPose();
-        graphics.pose().translate(originX, originY, 0);
-        graphics.pose().scale(scale, scale, 1);
-        drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusion"), 56, 0, 112, 0xFF505050);
-        drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
-                .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability(center) / 2))), 56, 194, 112, 0xFF505050);
-        graphics.flush();
-        RenderSystem.enableBlend();
-        graphics.blit(OVERLAY, 0, 20, 112, 34, 0, 6, 112, 34, 512, 512);
-        graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
-        RenderSystem.disableBlend();
-        ItemStack result = RunicArmor.augment(center);
-        drawItem(graphics, font, result, 48, 28);
-        if (inside(mx, my, 48, 28, 16, 16)) hover = new Hover(result, List.of());
-        drawItem(graphics, font, center, 48, 94);
-        if (inside(mx, my, 48, 94, 16, 16)) hover = new Hover(center, List.of());
-        int count = components.size();
-        // Source's 360 / length is integer division before assignment to float.
-        // Seven shards therefore use51-degree increments, not a normalized ring.
-        int slice = count == 0 ? 0 : 360 / count;
-        var selected = infusion.selectedComponents(center);
-        for (int i = 0; i < count; i++) {
-            double angle = (-90 + i * slice) / 180F * (float) Math.PI;
-            int sx = 56 + (int)(Math.cos(angle) * 40) - 8;
-            int sy = 102 + (int)(Math.sin(angle) * 40) - 8;
-            ItemStack component = selected.get(i).displayStack(declaredChoice(components.get(i), level, cycle));
-            drawItem(graphics, font, component, sx, sy);
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
-        }
-        var tags = aspects.keySet().stream().sorted().toList();
-        int rows = (tags.size() - 1) / 5, shift = (5 - tags.size() % 5) * 10;
-        for (int i = 0; i < tags.size(); i++) {
-            Aspect aspect = Aspect.getAspect(tags.get(i));
-            int sx = 8 + i % 5 * 20 + (i / 5 >= rows && (rows > 1 || tags.size() < 5) ? shift : 0);
-            int sy = 164 - 10 * rows + i / 5 * 20;
-            int color = aspect.getColor();
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusion"), 56, 0, 112, 0xFF505050);
+            drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
+                    .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability(center) / 2))), 56, 194, 112, 0xFF505050);
             graphics.flush();
             RenderSystem.enableBlend();
-            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-            graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
-            graphics.setColor(1, 1, 1, 1);
+            graphics.blit(OVERLAY, 0, 20, 112, 34, 0, 6, 112, 34, 512, 512);
+            graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
             RenderSystem.disableBlend();
-            graphics.pose().pushPose();
-            graphics.pose().translate(sx + 16, sy + 11, 200);
-            graphics.pose().scale(.5F, .5F, 1);
-            String amount = Integer.toString(aspects.get(aspect.getTag()));
-            graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+            ItemStack result = RunicArmor.augment(center);
+            drawItem(graphics, font, result, 48, 28);
+            if (inside(mx, my, 48, 28, 16, 16)) hover = new Hover(result, List.of());
+            drawItem(graphics, font, center, 48, 94);
+            if (inside(mx, my, 48, 94, 16, 16)) hover = new Hover(center, List.of());
+            int count = components.size();
+            // Source's 360 / length is integer division before assignment to float.
+            // Seven shards therefore use51-degree increments, not a normalized ring.
+            int slice = count == 0 ? 0 : 360 / count;
+            var selected = infusion.selectedComponents(center);
+            for (int i = 0; i < count; i++) {
+                double angle = (-90 + i * slice) / 180F * (float) Math.PI;
+                int sx = 56 + (int)(Math.cos(angle) * 40) - 8;
+                int sy = 102 + (int)(Math.sin(angle) * 40) - 8;
+                ItemStack component = selected.get(i).displayStack(declaredChoice(components.get(i), level, cycle));
+                drawItem(graphics, font, component, sx, sy);
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
+            }
+            var tags = aspects.keySet().stream().sorted().toList();
+            int rows = (tags.size() - 1) / 5, shift = (5 - tags.size() % 5) * 10;
+            for (int i = 0; i < tags.size(); i++) {
+                Aspect aspect = Aspect.getAspect(tags.get(i));
+                int sx = 8 + i % 5 * 20 + (i / 5 >= rows && (rows > 1 || tags.size() < 5) ? shift : 0);
+                int sy = 164 - 10 * rows + i / 5 * 20;
+                int color = aspect.getColor();
+                graphics.flush();
+                RenderSystem.enableBlend();
+                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+                graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
+                graphics.setColor(1, 1, 1, 1);
+                RenderSystem.disableBlend();
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(sx + 16, sy + 11, 200);
+                    graphics.pose().scale(.5F, .5F, 1);
+                    String amount = Integer.toString(aspects.get(aspect.getTag()));
+                    graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+                } finally {
+                    graphics.pose().popPose();
+                }
+                if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
+                        List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + aspect.getTag())));
+            }
+        } finally {
             graphics.pose().popPose();
-            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
-                    List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + aspect.getTag())));
         }
-        graphics.pose().popPose();
         return hover;
     }
 
@@ -98,10 +104,13 @@ public final class RunicAugmentationDisplay {
     private static void drawCenteredFit(GuiGraphics graphics, Font font, Component text, int center, int y, int width, int color) {
         float scale = Math.min(1, width / (float) Math.max(1, font.width(text)));
         graphics.pose().pushPose();
-        graphics.pose().translate(center, y, 0);
-        graphics.pose().scale(scale, scale, 1);
-        graphics.drawString(font, text, -font.width(text) / 2, 0, color, false);
-        graphics.pose().popPose();
+        try {
+            graphics.pose().translate(center, y, 0);
+            graphics.pose().scale(scale, scale, 1);
+            graphics.drawString(font, text, -font.width(text) / 2, 0, color, false);
+        } finally {
+            graphics.pose().popPose();
+        }
     }
 
     private static boolean inside(float mx, float my, int x, int y, int width, int height) {

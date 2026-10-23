@@ -956,7 +956,7 @@
       "ResourceLocation.tryParse(tag.getString(\"w_dim\"))"
     ],
     "common/src/main/java/thaumcraft/api/aspects/Aspect.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/aspects/\"+tag.toLowerCase(Locale.ROOT)+\".png\")"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/aspects/\"+requireTag(tag).toLowerCase(Locale.ROOT)+\".png\")"
     ],
     "common/src/main/java/thaumcraft/api/blocks/BlocksTC.java": [
       "ResourceLocation.tryParse(name)",
@@ -1409,7 +1409,7 @@
     ]
   },
   "source_contracts": {
-    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "1a465f983e45926d5d55445880ff9e1249df537afcbf2424ace94a5e2a5dc299",
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "84ab076a42a595ce58ebc82e8342d9346cf506d0d6e0704630b5c33f724a1dc7",
     "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": "d30a772140f079ffe0dc439aac08300d6bdb298907c05598b3aab5d24299f2ce",
     "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "fd1c8be36797ba032ef54273789bd1fdd59e6211da9e06317322d9112c490d91",
     "common/src/main/java/thaumcraft/api/wands/WandCap.java": "dc5963e4e9e5c0c716a8123bf570ee509a525b579418721df7cdf258e73b552b",

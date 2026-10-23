@@ -1422,6 +1422,26 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.ShockOrbRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "g25_scan_container")
+    public void scanKnowledgePreservesContainerBonusAboveBaseCap(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.containerBonusIsNotCappedAfterBase(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 350, batch = "g25_scan_kinds")
+    public void scanKnowledgePhysicalKindsAndRules(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.physicalKindsRecordExactKnowledge(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "g25_scan_discovery")
+    public void scanKnowledgeMissingParentsAndDiscovery(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.missingParentsBlockThenDiscoverOnce(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "g25_scan_advanced")
+    public void scanKnowledgeAdvancedMarkersSuppressThaumometer(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.advancedMarkersSuppressThaumometer(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m04_scan_api_locators")
     public void scanApiUsesNativeNbtAndNodeLocators(GameTestHelper test) {
         thaumcraft.common.testing.ScanApiRuntimeChecks.nativeApiUsesWorldNbtAndNodeLocators(test, test.makeMockServerPlayerInLevel());

@@ -37,13 +37,16 @@ public final class RenderEmber extends EntityRenderer<EntityEmber> {
         float v0 = .5625F, v1 = v0 + .0625F;
         float half = (.25F + fraction) * .5F;
         pose.pushPose();
-        pose.mulPose(entityRenderDispatcher.cameraOrientation());
-        VertexConsumer buffer = buffers.getBuffer(ADDITIVE);
-        vertex(pose, buffer, -half, -half, u0, v1);
-        vertex(pose, buffer, half, -half, u1, v1);
-        vertex(pose, buffer, half, half, u1, v0);
-        vertex(pose, buffer, -half, half, u0, v0);
-        pose.popPose();
+        try {
+            pose.mulPose(entityRenderDispatcher.cameraOrientation());
+            VertexConsumer buffer = buffers.getBuffer(ADDITIVE);
+            vertex(pose, buffer, -half, -half, u0, v1);
+            vertex(pose, buffer, half, -half, u1, v1);
+            vertex(pose, buffer, half, half, u1, v0);
+            vertex(pose, buffer, -half, half, u0, v0);
+        } finally {
+            pose.popPose();
+        }
     }
 
     private static void vertex(PoseStack pose, VertexConsumer buffer, float x, float y, float u, float v) {

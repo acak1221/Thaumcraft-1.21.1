@@ -166,10 +166,13 @@ public final class ThaumcraftShockClient {
                 float time = (bolt.age + partial) * 8;
                 float reach = Mth.clamp(time / bolt.travel, 0, 1), fade = Mth.clamp((time - bolt.travel) / bolt.fade, 0, 1);
                 pose.pushPose();
-                pose.translate(-eye.x, -eye.y, -eye.z);
-                for (Segment segment : bolt.segments) if (segment.progress <= reach) ribbon(pose, vertices, eye, segment, pass, fade);
-                if (pass == 1 && reach >= 1) impact(pose, vertices, camera, bolt, fade);
-                pose.popPose();
+                try {
+                    pose.translate(-eye.x, -eye.y, -eye.z);
+                    for (Segment segment : bolt.segments) if (segment.progress <= reach) ribbon(pose, vertices, eye, segment, pass, fade);
+                    if (pass == 1 && reach >= 1) impact(pose, vertices, camera, bolt, fade);
+                } finally {
+                    pose.popPose();
+                }
             }
             buffers.endBatch(type);
         }

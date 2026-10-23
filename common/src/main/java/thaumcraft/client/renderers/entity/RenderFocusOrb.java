@@ -25,13 +25,15 @@ public final class RenderFocusOrb<T extends Entity> extends EntityRenderer<T> {
         float u0 = explosive ? (entity.tickCount % 4) / 16F : (1 + entity.tickCount % 6) / 8F;
         float step = explosive ? 1 / 16F : 1 / 8F, v0 = explosive ? .8125F : .875F;
         float half = explosive ? .35F : (1.2F + (float)Math.sin(entity.tickCount / 5F) * .2F) / 2;
-        pose.pushPose(); pose.mulPose(entityRenderDispatcher.cameraOrientation());
-        var out = buffers.getBuffer(explosive ? FIRE_TYPE : ELECTRIC_TYPE);
-        vertex(out, pose, -half, -half, u0, v0 + step);
-        vertex(out, pose, half, -half, u0 + step, v0 + step);
-        vertex(out, pose, half, half, u0 + step, v0);
-        vertex(out, pose, -half, half, u0, v0);
-        pose.popPose();
+        pose.pushPose(); try { pose.mulPose(entityRenderDispatcher.cameraOrientation());
+            var out = buffers.getBuffer(explosive ? FIRE_TYPE : ELECTRIC_TYPE);
+            vertex(out, pose, -half, -half, u0, v0 + step);
+            vertex(out, pose, half, -half, u0 + step, v0 + step);
+            vertex(out, pose, half, half, u0 + step, v0);
+            vertex(out, pose, -half, half, u0, v0);
+        } finally {
+            pose.popPose();
+        }
     }
     private static void vertex(VertexConsumer out, PoseStack pose, float x, float y, float u, float v) {
         out.addVertex(pose.last(), x, y, 0).setColor(1F, 1F, 1F, .8F).setUv(u,v)

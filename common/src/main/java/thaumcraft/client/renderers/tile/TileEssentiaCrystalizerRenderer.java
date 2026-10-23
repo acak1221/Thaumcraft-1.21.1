@@ -30,15 +30,17 @@ public final class TileEssentiaCrystalizerRenderer implements BlockEntityRendere
      * SAME retained sheets and parts, no fake BE/world or saved contents gauge. */
     public static void renderItem(ItemStack stack,ItemDisplayContext context,PoseStack pose,MultiBufferSource buffers,int light,int overlay){if(!stack.is(ThaumcraftTubes.ESSENTIA_CRYSTALLIZER_ITEM.get()))return;ModelEssentiaCrystalizer model=itemModel;if(model==null){model=new ModelEssentiaCrystalizer(Minecraft.getInstance().getResourceManager());itemModel=model;}render(model,Direction.DOWN,0,1,1,1,0,pose,buffers,light,overlay);}
     private static void render(ModelEssentiaCrystalizer model,Direction facing,float spin,float red,float green,float blue,float partialTick,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
-        pose.pushPose();pose.translate(.5,.5,.5);
-        switch(facing){case DOWN->pose.mulPose(Axis.XP.rotationDegrees(-90));case UP->pose.mulPose(Axis.XP.rotationDegrees(90));case SOUTH->pose.mulPose(Axis.YP.rotationDegrees(180));case WEST->pose.mulPose(Axis.YP.rotationDegrees(90));case EAST->pose.mulPose(Axis.YP.rotationDegrees(-90));case NORTH->{}}
-        pose.translate(0,0,-.5);model.renderShell(pose,buffers.getBuffer(SHELL),light,overlay);
-        var camera=Minecraft.getInstance().getCameraEntity();int ticks=camera==null?0:camera.tickCount;
-        for(int q=0;q<4;q++){pose.pushPose();pose.scale(.75F,.75F,.75F);float glow=Mth.sin((ticks+partialTick+q*10)/2F)*.05F+.95F;
-            // Original gl lightmap coordinates (j,0), not a new fullbright RGB
-            // pulse. Native packed light's LOW16 coordinate is that same j.
-            int glowLight=50+(int)(150*glow);pose.mulPose(Axis.ZP.rotationDegrees(90*q));pose.translate(.34,0,1.2125);pose.mulPose(Axis.ZP.rotationDegrees(spin));model.renderCrystal(pose,buffers.getBuffer(CRYSTALS),glowLight,overlay,red,green,blue);pose.popPose();}
-        pose.popPose();
+        pose.pushPose(); try {pose.translate(.5,.5,.5);
+            switch(facing){case DOWN->pose.mulPose(Axis.XP.rotationDegrees(-90));case UP->pose.mulPose(Axis.XP.rotationDegrees(90));case SOUTH->pose.mulPose(Axis.YP.rotationDegrees(180));case WEST->pose.mulPose(Axis.YP.rotationDegrees(90));case EAST->pose.mulPose(Axis.YP.rotationDegrees(-90));case NORTH->{}}
+            pose.translate(0,0,-.5);model.renderShell(pose,buffers.getBuffer(SHELL),light,overlay);
+            var camera=Minecraft.getInstance().getCameraEntity();int ticks=camera==null?0:camera.tickCount;
+            for(int q=0;q<4;q++){pose.pushPose(); try {pose.scale(.75F,.75F,.75F);float glow=Mth.sin((ticks+partialTick+q*10)/2F)*.05F+.95F;
+                    // Original gl lightmap coordinates (j,0), not a new fullbright RGB
+                    // pulse. Native packed light's LOW16 coordinate is that same j.
+                int glowLight=50+(int)(150*glow);pose.mulPose(Axis.ZP.rotationDegrees(90*q));pose.translate(.34,0,1.2125);pose.mulPose(Axis.ZP.rotationDegrees(spin));model.renderCrystal(pose,buffers.getBuffer(CRYSTALS),glowLight,overlay,red,green,blue);} finally { pose.popPose(); }}
+        } finally {
+            pose.popPose();
+        }
     }
     // Native TRIANGLES, not Minecraft's quad entity buffers. No triangle-as-quad
     // translucency sorting: preserve the original immediate four-part order.

@@ -136,37 +136,43 @@ public final class TileTubeRenderer implements BlockEntityRenderer<TileTube> {
 
     private static void renderOneWay(Direction facing, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         pose.pushPose();
-        pose.translate(.5, .5, .5);
-        orientStem(facing, pose);
-        // TileTubeOnewayRenderer:42-49: three ORIGINAL valve-model rods,
-        // blue(.45,.5,1), scale(1.1,.5,1.1), successive localY -.25 travel.
-        pose.scale(1.1F, .5F, 1.1F);
-        pose.translate(0, -.5, 0);
-        VertexConsumer vertices = buffers.getBuffer(RenderType.entityCutoutNoCull(STEM));
-        for (int piece = 0; piece < 3; piece++) {
-            // Native model vertices store 8-bit colour: nearest ARGB to the
-            // original floating (.45,.5,1), not a replacement piece of artwork.
-            ValveModel.STEM.render(pose, vertices, light, overlay, 0xFF7380FF);
-            pose.translate(0, -.25, 0);
+        try {
+            pose.translate(.5, .5, .5);
+            orientStem(facing, pose);
+            // TileTubeOnewayRenderer:42-49: three ORIGINAL valve-model rods,
+            // blue(.45,.5,1), scale(1.1,.5,1.1), successive localY -.25 travel.
+            pose.scale(1.1F, .5F, 1.1F);
+            pose.translate(0, -.5, 0);
+            VertexConsumer vertices = buffers.getBuffer(RenderType.entityCutoutNoCull(STEM));
+            for (int piece = 0; piece < 3; piece++) {
+                // Native model vertices store 8-bit colour: nearest ARGB to the
+                // original floating (.45,.5,1), not a replacement piece of artwork.
+                ValveModel.STEM.render(pose, vertices, light, overlay, 0xFF7380FF);
+                pose.translate(0, -.25, 0);
+            }
+        } finally {
+            pose.popPose();
         }
-        pose.popPose();
     }
 
     private static void renderValve(Direction facing, float rotation, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         pose.pushPose();
-        pose.translate(.5, .5, .5);
-        // Preserve the original matrix order, including the vertical special
-        // case. Partial ticks are deliberately NOT interpolated: TC4 animates
-        // the client field in native +/-20-degree tick steps, even while venting.
-        orientStem(facing, pose);
-        pose.mulPose(Axis.YP.rotationDegrees(-1.5F * rotation));
-        pose.translate(0, -(rotation / 360F) * .12F, 0);
-        ValveModel.STEM.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(STEM)), light, overlay);
-        pose.mulPose(Axis.XP.rotationDegrees(90));
-        pose.translate(-.25, -.25, -.25);
-        pose.scale(.5F, .5F, .5F);
-        extrudedWheel(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), light, overlay);
-        pose.popPose();
+        try {
+            pose.translate(.5, .5, .5);
+            // Preserve the original matrix order, including the vertical special
+            // case. Partial ticks are deliberately NOT interpolated: TC4 animates
+            // the client field in native +/-20-degree tick steps, even while venting.
+            orientStem(facing, pose);
+            pose.mulPose(Axis.YP.rotationDegrees(-1.5F * rotation));
+            pose.translate(0, -(rotation / 360F) * .12F, 0);
+            ValveModel.STEM.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(STEM)), light, overlay);
+            pose.mulPose(Axis.XP.rotationDegrees(90));
+            pose.translate(-.25, -.25, -.25);
+            pose.scale(.5F, .5F, .5F);
+            extrudedWheel(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), light, overlay);
+        } finally {
+            pose.popPose();
+        }
     }
 
     private static void orientStem(Direction facing, PoseStack pose) {

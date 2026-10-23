@@ -59,10 +59,13 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
         if (view(node, minecraft).revealed() && node.getAspects().size() > 0) return;
         int frame = (int)Math.floorMod(System.nanoTime() / 40000000L + node.getBlockPos().getX(), 32L);
         pose.pushPose();
-        pose.translate(.5, .5, .5);
-        pose.mulPose(minecraft.gameRenderer.getMainCamera().rotation());
-        quad(pose, buffers.getBuffer(FAINT), .5f, .1f, 0xffffff, frame, 1);
-        pose.popPose();
+        try {
+            pose.translate(.5, .5, .5);
+            pose.mulPose(minecraft.gameRenderer.getMainCamera().rotation());
+            quad(pose, buffers.getBuffer(FAINT), .5f, .1f, 0xffffff, frame, 1);
+        } finally {
+            pose.popPose();
+        }
     }
 
     /** Actual renderer input; revealed is the original condition, not a scan/research gate. */
@@ -139,11 +142,14 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
         float age = viewer.tickCount + partialTick;
         float alpha = (float)((JAR_VIEW_DISTANCE - distance) / JAR_VIEW_DISTANCE);
         pose.pushPose();
-        // Original TileJarRenderer:56 - the node of the jar is one tenth of a block lower.
-        pose.translate(0, -.1F, 0);
-        drawNode(minecraft, partialTick, pose, buffers, jar.getBlockPos().getX(), aspects,
-                jar.getNodeType(), jar.getNodeModifier(), alpha, JAR_NODE_SIZE, false, age);
-        pose.popPose();
+        try {
+            // Original TileJarRenderer:56 - the node of the jar is one tenth of a block lower.
+            pose.translate(0, -.1F, 0);
+            drawNode(minecraft, partialTick, pose, buffers, jar.getBlockPos().getX(), aspects,
+                    jar.getNodeType(), jar.getNodeModifier(), alpha, JAR_NODE_SIZE, false, age);
+        } finally {
+            pose.popPose();
+        }
     }
 
     /** The shared body of the original {@code renderNode}. */
@@ -153,10 +159,13 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
         long now = System.nanoTime();
         int frame = (int) Math.floorMod(now / 40000000L + blockX, 32L);
         pose.pushPose();
-        pose.translate(.5, .5, .5);
-        pose.mulPose(minecraft.gameRenderer.getMainCamera().rotation());
-        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, depthIgnore, age, now);
-        pose.popPose();
+        try {
+            pose.translate(.5, .5, .5);
+            pose.mulPose(minecraft.gameRenderer.getMainCamera().rotation());
+            drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, depthIgnore, age, now);
+        } finally {
+            pose.popPose();
+        }
     }
 
     /**
@@ -195,45 +204,51 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
                                      NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age,
                                      long now, boolean itemForm) {
         pose.pushPose();
-        if (modifier == NodeModifier.BRIGHT) alpha *= 1.5f;
-        else if (modifier == NodeModifier.PALE) alpha *= .66f;
-        else if (modifier == NodeModifier.FADING) alpha *= Mth.sin(age / 3) * .25f + .33f;
-        float total = 0;
-        int count = 0;
-        float angle = 0;
-        RenderType additive = depthIgnore ? ADDITIVE : ADDITIVE_DEPTH;
-        RenderType translucent = depthIgnore ? TRANSLUCENT : TRANSLUCENT_DEPTH;
-        for (Aspect aspect : aspects.getAspects()) {
-            int amount = aspects.getAmount(aspect);
-            total += amount;
-            float pulse = Mth.sin(age / (14 - count)) * .25f + .5f;
-            float scale = .2f + pulse * (amount / 50f);
-            angle = (float)((now / 5000000L) % (5000 + 500L * count)) / (5000 + 500f * count) * Mth.TWO_PI;
-            float opacity = alpha / (itemForm ? Math.max(1, aspects.size()) : Math.max(1, aspects.size() / 2f));
-            if (aspect.getBlend() == 771) opacity *= 1.5f;
-            pose.pushPose();
-            pose.mulPose(Axis.ZP.rotation(angle));
-            quad(pose, buffers.getBuffer(aspect.getBlend() == 771 ? translucent : additive),
-                    scale * size, opacity, aspect.getColor(), frame, 0);
+        try {
+            if (modifier == NodeModifier.BRIGHT) alpha *= 1.5f;
+            else if (modifier == NodeModifier.PALE) alpha *= .66f;
+            else if (modifier == NodeModifier.FADING) alpha *= Mth.sin(age / 3) * .25f + .33f;
+            float total = 0;
+            int count = 0;
+            float angle = 0;
+            RenderType additive = depthIgnore ? ADDITIVE : ADDITIVE_DEPTH;
+            RenderType translucent = depthIgnore ? TRANSLUCENT : TRANSLUCENT_DEPTH;
+            for (Aspect aspect : aspects.getAspects()) {
+                int amount = aspects.getAmount(aspect);
+                total += amount;
+                float pulse = Mth.sin(age / (14 - count)) * .25f + .5f;
+                float scale = .2f + pulse * (amount / 50f);
+                angle = (float)((now / 5000000L) % (5000 + 500L * count)) / (5000 + 500f * count) * Mth.TWO_PI;
+                float opacity = alpha / (itemForm ? Math.max(1, aspects.size()) : Math.max(1, aspects.size() / 2f));
+                if (aspect.getBlend() == 771) opacity *= 1.5f;
+                pose.pushPose();
+                try {
+                    pose.mulPose(Axis.ZP.rotation(angle));
+                    quad(pose, buffers.getBuffer(aspect.getBlend() == 771 ? translucent : additive),
+                            scale * size, opacity, aspect.getColor(), frame, 0);
+                } finally {
+                    pose.popPose();
+                }
+                ++count;
+            }
+            // Reserved type rows remain distinguishable in saved/admin nodes;
+            // drawing them is NOT an implementation of their gameplay/ecology.
+            int strip = switch (type) {
+                case NORMAL -> 1;
+                case UNSTABLE -> 6;
+                case DARK -> 2;
+                case TAINTED -> 5;
+                case PURE -> 4;
+                case HUNGRY -> 3;
+            };
+            float coreSize = .1f + total / aspects.size() / 150;
+            if (type == NodeType.HUNGRY) coreSize *= .75f;
+            if (type != NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
+            boolean dark = type == NodeType.DARK || type == NodeType.TAINTED;
+            quad(pose, buffers.getBuffer(dark ? translucent : additive), coreSize * size, alpha, 0xffffff, frame, strip);
+        } finally {
             pose.popPose();
-            ++count;
         }
-        // Reserved type rows remain distinguishable in saved/admin nodes;
-        // drawing them is NOT an implementation of their gameplay/ecology.
-        int strip = switch (type) {
-            case NORMAL -> 1;
-            case UNSTABLE -> 6;
-            case DARK -> 2;
-            case TAINTED -> 5;
-            case PURE -> 4;
-            case HUNGRY -> 3;
-        };
-        float coreSize = .1f + total / aspects.size() / 150;
-        if (type == NodeType.HUNGRY) coreSize *= .75f;
-        if (type != NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
-        boolean dark = type == NodeType.DARK || type == NodeType.TAINTED;
-        quad(pose, buffers.getBuffer(dark ? translucent : additive), coreSize * size, alpha, 0xffffff, frame, strip);
-        pose.popPose();
     }
 
     /** One quad of the node atlas; shared with the item form of the node. */

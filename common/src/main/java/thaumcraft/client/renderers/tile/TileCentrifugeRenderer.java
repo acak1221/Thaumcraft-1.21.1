@@ -53,13 +53,15 @@ public final class TileCentrifugeRenderer implements BlockEntityRenderer<TileCen
     }
 
     private static void renderModel(float rotation, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        pose.pushPose(); pose.translate(.5, .5, .5);
-        var vertices = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
-        Model.PARTS.fixed().render(pose, vertices, light, overlay);
-        // Original transient rotation only: no facing transform, interpolation,
-        // animation reset, fabricated motion or render-triggered pump sound.
-        pose.mulPose(Axis.YP.rotationDegrees(rotation));
-        Model.PARTS.rotor().render(pose, vertices, light, overlay);
-        pose.popPose();
+        pose.pushPose(); try { pose.translate(.5, .5, .5);
+            var vertices = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
+            Model.PARTS.fixed().render(pose, vertices, light, overlay);
+            // Original transient rotation only: no facing transform, interpolation,
+            // animation reset, fabricated motion or render-triggered pump sound.
+            pose.mulPose(Axis.YP.rotationDegrees(rotation));
+            Model.PARTS.rotor().render(pose, vertices, light, overlay);
+        } finally {
+            pose.popPose();
+        }
     }
 }

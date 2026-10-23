@@ -37,38 +37,44 @@ public final class TileInfusionMatrixRenderer implements BlockEntityRenderer<Til
         float startup = animation.startup();
         float instability = Math.min(6, 1 + tile.getInstability() * .66F * (Math.min(animation.craftCount(), 50) / 50));
         pose.pushPose();
-        pose.translate(.5, .5, .5);
-        pose.mulPose(Axis.YP.rotationDegrees(ticks % 360 * startup));
-        pose.mulPose(Axis.XP.rotationDegrees(35 * startup));
-        pose.mulPose(Axis.ZP.rotationDegrees(45 * startup));
-        // TC4 TileRunicMatrixRenderer:103-175. One native unit cube at each
-        // (+/- .25)^3 corner, scaled .45, with the same per-axis phase offsets.
-        for (int a = 0; a < 2; a++) {
-            for (int b = 0; b < 2; b++) {
-                for (int c = 0; c < 2; c++) {
-                    pose.pushPose();
-                    float x = (a == 0 ? -.25F : .25F), y = (b == 0 ? -.25F : .25F), z = (c == 0 ? -.25F : .25F);
-                    if (tile.isActive()) {
-                        x += wobble(ticks, a, 15, instability, startup);
-                        y += wobble(ticks, b, 14, instability, startup);
-                        z += wobble(ticks, c, 13, instability, startup);
+        try {
+            pose.translate(.5, .5, .5);
+            pose.mulPose(Axis.YP.rotationDegrees(ticks % 360 * startup));
+            pose.mulPose(Axis.XP.rotationDegrees(35 * startup));
+            pose.mulPose(Axis.ZP.rotationDegrees(45 * startup));
+            // TC4 TileRunicMatrixRenderer:103-175. One native unit cube at each
+            // (+/- .25)^3 corner, scaled .45, with the same per-axis phase offsets.
+            for (int a = 0; a < 2; a++) {
+                for (int b = 0; b < 2; b++) {
+                    for (int c = 0; c < 2; c++) {
+                        pose.pushPose();
+                        try {
+                            float x = (a == 0 ? -.25F : .25F), y = (b == 0 ? -.25F : .25F), z = (c == 0 ? -.25F : .25F);
+                            if (tile.isActive()) {
+                                x += wobble(ticks, a, 15, instability, startup);
+                                y += wobble(ticks, b, 14, instability, startup);
+                                z += wobble(ticks, c, 13, instability, startup);
+                            }
+                            pose.translate(x, y, z);
+                            if (a > 0) pose.mulPose(Axis.XP.rotationDegrees(90));
+                            if (b > 0) pose.mulPose(Axis.YP.rotationDegrees(90));
+                            if (c > 0) pose.mulPose(Axis.ZP.rotationDegrees(90));
+                            pose.scale(.45F, .45F, .45F);
+                            cube.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, overlay, 0xffffffff);
+                            if (tile.isActive()) {
+                                float alpha = (Mth.sin((ticks + a * 2 + b * 3 + c * 4) / 4) * .1F + .2F) * startup;
+                                int argb = Mth.clamp((int)(alpha * 255), 0, 255) << 24 | 0xcc19ff;
+                                runes.render(pose, buffers.getBuffer(RUNES), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, argb);
+                            }
+                        } finally {
+                            pose.popPose();
+                        }
                     }
-                    pose.translate(x, y, z);
-                    if (a > 0) pose.mulPose(Axis.XP.rotationDegrees(90));
-                    if (b > 0) pose.mulPose(Axis.YP.rotationDegrees(90));
-                    if (c > 0) pose.mulPose(Axis.ZP.rotationDegrees(90));
-                    pose.scale(.45F, .45F, .45F);
-                    cube.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, overlay, 0xffffffff);
-                    if (tile.isActive()) {
-                        float alpha = (Mth.sin((ticks + a * 2 + b * 3 + c * 4) / 4) * .1F + .2F) * startup;
-                        int argb = Mth.clamp((int)(alpha * 255), 0, 255) << 24 | 0xcc19ff;
-                        runes.render(pose, buffers.getBuffer(RUNES), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, argb);
-                    }
-                    pose.popPose();
                 }
             }
+        } finally {
+            pose.popPose();
         }
-        pose.popPose();
         if (tile.isCrafting() && animation.craftCount() > 0) halo(pose, buffers.getBuffer(HALO), animation.craftCount());
     }
 
@@ -84,23 +90,26 @@ public final class TileInfusionMatrixRenderer implements BlockEntityRenderer<Til
         int rays = Minecraft.useFancyGraphics() ? 20 : 10;
         float ramp = Math.min(count, 50) / 50;
         pose.pushPose();
-        pose.translate(.5, .5, .5);
-        for (int i = 0; i < rays; i++) {
-            pose.mulPose(Axis.XP.rotationDegrees(random.nextFloat() * 360));
-            pose.mulPose(Axis.YP.rotationDegrees(random.nextFloat() * 360));
-            pose.mulPose(Axis.ZP.rotationDegrees(random.nextFloat() * 360));
-            pose.mulPose(Axis.XP.rotationDegrees(random.nextFloat() * 360));
-            pose.mulPose(Axis.YP.rotationDegrees(random.nextFloat() * 360));
-            pose.mulPose(Axis.ZP.rotationDegrees(random.nextFloat() * 360 + count / 500 * 360));
-            float length = (random.nextFloat() * 20 + 5) * ramp / 20;
-            float width = (random.nextFloat() * 2 + 1) * ramp / 20;
-            // Expand the original 5-vertex TRIANGLE_FAN into three genuine
-            // triangles. Never submit fan/triangle vertices to a QUADS buffer.
-            rayTriangle(pose, buffer, -.866F * width, -.5F * width, .866F * width, -.5F * width, length);
-            rayTriangle(pose, buffer, .866F * width, -.5F * width, 0, width, length);
-            rayTriangle(pose, buffer, 0, width, -.866F * width, -.5F * width, length);
+        try {
+            pose.translate(.5, .5, .5);
+            for (int i = 0; i < rays; i++) {
+                pose.mulPose(Axis.XP.rotationDegrees(random.nextFloat() * 360));
+                pose.mulPose(Axis.YP.rotationDegrees(random.nextFloat() * 360));
+                pose.mulPose(Axis.ZP.rotationDegrees(random.nextFloat() * 360));
+                pose.mulPose(Axis.XP.rotationDegrees(random.nextFloat() * 360));
+                pose.mulPose(Axis.YP.rotationDegrees(random.nextFloat() * 360));
+                pose.mulPose(Axis.ZP.rotationDegrees(random.nextFloat() * 360 + count / 500 * 360));
+                float length = (random.nextFloat() * 20 + 5) * ramp / 20;
+                float width = (random.nextFloat() * 2 + 1) * ramp / 20;
+                // Expand the original 5-vertex TRIANGLE_FAN into three genuine
+                // triangles. Never submit fan/triangle vertices to a QUADS buffer.
+                rayTriangle(pose, buffer, -.866F * width, -.5F * width, .866F * width, -.5F * width, length);
+                rayTriangle(pose, buffer, .866F * width, -.5F * width, 0, width, length);
+                rayTriangle(pose, buffer, 0, width, -.866F * width, -.5F * width, length);
+            }
+        } finally {
+            pose.popPose();
         }
-        pose.popPose();
     }
 
     private static void rayTriangle(PoseStack pose, VertexConsumer buffer, float x1, float z1, float x2, float z2, float y) {

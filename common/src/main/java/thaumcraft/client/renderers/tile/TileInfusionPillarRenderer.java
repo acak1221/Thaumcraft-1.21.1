@@ -38,11 +38,14 @@ public final class TileInfusionPillarRenderer implements BlockEntityRenderer<Til
             default -> 0; // NORTH / 2.
         };
         pose.pushPose();
-        pose.translate(.5, 0, .5);
-        pose.mulPose(Axis.XP.rotationDegrees(-90));
-        pose.mulPose(Axis.ZP.rotationDegrees(angle));
-        model.render(pose, buffers.getBuffer(TRIANGLES), light, overlay);
-        pose.popPose();
+        try {
+            pose.translate(.5, 0, .5);
+            pose.mulPose(Axis.XP.rotationDegrees(-90));
+            pose.mulPose(Axis.ZP.rotationDegrees(angle));
+            model.render(pose, buffers.getBuffer(TRIANGLES), light, overlay);
+        } finally {
+            pose.popPose();
+        }
     }
 
     // The original OBJ reaches 2.038 blocks above its lower BE. Do not let the

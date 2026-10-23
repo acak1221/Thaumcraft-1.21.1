@@ -27,45 +27,57 @@ public final class TileResearchTableRenderer implements BlockEntityRenderer<Tile
         int variant = tile.getBlockState().getValue(BlockTable.VARIANT);
         if (variant < 2 || variant > 5) return;
         pose.pushPose();
-        pose.translate(.5, 1, .5);
-        pose.mulPose(Axis.XP.rotationDegrees(180));
-        int rotation = switch (variant) { case 2 -> 270; case 3 -> 90; case 4 -> 180; default -> 0; };
-        pose.mulPose(Axis.YP.rotationDegrees(rotation));
-        var wood = buffers.getBuffer(RenderType.entityCutoutNoCull(TABLE));
-        model.root.render(pose, wood, light, overlay);
-        // Exhausted tools remain visible, just as in the original renderer.
-        if (!tile.getItem(0).isEmpty() && tile.getItem(0).getItem() instanceof IScribeTools) {
-            model.inkwell.render(pose, wood, light, overlay);
-            pose.pushPose();
-            pose.mulPose(Axis.YP.rotationDegrees(-90));
+        try {
+            pose.translate(.5, 1, .5);
             pose.mulPose(Axis.XP.rotationDegrees(180));
-            pose.translate(-.17, .1, -.15);
-            pose.mulPose(Axis.YP.rotationDegrees(15));
-            pose.scale(.5F, .5F, .5F);
-            quill(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(QUILL)), light, overlay);
+            int rotation = switch (variant) { case 2 -> 270; case 3 -> 90; case 4 -> 180; default -> 0; };
+            pose.mulPose(Axis.YP.rotationDegrees(rotation));
+            var wood = buffers.getBuffer(RenderType.entityCutoutNoCull(TABLE));
+            model.root.render(pose, wood, light, overlay);
+            // Exhausted tools remain visible, just as in the original renderer.
+            if (!tile.getItem(0).isEmpty() && tile.getItem(0).getItem() instanceof IScribeTools) {
+                model.inkwell.render(pose, wood, light, overlay);
+                pose.pushPose();
+                try {
+                    pose.mulPose(Axis.YP.rotationDegrees(-90));
+                    pose.mulPose(Axis.XP.rotationDegrees(180));
+                    pose.translate(-.17, .1, -.15);
+                    pose.mulPose(Axis.YP.rotationDegrees(15));
+                    pose.scale(.5F, .5F, .5F);
+                    quill(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(QUILL)), light, overlay);
+                } finally {
+                    pose.popPose();
+                }
+            }
+            for (int a = 0; a < 6; a++) {
+                pose.pushPose();
+                try {
+                    pose.translate(.1, -.01 - a * .015, .35);
+                    pose.mulPose(Axis.XP.rotationDegrees(-90));
+                    pose.mulPose(Axis.ZP.rotationDegrees(15 + a % 3 * 2));
+                    pose.scale(.5F, .6F, .6F);
+                    quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(PARCHMENT)), light, overlay,
+                            new float[][]{{0,1,0,0,1}, {1,1,0,1,1}, {1,0,0,1,0}, {0,0,0,0,0}}, 0, 0, -1);
+                } finally {
+                    pose.popPose();
+                }
+            }
+            if (!tile.getItem(1).isEmpty() && tile.getItem(1).getItem() instanceof ItemResearchNotes) {
+                var data = tile.getItem(1).get(ThaumcraftContent.RESEARCH_NOTE_DATA.get());
+                int color = data == null ? 0x999999 : data.color();
+                var scroll = buffers.getBuffer(RenderType.entityCutoutNoCull(SCROLL));
+                model.scrollTube.render(pose, scroll, light, overlay);
+                pose.pushPose();
+                try {
+                    pose.scale(1.2F, 1.2F, 1.2F);
+                    model.scrollRibbon.render(pose, scroll, light, overlay, 0xFF000000 | color & 0xFFFFFF);
+                } finally {
+                    pose.popPose();
+                }
+            }
+        } finally {
             pose.popPose();
         }
-        for (int a = 0; a < 6; a++) {
-            pose.pushPose();
-            pose.translate(.1, -.01 - a * .015, .35);
-            pose.mulPose(Axis.XP.rotationDegrees(-90));
-            pose.mulPose(Axis.ZP.rotationDegrees(15 + a % 3 * 2));
-            pose.scale(.5F, .6F, .6F);
-            quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(PARCHMENT)), light, overlay,
-                    new float[][]{{0,1,0,0,1}, {1,1,0,1,1}, {1,0,0,1,0}, {0,0,0,0,0}}, 0, 0, -1);
-            pose.popPose();
-        }
-        if (!tile.getItem(1).isEmpty() && tile.getItem(1).getItem() instanceof ItemResearchNotes) {
-            var data = tile.getItem(1).get(ThaumcraftContent.RESEARCH_NOTE_DATA.get());
-            int color = data == null ? 0x999999 : data.color();
-            var scroll = buffers.getBuffer(RenderType.entityCutoutNoCull(SCROLL));
-            model.scrollTube.render(pose, scroll, light, overlay);
-            pose.pushPose();
-            pose.scale(1.2F, 1.2F, 1.2F);
-            model.scrollRibbon.render(pose, scroll, light, overlay, 0xFF000000 | color & 0xFFFFFF);
-            pose.popPose();
-        }
-        pose.popPose();
     }
 
     @Override public boolean shouldRenderOffScreen(TileResearchTable tile) { return true; }

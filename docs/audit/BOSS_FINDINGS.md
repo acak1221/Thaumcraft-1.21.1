@@ -1,5 +1,10 @@
 # Boss fight audit — g23boss (2026-10-23)
 
+**Final verification:** Fabric production build passed; **128 focused eldritch unit tests
+and 8/8 dedicated-server GameTests passed** after all four fix categories. Evidence:
+`.tmp/g23-final-verified.log`, `common/build/test-results/test/`,
+`fabric/build/gametest-focused-results.xml`. These are focused checks, not the full suite.
+
 ## Scope and evidence
 
 **Six requested entity types inspected and driven from finalized spawn through lethal damage.**
@@ -28,7 +33,7 @@ Specification read directly from the private original 4.2.3.5 oracle under
 | Entity (6 total) | Driven / observed | GameTest | Finding / fix |
 |---|---|---|---|
 | Eldritch golem | Spawn protection; damage down to headless phase; second phase dies | `g23BossGolemFight` | **FAIL:** no pearl. Death lookup uses unregistered old metadata-family ID. Resolve original metadata 3 as native `primordial_pearl`. |
-| Eldritch warden | Spawn ward depleted; temporary frenzy rejects hits; later dies; inspect actual frenzy blocks | `g23BossWardenFight` | **FAIL:** no pearl (shared fix). **FAIL:** frenzy places nitor metadata 1, not field metadata 11. Resolve the actual native `airy_hole` hardness group and its `variant` property. |
+| Eldritch warden | Spawn ward depleted; temporary frenzy rejects hits; later dies; inspect actual frenzy blocks and a victim collision/expiry callback | `g23BossWardenFight` | **FAIL:** no pearl (shared fix). **FAIL:** frenzy places nitor metadata 1, not field metadata 11. Resolve native `airy_hole`/`variant`. **FAIL after mapping correction:** the field neither slows/weakens a victim nor expires on its scheduled tick; restore the metadata-11 hazard lifecycle. |
 | Cultist leader / praetor | Armor-bearing finalized spawn, repeated damage, rare bag, death removal | `g23BossPraetorFight`, `g23BossPraetorBar` | Fight/loot pass. **FAIL:** no server boss event exists after tracking callback. Restore original inherited boss display contract using native server boss event. |
 | Taintacle | Repeated damage, original goo/tendril drop, death removal | `g23BossTaintacleFight` | PASS; no new gameplay fix. No original health phase or boss bar to invent. |
 | Giant taintacle | Repeated damage reaches death | `g23BossGiantFight` | **FAIL:** last giant drops no pearl. Same lookup/fix. No original boss-display bar to invent. |
@@ -51,6 +56,28 @@ ordinary airy group and returned its nitor default. Metadata 11 belongs to `airy
 whose actual property is the shared sparse `variant` property. Oracle warden:197-229
 requires metadata 11 for both the footprint and frenzy rings.
 
+The corrected field identity exposed missing block behavior. A real ring field's native
+collision and scheduled-tick callbacks yielded `collision=false, expired=false`
+(`.tmp/g23-hazard-expiry-before.log`). Original `BlockAiry:384-415` requires 0.66
+horizontal drag, Weakness II for 100 ticks, player exhaustion 0.05, 1% wither damage 1,
+eldritch immunity and field removal on a block tick. Collision/expiry callback tests are
+not elapsed-world-time acceptance; only the native scheduler registration is asserted.
+An extended pre-fix run also observed `randomTicking=false`
+(`.tmp/g23-field-lifecycle-before.log`). The native hole group is now eligible for random
+ticks, and metadata 11 has both scheduled/random expiry handlers. The regression checks
+original ambient Weakness II duration, exact horizontal drag, player exhaustion, eldritch
+ally exemption and both expiry callbacks. The 1% wither roll is implemented from the
+oracle but its probability distribution is not claimed tested.
+
+### Count interpretation
+
+- **6** requested types driven through scripted spawn-to-death checks.
+- **3** distinct types failed a phase/drop check: golem, warden and giant taintacle.
+- **1** additional type failed boss-bar registration: praetor.
+- **4 PROVEN fix categories:** shared pearl lookup, praetor bar, warden field identity,
+  metadata-11 collision/expiry lifecycle. The warden has overlapping findings; do not
+  count it as several additional bosses. No permanent unkillability was established.
+
 ### Placement lock: suspicion rejected, no gameplay change
 
 `g23BossDeathPlacement` confirms live praetor detection, detection during its death
@@ -70,7 +97,8 @@ entity search, **not** the Fabric placement cancellation hook or a generated Out
   departure/death packets require connected-client acceptance. The bar test drives native
   tracking callbacks and inspects the real `ServerBossEvent`; it is not a screenshot claim.
 - Pech loot probabilities/inventory payout, multiple-giant last-survivor reward, all champion
-  variants, arena timed field decay and encounter-specific cleanup are not exhaustively tested.
+  variants, elapsed-world-time field decay and encounter-specific cleanup are not exhaustively
+  tested. Field tick registration and actual expiry callbacks were tested, not their wall clock.
 - A normally equipped player winning while taking real boss attacks remains unverified.
   The fixture proves normal-sized incoming damage can win, not survival balancing.
 - NeoForge not built or run.

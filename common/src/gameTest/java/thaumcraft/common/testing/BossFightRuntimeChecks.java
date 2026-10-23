@@ -116,13 +116,30 @@ public final class BossFightRuntimeChecks {
                 state.entityInside(level,field,victim);
                 boolean collision=victim.hasEffect(net.minecraft.world.effect.MobEffects.WEAKNESS)
                                 && victim.getEffect(net.minecraft.world.effect.MobEffects.WEAKNESS).getAmplifier()==1
+                                && victim.getEffect(net.minecraft.world.effect.MobEffects.WEAKNESS).getDuration()==100
+                                && victim.getEffect(net.minecraft.world.effect.MobEffects.WEAKNESS).isAmbient()
                                 && Math.abs(victim.getDeltaMovement().x-.66)<.00001
                                 && Math.abs(victim.getDeltaMovement().z-.66)<.00001
                                 && victim.getDeltaMovement().y==.25;
                 test.assertTrue(level.getBlockTicks().hasScheduledTick(field,state.getBlock()), "native frenzy scheduled field expiry");
                 state.tick(level,field,level.random);
                 boolean expired=level.getBlockState(field).isAir();
-                test.assertTrue(collision && expired, "actual frenzy field applies original drag/Weakness II and scheduled tick clears it: collision="+collision+", expired="+expired);
+                test.assertTrue(collision && expired && state.isRandomlyTicking(), "actual frenzy field applies original drag/Weakness II and expires: collision="+collision+", scheduledExpired="+expired+", randomTicking="+state.isRandomlyTicking());
+                lane.put(field,state);
+                float exhaustion=player.getFoodData().getExhaustionLevel();
+                state.entityInside(level,field,player);
+                test.assertTrue(Math.abs(player.getFoodData().getExhaustionLevel()-exhaustion-.05F)<.00001,
+                        "native field collision charges original player exhaustion");
+                var immune=lane.add(ThaumcraftEldritchMobs.ELDRITCH_CRAB.get().create(level));
+                immune.setPos(field.getX()+.5,field.getY(),field.getZ()+.5);
+                ChampionJoinRoll.join(level,immune);
+                immune.setDeltaMovement(1,.25,1);
+                state.entityInside(level,field,immune);
+                test.assertTrue(!immune.hasEffect(net.minecraft.world.effect.MobEffects.WEAKNESS)
+                                && immune.getDeltaMovement().equals(new net.minecraft.world.phys.Vec3(1,.25,1)),
+                        "real eldritch ally is exempt from field weakness and drag");
+                state.randomTick(level,field,level.random);
+                test.assertTrue(level.getBlockState(field).isAir(), "native random field tick also clears unscheduled footprints");
             }
             if (kind.equals("golem") || kind.equals("warden") || kind.equals("giant"))
                 test.assertTrue(lane.dropped(ThaumcraftContent.PRIMORDIAL_PEARL.get())==1, kind+" death drops exactly one pearl");

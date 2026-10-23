@@ -26,7 +26,9 @@ public class ItemApi {
 
     private ItemApi() {}
 
-    /** Null/empty names return null; malformed namespaced IDs fall back to reflection, but malformed plain paths throw ResourceLocationException. */
+    /** Returns a fresh named stack, or null for null/empty/missing names (failed lookups may log).
+     * In 1.7.10 meta selected subtypes; now only damageable stacks receive wear in damage points.
+     * Use native namespaced item IDs and data components for 1.21.1 variants, not subtype numbers. */
     public static ItemStack getItem(String itemString, int meta) {
         if (itemString == null || itemString.isEmpty()) return null;
         ResourceLocation id = id(itemString);
@@ -38,7 +40,9 @@ public class ItemApi {
         return null;
     }
 
-    /** Null/empty names return null; malformed namespaced IDs fall back to reflection, but malformed plain paths throw ResourceLocationException. */
+    /** Returns a fresh named block-item stack, or null for null/empty/missing names (failed lookups may log).
+     * In 1.7.10 meta selected block variants; now it only applies wear to damageable item forms.
+     * Use native block IDs and BlockState properties for 1.21.1 block variants. */
     public static ItemStack getBlock(String itemString, int meta) {
         if (itemString == null || itemString.isEmpty()) return null;
         ResourceLocation id = id(itemString);

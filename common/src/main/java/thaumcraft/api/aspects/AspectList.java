@@ -35,21 +35,29 @@ public class AspectList implements Serializable {
         }
     }
 
+    /** Creates an empty mutable list; no registry or world state is changed. */
     public AspectList() {
     }
 
+    /** Returns an independent amount map sharing the same mutable Aspect identities. */
     public AspectList copy() {
         AspectList result = new AspectList();
         result.aspects.putAll(this.aspects);
         return result;
     }
 
+    /** Returns the number of distinct keys, including keys with zero or negative amounts. */
     public int size() { return this.aspects.size(); }
+    /** Returns the signed sum in this list's consumer-defined units; integer overflow is unchecked. */
     public int visSize() { return this.aspects.values().stream().mapToInt(Integer::intValue).sum(); }
+    /** Returns the stored amount, or zero for an absent key (including null); does not mutate this list. */
     public int getAmount(Aspect aspect) { return this.aspects.getOrDefault(aspect, 0); }
+    /** Returns a new insertion-ordered key array; Aspect objects themselves remain shared. */
     public Aspect[] getAspects() { return this.aspects.keySet().toArray(Aspect[]::new); }
+    /** Returns a new array of primal keys; a null key inserted directly into the public map throws NPE. */
     public Aspect[] getPrimalAspects() { return this.aspects.keySet().stream().filter(Aspect::isPrimal).toArray(Aspect[]::new); }
 
+    /** Returns a new key array sorted by tag; null keys/tags inserted through mutable state can throw NPE. */
     public Aspect[] getAspectsSorted() {
         Aspect[] result = getAspects();
         Arrays.sort(result, Comparator.comparing(Aspect::getTag));
@@ -86,6 +94,7 @@ public class AspectList implements Serializable {
         }
     }
 
+    /** Returns a new key array using {@link #getAspectsSortedAmount()}; never changes the stored order. */
     public Aspect[] getAspectsSortedByAmount() { return getAspectsSortedAmount(); }
 
     /**
@@ -106,34 +115,34 @@ public class AspectList implements Serializable {
         return this;
     }
 
-    /** Rejects null other with IAE before mutation; otherwise adds signed amounts using {@link #add(Aspect, int)}. */
+    /** Adds other's amounts into this receiver and returns this; null other throws NPE, and units are not converted. */
     public AspectList add(AspectList other) {
         if (other == null) throw new IllegalArgumentException("other must not be null");
         for (Aspect aspect : other.getAspects()) add(aspect, other.getAmount(aspect));
         return this;
     }
 
-    /** Ignores null aspects; accepts signed amounts and retains the maximum for an existing aspect. */
+    /** Stores the maximum existing/supplied signed amount and returns this; null aspect is ignored, with no unit conversion. */
     public AspectList merge(Aspect aspect, int amount) {
         if (aspect != null) this.aspects.put(aspect, this.aspects.containsKey(aspect) ? Math.max(getAmount(aspect), amount) : amount);
         return this;
     }
 
-    /** Rejects null other with IAE before mutation; otherwise merges signed amounts using {@link #merge(Aspect, int)}. */
+    /** Merges each amount by maximum into this receiver and returns this; null other throws NPE. */
     public AspectList merge(AspectList other) {
         if (other == null) throw new IllegalArgumentException("other must not be null");
         for (Aspect aspect : other.getAspects()) merge(aspect, other.getAmount(aspect));
         return this;
     }
 
-    /** Returns false without mutation for a null aspect, negative amount or insufficient balance. */
+    /** Subtracts amount in the list's units, retaining a zero key; null aspect, negative amount or insufficient stock returns false unchanged. */
     public boolean reduce(Aspect aspect, int amount) {
         if (aspect == null || amount < 0 || getAmount(aspect) < amount) return false;
         this.aspects.put(aspect, getAmount(aspect) - amount);
         return true;
     }
 
-    /** Ignores null aspects and negative amounts; otherwise subtracts and removes nonpositive balances. */
+    /** Subtracts amount in the list's units and removes nonpositive stock; null aspect/negative amount is ignored, returning this. */
     public AspectList remove(Aspect aspect, int amount) {
         if (aspect == null || amount < 0) return this;
         int left = getAmount(aspect) - amount;
@@ -141,11 +150,13 @@ public class AspectList implements Serializable {
         return this;
     }
 
+    /** Removes the key (null is allowed by the map) and returns this; no other state changes. */
     public AspectList remove(Aspect aspect) {
         this.aspects.remove(aspect);
         return this;
     }
 
+    /** Returns a new recursive primal decomposition, preserving amount units; merge uses maxima within each level, not global deduplication. */
     public AspectList reduceToPrimals(boolean merge) {
         AspectList result = new AspectList();
         for (Aspect aspect : getAspects()) {
@@ -160,8 +171,10 @@ public class AspectList implements Serializable {
         return result;
     }
 
+    /** Writes amounts without unit conversion to tag's Aspects list; null tag throws NPE. */
     public void writeToNBT(CompoundTag tag) { writeToNBT(tag, "Aspects"); }
 
+    /** Replaces tag's named list with aspect tags and signed amounts; tag/label must be non-null, and this list is unchanged. */
     public void writeToNBT(CompoundTag tag, String label) {
         ListTag list = new ListTag();
         for (Aspect aspect : getAspects()) {
@@ -173,10 +186,10 @@ public class AspectList implements Serializable {
         tag.put(label, list);
     }
 
-    /** Null tag throws IAE without clearing state; malformed/missing Aspects lists load empty and unknown aspect names are ignored. */
+    /** Clears this receiver and reads tag's Aspects list; null tag throws NPE after clearing. */
     public void readFromNBT(CompoundTag tag) { readFromNBT(tag, "Aspects"); }
 
-    /** Null tag throws IAE before clearing state; missing/wrong-type lists load empty, unknown aspects are dropped, signed amounts remain valid. */
+    /** Clears this receiver and adds named-list amounts unchanged; unknown aspect names are dropped, missing lists read empty, and tag/label must be non-null. */
     public void readFromNBT(CompoundTag tag, String label) {
         if (tag == null) throw new IllegalArgumentException("tag must not be null");
         this.aspects.clear();

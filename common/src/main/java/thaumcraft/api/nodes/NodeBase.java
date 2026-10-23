@@ -8,8 +8,8 @@ import thaumcraft.api.aspects.AspectList;
  * A complete, self-contained {@link INode} implementation for an add-on's own node.
  *
  * <p>The native aura node is the game's own node; an add-on that contributes a node type implements this
- * class instead of the native one. The container rules are the original ones: the current essence never
- * exceeds the base, and the base only grows or shrinks through {@link #setNodeVisBase}.</p>
+     * class instead of the native one. Current stock and base capacity are separate: lowering the base
+     * through {@link #setNodeVisBase} does not reduce current essence and can leave stock above capacity.</p>
  */
 public class NodeBase implements INode {
     private final String id = UUID.randomUUID().toString();
@@ -73,12 +73,16 @@ public class NodeBase implements INode {
         return aspects.reduce(aspect, amount);
     }
 
+    /** Always returns false without reading the nullable list or changing state.
+     * @deprecated Use takeFromContainer(Aspect, int); a caller loop is not atomic. */
     @Override @Deprecated public boolean takeFromContainer(AspectList values) { return false; }
 
     @Override public boolean doesContainerContainAmount(Aspect aspect, int amount) {
         return aspect != null && aspects.getAmount(aspect) >= amount;
     }
 
+    /** Always returns false without reading the nullable list or changing state; not an all/any test.
+     * @deprecated Use doesContainerContainAmount(Aspect, int), explicitly checking each aspect for all-of semantics. */
     @Override @Deprecated public boolean doesContainerContain(AspectList values) { return false; }
 
     @Override public int containerContains(Aspect aspect) { return aspect == null ? 0 : aspects.getAmount(aspect); }

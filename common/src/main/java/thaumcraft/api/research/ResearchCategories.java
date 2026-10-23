@@ -48,6 +48,7 @@ public class ResearchCategories {
         }
     }
 
+    /** Initializes the global native corpus then returns the live category, or null for an absent key (including null unless manually registered). */
     public static ResearchCategoryList getResearchList(String key) {
         loadNative();
         return researchCategories.get(key);
@@ -58,6 +59,7 @@ public class ResearchCategories {
         return Component.translatable("tc.research_category." + key).getString();
     }
 
+    /** Initializes the global native corpus and returns the first live matching entry, or null for null/absent keys in ordinary registrations. */
     public static ResearchItem getResearch(String key) {
         loadNative();
         for (ResearchCategoryList cat : researchCategories.values()) {
@@ -75,6 +77,7 @@ public class ResearchCategories {
         return result;
     }
 
+    /** Initializes native research then registers a category only if absent, retaining nullable key/icon/background without copying or validation. */
     public static void registerCategory(String key, ResourceLocation icon, ResourceLocation background) {
         loadNative();
         if (researchCategories.get(key) == null) {

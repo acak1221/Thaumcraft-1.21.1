@@ -76,12 +76,16 @@ public class NodeAdapter implements INode {
 
     @Override public boolean takeFromContainer(Aspect aspect, int amount) { return node.takeFromContainer(aspect, amount); }
 
+    /** Delegates legacy removal to the native node, which returns false without mutation even for null.
+     * @deprecated Use takeFromContainer(Aspect, int); repeated single-aspect removals are not atomic. */
     @Override @Deprecated public boolean takeFromContainer(AspectList values) { return node.takeFromContainer(values); }
 
     @Override public boolean doesContainerContainAmount(Aspect aspect, int amount) {
         return node.doesContainerContainAmount(aspect, amount);
     }
 
+    /** Delegates the legacy query to the native node, which returns false even for null.
+     * @deprecated Use doesContainerContainAmount(Aspect, int) for explicit per-aspect checks; native nodes may reject that query too. */
     @Override @Deprecated public boolean doesContainerContain(AspectList values) { return node.doesContainerContain(values); }
 
     @Override public int containerContains(Aspect aspect) { return node.containerContains(aspect); }

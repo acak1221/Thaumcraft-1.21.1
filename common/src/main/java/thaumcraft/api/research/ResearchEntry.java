@@ -7,8 +7,10 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The legacy research entry view: the public shape an add-on may read for one research key.
  *
- * <p>The native port keeps the original corpus in {@link ResearchItem}; this class is that view, so the two
- * never drift apart.</p>
+     * <p>The native port keeps the original corpus in {@link ResearchItem}; of copies scalar values,
+     * aliases parent/sibling arrays and icon stacks, and setters do not write back to the ResearchItem.
+     * Stages/addenda/rewards are TC6-style DTO storage, not the TC4 1.7.10 progression model;
+     * in 1.21.1 use ResearchItem registration with supported pages/triggers for gameplay progression.</p>
  */
 public class ResearchEntry {
     String key;
@@ -107,17 +109,29 @@ public class ResearchEntry {
 
     public ResearchStage[] getStages() { return stages; }
 
+    /** Stores a nullable stage array by reference without changing gameplay.
+     * @deprecated Use ResearchItem.setPages and supported triggers for TC4 progression; TC6 stages have no native consumer. */
+    @Deprecated
     public void setStages(ResearchStage[] stages) { this.stages = stages; }
 
     public ItemStack[] getRewardItem() { return rewardItem; }
 
+    /** Stores a nullable reward array by reference without granting items.
+     * @deprecated Use native TC4 ResearchItem/page contracts; no equivalent automatic TC6 reward grant is wired. */
+    @Deprecated
     public void setRewardItem(ItemStack[] rewardItem) { this.rewardItem = rewardItem; }
 
     public ResearchStage.Knowledge[] getRewardKnow() { return rewardKnow; }
 
+    /** Stores a nullable knowledge-reward array by reference without granting knowledge.
+     * @deprecated Use native TC4 ResearchItem/page contracts; no TC6 staged reward flow is wired. */
+    @Deprecated
     public void setRewardKnow(ResearchStage.Knowledge[] rewardKnow) { this.rewardKnow = rewardKnow; }
 
     public ResearchAddendum[] getAddenda() { return addenda; }
 
+    /** Stores a nullable addendum array by reference without changing progression.
+     * @deprecated Use ResearchItem.setPages for TC4 pages; no TC6 addendum progression is wired. */
+    @Deprecated
     public void setAddenda(ResearchAddendum[] addenda) { this.addenda = addenda; }
 }

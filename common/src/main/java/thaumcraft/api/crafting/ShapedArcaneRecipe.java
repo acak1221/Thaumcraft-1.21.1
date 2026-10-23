@@ -38,14 +38,19 @@ public class ShapedArcaneRecipe implements IArcaneRecipe {
     private ArcaneShapedRecipe nativeRecipe;
     private boolean nativeMirrored = true;
 
+    /** Builds an unregistered one-block-result recipe using whole-vis costs; delegates parsing/ownership to the stack constructor, requiring non-null result/recipe. */
     public ShapedArcaneRecipe(String research, Block result, AspectList aspects, Object... recipe) {
         this(research, new ItemStack(result), aspects, recipe);
     }
 
+    /** Builds an unregistered one-item-result recipe using whole-vis costs; delegates parsing/ownership to the stack constructor, requiring non-null result/recipe. */
     public ShapedArcaneRecipe(String research, Item result, AspectList aspects, Object... recipe) {
         this(research, new ItemStack(result), aspects, recipe);
     }
 
+    /** Parses an unregistered shaped recipe, copying result and retaining nullable research/aspects (whole primal vis, not centivis).
+     * Null result/recipe throws NPE; malformed rows/keys/ingredients throw parsing exceptions, including IAE for unsupported ingredients.
+     * An optional leading Boolean controls mirroring; character mappings use native ingredients/item tags, not old ore names. */
     public ShapedArcaneRecipe(String research, ItemStack result, AspectList aspects, Object... recipe) {
         this.research = research;
         this.aspects = aspects;
@@ -123,19 +128,25 @@ public class ShapedArcaneRecipe implements IArcaneRecipe {
         return view;
     }
 
+    /** Returns a fresh assembled result without consuming inventory; inventory is not read by the native assembly path, including null. */
     @Override public ItemStack getCraftingResult(ArcaneRecipeInput inventory) {
         return nativeRecipe().assemble(inventory, ArcaneRecipes.registries());
     }
 
+    /** Returns the live input-array length in grid cells (including blanks); a public-field null assignment throws NPE. */
     @Override public int getRecipeSize() { return this.input.length; }
 
+    /** Returns the live nullable public output reference, not the independent native assembly result. */
     @Override public ItemStack getRecipeOutput() { return this.output; }
 
+    /** Tests research and translated/mirrored grid predicates without spending vis or items; may lazily cache the native recipe.
+     * Inventory must be non-null (native matching may throw otherwise); level is unused by matching, and null player fails a nonempty research gate. */
     @Override public boolean matches(ArcaneRecipeInput inventory, Level level, Player player) {
         if (this.research != null && !this.research.isEmpty() && !ThaumcraftApiHelper.isResearchComplete(player, this.research)) return false;
         return nativeRecipe().matches(inventory, level);
     }
 
+    /** Sets horizontal-mirroring permission and returns this; the native recipe is rebuilt lazily on next access. */
     public ShapedArcaneRecipe setMirrored(boolean mirror) {
         this.mirrored = mirror;
         return this;
@@ -162,9 +173,12 @@ public class ShapedArcaneRecipe implements IArcaneRecipe {
     /** The original ingredient cells of the pattern; a blank cell is null. */
     public Object[] getInput() { return this.input; }
 
+    /** Returns the live nullable primal vis-cost list in whole vis, not centivis; no copy is made. */
     @Override public AspectList getAspects() { return this.aspects; }
 
+    /** Returns the live nullable whole-vis cost list, ignoring inventory including null; no mutation occurs. */
     @Override public AspectList getAspects(ArcaneRecipeInput inventory) { return this.aspects; }
 
+    /** Returns the stored nullable research key without mutation. */
     @Override public String getResearch() { return this.research; }
 }

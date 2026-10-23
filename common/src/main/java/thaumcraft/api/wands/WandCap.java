@@ -10,7 +10,8 @@ import thaumcraft.api.aspects.Aspect;
  * The original TC4 wand cap.
  *
  * <p>The native port owns the real cap catalogue in {@code thaumcraft.common.items.wands.WandMaterials}; this
- * class keeps the original public shape and answers from the native catalogue.</p>
+     * class keeps mutable compatibility registrations. Addon constructors register only in {@link #caps},
+     * leave nativeCap null, and do not extend the native catalogue used by native wand operations.</p>
  */
 public class WandCap {
     /** The original public registry; it stays mutable so an add-on may add its own cap. */
@@ -24,6 +25,7 @@ public class WandCap {
     ItemStack item;
     private final thaumcraft.common.items.wands.WandMaterials.Cap nativeCap;
 
+    /** Registers/replaces a compatibility cap, retaining nullable tag/item; discount is a cost multiplier (1 means unchanged), craftCost a dimensionless assembly factor, neither validated. */
     public WandCap(String tag, float discount, ItemStack item, int craftCost) {
         this.nativeCap = null;
         this.setTag(tag);
@@ -35,6 +37,7 @@ public class WandCap {
         caps.put(tag, this);
     }
 
+    /** Registers/replaces a compatibility cap retaining nullable item/special-aspect list; discounts are cost multipliers, craftCost a dimensionless assembly factor, with no native catalogue binding. */
     public WandCap(String tag, float discount, List<Aspect> specialAspects, float discountSpecial, ItemStack item, int craftCost) {
         this.nativeCap = null;
         this.setTag(tag);
@@ -61,27 +64,37 @@ public class WandCap {
     /** The native cap behind this view, or null for an add-on cap. */
     public thaumcraft.common.items.wands.WandMaterials.Cap nativeCap() { return nativeCap; }
 
+    /** Returns the dimensionless base cost multiplier (1 means unchanged), without mutation. */
     public float getBaseCostModifier() { return this.baseCostModifier; }
 
+    /** Returns the live nullable special-aspect list; no copy is made. */
     public List<Aspect> getSpecialCostModifierAspects() { return this.specialCostModifierAspects; }
 
+    /** Returns the dimensionless special-aspect cost multiplier without mutation. */
     public float getSpecialCostModifier() { return this.specialCostModifier; }
 
+    /** Returns the stored nullable texture identifier without mutation. */
     public ResourceLocation getTexture() { return this.texture; }
 
+    /** Stores a nullable texture on this view only; no native registration is changed. */
     public void setTexture(ResourceLocation texture) { this.texture = texture; }
 
+    /** Returns the stored nullable tag without mutation. */
     public String getTag() { return this.tag; }
 
-    /** Stores null/malformed tags without validation or registry re-keying; a null tag can make {@link #byTag} throw NPE. */
+    /** Stores a nullable tag without re-keying caps or changing the native material. */
     public void setTag(String tag) { this.tag = tag; }
 
+    /** Returns the live nullable material stack reference; no copy is made. */
     public ItemStack getItem() { return this.item; }
 
+    /** Retains the nullable stack reference on this view without copying it or changing native registration. */
     public void setItem(ItemStack item) { this.item = item; }
 
+    /** Returns the dimensionless assembly cost factor, not a centivis debit. */
     public int getCraftCost() { return this.craftCost; }
 
+    /** Stores an unvalidated dimensionless assembly cost factor on this view only. */
     public void setCraftCost(int craftCost) { this.craftCost = craftCost; }
 
     /** The original research key of a cap. */

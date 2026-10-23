@@ -32,7 +32,9 @@ public class InfusionEnchantmentRecipe {
     private final Holder<Enchantment> enchantmentHolder;
     private thaumcraft.common.crafting.InfusionEnchantmentRecipe nativeRecipe;
 
-    /** Null enchantment throws IAE; null aspects/recipe mean zero costs/components; a holder without a registry key also throws IAE. */
+    /** Builds an unregistered enchantment recipe with dimensionless instability and essentia-unit costs, not centivis.
+     * Null/unregistered enchantment holders throw IAE; nullable aspects are retained (native cost empty), null recipe means no components.
+     * The component array is cloned but its stack references are retained; invalid component ingredients throw IAE. */
     public InfusionEnchantmentRecipe(String research, Holder<Enchantment> input, int inst, AspectList aspects, ItemStack[] recipe) {
         if (input == null) throw new IllegalArgumentException("An enchantment infusion recipe needs an enchantment");
         this.research = research;
@@ -75,6 +77,9 @@ public class InfusionEnchantmentRecipe {
     /** The registry holder of the enchanted effect. */
     public Holder<Enchantment> enchantmentHolder() { return enchantmentHolder; }
 
+    /** Tests research, enchantment admission and component predicates without consuming supplied stacks.
+     * Null input/central or null world returns false; null player fails nonempty research gates.
+     * Null component entries can throw while constructing the native input snapshot. */
     public boolean matches(ArrayList<ItemStack> input, ItemStack central, Level world, Player player) {
         if (this.research != null && !this.research.isEmpty() && !ThaumcraftApiHelper.isResearchComplete(player, this.research)) return false;
         if (input == null || central == null) return false;
@@ -86,10 +91,13 @@ public class InfusionEnchantmentRecipe {
         return InfusionRecipe.areItemStacksEqual(stack0, stack1, fuzzy);
     }
 
+    /** Returns the live public enchantment reference, possibly null after direct field edits; the captured native holder is unchanged. */
     public Enchantment getEnchantment() { return this.enchantment; }
 
+    /** Returns the live nullable essentia-unit cost list, not centivis; no copy is made. */
     public AspectList getAspects() { return this.aspects; }
 
+    /** Returns the stored nullable research key without changing state. */
     public String getResearch() { return this.research; }
 
     /** The original instability: the enchantments of the item plus the recipe's own instability. */

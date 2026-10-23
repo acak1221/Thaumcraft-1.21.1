@@ -16,7 +16,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>Forced 1.21.1 change: the original keyed a trigger by block and metadata; 1.21.1 has no block metadata,
  * so a trigger is keyed either by a whole block or by one exact block state. The original metadata argument
  * still exists and is ignored: a block that was registered for one metadata is now registered for all of its
- * states, because the flattened native blocks have no variants left.</p>
+     * states. It cannot express selection among 1.21.1 BlockState properties; metadata dispatch
+     * substitutes defaultBlockState. Use BlockState registration/query/dispatch for exact states,
+     * or explicit whole-Block forms when every state is intended.</p>
  */
 public class WandTriggerRegistry {
     private record Trigger(IWandTriggerManager manager, int event) {}

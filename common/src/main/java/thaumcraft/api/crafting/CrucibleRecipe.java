@@ -24,7 +24,10 @@ public class CrucibleRecipe {
     public int hash;
     private final Ingredient catalystIngredient;
 
-    /** Null result/tags throw named IAE before conversion; null/unsupported catalysts use the ingredient converter's existing rules. */
+    /** Creates an unregistered recipe, retaining result/tags/catalyst references and hashing essentia-unit costs.
+     * Null result/tags throw NPE; catalyst must be a nonempty ItemStack, Item, Block, Ingredient or resolvable item-tag string.
+     * Unlike the 1.7.10 Object catalyst shape, ArrayList alternatives are rejected with IAE even though hashing retains that branch.
+     * Use Ingredient or a namespaced native item tag for 1.21.1 alternatives; null/unsupported catalysts throw IAE. */
     public CrucibleRecipe(String researchKey, ItemStack result, Object cat, AspectList tags) {
         if (result == null) throw new IllegalArgumentException("result must not be null");
         if (tags == null) throw new IllegalArgumentException("tags must not be null");
@@ -67,6 +70,7 @@ public class CrucibleRecipe {
         return true;
     }
 
+    /** Tests the captured native catalyst predicate without consuming anything; null/empty stacks return false. */
     public boolean catalystMatches(ItemStack cat) {
         if (cat == null || cat.isEmpty()) return false;
         return catalystIngredient.test(cat);
@@ -83,6 +87,7 @@ public class CrucibleRecipe {
         return temptags;
     }
 
+    /** Returns the live output stack reference retained at construction; no copy is made. */
     public ItemStack getRecipeOutput() { return this.recipeOutput; }
 
     /** The original item comparison, without the ore-dictionary shortcut. */

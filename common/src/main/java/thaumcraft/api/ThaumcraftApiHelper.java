@@ -134,6 +134,8 @@ public class ThaumcraftApiHelper {
         return ThaumcraftApi.internalMethods.getStackInRowAndColumn(instance, row, column);
     }
 
+    /** Delegates the aspect-unit lookup, replacing a null result with a new empty list; does not convert to centivis.
+     * The installed handler returns a copy and treats null/empty input as empty; replacing internalMethods can change ownership/side effects. */
     public static AspectList getObjectAspects(ItemStack is) {
         AspectList result = ThaumcraftApi.internalMethods.getObjectAspects(is);
         return result == null ? new AspectList() : result;
@@ -145,16 +147,23 @@ public class ThaumcraftApiHelper {
         return ObjectAspectResolver.scanTags(is, level);
     }
 
+    /** Delegates to the installed handler, normalizing null results to an empty list.
+     * The 1.7.10 bonus-enrichment signature now only copies ot in the installed handler (null becomes empty), ignoring is.
+     * Use getObjectAspects(ItemStack, Level) for 1.21.1 scan-complete aspect units; no equivalent level-aware bonus facade exists here. */
     public static AspectList getBonusObjectTags(ItemStack is, AspectList ot) {
         AspectList result = ThaumcraftApi.internalMethods.getBonusObjectTags(is, ot);
         return result == null ? new AspectList() : result;
     }
 
+    /** Delegates to the installed handler and normalizes null results to an empty list; meta is native damage points.
+     * Unlike 1.7.10 recipe derivation, the installed level-free handler only reads catalogue/registered aspect units (null item becomes empty).
+     * Use getObjectAspects(ItemStack, Level) for 1.21.1 scan-complete results; no level-aware generate facade is implemented here. */
     public static AspectList generateTags(Item item, int meta) {
         AspectList result = ThaumcraftApi.internalMethods.generateTags(item, meta);
         return result == null ? new AspectList() : result;
     }
 
+    /** Returns whether any input/target pair matches item/damage; arrays must be non-null, null elements match each other, and neither array is mutated. */
     public static boolean containsMatch(boolean strict, ItemStack[] inputs, ItemStack... targets) {
         for (ItemStack input : inputs) {
             for (ItemStack target : targets) {
@@ -178,7 +187,7 @@ public class ThaumcraftApiHelper {
         return true;
     }
 
-    /** Two nulls match, exactly one null fails; EMPTY uses ordinary item/damage comparison, ignoring components and count. */
+    /** Compares item identity/damage without count/components; two nulls match, one null does not, and target damage 32767 is wildcard only when not strict. */
     public static boolean itemMatches(ItemStack target, ItemStack input, boolean strict) {
         if (input == null && target != null || input != null && target == null) return false;
         if (input == null) return true;
@@ -187,10 +196,12 @@ public class ThaumcraftApiHelper {
                 || target.getDamageValue() == input.getDamageValue();
     }
 
+    /** Reads the neighboring block coordinates and tests its opposite transport face; null world/face or no connectable transport returns null without explicit mutation. */
     public static BlockEntity getConnectableTile(Level world, int x, int y, int z, Direction face) {
         return getConnectableTile((BlockGetter) world, x, y, z, face);
     }
 
+    /** Reads the neighboring block coordinates and calls isConnectable on its opposite face; null world/face or no matching transport returns null. */
     public static BlockEntity getConnectableTile(BlockGetter world, int x, int y, int z, Direction face) {
         if (world == null || face == null) return null;
         BlockEntity te = world.getBlockEntity(new BlockPos(x + face.getStepX(), y + face.getStepY(), z + face.getStepZ()));
@@ -243,6 +254,11 @@ public class ThaumcraftApiHelper {
      *
      * <p>Forced 1.21.1 change: the result is a native {@link BlockHitResult}; the traversal itself is the
      * native one, so the original per-face step quirks are replaced by the native block outline.</p>
+     * <p>Endpoints are world coordinates in blocks; null world/endpoints or NaN components return null.
+     * The 1.7.10 includeFluid/reportMiss switches do not restore their old semantics: traversal tests
+     * block shapes only, never fluid shapes, and an unobstructed ray returns null even when reportMiss
+     * is true. Use Level.clip with a suitable ClipContext for 1.21.1 fluid/miss semantics.
+     * This method reads the world without explicitly mutating it.</p>
      */
     public static BlockHitResult rayTraceIgnoringSource(Level world, Vec3 v1, Vec3 v2, boolean includeFluid, boolean requireCollision, boolean reportMiss) {
         if (world == null || v1 == null || v2 == null) return null;

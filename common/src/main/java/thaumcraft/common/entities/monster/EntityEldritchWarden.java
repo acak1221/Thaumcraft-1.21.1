@@ -514,18 +514,10 @@ public class EntityEldritchWarden extends EntityThaumcraftBoss implements Ranged
     @Override public int getAmbientSoundInterval() { return EldritchMobRules.WARDEN.talkInterval(); }
     @Override protected float getSoundVolume() { return 1.5F; }
 
-    /** Original eldritch field block, resolved from its original registry id. */
-    @SuppressWarnings({"unchecked","rawtypes"})
+    /** Original airy metadata eleven lives in the native hole hardness group. */
     private static BlockState eldritchFieldState() {
-        var block=net.minecraft.core.registries.BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath("thaumcraft",EldritchMobRules.AIRY_BLOCK_ID));
-        if(block.isEmpty())return null;
-        BlockState state=block.get().defaultBlockState();
-        for(var property:state.getProperties()) {
-            if(!"type".equals(property.getName()))continue;
-            for(var value:((net.minecraft.world.level.block.state.properties.Property)property).getPossibleValues())
-                if(value instanceof Integer number&&number==11)return state.setValue((net.minecraft.world.level.block.state.properties.Property)property,11);
-        }
-        return state;
+        return thaumcraft.common.lib.world.FamilyVariant.with(
+                thaumcraft.common.config.ThaumcraftEldritchBlocks.AIRY_HOLE.get().defaultBlockState(),11);
     }
 
     static SoundEvent sound(String id) { return SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft",id)); }

@@ -82,7 +82,8 @@ public final class EldritchMobRules {
     public static int bossStrengthAmplifier(float damage) { return (int)(damage/40F); }
     public static int bossSpeedAmplifier(float damage) { return (int)(damage/40F); }
     /** Original eldritch object item id, dropped by every eldritch boss. */
-    public static final String ELDRITCH_OBJECT_ID="eldritch_object";
+    // Original itemEldritchObject metadata 3, flattened into its own native registry entry.
+    public static final String ELDRITCH_OBJECT_ID="primordial_pearl";
     /**
      * The registered cultist plate items worn and dropped by the eldritch crab and the
      * inhabited zombie. The 1.7 original wore the items ItemHelmetCultistPlate,

@@ -11,9 +11,11 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.BossEvent;
 import thaumcraft.common.entities.projectile.EntityGolemOrb;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -79,11 +81,35 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
     private static final AttributeModifier BOLD_SPEED = new AttributeModifier(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "champion_bold_speed"), 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
     private static final AttributeModifier MIGHTY_DAMAGE = new AttributeModifier(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "champion_mighty_damage"), 3.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
     private final Map<Integer, Integer> aggro = new HashMap<>();
+    private final ServerBossEvent bossEvent;
     private int spawnTimer;
 
     public EntityCultistLeader(EntityType<? extends EntityCultistLeader> type, Level level) {
         super(type, level);
         xpReward = CultistRules.LEADER_EXPERIENCE;
+        // Original EntityThaumcraftBoss implements IBossDisplayData. The praetor carries
+        // the folded boss base, so it needs the same native server tracking as its peers.
+        bossEvent = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS);
+    }
+
+    @Override public void startSeenByPlayer(ServerPlayer player) {
+        super.startSeenByPlayer(player);
+        if (isAlive()) bossEvent.addPlayer(player);
+    }
+
+    @Override public void stopSeenByPlayer(ServerPlayer player) {
+        super.stopSeenByPlayer(player);
+        bossEvent.removePlayer(player);
+    }
+
+    @Override public void die(DamageSource source) {
+        super.die(source);
+        bossEvent.removeAllPlayers();
+    }
+
+    @Override public void remove(Entity.RemovalReason reason) {
+        super.remove(reason);
+        if (bossEvent != null) bossEvent.removeAllPlayers();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -297,6 +323,8 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
         }
         // Original EntityThaumcraftBoss heals one point every thirty ticks.
         if (tickCount % 30 == 0) heal(1.0F);
+        bossEvent.setName(getDisplayName());
+        bossEvent.setProgress(Math.max(0F, Math.min(1F, getHealth() / getMaxHealth())));
         LivingEntity target = getTarget();
         if (target != null && !target.isAlive()) setTarget(null);
         if (target != null && tickCount % CultistRules.BOSS_TARGET_SWITCH_INTERVAL == 0) rotateTarget(target);

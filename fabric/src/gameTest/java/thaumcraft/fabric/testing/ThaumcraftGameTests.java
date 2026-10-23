@@ -86,6 +86,22 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_golem")
+    public void g23BossGolemFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "golem", false, false); }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_warden")
+    public void g23BossWardenFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "warden", false, false); }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_praetor")
+    public void g23BossPraetorFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "praetor", false, false); }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_giant")
+    public void g23BossGiantFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "giant", false, false); }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_taintacle")
+    public void g23BossTaintacleFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "taintacle", false, false); }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_pech")
+    public void g23BossPechFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "pech", false, false); }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_bar")
+    public void g23BossPraetorBar(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "praetor", true, false); }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_lock")
+    public void g23BossDeathPlacement(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "praetor", false, true); }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1550, batch = "g21_carry")
     public void g21CarryAndRefusals(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.carryAndRefusals(test); }
 

@@ -169,6 +169,31 @@ public final class BlockAiry extends BaseEntityBlock implements StateDependentBl
         }
     }
 
+    /** Original BlockAiry:393-405 - the warden's field, not an inert visual effect. */
+    @Override protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+        if (variant(state) != 11 || entity instanceof thaumcraft.api.entities.IEldritchMob) return;
+        if (!level.isClientSide && level.random.nextInt(100) == 0)
+            entity.hurt(level.damageSources().wither(), 1F);
+        entity.setDeltaMovement(entity.getDeltaMovement().multiply(.66D, 1D, .66D));
+        if (!level.isClientSide) {
+            if (entity instanceof net.minecraft.world.entity.player.Player player) player.causeFoodExhaustion(.05F);
+            if (entity instanceof net.minecraft.world.entity.LivingEntity living)
+                living.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                        net.minecraft.world.effect.MobEffects.WEAKNESS, 100, 1, true, true));
+        }
+    }
+
+    /** Original BlockAiry:409-414 - both scheduled and random ticks retire the field. */
+    @Override protected void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+                                  net.minecraft.util.RandomSource random) {
+        if (variant(state) == 11) level.removeBlock(pos, false);
+    }
+
+    @Override protected void randomTick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+                                        net.minecraft.util.RandomSource random) {
+        tick(state, level, pos, random);
+    }
+
     /** BlockAiry:96-100 - the warding fence carries the warding stone block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         if (variant(state) != EldritchBlockRules.AIRY_WARDING_FENCE) return null;

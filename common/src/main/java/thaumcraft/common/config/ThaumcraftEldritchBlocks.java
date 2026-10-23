@@ -321,10 +321,13 @@ public final class ThaumcraftEldritchBlocks {
     }
 
     private static BlockBehaviour.Properties airyProperties(int group) {
-        return BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
+        var properties = BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
                 .strength(EldritchBlockRules.airyGroupHardness(group), EldritchBlockRules.airyGroupResistance(group))
                 .sound(SoundType.WOOL).noOcclusion().noCollission()
                 .lightLevel(state -> EldritchBlockRules.airyLight(BlockAiry.variantOf(state, group)));
+        // Original BlockAiry:85,409-414: unscheduled warden footprints expire by random tick too.
+        if (group == EldritchBlockRules.airyGroup(11)) properties.randomTicks();
+        return properties;
     }
 
     // ------------------------------------------------------------------- items

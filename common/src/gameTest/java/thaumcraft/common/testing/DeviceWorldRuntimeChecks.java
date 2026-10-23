@@ -49,6 +49,9 @@ public final class DeviceWorldRuntimeChecks {
         test.getLevel().setBlockAndUpdate(pos, thaumcraft.common.config.ThaumcraftHungryChest.HUNGRY_CHEST.get().defaultBlockState());
         var chest = (thaumcraft.common.tiles.TileChestHungry) test.getLevel().getBlockEntity(pos);
         var input = new ItemEntity(test.getLevel(),pos.getX()+.5,pos.getY()+1.2,pos.getZ()+.5,new ItemStack(Items.IRON_INGOT,7));
+        // ItemEntity's default random sideways launch can miss the chest entirely.
+        // Declare a vertical drop; ordinary gravity/contact still performs collection.
+        input.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
         input.setPickUpDelay(1000);
         test.assertTrue(test.getLevel().addFreshEntity(input), "physical dropped iron7 input, not direct chest insertion");
         test.runAfterDelay(40, () -> {

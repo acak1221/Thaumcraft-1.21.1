@@ -77,6 +77,7 @@ public final class ResearchNoteRuntimeChecks {
             CompoundTag saved = new CompoundTag();
             player.addAdditionalSaveData(saved);
             var restored = test.makeMockPlayer(GameType.SURVIVAL);
+            test.assertTrue(!KnowledgeAccess.get(restored).isResearchComplete("NITOR"), "another player's knowledge does not inherit the solver's award");
             restored.readAdditionalSaveData(saved);
             test.assertValueEqual(KnowledgeAccess.get(restored).save(), knowledge.save(), "learned primary survives actual player NBT lifecycle");
         });
@@ -112,6 +113,11 @@ public final class ResearchNoteRuntimeChecks {
             test.assertTrue(!knowledge.isResearchComplete("@JARBRAIN"), "learning does not manufacture clue");
             test.assertTrue(knowledge.getWarpPerm() == 4 && knowledge.getWarpSticky() == 5
                     && knowledge.getWarpTemp() == 5 && knowledge.getWarpCounter() == 14, "original warp3 splits2/1 and counter is full14");
+            var awarded = knowledge.save();
+            var duplicate = ItemResearchNotes.create(data, true);
+            player.setItemInHand(InteractionHand.MAIN_HAND, duplicate);
+            duplicate.getItem().use(test.getLevel(), player, InteractionHand.MAIN_HAND);
+            test.assertTrue(duplicate.getCount() == 1 && awarded.equals(knowledge.save()), "JARBRAIN replay retains note and cannot grant warp3 twice");
             if (wire != null) wire.capture(knowledge.save(), true);
         });
     }

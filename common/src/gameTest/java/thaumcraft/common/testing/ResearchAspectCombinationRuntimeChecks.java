@@ -64,6 +64,7 @@ public final class ResearchAspectCombinationRuntimeChecks {
             level.setBlock(pos, ThaumcraftContent.TABLE.get().state(2), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
             level.setBlock(pos.north(), ThaumcraftContent.TABLE.get().state(7), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
             var table = (TileResearchTable) level.getBlockEntity(pos);
+            test.assertTrue(table.bonusPools().isEmpty(), "oracle: a newly placed table starts with zero bonus points, not a per-note allowance");
             ItemStack ink = new ItemStack(ThaumcraftContent.INKWELL.get());
             ink.setDamageValue(ink.getMaxDamage());
             ItemStack notes = ItemResearchNotes.create(new ResearchNoteData("NITOR", 0x123456, false, 2,
@@ -96,7 +97,10 @@ public final class ResearchAspectCombinationRuntimeChecks {
             table.setBonusPools(Map.of());
             denied(test, player, intent(menu, "aer", "aer"));
             table.setBonusPools(Map.of("aer", 1));
+            var failedExperiment = knowledge.copy();
+            failedExperiment.setAspectPool("aer", 0);
             accepted(test, player, menu, intent(menu, "aer", "aer"));
+            test.assertValueEqual(knowledge.save(), failedExperiment.save(), "invalid pair consumes its funded inputs but awards absolutely no aspect, research, scan or warp");
             test.assertTrue(knowledge.getAspectPoolFor("aer") == 0 && table.bonusFor("aer") == 0
                     && knowledge.getAspectPoolFor("lux") == 4, "same-aspect experiment atomically costs two: RP1 then bonus1, with no invented failure output");
             table.setBonusPools(Map.of("aer", 1, "ignis", 1));
@@ -146,6 +150,11 @@ public final class ResearchAspectCombinationRuntimeChecks {
             for (int tick = 0; tick < 602; tick++) TileResearchTable.tickTopologyOnLoad(level, pos, table.getBlockState(), table);
             test.assertTrue(table.bonusPools().equals(full) && table.tableRevision() == revision,
                     "ecology merges max(existing,1), does not stack free creative RP, and unchanged pools do not revise the table");
+            table.setItem(1, notes.copy());
+            test.assertTrue(table.bonusPools().equals(full), "inserting a note cannot refill or reset the shared ecology pool");
+            table.setItem(1, ItemStack.EMPTY);
+            test.assertTrue(table.bonusPools().equals(full), "removing a note retains the shared ecology pool");
+            driveOraclePairs(test, player, menu);
         } finally {
             player.closeContainer();
             for (SavedBlock block : blocks) clear(level, block.pos());
@@ -165,6 +174,40 @@ public final class ResearchAspectCombinationRuntimeChecks {
 
     private static ResearchTableCombinePayload intent(ContainerResearchTable menu, String left, String right) {
         return new ResearchTableCombinePayload(menu.containerId, menu.sessionToken(), menu.tableRevision(), left, right);
+    }
+
+    /** Literal parents from the independent aspect_research_oracle.json fixture, not native combinations. */
+    private static void driveOraclePairs(GameTestHelper test, ServerPlayer player, ContainerResearchTable menu) {
+        String vectors = "vacuos aer perditio;lux aer ignis;tempestas aer aqua;motus aer ordo;gelum ignis perditio;"
+                + "vitreus terra ordo;victus aqua terra;venenum aqua perditio;potentia ordo ignis;permutatio perditio ordo;"
+                + "metallum terra vitreus;mortuus victus perditio;volatus aer motus;tenebrae vacuos lux;spiritus victus mortuus;"
+                + "sano victus ordo;iter motus terra;alienis vacuos tenebrae;praecantatio vacuos potentia;auram praecantatio aer;"
+                + "vitium praecantatio perditio;limus victus aqua;herba victus terra;arbor aer herba;bestia motus victus;"
+                + "corpus mortuus bestia;exanimis motus mortuus;cognitio ignis spiritus;sensus aer spiritus;humanus bestia cognitio;"
+                + "messis herba humanus;perfodio humanus terra;instrumentum humanus ordo;meto messis instrumentum;"
+                + "telum instrumentum ignis;tutamen instrumentum terra;fames victus vacuos;lucrum humanus fames;"
+                + "fabrico humanus instrumentum;pannus instrumentum bestia;machina motus instrumentum;vinculum motus perditio";
+        var knowledge = KnowledgeAccess.get(player);
+        var table = menu.tile();
+        for (String vector : vectors.split(";")) {
+            String[] tags = vector.split(" ");
+            knowledge.reset(); knowledge.setInitializedAspects(true);
+            knowledge.setAspectPool(tags[1], 2); knowledge.setAspectPool(tags[2], 2);
+            table.setBonusPools(Map.of(tags[1], 1, tags[2], 1));
+            var beforeInventory = new ArrayList<ItemStack>();
+            for (int i = 0; i < player.getInventory().getContainerSize(); i++) beforeInventory.add(player.getInventory().getItem(i).copy());
+            accepted(test, player, menu, intent(menu, tags[1], tags[2]));
+            test.assertTrue(knowledge.getAspectPoolFor(tags[0]) == 3 && knowledge.getAspectPoolFor(tags[1]) == 1
+                    && knowledge.getAspectPoolFor(tags[2]) == 1, vector + ": measured first output3 and inputs1/1");
+            accepted(test, player, menu, intent(menu, tags[2], tags[1]));
+            test.assertTrue(knowledge.getAspectPoolFor(tags[0]) == 4 && knowledge.getAspectPoolFor(tags[1]) == 0
+                    && knowledge.getAspectPoolFor(tags[2]) == 0 && table.bonusFor(tags[1]) == 1 && table.bonusFor(tags[2]) == 1,
+                    vector + ": measured reverse repeat output4, inputs0/0, bonuses1/1");
+            accepted(test, player, menu, intent(menu, tags[1], tags[2]));
+            test.assertTrue(knowledge.getAspectPoolFor(tags[0]) == 5 && table.bonusPools().isEmpty(), vector + ": bonus-funded output5, bonuses0/0");
+            for (int i = 0; i < beforeInventory.size(); i++) test.assertTrue(ItemStack.matches(beforeInventory.get(i), player.getInventory().getItem(i)), vector + ": inventory slot " + i);
+            thaumcraft.common.Thaumcraft.LOG.info("G32 measured {}: first=3 repeat=4 bonus=5 inputs=0/0 bonus=0/0", vector);
+        }
     }
 
     private static void accepted(GameTestHelper test, ServerPlayer player, ContainerResearchTable menu, ResearchTableCombinePayload payload) {

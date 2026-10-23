@@ -30,6 +30,9 @@ public final class EntityPechBlast extends Projectile {
     private static Consumer<EntityPechBlast> clientImpact=ignored->{};
     private int strength,duration,age;
     private boolean nightshade;
+    // Native hurt/effect callbacks may synchronously tick this same projectile.
+    // Its terminal splash must finish once before any further flight/impact.
+    private boolean impacting;
     private Vec3 previousTrailPosition;
 
     public EntityPechBlast(EntityType<? extends EntityPechBlast> type,Level level) {super(type,level);}
@@ -65,7 +68,7 @@ public final class EntityPechBlast extends Projectile {
                 (z/length+random.nextGaussian()*.007499999832361937*scatter)*speed);
     }
     @Override public void tick(){
-        if(isRemoved())return;
+        if(isRemoved()||impacting)return;
         if(level().isClientSide)clientTrail.accept(this); // Original BEFORE EntityThrowable.tick.
         previousTrailPosition=position();setOldPosAndRot();setDeltaMovement(finite(getDeltaMovement()));
         if(age<Integer.MAX_VALUE)++age;
@@ -91,7 +94,9 @@ public final class EntityPechBlast extends Projectile {
     }
     @Override protected boolean canHitEntity(Entity entity){return !level().isClientSide&&!entity.isSpectator()&&entity.isPickable()&&(entity!=getOwner()||age>=5);}
     @Override protected void onHit(HitResult hit){
-        if(level().isClientSide||isRemoved()||hit.getType()==HitResult.Type.MISS)return;
+        if(level().isClientSide||isRemoved()||impacting||hit.getType()==HitResult.Type.MISS)return;
+        impacting=true;
+        try {
         // Current projectile position, not ray contact: exactly original splash box.
         for(Entity target:level().getEntities(getOwner(),getBoundingBox().inflate(2))){
             if(target instanceof EntityPech||!(target instanceof LivingEntity living))continue;
@@ -102,6 +107,7 @@ public final class EntityPechBlast extends Projectile {
             if(selected==-1||selected==2)living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,100+duration*40,strength));
         }
         level().broadcastEntityEvent(this,IMPACT_EVENT);discard();
+        } finally { impacting=false; }
     }
     private static Vec3 finite(Vec3 v){return Double.isFinite(v.x)&&Double.isFinite(v.y)&&Double.isFinite(v.z)&&Float.isFinite((float)Math.sqrt(v.lengthSqr()))?v:Vec3.ZERO;}
     public static void setClientTrail(Consumer<EntityPechBlast> handler){clientTrail=Objects.requireNonNull(handler);}

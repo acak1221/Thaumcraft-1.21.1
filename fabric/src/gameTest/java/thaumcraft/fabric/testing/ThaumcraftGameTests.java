@@ -542,6 +542,16 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         FocusUpgradeRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g31_focus_launches")
+    public void g31FocusCastingLaunchesAndPlayerCooldowns(GameTestHelper test) {
+        thaumcraft.common.testing.FocusCastingAuditChecks.launches(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g31_focus_impact")
+    public void g31PechCastImpactCannotReenter(GameTestHelper test) {
+        thaumcraft.common.testing.FocusCastingAuditChecks.pechImpactReentry(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "m08_excavation_upgrades")
     public void excavationUpgradeTreasureAndEnlarge(GameTestHelper test) {
         ExcavationUpgradeRuntimeChecks.run(test);

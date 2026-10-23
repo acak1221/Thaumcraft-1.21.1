@@ -73,6 +73,10 @@ public final class OuterLandsProvider {
      */
     public static final class MazeSavedData extends SavedData {
         public static final String ID = "thaumcraft_maze";
+        private static final String CELLS_KEY = "cells";
+        private static final String X_KEY = "x";
+        private static final String Z_KEY = "z";
+        private static final String CELL_KEY = "cell";
         private static final SavedData.Factory<MazeSavedData> FACTORY = new SavedData.Factory<>(
                 MazeSavedData::new, MazeSavedData::load, DataFixTypes.LEVEL);
         private final Map<Long, Short> cells = new java.util.concurrent.ConcurrentHashMap<>();
@@ -84,15 +88,15 @@ public final class OuterLandsProvider {
         public static MazeSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
             MazeSavedData data = new MazeSavedData();
             try {
-                if (!(tag.get("cells") instanceof ListTag list) || (!list.isEmpty() && list.getElementType()!=Tag.TAG_COMPOUND))
+                if (!(tag.get(CELLS_KEY) instanceof ListTag list) || (!list.isEmpty() && list.getElementType()!=Tag.TAG_COMPOUND))
                     throw new IllegalArgumentException("cells must be a compound list");
                 for (int i = 0; i < list.size(); ++i) {
                     CompoundTag entry = list.getCompound(i);
-                    if (!entry.contains("x",Tag.TAG_INT) || !entry.contains("z",Tag.TAG_INT) || !entry.contains("cell",Tag.TAG_SHORT))
+                    if (!entry.contains(X_KEY,Tag.TAG_INT) || !entry.contains(Z_KEY,Tag.TAG_INT) || !entry.contains(CELL_KEY,Tag.TAG_SHORT))
                         throw new IllegalArgumentException("cells["+i+"]: expected int x/z and short cell");
-                    long key = StructurePlacementRules.key(entry.getInt("x"), entry.getInt("z"));
-                    if (data.cells.putIfAbsent(key, entry.getShort("cell"))!=null)
-                        throw new IllegalArgumentException("duplicate cell at "+entry.getInt("x")+","+entry.getInt("z"));
+                    long key = StructurePlacementRules.key(entry.getInt(X_KEY), entry.getInt(Z_KEY));
+                    if (data.cells.putIfAbsent(key, entry.getShort(CELL_KEY))!=null)
+                        throw new IllegalArgumentException("duplicate cell at "+entry.getInt(X_KEY)+","+entry.getInt(Z_KEY));
                 }
             } catch (RuntimeException malformed) {
                 data.rejected=tag.copy(); data.cells.clear();
@@ -106,12 +110,12 @@ public final class OuterLandsProvider {
             ListTag list = new ListTag();
             for (Map.Entry<Long, Short> entry : cells.entrySet()) {
                 CompoundTag cell = new CompoundTag();
-                cell.putInt("x", (int) (entry.getKey() >> 32));
-                cell.putInt("z", (int) (entry.getKey() & 0xFFFFFFFFL));
-                cell.putShort("cell", entry.getValue());
+                cell.putInt(X_KEY, (int) (entry.getKey() >> 32));
+                cell.putInt(Z_KEY, (int) (entry.getKey() & 0xFFFFFFFFL));
+                cell.putShort(CELL_KEY, entry.getValue());
                 list.add(cell);
             }
-            tag.put("cells", list);
+            tag.put(CELLS_KEY, list);
             return tag;
         }
 

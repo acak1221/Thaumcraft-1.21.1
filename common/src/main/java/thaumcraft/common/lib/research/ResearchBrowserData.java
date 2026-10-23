@@ -101,7 +101,7 @@ public final class ResearchBrowserData {
                 if (!knowledge.addResearch(sibling)) continue;
                 changed = true;
                 // Original completion awards warp only when wuss mode is disabled.
-                int warp = definition == null ? 0 : definition.warp();
+                int warp = definition == null ? 0 : definition.currentWarp();
                 if (warp > 0 && !thaumcraft.common.lib.WarpEvents.isWussMode()) {
                     knowledge.addWarpPerm(warp - warp / 2);
                     knowledge.addWarpSticky(warp / 2);

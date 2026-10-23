@@ -61,10 +61,10 @@ public class ItemResearchNotes extends Item {
         if (research == null) return;
         tooltip.add(Component.translatable(research.nameKey()).withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.translatable(research.textKey()).withStyle(ChatFormatting.ITALIC));
-        if (research.warp() > 0) {
+        if (research.currentWarp() > 0) {
             // The original warning cap affects presentation, never the actual warp.
             tooltip.add(Component.translatable("tc.port.research.note_forbidden",
-                    Component.translatable("tc.forbidden.level." + Math.min(5, research.warp())))
+                    Component.translatable("tc.forbidden.level." + Math.min(5, research.currentWarp())))
                     .withStyle(ChatFormatting.DARK_PURPLE));
         }
     }

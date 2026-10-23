@@ -169,7 +169,7 @@ public final class TileEldritchPortal extends BlockEntity {
         if (knowledge.isResearchComplete(OUTER_LANDS_RESEARCH)) return;
         var definition = ResearchCatalog.get(OUTER_LANDS_RESEARCH);
         if (definition == null || !knowledge.addResearch(OUTER_LANDS_RESEARCH)) return;
-        int warp = definition.warp();
+        int warp = definition.currentWarp();
         if (warp > 0 && !WarpEvents.isWussMode()) {
             knowledge.addWarpPerm(warp - warp / 2);
             knowledge.addWarpSticky(warp / 2);

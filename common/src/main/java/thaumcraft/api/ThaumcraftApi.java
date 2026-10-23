@@ -394,9 +394,14 @@ public final class ThaumcraftApi {
             Integer value = warpMap.get(research);
             if (value != null) return value;
             var definition = ResearchCatalog.get(research);
-            return definition == null ? 0 : definition.warp();
+            return definition == null ? 0 : definition.currentWarp();
         }
         return 0;
+    }
+
+    /** Native catalogue bridge: retain the extracted default unless the public API overrides it. */
+    public static int getWarpForResearch(ResearchDefinition research) {
+        return warpMap.getOrDefault(research.key(), research.warp());
     }
 
     /** The native block tag is authoritative; this mirrors it for the original public list. */

@@ -65,7 +65,7 @@ public final class WarpEvents {
                 if (knowledge.addResearch(research)) {
                     feedback.add(new thaumcraft.common.lib.network.ResearchNoticePayload(research));
                     var definition = thaumcraft.common.lib.research.ResearchCatalog.get(research);
-                    int addedWarp = definition == null ? 0 : definition.warp();
+                    int addedWarp = definition == null ? 0 : definition.currentWarp();
                     if (!wussMode && addedWarp > 0) {
                         knowledge.addWarpPerm(addedWarp - addedWarp / 2);
                         knowledge.addWarpSticky(addedWarp / 2);

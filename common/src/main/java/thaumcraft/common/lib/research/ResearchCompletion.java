@@ -27,7 +27,7 @@ final class ResearchCompletion {
     private static void complete(PlayerKnowledge state, ResearchDefinition research, Set<String> unlocked) {
         if (!state.addResearch(research.key())) return;
         unlocked.add(research.key());
-        int warp = research.warp();
+        int warp = research.currentWarp();
         if (warp > 0 && !thaumcraft.common.lib.WarpEvents.isWussMode()) {
             // ResearchManager:510 / Thaumcraft:302; original wuss default false.
             state.addWarpPerm(warp - warp / 2);

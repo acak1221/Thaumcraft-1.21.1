@@ -8,7 +8,7 @@ public final class CrimsonRitesResearch {
         var definition=ResearchCatalog.get(KEY);
         if(definition==null)throw new IllegalStateException("Original CRIMSON research must be loaded before studying Rites");
         if(!knowledge.addResearch(KEY))return false;
-        int warp=definition.warp();
+        int warp=definition.currentWarp();
         if(warp>0&&!wuss){knowledge.addWarpPerm(warp-warp/2);knowledge.addWarpSticky(warp/2);knowledge.setWarpCounter(knowledge.getTotalWarp());}
         return true;
     }

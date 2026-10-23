@@ -58,7 +58,7 @@ public final class ResearchAdministration {
 
     private static boolean complete(PlayerKnowledge state, ResearchDefinition definition) {
         if (!state.addResearch(definition.key())) return false;
-        int warp = definition.warp();
+        int warp = definition.currentWarp();
         if (warp > 0 && !WarpEvents.isWussMode()) {
             state.addWarpPerm(warp - warp / 2);
             state.addWarpSticky(warp / 2);

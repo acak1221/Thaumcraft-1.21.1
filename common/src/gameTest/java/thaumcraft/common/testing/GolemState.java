@@ -30,8 +30,9 @@ final class GolemState {
                 + " area=" + area
                 + " work=" + golem.canWork()
                 + " fettered=" + golem.isFettered()
+                + " noAi=" + golem.isNoAi()
                 + " nav=" + (golem.getNavigation() == null ? "none" : String.valueOf(golem.getNavigation().isDone()))
-                + " ticks=" + golem.tickCount;
+                + " ticks=" + golem.tickCount + " " + golem.describeWorkState();
     }
 
     /** The entities that stand around a fixture, for the log of a scenario that starts. */

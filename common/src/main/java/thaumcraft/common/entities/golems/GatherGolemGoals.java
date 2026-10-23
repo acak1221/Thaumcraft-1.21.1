@@ -21,6 +21,7 @@ final class GatherGolemGoals {
     private ItemEntity target;
     private int returnDelay;
     private int returnDelayIncrement = 5;
+    private Pickup pickup;
 
     GatherGolemGoals(EntityGolemBase golem) { this.golem = golem; }
 
@@ -40,7 +41,8 @@ final class GatherGolemGoals {
      * <p>It belongs to the goals of the core, so it is registered with them and before the shared goals.</p>
      */
     void installGather() {
-        if (golem.getGolemCore() == GolemData.GATHER) golem.addWorkGoal(GoalPriority.ITEM_PICKUP, new Pickup());
+        pickup = golem.getGolemCore() == GolemData.GATHER ? new Pickup() : null;
+        if (pickup != null) golem.addWorkGoal(GoalPriority.ITEM_PICKUP, pickup);
     }
 
     /**
@@ -79,6 +81,20 @@ final class GatherGolemGoals {
         returnDelayIncrement = 5;
     }
 
+    /** Read-only work witness for runtime diagnostics. */
+    String describe() {
+        return "target=" + (target == null ? "null" : target.getItem() + "@" + target.position() + ":eligible=" + golem.eligibleItem(target)
+                + ":distanceSqr=" + golem.distanceToSqr(target))
+                + ",returnDelay=" + returnDelay;
+    }
+
+    /** A completed approach that cannot satisfy the original pickup reach. Read-only. */
+    ItemEntity unfinishedPickupTarget() {
+        return pickup != null && pickup.budget > 0 && pickup.pursued != null
+                && golem.eligibleItem(pickup.pursued) && golem.getNavigation().isDone()
+                && golem.distanceToSqr(pickup.pursued) > 2 ? pickup.pursued : null;
+    }
+
     /** Actual five-server-tick cadence, independent of native goal-start throttling. */
     void serverTick() {
         if (returnDelay > 0) --returnDelay;
@@ -114,7 +130,10 @@ final class GatherGolemGoals {
             pursued = target;
             budget = 200;
             if (pursued == null || !golem.loadedNavigationArea(pursued.blockPosition())
-                    || !golem.getNavigation().moveTo(pursued, 1)) budget = 0;
+                    // Native moveTo(Entity, speed) requests accuracy=1: an adjacent cell
+                    // can count as arrival while a fractional drop remains outside reach²2.
+                    // Keep native navigation, but approach the actual drop's cell.
+                    || !golem.getNavigation().moveTo(golem.getNavigation().createPath(pursued, 0), 1)) budget = 0;
         }
         @Override public void tick() {
             --budget;

@@ -12,6 +12,7 @@ import thaumcraft.common.config.ThaumcraftBiomeSettings;
 import thaumcraft.common.config.ThaumcraftSettings;
 import thaumcraft.common.config.ThaumcraftTaintSettings;
 import thaumcraft.common.lib.bore.BoreNativeContext;
+import thaumcraft.common.entities.golems.EntityGolemBase;
 
 /** Test-only ownership ledger. Never restore somebody else's live fixture to a global snapshot.
  * Check after tickInternal, NOT finish: succeed() may run inside a try/finally whose restore
@@ -22,9 +23,45 @@ public final class GameTestStateGuard {
     private static final Map<GameTestInfo, Snapshot> START = new IdentityHashMap<>();
     private static final Map<Object, GameTestInfo> RESOURCES = new HashMap<>();
     private static final Map<GameTestInfo, List<String>> VIOLATIONS = new IdentityHashMap<>();
+    private static final Map<GameTestInfo, List<WorkerWatch>> WORKERS = new IdentityHashMap<>();
     private static GameTestInfo current;
 
     private GameTestStateGuard() {}
+
+    /** Integrity snapshots cannot detect a healthy worker repeatedly completing an unusable path. */
+    public static void watchWorker(EntityGolemBase golem, Runnable cleanup) {
+        if (current != null) WORKERS.computeIfAbsent(current, ignored -> new ArrayList<>()).add(new WorkerWatch(golem, cleanup));
+    }
+
+    private static final class WorkerWatch {
+        final EntityGolemBase golem;
+        final Runnable cleanup;
+        java.util.UUID target;
+        int incompleteApproaches;
+        boolean outsideReach;
+        int carried;
+        String lastState;
+
+        WorkerWatch(EntityGolemBase golem, Runnable cleanup) { this.golem = golem; this.cleanup = cleanup; }
+
+        void observe(GameTestInfo info) {
+            if (golem.isRemoved()) return;
+            lastState = GolemState.of(golem);
+            int cargo = golem.getCarriedItem().getCount();
+            if (cargo != carried) { incompleteApproaches = 0; carried = cargo; }
+            var item = golem.unfinishedPickupTarget();
+            if (item == null) { outsideReach = false; return; }
+            if (!item.getUUID().equals(target)) { target = item.getUUID(); incompleteApproaches = 0; }
+            if (!outsideReach) incompleteApproaches++;
+            outsideReach = true;
+            if (incompleteApproaches < 3 || info.isDone()) return;
+            String message = "GameTest work progress: " + info.getTestName()
+                    + ": Pickup completed three approaches outside distanceSqr<=2; actual=" + golem.distanceToSqr(item);
+            thaumcraft.common.Thaumcraft.LOG.error("{}; {}", message, lastState);
+            cleanup.run();
+            info.fail(new AssertionError(message));
+        }
+    }
 
     public static void enter(GameTestInfo info) {
         current = info;
@@ -62,8 +99,13 @@ public final class GameTestStateGuard {
     public static void exit() { current = null; }
 
     public static void leave(GameTestInfo info) {
+        var workers = WORKERS.get(info);
+        if (workers != null) for (var worker : List.copyOf(workers)) worker.observe(info);
         current = null;
         if (!info.isDone()) return;
+        WORKERS.remove(info);
+        if (info.getError() != null && workers != null) for (var worker : workers)
+            thaumcraft.common.Thaumcraft.LOG.error("GameTest work witness: {}: {}", info.getTestName(), worker.lastState);
         Snapshot before = START.remove(info);
         if (before == null) return;
         Snapshot after = snapshot(info.getLevel());

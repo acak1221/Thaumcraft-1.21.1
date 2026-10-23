@@ -822,6 +822,26 @@ public class EntityGolemBase extends AbstractGolem {
     public boolean canWork() {
         return canWorkInner();
     }
+    /** Read-only native pickup/arrival witness, also used by the GameTest progress guard. */
+    public ItemEntity unfinishedPickupTarget() { return work.unfinishedPickupTarget(); }
+    /** Read-only diagnostic of every work gate and the native selector's running goals. */
+    public String describeWorkState() {
+        return "server=" + !level().isClientSide + " placementIdle=" + !ItemGolemPlacer.isPlacementInProgress()
+                + " alive=" + isAlive() + " current=" + current() + " home=" + hasHome
+                + " unfettered=" + !fettered + " materialSupported=" + EnumGolemType.isSupported(material)
+                + " supported=" + !unsupported + " notRetiring=" + !retiring
+                + " readItem=" + (unreadCarried == null) + " readFluid=" + (unreadFluidCargo == null)
+                + " readAspect=" + (unreadAspect == null) + " noRemainders=" + !hasUseRemainders()
+                + " useScope=" + (!useWorkScope || useInvoking) + " fishingIdle=" + !fishing.hasPending()
+                + " coreSupported=" + hasSupportedCore() + " configurationClosed=" + configurationOpeners.isEmpty()
+                + " liquidControls=" + (core != GolemData.LIQUID || liquidControls())
+                + " useControls=" + (core != GolemData.USE || useControls())
+                + " homeDistance=" + distanceToHomeSqr() + " home=" + getHomePosition()
+                + " gather=" + work.describe()
+                + " path=" + (getNavigation().getPath() == null ? "null" : getNavigation().getPath().getNextNodeIndex() + "/" + getNavigation().getPath().getNodeCount() + "->" + getNavigation().getPath().getTarget())
+                + " goals=" + goalSelector.getAvailableGoals().stream().filter(g -> g.isRunning())
+                        .map(g -> g.getPriority() + ":" + g.getGoal().getClass().getName()).toList();
+    }
     private boolean canWorkInner() {
         return !level().isClientSide && !ItemGolemPlacer.isPlacementInProgress()
                 && isAlive() && current() && hasHome && !fettered && EnumGolemType.isSupported(material) && !unsupported && !retiring

@@ -168,6 +168,26 @@ public final class GolemEndToEndRuntimeChecks {
         });
     }
 
+    /** Native drops can rest at either edge of a cell, not just its center. */
+    public static void gatherFractionalDropPositions(GameTestHelper test) {
+        var f = new Fixture(test, 4);
+        Item[] kinds = {Items.COBBLESTONE, Items.DIAMOND, Items.EMERALD, Items.GOLD_INGOT};
+        var sinks = new ArrayList<ChestBlockEntity>();
+        for (int i = 0; i < 4; i++) {
+            BlockPos home = f.home(i);
+            sinks.add(f.chest(home.west()));
+            f.worker(GolemData.GATHER, home, List.of(), List.of(), kinds[i], 1);
+            var item = f.loose(home.south(4), new ItemStack(kinds[i]));
+            item.setNoGravity(true);
+            item.setPos(home.getX() + (i % 2 == 0 ? .001 : .999), home.getY() + .1,
+                    home.getZ() + (i < 2 ? 4.999 : 4.001));
+        }
+        f.poll(500, () -> {
+            for (int i = 0; i < 4; i++) if (count(sinks.get(i), kinds[i]) != 1) return false;
+            return true;
+        });
+    }
+
     public static void measuredWaterPickupRadius(GameTestHelper test) {
         var f = new Fixture(test, 4);
         double[] distances = {15.9, 16.1, 19.9, 20.1};
@@ -309,6 +329,7 @@ public final class GolemEndToEndRuntimeChecks {
             golem.setGolemMaterial(2);
             golem.applyConfiguration(new GolemData(core, filters, counts, false, markers, GolemUseOptions.DEFAULT, upgrades));
             golem.setHome(home, Direction.EAST); golem.setPos(Vec3.atBottomCenterOf(home)); golem.setPersistenceRequired(); add(golem);
+            GameTestStateGuard.watchWorker(golem, this::close);
             return golem;
         }
         ItemEntity loose(BlockPos pos, ItemStack stack) {
@@ -337,8 +358,9 @@ public final class GolemEndToEndRuntimeChecks {
             test.runAtTickTime(deadline, () -> {
                 if (closed) return;
                 String state = entities.stream().filter(e -> e instanceof EntityGolemBase)
-                        .map(e -> e.position() + " cargo=" + ((EntityGolemBase) e).getCarriedItem()).toList().toString();
-                close(); test.fail("G21 live work deadline; workers=" + state);
+                        .map(e -> e.position() + " cargo=" + ((EntityGolemBase) e).getCarriedItem() + " " + GolemState.of((EntityGolemBase) e)).toList().toString();
+                Thaumcraft.LOG.error("G21 live work deadline; workers={}", state);
+                close(); test.fail("G21 live work deadline; see per-worker work witness in server log");
             });
         }
         void close() {

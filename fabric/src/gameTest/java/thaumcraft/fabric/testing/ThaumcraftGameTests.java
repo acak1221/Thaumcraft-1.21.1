@@ -86,6 +86,26 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1550, batch = "g21_carry")
+    public void g21CarryAndRefusals(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.carryAndRefusals(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1050, batch = "g21_gather")
+    public void g21GatherAndAir(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.gatherAndAir(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1550, batch = "g21_harvest_lumber")
+    public void g21HarvestAndLumberDelivery(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.harvestAndLumberDelivery(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 750, batch = "g21_use")
+    public void g21UsePlantsExactlyOneSeed(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.usePlantsExactlyOneSeed(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 750, batch = "g21_use_empty_space")
+    public void g21UseEmptySpacePlantsExactlyOneSeed(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.useEmptySpacePlantsExactlyOneSeed(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1150, batch = "g21_water_measurement")
+    public void g21MeasuredWaterPickupRadius(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.measuredWaterPickupRadius(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1350, batch = "g21_butcher")
+    public void g21ButcherLeavesBreedingPair(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.butcherLeavesBreedingPair(test); }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void sound_registry_covers_bundled_events(GameTestHelper helper) {
         try (var input = ThaumcraftGameTests.class.getResourceAsStream("/assets/thaumcraft/sounds.json")) {

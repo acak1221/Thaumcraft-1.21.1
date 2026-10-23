@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemMarker;
@@ -97,6 +98,10 @@ final class UseGolemGoals {
      */
     static BlockPos clickPos(GolemMarker marker, boolean emptySpace) {
         return marker.clickPos(emptySpace);
+    }
+    /** Sight ends on the clicked face, not inside the block below a floor-level job. */
+    static Vec3 sightTarget(GolemMarker marker, boolean emptySpace) {
+        return Vec3.atCenterOf(clickPos(marker, emptySpace)).relative(marker.face(), .5);
     }
     private boolean markerLoaded(ServerLevel level, GolemMarker marker) {
         // Reject dimensions BEFORE ANY block/BE reads. Original unused ceil(range/3) was NOT a bound.

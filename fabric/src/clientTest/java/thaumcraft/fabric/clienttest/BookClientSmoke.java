@@ -92,7 +92,7 @@ public final class BookClientSmoke implements ClientModInitializer {
     /** How long a stage may wait for a vanilla screen button that is not built yet. */
     private static final int SCREEN_RETRY_TICKS = 200;
     private enum Stage {
-        WAIT_WORLD, WAIT_RESTART_PROBE, ENGLISH_RELOAD, WAIT_ITEM, BROWSER, OPEN_BOOK, BOOK, BACK_TO_BROWSER, OPEN_RESEARCH,
+        RESEARCH_HANDS, WAIT_WORLD, WAIT_RESTART_PROBE, ENGLISH_RELOAD, WAIT_ITEM, BROWSER, OPEN_BOOK, BOOK, BACK_TO_BROWSER, OPEN_RESEARCH,
         RESEARCH, NEXT_RESEARCH, ILLUSTRATED, PREVIOUS_RESEARCH, PREVIOUS_CAPTURE,
         RUSSIAN_RELOAD, RUSSIAN_SIZE, RUSSIAN_BROWSER, OPEN_RUSSIAN_BOOK, RUSSIAN_BOOK,
         RUSSIAN_NEXT, RUSSIAN_PAGINATION, PURCHASE_RELOAD, PURCHASE_SIZE,
@@ -127,6 +127,8 @@ public final class BookClientSmoke implements ClientModInitializer {
     private final long started = System.nanoTime();
     private final String runId = System.getProperty("thaumcraft.clientSmokeRunId", "client-smoke-" + UUID.randomUUID());
     private final boolean equipmentOnly = "equipment".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
+    private final boolean researchHandsOnly = "researchhands".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
+    private ResearchHandsClientSequence researchHands;
     private final boolean capsOnly = "caps".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
     private final boolean gogglesOnly = "goggles".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
     private final boolean clothingOnly = "clothing".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
@@ -262,6 +264,11 @@ public final class BookClientSmoke implements ClientModInitializer {
                                 client.player.getInventory().selected);
                         graphics.flush();
                         rendered.render(graphics, point[0], point[1], delta);
+                    } else if (researchHandsOnly && rendered instanceof GuiResearchTable && pendingScreenshotName.startsWith("203-")) {
+                        // Show the actual copy widget's native cost tooltip before payment.
+                        graphics.flush();
+                        rendered.render(graphics, (rendered.width - 255) / 2 + 48,
+                                (rendered.height - 255) / 2 + 16, delta);
                     } else if (rendered instanceof GuiResearchTable || rendered instanceof GuiArcaneWorkbench || rendered instanceof GuiAlchemyFurnace
                              || rendered instanceof thaumcraft.client.gui.GuiArcaneBore
                              || rendered instanceof net.minecraft.client.gui.screens.inventory.FurnaceScreen
@@ -342,9 +349,21 @@ public final class BookClientSmoke implements ClientModInitializer {
             }
             stageTicks++;
             switch (stage) {
+                case RESEARCH_HANDS -> {
+                    if (researchHands == null) researchHands = new ResearchHandsClientSequence();
+                    if (researchHands.tick(client, name -> capture(client, name, Stage.RESEARCH_HANDS))) {
+                        advance(client, Stage.FINISH, "Native table insert, combine, solve and paid copy cross-checked on client and server");
+                    }
+                }
                 case WAIT_WORLD -> {
                     if (client.player == null || client.level == null || client.gameMode == null
                             || client.getSingleplayerServer() == null || stageTicks < 20) return;
+                    if (researchHandsOnly) {
+                        client.options.guiScale().set(2);
+                        client.resizeDisplay();
+                        advance(client, Stage.RESEARCH_HANDS, "Focused fresh-world research-table input fixture");
+                        return;
+                    }
                     if (boreOnly) {
                         if (!client.getLanguageManager().getSelected().equals("en_us")
                                 || !client.player.getUUID().equals(UUID.fromString("13848433-7be7-350d-8b4a-c038819c2260"))
@@ -2117,8 +2136,9 @@ public final class BookClientSmoke implements ClientModInitializer {
         report.put("captured_utc", Instant.now().toString());
         report.put("run_directory", runDirectory.toString());
         report.put("run_id", runId);
-        report.put("scope", boreOnly ? "bore" : focalOnly ? "focal" : visnetOnly ? "visnet" : stabilizerOnly ? "stabilizer" : crystallizerOnly ? "crystallizer" : centrifugeOnly ? "centrifuge" : bufferOnly ? "buffer" : tubeFilterOnly ? "tubefilter" : valveOnly ? "valve" : voidJarOnly ? "voidjar" : frostOnly ? "frost" : excavationOnly ? "excavation" : clothingOnly ? "clothing" : gogglesOnly ? "goggles" : capsOnly ? "caps" : equipmentOnly ? "equipment" : "full");
-        report.put("previous_content_replayed", !equipmentOnly && !capsOnly && !gogglesOnly && !clothingOnly && !excavationOnly && !frostOnly && !voidJarOnly && !valveOnly && !tubeFilterOnly && !bufferOnly && !centrifugeOnly && !crystallizerOnly && !stabilizerOnly && !visnetOnly && !focalOnly && !boreOnly);
+        report.put("scope", researchHandsOnly ? "researchhands" : boreOnly ? "bore" : focalOnly ? "focal" : visnetOnly ? "visnet" : stabilizerOnly ? "stabilizer" : crystallizerOnly ? "crystallizer" : centrifugeOnly ? "centrifuge" : bufferOnly ? "buffer" : tubeFilterOnly ? "tubefilter" : valveOnly ? "valve" : voidJarOnly ? "voidjar" : frostOnly ? "frost" : excavationOnly ? "excavation" : clothingOnly ? "clothing" : gogglesOnly ? "goggles" : capsOnly ? "caps" : equipmentOnly ? "equipment" : "full");
+        report.put("research_hands", researchHands == null ? Map.of() : researchHands.evidence);
+        report.put("previous_content_replayed", !researchHandsOnly && !equipmentOnly && !capsOnly && !gogglesOnly && !clothingOnly && !excavationOnly && !frostOnly && !voidJarOnly && !valveOnly && !tubeFilterOnly && !bufferOnly && !centrifugeOnly && !crystallizerOnly && !stabilizerOnly && !visnetOnly && !focalOnly && !boreOnly);
         report.put("original_world_modified", false);
         report.put("visual_inspection", "pending; script completion is not visual parity evidence");
         report.put("actions", actions);

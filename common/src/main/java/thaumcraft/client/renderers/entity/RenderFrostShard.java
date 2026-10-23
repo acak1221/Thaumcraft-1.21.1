@@ -39,19 +39,22 @@ public final class RenderFrostShard extends EntityRenderer<EntityFrostShard> {
         Random scale = new Random(entity.getId()); // The original java.util.Random(entityID), not a test seed.
         float base = entity.getDamage() * .1F;
         pose.pushPose();
-        pose.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTick, entity.yRotO, entity.getYRot())));
-        pose.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(partialTick, entity.xRotO, entity.getXRot())));
-        pose.scale(base + scale.nextFloat() * .1F, base + scale.nextFloat() * .1F, base + scale.nextFloat() * .1F);
-        VertexConsumer buffer = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
-        for (int triangle = 0; triangle < triangles.size(); triangle += 3) {
-            emit(triangles.get(triangle), pose, buffer, light);
-            emit(triangles.get(triangle + 1), pose, buffer, light);
-            emit(triangles.get(triangle + 2), pose, buffer, light);
-            // Native entity buffers are QUADS. A duplicated final corner leaves
-            // the original triangle plus one degenerate triangle, not a new face.
-            emit(triangles.get(triangle + 2), pose, buffer, light);
+        try {
+            pose.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTick, entity.yRotO, entity.getYRot())));
+            pose.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(partialTick, entity.xRotO, entity.getXRot())));
+            pose.scale(base + scale.nextFloat() * .1F, base + scale.nextFloat() * .1F, base + scale.nextFloat() * .1F);
+            VertexConsumer buffer = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
+            for (int triangle = 0; triangle < triangles.size(); triangle += 3) {
+                emit(triangles.get(triangle), pose, buffer, light);
+                emit(triangles.get(triangle + 1), pose, buffer, light);
+                emit(triangles.get(triangle + 2), pose, buffer, light);
+                // Native entity buffers are QUADS. A duplicated final corner leaves
+                // the original triangle plus one degenerate triangle, not a new face.
+                emit(triangles.get(triangle + 2), pose, buffer, light);
+            }
+        } finally {
+            pose.popPose();
         }
-        pose.popPose();
     }
 
     private static void emit(Vertex vertex, PoseStack pose, VertexConsumer buffer, int light) {

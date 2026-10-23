@@ -79,7 +79,7 @@ public final class ThaumcraftGearModelsClient {
     public static final ModelLayerLocation LEADER_LIGHT = layer("gear/leader", "light");
 
     private static ModelRobe robeArmoured, robeCloth;
-    private static ModelFortressArmor fortressArmoured, fortressLight;
+    private static ModelFortressArmor fortressArmoured;
     private static ModelKnightArmor knightArmoured, knightLight;
     private static ModelLeaderArmor leaderArmoured, leaderLight;
     private static ModelWand wand;
@@ -432,11 +432,6 @@ public final class ThaumcraftGearModelsClient {
     private static ModelFortressArmor fortressArmoured() {
         if (fortressArmoured == null) fortressArmoured = new ModelFortressArmor(bake(FORTRESS_ARMOURED), true);
         return fortressArmoured;
-    }
-
-    private static ModelFortressArmor fortressLight() {
-        if (fortressLight == null) fortressLight = new ModelFortressArmor(bake(FORTRESS_LIGHT), false);
-        return fortressLight;
     }
 
     private static ModelKnightArmor knightArmoured() {

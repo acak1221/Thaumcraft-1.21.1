@@ -19,9 +19,6 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
  * both loaders, and the draw order of the chest is the same as well.</p>
  */
 public interface NeoForgeLootPoolAccess {
-    /** The rows of the pool, in their order. */
-    List<LootPoolEntryContainer> thaumcraft$entries();
-
     /** Appends the given rows to the pool, keeping the rows that are already there. */
     void thaumcraft$appendEntries(List<LootPoolEntryContainer> extra);
 }

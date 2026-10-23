@@ -9,6 +9,9 @@ logs
 .gradle-fix4/
 # private Gradle homes of the parallel agents
 .gradle-t2/
+.gradle-t1/
+.gradle-visualrun/
+.gradle-shimmer/
 .gradle-e1/
 .gradle-c5fix/
 .gradle-g32/

@@ -91,6 +91,8 @@ public final class ModelTunnelField {
             float scale = 1.0F / (distance + 1.0F);
             float alpha = layer == 0 ? .1F : scale;
             float textureScale = layer == 0 ? OUTER_TEXTURE_SCALE : (layer == 1 ? INNER_TEXTURE_SCALE : .0625F);
+            // Non-fixed render types share a builder: requesting the next type can end
+            // the previous builder, so never retain both consumers.
             VertexConsumer out = buffers.getBuffer(layer == 0 ? RenderType.entityTranslucent(TUNNEL) : RenderType.eyes(FIELD));
             float red = random.nextFloat() * .5F + .1F;
             float green = random.nextFloat() * .5F + .4F;

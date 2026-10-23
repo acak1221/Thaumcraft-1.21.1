@@ -92,7 +92,7 @@ public final class BookClientSmoke implements ClientModInitializer {
     /** How long a stage may wait for a vanilla screen button that is not built yet. */
     private static final int SCREEN_RETRY_TICKS = 200;
     private enum Stage {
-        RESEARCH_HANDS, WAIT_WORLD, WAIT_RESTART_PROBE, ENGLISH_RELOAD, WAIT_ITEM, BROWSER, OPEN_BOOK, BOOK, BACK_TO_BROWSER, OPEN_RESEARCH,
+        ELDRITCH_VISUAL, CABINET_VISUAL, MIRROR_VISUAL, RESEARCH_HANDS, WAIT_WORLD, WAIT_RESTART_PROBE, ENGLISH_RELOAD, WAIT_ITEM, BROWSER, OPEN_BOOK, BOOK, BACK_TO_BROWSER, OPEN_RESEARCH,
         RESEARCH, NEXT_RESEARCH, ILLUSTRATED, PREVIOUS_RESEARCH, PREVIOUS_CAPTURE,
         RUSSIAN_RELOAD, RUSSIAN_SIZE, RUSSIAN_BROWSER, OPEN_RUSSIAN_BOOK, RUSSIAN_BOOK,
         RUSSIAN_NEXT, RUSSIAN_PAGINATION, PURCHASE_RELOAD, PURCHASE_SIZE,
@@ -129,6 +129,10 @@ public final class BookClientSmoke implements ClientModInitializer {
     private final boolean equipmentOnly = "equipment".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
     private final boolean researchHandsOnly = "researchhands".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
     private ResearchHandsClientSequence researchHands;
+    private final boolean visualsOnly = "visuals".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
+    private EldritchVisualClientSequence eldritchVisual;
+    private CabinetVisualClientSequence cabinetVisual;
+    private MirrorVisualClientSequence mirrorVisual;
     private final boolean capsOnly = "caps".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
     private final boolean gogglesOnly = "goggles".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
     private final boolean clothingOnly = "clothing".equals(System.getProperty("thaumcraft.clientSmokeScope", "full"));
@@ -362,6 +366,12 @@ public final class BookClientSmoke implements ClientModInitializer {
                         client.options.guiScale().set(2);
                         client.resizeDisplay();
                         advance(client, Stage.RESEARCH_HANDS, "Focused fresh-world research-table input fixture");
+                        return;
+                    }
+                    if (visualsOnly) {
+                        client.options.guiScale().set(2);
+                        client.resizeDisplay();
+                        advance(client, Stage.ELDRITCH_VISUAL, "Declared creative visual fixtures in a private fresh-world copy; no survival acquisition claim");
                         return;
                     }
                     if (boreOnly) {
@@ -1562,6 +1572,21 @@ public final class BookClientSmoke implements ClientModInitializer {
                         advance(client, Stage.FINISH, "Native furnace XP, real recipes and bound paid Potency upgrade completed; exact PNG and stopped-save inspection still required");
                     }
                 }
+                case ELDRITCH_VISUAL -> {
+                    if (eldritchVisual == null) eldritchVisual = new EldritchVisualClientSequence();
+                    if (eldritchVisual.tick(client, name -> capture(client, name, Stage.ELDRITCH_VISUAL)))
+                        advance(client, Stage.CABINET_VISUAL, "Outer Lands obelisk wide and close native frames captured");
+                }
+                case CABINET_VISUAL -> {
+                    if (cabinetVisual == null) cabinetVisual = new CabinetVisualClientSequence();
+                    if (cabinetVisual.tick(client, name -> capture(client, name, Stage.CABINET_VISUAL)))
+                        advance(client, Stage.MIRROR_VISUAL, "Visual cabinet frames captured; exact PNG inspection still required");
+                }
+                case MIRROR_VISUAL -> {
+                    if (mirrorVisual == null) mirrorVisual = new MirrorVisualClientSequence();
+                    if (mirrorVisual.tick(client, name -> capture(client, name, Stage.MIRROR_VISUAL)))
+                        advance(client, Stage.FINISH, "Native mirror item binding and placement linked a real pair; projected field frames still require inspection");
+                }
                 case BORE -> {
                     if (bore == null) bore = new BoreClientSequence(client,
                             name -> capture(client, name, Stage.BORE), runDirectory, runId);
@@ -2142,9 +2167,10 @@ public final class BookClientSmoke implements ClientModInitializer {
         report.put("captured_utc", Instant.now().toString());
         report.put("run_directory", runDirectory.toString());
         report.put("run_id", runId);
-        report.put("scope", researchHandsOnly ? "researchhands" : boreOnly ? "bore" : focalOnly ? "focal" : visnetOnly ? "visnet" : stabilizerOnly ? "stabilizer" : crystallizerOnly ? "crystallizer" : centrifugeOnly ? "centrifuge" : bufferOnly ? "buffer" : tubeFilterOnly ? "tubefilter" : valveOnly ? "valve" : voidJarOnly ? "voidjar" : frostOnly ? "frost" : excavationOnly ? "excavation" : clothingOnly ? "clothing" : gogglesOnly ? "goggles" : capsOnly ? "caps" : equipmentOnly ? "equipment" : "full");
+        report.put("scope", researchHandsOnly ? "researchhands" : visualsOnly ? "visuals" : boreOnly ? "bore" : focalOnly ? "focal" : visnetOnly ? "visnet" : stabilizerOnly ? "stabilizer" : crystallizerOnly ? "crystallizer" : centrifugeOnly ? "centrifuge" : bufferOnly ? "buffer" : tubeFilterOnly ? "tubefilter" : valveOnly ? "valve" : voidJarOnly ? "voidjar" : frostOnly ? "frost" : excavationOnly ? "excavation" : clothingOnly ? "clothing" : gogglesOnly ? "goggles" : capsOnly ? "caps" : equipmentOnly ? "equipment" : "full");
         report.put("research_hands", researchHands == null ? Map.of() : researchHands.evidence);
-        report.put("previous_content_replayed", !researchHandsOnly && !equipmentOnly && !capsOnly && !gogglesOnly && !clothingOnly && !excavationOnly && !frostOnly && !voidJarOnly && !valveOnly && !tubeFilterOnly && !bufferOnly && !centrifugeOnly && !crystallizerOnly && !stabilizerOnly && !visnetOnly && !focalOnly && !boreOnly);
+        report.put("previous_content_replayed", !researchHandsOnly && !visualsOnly && !equipmentOnly && !capsOnly && !gogglesOnly && !clothingOnly && !excavationOnly && !frostOnly && !voidJarOnly && !valveOnly && !tubeFilterOnly && !bufferOnly && !centrifugeOnly && !crystallizerOnly && !stabilizerOnly && !visnetOnly && !focalOnly && !boreOnly);
+        if (visualsOnly) report.put("fixture_boundary", "Supplied creative visual fixtures on isolated elevated platforms in a fresh-world copy; obelisk in real Outer Lands; no survival acquisition or original pixel parity claimed");
         report.put("original_world_modified", false);
         report.put("visual_inspection", "pending; script completion is not visual parity evidence");
         report.put("actions", actions);

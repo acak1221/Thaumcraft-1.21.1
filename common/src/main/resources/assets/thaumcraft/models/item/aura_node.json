@@ -1,5 +1,17 @@
 {
   "parent": "minecraft:builtin/entity",
+  "display": {
+    "firstperson_righthand": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 3, 0],
+      "scale": [0.125, 0.125, 0.125]
+    },
+    "firstperson_lefthand": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 3, 0],
+      "scale": [0.125, 0.125, 0.125]
+    }
+  },
   "textures": {
     "particle": "thaumcraft:items/shard"
   }

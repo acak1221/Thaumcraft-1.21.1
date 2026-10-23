@@ -96,6 +96,17 @@ class GameTestIsolationTest {
         }
     }
 
+    @Test void integrityVerdictsAlsoWitnessNativeWorkerProgress() throws IOException {
+        String guard = source("GameTestStateGuard.java");
+        assertTrue(guard.contains("unfinishedPickupTarget()") && guard.contains("incompleteApproaches < 3"),
+                "repeated completed paths outside actual action reach must be named, not mistaken for global leaks");
+        assertTrue(guard.contains("cleanup.run()") && guard.contains("GameTest work witness:"),
+                "progress refusal cleans its owner and retains the actual worker state before publication");
+        assertTrue(source("GolemEndToEndRuntimeChecks.java").contains("GameTestStateGuard.watchWorker(golem, this::close)"));
+        assertTrue(source("GolemEndToEndRuntimeChecks.java").contains("gatherFractionalDropPositions"),
+                "the cell-edge native drop negative control remains in the runtime suite");
+    }
+
     @Test void nativeReloadUsesABoundedRealTimeBudgetWithoutAnotherTicket() throws IOException {
         String wait = source("GameTestChunkAwait.java");
         assertTrue(wait.contains("System.nanoTime()") && wait.contains("Duration.ofSeconds(10)"),

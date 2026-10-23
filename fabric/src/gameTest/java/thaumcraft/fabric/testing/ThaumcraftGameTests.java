@@ -176,6 +176,9 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1550, batch = "g21_harvest_lumber")
     public void g21HarvestAndLumberDelivery(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.harvestAndLumberDelivery(test); }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 550, batch = "g21_fractional_drops")
+    public void g21GatherFractionalDropPositions(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.gatherFractionalDropPositions(test); }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 750, batch = "g21_use")
     public void g21UsePlantsExactlyOneSeed(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.usePlantsExactlyOneSeed(test); }
 

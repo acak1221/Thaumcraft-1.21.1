@@ -581,7 +581,13 @@ public final class BookClientSmoke implements ClientModInitializer {
                 }
                 case OPEN_RUSSIAN_BOOK -> {
                     if (!ready(client, GuiResearchBrowser.class)) return;
-                    clickEntry(client, "THAUMONOMICON");
+                    // THAUMONOMICON has exactly two pages in the original
+                    // (ConfigResearch:369 - one text page and one recipe page), so the
+                    // forward arrow is correctly inactive there and there is nothing to
+                    // turn to. The pagination stage below needs a research that really
+                    // spans more than one spread; ORE has five pages
+                    // (ConfigResearch:374) in both the oracle and the port.
+                    clickEntry(client, "ORE");
                     advance(client, Stage.RUSSIAN_BOOK, "Open Russian book at small GUI size");
                 }
                 case RUSSIAN_BOOK -> {

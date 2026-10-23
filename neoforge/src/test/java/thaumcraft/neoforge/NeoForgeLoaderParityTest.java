@@ -213,7 +213,10 @@ class NeoForgeLoaderParityTest {
             fabricEntries.add(simple(arguments.get(0)) + "|" + simple(arguments.get(1)) + "|"
                     + simple(arguments.get(2)) + "|" + simple(arguments.get(3)));
         }
-        assertEquals(7, fabricEntries.size(), "the Fabric bootstrap owns seven spawn placements");
+        // The count is asserted so a spawn placement added on one loader and not the other is
+        // caught. The inhabited zombie was added by the spawn audit lane, so the catalogue is
+        // eight on both sides now.
+        assertEquals(8, fabricEntries.size(), "the Fabric bootstrap owns eight spawn placements");
 
         Set<String> neoforgeEntries = new LinkedHashSet<>();
         for (List<String> arguments : calls(neoforge, "event.register(")) {
@@ -223,11 +226,15 @@ class NeoForgeLoaderParityTest {
         }
         assertTrue(neoforgeEntries.containsAll(fabricEntries),
                 "the NeoForge event owns every spawn placement of the Fabric bootstrap: " + fabricEntries);
-        // Two TC4 entities carry a spawn entry in the biome data of the original eerie biome but
-        // no placement of their own. Fabric leaves them without a placement, and vanilla then lets
-        // them spawn anywhere; NeoForge reports that state as an error, so the very same
-        // unrestricted behaviour is published there.
-        for (String extra : List.of("ThaumcraftWarp.ELDRITCH_GUARDIAN", "ThaumcraftEldritchMobs.INHABITED_ZOMBIE")) {
+        // ONE TC4 entity carries a spawn entry in the biome data of the original eerie biome but
+        // no placement of its own: the eldritch guardian (oracle BiomeGenEldritch registers it,
+        // and EntityEldritchGuardian overrides no spawn rule). Fabric leaves it without a
+        // placement and vanilla then lets it spawn anywhere; NeoForge reports that state as an
+        // error, so the very same unrestricted behaviour is published there.
+        //
+        // The inhabited zombie is NOT in this list: it extends EntityZombie, so it inherits
+        // ON_GROUND plus a light check, and both loaders must carry that rule.
+        for (String extra : List.of("ThaumcraftWarp.ELDRITCH_GUARDIAN")) {
             assertTrue(neoforgeEntries.contains(extra + "|SpawnPlacementTypes.NO_RESTRICTIONS|"
                             + "Types.MOTION_BLOCKING_NO_LEAVES|NeoForgeSpawnPlacements.unrestricted"),
                     "the NeoForge event publishes the unrestricted placement of " + extra);

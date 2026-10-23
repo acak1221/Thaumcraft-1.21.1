@@ -64,8 +64,12 @@ final class NeoForgeSpawnPlacements {
             event.register(ThaumcraftWarp.ELDRITCH_GUARDIAN.get(), SpawnPlacementTypes.NO_RESTRICTIONS,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, NeoForgeSpawnPlacements::unrestricted,
                     RegisterSpawnPlacementsEvent.Operation.REPLACE);
-            event.register(ThaumcraftEldritchMobs.INHABITED_ZOMBIE.get(), SpawnPlacementTypes.NO_RESTRICTIONS,
-                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, NeoForgeSpawnPlacements::unrestricted,
+            // The inhabited zombie is NOT unrestricted: it extends EntityZombie, whose 1.7.10
+            // placement is ON_GROUND with a light check, and the spawn audit gave it exactly
+            // that rule on Fabric. Only the guardian above is genuinely placement-free.
+            event.register(ThaumcraftEldritchMobs.INHABITED_ZOMBIE.get(), SpawnPlacementTypes.ON_GROUND,
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    thaumcraft.common.entities.monster.EntityInhabitedZombie::checkInhabitedSpawnRules,
                     RegisterSpawnPlacementsEvent.Operation.REPLACE);
         });
     }

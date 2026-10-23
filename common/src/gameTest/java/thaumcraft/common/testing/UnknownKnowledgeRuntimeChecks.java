@@ -158,7 +158,31 @@ public final class UnknownKnowledgeRuntimeChecks {
                     blocker[0].discard();
                 } catch (RuntimeException | Error error) { cleanup.run(); throw error; }
             });
-            test.runAfterDelay(45, () -> {
+            // The delivery is a POST-retry queue drained by the world tick. A FIXED delay is a
+            // race: in the full suite the server is loaded and the queue can still be draining
+            // at tick 45, which is exactly how this scenario flaked. Poll until every output has
+            // been delivered, with a generous bounded deadline, and fail only if it never does.
+            final int DELIVERY_DEADLINE = 45;
+            final int MAX_WAIT = 400;
+            test.onEachTick(() -> {
+                if (closed[0] || test.getTick() < DELIVERY_DEADLINE) return;
+                boolean allDelivered = true;
+                for (var output : fragmentOutputs.entrySet()) {
+                    var entity = level.getEntity(output.getKey());
+                    if (!(entity instanceof ItemEntity item
+                            && item.getItem().is(ThaumcraftContent.MATERIALS.get("knowledge_fragment").get())
+                            && item.getItem().getCount() == output.getValue()
+                            && !pendingIds(test).contains(output.getKey()))) {
+                        allDelivered = false;
+                        break;
+                    }
+                }
+                if (allDelivered) { cleanup.run(); test.succeed(); }
+                else if (test.getTick() > MAX_WAIT) {
+                    test.fail("native POST retry never delivered every paid fragment result: " + fragmentOutputs);
+                }
+            });
+            test.runAfterDelay(MAX_WAIT + 1, () -> {
                 if (closed[0]) return;
                 try {
                     for (var output : fragmentOutputs.entrySet()) {

@@ -88,6 +88,7 @@ final class DistillationClientSequence {
     private final BlockPos furnace, fireJar, energyJar, grove, greatwood, silverwood, workbench, node;
     private Step step = Step.SETUP;
     private int ticks, transfer, bookTurns;
+    private boolean lastDragAccepted;
     private float initialInflation = Float.NaN;
     private CompletableFuture<Void> serverAction;
     private Map<String, Object> serverSnapshot = Map.of();
@@ -509,7 +510,47 @@ final class DistillationClientSequence {
                 if (ticks < 10) return false;
                 int x = (int) BookClientSmoke.field(client.screen, "graphLeft") + (int) BookClientSmoke.field(client.screen, "graphWidth") / 2;
                 int y = (int) BookClientSmoke.field(client.screen, "graphTop") + (int) BookClientSmoke.field(client.screen, "graphHeight") / 2;
-                require(client.screen.mouseDragged(x, y, 0, 24, -48), "native browser drag centres both newly ported material icons");
+                // The two material nodes sit eight map cells apart (ROD_greatwood col -5,
+                // CAP_gold col 3), i.e. 192 px, and each cell box is 26 px wide. Both fit
+                // inside the original 224 px interior only in a narrow pan window, so one
+                // fixed drag is a guess: it was 24 px when the port still had a 480 px-wide
+                // book, where almost any pan fit. Instead of hard-coding a new magic number,
+                // pan until both icons really are inside the interior - the same thing a
+                // player does when dragging the map - and fail honestly if that never happens.
+                int graphLeft = (int) BookClientSmoke.field(client.screen, "graphLeft");
+                int graphTop = (int) BookClientSmoke.field(client.screen, "graphTop");
+                int graphWidth = (int) BookClientSmoke.field(client.screen, "graphWidth");
+                int graphHeight = (int) BookClientSmoke.field(client.screen, "graphHeight");
+                boolean visible = false;
+                // The two nodes span 8 cells = 192 px horizontally, plus a 26 px box, i.e.
+                // 218 of the 224 px interior, and their row must be brought inside the
+                // 196 px height too. mapX_new = mapX - dx and mapY_new = mapY - dy, so a
+                // positive step moves the map left/up; the sign below is chosen so that a
+                // node outside on the left or top is pulled in, one pixel per step, until
+                // both boxes really fit. This is what a player nudging the map does.
+                for (int attempt = 0; attempt < 400 && !visible; attempt++) {
+                    int[] rod = researchPoint(client, "ROD_greatwood");
+                    int[] cap = researchPoint(client, "CAP_gold");
+                    visible = inside(rod, graphLeft, graphTop, graphWidth, graphHeight)
+                            && inside(cap, graphLeft, graphTop, graphWidth, graphHeight);
+                    if (visible) break;
+                    int minX = Math.min(rod[0], cap[0]) - 2, maxX = Math.max(rod[0], cap[0]) + 24;
+                    // panX_new = panX + dx and the node sits at graphLeft + graphWidth/2 +
+                    // panX + column*24, so a POSITIVE dx moves the nodes right. A node that
+                    // is outside on the left therefore needs dx = +1, and one outside on
+                    // the right needs dx = -1.
+                    int dx = minX < graphLeft ? 1 : (maxX >= graphLeft + graphWidth ? -1 : 0);
+                    int dy = rod[1] - 2 < graphTop ? 1 : (rod[1] + 24 >= graphTop + graphHeight ? -1 : 0);
+                    require(dx != 0 || dy != 0, "both material icons are inside the graph pan range");
+                    lastDragAccepted = client.screen.mouseDragged(x, y, 0, dx, dy);
+                    require(lastDragAccepted, "native browser drag centres both newly ported material icons");
+                }
+                require(visible, "native browser drag can bring both material icons inside the original 224x196 interior: "
+                        + "rod=" + java.util.Arrays.toString(researchPoint(client, "ROD_greatwood"))
+                        + " cap=" + java.util.Arrays.toString(researchPoint(client, "CAP_gold"))
+                        + " graph=[" + graphLeft + "," + graphTop + " " + graphWidth + "x" + graphHeight + "]"
+                        + " panX=" + BookClientSmoke.field(client.screen, "panX")
+                        + " lastDragAccepted=" + lastDragAccepted);
                 next(Step.BROWSER_SCENE);
             }
             case BROWSER_SCENE -> {
@@ -681,6 +722,12 @@ final class DistillationClientSequence {
         return false;
     }
 
+    /** The 26 px cell box of a research node, fully inside the graph interior. */
+    private static boolean inside(int[] point, int left, int top, int width, int height) {
+        return point[0] - 2 >= left && point[1] - 2 >= top
+                && point[0] + 24 < left + width && point[1] + 24 < top + height;
+    }
+
     private static Map<String, Object> materialIcons(Minecraft client) throws ReflectiveOperationException {
         var resolve = Class.forName("thaumcraft.client.gui.ResearchIconDisplay").getDeclaredMethod("resolve", String.class);
         resolve.setAccessible(true);
@@ -691,7 +738,12 @@ final class DistillationClientSequence {
             ItemStack icon = (ItemStack) resolve.invoke(null, ResearchCatalog.get(key).iconExpression());
             require(icon.is(key.equals("ROD_greatwood") ? ThaumcraftWands.GREATWOOD_WAND_ROD.get() : ThaumcraftWands.GOLD_WAND_CAP.get()), "native research icon resolves the actual material item, not book fallback");
             int[] point = researchPoint(client, key);
-            require(point[0] - 2 >= left && point[1] - 2 >= top && point[0] + 24 < left + width && point[1] + 24 < top + height, "both material icons are fully inside the actual graph scissor");
+            require(point[0] - 2 >= left && point[1] - 2 >= top && point[0] + 24 < left + width && point[1] + 24 < top + height,
+                    "both material icons are fully inside the actual graph scissor: " + key
+                            + " point=" + point[0] + "," + point[1]
+                            + " graph=[" + left + "," + top + " " + width + "x" + height + "]"
+                            + " graphRight=" + (left + width) + " graphBottom=" + (top + height)
+                            + " keys=" + List.of("ROD_greatwood", "CAP_gold"));
             require(client.getItemRenderer().getModel(icon, client.level, client.player, 0) != client.getModelManager().getMissingModel(), "native browser material icon has a real item model");
             result.put(key, Map.of("item", BuiltInRegistries.ITEM.getKey(icon.getItem()).toString(), "x", point[0], "y", point[1], "fully_visible", true));
         }
@@ -699,10 +751,21 @@ final class DistillationClientSequence {
     }
 
     private static int[] researchPoint(Minecraft client, String key) throws ReflectiveOperationException {
-        for (Object node : (List<?>) BookClientSmoke.field(client.screen, "nodes")) {
-            if (((ResearchDefinition) BookClientSmoke.field(node, "research")).key().equals(key)) return new int[] {(int) BookClientSmoke.field(node, "x"), (int) BookClientSmoke.field(node, "y")};
-        }
-        throw new IllegalStateException("Native browser did not draw " + key);
+        // The cached node.x/node.y of the last render frame are stale within the tick that
+        // just panned the map, so a click or an inside-check placed right after
+        // mouseDragged would use last frame's geometry and never converge. Compute the
+        // point from the live pan the same way GuiResearchBrowser.render does:
+        // originX = graphLeft - mapX, mapX = clamp((int)(-panX - graphWidth/2), ...).
+        var research = ResearchCatalog.get(key);
+        int graphLeft = (int) BookClientSmoke.field(client.screen, "graphLeft");
+        int graphTop = (int) BookClientSmoke.field(client.screen, "graphTop");
+        int graphWidth = (int) BookClientSmoke.field(client.screen, "graphWidth");
+        int graphHeight = (int) BookClientSmoke.field(client.screen, "graphHeight");
+        double panX = (double) BookClientSmoke.field(client.screen, "panX");
+        double panY = (double) BookClientSmoke.field(client.screen, "panY");
+        int x = graphLeft + graphWidth / 2 + (int) panX + research.column() * 24;
+        int y = graphTop + graphHeight / 2 + (int) panY + research.row() * 24;
+        return new int[]{x, y};
     }
 
     private static void clickButton(Minecraft client, String label) {

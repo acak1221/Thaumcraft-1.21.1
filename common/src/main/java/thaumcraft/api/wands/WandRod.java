@@ -63,7 +63,8 @@ public class WandRod {
         this.capacity = rod.capacity();
         this.craftCost = rod.craftCost();
         this.item = item;
-        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + rod.tag() + ".png");
+        // StaffRod uses the base material sheet, not a nonexistent *_staff PNG.
+        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + rod.baseTag() + ".png");
         rods.put(rod.tag(), this);
     }
 

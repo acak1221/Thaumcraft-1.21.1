@@ -1,0 +1,1474 @@
+{
+  "schema_version": 1,
+  "policy": "First 37 entries reconcile CLIENT_QUALITY findings: 33 construction + 2 classpath loaders + 2 silent fallbacks; remaining entries are independently found shared/API paths. Registry, sound, recipe, model-layer and tag factories are inventoried but are NOT file paths. Addon-supplied arguments are unbounded and are not bundled-asset claims.",
+  "sites": [
+    {
+      "site": "common/src/main/java/thaumcraft/client/BoreClientEffects.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/misc/beam1.png",
+        "thaumcraft:textures/misc/beam2.png",
+        "thaumcraft:textures/misc/vortex.png",
+        "thaumcraft:textures/models/bore.png",
+        "thaumcraft:textures/models/jar.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/warded_glass_1.png",
+        "thaumcraft:textures/blocks/warded_glass_10.png",
+        "thaumcraft:textures/blocks/warded_glass_11.png",
+        "thaumcraft:textures/blocks/warded_glass_12.png",
+        "thaumcraft:textures/blocks/warded_glass_13.png",
+        "thaumcraft:textures/blocks/warded_glass_14.png",
+        "thaumcraft:textures/blocks/warded_glass_15.png",
+        "thaumcraft:textures/blocks/warded_glass_16.png",
+        "thaumcraft:textures/blocks/warded_glass_17.png",
+        "thaumcraft:textures/blocks/warded_glass_18.png",
+        "thaumcraft:textures/blocks/warded_glass_19.png",
+        "thaumcraft:textures/blocks/warded_glass_2.png",
+        "thaumcraft:textures/blocks/warded_glass_20.png",
+        "thaumcraft:textures/blocks/warded_glass_21.png",
+        "thaumcraft:textures/blocks/warded_glass_22.png",
+        "thaumcraft:textures/blocks/warded_glass_23.png",
+        "thaumcraft:textures/blocks/warded_glass_24.png",
+        "thaumcraft:textures/blocks/warded_glass_25.png",
+        "thaumcraft:textures/blocks/warded_glass_26.png",
+        "thaumcraft:textures/blocks/warded_glass_27.png",
+        "thaumcraft:textures/blocks/warded_glass_28.png",
+        "thaumcraft:textures/blocks/warded_glass_29.png",
+        "thaumcraft:textures/blocks/warded_glass_3.png",
+        "thaumcraft:textures/blocks/warded_glass_30.png",
+        "thaumcraft:textures/blocks/warded_glass_31.png",
+        "thaumcraft:textures/blocks/warded_glass_32.png",
+        "thaumcraft:textures/blocks/warded_glass_33.png",
+        "thaumcraft:textures/blocks/warded_glass_34.png",
+        "thaumcraft:textures/blocks/warded_glass_35.png",
+        "thaumcraft:textures/blocks/warded_glass_36.png",
+        "thaumcraft:textures/blocks/warded_glass_37.png",
+        "thaumcraft:textures/blocks/warded_glass_38.png",
+        "thaumcraft:textures/blocks/warded_glass_39.png",
+        "thaumcraft:textures/blocks/warded_glass_4.png",
+        "thaumcraft:textures/blocks/warded_glass_40.png",
+        "thaumcraft:textures/blocks/warded_glass_41.png",
+        "thaumcraft:textures/blocks/warded_glass_42.png",
+        "thaumcraft:textures/blocks/warded_glass_43.png",
+        "thaumcraft:textures/blocks/warded_glass_44.png",
+        "thaumcraft:textures/blocks/warded_glass_45.png",
+        "thaumcraft:textures/blocks/warded_glass_46.png",
+        "thaumcraft:textures/blocks/warded_glass_47.png",
+        "thaumcraft:textures/blocks/warded_glass_5.png",
+        "thaumcraft:textures/blocks/warded_glass_6.png",
+        "thaumcraft:textures/blocks/warded_glass_7.png",
+        "thaumcraft:textures/blocks/warded_glass_8.png",
+        "thaumcraft:textures/blocks/warded_glass_9.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/misc/beam2.png",
+        "thaumcraft:textures/misc/particles.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/void_robe_armor.png",
+        "thaumcraft:textures/models/void_robe_armor_overlay.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/misc/p_large.png",
+        "thaumcraft:textures/misc/p_small.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:shaders/post/warp_blurred.json",
+        "thaumcraft:shaders/post/warp_death_gaze.json",
+        "thaumcraft:shaders/post/warp_hunger.json",
+        "thaumcraft:shaders/post/warp_sun_scorned.json"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/ripple1.png",
+        "thaumcraft:textures/models/ripple10.png",
+        "thaumcraft:textures/models/ripple11.png",
+        "thaumcraft:textures/models/ripple12.png",
+        "thaumcraft:textures/models/ripple13.png",
+        "thaumcraft:textures/models/ripple14.png",
+        "thaumcraft:textures/models/ripple15.png",
+        "thaumcraft:textures/models/ripple2.png",
+        "thaumcraft:textures/models/ripple3.png",
+        "thaumcraft:textures/models/ripple4.png",
+        "thaumcraft:textures/models/ripple5.png",
+        "thaumcraft:textures/models/ripple6.png",
+        "thaumcraft:textures/models/ripple7.png",
+        "thaumcraft:textures/models/ripple8.png",
+        "thaumcraft:textures/models/ripple9.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/gui/gui_wandtable.png",
+        "thaumcraft:textures/misc/particles.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/misc/radial.png",
+        "thaumcraft:textures/misc/radial2.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/alchemyblock.png",
+        "thaumcraft:textures/foci/vampirebats.png",
+        "thaumcraft:textures/gui/gui_research.png",
+        "thaumcraft:textures/gui/gui_researchback.png",
+        "thaumcraft:textures/gui/gui_researchbackeldritch.png",
+        "thaumcraft:textures/misc/nodes.png",
+        "thaumcraft:textures/misc/particles.png",
+        "thaumcraft:textures/misc/r_alchent.png",
+        "thaumcraft:textures/misc/r_alchman.png",
+        "thaumcraft:textures/misc/r_alchmult.png",
+        "thaumcraft:textures/misc/r_aspects.png",
+        "thaumcraft:textures/misc/r_eldritchmajor.png",
+        "thaumcraft:textures/misc/r_eldritchminor.png",
+        "thaumcraft:textures/misc/r_enchant.png",
+        "thaumcraft:textures/misc/r_infernalfurnace.png",
+        "thaumcraft:textures/misc/r_mask0.png",
+        "thaumcraft:textures/misc/r_mask1.png",
+        "thaumcraft:textures/misc/r_mask2.png",
+        "thaumcraft:textures/misc/r_nodepreserve.png",
+        "thaumcraft:textures/misc/r_nodes.png",
+        "thaumcraft:textures/misc/r_nodes_2.png",
+        "thaumcraft:textures/misc/r_nodetap1.png",
+        "thaumcraft:textures/misc/r_nodetap2.png",
+        "thaumcraft:textures/misc/r_outer.png",
+        "thaumcraft:textures/misc/r_outerrev.png",
+        "thaumcraft:textures/misc/r_pech.png",
+        "thaumcraft:textures/misc/r_resdupe.png",
+        "thaumcraft:textures/misc/r_researcher1.png",
+        "thaumcraft:textures/misc/r_researcher2.png",
+        "thaumcraft:textures/misc/r_runicupg.png",
+        "thaumcraft:textures/misc/r_warp.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/alchemyblock.png",
+        "thaumcraft:textures/foci/vampirebats.png",
+        "thaumcraft:textures/misc/r_alchent.png",
+        "thaumcraft:textures/misc/r_alchman.png",
+        "thaumcraft:textures/misc/r_alchmult.png",
+        "thaumcraft:textures/misc/r_aspects.png",
+        "thaumcraft:textures/misc/r_eldritchmajor.png",
+        "thaumcraft:textures/misc/r_eldritchminor.png",
+        "thaumcraft:textures/misc/r_enchant.png",
+        "thaumcraft:textures/misc/r_infernalfurnace.png",
+        "thaumcraft:textures/misc/r_mask0.png",
+        "thaumcraft:textures/misc/r_mask1.png",
+        "thaumcraft:textures/misc/r_mask2.png",
+        "thaumcraft:textures/misc/r_nodepreserve.png",
+        "thaumcraft:textures/misc/r_nodes.png",
+        "thaumcraft:textures/misc/r_nodes_2.png",
+        "thaumcraft:textures/misc/r_nodetap1.png",
+        "thaumcraft:textures/misc/r_nodetap2.png",
+        "thaumcraft:textures/misc/r_outer.png",
+        "thaumcraft:textures/misc/r_outerrev.png",
+        "thaumcraft:textures/misc/r_pech.png",
+        "thaumcraft:textures/misc/r_resdupe.png",
+        "thaumcraft:textures/misc/r_researcher1.png",
+        "thaumcraft:textures/misc/r_researcher2.png",
+        "thaumcraft:textures/misc/r_runicupg.png",
+        "thaumcraft:textures/misc/r_warp.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/items/amber.png",
+        "thaumcraft:textures/items/golem_upgrade_air.png",
+        "thaumcraft:textures/items/golem_upgrade_entropy.png",
+        "thaumcraft:textures/items/golem_upgrade_fire.png",
+        "thaumcraft:textures/items/golem_upgrade_order.png",
+        "thaumcraft:textures/items/quicksilver.png",
+        "thaumcraft:textures/misc/eldritchajor1.png",
+        "thaumcraft:textures/misc/eldritchajor2.png",
+        "thaumcraft:textures/misc/research1.png",
+        "thaumcraft:textures/misc/research2.png",
+        "thaumcraft:textures/misc/research3.png",
+        "thaumcraft:textures/misc/research4.png",
+        "thaumcraft:textures/misc/research5.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/aspects/_back.png",
+        "thaumcraft:textures/aspects/_unknown.png",
+        "thaumcraft:textures/gui/guiresearchtable2.png",
+        "thaumcraft:textures/gui/hex1.png",
+        "thaumcraft:textures/misc/parchment3.png",
+        "thaumcraft:textures/misc/particles.png",
+        "thaumcraft:textures/misc/script.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/aspects/_back.png",
+        "thaumcraft:textures/aspects/_unknown.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/aspects/aer.png",
+        "thaumcraft:textures/aspects/alienis.png",
+        "thaumcraft:textures/aspects/aqua.png",
+        "thaumcraft:textures/aspects/arbor.png",
+        "thaumcraft:textures/aspects/auram.png",
+        "thaumcraft:textures/aspects/bestia.png",
+        "thaumcraft:textures/aspects/cognitio.png",
+        "thaumcraft:textures/aspects/corpus.png",
+        "thaumcraft:textures/aspects/exanimis.png",
+        "thaumcraft:textures/aspects/fabrico.png",
+        "thaumcraft:textures/aspects/fames.png",
+        "thaumcraft:textures/aspects/gelum.png",
+        "thaumcraft:textures/aspects/herba.png",
+        "thaumcraft:textures/aspects/humanus.png",
+        "thaumcraft:textures/aspects/ignis.png",
+        "thaumcraft:textures/aspects/instrumentum.png",
+        "thaumcraft:textures/aspects/iter.png",
+        "thaumcraft:textures/aspects/limus.png",
+        "thaumcraft:textures/aspects/lucrum.png",
+        "thaumcraft:textures/aspects/lux.png",
+        "thaumcraft:textures/aspects/machina.png",
+        "thaumcraft:textures/aspects/messis.png",
+        "thaumcraft:textures/aspects/metallum.png",
+        "thaumcraft:textures/aspects/meto.png",
+        "thaumcraft:textures/aspects/mortuus.png",
+        "thaumcraft:textures/aspects/motus.png",
+        "thaumcraft:textures/aspects/ordo.png",
+        "thaumcraft:textures/aspects/pannus.png",
+        "thaumcraft:textures/aspects/perditio.png",
+        "thaumcraft:textures/aspects/perfodio.png",
+        "thaumcraft:textures/aspects/permutatio.png",
+        "thaumcraft:textures/aspects/potentia.png",
+        "thaumcraft:textures/aspects/praecantatio.png",
+        "thaumcraft:textures/aspects/sano.png",
+        "thaumcraft:textures/aspects/sensus.png",
+        "thaumcraft:textures/aspects/spiritus.png",
+        "thaumcraft:textures/aspects/telum.png",
+        "thaumcraft:textures/aspects/tempestas.png",
+        "thaumcraft:textures/aspects/tenebrae.png",
+        "thaumcraft:textures/aspects/terra.png",
+        "thaumcraft:textures/aspects/tutamen.png",
+        "thaumcraft:textures/aspects/vacuos.png",
+        "thaumcraft:textures/aspects/venenum.png",
+        "thaumcraft:textures/aspects/victus.png",
+        "thaumcraft:textures/aspects/vinculum.png",
+        "thaumcraft:textures/aspects/vitium.png",
+        "thaumcraft:textures/aspects/vitreus.png",
+        "thaumcraft:textures/aspects/volatus.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/lib/UtilsFX.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/items/lightningringv.png",
+        "thaumcraft:textures/misc/wisp.png"
+      ],
+      "note": "Bundled callers only; public path arguments are addon-owned and unbounded; existing WARN fallback retained."
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/items/lightningringv.png",
+        "thaumcraft:textures/misc/beam1.png",
+        "thaumcraft:textures/misc/nodes.png",
+        "thaumcraft:textures/misc/p_large.png",
+        "thaumcraft:textures/misc/p_small.png",
+        "thaumcraft:textures/misc/particles.png",
+        "thaumcraft:textures/misc/particles2.png",
+        "thaumcraft:textures/models/hemis0.png",
+        "thaumcraft:textures/models/hemis1.png",
+        "thaumcraft:textures/models/hemis10.png",
+        "thaumcraft:textures/models/hemis11.png",
+        "thaumcraft:textures/models/hemis12.png",
+        "thaumcraft:textures/models/hemis13.png",
+        "thaumcraft:textures/models/hemis14.png",
+        "thaumcraft:textures/models/hemis15.png",
+        "thaumcraft:textures/models/hemis2.png",
+        "thaumcraft:textures/models/hemis3.png",
+        "thaumcraft:textures/models/hemis4.png",
+        "thaumcraft:textures/models/hemis5.png",
+        "thaumcraft:textures/models/hemis6.png",
+        "thaumcraft:textures/models/hemis7.png",
+        "thaumcraft:textures/models/hemis8.png",
+        "thaumcraft:textures/models/hemis9.png",
+        "thaumcraft:textures/models/node_converter.png",
+        "thaumcraft:textures/models/node_converter_over.png",
+        "thaumcraft:textures/models/vis_relay.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java",
+      "kind": "sprite",
+      "paths": [
+        "thaumcraft:blocks/legacy_stone",
+        "thaumcraft:blocks/taint_fibres",
+        "thaumcraft:blocks/taint_over_1",
+        "thaumcraft:blocks/taint_over_2",
+        "thaumcraft:blocks/taint_over_3",
+        "thaumcraft:blocks/taint_spore_stalk_1",
+        "thaumcraft:blocks/taint_spore_stalk_2",
+        "thaumcraft:blocks/taintgrass1",
+        "thaumcraft:blocks/taintgrass2"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java",
+      "kind": "sprite",
+      "paths": [
+        "thaumcraft:blocks/es_1",
+        "thaumcraft:blocks/es_2",
+        "thaumcraft:blocks/es_3",
+        "thaumcraft:blocks/es_4"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/entity/RenderPech.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/pech_forage.png",
+        "thaumcraft:textures/models/pech_stalker.png",
+        "thaumcraft:textures/models/pech_thaum.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/entity/RenderTravelingTrunk.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/items/golem_upgrade_air.png",
+        "thaumcraft:textures/items/golem_upgrade_earth.png",
+        "thaumcraft:textures/items/golem_upgrade_entropy.png",
+        "thaumcraft:textures/items/golem_upgrade_fire.png",
+        "thaumcraft:textures/items/golem_upgrade_order.png",
+        "thaumcraft:textures/items/golem_upgrade_water.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/crystalizer.obj",
+        "thaumcraft:textures/models/vis_relay.obj"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/models/gear/HarnessArmorRenderer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/hoverharness.obj",
+        "thaumcraft:textures/models/hoverharness.png",
+        "thaumcraft:textures/models/hoverharness2.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelHoverHarness.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/hoverharness.obj",
+        "thaumcraft:textures/models/hoverharness.png",
+        "thaumcraft:textures/models/hoverharness2.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java:rodTexture",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_rod_blaze.png",
+        "thaumcraft:textures/models/wand_rod_bone.png",
+        "thaumcraft:textures/models/wand_rod_greatwood.png",
+        "thaumcraft:textures/models/wand_rod_ice.png",
+        "thaumcraft:textures/models/wand_rod_obsidian.png",
+        "thaumcraft:textures/models/wand_rod_primal.png",
+        "thaumcraft:textures/models/wand_rod_quartz.png",
+        "thaumcraft:textures/models/wand_rod_reed.png",
+        "thaumcraft:textures/models/wand_rod_silverwood.png",
+        "thaumcraft:textures/models/wand_rod_wood.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java:capTexture",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_cap_copper.png",
+        "thaumcraft:textures/models/wand_cap_gold.png",
+        "thaumcraft:textures/models/wand_cap_iron.png",
+        "thaumcraft:textures/models/wand_cap_thaumium.png",
+        "thaumcraft:textures/models/wand_cap_void.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileAlchemyFurnaceAdvancedRenderer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/alch_furnace.png",
+        "thaumcraft:textures/models/alch_furnace_on.png",
+        "thaumcraft:textures/models/alch_furnace_tank.png",
+        "thaumcraft:textures/models/alch_furnace_tank_on.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileAlchemyFurnaceAdvancedRenderer.java:quad",
+      "kind": "sprite",
+      "paths": [
+        "thaumcraft:blocks/fluxgoo",
+        "thaumcraft:blocks/metalbase"
+      ],
+      "note": "Also minecraft:block/lava_still: vanilla external sprite, not a bundled file."
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeStabilizerRenderer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/node_stabilizer.png",
+        "thaumcraft:textures/models/node_stabilizer_over.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/tablequill.png",
+        "thaumcraft:textures/misc/parchment.png",
+        "thaumcraft:textures/models/restable.png",
+        "thaumcraft:textures/models/restable2.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java",
+      "kind": "sprite",
+      "paths": [
+        "thaumcraft:blocks/pipe_1",
+        "thaumcraft:blocks/pipe_2",
+        "thaumcraft:blocks/pipe_3",
+        "thaumcraft:blocks/pipe_filter",
+        "thaumcraft:blocks/pipe_filter_core",
+        "thaumcraft:blocks/pipe_oneway",
+        "thaumcraft:blocks/pipe_restrict",
+        "thaumcraft:blocks/pipe_valve"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedGlassRenderer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/warded_glass_1.png",
+        "thaumcraft:textures/blocks/warded_glass_10.png",
+        "thaumcraft:textures/blocks/warded_glass_11.png",
+        "thaumcraft:textures/blocks/warded_glass_12.png",
+        "thaumcraft:textures/blocks/warded_glass_13.png",
+        "thaumcraft:textures/blocks/warded_glass_14.png",
+        "thaumcraft:textures/blocks/warded_glass_15.png",
+        "thaumcraft:textures/blocks/warded_glass_16.png",
+        "thaumcraft:textures/blocks/warded_glass_17.png",
+        "thaumcraft:textures/blocks/warded_glass_18.png",
+        "thaumcraft:textures/blocks/warded_glass_19.png",
+        "thaumcraft:textures/blocks/warded_glass_2.png",
+        "thaumcraft:textures/blocks/warded_glass_20.png",
+        "thaumcraft:textures/blocks/warded_glass_21.png",
+        "thaumcraft:textures/blocks/warded_glass_22.png",
+        "thaumcraft:textures/blocks/warded_glass_23.png",
+        "thaumcraft:textures/blocks/warded_glass_24.png",
+        "thaumcraft:textures/blocks/warded_glass_25.png",
+        "thaumcraft:textures/blocks/warded_glass_26.png",
+        "thaumcraft:textures/blocks/warded_glass_27.png",
+        "thaumcraft:textures/blocks/warded_glass_28.png",
+        "thaumcraft:textures/blocks/warded_glass_29.png",
+        "thaumcraft:textures/blocks/warded_glass_3.png",
+        "thaumcraft:textures/blocks/warded_glass_30.png",
+        "thaumcraft:textures/blocks/warded_glass_31.png",
+        "thaumcraft:textures/blocks/warded_glass_32.png",
+        "thaumcraft:textures/blocks/warded_glass_33.png",
+        "thaumcraft:textures/blocks/warded_glass_34.png",
+        "thaumcraft:textures/blocks/warded_glass_35.png",
+        "thaumcraft:textures/blocks/warded_glass_36.png",
+        "thaumcraft:textures/blocks/warded_glass_37.png",
+        "thaumcraft:textures/blocks/warded_glass_38.png",
+        "thaumcraft:textures/blocks/warded_glass_39.png",
+        "thaumcraft:textures/blocks/warded_glass_4.png",
+        "thaumcraft:textures/blocks/warded_glass_40.png",
+        "thaumcraft:textures/blocks/warded_glass_41.png",
+        "thaumcraft:textures/blocks/warded_glass_42.png",
+        "thaumcraft:textures/blocks/warded_glass_43.png",
+        "thaumcraft:textures/blocks/warded_glass_44.png",
+        "thaumcraft:textures/blocks/warded_glass_45.png",
+        "thaumcraft:textures/blocks/warded_glass_46.png",
+        "thaumcraft:textures/blocks/warded_glass_47.png",
+        "thaumcraft:textures/blocks/warded_glass_5.png",
+        "thaumcraft:textures/blocks/warded_glass_6.png",
+        "thaumcraft:textures/blocks/warded_glass_7.png",
+        "thaumcraft:textures/blocks/warded_glass_8.png",
+        "thaumcraft:textures/blocks/warded_glass_9.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedRenderer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/warded_glass_1.png",
+        "thaumcraft:textures/blocks/warded_glass_10.png",
+        "thaumcraft:textures/blocks/warded_glass_11.png",
+        "thaumcraft:textures/blocks/warded_glass_12.png",
+        "thaumcraft:textures/blocks/warded_glass_13.png",
+        "thaumcraft:textures/blocks/warded_glass_14.png",
+        "thaumcraft:textures/blocks/warded_glass_15.png",
+        "thaumcraft:textures/blocks/warded_glass_16.png",
+        "thaumcraft:textures/blocks/warded_glass_17.png",
+        "thaumcraft:textures/blocks/warded_glass_18.png",
+        "thaumcraft:textures/blocks/warded_glass_19.png",
+        "thaumcraft:textures/blocks/warded_glass_2.png",
+        "thaumcraft:textures/blocks/warded_glass_20.png",
+        "thaumcraft:textures/blocks/warded_glass_21.png",
+        "thaumcraft:textures/blocks/warded_glass_22.png",
+        "thaumcraft:textures/blocks/warded_glass_23.png",
+        "thaumcraft:textures/blocks/warded_glass_24.png",
+        "thaumcraft:textures/blocks/warded_glass_25.png",
+        "thaumcraft:textures/blocks/warded_glass_26.png",
+        "thaumcraft:textures/blocks/warded_glass_27.png",
+        "thaumcraft:textures/blocks/warded_glass_28.png",
+        "thaumcraft:textures/blocks/warded_glass_29.png",
+        "thaumcraft:textures/blocks/warded_glass_3.png",
+        "thaumcraft:textures/blocks/warded_glass_30.png",
+        "thaumcraft:textures/blocks/warded_glass_31.png",
+        "thaumcraft:textures/blocks/warded_glass_32.png",
+        "thaumcraft:textures/blocks/warded_glass_33.png",
+        "thaumcraft:textures/blocks/warded_glass_34.png",
+        "thaumcraft:textures/blocks/warded_glass_35.png",
+        "thaumcraft:textures/blocks/warded_glass_36.png",
+        "thaumcraft:textures/blocks/warded_glass_37.png",
+        "thaumcraft:textures/blocks/warded_glass_38.png",
+        "thaumcraft:textures/blocks/warded_glass_39.png",
+        "thaumcraft:textures/blocks/warded_glass_4.png",
+        "thaumcraft:textures/blocks/warded_glass_40.png",
+        "thaumcraft:textures/blocks/warded_glass_41.png",
+        "thaumcraft:textures/blocks/warded_glass_42.png",
+        "thaumcraft:textures/blocks/warded_glass_43.png",
+        "thaumcraft:textures/blocks/warded_glass_44.png",
+        "thaumcraft:textures/blocks/warded_glass_45.png",
+        "thaumcraft:textures/blocks/warded_glass_46.png",
+        "thaumcraft:textures/blocks/warded_glass_47.png",
+        "thaumcraft:textures/blocks/warded_glass_5.png",
+        "thaumcraft:textures/blocks/warded_glass_6.png",
+        "thaumcraft:textures/blocks/warded_glass_7.png",
+        "thaumcraft:textures/blocks/warded_glass_8.png",
+        "thaumcraft:textures/blocks/warded_glass_9.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/models/ModelAdvancedAlchemyFurnace.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/adv_alch_furnace.obj"
+      ],
+      "note": "Audit classpath bypass; already throws for absent mesh. No reload refactor in this existence fix."
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/scanner.obj"
+      ],
+      "note": "Audit classpath bypass; already throws for absent mesh. No reload refactor in this existence fix."
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java:silent-fallback",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/alchemyblock.png",
+        "thaumcraft:textures/foci/vampirebats.png",
+        "thaumcraft:textures/items/thaumonomicon.png",
+        "thaumcraft:textures/misc/r_alchent.png",
+        "thaumcraft:textures/misc/r_alchman.png",
+        "thaumcraft:textures/misc/r_alchmult.png",
+        "thaumcraft:textures/misc/r_aspects.png",
+        "thaumcraft:textures/misc/r_eldritchmajor.png",
+        "thaumcraft:textures/misc/r_eldritchminor.png",
+        "thaumcraft:textures/misc/r_enchant.png",
+        "thaumcraft:textures/misc/r_infernalfurnace.png",
+        "thaumcraft:textures/misc/r_mask0.png",
+        "thaumcraft:textures/misc/r_mask1.png",
+        "thaumcraft:textures/misc/r_mask2.png",
+        "thaumcraft:textures/misc/r_nodepreserve.png",
+        "thaumcraft:textures/misc/r_nodes.png",
+        "thaumcraft:textures/misc/r_nodes_2.png",
+        "thaumcraft:textures/misc/r_nodetap1.png",
+        "thaumcraft:textures/misc/r_nodetap2.png",
+        "thaumcraft:textures/misc/r_outer.png",
+        "thaumcraft:textures/misc/r_outerrev.png",
+        "thaumcraft:textures/misc/r_pech.png",
+        "thaumcraft:textures/misc/r_resdupe.png",
+        "thaumcraft:textures/misc/r_researcher1.png",
+        "thaumcraft:textures/misc/r_researcher2.png",
+        "thaumcraft:textures/misc/r_runicupg.png",
+        "thaumcraft:textures/misc/r_warp.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:silent-fallback",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/alchemyblock.png",
+        "thaumcraft:textures/foci/vampirebats.png",
+        "thaumcraft:textures/misc/r_alchent.png",
+        "thaumcraft:textures/misc/r_alchman.png",
+        "thaumcraft:textures/misc/r_alchmult.png",
+        "thaumcraft:textures/misc/r_aspects.png",
+        "thaumcraft:textures/misc/r_eldritchmajor.png",
+        "thaumcraft:textures/misc/r_eldritchminor.png",
+        "thaumcraft:textures/misc/r_enchant.png",
+        "thaumcraft:textures/misc/r_infernalfurnace.png",
+        "thaumcraft:textures/misc/r_mask0.png",
+        "thaumcraft:textures/misc/r_mask1.png",
+        "thaumcraft:textures/misc/r_mask2.png",
+        "thaumcraft:textures/misc/r_nodepreserve.png",
+        "thaumcraft:textures/misc/r_nodes.png",
+        "thaumcraft:textures/misc/r_nodes_2.png",
+        "thaumcraft:textures/misc/r_nodetap1.png",
+        "thaumcraft:textures/misc/r_nodetap2.png",
+        "thaumcraft:textures/misc/r_outer.png",
+        "thaumcraft:textures/misc/r_outerrev.png",
+        "thaumcraft:textures/misc/r_pech.png",
+        "thaumcraft:textures/misc/r_resdupe.png",
+        "thaumcraft:textures/misc/r_researcher1.png",
+        "thaumcraft:textures/misc/r_researcher2.png",
+        "thaumcraft:textures/misc/r_runicupg.png",
+        "thaumcraft:textures/misc/r_warp.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/aspects/Aspect.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/aspects/aer.png",
+        "thaumcraft:textures/aspects/alienis.png",
+        "thaumcraft:textures/aspects/aqua.png",
+        "thaumcraft:textures/aspects/arbor.png",
+        "thaumcraft:textures/aspects/auram.png",
+        "thaumcraft:textures/aspects/bestia.png",
+        "thaumcraft:textures/aspects/cognitio.png",
+        "thaumcraft:textures/aspects/corpus.png",
+        "thaumcraft:textures/aspects/exanimis.png",
+        "thaumcraft:textures/aspects/fabrico.png",
+        "thaumcraft:textures/aspects/fames.png",
+        "thaumcraft:textures/aspects/gelum.png",
+        "thaumcraft:textures/aspects/herba.png",
+        "thaumcraft:textures/aspects/humanus.png",
+        "thaumcraft:textures/aspects/ignis.png",
+        "thaumcraft:textures/aspects/instrumentum.png",
+        "thaumcraft:textures/aspects/iter.png",
+        "thaumcraft:textures/aspects/limus.png",
+        "thaumcraft:textures/aspects/lucrum.png",
+        "thaumcraft:textures/aspects/lux.png",
+        "thaumcraft:textures/aspects/machina.png",
+        "thaumcraft:textures/aspects/messis.png",
+        "thaumcraft:textures/aspects/metallum.png",
+        "thaumcraft:textures/aspects/meto.png",
+        "thaumcraft:textures/aspects/mortuus.png",
+        "thaumcraft:textures/aspects/motus.png",
+        "thaumcraft:textures/aspects/ordo.png",
+        "thaumcraft:textures/aspects/pannus.png",
+        "thaumcraft:textures/aspects/perditio.png",
+        "thaumcraft:textures/aspects/perfodio.png",
+        "thaumcraft:textures/aspects/permutatio.png",
+        "thaumcraft:textures/aspects/potentia.png",
+        "thaumcraft:textures/aspects/praecantatio.png",
+        "thaumcraft:textures/aspects/sano.png",
+        "thaumcraft:textures/aspects/sensus.png",
+        "thaumcraft:textures/aspects/spiritus.png",
+        "thaumcraft:textures/aspects/telum.png",
+        "thaumcraft:textures/aspects/tempestas.png",
+        "thaumcraft:textures/aspects/tenebrae.png",
+        "thaumcraft:textures/aspects/terra.png",
+        "thaumcraft:textures/aspects/tutamen.png",
+        "thaumcraft:textures/aspects/vacuos.png",
+        "thaumcraft:textures/aspects/venenum.png",
+        "thaumcraft:textures/aspects/victus.png",
+        "thaumcraft:textures/aspects/vinculum.png",
+        "thaumcraft:textures/aspects/vitium.png",
+        "thaumcraft:textures/aspects/vitreus.png",
+        "thaumcraft:textures/aspects/volatus.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/foci/alchemistsfire.png",
+        "thaumcraft:textures/foci/alchemistsfrost.png",
+        "thaumcraft:textures/foci/architect.png",
+        "thaumcraft:textures/foci/batbombs.png",
+        "thaumcraft:textures/foci/chainlightning.png",
+        "thaumcraft:textures/foci/devilbats.png",
+        "thaumcraft:textures/foci/dowsing.png",
+        "thaumcraft:textures/foci/earthshock.png",
+        "thaumcraft:textures/foci/enlarge.png",
+        "thaumcraft:textures/foci/extend.png",
+        "thaumcraft:textures/foci/fireball.png",
+        "thaumcraft:textures/foci/firebeam.png",
+        "thaumcraft:textures/foci/frugal.png",
+        "thaumcraft:textures/foci/iceboulder.png",
+        "thaumcraft:textures/foci/nightshade.png",
+        "thaumcraft:textures/foci/potency.png",
+        "thaumcraft:textures/foci/scattershot.png",
+        "thaumcraft:textures/foci/seeker.png",
+        "thaumcraft:textures/foci/silktouch.png",
+        "thaumcraft:textures/foci/treasure.png",
+        "thaumcraft:textures/foci/vampirebats.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/WandCap.java:32",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_cap_copper.png",
+        "thaumcraft:textures/models/wand_cap_gold.png",
+        "thaumcraft:textures/models/wand_cap_iron.png",
+        "thaumcraft:textures/models/wand_cap_thaumium.png",
+        "thaumcraft:textures/models/wand_cap_void.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/WandCap.java:44",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_cap_copper.png",
+        "thaumcraft:textures/models/wand_cap_gold.png",
+        "thaumcraft:textures/models/wand_cap_iron.png",
+        "thaumcraft:textures/models/wand_cap_thaumium.png",
+        "thaumcraft:textures/models/wand_cap_void.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/WandCap.java:57",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_cap_copper.png",
+        "thaumcraft:textures/models/wand_cap_gold.png",
+        "thaumcraft:textures/models/wand_cap_iron.png",
+        "thaumcraft:textures/models/wand_cap_thaumium.png",
+        "thaumcraft:textures/models/wand_cap_void.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/WandRod.java:51",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_rod_blaze.png",
+        "thaumcraft:textures/models/wand_rod_bone.png",
+        "thaumcraft:textures/models/wand_rod_greatwood.png",
+        "thaumcraft:textures/models/wand_rod_ice.png",
+        "thaumcraft:textures/models/wand_rod_obsidian.png",
+        "thaumcraft:textures/models/wand_rod_primal.png",
+        "thaumcraft:textures/models/wand_rod_quartz.png",
+        "thaumcraft:textures/models/wand_rod_reed.png",
+        "thaumcraft:textures/models/wand_rod_silverwood.png",
+        "thaumcraft:textures/models/wand_rod_wood.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/WandRod.java:56",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_rod_blaze.png",
+        "thaumcraft:textures/models/wand_rod_bone.png",
+        "thaumcraft:textures/models/wand_rod_greatwood.png",
+        "thaumcraft:textures/models/wand_rod_ice.png",
+        "thaumcraft:textures/models/wand_rod_obsidian.png",
+        "thaumcraft:textures/models/wand_rod_primal.png",
+        "thaumcraft:textures/models/wand_rod_quartz.png",
+        "thaumcraft:textures/models/wand_rod_reed.png",
+        "thaumcraft:textures/models/wand_rod_silverwood.png",
+        "thaumcraft:textures/models/wand_rod_wood.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/WandRod.java:66",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_rod_blaze.png",
+        "thaumcraft:textures/models/wand_rod_bone.png",
+        "thaumcraft:textures/models/wand_rod_greatwood.png",
+        "thaumcraft:textures/models/wand_rod_ice.png",
+        "thaumcraft:textures/models/wand_rod_obsidian.png",
+        "thaumcraft:textures/models/wand_rod_primal.png",
+        "thaumcraft:textures/models/wand_rod_quartz.png",
+        "thaumcraft:textures/models/wand_rod_reed.png",
+        "thaumcraft:textures/models/wand_rod_silverwood.png",
+        "thaumcraft:textures/models/wand_rod_wood.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/StaffRod.java:17",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_rod_blaze.png",
+        "thaumcraft:textures/models/wand_rod_bone.png",
+        "thaumcraft:textures/models/wand_rod_greatwood.png",
+        "thaumcraft:textures/models/wand_rod_ice.png",
+        "thaumcraft:textures/models/wand_rod_obsidian.png",
+        "thaumcraft:textures/models/wand_rod_primal.png",
+        "thaumcraft:textures/models/wand_rod_quartz.png",
+        "thaumcraft:textures/models/wand_rod_reed.png",
+        "thaumcraft:textures/models/wand_rod_silverwood.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/api/wands/StaffRod.java:26",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/models/wand_rod_blaze.png",
+        "thaumcraft:textures/models/wand_rod_bone.png",
+        "thaumcraft:textures/models/wand_rod_greatwood.png",
+        "thaumcraft:textures/models/wand_rod_ice.png",
+        "thaumcraft:textures/models/wand_rod_obsidian.png",
+        "thaumcraft:textures/models/wand_rod_primal.png",
+        "thaumcraft:textures/models/wand_rod_quartz.png",
+        "thaumcraft:textures/models/wand_rod_reed.png",
+        "thaumcraft:textures/models/wand_rod_silverwood.png"
+      ],
+      "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/gui/gui_researchback.png",
+        "thaumcraft:textures/gui/gui_researchbackeldritch.png",
+        "thaumcraft:textures/items/thaumonomiconcheat.png",
+        "thaumcraft:textures/misc/r_artifice.png",
+        "thaumcraft:textures/misc/r_crucible.png",
+        "thaumcraft:textures/misc/r_eldritch.png",
+        "thaumcraft:textures/misc/r_golemancy.png",
+        "thaumcraft:textures/misc/r_thaumaturgy.png"
+      ],
+      "note": ""
+    }
+  ],
+  "external_dependencies": {
+    "TileAlchemyFurnaceAdvancedRenderer.java:quad": [
+      "minecraft:block/lava_still"
+    ],
+    "TaintDropParticle.java:frame": [
+      "minecraft:drip_hang",
+      "minecraft:drip_fall",
+      "minecraft:drip_land"
+    ]
+  },
+  "dynamic_factories": {
+    "common/src/main/java/thaumcraft/api/ItemApi.java": [
+      "ResourceLocation.tryParse(name)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/api/ThaumcraftApi.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
+      "ResourceLocation.parse(id)",
+      "ResourceLocation.tryParse(nativeItemTag)"
+    ],
+    "common/src/main/java/thaumcraft/api/ThaumcraftMaterials.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/api/WorldCoordinates.java": [
+      "ResourceLocation.tryParse(tag.getString(\"w_dim\"))"
+    ],
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/aspects/\"+tag.toLowerCase(Locale.ROOT)+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/api/blocks/BlocksTC.java": [
+      "ResourceLocation.tryParse(name)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/api/crafting/ArcaneRecipes.java": [
+      "ResourceLocation.tryParse(name)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/api/items/ItemsTC.java": [
+      "ResourceLocation.tryParse(name)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/foci/\"+key+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/api/wands/StaffRod.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/api/wands/WandCap.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+this.getTag()+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+this.getTag()+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+cap.tag()+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/api/wands/WandRod.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+rod.baseTag()+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/BoreClientEffects.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/blocks/warded_glass_\"+texture+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftEldritchItemsClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/misc/\"+texture+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+layer.sheet())"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/misc/p_\"+size+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftTravelGearClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"shaders/post/\"+name+\".json\")"
+    ],
+    "common/src/main/java/thaumcraft/client/fx/InfusionClientEffects.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": [
+      "ResourceLocation.withDefaultNamespace(sprite)"
+    ],
+    "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/ripple\"+frame+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",match.group(1).toLowerCase(java.util.Locale.ROOT))"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": [
+      "ResourceLocation.parse(image.texture())"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/ResearchIconDisplay.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",nativeId)",
+      "ResourceLocation.tryParse(entry.getValue())",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"crucible/balanced_shard_\"+primal)"
+    ],
+    "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": [
+      "ResourceLocation.parse(entry.image())"
+    ],
+    "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"blocks/\"+name)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"blocks/es_\"+(index+1))"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderPech.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+name+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderTravelingTrunk.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/items/golem_upgrade_\"+upgrade.key+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+name+\".obj\")"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/HarnessArmorRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelHoverHarness.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+baseTag+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+tag+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileAlchemyFurnaceAdvancedRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+path+\".png\")",
+      "ResourceLocation.parse(id)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeStabilizerRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+name+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"blocks/\"+name)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedGlassRenderer.java": [
+      "ResourceLocation.parse(TEXTURES[texture])"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/blocks/warded_glass_\"+(index+1)+\".png\")"
+    ],
+    "common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java": [
+      "ResourceLocation.parse(OuterLandsWiringRules.eldritchObjectItem(EldritchBlockRules.ELDRITCH_OBJECT_TABLET))"
+    ],
+    "common/src/main/java/thaumcraft/common/blocks/ItemMirrorBlock.java": [
+      "ResourceLocation.tryParse(dimension)"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,path)"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"crystal\")"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"thaumium\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"void\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"thaumium\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"void\")"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"incorrect_for_primal_crusher\")"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,path)"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftNodes.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"normal_aura_nodes\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"aura_totem\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"normal_aura_node_biomes\")"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"tc4_outer_lands_maze\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"tc4_eldritch_ring\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,path)",
+      "ResourceLocation.parse(registryId)",
+      "ResourceLocation.parse(OuterLandsWiringRules.eldritchObjectItem(variant))"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"cultist_robe\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"cultist_robe\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"cultist_plate\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"cultist_leader\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"cultist_boots\")"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftSounds.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,name)"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,texture)"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftVillages.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"surface_structure_biomes\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"eldritch\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"cosmetic_solid_tough\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,path)",
+      "ResourceLocation.parse(material.id())"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"goggles\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"robes\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"robes\")"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWorldgen.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"tc4_ores\")"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
+      "ResourceLocation.tryParse(tag)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/golems/FishingGolemGoals.java": [
+      "ResourceLocation.parse(data.getString(\"Dimension\"))"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityCultist.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityCultistLeader.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_health_1\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_health_2\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_health_3\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_health_4\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_health_5\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_1\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_2\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_3\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_4\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_5\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"champion_bold_speed\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"champion_mighty_damage\")"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchCrab.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",EldritchMobRules.CULTIST_PLATE_CHEST_ID)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGuardian.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",itemId)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityInhabitedZombie.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityPech.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSeed.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSpore.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacle.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityThaumicSlime.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/entities/monster/EntityWisp.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
+    ],
+    "common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalCrusher.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"mineable/primal_crusher\")"
+    ],
+    "common/src/main/java/thaumcraft/common/items/golems/GolemFluidCargo.java": [
+      "ResourceLocation.tryParse(name)"
+    ],
+    "common/src/main/java/thaumcraft/common/items/golems/ItemGolemBell.java": [
+      "ResourceLocation.tryParse(name)"
+    ],
+    "common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java": [
+      "ResourceLocation.tryParse(link.dimension())"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/CustomSoundType.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)",
+      "ResourceLocation.fromNamespaceAndPath(\"minecraft\",\"block.\"+name)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/GrowthLampTicks.java": [
+      "ResourceLocation.tryParse(row.getString(\"Block\"))"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/MagicWard.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"is_magic\")"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/crafting/SmeltingBonusCatalog.java": [
+      "ResourceLocation.parse(id)",
+      "ResourceLocation.parse(entry.itemTag())"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/enchantment/EquipmentEnchantments.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/loot/OriginalLootEnchantments.java": [
+      "ResourceLocation.parse(rule.key().contains(\":\")?rule.key():\"minecraft:\"+rule.key())"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/mods/ChampionHooks.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"eldritch_lands\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"node_biome_types/\"+name)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/research/EarlyObjectAspectBindings.java": [
+      "ResourceLocation.parse(identifier.getAsString())"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/research/ObjectAspectCatalog.java": [
+      "ResourceLocation.parse(id.getAsString())",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",flattened.get(metadata))"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchConditions.java": [
+      "ResourceLocation.fromNamespaceAndPath(namespace,path)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java": [
+      "ResourceLocation.tryParse(id)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/research/UnknownKnowledge.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",modifier.attributeModifierId.toString())",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",uuid)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/utils/OriginalOreTags.java": [
+      "ResourceLocation.fromNamespaceAndPath(NAMESPACE,\"original_log_wood\")",
+      "ResourceLocation.fromNamespaceAndPath(NAMESPACE,TAG_ROOT+tagPath)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/AuraGenRules.java": [
+      "ResourceLocation.withDefaultNamespace(path)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/MagicalTreeBiomeAdapter.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/NormalNodeBiomeAdapter.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"node_biome_types/\"+name)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/OuterLandsBossRooms.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"ice\")",
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,id)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/PortableHoles.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"portable_hole_blacklist\")"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/VillageTradeRules.java": [
+      "ResourceLocation.tryParse(id)"
+    ],
+    "common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java": [
+      "ResourceLocation.parse(id)"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileEldritchCrabSpawner.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"gore\")"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileEldritchLock.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"pump\")"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileFocalManipulator.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java": [
+      "ResourceLocation.tryParse(tag.getString(\"RecipeEnchantment\"))",
+      "ResourceLocation.tryParse(tag.getString(\"RecipeEnchantment\"))"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileMirror.java": [
+      "ResourceLocation.tryParse(linkDim)",
+      "ResourceLocation.tryParse(dimension)"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileMirrorEssentia.java": [
+      "ResourceLocation.tryParse(linkDim)"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"research_bonus/\"+path)"
+    ],
+    "common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java": [
+      "ResourceLocation.parse(tag.getString(\"Recipe\"))",
+      "ResourceLocation.parse(row.getString(\"id\"))"
+    ],
+    "fabric/src/main/java/thaumcraft/fabric/world/FabricBiomeSpawns.java": [
+      "ResourceLocation.parse(row.entity())"
+    ],
+    "neoforge/src/main/java/thaumcraft/neoforge/OriginalEntitySpawnsBiomeModifier.java": [
+      "ResourceLocation.parse(row.entity())"
+    ]
+  },
+  "helper_calls": {
+    "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": [
+      "VisNetRender.texture(\"misc/particles2\")"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": [
+      "ModelWand.rodTexture(rod.baseTag())",
+      "ModelWand.capTexture(cap.tag())"
+    ],
+    "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": [
+      "VisNetRender.texture(\"models/hemis\"+frame)"
+    ],
+    "common/src/main/java/thaumcraft/client/fx/particles/ShockSparkParticle.java": [
+      "VisNetRender.texture(\"misc/particles2\")"
+    ],
+    "common/src/main/java/thaumcraft/client/fx/particles/WardHitParticle.java": [
+      "VisNetRender.texture(\"models/hemis\"+frame)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java": [
+      "VisNetRender.texture(\"models/\"+texture)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/block/TaintFibreWorldQuads.java": [
+      "LegacyBlockQuads.sprite(pass==0?\"taint_fibres\":\"taint_over_\"+index)",
+      "LegacyBlockQuads.sprite(texture)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderPrimalArrow.java": [
+      "UtilsFX.getTextureSize(\"textures/misc/wisp.png\",64)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderWisp.java": [
+      "UtilsFX.getTextureSize(\"textures/misc/wisp.png\",64)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileMagicWorkbenchChargerRenderer.java": [
+      "VisNetRender.modelType(\"charger_base\",\"vis_relay\",false)",
+      "VisNetRender.modelType(\"charger_crystal\",\"vis_relay\",true)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeConverterRenderer.java": [
+      "VisNetRender.modelType(\"converter_base\",\"node_converter\",false)",
+      "VisNetRender.modelType(\"converter_over\",\"node_converter_over\",false)"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeEnergizedRenderer.java": [
+      "UtilsFX.getTextureAnimationSize(\"textures/items/lightningringv.png\")"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java": [
+      "VisNetRender.modelType(\"relay_base\",\"vis_relay\",false)",
+      "VisNetRender.modelType(\"relay_crystal\",\"vis_relay\",true)"
+    ]
+  },
+  "source_contracts": {
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "1a465f983e45926d5d55445880ff9e1249df537afcbf2424ace94a5e2a5dc299",
+    "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": "d30a772140f079ffe0dc439aac08300d6bdb298907c05598b3aab5d24299f2ce",
+    "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "fd1c8be36797ba032ef54273789bd1fdd59e6211da9e06317322d9112c490d91",
+    "common/src/main/java/thaumcraft/api/wands/WandCap.java": "dc5963e4e9e5c0c716a8123bf570ee509a525b579418721df7cdf258e73b552b",
+    "common/src/main/java/thaumcraft/api/wands/WandRod.java": "21d2fec3787a9fbddefd1040a7338a49879ca61a1b8aaabd5391027d72d8c800",
+    "common/src/main/java/thaumcraft/client/BoreClientEffects.java": "99563c98766c47450475e263f412100d61724c624b6b9050b6330b85295c8433",
+    "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "6471c99c018271104ad721ccc61332275023a36b16983acfaee85a34e70f6d68",
+    "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
+    "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "8a82c324559a31c13e51f1bfe8dabbf9b3cabad505e7bdc3c1749c480bf76bae",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "8d3ac9a7aa42a7624fa82235f1a246c5094a5cca5be1432362250838b4187925",
+    "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
+    "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "9a482d65fb0eaa1005d9110f130ff3f1ea4e772f8d419256f2e39748ee7c3efe",
+    "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",
+    "common/src/main/java/thaumcraft/client/fx/particles/ShockSparkParticle.java": "9f11e10c3f78b824ed049ba218805e7ff906f965483fcb91d0b888b7bcb125fe",
+    "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": "26a99565842c9e75ada6f2df95f0e383227c6bccc2e37a3b3109d465c80de242",
+    "common/src/main/java/thaumcraft/client/fx/particles/WardHitParticle.java": "13b59286b12f7b99a128c4d46a32447fa38f517f03313e54988dd806f6a28f57",
+    "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
+    "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",
+    "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "7b79ce511e397760b8b05c7cd35df2be79d5d695cf6f0f1426513fd25dd8fef6",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "c35f2e3a39cef0185c63e78784a89f7be0aa1649cd67b596880cf78bef0ddbf2",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "c6ea5cb6f2205a947f622cea15ffb463063678ca5adc4dafb6b6ebd813bb5343",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "27036df65f1b9c792a9ea98d12401bb8569257a662e0b65c80d2340008419ed5",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "9b7c4f16de3d9430ebed599a5b895ffcf6f2a69ca7bddc890e8e0b2f18549bde",
+    "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "73e8c2b51da90c42dfb5087d21d9e0f4d4943d02d335e09a664df72f0c3a451d",
+    "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "310799552cea6c938b10a8070cbfd59dbe3c23d2bc376f7f5d760d298a8f8a0d",
+    "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": "dab7c8e0478567f85b9c3e03856b40f9d84a329fd0e4bbae06a0e2c4934415a7",
+    "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": "b850c890fdfe2dd96712703456cfe3adeec974823339ce98fbd0a7d61d289a97",
+    "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java": "154bd83f96716470a6b14f5c1114228e3ba35699f3dae1fb9e3205ea5effcc35",
+    "common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java": "929d264b2b14947d22cf5156cfa6ce0f0c11a021d5d7518eb998aaf0797803eb",
+    "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java": "6d7e1d3ff571c8d64181e3ee7f113f7727eb3b2991faef5598a502fc3a060b6f",
+    "common/src/main/java/thaumcraft/client/renderers/block/TaintFibreWorldQuads.java": "296250e26ab5af2aebf066c6d23d3944dfaad66bde95d6b9db3752869efdaba3",
+    "common/src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java": "f6a7444e8effb800bbd4ab4867c3b126881b0e0cad0ed000b7baef45f4e76f65",
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderPech.java": "0c8dc5f4c7dc8427141774c5694b15db213b375fe9eb4dc98f707a61afc21278",
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderPrimalArrow.java": "3db4ca63d7b458e810426a04a6df9954817b09ff2f733a31cefef76b7ef931cd",
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderTravelingTrunk.java": "5a5f1c81aca1b68d46f7dd975da25e11a8f898bc91198f10f803db0bd5715d24",
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderWisp.java": "3309e49e436b169d67f9841c2ee3b88186416baf8b47b864af3d7e2da0318d75",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelAdvancedAlchemyFurnace.java": "58ab026d8b9af77e1a06aab2292e6d87177b46a774691a81ae4233f237a2b7f6",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java": "a912db88b759e986c038cbc8cd126e86bb151463a894dff8f78c855d1c53810f",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java": "ea10e543e92f616e94af656eaec78fb2b0a9a31a3a9a7be7cdab980b65d2bb54",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/HarnessArmorRenderer.java": "226216949728f6d8df4297fa7bd397f45fd883283255ba7c8fc331719b7f5007",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelHoverHarness.java": "bd8224012149acfec22551ecc6591aac37a3f5c5fc0e16462d25a8cd3f95712a",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java": "52e25ffbd3247f2d1e3c5866b3354a88093e1e6503b6e5112730e43412ec7694",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileAlchemyFurnaceAdvancedRenderer.java": "93272dbf8a6c8f29dd878f0c07f3f02979a2458209377b40acd6f53f6384bfcc",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileMagicWorkbenchChargerRenderer.java": "a7c1d902af52287c94cd582832389717af096e7527c663949068db80c4ccaab0",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeConverterRenderer.java": "9e485cd5554d5d3d1a69ab4a7abb739aa11b6f5827e8c50d3d2b251c025d7515",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeEnergizedRenderer.java": "caada86707b1a2dbc650e8c21b1d9c0329ae46fb9c48ace52e95f63d2cbe905b",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeStabilizerRenderer.java": "05e443989e7c7346b4bd1ab39409f8ce03024459bd4f9e1a89c9d525f9b50a81",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java": "1f32e4a1ffa0e190f51cc0343acf95479c5fa73b059599c0400d990b549bbd2f",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java": "9f7acfc2a6a8c67fd0d5e703e6c35f1064da5edf13df832a3a06caf1170e7338",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java": "1e1626143517d3516e5806ba2d53413add9ecf48811b6611de9050c44b4a4c14",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedGlassRenderer.java": "e027825854cfcac7ad6de1561300b299bee2c8f6b4f8fcae6bb27821a94cc834",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedRenderer.java": "867cf171846a9f23add0e6c38735bc846ef465c3151b1306a2ec93feb575562c",
+    "common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java": "f2cc7513778677ed8ed2206f2957c6451eddeb42f4a4981278fb482adb3c257a",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java": "39e8a870dd9a0c1d49548d1c13c9a3269b8d5a1a69dd5f0216a26192553708ef",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java": "2d30c4493247ecbc9131ff60e6bd95cdee7199ccda16f678497dea8aada3b2d7",
+    "common/src/main/java/thaumcraft/common/items/armor/VoidRobeLayers.java": "8241dc3e7534ccbc90ef2f79894b1218189681f3880c2ffe5b3733941e6f1a16",
+    "common/src/main/java/thaumcraft/common/items/golems/GolemUpgrade.java": "770663031aea503eda84ecaafbee6907835a1fc9a55aa22c308bc60d2c36fd15",
+    "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java": "ced3a62c9861d08d0340e20116a0689a1cdef5d9d28dfb37b484f761e964b0fc",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java": "655f22fae0b97543c5958f103e87bb8d5724c9736db06c9e99727ef35593966b",
+    "common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java": "653d2e42aeb3842b8c917c7a41671ea8f0fe7dbc5328454fd026f7299b6d48ef",
+    "common/src/main/java/thaumcraft/common/lib/world/WardingOverlay.java": "02f4d10b8880c9255b638b507a37dfa1ece81472bce974fae0e35425a62de7cf"
+  }
+}

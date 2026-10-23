@@ -97,4 +97,19 @@ class WandApiTest {
         assertEquals(WandMaterials.IRON.craftCost(), nativeCap.getCraftCost());
         assertNull(WandRod.byTag("not_a_rod"));
     }
+
+    @Test void everyNativeRodIncludingStaffsUsesAnExistingBaseMaterialSheet() {
+        var previous = new java.util.LinkedHashMap<>(WandRod.rods);
+        try {
+            for (var material : WandMaterials.RODS) {
+                var rod = new WandRod(material, ItemStack.EMPTY);
+                assertEquals("textures/models/wand_rod_" + material.baseTag() + ".png", rod.getTexture().getPath());
+                assertNotNull(getClass().getClassLoader().getResource(
+                        "assets/" + rod.getTexture().getNamespace() + "/" + rod.getTexture().getPath()), material.tag());
+            }
+        } finally {
+            WandRod.rods.clear();
+            WandRod.rods.putAll(previous);
+        }
+    }
 }

@@ -5,6 +5,7 @@ logs
 # Gradle / Forge workspace
 .gradle/
 .gradle_home/
+.gradle-e2/
 .gradle-fix4/
 # private Gradle homes of the parallel agents
 .gradle-c5fix/

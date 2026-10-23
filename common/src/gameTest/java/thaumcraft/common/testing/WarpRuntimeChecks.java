@@ -155,7 +155,11 @@ public final class WarpRuntimeChecks {
                 // Isolate this command completion: all other parents/siblings are declared completed inputs.
                 for (var definition : thaumcraft.common.lib.research.ResearchCatalog.all()) if (!definition.key().equals(keys[i])) knowledge().addResearch(definition.key());
                 int api = thaumcraft.api.ThaumcraftApi.getWarp(keys[i]);
-                thaumcraft.common.lib.research.ResearchAdministration.grant(knowledge(), keys[i]);
+                try {
+                    int result = level.getServer().getCommands().getDispatcher().execute("tc research @s " + keys[i],
+                            player.createCommandSourceStack().withPermission(2).withSuppressedOutput());
+                    test.assertTrue(result == 1 && knowledge().isResearchComplete(keys[i]), "actual research command completes " + keys[i]);
+                } catch (com.mojang.brigadier.exceptions.CommandSyntaxException failure) { throw new IllegalStateException(failure); }
                 System.out.println("G27 SOURCE research " + keys[i] + " api=" + api + " pools=" + knowledge().getWarpPerm() + "," + knowledge().getWarpSticky() + "," + knowledge().getWarpTemp());
                 if (api != amounts[i] || knowledge().getWarpPerm() != amounts[i] - amounts[i] / 2 || knowledge().getWarpSticky() != amounts[i] / 2 || knowledge().getWarpTemp() != 0 || knowledge().getWarpCounter() != amounts[i]) failures++;
             }
@@ -208,6 +212,13 @@ public final class WarpRuntimeChecks {
             int counter = knowledge().getWarpCounter(), temporary = knowledge().getWarpTemp();
             for (int age = 40001; age < 42000; age++) { player.tickCount = age; WarpEvents.playerTick(player); }
             test.assertTrue(knowledge().getWarpCounter() == counter && knowledge().getWarpTemp() == temporary, "event/decay not repeated between scheduled checks");
+            // Drain older snapshots, then inspect the actual encoded outbound authoritative state.
+            outboundKnowledge();
+            thaumcraft.common.lib.network.KnowledgeEvents.sync(player);
+            var snapshot = outboundKnowledge();
+            test.assertTrue(snapshot != null, "actual S2C knowledge snapshot was emitted");
+            var clientMirror = new PlayerKnowledge(); clientMirror.load(snapshot);
+            assertWarp(knowledge(), clientMirror, "actual encoded outbound server snapshot");
             CompoundTag savedPlayer = new CompoundTag(); player.saveWithoutId(savedPlayer);
             var loaded = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "g27-loaded"), ClientInformation.createDefault());
             loaded.load(savedPlayer);
@@ -238,6 +249,23 @@ public final class WarpRuntimeChecks {
         void assertWarp(PlayerKnowledge expected, PlayerKnowledge actual, String boundary) {
             test.assertTrue(expected.getWarpPerm() == actual.getWarpPerm() && expected.getWarpSticky() == actual.getWarpSticky()
                     && expected.getWarpTemp() == actual.getWarpTemp() && expected.getWarpCounter() == actual.getWarpCounter(), "all four warp fields survive " + boundary);
+        }
+        CompoundTag outboundKnowledge() {
+            connection.flushChannel(); channel.runPendingTasks(); Object packet; CompoundTag result = null;
+            while ((packet = channel.readOutbound()) != null) {
+                try {
+                    if (packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket custom
+                            && custom.payload().type().id().equals(thaumcraft.common.lib.network.KnowledgeSyncPayload.TYPE.id())) {
+                        if (custom.payload() instanceof thaumcraft.common.lib.network.KnowledgeSyncPayload snapshot) result = snapshot.state();
+                        else if (custom.payload() instanceof dev.architectury.impl.NetworkAggregator.BufCustomPacketPayload wrapped) {
+                            var body = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.wrappedBuffer(wrapped.payload()), level.registryAccess());
+                            try { result = thaumcraft.common.lib.network.KnowledgeSyncPayload.STREAM_CODEC.decode(body).state(); }
+                            finally { body.release(); }
+                        }
+                    }
+                } finally { io.netty.util.ReferenceCountUtil.release(packet); }
+            }
+            return result;
         }
         void clean() {
             player.removeAllEffects(); player.getInventory().clearContent(); knowledge().reset();

@@ -45,6 +45,15 @@ public interface IInternalMethodHandler {
 
     default void addStickyWarpToPlayer(Player player, int amount) {}
 
+    /**
+     * Retained numeric-dimension compatibility signature; the installed 1.21.1 handler emits no effect.
+     * Legacy Forge dimension numbers cannot identify a native {@link ServerLevel}.
+     *
+     * @deprecated Inert in this port. Use
+     * {@link thaumcraft.api.visnet.VisNetHandler#generateVisEffect(ServerLevel, BlockPos, BlockPos, Aspect)}
+     * with the actual server level, endpoint positions and aspect instead.
+     */
+    @Deprecated
     default void generateVisEffect(int dim, int x, int y, int z, int x2, int y2, int z2, int color) {}
 
     default boolean isResearchComplete(String username, String researchkey) { return false; }

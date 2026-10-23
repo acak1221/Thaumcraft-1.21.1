@@ -32,6 +32,12 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     private static final AtomicReference<WeakReference<MinecraftServer>> SERVER = new AtomicReference<>(new WeakReference<>(null));
     public ThaumcraftInternalMethods() {}
 
+    /**
+     * @deprecated Inert: numeric Forge dimensions cannot select a native server level. Use
+     * {@link thaumcraft.api.visnet.VisNetHandler#generateVisEffect(net.minecraft.server.level.ServerLevel,
+     * net.minecraft.core.BlockPos, net.minecraft.core.BlockPos, Aspect)} instead.
+     */
+    @Deprecated
     @Override public void generateVisEffect(int dim, int x, int y, int z, int x2, int y2, int z2, int color) {
         // The original integer dimension has no 1.21.1 equivalent; the native vis-net owns the effect itself.
     }

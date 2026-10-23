@@ -3,7 +3,6 @@ package thaumcraft.client.gui;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -33,8 +32,6 @@ public final class GuiResearchBrowser extends Screen {
     /** Original GuiResearchBrowser:290 - the background is a 112x98 window of the sheet. */
     private static final int ORIGINAL_BACKGROUND_WINDOW_WIDTH = 112;
     private static final int ORIGINAL_BACKGROUND_WINDOW_HEIGHT = 98;
-    /** The original category sheets are 512x512 (gui_researchback.png / gui_researchbackeldritch.png). */
-    private static final int BACKGROUND_SHEET_SIZE = 512;
     private final List<Node> nodes = new ArrayList<>();
     private final List<Tab> tabs = new ArrayList<>();
     private String category = thaumcraft.client.lib.ResearchNotifications.selectedCategory();
@@ -44,15 +41,20 @@ public final class GuiResearchBrowser extends Screen {
     /** The original node sheet is 2048x2048 with thirty two frames and thirty two strips. */
     private static final int NODE_CELL = 64;
     private int left, top, panelWidth, panelHeight, graphLeft, graphTop, graphWidth, graphHeight;
-    private double panX, panY;
+    // Offset from the pane center. The oracle's guiMapX/Y are -(pan + half-pane).
+    // Constructor :100-106 places column/row zero at (82,70) inside the 224x196 pane.
+    private double panX = 82 - 112, panY = 70 - 98;
     private record Node(ResearchDefinition research, int x, int y) {}
     private record Tab(String key, int x, int y, ResourceLocation icon) {}
 
     public GuiResearchBrowser() {
         super(Component.translatable("item.thaumcraft.thaumonomicon"));
+        // Start a fresh native book at remembered column/row (0,0), so its basics
+        // entries are on-screen. The oracle's startup (-5,-6) is a different camera
+        // view; queued notices and subsequent opens still restore their real center.
         if (thaumcraft.client.lib.ResearchNotifications.hasQueuedResearch()) {
-            panX = -thaumcraft.client.lib.ResearchNotifications.lastColumn() * 24;
-            panY = -thaumcraft.client.lib.ResearchNotifications.lastRow() * 24;
+            panX -= thaumcraft.client.lib.ResearchNotifications.lastColumn() * 24;
+            panY -= thaumcraft.client.lib.ResearchNotifications.lastRow() * 24;
         }
     }
     private Set<String> completed() {
@@ -61,42 +63,40 @@ public final class GuiResearchBrowser extends Screen {
     private static ResourceLocation texture(String path) { return ResourceLocation.fromNamespaceAndPath("thaumcraft", path); }
 
     @Override protected void init() {
-        panelWidth = Math.min(510, width - 16); panelHeight = Math.min(300, height - 16);
+        // Oracle GuiResearchBrowser:75-76,272-275: no stretched replacement panel.
+        panelWidth = 256; panelHeight = 230;
         left = (width - panelWidth) / 2; top = (height - panelHeight) / 2;
-        graphLeft = left + 116; graphTop = top + 28;
-        graphWidth = panelWidth - 126; graphHeight = panelHeight - 58;
+        graphLeft = left + 16; graphTop = top + 17;
+        graphWidth = 224; graphHeight = 196;
         tabs.clear();
         var categories = ResearchBrowserData.categories(completed());
         if (!categories.contains(category)) category = "BASICS";
-        int y = top + 30;
+        int count = 0;
         for (String key : categories) {
             // Original GuiResearchBrowser:460-509 draws one tab per visible
             // category, 24 pixels apart, each with the icon of its category.
-            tabs.add(new Tab(key, left + 8, y, categoryIcon(key)));
-            y += 24;
+            tabs.add(new Tab(key, count < 9 ? left - 24 : left + 256,
+                    top + (count % 9) * 24, categoryIcon(key)));
+            count++;
         }
-        addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-                .bounds(left + panelWidth - 88, top + panelHeight - 24, 80, 20).build());
     }
 
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.renderBackground(graphics, mouseX, mouseY, delta);
-        graphics.fill(left, top, left + panelWidth, top + panelHeight, 0xF0181513);
-        graphics.drawString(font, title, left + 10, top + 10, 0xFFE8D8B4, false);
-        graphics.drawString(font, Component.translatable("tc.book.drag"), graphLeft, top + panelHeight - 18, 0xFFBCAA89, false);
         var completed = completed();
         var entries = ResearchBrowserData.entries(category, completed);
         nodes.clear();
-        int originX = graphLeft + graphWidth / 2 + (int)panX;
-        int originY = graphTop + graphHeight / 2 + (int)panY;
+        int[] bounds = mapBounds();
+        int mapX = Math.clamp((int)(-panX - graphWidth / 2), bounds[0], bounds[2] - 1);
+        int mapY = Math.clamp((int)(-panY - graphHeight / 2), bounds[1], bounds[3] - 1);
+        panX = -mapX - graphWidth / 2;
+        panY = -mapY - graphHeight / 2;
+        int originX = graphLeft - mapX;
+        int originY = graphTop - mapY;
         for (var research : entries) nodes.add(new Node(research, originX + research.column() * 24, originY + research.row() * 24));
         graphics.enableScissor(graphLeft, graphTop, graphLeft + graphWidth, graphTop + graphHeight);
-        // Original GuiResearchBrowser:277-292 draws the category background as a 112x98 WINDOW
-        // of the sheet under a glScalef(2,2,1), so the window covers 224x196 screen pixels and the
-        // rest of the sheet is panned into view, never squeezed into the frame. Blitting the whole
-        // 512x512 sheet to graphWidth x graphHeight instead resamples the parchment texture by a
-        // different factor on each axis, which is what made the graph paper look washed out.
-        drawCategoryBackground(graphics, category, graphLeft, graphTop, graphWidth, graphHeight);
+        // Oracle :277-292: one normalized, panning window, under scale(2,2,1).
+        drawCategoryBackground(graphics, mapX, mapY, bounds);
         drawConnectors(graphics, completed, originX, originY, delta);
         for (Node node : nodes) {
             boolean unlocked = completed.contains(node.research.key());
@@ -127,10 +127,13 @@ public final class GuiResearchBrowser extends Screen {
                 }
             }
             if (!available && !unlocked) graphics.fill(node.x, node.y, node.x + 22, node.y + 22, 0x99000000);
-            if (unlocked) graphics.fill(node.x + 17, node.y + 17, node.x + 22, node.y + 22, 0xFF75AD45);
         }
         graphics.disableScissor();
         renderTabs(graphics);
+        // Oracle GuiResearchBrowser:511-513 draws the original carved frame LAST,
+        // covering the cropped graph and the inner ends of the category tabs.
+        blend();
+        graphics.blit(FRAME, left, top, 0, 0, 256, 230, 256, 256);
         super.render(graphics, mouseX, mouseY, delta);
         Node hover = nodeAt(mouseX, mouseY);
         Tab hovered = tabAt(mouseX, mouseY);
@@ -154,14 +157,27 @@ public final class GuiResearchBrowser extends Screen {
         for (Tab tab : tabs) {
             blend();
             boolean selected = tab.key().equals(category);
-            int shift = selected ? 0 : 8;
-            graphics.blit(FRAME, tab.x(), tab.y(), selected ? 152 : 176, 232, 24, 24, 256, 256);
+            boolean right = tab.x() > left;
+            int shift = right ? (selected ? 14 : 6) : (selected ? 0 : 8);
+            int iconX = right ? left + 245 + shift : tab.x() + 5 + shift;
+            // Oracle :481-485 mirrors the right-hand tab. PoseStack replaces GL11.
+            graphics.pose().pushPose();
+            graphics.pose().translate(tab.x() + (right ? 24 : 0), tab.y(), 0);
+            graphics.pose().scale(right ? -1 : 1, 1, 1);
+            graphics.blit(FRAME, 0, 0, selected ? 152 : 176, 232, 24, 24, 256, 256);
+            graphics.pose().popPose();
             if (thaumcraft.client.lib.ResearchNotifications.highlighted(tab.key())) {
-                highlight(graphics, tab.x() - 3 + shift, tab.y() - 4);
+                highlight(graphics, iconX - 8, tab.y() - 4);
             }
             ResourceLocation icon = tab.icon();
-            if (icon != null) graphics.blit(icon, tab.x() + 5 + shift, tab.y() + 4, 16, 16, 0, 0, 32, 32, 32, 32);
-            if (!selected) graphics.blit(FRAME, tab.x(), tab.y(), 200, 232, 24, 24, 256, 256);
+            if (icon != null) graphics.blit(icon, iconX, tab.y() + 4, 16, 16, 0, 0, 32, 32, 32, 32);
+            if (!selected) {
+                graphics.pose().pushPose();
+                graphics.pose().translate(tab.x() + (right ? 24 : 0), tab.y(), 0);
+                graphics.pose().scale(right ? -1 : 1, 1, 1);
+                graphics.blit(FRAME, 0, 0, 200, 232, 24, 24, 256, 256);
+                graphics.pose().popPose();
+            }
         }
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
     }
@@ -183,62 +199,35 @@ public final class GuiResearchBrowser extends Screen {
         graphics.setColor(1, 1, 1, 1);
     }
 
-    /**
-     * Original GuiResearchBrowser:299-348 - the parent and the sibling connectors of the map.
-     *
-     * <p>The original draws them over <em>every</em> research of the selected category, not only
-     * over the visible cells, so the line of a hidden research is drawn as well. The line itself
-     * is the three pixel wide gradient polyline of {@code :732-787}: the colour of a vertex fades
-     * to black along the line, the alpha grows from zero to 0.6 and the whole line wobbles with
-     * the sine of the ticks of the player.</p>
-     */
-    /**
-     * The category background of the original graph.
-     *
-     * <p>Original {@code GuiResearchBrowser:277-292}: the sheet is bound, the pose is scaled by
-     * {@code (2, 2, 1)}, and a <b>112x98</b> window of it is blitted at the pane origin, with the
-     * sheet offset by the pan of the map ({@code vx}, {@code vy}). One texel of the sheet is
-     * therefore two screen pixels, on <b>both</b> axes. The previous revision blitted the whole
-     * 512x512 sheet into {@code graphWidth x graphHeight} instead, which resamples the parchment by
-     * a different factor on each axis - that is what made the graph paper look washed out and
-     * blurry.</p>
-     *
-     * <p>This keeps the original window and the original density. The graph of the port is wider
-     * than one 224 px window, so adjacent windows continue sampling the sheet rather than
-     * repeating the same crop. This preserves both the original density and continuity.</p>
-     */
-    private void drawCategoryBackground(GuiGraphics graphics, String category, int left, int top, int width, int height) {
+    /** Oracle GuiResearchBrowser:139-142: bounds over all entries, not only visible ones. */
+    private int[] mapBounds() {
+        var entries = ResearchBrowserData.categoryEntries(category);
+        // ResearchCategoryList starts its extrema at zero; oracle browser:139-142.
+        int minX = 0, minY = 0, maxX = 0, maxY = 0;
+        for (var entry : entries) {
+            minX = Math.min(minX, entry.column()); maxX = Math.max(maxX, entry.column());
+            minY = Math.min(minY, entry.row()); maxY = Math.max(maxY, entry.row());
+        }
+        return new int[] {minX * 24 - 85, minY * 24 - 112, maxX * 24 - 112, maxY * 24 - 61};
+    }
+
+    private void drawCategoryBackground(GuiGraphics graphics, int mapX, int mapY, int[] bounds) {
         ResourceLocation sheet = texture("textures/gui/"
                 + (category.equals("ELDRITCH") ? "gui_researchbackeldritch.png" : "gui_researchback.png"));
-        // Original GuiResearchBrowser:290 - the 112x98 window and the glScalef(2, 2, 1) over it.
-        int windowWidth = ORIGINAL_BACKGROUND_WINDOW_WIDTH;
-        int windowHeight = ORIGINAL_BACKGROUND_WINDOW_HEIGHT;
-        int stepX = windowWidth * 2;
-        int stepY = windowHeight * 2;
-        // The pan of the original is divided by the scale of two before the blit (:285-286).
-        int offsetX = Math.floorDiv((int) panX, 2);
-        int offsetY = Math.floorDiv((int) panY, 2);
-        for (int y = 0; y < height; y += stepY) {
-            for (int x = 0; x < width; x += stepX) {
-                int drawWidth = Math.min(stepX, width - x);
-                int drawHeight = Math.min(stepY, height - y);
-                // A partial tile samples only the texels it covers, so the density stays 1:2.
-                int texWidth = Math.max(1, (drawWidth + 1) / 2);
-                int texHeight = Math.max(1, (drawHeight + 1) / 2);
-                // Each tile continues the sheet where the previous one stopped. Sampling the same
-                // (offsetX, offsetY) in every tile repeated one identical 112x98 window across the
-                // graph, and the parchment does not tile: the repeats met at a visible seam grid.
-                //
-                // The 11-argument overload is (loc, x, y, width, height, u, v, texWidth, texHeight,
-                // fileWidth, fileHeight). Passing the pan where width/height belong scrambles the
-                // call completely - it draws one small mis-UV'd rectangle and leaves the rest of
-                // the graph black - so the destination size and the source UV must not be swapped.
-                int texX = Math.floorMod(offsetX + x / 2, BACKGROUND_SHEET_SIZE);
-                int texY = Math.floorMod(offsetY + y / 2, BACKGROUND_SHEET_SIZE);
-                graphics.blit(sheet, left + x, top + y, drawWidth, drawHeight, (float) texX, (float) texY,
-                        texWidth, texHeight, BACKGROUND_SHEET_SIZE, BACKGROUND_SHEET_SIZE);
-            }
-        }
+        // Oracle :287-291: normalized pan, NOT raw pixel pan and NOT wrapping.
+        int vx = backgroundOffset(mapX, bounds[0], bounds[2], 288);
+        int vy = backgroundOffset(mapY, bounds[1], bounds[3], 316);
+        // 1.7's drawTexturedModalRect always used 256 as the UV denominator, even
+        // for this 512px sheet. Preserve that geometry rather than correcting it.
+        graphics.pose().pushPose();
+        graphics.pose().scale(2, 2, 1);
+        graphics.blit(sheet, graphLeft / 2, graphTop / 2, vx / 2, vy / 2,
+                ORIGINAL_BACKGROUND_WINDOW_WIDTH, ORIGINAL_BACKGROUND_WINDOW_HEIGHT, 256, 256);
+        graphics.pose().popPose();
+    }
+
+    static int backgroundOffset(int map, int min, int max, int extent) {
+        return (int)((float)(map - min) / Math.abs(min - max) * extent);
     }
 
     private void drawConnectors(GuiGraphics graphics, Set<String> completed, int originX, int originY, float partialTick) {        Map<String, int[]> positions = new LinkedHashMap<>();
@@ -270,9 +259,17 @@ public final class GuiResearchBrowser extends Screen {
         float stepX = dx / segments, stepY = dy / segments;
         boolean horizontal = Math.abs(dx) > Math.abs(dy);
         if (horizontal) stepX *= 2.0F; else stepY *= 2.0F;
-        float previousX = x, previousY = y;
-        float previousRed = connector.red(), previousGreen = connector.green(), previousBlue = connector.blue();
-        float previousAlpha = ResearchBrowserConnectors.VERTEX_ALPHA;
+        // Oracle :751-754: GL line width is THREE PHYSICAL pixels, not three GUI
+        // units. Native DEBUG_LINE_STRIP preserves the original strip and vertex
+        // gradients; filled staircase rectangles made these connectors enormous.
+        graphics.flush();
+        blend();
+        com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionColorShader);
+        com.mojang.blaze3d.systems.RenderSystem.lineWidth(3);
+        org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL11.GL_LINE_SMOOTH);
+        var buffer = com.mojang.blaze3d.vertex.Tesselator.getInstance().begin(
+                com.mojang.blaze3d.vertex.VertexFormat.Mode.DEBUG_LINE_STRIP,
+                com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR);
         for (int step = 0; step <= segments; step++) {
             float phase = ResearchBrowserConnectors.phase(step, segments);
             float red = connector.red(), green = connector.green(), blue = connector.blue();
@@ -290,37 +287,13 @@ public final class GuiResearchBrowser extends Screen {
                 vertexX = x - stepX * step;
                 vertexY = y - stepY * step;
             }
-            if (step > 0) {
-                int color = argb((previousRed + red) / 2.0F, (previousGreen + green) / 2.0F,
-                        (previousBlue + blue) / 2.0F, (previousAlpha + alpha) / 2.0F);
-                segment(graphics, previousX, previousY, vertexX, vertexY, color);
-            }
-            previousX = vertexX; previousY = vertexY;
-            previousRed = red; previousGreen = green; previousBlue = blue; previousAlpha = alpha;
+            buffer.addVertex(graphics.pose().last().pose(), vertexX, vertexY, 0).setColor(red, green, blue, alpha);
             if (horizontal) stepX *= 1.0F - 1.0F / (segments * 3.0F / 2.0F);
             else stepY *= 1.0F - 1.0F / (segments * 3.0F / 2.0F);
         }
-    }
-
-    /**
-     * One segment of the original line. The 1.21.1 GUI cannot draw a three pixel wide diagonal
-     * line, so the segment is drawn as the staircase of the original polyline: a horizontal bar
-     * at the height of its first vertex and a vertical bar at the x of its second one.
-     */
-    private static void segment(GuiGraphics graphics, float x1, float y1, float x2, float y2, int color) {
-        int half = (int) Math.ceil(ResearchBrowserConnectors.WIDTH / 2.0F);
-        graphics.fill((int) Math.floor(Math.min(x1, x2)) - half, (int) Math.floor(y1) - half,
-                (int) Math.ceil(Math.max(x1, x2)) + half, (int) Math.ceil(y1) + half, color);
-        graphics.fill((int) Math.floor(x2) - half, (int) Math.floor(Math.min(y1, y2)) - half,
-                (int) Math.ceil(x2) + half, (int) Math.ceil(Math.max(y1, y2)) + half, color);
-    }
-
-    private static int argb(float red, float green, float blue, float alpha) {
-        int a = Math.max(0, Math.min(255, Math.round(alpha * 255.0F)));
-        int r = Math.max(0, Math.min(255, Math.round(red * 255.0F)));
-        int g = Math.max(0, Math.min(255, Math.round(green * 255.0F)));
-        int b = Math.max(0, Math.min(255, Math.round(blue * 255.0F)));
-        return (a << 24) | (r << 16) | (g << 8) | b;
+        com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(buffer.buildOrThrow());
+        org.lwjgl.opengl.GL11.glDisable(org.lwjgl.opengl.GL11.GL_LINE_SMOOTH);
+        com.mojang.blaze3d.systems.RenderSystem.lineWidth(1);
     }
 
     /**
@@ -450,7 +423,6 @@ public final class GuiResearchBrowser extends Screen {
         if (button == 0 && tab != null) {
             category = tab.key();
             thaumcraft.client.lib.ResearchNotifications.selectCategory(category);
-            panX = panY = 0;
             rebuildWidgets();
             return true;
         }
@@ -484,13 +456,9 @@ public final class GuiResearchBrowser extends Screen {
     }
     @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
         if (button == 0 && inGraph(x, y)) {
-            var entries = ResearchBrowserData.entries(category, completed());
-            int minX = entries.stream().mapToInt(ResearchDefinition::column).min().orElse(0) * 24;
-            int maxX = entries.stream().mapToInt(ResearchDefinition::column).max().orElse(0) * 24;
-            int minY = entries.stream().mapToInt(ResearchDefinition::row).min().orElse(0) * 24;
-            int maxY = entries.stream().mapToInt(ResearchDefinition::row).max().orElse(0) * 24;
-            panX = Math.clamp(panX + dx, -maxX - graphWidth / 3.0, -minX + graphWidth / 3.0);
-            panY = Math.clamp(panY + dy, -maxY - graphHeight / 3.0, -minY + graphHeight / 3.0);
+            int[] bounds = mapBounds();
+            panX = -Math.clamp(-panX - graphWidth / 2 - dx, bounds[0], bounds[2] - 1) - graphWidth / 2;
+            panY = -Math.clamp(-panY - graphHeight / 2 - dy, bounds[1], bounds[3] - 1) - graphHeight / 2;
             return true;
         }
         return super.mouseDragged(x, y, button, dx, dy);
@@ -505,7 +473,7 @@ public final class GuiResearchBrowser extends Screen {
         super.onClose();
     }
     @Override public void removed() {
-        thaumcraft.client.lib.ResearchNotifications.rememberCenter((int)(-panX/24),(int)(-panY/24));
+        thaumcraft.client.lib.ResearchNotifications.rememberCenter((int)((82-graphWidth/2-panX)/24),(int)((70-graphHeight/2-panY)/24));
         super.removed();
     }
     @Override public boolean keyPressed(int key, int scanCode, int modifiers) {

@@ -64,6 +64,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         for (var crystal : thaumcraft.common.config.ThaumcraftCrystalClusters.blocks())
             BuiltinItemRendererRegistry.INSTANCE.register(crystal, thaumcraft.client.renderers.tile.TileCrystalRenderer::renderItem);
         net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((graphics, ticks) -> {
+            thaumcraft.client.lib.CastingWandHud.render(graphics);
             thaumcraft.client.ThaumcraftWarpClient.renderHud(graphics);
             thaumcraft.client.ThaumcraftRunicClient.renderHud(graphics);
             thaumcraft.client.lib.PlayerNotifications.renderHud(graphics);

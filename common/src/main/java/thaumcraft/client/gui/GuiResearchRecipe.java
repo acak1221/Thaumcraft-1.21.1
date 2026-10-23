@@ -33,14 +33,21 @@ public final class GuiResearchRecipe extends Screen {
         super(Component.translatable(research.nameKey())); this.parent = parent; this.research = research;
     }
     @Override protected void init() {
-        bookWidth = Math.min(480, Math.min(width - 16, (height - 42) * 512 / 360));
-        bookHeight = bookWidth * 360 / 512;
-        left = (width - bookWidth) / 2; top = (height - bookHeight - 24) / 2;
-        textWidth = bookWidth * 215 / 512; textHeight = bookHeight - 54;
+        // Oracle GuiResearchRecipe:83-84,216-227: fixed 256x181 sheet at scale 1.3.
+        // Text is NOT inside that scaled pose (:231-235,1236).
+        bookWidth = Math.round(256 * 1.3F); bookHeight = Math.round(181 * 1.3F);
+        left = (width - bookWidth) / 2; top = (height - bookHeight) / 2;
+        textWidth = 139; textHeight = 181;
         refreshPages(true);
-        previous = addRenderableWidget(Button.builder(Component.literal("←"), b -> { page -= 2; updateButtons(); }).bounds(left, top + bookHeight + 4, 36, 20).build());
-        next = addRenderableWidget(Button.builder(Component.literal("→"), b -> { page += 2; updateButtons(); }).bounds(left + bookWidth - 36, top + bookHeight + 4, 36, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.back"), b -> onClose()).bounds(left + bookWidth / 2 - 40, top + bookHeight + 4, 80, 20).build());
+        int sw = (width - 256) / 2, sh = (height - 181) / 2;
+        // Oracle :242-257: original arrow positions and artwork, not a vanilla button row.
+        previous = addRenderableWidget(new BookNavigation(sw - 17, sh + 189, 14, 10,
+                Component.literal("←"), b -> { page -= 2; updateButtons(); }, 0, 184, 12, 8, 1, 1));
+        next = addRenderableWidget(new BookNavigation(sw + 261, sh + 189, 14, 10,
+                Component.literal("→"), b -> { page += 2; updateButtons(); }, 12, 184, 12, 8, 1, 1));
+        // Native parent-screen Back retains its existing action using the original history arrow.
+        addRenderableWidget(new BookNavigation(sw + 118, sh + 189, 20, 12,
+                Component.translatable("gui.back"), b -> onClose(), 38, 202, 20, 12, 0, 0));
         updateButtons();
     }
     private void updateButtons() { previous.active = page > 0; next.active = page + 2 < pages.size(); }
@@ -77,8 +84,8 @@ public final class GuiResearchRecipe extends Screen {
             for (var part : ResearchText.parse(Component.translatable(descriptor.textKey()).getString())) {
                 if (part instanceof ResearchText.Text text) {
                     for (var line : font.split(Component.literal(text.value()), textWidth)) {
-                        if (y + 10 > textHeight) { pages.add(new BookPage(List.copyOf(current), null)); current.clear(); y = 0; }
-                        current.add(new Draw(line, null, y, 0, 10)); y += 10;
+                        if (y + font.lineHeight > textHeight) { pages.add(new BookPage(List.copyOf(current), null)); current.clear(); y = 0; }
+                        current.add(new Draw(line, null, y, 0, font.lineHeight)); y += font.lineHeight;
                     }
                 } else if (part instanceof ResearchText.Image image) {
                     float scale = Math.min(image.scale(), Math.min((float)textWidth / image.width(), (float)(textHeight - 4) / image.height()));
@@ -87,7 +94,7 @@ public final class GuiResearchRecipe extends Screen {
                     current.add(new Draw(null, image, y, w, h)); y += h + 4;
                 } else {
                     if (y + 8 > textHeight) { pages.add(new BookPage(List.copyOf(current), null)); current.clear(); y = 0; }
-                    current.add(new Draw(null, null, y + 3, textWidth, 8)); y += 8;
+                    current.add(new Draw(null, null, y, 96, 4)); y += font.lineHeight;
                 }
             }
         }
@@ -108,35 +115,81 @@ public final class GuiResearchRecipe extends Screen {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         try {
-            graphics.blit(BOOK, left, top, bookWidth, bookHeight, 0, 0, 512, 360, 512, 512);
+            graphics.pose().pushPose();
+            graphics.pose().translate((width - 256 * 1.3F) / 2, (height - 181 * 1.3F) / 2, 0);
+            graphics.pose().scale(1.3F, 1.3F, 1);
+            graphics.blit(BOOK, 0, 0, 0, 0, 256, 181, 256, 256);
+            graphics.pose().popPose();
+            int paneLeft = (width - 256) / 2, paneTop = (height - 181) / 2;
             ThaumcraftRecipeDisplay.Hover hover = null;
             for (int side = 0; side < 2; side++) {
-                int x = left + bookWidth * (side == 0 ? 26 : 273) / 512;
+                int x = paneLeft - 15 + side * 152;
                 int index = page + side;
                 if (index >= pages.size()) continue;
-                graphics.drawString(font, font.substrByWidth(title, textWidth).getString(), x, top + 14, 0xFF43301F, false);
+                int bodyTop = paneTop - 10;
+                if (page == 0 && side == 0) {
+                    // Oracle :272-282: original textured rules and neutral-grey title.
+                    rule(graphics, paneLeft + 4, paneTop - 13);
+                    rule(graphics, paneLeft + 4, paneTop + 4);
+                    int titleWidth = font.width(title);
+                    float scale = titleWidth <= 130 ? 1 : 130F / titleWidth;
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(paneLeft + 52 - titleWidth / 2F * scale, paneTop - 6 * scale, 0);
+                    graphics.pose().scale(scale, scale, 1);
+                    graphics.drawString(font, title, 0, 0, 0xFF303030, false);
+                    graphics.pose().popPose();
+                    bodyTop += 25;
+                }
                 BookPage current = pages.get(index);
                 if (current.recipe != null && minecraft.level != null) {
                     var recipeHover = current.recipe.render(graphics, font, minecraft.level, minecraft.player,
-                            x, top + 32, textWidth, textHeight, mouseX, mouseY, net.minecraft.Util.getMillis() / 1000L);
+                            x, bodyTop, textWidth, textHeight, mouseX, mouseY, net.minecraft.Util.getMillis() / 1000L);
                     if (recipeHover != null) hover = recipeHover;
                 }
                 for (Draw draw : current.text) {
-                    int y = top + 32 + draw.y;
-                    if (draw.text != null) graphics.drawString(font, draw.text, x, y, 0xFF30251B, false);
+                    int y = bodyTop + draw.y;
+                    if (draw.text != null) graphics.drawString(font, draw.text, x, y, 0xFF505050, false);
                     else if (draw.image != null) {
                         var image = draw.image;
                         RenderSystem.enableBlend();
                         RenderSystem.defaultBlendFunc();
                         graphics.blit(ResourceLocation.parse(image.texture()), x + (textWidth - draw.width) / 2, y,
                                 draw.width, draw.height, image.u(), image.v(), image.width(), image.height(), 256, 256);
-                    } else graphics.hLine(x + 6, x + textWidth - 6, y, 0xFF927A54);
+                    } else rule(graphics, x + textWidth / 2 - 48, y + 2);
                 }
             }
             super.render(graphics, mouseX, mouseY, delta);
             if (hover != null) hover.render(graphics, font, mouseX, mouseY);
         } finally {
             RenderSystem.disableBlend();
+        }
+    }
+    /** Original TCFontRenderer.renderSplitString: <LINE/> blits (24,184), 96x4. */
+    private static void rule(GuiGraphics graphics, int x, int y) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        graphics.blit(BOOK, x, y, 24, 184, 96, 4, 256, 256);
+    }
+    private static final class BookNavigation extends Button {
+        private final int u, v, artWidth, artHeight, dx, dy;
+        private BookNavigation(int x, int y, int width, int height, Component title, OnPress action,
+                               int u, int v, int artWidth, int artHeight, int dx, int dy) {
+            super(x, y, width, height, title, action, DEFAULT_NARRATION);
+            this.u = u; this.v = v; this.artWidth = artWidth; this.artHeight = artHeight;
+            this.dx = dx; this.dy = dy;
+        }
+        @Override protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+            if (!active) return;
+            var player = net.minecraft.client.Minecraft.getInstance().player;
+            float bob = player == null ? .1F : (float)Math.sin(player.tickCount / 3F) * .2F + .1F;
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            // Oracle :1287-1298: scale around the sprite center, not the hit box.
+            graphics.pose().pushPose();
+            graphics.pose().translate(getX() + dx + artWidth / 2F, getY() + dy + artHeight / 2F, 0);
+            graphics.pose().scale(1 + bob, 1 + bob, 1);
+            graphics.blit(BOOK, -artWidth / 2, -artHeight / 2, u, v, artWidth, artHeight, 256, 256);
+            graphics.pose().popPose();
         }
     }
     // Screen.render draws widgets after calling this. Do not blur the pages a

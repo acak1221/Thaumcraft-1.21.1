@@ -29,6 +29,9 @@ public final class BlockInfusionMatrix extends BaseEntityBlock {
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileInfusionMatrix(pos, state); }
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.ENTITYBLOCK_ANIMATED; }
+    // Original BlockStoneDevice:291-305 advertises analog capability for every
+    // variant. The matrix inherits the default zero strength, not craft progress.
+    @Override protected boolean hasAnalogOutputSignal(BlockState state) { return true; }
     @Override protected VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) { return Shapes.empty(); }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide ? null : createTickerHelper(type, ThaumcraftInfusion.MATRIX_BLOCK_ENTITY.get(), TileInfusionMatrix::tick);

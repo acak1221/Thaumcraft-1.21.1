@@ -732,6 +732,31 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         InfusionRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "g24_comparator")
+    public void g24InfusionComparator(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.comparator(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "g24_payment")
+    public void g24InfusionProgressivePayment(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.progressivePaymentAndFinish(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "g24_interrupt")
+    public void g24InfusionInterruptions(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.interruptions(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "g24_measure")
+    public void g24InfusionMeasuredInstability(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.measuredInstability(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "g24_missing")
+    public void g24InfusionMissingIngredientRate(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.measuredMissingIngredients(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "tc_isolated_infusion_altar")
     public void infusionAltarFormsAndExecutesAllInstabilityOutcomes(GameTestHelper test) {
         InfusionStructureRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());

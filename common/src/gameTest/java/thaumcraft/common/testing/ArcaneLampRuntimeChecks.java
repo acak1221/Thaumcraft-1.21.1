@@ -153,6 +153,7 @@ public final class ArcaneLampRuntimeChecks {
             test.assertTrue(lights>0,"ordinary server ticks make secondary lights in the real dark room, saw "+lights
                     +", darkAir="+darkAir+", currentTile="+(level.getBlockEntity(center)==tile)
                     +", removed="+tile.isRemoved()+", aboveBlockLight="+level.getBrightness(LightLayer.BLOCK,center.above()));
+            thaumcraft.common.Thaumcraft.LOG.info("G26 measured arcane lamp: no recurring fuel, emission15, secondary lights={}",lights);
             BlockPos edge=center.offset(15,0,0),outside=center.offset(16,0,0);
             set(edge,ThaumcraftLamps.ARCANE_LIGHT.get().defaultBlockState(),QUIET);
             set(outside,ThaumcraftLamps.ARCANE_LIGHT.get().defaultBlockState(),QUIET);

@@ -1,0 +1,17 @@
+{
+  "agent": "g26achieve",
+  "loader": "fabric",
+  "minecraft": "1.21.1",
+  "source_base": "7f37e8a6",
+  "tests": 16,
+  "passed": 15,
+  "failed": 1,
+  "runtime_log": ".tmp-g26-runtime-first-online.log",
+  "failure": {
+    "test": "thaumcraftgametests.deviceworldhungrychestcollectsphysicalinput",
+    "message": "(-2172703, -60, 4665356) world contact delivers exactly iron7 despite pickup delay: stored=0, inputRemoved=false, y=-60.0",
+    "classification": "Unconfirmed device defect: default ItemEntity launch can miss the chest; repeat with a declared vertical drop before judging collection."
+  },
+  "completed_server_shutdown": true,
+  "production_changes": 0
+}

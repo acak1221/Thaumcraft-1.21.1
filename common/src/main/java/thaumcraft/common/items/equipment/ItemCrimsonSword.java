@@ -49,9 +49,8 @@ public class ItemCrimsonSword extends SwordItem implements IRepairable, IWarping
     /** Original ItemCrimsonSword.onUpdate: the blade mends itself by one point every twenty ticks of its carrier's age. */
     @Override public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, level, entity, slot, selected);
-        if (level.isClientSide || !stack.isDamaged() || entity == null || !(entity instanceof LivingEntity)) return;
-        if (entity.tickCount % EquipmentRules.SELF_REPAIR_PERIOD != 0) return;
-        stack.setDamageValue(Math.max(0, stack.getDamageValue() - 1));
+        // Original damageItem(-1) does nothing for creative players, just like void tools.
+        thaumcraft.common.items.VoidMetal.repair(stack, entity);
     }
 
     /** Original ItemCrimsonSword.getWarp: two points of warp. */

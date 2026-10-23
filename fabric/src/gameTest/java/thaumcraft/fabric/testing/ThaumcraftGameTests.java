@@ -88,6 +88,21 @@ import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_golem")
     public void g23BossGolemFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "golem", false, false); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g28_gear")
+    public void g28GearDiscountPayments(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.discountPayments(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g28_gear")
+    public void g28GearCrimsonAttack(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.crimsonAttack(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g28_gear")
+    public void g28GearCrusherBreak(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.crusherBreak(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g28_gear")
+    public void g28GearCreativeRepair(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.creativeRepair(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g28_gear")
+    public void g28GearNativeUseAndAmulets(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.nativeUseAndAmulets(test); }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_warden")
     public void g23BossWardenFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "warden", false, false); }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_praetor")

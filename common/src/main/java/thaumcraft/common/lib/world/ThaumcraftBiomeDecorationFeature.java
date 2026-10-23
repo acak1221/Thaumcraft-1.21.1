@@ -28,6 +28,7 @@ public final class ThaumcraftBiomeDecorationFeature extends Feature<NoneFeatureC
         WorldGenLevel level=context.level();int x=context.origin().getX()&~15,z=context.origin().getZ()&~15;
         var biome=BiomeColumns.surfaceHolder(level,x+8,z+8);if(biome==null)return false;
         int kind=biome.is(ThaumcraftBiomes.MAGICAL_FOREST)?0:biome.is(ThaumcraftBiomes.EERIE)?1:biome.is(ThaumcraftBiomes.TAINT)?2:-1;if(kind<0)return false;
+        if(kind==2&&!BiomeColumns.targetAvailable(level,context.origin(),ThaumcraftBiomes.TAINT))return false;
         RandomSource random=context.random();
         if(kind==0){
             int blobs=random.nextInt(3);for(int i=0;i<blobs;i++){int xx=x+random.nextInt(16)+8,zz=z+random.nextInt(16)+8;OriginalBiomeVegetation.blob(level,random,top(level,xx,zz),Blocks.MOSSY_COBBLESTONE.defaultBlockState());}

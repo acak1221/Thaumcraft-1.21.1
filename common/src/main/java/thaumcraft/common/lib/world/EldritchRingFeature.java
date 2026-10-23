@@ -78,7 +78,9 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         for (int[] sample : StructurePlacementRules.RING_SAMPLES) {
             if (!validSpawn(level, centreX + sample[0], j, centreZ + sample[1])) return false;
         }
-        OuterLandsProvider.MazeSavedData maze = OuterLandsProvider.maze(server);
+        var available = OuterLandsProvider.maze(server).forGeneration(new BlockPos(centreX, j, centreZ));
+        if (available.isEmpty()) return false;
+        OuterLandsProvider.MazeSavedData maze = available.get();
         if (maze.mazesInRange(chunkX, chunkZ, width, height)) return false;
         buildRing(level, random, centreX, j, centreZ);
         // Oracle ThaumcraftWorldGenerator:446 - the ring carries a dark aura node
@@ -115,14 +117,8 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         for (int[] sample : StructurePlacementRules.RING_SAMPLES) {
             if (!validSpawn(level, centreX + sample[0], j, centreZ + sample[1])) return false;
         }
-        try {
-            return !OuterLandsProvider.maze(server).mazesInRange(chunkX, chunkZ, size[0], size[1]);
-        } catch (RuntimeException unreadable) {
-            // The original reads the same labyrinth here; a labyrinth that cannot be read must
-            // not turn the decoration of a chunk into a server crash. The ring pass of the
-            // chunk reports the failure itself.
-            return false;
-        }
+        var maze = OuterLandsProvider.maze(server);
+        return maze.availableForGeneration() && !maze.mazesInRange(chunkX, chunkZ, size[0], size[1]);
     }
 
     /**

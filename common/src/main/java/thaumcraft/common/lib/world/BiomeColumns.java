@@ -1,6 +1,7 @@
 package thaumcraft.common.lib.world;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.registries.Registries;
@@ -57,8 +58,8 @@ public final class BiomeColumns {
         requireWorld(level);
         LevelChunk chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4);
         if (chunk == null) return false;
-        Holder<Biome> target = level.registryAccess().registryOrThrow(Registries.BIOME).getHolder(targetKey).orElse(null);
-        if (target == null) throw new IllegalStateException("Missing real native biome " + targetKey.location());
+        Holder<Biome> target = target(level, new BlockPos(x, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15), z), targetKey);
+        if (target == null) return false;
         if (!rewriteColumn(chunk, target, targetKey, x, z, level.getChunkSource().randomState().sampler())) return false;
         level.getChunkSource().chunkMap.resendBiomesForChunks(List.of(chunk));
         return true;
@@ -72,11 +73,24 @@ public final class BiomeColumns {
         ChunkAccess chunk = level.getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, false);
         if (chunk == null) return false;
         int y = Mth.clamp(chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15), level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
-        if (!WorldGenWriteArea.canWrite(level, new net.minecraft.core.BlockPos(x, y, z))) return false;
-        Holder<Biome> target = level.registryAccess().registryOrThrow(Registries.BIOME).getHolder(targetKey).orElse(null);
-        if (target == null) throw new IllegalStateException("Missing real native biome " + targetKey.location());
+        if (!WorldGenWriteArea.canWrite(level, new BlockPos(x, y, z))) return false;
+        Holder<Biome> target = target(level, new BlockPos(x, y, z), targetKey);
+        if (target == null) return false;
         // RandomState/Sampler are immutable generation inputs. No mutable ServerLevel chunk query, update or packet occurs here.
         return rewriteColumn(chunk, target, targetKey, x, z, level.getLevel().getChunkSource().randomState().sampler());
+    }
+
+    /** Admit an optional feature before it writes anything, not halfway through its conversion loop. */
+    public static boolean targetAvailable(WorldGenLevel level, BlockPos position, ResourceKey<Biome> targetKey) {
+        return target(level, position, targetKey) != null;
+    }
+
+    private static Holder<Biome> target(WorldGenLevel level, BlockPos position, ResourceKey<Biome> targetKey) {
+        Holder<Biome> target = level.registryAccess().registry(Registries.BIOME)
+                .flatMap(registry -> registry.getHolder(targetKey)).orElse(null);
+        if (target == null) com.mojang.logging.LogUtils.getLogger().error(
+                "Skipping biome conversion/decoration at {}: Missing native biome {}", position, targetKey.location());
+        return target;
     }
 
     private static boolean rewriteColumn(ChunkAccess chunk, Holder<Biome> target, ResourceKey<Biome> targetKey,

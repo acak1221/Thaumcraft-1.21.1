@@ -45,12 +45,17 @@ sourceSets {
 // run VM property, not loom.mods (which writes into the shared launch.cfg).
 def gameTestModRoots = files(sourceSets.gameTest.output, project(':common').sourceSets.gameTest.output)
 def clientSmokeScope = providers.gradleProperty('clientSmokeScope').getOrElse('full')
-if (!(clientSmokeScope in ['full', 'equipment', 'caps', 'goggles', 'clothing', 'excavation', 'frost', 'voidjar', 'valve', 'tubefilter', 'buffer', 'centrifuge', 'crystallizer', 'stabilizer', 'visnet', 'focal', 'bore'])) throw new GradleException('Unknown clientSmokeScope: ' + clientSmokeScope)
+if (!(clientSmokeScope in ['full', 'visuals', 'equipment', 'caps', 'goggles', 'clothing', 'excavation', 'frost', 'voidjar', 'valve', 'tubefilter', 'buffer', 'centrifuge', 'crystallizer', 'stabilizer', 'visnet', 'focal', 'bore'])) throw new GradleException('Unknown clientSmokeScope: ' + clientSmokeScope)
 def clientSmokeWorld = clientSmokeScope != 'full' ? clientSmokeScope + '-smoke-' + java.util.UUID.randomUUID().toString() : 'book-smoke'
 def clientSmokeEquipmentOrigin = ''
 def clientSmokeInfusionCenter = ''
 def clientSmokeSourceWorld = file(clientSmokeScope == 'full' ? 'run/saves/New World' : 'run-clienttest/saves/book-smoke').toPath().toAbsolutePath().normalize()
-if (clientSmokeScope != 'full') {
+// The visual-only scope does not depend on any earned inventory. Prefer an
+// existing local smoke world, otherwise use the fresh native server seed.
+if (clientSmokeScope == 'visuals' && !java.nio.file.Files.isRegularFile(clientSmokeSourceWorld.resolve('level.dat'))) {
+ clientSmokeSourceWorld = file('run/visual-seed').toPath().toAbsolutePath().normalize()
+}
+if (clientSmokeScope != 'full' && clientSmokeScope != 'visuals') {
  def accepted = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/infusion-client.json'), 'UTF-8')
  if (accepted.status != 'SCRIPT_PASSED') throw new GradleException('Focused equipment requires the accepted infusion save/input record')
  def origin = (accepted.infusion.coordinates.workbench as String).split(',').collect { it.trim().toInteger() }
@@ -453,10 +458,20 @@ tasks.named('runClientSmoke') {
    if (result.run_id != extensions.extraProperties.get('clientSmokeRunId') || result.status != 'SCRIPT_PASSED' || result.scope != clientSmokeScope) {
    throw new GradleException("Client smoke failed or did not produce fresh evidence; inspect $resultFile")
   }
-         def expectedCaptures = clientSmokeScope in ['visnet', 'focal', 'bore'] ? 10 : clientSmokeScope in ['tubefilter', 'buffer', 'centrifuge', 'crystallizer', 'stabilizer'] ? 8 : clientSmokeScope in ['voidjar', 'valve'] ? 7 : clientSmokeScope == 'frost' ? 5 : clientSmokeScope == 'excavation' ? 6 : clientSmokeScope == 'clothing' ? 8 : clientSmokeScope in ['caps', 'goggles'] ? 7 : clientSmokeScope == 'equipment' ? 6 : 66
+          def expectedCaptures = clientSmokeScope in ['visuals', 'visnet', 'focal', 'bore'] ? 10 : clientSmokeScope in ['tubefilter', 'buffer', 'centrifuge', 'crystallizer', 'stabilizer'] ? 8 : clientSmokeScope in ['voidjar', 'valve'] ? 7 : clientSmokeScope == 'frost' ? 5 : clientSmokeScope == 'excavation' ? 6 : clientSmokeScope == 'clothing' ? 8 : clientSmokeScope in ['caps', 'goggles'] ? 7 : clientSmokeScope == 'equipment' ? 6 : 66
    if (!(result.screenshots instanceof List) || result.screenshots.size() != expectedCaptures) {
-    throw new GradleException("Client $clientSmokeScope check did not produce $expectedCaptures screenshots; inspect $resultFile")
-  }
+     throw new GradleException("Client $clientSmokeScope check did not produce $expectedCaptures screenshots; inspect $resultFile")
+   }
+   if (clientSmokeScope == 'visuals') {
+    def names = ['201-outer-lands-obelisk-tunnel-wide-en.png', '202-outer-lands-obelisk-tunnel-close-en.png',
+                 '203-advanced-node-stabilizer-held-en.png', '204-aura-node-held-and-jar-node-en.png',
+                 '205-void-robe-front-en.png', '206-void-robe-back-en.png',
+                 '207-research-graph-parchment-en.png', '208-candle-crust-stairs-contained-flux-en.png',
+                 '209-linked-mirror-projected-field-front-en.png', '210-linked-mirror-projected-field-angle-en.png']
+    if (result.screenshots.collect { java.nio.file.Path.of(it.path as String).fileName.toString() } != names.collect { result.run_id + '-' + it }) {
+     throw new GradleException('Visual fixture capture names/order do not match the ten-frame contract')
+    }
+   }
   def screenshotRoot = file('run-clienttest/screenshots').toPath().toAbsolutePath().normalize()
    result.screenshots.each { screenshot ->
    def screenshotPath = java.nio.file.Path.of(screenshot.path as String).toAbsolutePath().normalize()

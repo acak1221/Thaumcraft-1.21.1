@@ -133,7 +133,6 @@ public class ItemFocusBasic extends Item {
             if (level > 1) line.append(" ").append(Component.translatable("enchantment.level." + level));
             tooltip.add(line);
         });
-        tooltip.add(Component.translatable("tc.port.focus.upgrades.partial").withStyle(ChatFormatting.DARK_GRAY));
     }
 
     /** Non-null animation tokens returned by focus implementations; not timing values or persistent numeric IDs. */

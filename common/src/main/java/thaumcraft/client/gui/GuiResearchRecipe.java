@@ -132,7 +132,6 @@ public final class GuiResearchRecipe extends Screen {
                                 draw.width, draw.height, image.u(), image.v(), image.width(), image.height(), 256, 256);
                     } else graphics.hLine(x + 6, x + textWidth - 6, y, 0xFF927A54);
                 }
-                graphics.drawCenteredString(font, Component.literal((index + 1) + " / " + pages.size()), x + textWidth / 2, top + bookHeight - 15, 0xFF635034);
             }
             super.render(graphics, mouseX, mouseY, delta);
             if (hover != null) hover.render(graphics, font, mouseX, mouseY);

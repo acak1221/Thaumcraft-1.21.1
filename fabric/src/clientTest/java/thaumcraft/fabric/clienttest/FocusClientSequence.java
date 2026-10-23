@@ -991,8 +991,8 @@ final class FocusClientSequence {
 
     private Map<String, Integer> flowerParticles(Minecraft client) throws ReflectiveOperationException {
         int shimmer = 0, flame = 0, smoke = 0, nearGarden = 0, resourceAnywhere = 0, resourceNear = 0, smallWisps = 0;
-        var tc4 = (thaumcraft.client.fx.ParticleLayers<?, ?>) BookClientSmoke.staticField(
-                thaumcraft.client.fx.ParticleEngine.class, "PARTICLES");
+        var tc4 = (thaumcraft.client.fx.ParticleLayers<net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, net.minecraft.client.particle.Particle>)
+                BookClientSmoke.staticField(thaumcraft.client.fx.ParticleEngine.class, "PARTICLES");
         var queues = new java.util.ArrayList<Object>();
         for (Object queue : ((Map<?, ?>) BookClientSmoke.field(client.particleEngine, "particles")).values()) queues.add(queue);
         // TC4 particles never reach the vanilla map: Tc4ParticleEngineMixin intercepts

@@ -62,3 +62,76 @@ not an observation. The frame is still captured only on a tick where particles a
 present, and no particle is ever synthesised by the harness.
 
 **Not a mod defect.** No gameplay code changed for this one.
+
+## 3. Reading a wand's baked model: one real test bug, repeated in four places
+
+**Symptom.** `InfusionClientSequence` failed at `REWARD_WORLD` with "held reward selects
+original Silverwood rod and gold cap sprites, not a fallback" — after the infusion itself had
+succeeded and the wand had been crafted.
+
+**Cause.** The wand is a `builtin/entity` item. `models/item/wand_shape.json` declares
+`"parent": "minecraft:builtin/entity"` and every per-material model parents to it, so the baked
+model is the empty custom-renderer shell and `getQuads(...)` returns nothing for the materials.
+The pixels come from `ThaumcraftGearModelsClient.renderWand`, which binds
+`ModelWand.rodTexture(rod.baseTag())` and `ModelWand.capTexture(cap.tag())` directly, and draws the
+focus cube with `ModelWand.FOCUS_TEXTURE` tinted by `ItemFocusBasic.getFocusColor(focusStack)`.
+
+Four separate scenes asserted on those quads. Each one therefore asserted on a layer that cannot
+contain the answer, and each one was going to fail (or, worse, could only ever pass by accident):
+
+| Scene | Was asserting | Now asserts |
+| --- | --- | --- |
+| `DistillationClientSequence` | `getQuads` sprites `wand_rod_greatwood`/`wand_cap_gold` | `rodTexture("greatwood")`/`capTexture("gold")` + sheets present |
+| `InfusionClientSequence` | `getQuads` sprites `wand_rod_silverwood`/`wand_cap_gold` | `rodTexture("silverwood")`/`capTexture("gold")` + sheets present |
+| `ThaumiumCapsClientSequence` | `getQuads` sprites `wand_rod_silverwood`/`wand_cap_thaumium` | same, through `ModelWand` |
+| `ExcavationClientSequence`, `FrostClientSequence` | six tinted `models/wand` quads + item-colour tint | `rodTexture`/`capTexture`/`FOCUS_TEXTURE` + `getFocusColor(...)` |
+
+The three older scenes had passed in their recorded runs, which is itself suspicious: the accepted
+JSON records `actual_sprites` with the material names in them, so at that time the model did return
+quads. The `builtin/entity` parent is what removed them, and the scenes were never re-run against
+it. This is exactly the failure mode a saved evidence record cannot catch on its own.
+
+**Not a mod defect.** The renderer was right all along; only the tests were reading the wrong layer.
+
+## 4. The book printed a page counter the original never had (real defect, removed)
+
+`GuiResearchRecipe` drew `"<page> / <pages>"` centred 15 px above the bottom of the page, where it
+was also vertically clipped by the page edge. The oracle has no such counter anywhere: no
+`drawCenteredString` in `GuiResearchRecipe.java` at all, no `" / "` concatenation in any GUI of
+`thaumcraft/`. Page position is communicated by the turn arrows alone. The line was removed.
+
+Two earlier analysis documents (`2026-10-23-agent-clientrun.md:353`,
+`2026-10-23-agent-clientrun2.md:340`) recorded this counter as *original* and passed it. That is a
+false acceptance and is corrected here: what they saw was port-added UI, not parity.
+
+## 5. The focus tooltip carried a port status note (real defect, removed)
+
+`ItemFocusBasic.appendHoverText` appended
+`"Frugal and Potency are implemented; Excavation also supports Treasure and Enlarge. Other branches
+are not yet available."` to every focus tooltip, so a player hovering a focus read a note about the
+state of the port. It is not original text and it is not a gameplay fact the player can act on.
+Removed; `tc.port.focus.upgrades.partial` is now unused.
+
+The same audit found `tc.port.golem.use_default` ("…Other ordinary modes are not yet ported."),
+which is referenced by no Java and no data file — dead text, left in place for now and recorded here
+rather than silently rewritten.
+
+## 6. Research graph: the background repeated one identical window (real defect, fixed)
+
+`drawCategoryBackground` tiled the 224x196 screen window of the texture and sampled the *same*
+`(offsetX, offsetY)` in every tile. A texture that does not tile then meets itself at a visible seam
+grid: on the 1280x720 frame the seams sat at `graphLeft` + 224·n. Each tile now continues the sheet
+where the previous one stopped (`offsetX + x/2`, wrapped by `floorMod`), so the texel density stays
+2 screen pixels per texel while the seams disappear. Independently found and fixed the same way by
+the `visualrun` lane, which also verified the 1:2 density numerically: four source texels map to
+exactly 2x2 GUI pixels in the captured PNG.
+
+## 7. Notable but NOT defects
+
+* **The tall pillar in frame 55** is a fixture: it stands in frames 43, 46 and 55 alike and is not
+  part of the crafted wand. It does, however, sit between the camera and the altar, so frame 55
+  does not show the altar it claims to. That is a scene-composition flaw worth fixing in the scene,
+  not a renderer defect.
+* **Frame 43's radial menu** correctly shows the focus list, the "Gold Banded Greatwood Wand" label
+  and the Remove/Cancel buttons; the only problem was the port note, removed above.
+

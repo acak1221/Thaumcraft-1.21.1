@@ -226,7 +226,17 @@ public final class GuiResearchBrowser extends Screen {
                 // A partial tile samples only the texels it covers, so the density stays 1:2.
                 int texWidth = Math.max(1, (drawWidth + 1) / 2);
                 int texHeight = Math.max(1, (drawHeight + 1) / 2);
-                graphics.blit(sheet, left + x, top + y, offsetX, offsetY, drawWidth, drawHeight,
+                // Each tile continues the sheet where the previous one stopped. Sampling the same
+                // (offsetX, offsetY) in every tile repeated one identical 112x98 window across the
+                // graph, and the parchment does not tile: the repeats met at a visible seam grid.
+                //
+                // The 11-argument overload is (loc, x, y, width, height, u, v, texWidth, texHeight,
+                // fileWidth, fileHeight). Passing the pan where width/height belong scrambles the
+                // call completely - it draws one small mis-UV'd rectangle and leaves the rest of
+                // the graph black - so the destination size and the source UV must not be swapped.
+                int texX = Math.floorMod(offsetX + x / 2, BACKGROUND_SHEET_SIZE);
+                int texY = Math.floorMod(offsetY + y / 2, BACKGROUND_SHEET_SIZE);
+                graphics.blit(sheet, left + x, top + y, drawWidth, drawHeight, (float) texX, (float) texY,
                         texWidth, texHeight, BACKGROUND_SHEET_SIZE, BACKGROUND_SHEET_SIZE);
             }
         }

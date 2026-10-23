@@ -807,23 +807,35 @@ public final class ExcavationClientSequence {
         var slot = client.player.containerMenu.getSlot(playerSlot(client, inventory));
         return new int[] {(int) BookClientSmoke.field(client.screen, "leftPos") + slot.x + 8, (int) BookClientSmoke.field(client.screen, "topPos") + slot.y + 8};
     }
-    private static Map<String, Object> heldModel(Minecraft client) {
+    private static Map<String, Object> heldModel(Minecraft client) throws ReflectiveOperationException {
         ItemStack actual = client.player.getMainHandItem(); require(reward(actual) && FocusData.get(actual).is(excavation()), "final genuinely held earned Excavation");
         var model = client.getItemRenderer().getModel(actual, client.level, client.player, 0); require(model != client.getModelManager().getMissingModel(), "native focused wand model resolves");
-        var sprites = new LinkedHashSet<String>(); int focusFaces = 0;
-        for (var quad : model.getQuads(null, null, RandomSource.create(0))) {
-            String sprite = quad.getSprite().contents().name().toString(); sprites.add(sprite);
-            if (sprite.equals("thaumcraft:models/wand") && quad.getTintIndex() == 0) ++focusFaces;
+        // The wand is a builtin/entity item drawn by ThaumcraftGearModelsClient.renderWand: its
+        // BakedModel is the empty custom-renderer shell, so the material sheets and the focus cube
+        // are not reachable as quads. Assert the selection the renderer actually reads: the two
+        // material sheets, the shared focus texture and the tint of the real focus stack.
+        var data = ItemWandCasting.data(actual);
+        var rodTexture = thaumcraft.client.renderers.models.gear.ModelWand.rodTexture(
+                thaumcraft.common.items.wands.WandMaterials.rod(data.rod()).baseTag());
+        var capTexture = thaumcraft.client.renderers.models.gear.ModelWand.capTexture(
+                thaumcraft.common.items.wands.WandMaterials.cap(data.cap()).tag());
+        var focusStack = FocusData.get(actual);
+        int color = ((ItemFocusBasic) focusStack.getItem()).getFocusColor(focusStack);
+        // Held foci are the original shared models/wand focus cube + focus RGB, NOT the flat
+        // items/focus_excavation icon used for a loose focus/selector.
+        require(rodTexture.getPath().equals("textures/models/wand_rod_silverwood.png")
+                        && capTexture.getPath().equals("textures/models/wand_cap_thaumium.png")
+                        && color == (0xFF000000 | 409606),
+                "actual earned held wand selects the original Silverwood/Thaumium sheets and the Excavation focus RGB; rod="
+                        + rodTexture + "; cap=" + capTexture + "; argb=" + Integer.toHexString(color));
+        for (var sheet : List.of(rodTexture, capTexture, thaumcraft.client.renderers.models.gear.ModelWand.FOCUS_TEXTURE)) {
+            require(ExcavationClientSequence.class.getClassLoader()
+                            .getResource("assets/" + sheet.getNamespace() + "/" + sheet.getPath()) != null,
+                    "a sheet the held renderer binds exists in the shipped assets: " + sheet);
         }
-        int color = ((thaumcraft.common.mixin.client.MinecraftItemColorsAccess) client).thaumcraft$itemColors().getColor(actual, 0);
-        // Held foci are the original shared models/wand cube + focus RGB, NOT
-        // the flat items/focus_excavation icon used for a loose focus/selector.
-        require(focusFaces == 6 && color == (0xFF000000 | 409606)
-                && sprites.contains("thaumcraft:models/wand_rod_silverwood") && sprites.contains("thaumcraft:models/wand_cap_thaumium")
-                && sprites.stream().noneMatch(value -> value.contains("missingno")),
-                "actual earned held model has original six-face focus cube/Excavation RGB and unchanged Silverwood/Thaumium materials; sprites=" + sprites + "; argb=" + Integer.toHexString(color));
-        return Map.of("actual_sprites", List.copyOf(sprites), "focus", "thaumcraft:focus_excavation", "native_focus_tint_argb", Integer.toHexString(color),
-                "tinted_focus_faces", focusFaces, "seen_pixels", "pending root94 inspection");
+        return Map.of("rod_texture", rodTexture.toString(), "cap_texture", capTexture.toString(),
+                "focus_texture", thaumcraft.client.renderers.models.gear.ModelWand.FOCUS_TEXTURE.toString(), "focus", "thaumcraft:focus_excavation", "native_focus_tint_argb", Integer.toHexString(color),
+                "seen_pixels", "pending root94 inspection");
     }
 
     private boolean hand(Minecraft client, Predicate<ItemStack> wanted) throws ReflectiveOperationException {

@@ -489,13 +489,34 @@ public final class FrostClientSequence {
     private static void moveCursor(Minecraft client, int[] point) { client.screen.mouseMoved(point[0], point[1]); GLFW.glfwSetCursorPos(client.getWindow().getWindow(), point[0] * (double) client.getWindow().getScreenWidth() / client.screen.width, point[1] * (double) client.getWindow().getScreenHeight() / client.screen.height); }
     private static void requireCursor(Minecraft client, int[] point) { double x = client.mouseHandler.xpos() * client.screen.width / client.getWindow().getScreenWidth(), y = client.mouseHandler.ypos() * client.screen.height / client.getWindow().getScreenHeight(); require(Math.abs(x - point[0]) <= 1 && Math.abs(y - point[1]) <= 1, "real cursor hovers native widget/slot inside owned active window"); }
     private static int[] inventoryPoint(Minecraft client, int inventory) throws ReflectiveOperationException { var slot = client.player.containerMenu.getSlot(playerSlot(client, inventory)); return new int[] {(int) BookClientSmoke.field(client.screen, "leftPos") + slot.x + 8, (int) BookClientSmoke.field(client.screen, "topPos") + slot.y + 8}; }
-    private static Map<String, Object> heldModel(Minecraft client) {
-        ItemStack actual = client.player.getMainHandItem(); require(payer(actual) && FocusData.get(actual).is(frost()), "final actual earned held Frost"); var model = client.getItemRenderer().getModel(actual, client.level, client.player, 0); require(model != client.getModelManager().getMissingModel(), "native held model resolves"); var sprites = new LinkedHashSet<String>(); int faces = 0;
-        // Detached baked-model query only: never seed/touch level or projectile launch RNG.
-        for (var quad : model.getQuads(null, null, RandomSource.create(0))) { String sprite = quad.getSprite().contents().name().toString(); sprites.add(sprite); if (sprite.equals("thaumcraft:models/wand") && quad.getTintIndex() == 0) ++faces; }
-        int color = ((thaumcraft.common.mixin.client.MinecraftItemColorsAccess) client).thaumcraft$itemColors().getColor(actual, 0);
-        require(faces == 6 && color == (0xFF000000 | 5204428) && sprites.contains("thaumcraft:models/wand_rod_silverwood") && sprites.contains("thaumcraft:models/wand_cap_thaumium") && sprites.stream().noneMatch(value -> value.contains("missingno")), "original shared six-face held focus cube+native RGB5204428, NOT flat focus_frost loose icon");
-        require(client.getResourceManager().getResource(id("textures/blocks/frostshard.png")).isPresent(), "original native projectile texture resolves"); return Map.of("actual_sprites", List.copyOf(sprites), "tinted_focus_faces", faces, "native_focus_RGB", Integer.toHexString(color & 0xFFFFFF), "native_focus_ARGB", Integer.toHexString(color), "seen_pixels", "pending root exact97/99 inspection");
+    private static Map<String, Object> heldModel(Minecraft client) throws ReflectiveOperationException {
+        ItemStack actual = client.player.getMainHandItem(); require(payer(actual) && FocusData.get(actual).is(frost()), "final actual earned held Frost");
+        var model = client.getItemRenderer().getModel(actual, client.level, client.player, 0); require(model != client.getModelManager().getMissingModel(), "native held model resolves");
+        // The wand is a builtin/entity item drawn by ThaumcraftGearModelsClient.renderWand, whose
+        // BakedModel is the empty custom-renderer shell. The material sheets and the focus cube are
+        // not quads; assert the selection the renderer actually reads.
+        var data = ItemWandCasting.data(actual);
+        var rodTexture = thaumcraft.client.renderers.models.gear.ModelWand.rodTexture(
+                thaumcraft.common.items.wands.WandMaterials.rod(data.rod()).baseTag());
+        var capTexture = thaumcraft.client.renderers.models.gear.ModelWand.capTexture(
+                thaumcraft.common.items.wands.WandMaterials.cap(data.cap()).tag());
+        var focusStack = FocusData.get(actual);
+        int color = ((ItemFocusBasic) focusStack.getItem()).getFocusColor(focusStack);
+        require(rodTexture.getPath().equals("textures/models/wand_rod_silverwood.png")
+                        && capTexture.getPath().equals("textures/models/wand_cap_thaumium.png")
+                        && color == (0xFF000000 | 5204428),
+                "held wand selects the original Silverwood/Thaumium sheets and the native Frost focus RGB "
+                        + Integer.toHexString(0xFF000000 | 5204428) + ", NOT the flat focus_frost loose icon; rod="
+                        + rodTexture + "; cap=" + capTexture + "; argb=" + Integer.toHexString(color));
+        for (var sheet : List.of(rodTexture, capTexture, thaumcraft.client.renderers.models.gear.ModelWand.FOCUS_TEXTURE)) {
+            require(FrostClientSequence.class.getClassLoader()
+                            .getResource("assets/" + sheet.getNamespace() + "/" + sheet.getPath()) != null,
+                    "a sheet the held renderer binds exists in the shipped assets: " + sheet);
+        }
+        require(client.getResourceManager().getResource(id("textures/blocks/frostshard.png")).isPresent(), "original native projectile texture resolves");
+        return Map.of("rod_texture", rodTexture.toString(), "cap_texture", capTexture.toString(),
+                "focus_texture", thaumcraft.client.renderers.models.gear.ModelWand.FOCUS_TEXTURE.toString(),
+                "native_focus_RGB", Integer.toHexString(color & 0xFFFFFF), "native_focus_ARGB", Integer.toHexString(color), "seen_pixels", "pending root exact97/99 inspection");
     }
     private boolean hand(Minecraft client) throws ReflectiveOperationException { require(client.player.containerMenu == client.player.inventoryMenu, "native hand SWAP outside menus"); if (!payer(client.player.getInventory().getItem(8))) { click(client, playerSlot(client, itemSlot(client.player, FrostClientSequence::payer)), 8, ClickType.SWAP); handChangedAt = client.player.tickCount; return false; } if (client.player.tickCount - handChangedAt < 6) return false; select(client); return true; }
     private static void stand(ServerPlayer player, double x, double y, double z) { var body = new AABB(x - .3, y + .001, z - .3, x + .3, y + 1.8, z + .3); BlockPos floor = BlockPos.containing(x, y - .01, z); require(player.level().noCollision(player, body) && !player.level().getBlockState(floor).getCollisionShape(player.level(), floor).isEmpty(), "declared collision-checked camera above existing solid floor"); player.teleportTo(x, y, z); }

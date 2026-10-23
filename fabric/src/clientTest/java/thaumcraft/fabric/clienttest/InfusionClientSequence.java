@@ -1139,14 +1139,29 @@ public final class InfusionClientSequence {
     private Map<String, Object> presentation(Minecraft client) {
         ItemStack actual = client.player.getMainHandItem();
         require(isReward(actual), "presentation only inspects the actual native reward");
+        // The wand is a builtin/entity item drawn by ThaumcraftGearModelsClient.renderWand through
+        // BuiltinItemRendererRegistry. Its BakedModel is the empty custom-renderer shell and can
+        // never carry the material quads, so assert the selection the renderer actually reads.
+        var data = ItemWandCasting.data(actual);
+        var rodTexture = thaumcraft.client.renderers.models.gear.ModelWand.rodTexture(
+                thaumcraft.common.items.wands.WandMaterials.rod(data.rod()).baseTag());
+        var capTexture = thaumcraft.client.renderers.models.gear.ModelWand.capTexture(
+                thaumcraft.common.items.wands.WandMaterials.cap(data.cap()).tag());
+        require(rodTexture.getPath().equals("textures/models/wand_rod_silverwood.png"),
+                "the silverwood rod selects the original silverwood sheet, not a fallback: " + rodTexture);
+        require(capTexture.getPath().equals("textures/models/wand_cap_gold.png"),
+                "the gold cap selects the original gold sheet, not a fallback: " + capTexture);
+        for (var sheet : List.of(rodTexture, capTexture)) {
+            require(InfusionClientSequence.class.getClassLoader()
+                            .getResource("assets/" + sheet.getNamespace() + "/" + sheet.getPath()) != null,
+                    "the selected material sheet exists in the shipped assets: " + sheet);
+        }
         var model = client.getItemRenderer().getModel(actual, client.level, client.player, 0);
-        require(model != client.getModelManager().getMissingModel(), "actual Silverwood/gold component-driven model exists");
-        var textures = new LinkedHashSet<String>();
-        for (var quad : model.getQuads(null, null, RandomSource.create(0))) textures.add(quad.getSprite().contents().name().toString());
-        for (Direction face : Direction.values()) for (var quad : model.getQuads(null, face, RandomSource.create(0))) textures.add(quad.getSprite().contents().name().toString());
-        report.put("native_reward_model_observation", Map.of("actual_sprites", List.copyOf(textures), "rod", ItemWandCasting.data(actual).rod(), "cap", ItemWandCasting.data(actual).cap()));
-        require(textures.contains("thaumcraft:models/wand_rod_silverwood") && textures.contains("thaumcraft:models/wand_cap_gold"), "held reward selects original Silverwood rod and gold cap sprites, not a fallback");
-        return Map.of("actual_model_sprites", List.copyOf(textures), "tooltip", actual.getTooltipLines(Item.TooltipContext.of(client.level), client.player, TooltipFlag.NORMAL)
+        require(model != client.getModelManager().getMissingModel(), "the actual Silverwood/gold reward resolves an item model shell");
+        report.put("native_reward_model_observation", Map.of("rod_texture", rodTexture.toString(), "cap_texture", capTexture.toString(),
+                "rod", data.rod(), "cap", data.cap()));
+        return Map.of("rod_texture", rodTexture.toString(), "cap_texture", capTexture.toString(),
+                "tooltip", actual.getTooltipLines(Item.TooltipContext.of(client.level), client.player, TooltipFlag.NORMAL)
                 .stream().map(Component::getString).toList(), "capacity_centivis", ItemWandCasting.getMaxVis(actual));
     }
 

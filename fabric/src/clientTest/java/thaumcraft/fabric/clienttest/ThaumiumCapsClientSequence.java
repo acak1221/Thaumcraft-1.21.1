@@ -1559,12 +1559,26 @@ public final class ThaumiumCapsClientSequence {
         var actual = client.player.getMainHandItem(); require(isReward(actual), "probe only the actual newly assembled wand");
         var model = client.getItemRenderer().getModel(actual, client.level, client.player, 0);
         require(model != client.getModelManager().getMissingModel(), "native component-driven new wand model exists");
-        var sprites = new LinkedHashSet<String>();
-        for (var quad : model.getQuads(null, null, RandomSource.create(0))) sprites.add(quad.getSprite().contents().name().toString());
-        for (Direction face : Direction.values()) for (var quad : model.getQuads(null, face, RandomSource.create(0))) sprites.add(quad.getSprite().contents().name().toString());
-        report.put("latest_native_wand_model_probe", Map.of("actual_sprites", List.copyOf(sprites), "focus_equipped", !FocusData.get(actual).isEmpty()));
-        require(sprites.contains("thaumcraft:models/wand_rod_silverwood") && sprites.contains("thaumcraft:models/wand_cap_thaumium"), "actual native new wand selects Silverwood rod and PURPLE Thaumium cap, not clamped gold/greatwood fallback");
-        return Map.of("actual_sprites", List.copyOf(sprites), "capacity_centivis", ItemWandCasting.getMaxVis(actual), "tooltip", actual.getTooltipLines(Item.TooltipContext.of(client.level), client.player, TooltipFlag.NORMAL).stream().map(Component::getString).toList(),
+        // The wand is a builtin/entity item: its BakedModel is the empty custom-renderer shell and
+        // never carries material quads. Assert the selection renderWand actually reads instead.
+        var data = ItemWandCasting.data(actual);
+        var rodTexture = thaumcraft.client.renderers.models.gear.ModelWand.rodTexture(
+                thaumcraft.common.items.wands.WandMaterials.rod(data.rod()).baseTag());
+        var capTexture = thaumcraft.client.renderers.models.gear.ModelWand.capTexture(
+                thaumcraft.common.items.wands.WandMaterials.cap(data.cap()).tag());
+        require(rodTexture.getPath().equals("textures/models/wand_rod_silverwood.png")
+                        && capTexture.getPath().equals("textures/models/wand_cap_thaumium.png"),
+                "actual native new wand selects the Silverwood rod and the PURPLE Thaumium cap, not the clamped gold/greatwood fallback: "
+                        + rodTexture + " / " + capTexture);
+        for (var sheet : List.of(rodTexture, capTexture)) {
+            require(ThaumiumCapsClientSequence.class.getClassLoader()
+                            .getResource("assets/" + sheet.getNamespace() + "/" + sheet.getPath()) != null,
+                    "the selected material sheet exists in the shipped assets: " + sheet);
+        }
+        report.put("latest_native_wand_model_probe", Map.of("rod_texture", rodTexture.toString(), "cap_texture", capTexture.toString(),
+                "focus_equipped", !FocusData.get(actual).isEmpty()));
+        return Map.of("rod_texture", rodTexture.toString(), "cap_texture", capTexture.toString(),
+                "capacity_centivis", ItemWandCasting.getMaxVis(actual), "tooltip", actual.getTooltipLines(Item.TooltipContext.of(client.level), client.player, TooltipFlag.NORMAL).stream().map(Component::getString).toList(),
                 "visual_inspection", "pending exact capture; model resolution is not full visual parity");
     }
 

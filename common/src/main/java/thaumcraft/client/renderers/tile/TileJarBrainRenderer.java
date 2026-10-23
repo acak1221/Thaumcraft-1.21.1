@@ -50,25 +50,31 @@ public final class TileJarBrainRenderer implements BlockEntityRenderer<TileJarBr
 
     @Override public void render(TileJarBrain tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         pose.pushPose();
-        // Original TileJarRenderer:62-63 - the content frame of the jar: the block centre and
-        // one hundredth of a block above the block floor.
-        pose.translate(.5F, CONTENT_OFFSET, .5F);
-        pose.mulPose(Axis.XP.rotationDegrees(180));
-        renderBrain(tile, partialTick, pose, buffers, overlay);
-        // Original TileJarRenderer:173-174 - the brine of the jar, in the content frame.
-        jar.renderBrine(pose, buffers.getBuffer(RenderType.entityTranslucent(BRINE)), LightTexture.FULL_BRIGHT, overlay);
-        pose.popPose();
+        try {
+            // Original TileJarRenderer:62-63 - the content frame of the jar: the block centre and
+            // one hundredth of a block above the block floor.
+            pose.translate(.5F, CONTENT_OFFSET, .5F);
+            pose.mulPose(Axis.XP.rotationDegrees(180));
+            renderBrain(tile, partialTick, pose, buffers, overlay);
+            // Original TileJarRenderer:173-174 - the brine of the jar, in the content frame.
+            jar.renderBrine(pose, buffers.getBuffer(RenderType.entityTranslucent(BRINE)), LightTexture.FULL_BRIGHT, overlay);
+        } finally {
+            pose.popPose();
+        }
     }
 
     /** The original {@code renderBrain}: the bob, the turn and the scale of the brain. */
     private void renderBrain(TileJarBrain tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int overlay) {
         float bob = bob(Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount);
         pose.pushPose();
-        pose.translate(0, BRAIN_HEIGHT + bob, 0);
-        applyTurn(pose, turn(tile.rota, tile.rotb, partialTick));
-        pose.scale(BRAIN_SCALE, BRAIN_SCALE, BRAIN_SCALE);
-        brain.render(pose, buffers.getBuffer(RenderType.entityTranslucent(BRAIN)), LightTexture.FULL_BRIGHT, overlay);
-        pose.popPose();
+        try {
+            pose.translate(0, BRAIN_HEIGHT + bob, 0);
+            applyTurn(pose, turn(tile.rota, tile.rotb, partialTick));
+            pose.scale(BRAIN_SCALE, BRAIN_SCALE, BRAIN_SCALE);
+            brain.render(pose, buffers.getBuffer(RenderType.entityTranslucent(BRAIN)), LightTexture.FULL_BRIGHT, overlay);
+        } finally {
+            pose.popPose();
+        }
     }
 
     /**

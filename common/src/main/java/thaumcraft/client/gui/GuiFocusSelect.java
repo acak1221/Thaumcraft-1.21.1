@@ -319,16 +319,19 @@ public final class GuiFocusSelect extends Screen {
         int size = Math.round(diameter);
         if (size <= 0) return;
         graphics.pose().pushPose();
-        graphics.pose().translate(centerX, centerY, 0);
-        graphics.pose().mulPose(Axis.ZP.rotationDegrees(angle));
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        graphics.setColor(0.5F, 0.5F, 0.5F, 0.5F);
         try {
+            graphics.pose().translate(centerX, centerY, 0);
+            graphics.pose().mulPose(Axis.ZP.rotationDegrees(angle));
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            graphics.setColor(0.5F, 0.5F, 0.5F, 0.5F);
             graphics.blit(texture, -size / 2, -size / 2, size, size, 0, 0, 256, 256, 256, 256);
         } finally {
-            graphics.setColor(1F, 1F, 1F, 1F);
-            graphics.pose().popPose();
+            try {
+                graphics.setColor(1F, 1F, 1F, 1F);
+            } finally {
+                graphics.pose().popPose();
+            }
             RenderSystem.disableBlend();
         }
     }
@@ -442,11 +445,14 @@ public final class GuiFocusSelect extends Screen {
             float scale = animation.scale() * hoverScale;
             if (scale <= 0) return;
             graphics.pose().pushPose();
-            graphics.pose().translate(centerX + offsetX * animation.scale(), centerY + offsetY * animation.scale(), 100);
-            graphics.pose().scale(scale, scale, scale);
-            ItemStack stack = choices.get(index).preview();
-            graphics.renderItem(stack, -8, -8);
-            graphics.pose().popPose();
+            try {
+                graphics.pose().translate(centerX + offsetX * animation.scale(), centerY + offsetY * animation.scale(), 100);
+                graphics.pose().scale(scale, scale, scale);
+                ItemStack stack = choices.get(index).preview();
+                graphics.renderItem(stack, -8, -8);
+            } finally {
+                graphics.pose().popPose();
+            }
         }
 
         @Override public void playDownSound(SoundManager sounds) {}

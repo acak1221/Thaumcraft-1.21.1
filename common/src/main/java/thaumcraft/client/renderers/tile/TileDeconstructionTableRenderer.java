@@ -23,24 +23,26 @@ public final class TileDeconstructionTableRenderer implements BlockEntityRendere
     private final ItemRenderer items;
     public TileDeconstructionTableRenderer(BlockEntityRendererProvider.Context context) { items = context.getItemRenderer(); }
     @Override public void render(TileDeconstructionTable table, float partial, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        pose.pushPose(); pose.translate(.5, 1, .5); pose.mulPose(Axis.XP.rotationDegrees(180));
-        model.root.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, overlay); pose.popPose();
+        pose.pushPose(); try { pose.translate(.5, 1, .5); pose.mulPose(Axis.XP.rotationDegrees(180));
+        model.root.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, overlay); } finally { pose.popPose(); }
         if (table.getLevel() == null) return;
-        pose.pushPose(); pose.translate(.5, .92, .5); pose.scale(.8F, .8F, .8F);
-        items.renderStatic(new ItemStack(ThaumcraftContent.THAUMOMETER.get()), ItemDisplayContext.GROUND, light, overlay, pose, buffers, table.getLevel(), 0); pose.popPose();
+        pose.pushPose(); try { pose.translate(.5, .92, .5); pose.scale(.8F, .8F, .8F);
+        items.renderStatic(new ItemStack(ThaumcraftContent.THAUMOMETER.get()), ItemDisplayContext.GROUND, light, overlay, pose, buffers, table.getLevel(), 0); } finally { pose.popPose(); }
         var viewer = Minecraft.getInstance().getCameraEntity(); float ticks = (viewer == null ? table.getLevel().getGameTime() : viewer.tickCount) + partial;
         if (!table.getItem(0).isEmpty()) {
-            pose.pushPose(); pose.translate(.5, 1.15 + (Mth.sin(ticks / 14F) * .2F + .2F) * .1F, .5); pose.mulPose(Axis.YP.rotationDegrees(ticks % 360));
-            items.renderStatic(table.getItem(0).copyWithCount(1), ItemDisplayContext.GROUND, light, overlay, pose, buffers, table.getLevel(), 0); pose.popPose();
+            pose.pushPose(); try { pose.translate(.5, 1.15 + (Mth.sin(ticks / 14F) * .2F + .2F) * .1F, .5); pose.mulPose(Axis.YP.rotationDegrees(ticks % 360));
+            items.renderStatic(table.getItem(0).copyWithCount(1), ItemDisplayContext.GROUND, light, overlay, pose, buffers, table.getLevel(), 0); } finally { pose.popPose(); }
         }
         if (table.reward() != null) {
-            pose.pushPose(); pose.translate(.5, 1.081, .5); pose.mulPose(Axis.XP.rotationDegrees(90)); pose.mulPose(Axis.ZP.rotationDegrees(ticks % 360)); pose.scale(.024F, .024F, .024F);
-            var aspect = table.reward(); int color = aspect.getColor(); var out = buffers.getBuffer(RenderType.entityTranslucent(aspect.getImage()));
-            float[] xy = {-8,8,8,8,8,-8,-8,-8};
-            for (int vertex = 0; vertex < 4; vertex++) out.addVertex(pose.last(), xy[vertex * 2], xy[vertex * 2 + 1], 0)
-                    .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, 204).setUv(vertex == 0 || vertex == 3 ? 0 : 1, vertex < 2 ? 0 : 1)
-                    .setOverlay(overlay).setLight(light).setNormal(pose.last(), 0, 0, -1);
-            pose.popPose();
+            pose.pushPose(); try { pose.translate(.5, 1.081, .5); pose.mulPose(Axis.XP.rotationDegrees(90)); pose.mulPose(Axis.ZP.rotationDegrees(ticks % 360)); pose.scale(.024F, .024F, .024F);
+                var aspect = table.reward(); int color = aspect.getColor(); var out = buffers.getBuffer(RenderType.entityTranslucent(aspect.getImage()));
+                float[] xy = {-8,8,8,8,8,-8,-8,-8};
+                for (int vertex = 0; vertex < 4; vertex++) out.addVertex(pose.last(), xy[vertex * 2], xy[vertex * 2 + 1], 0)
+                        .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, 204).setUv(vertex == 0 || vertex == 3 ? 0 : 1, vertex < 2 ? 0 : 1)
+                        .setOverlay(overlay).setLight(light).setNormal(pose.last(), 0, 0, -1);
+            } finally {
+                pose.popPose();
+            }
         }
     }
 }

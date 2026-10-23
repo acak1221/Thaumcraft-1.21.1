@@ -21,10 +21,13 @@ public final class TileTableRenderer implements BlockEntityRenderer<TileTable> {
         int variant = tile.getBlockState().getValue(BlockTable.VARIANT);
         if (variant >= 6) return;
         pose.pushPose();
-        pose.translate(.5, 1, .5);
-        pose.mulPose(Axis.XP.rotationDegrees(180));
-        if (variant == 1) pose.mulPose(Axis.YP.rotationDegrees(90));
-        model.root.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, overlay);
-        pose.popPose();
+        try {
+            pose.translate(.5, 1, .5);
+            pose.mulPose(Axis.XP.rotationDegrees(180));
+            if (variant == 1) pose.mulPose(Axis.YP.rotationDegrees(90));
+            model.root.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, overlay);
+        } finally {
+            pose.popPose();
+        }
     }
 }

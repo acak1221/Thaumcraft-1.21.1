@@ -33,25 +33,27 @@ public final class TileAlchemyFurnaceAdvancedRenderer implements BlockEntityRend
             pose.translate(.5,0,.5); pose.mulPose(Axis.XN.rotationDegrees(90));
             model.render("Base",pose,buffers.getBuffer(RenderType.entityCutoutNoCull(heat>100?BASE_ON:BASE)),light,overlay);
             var tank=buffers.getBuffer(RenderType.entityCutoutNoCull(vis>0?TANK_ON:TANK));
-            for(int side=0;side<4;side++) { pose.pushPose(); pose.mulPose(Axis.ZP.rotationDegrees(side*90)); model.render("Tank",pose,tank,light,overlay); pose.popPose(); }
+            for(int side=0;side<4;side++) { pose.pushPose(); try { pose.mulPose(Axis.ZP.rotationDegrees(side*90)); model.render("Tank",pose,tank,light,overlay); } finally { pose.popPose(); } }
             if(vis>0) {
-                pose.pushPose(); pose.translate(.5,-.5,1.1); pose.mulPose(Axis.YP.rotationDegrees(180)); quad("thaumcraft:blocks/fluxgoo",190,0,pose,buffers,overlay); pose.popPose();
+                pose.pushPose(); try { pose.translate(.5,-.5,1.1); pose.mulPose(Axis.YP.rotationDegrees(180)); quad("thaumcraft:blocks/fluxgoo",190,0,pose,buffers,overlay); } finally { pose.popPose(); }
                 float empty=1F-vis/500F;
                 for(int side=0;side<4;side++) {
-                    pose.pushPose(); pose.mulPose(Axis.ZP.rotationDegrees(side*90)); pose.mulPose(Axis.XN.rotationDegrees(90)); pose.translate(.85,-1.8,-1.4); pose.scale(.3F,.6F,1);
-                    quad("thaumcraft:blocks/metalbase",150,0,pose,buffers,overlay); pose.translate(0,0,-.01); quad("thaumcraft:blocks/fluxgoo",190,empty,pose,buffers,overlay); pose.popPose();
-                    pose.pushPose(); pose.mulPose(Axis.ZN.rotationDegrees(side*90)); pose.mulPose(Axis.XP.rotationDegrees(90)); pose.translate(1.15,1.8,-1.4); pose.scale(-.3F,-.6F,-1);
-                    quad("thaumcraft:blocks/metalbase",150,0,pose,buffers,overlay); pose.translate(0,0,.01); quad("thaumcraft:blocks/fluxgoo",190,empty,pose,buffers,overlay); pose.popPose();
+                    pose.pushPose(); try { pose.mulPose(Axis.ZP.rotationDegrees(side*90)); pose.mulPose(Axis.XN.rotationDegrees(90)); pose.translate(.85,-1.8,-1.4); pose.scale(.3F,.6F,1);
+                    quad("thaumcraft:blocks/metalbase",150,0,pose,buffers,overlay); pose.translate(0,0,-.01); quad("thaumcraft:blocks/fluxgoo",190,empty,pose,buffers,overlay); } finally { pose.popPose(); }
+                    pose.pushPose(); try { pose.mulPose(Axis.ZN.rotationDegrees(side*90)); pose.mulPose(Axis.XP.rotationDegrees(90)); pose.translate(1.15,1.8,-1.4); pose.scale(-.3F,-.6F,-1);
+                    quad("thaumcraft:blocks/metalbase",150,0,pose,buffers,overlay); pose.translate(0,0,.01); quad("thaumcraft:blocks/fluxgoo",190,empty,pose,buffers,overlay); } finally { pose.popPose(); }
                 }
             }
             if(heat>100) {
-                pose.pushPose(); pose.translate(0,0,1);
-                for(int side=0;side<4;side++) {
-                    pose.pushPose(); pose.mulPose(Axis.ZP.rotationDegrees(side*90)); pose.mulPose(Axis.XP.rotationDegrees(135)); pose.mulPose(Axis.ZP.rotationDegrees(180)); pose.translate(-.5,0,-1);
-                    quad("minecraft:block/lava_still",220,1F-Math.min(1F,heat/500F),pose,buffers,overlay);
-                    pose.translate(0,0,.05); quad("thaumcraft:blocks/metalbase",150,0,pose,buffers,overlay); pose.popPose();
+                pose.pushPose(); try { pose.translate(0,0,1);
+                    for(int side=0;side<4;side++) {
+                        pose.pushPose(); try { pose.mulPose(Axis.ZP.rotationDegrees(side*90)); pose.mulPose(Axis.XP.rotationDegrees(135)); pose.mulPose(Axis.ZP.rotationDegrees(180)); pose.translate(-.5,0,-1);
+                            quad("minecraft:block/lava_still",220,1F-Math.min(1F,heat/500F),pose,buffers,overlay);
+                        pose.translate(0,0,.05); quad("thaumcraft:blocks/metalbase",150,0,pose,buffers,overlay); } finally { pose.popPose(); }
+                    }
+                } finally {
+                    pose.popPose();
                 }
-                pose.popPose();
             }
         } finally { pose.popPose(); }
     }

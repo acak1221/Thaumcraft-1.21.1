@@ -52,8 +52,12 @@ public final class GuiResearchPopup {
                 graphics.blit(texture,8,frame.y()+8,16,16,0,0,256,256,256,256);
             }
         } finally {
-            RenderSystem.disableBlend();
-            graphics.pose().popPose();graphics.flush();graphics.setColor(old[0],old[1],old[2],old[3]);
+            try {
+                RenderSystem.disableBlend();
+            } finally {
+                graphics.pose().popPose();
+            }
+            graphics.flush();graphics.setColor(old[0],old[1],old[2],old[3]);
             if(depth)RenderSystem.enableDepthTest();else RenderSystem.disableDepthTest();
         }
     }

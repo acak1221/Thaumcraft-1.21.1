@@ -34,34 +34,40 @@ public final class TileAlembicRenderer implements BlockEntityRenderer<TileAlembi
         var below = level == null ? null : level.getBlockEntity(tile.getBlockPos().below());
         int angle = originalAngle(tile.getFacing());
         pose.pushPose();
-        pose.translate(.5, 0, .5);
-        pose.pushPose();
-        // The source OBJ is Z-up. Source renderer:44,49-60 applies -90 X,
-        // then a Z rotation (WEST0/EAST180/SOUTH90/NORTH270).
-        pose.mulPose(Axis.XP.rotationDegrees(-90));
-        pose.mulPose(Axis.ZP.rotationDegrees(angle));
-        var buffer = buffers.getBuffer(TRIANGLES);
-        if (below instanceof TileAlchemyFurnace) {
-            model.render("TubeMain", pose, buffer, light, overlay);
-            model.render("Legs", pose, buffer, light, overlay);
-        } else if (below instanceof TileAlembic) {
-            model.render("TubeMain", pose, buffer, light, overlay);
-            model.render("TubeSmall", pose, buffer, light, overlay);
-        } else {
-            model.render("Legs", pose, buffer, light, overlay);
+        try {
+            pose.translate(.5, 0, .5);
+            pose.pushPose();
+            try {
+                // The source OBJ is Z-up. Source renderer:44,49-60 applies -90 X,
+                // then a Z rotation (WEST0/EAST180/SOUTH90/NORTH270).
+                pose.mulPose(Axis.XP.rotationDegrees(-90));
+                pose.mulPose(Axis.ZP.rotationDegrees(angle));
+                var buffer = buffers.getBuffer(TRIANGLES);
+                if (below instanceof TileAlchemyFurnace) {
+                    model.render("TubeMain", pose, buffer, light, overlay);
+                    model.render("Legs", pose, buffer, light, overlay);
+                } else if (below instanceof TileAlembic) {
+                    model.render("TubeMain", pose, buffer, light, overlay);
+                    model.render("TubeSmall", pose, buffer, light, overlay);
+                } else {
+                    model.render("Legs", pose, buffer, light, overlay);
+                }
+                model.render("Pot", pose, buffer, light, overlay);
+                model.render("Panel", pose, buffer, light, overlay);
+            } finally {
+                pose.popPose();
+            }
+            if (tile.getFilter() != null) {
+                // Source renderer:78-103's bound label. This visual reflects BE
+                // state only; it does not pretend a label-item attachment API exists.
+                pose.mulPose(Axis.YP.rotationDegrees(90 + angle));
+                quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(LABEL)), .135F, .468F, -.409F, 0xffffff, light, overlay);
+                quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(tile.getFilter().getImage())), .104F, .468F, -.41F,
+                        tile.getFilter().getColor(), light, overlay);
+            }
+        } finally {
+            pose.popPose();
         }
-        model.render("Pot", pose, buffer, light, overlay);
-        model.render("Panel", pose, buffer, light, overlay);
-        pose.popPose();
-        if (tile.getFilter() != null) {
-            // Source renderer:78-103's bound label. This visual reflects BE
-            // state only; it does not pretend a label-item attachment API exists.
-            pose.mulPose(Axis.YP.rotationDegrees(90 + angle));
-            quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(LABEL)), .135F, .468F, -.409F, 0xffffff, light, overlay);
-            quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(tile.getFilter().getImage())), .104F, .468F, -.41F,
-                    tile.getFilter().getColor(), light, overlay);
-        }
-        pose.popPose();
     }
 
     private static int originalAngle(Direction facing) {

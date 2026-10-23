@@ -152,9 +152,12 @@ public final class ThaumcraftGogglesClient {
                 if (!(blockEntity instanceof TileNode node) || node.isRemoved() || node.getLevel() != minecraft.level) continue;
                 BlockPos pos = node.getBlockPos();
                 pose.pushPose();
-                pose.translate(pos.getX() - eye.x, pos.getY() - eye.y, pos.getZ() - eye.z);
-                TileNodeRenderer.renderRevealed(node, minecraft, partialTick, pose, buffers);
-                pose.popPose();
+                try {
+                    pose.translate(pos.getX() - eye.x, pos.getY() - eye.y, pos.getZ() - eye.z);
+                    TileNodeRenderer.renderRevealed(node, minecraft, partialTick, pose, buffers);
+                } finally {
+                    pose.popPose();
+                }
             }
         }
     }
@@ -165,31 +168,37 @@ public final class ThaumcraftGogglesClient {
         var face = target.face();
         var eye = camera.getPosition();
         pose.pushPose();
-        pose.translate(pos.getX() + .5 + tagScale * 2 * face.getStepX() - eye.x,
-                pos.getY() + .5 + (target.spaceAbove() ? .4 : 0) + tagScale * 2 * face.getStepY() - eye.y,
-                pos.getZ() + .5 + tagScale * 2 * face.getStepZ() - eye.z);
-        // Native1.21 nameplates use POSITIVE X/negative Y after the camera
-        // rotation. Negative X mirrors icons and back-face-culls font glyphs.
-        pose.mulPose(camera.rotation());
-        pose.scale(1, -1, 1);
-        List<AspectView> entries = target.entries();
-        for (int i = 0; i < entries.size(); i++) {
-            int row = i / 5, column = i % 5, rowSize = Math.min(5, entries.size() - row * 5);
-            float shift = (column - rowSize / 2f + .5f) * tagScale * tagScale * 4;
-            AspectView entry = entries.get(i);
-            pose.pushPose();
-            pose.translate(shift, -row * tagScale * 1.05f, 0);
-            pose.scale(tagScale, tagScale, tagScale);
-            icon(pose, buffers.getBuffer(ICON_TYPES.computeIfAbsent(entry.image(), PopupRenderType::new)), entry.color());
-            // Original unknown aspects hide identity, NOT nonnegative quantity.
-            if (entry.amount() >= 0) {
-                String text = Integer.toString(entry.amount());
-                pose.scale(.04f, .04f, .04f);
-                drawText(minecraft.font, text, 13 - minecraft.font.width(text), 6, pose, buffers);
+        try {
+            pose.translate(pos.getX() + .5 + tagScale * 2 * face.getStepX() - eye.x,
+                    pos.getY() + .5 + (target.spaceAbove() ? .4 : 0) + tagScale * 2 * face.getStepY() - eye.y,
+                    pos.getZ() + .5 + tagScale * 2 * face.getStepZ() - eye.z);
+            // Native1.21 nameplates use POSITIVE X/negative Y after the camera
+            // rotation. Negative X mirrors icons and back-face-culls font glyphs.
+            pose.mulPose(camera.rotation());
+            pose.scale(1, -1, 1);
+            List<AspectView> entries = target.entries();
+            for (int i = 0; i < entries.size(); i++) {
+                int row = i / 5, column = i % 5, rowSize = Math.min(5, entries.size() - row * 5);
+                float shift = (column - rowSize / 2f + .5f) * tagScale * tagScale * 4;
+                AspectView entry = entries.get(i);
+                pose.pushPose();
+                try {
+                    pose.translate(shift, -row * tagScale * 1.05f, 0);
+                    pose.scale(tagScale, tagScale, tagScale);
+                    icon(pose, buffers.getBuffer(ICON_TYPES.computeIfAbsent(entry.image(), PopupRenderType::new)), entry.color());
+                    // Original unknown aspects hide identity, NOT nonnegative quantity.
+                    if (entry.amount() >= 0) {
+                        String text = Integer.toString(entry.amount());
+                        pose.scale(.04f, .04f, .04f);
+                        drawText(minecraft.font, text, 13 - minecraft.font.width(text), 6, pose, buffers);
+                    }
+                } finally {
+                    pose.popPose();
+                }
             }
+        } finally {
             pose.popPose();
         }
-        pose.popPose();
     }
 
     private static void drawNote(Minecraft minecraft, TargetView target, PoseStack pose,
@@ -198,11 +207,14 @@ public final class ThaumcraftGogglesClient {
         var eye = camera.getPosition();
         String text = target.noteText();
         pose.pushPose();
-        pose.translate(pos.getX() + .5 - eye.x, pos.getY() + 1.5 - eye.y, pos.getZ() + .5 - eye.z);
-        pose.mulPose(camera.rotation());
-        pose.scale(.02f, -.02f, .02f);
-        drawText(minecraft.font, text, -minecraft.font.width(text) / 2f, 0, pose, buffers);
-        pose.popPose();
+        try {
+            pose.translate(pos.getX() + .5 - eye.x, pos.getY() + 1.5 - eye.y, pos.getZ() + .5 - eye.z);
+            pose.mulPose(camera.rotation());
+            pose.scale(.02f, -.02f, .02f);
+            drawText(minecraft.font, text, -minecraft.font.width(text) / 2f, 0, pose, buffers);
+        } finally {
+            pose.popPose();
+        }
     }
 
     private static void drawText(Font font, String text, float x, float y, PoseStack pose, MultiBufferSource buffers) {

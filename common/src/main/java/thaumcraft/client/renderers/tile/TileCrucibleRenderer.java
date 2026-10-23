@@ -58,15 +58,18 @@ public final class TileCrucibleRenderer implements BlockEntityRenderer<TileCruci
         var buffer = buffers.getBuffer(BUBBLES);
         for (Bubble bubble : bubbles) {
             pose.pushPose();
-            pose.translate(Mth.lerp(partialTick, bubble.ox, bubble.x), Mth.lerp(partialTick, bubble.oy, bubble.y), Mth.lerp(partialTick, bubble.oz, bubble.z));
-            pose.mulPose(Minecraft.getInstance().gameRenderer.getMainCamera().rotation());
-            float u = bubble.frame % 16 / 16F, v = bubble.frame / 16 / 16F;
-            float endU = u + .0624375F, endV = v + .0624375F, size = bubble.size;
-            vertex(pose, buffer, -size, -size, 0, endU, endV, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
-            vertex(pose, buffer, size, -size, 0, u, endV, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
-            vertex(pose, buffer, size, size, 0, u, v, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
-            vertex(pose, buffer, -size, size, 0, endU, v, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
-            pose.popPose();
+            try {
+                pose.translate(Mth.lerp(partialTick, bubble.ox, bubble.x), Mth.lerp(partialTick, bubble.oy, bubble.y), Mth.lerp(partialTick, bubble.oz, bubble.z));
+                pose.mulPose(Minecraft.getInstance().gameRenderer.getMainCamera().rotation());
+                float u = bubble.frame % 16 / 16F, v = bubble.frame / 16 / 16F;
+                float endU = u + .0624375F, endV = v + .0624375F, size = bubble.size;
+                vertex(pose, buffer, -size, -size, 0, endU, endV, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
+                vertex(pose, buffer, size, -size, 0, u, endV, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
+                vertex(pose, buffer, size, size, 0, u, v, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
+                vertex(pose, buffer, -size, size, 0, endU, v, bubble.color, LightTexture.FULL_BRIGHT, 0, 0, 1);
+            } finally {
+                pose.popPose();
+            }
         }
     }
 

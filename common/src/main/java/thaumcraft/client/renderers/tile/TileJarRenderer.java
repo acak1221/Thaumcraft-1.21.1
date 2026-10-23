@@ -31,16 +31,19 @@ public final class TileJarRenderer implements BlockEntityRenderer<TileJar> {
                                       PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (filter != null) {
             pose.pushPose();
-            pose.translate(.5, .4, .5);
-            float angle = switch (facing) { case SOUTH -> 180; case EAST -> -90; case WEST -> 90; default -> 0; };
-            pose.mulPose(Axis.YP.rotationDegrees(angle));
-            // Config.crooked defaults true. Keep the original signed Java %
-            // result; a future config toggle must not invent a new random roll.
-            float crooked = (filter.getTag().hashCode() + blockX + facing.get3DDataValue()) % 4 - 2;
-            label(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(LABEL)), .25F, -.315F, crooked, 0xffffff, light, overlay);
-            label(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(filter.getImage())), .168F, -.316F, crooked,
-                    filter.getColor(), light, overlay);
-            pose.popPose();
+            try {
+                pose.translate(.5, .4, .5);
+                float angle = switch (facing) { case SOUTH -> 180; case EAST -> -90; case WEST -> 90; default -> 0; };
+                pose.mulPose(Axis.YP.rotationDegrees(angle));
+                // Config.crooked defaults true. Keep the original signed Java %
+                // result; a future config toggle must not invent a new random roll.
+                float crooked = (filter.getTag().hashCode() + blockX + facing.get3DDataValue()) % 4 - 2;
+                label(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(LABEL)), .25F, -.315F, crooked, 0xffffff, light, overlay);
+                label(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(filter.getImage())), .168F, -.316F, crooked,
+                        filter.getColor(), light, overlay);
+            } finally {
+                pose.popPose();
+            }
         }
         if (aspect == null || amount <= 0 || capacity <= 0 || amount > capacity) return;
         float bottom = .0625F, top = bottom + amount / (float) capacity * .625F;
@@ -65,14 +68,17 @@ public final class TileJarRenderer implements BlockEntityRenderer<TileJar> {
 
     private static void label(PoseStack pose, VertexConsumer buffer, float half, float z, float crooked, int color, int light, int overlay) {
         pose.pushPose();
-        pose.translate(0, 0, z);
-        // Parent X180 in the original flips the apparent Z rotation.
-        pose.mulPose(Axis.ZP.rotationDegrees(-crooked));
-        float[] xy = {-half, half, half, half, half, -half, -half, -half};
-        for (int i = 0; i < 4; i++) buffer.addVertex(pose.last(), xy[i * 2], xy[i * 2 + 1], 0)
-                .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, 255)
-                .setUv(i == 0 || i == 3 ? 0 : 1, i < 2 ? 0 : 1).setOverlay(overlay).setLight(light).setNormal(pose.last(), 0, 0, -1);
-        pose.popPose();
+        try {
+            pose.translate(0, 0, z);
+            // Parent X180 in the original flips the apparent Z rotation.
+            pose.mulPose(Axis.ZP.rotationDegrees(-crooked));
+            float[] xy = {-half, half, half, half, half, -half, -half, -half};
+            for (int i = 0; i < 4; i++) buffer.addVertex(pose.last(), xy[i * 2], xy[i * 2 + 1], 0)
+                    .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, 255)
+                    .setUv(i == 0 || i == 3 ? 0 : 1, i < 2 ? 0 : 1).setOverlay(overlay).setLight(light).setNormal(pose.last(), 0, 0, -1);
+        } finally {
+            pose.popPose();
+        }
     }
 
     private static void face(PoseStack pose, VertexConsumer buffer, TextureAtlasSprite sprite, int color, int light, int overlay,

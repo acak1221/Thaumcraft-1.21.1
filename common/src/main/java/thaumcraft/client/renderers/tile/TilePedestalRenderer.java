@@ -27,15 +27,18 @@ public final class TilePedestalRenderer implements BlockEntityRenderer<TilePedes
         var display = actual.copy();
         display.setCount(1); // Never clamp the actual infusion output or lose its components/glint.
         pose.pushPose();
-        pose.translate(.5, 1.15 + Mth.sin(ticks % 32767 / 16) * .05, .5);
-        pose.mulPose(Axis.YP.rotationDegrees(ticks % 360));
-        // Native GROUND replaces the old throwaway EntityItem renderer. Ground
-        // models already supply their own scale; doubling block items retains
-        // the original pedestal's deliberate block/non-block size distinction.
-        float scale = display.getItem() instanceof BlockItem ? 2 : 1;
-        pose.scale(scale, scale, scale);
-        items.renderStatic(display, ItemDisplayContext.GROUND, light, overlay, pose, buffers, level, 0);
-        pose.popPose();
+        try {
+            pose.translate(.5, 1.15 + Mth.sin(ticks % 32767 / 16) * .05, .5);
+            pose.mulPose(Axis.YP.rotationDegrees(ticks % 360));
+            // Native GROUND replaces the old throwaway EntityItem renderer. Ground
+            // models already supply their own scale; doubling block items retains
+            // the original pedestal's deliberate block/non-block size distinction.
+            float scale = display.getItem() instanceof BlockItem ? 2 : 1;
+            pose.scale(scale, scale, scale);
+            items.renderStatic(display, ItemDisplayContext.GROUND, light, overlay, pose, buffers, level, 0);
+        } finally {
+            pose.popPose();
+        }
     }
 
     @Override public boolean shouldRenderOffScreen(TilePedestal tile) { return true; }

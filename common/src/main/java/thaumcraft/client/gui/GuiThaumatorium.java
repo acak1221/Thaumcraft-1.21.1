@@ -30,9 +30,11 @@ public final class GuiThaumatorium extends ThaumcraftContainerScreen<ContainerTh
                 graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
                 graphics.blit(aspect.getImage(), xAspect, topPos + 40, 0, 0, 16, 16, 16, 16);
                 graphics.setColor(1, 1, 1, 1); RenderSystem.disableBlend();
-                graphics.pose().pushPose(); graphics.pose().translate(xAspect, topPos + 57, 0); graphics.pose().scale(.5F, .5F, 1);
-                graphics.drawString(font, (menu.selected(index) ? menu.stored(aspect) + "/" : "") + cost.get(tag), 0, 0, 0x443322, false);
-                graphics.pose().popPose();
+                graphics.pose().pushPose(); try { graphics.pose().translate(xAspect, topPos + 57, 0); graphics.pose().scale(.5F, .5F, 1);
+                    graphics.drawString(font, (menu.selected(index) ? menu.stored(aspect) + "/" : "") + cost.get(tag), 0, 0, 0x443322, false);
+                } finally {
+                    graphics.pose().popPose();
+                }
             }
             graphics.drawString(font, "<   >", leftPos + 96, topPos + 60, 0x443322, false);
             break;

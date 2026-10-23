@@ -42,14 +42,17 @@ public final class ItemJarNodeRenderer {
         if (aspects != null && aspects.size() > 0 && type != null) {
             // Oracle ItemJarNodeRenderer:68-73 - the node of the jar in three crossed planes.
             pose.pushPose();
-            pose.translate(NODE_X, NODE_Y, NODE_Z);
-            float age = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
-            TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
-            pose.mulPose(Axis.YP.rotationDegrees(90));
-            TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
-            pose.mulPose(Axis.XP.rotationDegrees(90));
-            TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
-            pose.popPose();
+            try {
+                pose.translate(NODE_X, NODE_Y, NODE_Z);
+                float age = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
+                TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
+                pose.mulPose(Axis.YP.rotationDegrees(90));
+                TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
+                pose.mulPose(Axis.XP.rotationDegrees(90));
+                TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
+            } finally {
+                pose.popPose();
+            }
         }
         // Oracle ItemJarNodeRenderer:75-83 - the glass shell of the jar with the alpha blend.
         var state = ThaumcraftEldritchBlocks.JAR_NODE.get().defaultBlockState();

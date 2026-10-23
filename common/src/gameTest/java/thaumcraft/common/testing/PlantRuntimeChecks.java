@@ -69,13 +69,18 @@ public final class PlantRuntimeChecks {
                             "original Forge BlockBush/Plains/Desert soil rule of the ITEM: cinderpearl=" + cinderpearl + "; soil=" + soil);
                     // Oracle BlockCustomPlant:130-132 answers canPlaceBlockAt with a plain true, so the
                     // plant is never refused a position. The rule that removes it again is the
-                    // inherited 1.7.10 BlockBush.func_149718_j (canBlockStay, the official client jar,
-                    // the class ajr): the grass, the dirt or the farmland below. The cinderpearl
-                    // stands on the sand of the original item but it does not stay there.
+                    // inherited 1.7.10 BlockBush.func_149718_j (canBlockStay), and Forge 1.7.10
+                    // REPLACES that method: its binary patch for ajr delegates to
+                    // Block.canSustainPlant, which honours IPlantable.getPlantType. TC4 answers
+                    // Desert for the cinderpearl (BlockCustomPlant:119-128) and the Desert case of
+                    // the Forge table returns Blocks.sand, so the cinderpearl really does stay on the
+                    // sand it is generated on. Reading the unpatched vanilla ajr alone gives the
+                    // grass/dirt/farmland answer and makes a generated desert cinderpearl die.
                     level.setBlock(origin, flower.defaultBlockState(), QUIET);
-                    boolean staySoil = soil == Blocks.DIRT || soil == Blocks.GRASS_BLOCK || soil == Blocks.FARMLAND;
+                    boolean staySoil = soil == Blocks.DIRT || soil == Blocks.GRASS_BLOCK || soil == Blocks.FARMLAND
+                            || (cinderpearl && soil == Blocks.SAND);
                     test.assertTrue(flower.defaultBlockState().canSurvive(level, origin) == staySoil,
-                            "original BlockBush.canBlockStay rule of the BLOCK: cinderpearl=" + cinderpearl + "; soil=" + soil);
+                            "original Forge BlockBush.canBlockStay rule of the BLOCK: cinderpearl=" + cinderpearl + "; soil=" + soil);
                 }
                 var drops = Block.getDrops(state, level, origin, null);
                 test.assertTrue(drops.size() == 1 && drops.getFirst().is(flower.asItem()) && drops.getFirst().getCount() == 1,

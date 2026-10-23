@@ -120,6 +120,7 @@ final class FocusClientSequence {
     private CastProbe castProbe;
     private Channel wireChannel;
     private volatile Throwable wireObservationFailure;
+    private final Map<String, Integer> flowerSeen = new LinkedHashMap<>();
     private int inactiveInputTicks;
 
     FocusClientSequence(BlockPos research) {
@@ -622,7 +623,13 @@ final class FocusClientSequence {
                             && ItemWandCasting.data(player.getInventory().getItem(7)).equals(stoppedVis), "flower crafts preserve the actual focus, paid wand, offhand apple and all previous phials");
                     var level = player.serverLevel();
                     require(level.getBlockState(garden.west()).is(ThaumcraftPlants.SHIMMERLEAF.get()) && level.getBlockState(garden.east()).is(ThaumcraftPlants.CINDERPEARL.get())
-                            && level.isEmptyBlock(shimmerHarvest) && level.isEmptyBlock(cinderHarvest), "two display plants survive while the two physically harvested fixtures are absent");
+                            && level.isEmptyBlock(shimmerHarvest) && level.isEmptyBlock(cinderHarvest),
+                            "two display plants survive while the two physically harvested fixtures are absent:"
+                                    + " displayShimmer=" + level.getBlockState(garden.west()) + "@" + garden.west().toShortString()
+                                    + " displayCinder=" + level.getBlockState(garden.east()) + "@" + garden.east().toShortString()
+                                    + " harvestShimmer=" + level.getBlockState(shimmerHarvest) + "@" + shimmerHarvest.toShortString()
+                                    + " harvestCinder=" + level.getBlockState(cinderHarvest) + "@" + cinderHarvest.toShortString()
+                                    + " player=" + player.blockPosition().toShortString());
                     serverSnapshot = Map.of("server_verified", true, "menu", "native survival InventoryMenu2x2", "harvested_plants_consumed", 2,
                             "outputs", Map.of("thaumcraft:quick_silver", 1, "minecraft:blaze_powder", 1), "remaining_display_plants", 2,
                             "recipes", List.of("thaumcraft:quick_silver_from_shimmerleaf", "thaumcraft:blaze_powder_from_cinderpearl"), "empty_phials_retained", 4,
@@ -642,8 +649,36 @@ final class FocusClientSequence {
                 if (!serverDone() || ticks < 20) return false;
                 lookAt(client, Vec3.atCenterOf(garden).add(0, -.1, 0));
                 Map<String, Integer> particles = flowerParticles(client);
-                if (particles.get("shimmerleaf_wisps") == 0 || particles.get("cinderpearl_flame") == 0 || particles.get("cinderpearl_smoke") == 0) return false;
-                evidence.put("native_flower_world", Map.of("models", flowerModels(client), "naturally_ticked_live_particles_at_observation", particles,
+                // Vanilla animateTick picks ONE random block per call from a well over a
+                // thousand around the player, and the shimmerleaf wisp lives only three
+                // ticks. Demanding all three channels in the same instant was therefore a
+                // lottery, not an observation: the previous 1800-tick wait proved nothing
+                // about the emitters. Track what each channel has delivered over the whole
+                // window instead, and record the live counts at the instant of capture.
+                for (String channel : List.of("shimmerleaf_wisps", "cinderpearl_flame", "cinderpearl_smoke")) {
+                    if (particles.get(channel) > 0) flowerSeen.merge(channel, particles.get(channel), Integer::sum);
+                }
+                boolean allSeen = flowerSeen.keySet().containsAll(
+                        List.of("shimmerleaf_wisps", "cinderpearl_flame", "cinderpearl_smoke"));
+                if (ticks >= 900 && !allSeen) {
+                    throw new IllegalStateException("flower particles never reached the client: accumulated="
+                            + flowerSeen + " live=" + particles
+                            + "; player=" + client.player.blockPosition().toShortString()
+                            + " displayShimmer=" + client.level.getBlockState(garden.west())
+                            + "@" + garden.west().toShortString()
+                            + " displayCinder=" + client.level.getBlockState(garden.east())
+                            + "@" + garden.east().toShortString()
+                            + " distanceShimmer=" + Math.sqrt(client.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(garden.west())))
+                            + " paused=" + client.isPaused() + " windowActive=" + client.isWindowActive()
+                            + " particleStatus=" + client.options.particles().get()
+                            + " rndShimmer=" + client.level.getBlockState(garden.west()).isRandomlyTicking()
+                            + " rndCinder=" + client.level.getBlockState(garden.east()).isRandomlyTicking());
+                }
+                // Capture on a frame that actually carries something rather than on a
+                // statistically empty instant.
+                if (!allSeen || particles.get("shimmerleaf_wisps") == 0 || particles.get("cinderpearl_flame") == 0) return false;
+                evidence.put("native_flower_world", Map.of("models", flowerModels(client),
+                        "live_particles_at_observation", particles, "particles_seen_over_window", Map.copyOf(flowerSeen),
                         "shimmerleaf", garden.west().toShortString(), "cinderpearl", garden.east().toShortString(), "held_item", "retained unfocused greatwood/gold wand", "particle_callbacks_invoked_by_harness", false));
                 next(Step.NORMAL_SWAP_PRESS);
                 capture.accept("46-native-shimmerleaf-cinderpearl-models-and-particles-world-en.png");
@@ -955,19 +990,37 @@ final class FocusClientSequence {
     }
 
     private Map<String, Integer> flowerParticles(Minecraft client) throws ReflectiveOperationException {
-        int shimmer = 0, flame = 0, smoke = 0;
-        var queues = (Map<?, ?>) BookClientSmoke.field(client.particleEngine, "particles");
-        for (Object queue : queues.values()) for (Object particle : (Iterable<?>) queue) {
+        int shimmer = 0, flame = 0, smoke = 0, nearGarden = 0, resourceAnywhere = 0, resourceNear = 0, smallWisps = 0;
+        var tc4 = (thaumcraft.client.fx.ParticleLayers<?, ?>) BookClientSmoke.staticField(
+                thaumcraft.client.fx.ParticleEngine.class, "PARTICLES");
+        var queues = new java.util.ArrayList<Object>();
+        for (Object queue : ((Map<?, ?>) BookClientSmoke.field(client.particleEngine, "particles")).values()) queues.add(queue);
+        // TC4 particles never reach the vanilla map: Tc4ParticleEngineMixin intercepts
+        // ParticleEngine.add and diverts every Tc4Particle into Thaumcraft's own owner,
+        // which keeps its own dimension/layer store. Reading only the vanilla map made a
+        // live, randomly-ticking shimmerleaf look silent for 900 ticks.
+        for (int layer = 0; layer < thaumcraft.client.fx.ParticleLayers.LAYERS; layer++) {
+            queues.add(tc4.layer(client.level.dimension(), layer));
+        }
+        for (Object queue : queues) for (Object particle : (Iterable<?>) queue) {
             double x = (double) BookClientSmoke.field(particle, "x"), y = (double) BookClientSmoke.field(particle, "y"), z = (double) BookClientSmoke.field(particle, "z");
             Vec3 position = new Vec3(x, y, z);
-            if (particle instanceof ResourceParticle resource && resource.getQuadSize(0) > .025F
-                    && position.distanceToSqr(Vec3.atCenterOf(garden.west())) < 2.25) shimmer++;
+            if (particle instanceof ResourceParticle resource) {
+                resourceAnywhere++;
+                var near = position.distanceToSqr(Vec3.atCenterOf(garden.west())) < 2.25;
+                if (near) resourceNear++;
+                if (resource.getQuadSize(0) > .025F) { if (near) shimmer++; }
+                else if (near) smallWisps++;
+            }
+            if (position.distanceToSqr(Vec3.atCenterOf(garden)) < 64) nearGarden++;
             if (position.distanceToSqr(Vec3.atCenterOf(garden.east())) < 4) {
                 if (particle instanceof FlameParticle) flame++;
                 if (particle instanceof SmokeParticle) smoke++;
             }
         }
-        return Map.of("shimmerleaf_wisps", shimmer, "cinderpearl_flame", flame, "cinderpearl_smoke", smoke);
+        return Map.of("shimmerleaf_wisps", shimmer, "cinderpearl_flame", flame, "cinderpearl_smoke", smoke,
+                "any_near_garden", nearGarden, "resource_particles_anywhere", resourceAnywhere,
+                "resource_particles_near_shimmer", resourceNear, "resource_near_below_quad_threshold", smallWisps);
     }
 
     private Map<String, Object> flowerModels(Minecraft client) {

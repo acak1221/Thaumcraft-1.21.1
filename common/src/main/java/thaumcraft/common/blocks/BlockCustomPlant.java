@@ -55,6 +55,22 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
     }
 
     /**
+     * The <em>stay</em> soil of a plant, the rule of {@link #mayPlaceOn}.
+     *
+     * <p>The port once answered the inherited vanilla {@code BlockBush} table here (grass, dirt,
+     * farmland only) and applied it to every plant. That is the unpatched vanilla answer: Forge
+     * 1.7.10 replaces {@code BlockBush.func_149718_j} with {@code Block.canSustainPlant}, which
+     * honours the plant type, so the cinderpearl's {@code Desert} type really does admit sand. Keep
+     * the stay rule and the item rule on one table.</p>
+     *
+     * @param cinderpearl the plant type of the cinderpearl metadata, Desert
+     * @param soil        the block the plant stands on
+     */
+    public static boolean staySoil(boolean cinderpearl, BlockState soil) {
+        return soilSupports(cinderpearl ? PlantType.DESERT : PlantType.PLAINS, soil);
+    }
+
+    /**
      * The plant types of the original Forge {@code EnumPlantType}. Minecraft 1.21.1 has no
      * {@code IPlantable} and no {@code EnumPlantType}, so the plant type of the original is
      * answered by the block itself and the soil rule is a pure function of the type and the soil.
@@ -191,19 +207,28 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
     }
 
     /**
-     * The stay rule of the original plant, the soil of the inherited {@code BlockBush}.
+     * The stay rule of the original plant.
      *
-     * <p>Original: the 1.7.10 {@code BlockBush.func_149854_a} (the official client jar, the class
-     * {@code ajr}) - the MCP name of the method is {@code canPlaceBlockOn} and the MCP mapping
-     * describes it as "is the block grass, dirt or farmland". The three blocks are the whole table
-     * of the method.</p>
+     * <p>The 1.7.10 vanilla {@code BlockBush.func_149854_a} (the class {@code ajr}) accepts only
+     * grass, dirt and farmland, and it would be a mistake to stop there: <b>Forge 1.7.10 replaces
+     * that method</b>. Its binary patch for {@code ajr} (the shipped {@code binpatches.pack.lzma},
+     * whose {@code inputChecksum} is the adler32 of the vanilla {@code ajr.class}) rewrites
+     * {@code func_149718_j} to {@code below.canSustainPlant(world, x, y - 1, z, UP, this)}, and the
+     * patched {@code Block.canSustainPlant} switches on {@code IPlantable.getPlantType}. TC4 answers
+     * {@code EnumPlantType.Desert} for the cinderpearl metadata, and the Desert case of that table
+     * returns {@code this == Blocks.sand}. The original {@code getPlantType} is therefore live,
+     * load-bearing code, and a cinderpearl really does stand on sand in a desert.</p>
+     *
+     * <p>The port's {@link #soilSupports(PlantType, BlockState, BlockGetter, BlockPos)} is that
+     * Forge table, so the stay rule asks it. Reading the unpatched vanilla {@code ajr} alone is
+     * what made the ported cinderpearl die on the sand it is generated on.</p>
      */
     @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {
-        return bushSoil(soil);
+        return staySoil(cinderpearl, soil);
     }
 
     /**
-     * The stay rule of the original plant.
+     * The removal rule of the original plant.
      *
      * <p>Oracle {@code thaumcraft/common/blocks/BlockCustomPlant.java:130-132} answers
      * {@code canPlaceBlockAt} with a plain {@code true}: the original plant is never refused a
@@ -215,9 +240,10 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
      * plant did <b>not</b> override {@code func_149718_j} ({@code canBlockStay}, the official
      * client jar, the class {@code ajr}), so the plant breaks on the next neighbour change
      * ({@code func_149695_a}) and on the next random tick ({@code func_149674_a}, which the oracle
-     * calls at {@code BlockCustomPlant:136}) when the block below it is not the grass, the dirt or
-     * the farmland. 1.21.1 asks that same question in {@code canSurvive}, which
-     * {@code BushBlock.updateShape} and the random tick of this plant use to remove it.</p>
+     * calls at {@code BlockCustomPlant:136}) when the soil below it does not satisfy the Forge
+     * {@code canSustainPlant} table of {@link #mayPlaceOn}. 1.21.1 asks that same question in
+     * {@code canSurvive}, which {@code BushBlock.updateShape} and the random tick of this plant use
+     * to remove it.</p>
      */
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below());

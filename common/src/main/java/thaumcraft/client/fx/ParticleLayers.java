@@ -43,5 +43,11 @@ public final class ParticleLayers<K, P> {
         }
     }
 
+    /** Read-only view of one layer of one dimension; used by client evidence readers. */
+    public List<P> layer(K dimension, int layer) {
+        List<P> particles = layers.get(layer).get(dimension);
+        return particles == null ? List.of() : java.util.Collections.unmodifiableList(particles);
+    }
+
     public void clear() { layers.forEach(Map::clear); }
 }

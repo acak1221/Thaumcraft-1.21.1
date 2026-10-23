@@ -68,8 +68,18 @@ def main():
                     path.write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8", newline="")
                 overrides.append({"predicate": {"thaumcraft:wand_rod": value(r, ROD_SCALE), "thaumcraft:wand_cap": value(c, CAP_SCALE),
                                                 "thaumcraft:wand_focus": focus}, "model": f"thaumcraft:item/{name}"})
-    wand = {"parent": "minecraft:item/handheld",
-            "textures": {"layer0": "thaumcraft:items/wand_rod_greatwood", "layer1": "thaumcraft:items/wand_cap_iron"},
+    # The fallback model is the SHAPE, not a flat handheld sprite.
+    #
+    # Every override above parents to wand_shape (builtin/entity) and supplies #rod/#cap, so the
+    # item is drawn by ItemWandRenderer through the builtin item hook. A root model of
+    # minecraft:item/handheld is a completely different kind of model: it carries layer0/layer1
+    # sprites and no #rod/#cap, so a stack that matched NO override - or whose properties were
+    # read before they were registered - fell back to a flat 2D wand picture while every other
+    # wand in the game was three dimensional. It also put two incompatible model kinds in one
+    # overrides list. The correct fallback is the same wand_shape the overrides use.
+    wand = {"parent": "thaumcraft:item/wand_shape",
+            "textures": {"rod": "thaumcraft:models/wand_rod_greatwood",
+                         "cap": "thaumcraft:models/wand_cap_iron"},
             "overrides": overrides}
     (MODELS / "wand.json").write_text(json.dumps(wand, indent=1) + "\n", encoding="utf-8", newline="")
     print(f"{len(overrides)} overrides")

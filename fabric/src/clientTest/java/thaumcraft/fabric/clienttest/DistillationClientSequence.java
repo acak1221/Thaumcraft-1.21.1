@@ -628,15 +628,33 @@ final class DistillationClientSequence {
     private static Map<String, Object> wandPresentation(Minecraft client) throws ReflectiveOperationException {
         ItemStack stack = client.player.getMainHandItem();
         require(isGreatwoodGold(stack), "held presentation uses the native crafted result");
+        // The wand is a builtin/entity item: its model is drawn by ThaumcraftGearModelsClient.renderWand
+        // through BuiltinItemRendererRegistry, NOT by baked quads. Asking the BakedModel for quads can
+        // only ever return the empty custom-renderer shell, so the previous assertion could not pass
+        // for the right reason and failed even though the frame shows the correct 3D wand.
+        //
+        // The material selection that actually decides the pixels is ModelWand.rodTexture(baseTag)
+        // and ModelWand.capTexture(tag). Assert THOSE, and assert that the files they name exist.
+        var data = ItemWandCasting.data(stack);
+        var rod = thaumcraft.common.items.wands.WandMaterials.rod(data.rod());
+        var cap = thaumcraft.common.items.wands.WandMaterials.cap(data.cap());
+        var rodTexture = thaumcraft.client.renderers.models.gear.ModelWand.rodTexture(rod.baseTag());
+        var capTexture = thaumcraft.client.renderers.models.gear.ModelWand.capTexture(cap.tag());
+        require(rodTexture.getPath().equals("textures/models/wand_rod_greatwood.png"),
+                "the greatwood rod selects the original greatwood sheet, not the wood fallback: " + rodTexture);
+        require(capTexture.getPath().equals("textures/models/wand_cap_gold.png"),
+                "the gold cap selects the original gold sheet, not the iron fallback: " + capTexture);
+        for (var sheet : List.of(rodTexture, capTexture)) {
+            require(BookClientSmoke.class.getClassLoader().getResource("assets/" + sheet.getNamespace() + "/" + sheet.getPath()) != null,
+                    "the selected material sheet exists in the shipped assets: " + sheet);
+        }
+        // The model still has to resolve to something (the builtin shell), so a missing model is caught.
         var model = client.getItemRenderer().getModel(stack, client.level, client.player, 0);
-        require(model != client.getModelManager().getMissingModel(), "crafted wand resolves an actual baked item model");
-        var textures = new LinkedHashSet<String>();
-        for (var quad : model.getQuads(null, null, RandomSource.create(0))) textures.add(quad.getSprite().contents().name().toString());
-        for (Direction face : Direction.values()) for (var quad : model.getQuads(null, face, RandomSource.create(0))) textures.add(quad.getSprite().contents().name().toString());
-        require(textures.contains("thaumcraft:models/wand_rod_greatwood") && textures.contains("thaumcraft:models/wand_cap_gold"), "component-driven held model actually selects original greatwood/gold textures, not wood/iron fallback");
+        require(model != client.getModelManager().getMissingModel(), "the wand resolves an item model shell");
         var colors = (ItemColors) BookClientSmoke.field(client, "itemColors");
         require(colors.getColor(stack, 0) == -1, "wand's original material textures retain their native untinted colour");
-        return Map.of("model_textures", List.copyOf(textures), "tint_argb", colors.getColor(stack, 0), "capacity_centivis", ItemWandCasting.getMaxVis(stack),
+        return Map.of("rod_texture", rodTexture.toString(), "cap_texture", capTexture.toString(),
+                "tint_argb", colors.getColor(stack, 0), "capacity_centivis", ItemWandCasting.getMaxVis(stack),
                 "tooltip", stack.getTooltipLines(Item.TooltipContext.of(client.level), client.player, TooltipFlag.NORMAL).stream().map(Component::getString).toList());
     }
 

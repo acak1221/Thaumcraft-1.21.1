@@ -2021,6 +2021,12 @@ public final class BookClientSmoke implements ClientModInitializer {
         throw new NoSuchFieldException(owner.getClass().getName() + "." + name);
     }
 
+    static Object staticField(Class<?> owner, String name) throws ReflectiveOperationException {
+        Field field = owner.getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(null);
+    }
+
     /** One allowlist for BOTH registration and request validation. New scenes
      * cannot silently request a screen whose afterRender handler never exists. */
     private static boolean supportsCapture(Screen screen) {

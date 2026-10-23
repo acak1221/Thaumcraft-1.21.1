@@ -51,6 +51,26 @@ import thaumcraft.common.tiles.TileThaumatoriumTop;
 public final class ThaumatoriumRuntimeChecks {
     private ThaumatoriumRuntimeChecks() {}
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
+    public static void worldScheduled(GameTestHelper test) {
+        Check check = new Check(test);
+        DeviceWorldRuntimeChecks.cleanup(test, check::finish);
+        check.prepare();
+        test.runAfterDelay(5, () -> {
+            check.form();
+            check.tile.setItem(0, new ItemStack(Items.IRON_NUGGET));
+            check.select();
+        });
+        test.runAfterDelay(70, () -> {
+            test.assertTrue(check.tile.isHeated() && check.tile.getItem(0).isEmpty()
+                            && check.source.getAmount() == 0 && check.tile.getAspects().visSize() == 0
+                            && check.outputCount() == 3,
+                    "world formed thaumatorium pays nugget1+metallum2 for iron nuggets3");
+        });
+        test.runAfterDelay(100, () -> {
+            test.assertTrue(check.outputCount() == 3, "world empty thaumatorium cannot replay paid recipe");
+            check.finish(); test.succeed();
+        });
+    }
     public static void run(GameTestHelper test) {
         Check check = new Check(test);
         try { check.prepare(); } catch (RuntimeException | Error failure) { check.finish(); throw failure; }

@@ -124,6 +124,7 @@ public final class LevitatorRuntimeChecks {
                             test.assertTrue(items[1].getY() < powered.getY() + 2, "a powered levitator lifts nothing: " + (items[1].getY() - powered.getY()));
                             test.assertTrue(items[2].getY() < above.getY() + 2, "power on the block above stops it too: " + (items[2].getY() - above.getY()));
                             test.assertTrue(cart.getY() > pigPos.getY() + 6 && cart.isAlive(), "a minecart (pushable) is carried up too: " + (cart.getY() - pigPos.getY()));
+                            thaumcraft.common.Thaumcraft.LOG.info("G26 measured levitator after45 world ticks: item height={}, powered item height={}, minecart height={}",items[0].getY()-lift.getY(),items[1].getY()-powered.getY(),cart.getY()-pigPos.getY());
                             test.assertTrue(Math.abs(stand.getY() - standY) < 1e-6, "an armor stand cannot be pushed, so it stays");
                             test.runAfterDelay(40, () -> {
                                 try {

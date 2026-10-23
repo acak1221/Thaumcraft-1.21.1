@@ -52,6 +52,29 @@ import thaumcraft.api.nodes.NodeType;
  * Raw materials, late crafting wand, ordinary node capacities and physical pearls are explicit SERVER INPUT fixtures. */
 public final class AdvancedFurnaceRuntimeChecks {
     private AdvancedFurnaceRuntimeChecks() {}
+    public static void worldScheduled(GameTestHelper test) {
+        var f = new Fixture(test);
+        DeviceWorldRuntimeChecks.cleanup(test, f::close);
+        f.open(); rememberBox(f,f.base.offset(-8,-3,-3),f.base.offset(8,3,3));
+        var core = form(f,f.base,false);
+        NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,NodeType.NORMAL);
+        test.runAfterDelay(300, () -> {
+            f.check(core.getHeat() >= 8 && core.getPower1() >= 4 && core.getPower2() >= 4,
+                    "formed world advanced furnace actually draws native source power without manual machine ticks");
+            int heat=core.getHeat(), entropy=core.getPower1(), water=core.getPower2();
+            var item=physical(f,f.base,new ItemStack(Items.COAL));
+            // Native collision entry on an actual registered built multiblock and actual physical item.
+            f.level.getBlockState(f.base).entityInside(f.level,f.base,item);
+            f.check(item.isRemoved() && core.getVis()==4 && core.getHeat()==heat-8
+                            && core.getPower1()==entropy-4 && core.getPower2()==water-4,
+                    "actual collision pays coal1+ignis8+perditio4+aqua4 for essentia ignis2+potentia2");
+            var nozzle=(TileAlchemyFurnaceAdvancedNozzle)f.level.getBlockEntity(f.base.east());
+            f.check(nozzle.takeEssentia(Aspect.FIRE,2,Direction.EAST)==2
+                            && nozzle.takeEssentia(Aspect.ENERGY,2,Direction.EAST)==2 && core.getVis()==0,
+                    "all four generated units are actually recoverable through registered output nozzle");
+            f.close(); test.succeed();
+        });
+    }
     public static void run(GameTestHelper test) {
         var forced=GolemChunks.hold(test.getLevel(),List.of(test.absolutePos(new BlockPos(-9,3,-3)),test.absolutePos(new BlockPos(12,3,9))));
         try(var f=new Fixture(test)) {

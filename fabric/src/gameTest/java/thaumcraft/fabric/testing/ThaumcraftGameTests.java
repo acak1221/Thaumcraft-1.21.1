@@ -86,6 +86,56 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "g26_world_powered_bore")
+    public void deviceWorldPoweredBoreMinesAndReturnsItem(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.poweredBore(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1160, batch = "g26_world_tube_buffer")
+    public void deviceWorldTubeAndBufferDeliverToConsumer(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.tubeAndBuffer(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 80, batch = "g26_world_hungry_chest")
+    public void deviceWorldHungryChestCollectsPhysicalInput(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.hungryChest(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 180, batch = "g26_world_relay")
+    public void deviceWorldRelayPaysActualConsumer(GameTestHelper test) {
+        thaumcraft.common.testing.VisNetLifecycleChecks.worldScheduled(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 360, batch = "g26_world_advanced_furnace")
+    public void deviceWorldAdvancedFurnacePaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.AdvancedFurnaceRuntimeChecks.worldScheduled(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 140, batch = "g26_world_thaumatorium")
+    public void deviceWorldThaumatoriumPaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.ThaumatoriumRuntimeChecks.worldScheduled(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 90, batch = "g26_world_deconstruction")
+    public void deviceWorldDeconstructionPaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.deconstruction(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 260, batch = "g26_world_furnace")
+    public void deviceWorldFurnacePaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.furnace(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 160, batch = "g26_world_centrifuge")
+    public void deviceWorldCentrifugePaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.centrifuge(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1120, batch = "g26_world_crystallizer")
+    public void deviceWorldCrystallizerPaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.crystallizer(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1550, batch = "g21_carry")
     public void g21CarryAndRefusals(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.carryAndRefusals(test); }
 

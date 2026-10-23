@@ -32,6 +32,35 @@ import thaumcraft.api.nodes.NodeType;
 public final class VisNetLifecycleChecks {
     private VisNetLifecycleChecks() {}
 
+    public static void worldScheduled(GameTestHelper test) {
+        var f = NodeTransductionRuntimeChecks.fixture(test, false);
+        DeviceWorldRuntimeChecks.cleanup(test, f::close);
+        f.open();
+        var source = source(f, f.base.west(7));
+        var relay = VisNetRuntimeChecks.relay(f, f.base, (byte) -1);
+        var machine = CrystallizerRuntimeChecks.machine(f, f.base.east(7), Direction.DOWN);
+        f.put(machine.getBlockPos().below(), ThaumcraftAlembics.ALEMBIC.get());
+        var raw = (TileAlembic) f.level.getBlockEntity(machine.getBlockPos().below());
+        f.check(raw.addToContainer(Aspect.ENERGY, 1) == 0, "one declared raw potentia in physical source alembic");
+        f.put(machine.getBlockPos().north(), Blocks.REDSTONE_BLOCK);
+        test.runAfterDelay(20, () -> {
+            f.check(VisNetRuntimeChecks.parent(relay) == source && source.getAvailableVis().getAmount(Aspect.EARTH) == 8,
+                    "world scheduled relay really attaches to renewable source, consumer14 blocks away cannot bypass relay");
+            f.check(VisNetHandler.drainVis(f.level,machine.getBlockPos(),Aspect.EARTH,3)==3
+                            && source.getAvailableVis().getAmount(Aspect.EARTH)==5
+                            && VisNetHandler.drainVis(f.level,machine.getBlockPos(),Aspect.EARTH,9)==5
+                            && source.getAvailableVis().getAmount(Aspect.EARTH)==0
+                            && VisNetHandler.drainVis(f.level,machine.getBlockPos(),Aspect.EARTH,1)==0,
+                    "real route conserves source8=consumer3+consumer5; exhausted pulse grants0");
+            f.put(machine.getBlockPos().north(),Blocks.AIR);
+        });
+        test.runAfterDelay(130, () -> {
+            f.check(raw.getAmount()==0 && machine.getAspect()==null && CrystallizerRuntimeChecks.crystalDrops(f)==1,
+                    "world source->relay->actual crystallizer turns paid essentia1 into physical crystal1 with native acceleration");
+            f.close(); test.succeed();
+        });
+    }
+
     /** Suggested timeout240, separate batch with no other M09b level owner. */
     public static void callbacksReloadAndIsolation(GameTestHelper test) {
         try (var f = NodeTransductionRuntimeChecks.fixture(test, false)) {

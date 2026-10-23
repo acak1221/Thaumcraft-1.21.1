@@ -172,7 +172,7 @@ public final class GuiResearchBrowser extends Screen {
      * {@code 0.66}. The frame runs backwards over the thirty two frames of the sheet.
      */
     private void forbidden(GuiGraphics graphics, ResearchDefinition research, int centreX, int centreY) {
-        if (research.warp() <= 0) return;
+        if (research.currentWarp() <= 0) return;
         int frames = 32, strip = 5, size = 80;
         int part = minecraft.player == null ? 0 : minecraft.player.tickCount % frames;
         int frame = frames - 1 - part;

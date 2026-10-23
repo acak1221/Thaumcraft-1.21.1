@@ -36,7 +36,7 @@ public final class WarpMessageNetworking {
         if (WarpEvents.isWussMode()) return;
         for (String key : completed) {
             var definition = ResearchCatalog.get(key);
-            int warp = definition == null ? 0 : definition.warp();
+            int warp = definition == null ? 0 : definition.currentWarp();
             if (warp <= 0) continue;
             send(player, (byte) 0, warp - warp / 2);
             if (warp / 2 > 0) send(player, (byte) 1, warp / 2);

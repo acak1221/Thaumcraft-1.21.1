@@ -4,7 +4,6 @@ import java.util.List;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -66,7 +65,7 @@ public final class WarpEvents {
                 if (knowledge.addResearch(research)) {
                     feedback.add(new thaumcraft.common.lib.network.ResearchNoticePayload(research));
                     var definition = thaumcraft.common.lib.research.ResearchCatalog.get(research);
-                    int addedWarp = definition == null ? 0 : definition.warp();
+                    int addedWarp = definition == null ? 0 : definition.currentWarp();
                     if (!wussMode && addedWarp > 0) {
                         knowledge.addWarpPerm(addedWarp - addedWarp / 2);
                         knowledge.addWarpSticky(addedWarp / 2);
@@ -186,12 +185,7 @@ public final class WarpEvents {
     public static int onCrafted(ServerPlayer player, ItemStack output) {
         if (!player.server.isSameThread()) throw new IllegalStateException("Crafting warp requires the server thread");
         if (wussMode || output == null || output.isEmpty()) return 0;
-        var id = BuiltInRegistries.ITEM.getKey(output.getItem());
-        if (!id.getNamespace().equals("thaumcraft")) return 0;
-        int amount = switch (id.getPath()) {
-            case "focus_hellbat", "compass_stone", "jar_brain", "bucket_death", "bottle_taint", "golem_flesh", "focus_primal", "staff_rod_primal" -> 1;
-            default -> 0;
-        };
+        int amount = thaumcraft.api.ThaumcraftApi.getWarp(output);
         if (amount > 0) {
             var knowledge = KnowledgeAccess.get(player);
             knowledge.addWarpSticky(amount); knowledge.setWarpCounter(knowledge.getTotalWarp()); KnowledgeEvents.sync(player);

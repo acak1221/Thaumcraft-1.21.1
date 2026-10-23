@@ -29,6 +29,8 @@ public record ResearchDefinition(
     }
 
     public boolean isAutoUnlock() { return this.flags.contains("AutoUnlock"); }
+    /** The immutable warp field is provenance; gameplay and warnings use the live public registry. */
+    public int currentWarp() { return thaumcraft.api.ThaumcraftApi.getWarpForResearch(this); }
     public boolean isVirtual() { return this.flags.contains("Virtual"); }
     public boolean isHidden() { return this.flags.contains("Hidden"); }
     public boolean isLost() { return this.flags.contains("Lost"); }

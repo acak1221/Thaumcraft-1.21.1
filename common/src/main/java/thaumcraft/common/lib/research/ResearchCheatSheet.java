@@ -13,7 +13,7 @@ public final class ResearchCheatSheet {
         for (ResearchDefinition research : ResearchRegistrationOrder.enabled()) {
             if (!staged.addResearch(research.key())) continue;
             changed = true;
-            int warp = research.warp();
+            int warp = research.currentWarp();
             // Original completeResearch has NO sibling pass and awards permanent ceil(warp/2), sticky floor(warp/2).
             if (warp > 0 && !settings.wuss()) {
                 staged.addWarpPerm(warp - warp / 2); staged.addWarpSticky(warp / 2);

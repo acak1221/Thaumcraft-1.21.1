@@ -170,6 +170,9 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1550, batch = "g21_carry")
     public void g21CarryAndRefusals(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.carryAndRefusals(test); }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "goal_lifecycle")
+    public void goalLifecycleDecorationClosesGate(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.decorationClosesRunningGate(test); }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1050, batch = "g21_gather")
     public void g21GatherAndAir(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.gatherAndAir(test); }
 

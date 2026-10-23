@@ -44,9 +44,58 @@ import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUseOptions;
 
-/** Live selector tests: no direct goal, transfer, damage, harvest or navigation calls. */
+/** Live selector tests: no direct goal actions, transfers, damage or harvest calls.
+ * The door lifecycle case supplies navigation/collision inputs; work cases use natural routes. */
 public final class GolemEndToEndRuntimeChecks {
     private GolemEndToEndRuntimeChecks() {}
+
+    /** A real registered door goal must release its window during decoration's setupGolem rebuild. */
+    public static void decorationClosesRunningGate(GameTestHelper test) {
+        var f = new Fixture(test, 1);
+        BlockPos home = f.home(0), gate = home.south();
+        f.level.setBlock(gate, Blocks.OAK_FENCE_GATE.defaultBlockState(), Fixture.QUIET);
+        var worker = new DoorWindowGolem(f.level);
+        worker.setGolemMaterial(2);
+        worker.applyConfiguration(new GolemData(GolemData.GATHER,
+                Collections.nCopies(GolemData.FILTER_SLOTS, ItemStack.EMPTY),
+                Collections.nCopies(GolemData.FILTER_SLOTS, 0), false, List.of(), GolemUseOptions.DEFAULT, List.of()));
+        worker.setHome(home, Direction.EAST);
+        worker.setPos(Vec3.atBottomCenterOf(home));
+        f.add(worker);
+        var player = f.player(home.east());
+        worker.setOwnerName(player.getGameProfile().getName());
+        f.poll(100, () -> {
+            if (!worker.canWork()) return false;
+            // Supply only the collision/path inputs; the installed selector admits and opens the gate.
+            var path = new net.minecraft.world.level.pathfinder.Path(List.of(
+                    new net.minecraft.world.level.pathfinder.Node(gate.getX(), gate.getY(), gate.getZ()),
+                    new net.minecraft.world.level.pathfinder.Node(gate.getX(), gate.getY(), gate.getZ() + 2)), gate.south(2), true);
+            worker.getNavigation().moveTo(path, 1);
+            worker.horizontalCollision = true;
+            worker.tickSelector();
+            test.assertTrue(worker.runningDoorWindow(), "the registered door wrapper is running before reconfiguration");
+            test.assertTrue(f.level.getBlockState(gate).getValue(net.minecraft.world.level.block.FenceGateBlock.OPEN),
+                    "the real door goal opened the initially closed gate");
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
+                    new ItemStack(ThaumcraftGolems.DECORATION_DART.get(), 2));
+            test.assertTrue(worker.interact(player, net.minecraft.world.InteractionHand.MAIN_HAND)
+                            == net.minecraft.world.InteractionResult.CONSUME
+                            && worker.getDecoration().equals("R") && player.getMainHandItem().getCount() == 1,
+                    "real survival decoration installation pays once and triggers the goal rebuild");
+            test.assertTrue(!f.level.getBlockState(gate).getValue(net.minecraft.world.level.block.FenceGateBlock.OPEN),
+                    "decoration rebuild must stop the running door goal and close its gate immediately");
+            return true;
+        });
+    }
+
+    private static final class DoorWindowGolem extends EntityGolemBase {
+        DoorWindowGolem(ServerLevel level) { super(ThaumcraftGolems.GOLEM.get(), level); }
+        void tickSelector() { goalSelector.tick(); }
+        boolean runningDoorWindow() {
+            return goalSelector.getAvailableGoals().stream().anyMatch(goal -> goal.isRunning()
+                    && goal.getGoal().getClass().getSimpleName().equals("GolemDoorGoal") && goal.canContinueToUse());
+        }
+    }
 
     public static void carryAndRefusals(GameTestHelper test) {
         var f = new Fixture(test, 6);

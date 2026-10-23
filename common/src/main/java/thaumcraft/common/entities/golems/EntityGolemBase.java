@@ -45,6 +45,7 @@ import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.animal.Animal;
@@ -1024,6 +1025,8 @@ public class EntityGolemBase extends AbstractGolem {
      * {@link GoalPriority}.</p>
      */
     private void rebuildGoals() {
+        stopAndRemoveGoals(goalSelector);
+        stopAndRemoveGoals(targetSelector);
         use.reset();
         alchemy.reset();
         liquid.reset();
@@ -1032,8 +1035,6 @@ public class EntityGolemBase extends AbstractGolem {
         guard.reset();
         harvest.reset();
         lumber.reset();
-        goalSelector.removeAllGoals(goal -> true);
-        targetSelector.removeAllGoals(goal -> true);
         work.reset();
         inventories.reset();
         getNavigation().stop();
@@ -1055,6 +1056,13 @@ public class EntityGolemBase extends AbstractGolem {
             else if (inventoryCore(core)) inventories.install();
             work.installShared();
         }
+    }
+    private static void stopAndRemoveGoals(GoalSelector selector) {
+        // Bulk removal does not invoke stop. Retire wrappers before resetting their resource owners.
+        for (var goal : selector.getAvailableGoals()) {
+            if (goal.isRunning()) goal.stop();
+        }
+        selector.removeAllGoals(goal -> true);
     }
     boolean hasInventoryRoute() {
         // Shared ReturnHome also yields to combat, farming, a live cast and liquid intent.

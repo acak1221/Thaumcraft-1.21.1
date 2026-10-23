@@ -78,14 +78,20 @@ public final class ModelTunnelField {
         // RenderStateShard.ADDITIVE_TRANSPARENCY, whose blend is exactly
         // RenderSystem.blendFunc(ONE, ONE), and its shader ignores the lightmap
         // like the original, which draws the tunnel with GL_TEXTURE_2D disabled.
-        VertexConsumer tunnel = buffers.getBuffer(RenderType.entityTranslucent(TUNNEL));
-        VertexConsumer field = buffers.getBuffer(RenderType.eyes(FIELD));
+        //
+        // The buffer MUST be fetched per layer, not once before the loop. A
+        // MultiBufferSource.BufferSource closes the previous buffer for a RenderType
+        // that cannot consolidate consecutive geometry (verified in the 1.21.1
+        // bytecode: getBuffer ends the batch and starts a fresh builder when
+        // canConsolidateConsecutiveGeometry() is false, which is RenderType.eyes).
+        // Holding it across the loop therefore writes into a buffer that is already
+        // closed and the client crashes with "Not building!".
         for (int layer = 0; layer < LAYERS; layer++) {
             float distance = LAYERS - layer;
             float scale = 1.0F / (distance + 1.0F);
             float alpha = layer == 0 ? .1F : scale;
             float textureScale = layer == 0 ? OUTER_TEXTURE_SCALE : (layer == 1 ? INNER_TEXTURE_SCALE : .0625F);
-            VertexConsumer out = layer == 0 ? tunnel : field;
+            VertexConsumer out = buffers.getBuffer(layer == 0 ? RenderType.entityTranslucent(TUNNEL) : RenderType.eyes(FIELD));
             float red = random.nextFloat() * .5F + .1F;
             float green = random.nextFloat() * .5F + .4F;
             float blue = random.nextFloat() * .5F + .5F;

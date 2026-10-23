@@ -174,11 +174,7 @@ public final class ItemThaumometerRenderer {
         // Original ItemThaumometerRenderer:169,179,183 - the icons are only drawn for a target
         // that was already scanned.
         var knowledge = KnowledgeAccess.get(player);
-        boolean scanned = switch (target.kind()) {
-            case ITEM -> knowledge.hasScannedItem(target.signature());
-            case ENTITY -> knowledge.hasScannedEntity(target.signature());
-            case PHENOMENA -> knowledge.hasScannedPhenomena(target.signature());
-        };
+        boolean scanned = thaumcraft.common.lib.research.ScanManager.hasBeenScanned(knowledge, target.signature(), target.kind());
         int ticks = player.tickCount;
         int jitter = player.level() == null ? 0 : player.level().getRandom().nextInt(2);
         ThaumometerReadout.render(pose, buffers, target, scanned, ThaumometerReadout.packedLight(ticks, jitter));

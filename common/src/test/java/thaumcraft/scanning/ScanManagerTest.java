@@ -114,6 +114,34 @@ public class ScanManagerTest {
     }
 
     @Test
+    public void advancedMarkersBlockThaumometerAcrossEveryKnowledgeBucket() {
+        for (ScanKind kind : ScanKind.values()) {
+            PlayerKnowledge knowledge = new PlayerKnowledge();
+            AspectList aspects = new AspectList().add(Aspect.AIR, 1);
+            assertTrue(ScanManager.awardScan(knowledge, "#native-id", aspects, kind, 100).success());
+            CompoundTag before = knowledge.save();
+            assertTrue(ScanManager.hasBeenScanned(knowledge, "@native-id", kind));
+            assertTrue(ScanManager.hasBeenScanned(knowledge, "#native-id", kind));
+            assertFalse(ScanManager.hasBeenScanned(knowledge, "@other-id", kind));
+            assertEquals(ScanManager.Failure.DUPLICATE,
+                    ScanManager.awardScan(knowledge, "@native-id", aspects, kind, 100).failure());
+            assertEquals(before, knowledge.save());
+        }
+    }
+
+    @Test
+    public void markerAdmissionRemainsOneWayWhileReadoutRecognizesEitherPrefix() {
+        for (ScanKind kind : ScanKind.values()) {
+            PlayerKnowledge knowledge = new PlayerKnowledge();
+            AspectList aspects = new AspectList().add(Aspect.AIR, 1);
+            assertTrue(ScanManager.awardScan(knowledge, "@native-id", aspects, kind, 100).success());
+            assertTrue(ScanManager.hasBeenScanned(knowledge, "#native-id", kind));
+            // Admission only: this does not specify an advanced scanner's reward amounts.
+            assertTrue(ScanManager.awardScan(knowledge, "#native-id", aspects, kind, 100).success());
+        }
+    }
+
+    @Test
     public void diminishingReturnsUseInclusiveThresholdsRatherThanHardCap() {
         assertEquals(9, earnedAtPool(99, 9));
         assertEquals(3, earnedAtPool(100, 9));

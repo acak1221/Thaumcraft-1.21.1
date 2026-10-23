@@ -138,7 +138,21 @@ public final class ScanManager {
         return new ScanOutcome(true, Failure.NONE, null, awards, discovered);
     }
 
+    /** Original hasBeenScanned:317-348: readout recognizes either thaumometer or advanced marker. */
+    public static boolean hasBeenScanned(PlayerKnowledge knowledge, String signature, ScanKind kind) {
+        if (knowledge == null || signature == null || signature.isEmpty() || kind == null) return false;
+        String target = signature.startsWith("#") ? "@" + signature.substring(1) : signature;
+        return wasScanned(knowledge, target, kind);
+    }
+
     private static boolean wasScanned(PlayerKnowledge knowledge, String signature, ScanKind kind) {
+        // Original isValidScanTarget:282-284 checks # before admitting @. An advanced
+        // scan replaces its @ marker, but must never make that target scannable again.
+        return hasExactScan(knowledge, signature, kind)
+                || signature.startsWith("@") && hasExactScan(knowledge, "#" + signature.substring(1), kind);
+    }
+
+    private static boolean hasExactScan(PlayerKnowledge knowledge, String signature, ScanKind kind) {
         return switch (kind) {
             case ITEM -> knowledge.hasScannedItem(signature);
             case ENTITY -> knowledge.hasScannedEntity(signature);

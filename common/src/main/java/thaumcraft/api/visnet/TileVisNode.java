@@ -30,14 +30,20 @@ public abstract class TileVisNode extends BlockEntity {
     public boolean nodeRefresh;
 
     protected TileVisNode(BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type, pos, state); }
+    /** Returns this node's connection radius in blocks; nonpositive ranges cannot establish a usable graph link. */
     public abstract int getRange();
     public abstract boolean isSource();
+    /** Returns the dimensionless channel token; the base value -1 is uncolored/unattuned, without mutation. */
     public byte getAttunement() { return -1; }
     protected boolean isNetworkEnabled() { return true; }
+    /** Returns a new immutable location in block coordinates, or null when unattached; does not alter graph state. */
     public final WorldCoordinates getLocation() { return level == null ? null : new WorldCoordinates(level.dimension(), worldPosition); }
+    /** Returns the count of eligible node-tick phases entered, in game ticks, reset on level change/reload; no mutation. */
     public final int getNodeCounter() { return nodeCounter; }
     public final long getAttachmentVersion() { return attachmentVersion; }
+    /** Returns whether a node tick, notification, removal or parent-change frame is active; no mutation. */
     public final boolean isNodeTickActive() { return nodeTickActive || notifying || removing || settingParent; }
+    /** Returns whether this level has an active vis consume frame; an unattached node returns false. */
     public final boolean isConsumeActive() { return VisNetHandler.isConsumeActive(level); }
     protected final boolean isSourceDebitActive() { return sourceDebitActive; }
     protected final boolean isCurrentNode() { return VisNetHandler.isCurrent(this); }
@@ -54,13 +60,16 @@ public abstract class TileVisNode extends BlockEntity {
      * run of a drain answers exactly what the real drain would take. */
     protected int availableFromSource(Aspect aspect) { return 0; }
     public final int consumeVis(Aspect aspect, int amount) { return VisNetHandler.consume(this, aspect, amount); }
+    /** Default no-op effect notification, accepting null aspect without sending packets; subclasses may supply effects. */
     public void triggerConsumeEffect(Aspect aspect) {}
+    /** Default no-op link-change callback; graph notification may already have marked/synchronized the block before invoking it. */
     public void parentChanged() {}
 
     public final WeakReference<TileVisNode> getParent() {
         TileVisNode value = VisNetHandler.parentFor(this);
         return value == null ? null : new WeakReference<>(value);
     }
+    /** Returns an immutable snapshot of live child references; clearing these new weak references cannot remove stored edges. */
     public final List<WeakReference<TileVisNode>> getChildren() {
         List<WeakReference<TileVisNode>> snapshot = new ArrayList<>();
         for (WeakReference<TileVisNode> ref : children) {

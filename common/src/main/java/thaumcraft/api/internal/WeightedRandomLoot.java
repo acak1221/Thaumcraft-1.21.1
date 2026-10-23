@@ -11,5 +11,6 @@ public class WeightedRandomLoot {
     public static ArrayList<WeightedRandomLoot> lootBagUncommon = new ArrayList<>();
     public static ArrayList<WeightedRandomLoot> lootBagRare = new ArrayList<>();
 
+    /** Creates an unregistered entry retaining the nullable stack and unvalidated dimensionless relative weight; does not append to any loot list. */
     public WeightedRandomLoot(ItemStack stack, int weight) { item = stack; itemWeight = weight; }
 }

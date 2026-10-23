@@ -59,6 +59,7 @@ public final class FocusUpgradeType {
         return Map.copyOf(result);
     }
 
+    /** Returns a caller-owned copy of the upgrade's aspect weights (unitless recipe weights, not centivis); Aspect identities remain shared. */
     public AspectList getAspects() { return aspects.copy(); }
 
     /**
@@ -77,7 +78,9 @@ public final class FocusUpgradeType {
      */
     public String getLocalizedText() { return net.minecraft.network.chat.Component.translatable(this.text).getString(); }
 
+    /** Returns the catalogue identity for a stable dimensionless TC4 upgrade ID, or null if unsupported; no mutation. */
     public static FocusUpgradeType get(short id) { return TYPES.get(id); }
+    /** Returns the catalogue identity, or null for an unsupported/out-of-short-range ID; no mutation. */
     public static FocusUpgradeType get(int id) { return id < 0 || id > Short.MAX_VALUE ? null : get((short) id); }
     @Override public boolean equals(Object other) { return this == other || other instanceof FocusUpgradeType type && id == type.id; }
     @Override public int hashCode() { return Short.hashCode(id); }

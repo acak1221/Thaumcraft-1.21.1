@@ -19,6 +19,7 @@ public class ResearchCategoryList {
     public ResourceLocation background;
     public Map<String, ResearchItem> research = new LinkedHashMap<>();
 
+    /** Creates an empty unregistered category with nullable icon/background references and zero research-grid bounds; no global state changes. */
     public ResearchCategoryList(ResourceLocation icon, ResourceLocation background) {
         this.icon = icon;
         this.background = background;

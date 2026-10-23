@@ -83,26 +83,36 @@ public class Aspect {
         }
     }
 
+    /** Registers a new aspect with a derived texture; RGB color/blend are raw render values, components are copied (null allowed), null tag throws NPE and duplicate tags throw IAE. */
     public Aspect(String tag, int color, Aspect[] components, int blend) {
         this(tag, color, components,
                 ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/aspects/" + tag.toLowerCase(Locale.ROOT) + ".png"), blend);
     }
 
+    /** Registers an aspect as {@link #Aspect(String, int, Aspect[], int)} with blend 1; component entries are not validated. */
     public Aspect(String tag, int color, Aspect[] components) {
         this(tag, color, components, 1);
     }
 
+    /** Registers a primal aspect with raw RGB/blend values and nullable chat color; null tag throws NPE and a duplicate tag throws IAE. */
     public Aspect(String tag, int color, String chatcolor, int blend) {
         this(tag, color, (Aspect[]) null, blend);
         this.chatcolor = chatcolor;
     }
 
+    /** Returns the mutable display tag, possibly null after setTag; does not change registry keys. */
     public String getTag() { return this.tag; }
+    /** Returns the stored RGB integer without changing state. */
     public int getColor() { return this.color; }
+    /** Returns the tag with its first character capitalized; null/empty tags fail, and this is not a translation lookup. */
     public String getName() { return this.tag.substring(0, 1).toUpperCase(Locale.ROOT) + this.tag.substring(1); }
+    /** Returns a new component array sharing Aspect objects, or null when no array is stored. */
     public Aspect[] getComponents() { return this.components == null ? null : this.components.clone(); }
+    /** Returns the non-null texture identifier without changing state. */
     public ResourceLocation getImage() { return this.image; }
+    /** Returns the raw render blend value without changing state. */
     public int getBlend() { return this.blend; }
+    /** Returns the stored chat-color string, which constructors/setters may leave null. */
     public String getChatcolor() { return this.chatcolor; }
 
     /**
@@ -129,20 +139,24 @@ public class Aspect {
     /** Original Aspect:172 - the chat colour of an aspect can be retuned by an add-on. */
     public void setChatcolor(String chatcolor) { this.chatcolor = chatcolor; }
 
+    /** Looks up the live registry by key; unknown/null keys return null unless the public map was manually populated at that key. */
     public static Aspect getAspect(String tag) { return aspects.get(tag); }
 
+    /** Returns a new registry-ordered list of primal aspects; elements remain shared mutable identities. */
     public static ArrayList<Aspect> getPrimalAspects() {
         ArrayList<Aspect> result = new ArrayList<>();
         for (Aspect aspect : aspects.values()) if (aspect.isPrimal()) result.add(aspect);
         return result;
     }
 
+    /** Returns a new registry-ordered list of nonprimal aspects; elements remain shared mutable identities. */
     public static ArrayList<Aspect> getCompoundAspects() {
         ArrayList<Aspect> result = new ArrayList<>();
         for (Aspect aspect : aspects.values()) if (!aspect.isPrimal()) result.add(aspect);
         return result;
     }
 
+    /** Returns the first registry aspect matching the two parent identities in either order, or null for null inputs/no match; malformed short component arrays can throw. */
     public static Aspect getCombinationResult(Aspect first, Aspect second) {
         if (first == null || second == null) return null;
         for (Aspect aspect : aspects.values()) {

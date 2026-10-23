@@ -19,19 +19,25 @@ import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 
 /** Native supported focus contracts; upgrade candidates never advertise inert branches. */
 public class ItemFocusBasic extends Item {
+    /** Creates an unregistered focus item, mutating supplied properties to stack size one/rare rarity; null properties throws NPE. */
     public ItemFocusBasic(Properties properties) { super(properties.stacksTo(1).rarity(Rarity.RARE)); }
 
     /** Like original ItemFocusBasic:65-72, these amounts are CENTIVIS, not recipe vis. */
     public AspectList getVisCost(ItemStack focusstack) { return null; }
+    /** Returns false in this base implementation, meaning cost is not per game tick; ignores nullable stack without mutation. */
     public boolean isVisCostPerTick(ItemStack focusstack) { return false; }
+    /** Returns RGB zero in this base implementation, ignoring nullable stack without mutation. */
     public int getFocusColor(ItemStack focusstack) { return 0; }
+    /** Returns concatenated applied numeric upgrade IDs, including -1 holes; null/empty stack uses empty upgrade data, with no mutation. */
     public String getSortingHelper(ItemStack focusstack) {
         FocusUpgradeData data = FocusUpgradeData.read(focusstack);
         StringBuilder result = new StringBuilder();
         for (short id : data.applied()) result.append(id);
         return result.toString();
     }
+    /** Returns zero game ticks of cooldown in this base implementation, ignoring nullable stack. */
     public int getActivationCooldown(ItemStack focusstack) { return 0; }
+    /** Returns WAVE in this base implementation, ignoring nullable stack without mutation. */
     public WandFocusAnimation getAnimation(ItemStack focusstack) { return WandFocusAnimation.WAVE; }
 
     /**
@@ -70,15 +76,24 @@ public class ItemFocusBasic extends Item {
      */
     public boolean onFocusBlockStartBreak(ItemStack focusstack, int x, int y, int z, Player player) { return false; }
 
+    /** Returns null in this base implementation without acting on any nullable argument; subclasses supply stack/hand-aware use behavior. */
     public ItemStack onFocusRightClick(ItemStack wandstack, Level level, Player player, InteractionHand hand) { return null; }
+    /** Does nothing in this base implementation; nullable wand/player are ignored and count is remaining item-use game ticks in native dispatch. */
     public void onUsingFocusTick(ItemStack wandstack, Player player, int count) {}
+    /** Does nothing in this base implementation; nullable arguments are ignored and count is remaining item-use game ticks in native dispatch. */
     public void onPlayerStoppedUsingFocus(ItemStack wandstack, Level level, Player player, int count) {}
 
+    /** Returns a new five-rank ID array with -1 holes; null/empty stack returns empty upgrade data and is not mutated. */
     public short[] getAppliedUpgrades(ItemStack focusstack) { return FocusUpgradeData.read(focusstack).applied(); }
+    /** Returns a new empty choice array in this base implementation, ignoring nullable stack and dimensionless rank. */
     public FocusUpgradeType[] getPossibleUpgradesByRank(ItemStack focusstack, int rank) { return new FocusUpgradeType[0]; }
+    /** Counts occurrences of the registered upgrade identity; null stack/type or unregistered type yields zero without mutation. */
     public int getUpgradeLevel(ItemStack focusstack, FocusUpgradeType type) { return FocusUpgradeData.level(focusstack, type); }
+    /** Tests whether the upgrade count is positive; null stack/type yields false without mutation. */
     public boolean isUpgradedWith(ItemStack focusstack, FocusUpgradeType type) { return getUpgradeLevel(focusstack, type) > 0; }
 
+    /** Tests a free one-based rank 1..5 against subclass choices, without paying costs or writing components.
+     * Null/wrong/unsupported stack, null/unregistered type or invalid/occupied rank returns false; player is ignored here. */
     public boolean canApplyUpgrade(ItemStack focusstack, Player player, FocusUpgradeType type, int rank) {
         if (rank < 1 || rank > 5 || type == null || FocusUpgradeType.get(type.id) != type
                 || focusstack == null || focusstack.getItem() != this || !FocusUpgradeData.supportedForFocus(focusstack)
@@ -121,5 +136,6 @@ public class ItemFocusBasic extends Item {
         tooltip.add(Component.translatable("tc.port.focus.upgrades.partial").withStyle(ChatFormatting.DARK_GRAY));
     }
 
+    /** Non-null animation tokens returned by focus implementations; not timing values or persistent numeric IDs. */
     public enum WandFocusAnimation { WAVE, CHARGE }
 }

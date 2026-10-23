@@ -40,6 +40,7 @@ public class ResearchItem {
     private ResearchPage[] pages = null;
     private ResearchDefinition definition;
 
+    /** Creates an unregistered virtual entry at research-grid (0,0), accepting nullable keys/category without validation. */
     public ResearchItem(String key, String category) {
         this.key = key;
         this.category = category;
@@ -51,6 +52,7 @@ public class ResearchItem {
         this.setVirtual();
     }
 
+    /** Creates an unregistered entry at research-grid column/row, clamping complexity to 1..3; nullable tags/icon are retained, not copied. */
     public ResearchItem(String key, String category, AspectList tags, int col, int row, int complex, ResourceLocation icon) {
         this.key = key;
         this.category = category;
@@ -64,6 +66,7 @@ public class ResearchItem {
         if (this.complexity > 3) this.complexity = 3;
     }
 
+    /** Creates an unregistered entry at research-grid column/row, clamping complexity to 1..3; nullable tags/icon stack are retained, not copied. */
     public ResearchItem(String key, String category, AspectList tags, int col, int row, int complex, ItemStack icon) {
         this.key = key;
         this.category = category;
@@ -123,32 +126,46 @@ public class ResearchItem {
     /** The original corpus entry behind this view, or null for an add-on registration. */
     public ResearchDefinition definition() { return this.definition; }
 
+    /** Sets this entry's special flag and returns this; does not register the entry. */
     public ResearchItem setSpecial() { this.isSpecial = true; return this; }
 
+    /** Sets this entry's stub flag and returns this; does not register the entry. */
     public ResearchItem setStub() { this.isStub = true; return this; }
 
+    /** Sets this entry's lost flag and returns this; does not register the entry. */
     public ResearchItem setLost() { this.isLost = true; return this; }
 
+    /** Sets this entry's concealed flag and returns this; does not register the entry. */
     public ResearchItem setConcealed() { this.isConcealed = true; return this; }
 
+    /** Sets this entry's hidden flag and returns this; does not register the entry. */
     public ResearchItem setHidden() { this.isHidden = true; return this; }
 
+    /** Sets this entry's virtual flag and returns this; does not register the entry. */
     public ResearchItem setVirtual() { this.isVirtual = true; return this; }
 
+    /** Retains the nullable parent-key array by reference and returns this; does not validate entries. */
     public ResearchItem setParents(String... par) { this.parents = par; return this; }
 
+    /** Retains the nullable hidden-parent array by reference and returns this; does not validate entries. */
     public ResearchItem setParentsHidden(String... par) { this.parentsHidden = par; return this; }
 
+    /** Retains the nullable sibling-key array by reference and returns this; does not validate entries. */
     public ResearchItem setSiblings(String... sib) { this.siblings = sib; return this; }
 
+    /** Retains the nullable page array by reference and returns this; pages and their order remain mutable. */
     public ResearchItem setPages(ResearchPage... par) { this.pages = par; return this; }
 
+    /** Returns the live page array, or null when unset; editing it edits this entry. */
     public ResearchPage[] getPages() { return this.pages; }
 
+    /** Retains the nullable trigger array and its stack references, returning this without validation. */
     public ResearchItem setItemTriggers(ItemStack... par) { this.itemTriggers = par; return this; }
 
+    /** Retains the nullable entity-trigger array by reference and returns this. */
     public ResearchItem setEntityTriggers(String... par) { this.entityTriggers = par; return this; }
 
+    /** Retains the nullable aspect-trigger array by reference and returns this. */
     public ResearchItem setAspectTriggers(Aspect... par) { this.aspectTriggers = par; return this; }
 
     /**
@@ -170,42 +187,61 @@ public class ResearchItem {
         return this.itemTriggers;
     }
 
+    /** Returns the live entity-trigger array, or null when unset; no copy is made. */
     public String[] getEntityTriggers() { return this.entityTriggers; }
 
+    /** Returns the live aspect-trigger array, or null when unset; no copy is made. */
     public Aspect[] getAspectTriggers() { return this.aspectTriggers; }
 
+    /** Attempts global category registration and returns this even if rejected for missing category, duplicate key or overlap. */
     public ResearchItem registerResearchItem() { ResearchCategories.addResearch(this); return this; }
 
+    /** Returns the current translation of tc.research_name plus this key; null keys are concatenated as "null", with no mutation. */
     public String getName() { return Component.translatable("tc.research_name." + this.key).getString(); }
 
+    /** Returns the current translation of tc.research_text plus this key; null keys are concatenated as "null", with no mutation. */
     public String getText() { return Component.translatable("tc.research_text." + this.key).getString(); }
 
+    /** Returns this entry's special flag without changing state. */
     public boolean isSpecial() { return this.isSpecial; }
 
+    /** Returns this entry's stub flag without changing state. */
     public boolean isStub() { return this.isStub; }
 
+    /** Returns this entry's lost flag without changing state. */
     public boolean isLost() { return this.isLost; }
 
+    /** Returns this entry's concealed flag without changing state. */
     public boolean isConcealed() { return this.isConcealed; }
 
+    /** Returns this entry's hidden flag without changing state. */
     public boolean isHidden() { return this.isHidden; }
 
+    /** Returns this entry's virtual flag without changing state. */
     public boolean isVirtual() { return this.isVirtual; }
 
+    /** Returns this entry's auto-unlock flag without changing state. */
     public boolean isAutoUnlock() { return this.isAutoUnlock; }
 
+    /** Sets this entry's auto-unlock flag and returns this without registering it. */
     public ResearchItem setAutoUnlock() { this.isAutoUnlock = true; return this; }
 
+    /** Returns this entry's round-display flag without changing state. */
     public boolean isRound() { return this.isRound; }
 
+    /** Sets this entry's round-display flag and returns this. */
     public ResearchItem setRound() { this.isRound = true; return this; }
 
+    /** Returns this entry's secondary flag without changing state. */
     public boolean isSecondary() { return this.isSecondary; }
 
+    /** Sets this entry's secondary flag and returns this without registering it. */
     public ResearchItem setSecondary() { this.isSecondary = true; return this; }
 
+    /** Returns the dimensionless stored research complexity; setters may put it outside the constructor's 1..3 range. */
     public int getComplexity() { return this.complexity; }
 
+    /** Stores the dimensionless research complexity without clamping and returns this. */
     public ResearchItem setComplexity(int complexity) { this.complexity = complexity; return this; }
 
     /** The aspect with the highest amount; the original returned null for an empty tag list. */

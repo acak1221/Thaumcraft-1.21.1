@@ -30,67 +30,81 @@ public class ResearchPage {
     /** The native corpus recipe reference of this page, when it has one. */
     public String recipeKey = null;
 
+    /** Creates an unregistered text page retaining the nullable translation key; does not translate or change research state. */
     public ResearchPage(String text) {
         this.type = PageType.TEXT;
         this.text = text;
     }
 
+    /** Creates an unregistered concealed text page retaining nullable research/text keys; does not unlock research. */
     public ResearchPage(String research, String text) {
         this.type = PageType.TEXT_CONCEALED;
         this.research = research;
         this.text = text;
     }
 
+    /** Retains the vanilla recipe and copies its registry-resolved output; null recipe throws NPE, with no recipe registration or consumption. */
     public ResearchPage(Recipe<?> recipe) {
         this.type = PageType.NORMAL_CRAFTING;
         this.recipe = recipe;
         this.recipeOutput = recipe.getResultItem(registries()).copy();
     }
 
+    /** Creates a vanilla crafting page retaining the nullable recipe array by reference; output remains null and no registration occurs. */
     public ResearchPage(Recipe<?>[] recipe) {
         this.type = PageType.NORMAL_CRAFTING;
         this.recipe = recipe;
     }
 
+    /** Creates an arcane crafting page retaining the nullable recipe array by reference; output remains null and no registration occurs. */
     public ResearchPage(IArcaneRecipe[] recipe) {
         this.type = PageType.ARCANE_CRAFTING;
         this.recipe = recipe;
     }
 
+    /** Creates a crucible crafting page retaining the nullable recipe array by reference; output remains null and no registration occurs. */
     public ResearchPage(CrucibleRecipe[] recipe) {
         this.type = PageType.CRUCIBLE_CRAFTING;
         this.recipe = recipe;
     }
 
+    /** Creates an infusion crafting page retaining the nullable recipe array by reference; output remains null and no registration occurs. */
     public ResearchPage(InfusionRecipe[] recipe) {
         this.type = PageType.INFUSION_CRAFTING;
         this.recipe = recipe;
     }
 
+    /** Creates a compound crafting page retaining the nullable list by reference; output remains null and no registration occurs. */
     public ResearchPage(List<Recipe<?>> recipe) {
         this.type = PageType.COMPOUND_CRAFTING;
         this.recipe = recipe;
     }
 
+    /** Retains an arcane recipe and its returned output reference; null recipe throws NPE, without registering or consuming anything. */
     public ResearchPage(IArcaneRecipe recipe) {
         this.type = PageType.ARCANE_CRAFTING;
         this.recipe = recipe;
         this.recipeOutput = recipe.getRecipeOutput();
     }
 
+    /** Retains a crucible recipe and its live output reference; null recipe throws NPE, without registering or consuming anything. */
     public ResearchPage(CrucibleRecipe recipe) {
         this.type = PageType.CRUCIBLE_CRAFTING;
         this.recipe = recipe;
         this.recipeOutput = recipe.getRecipeOutput();
     }
 
-    /** The original smelting page; without a world the output stays unknown. */
+    /** Stores the nullable input reference as a smelting display page, leaving recipeOutput null.
+     * In 1.7.10 a global furnace registry resolved the output; 1.21.1 needs a loaded level.
+     * @deprecated Use {@link #ResearchPage(ItemStack, Level)} for a resolvable native smelting page. */
+    @Deprecated
     public ResearchPage(ItemStack input) {
         this.type = PageType.SMELTING;
         this.recipe = input;
     }
 
-    /** The native smelting page: the output is read from the live recipe manager. */
+    /** Stores the nullable input by reference and copies the live smelting output when resolvable;
+     * null/empty input, null level, no server or no recipe leaves recipeOutput null, without consuming input. */
     public ResearchPage(ItemStack input, Level level) {
         this.type = PageType.SMELTING;
         this.recipe = input;
@@ -102,23 +116,27 @@ public class ResearchPage {
         }
     }
 
+    /** Retains an infusion recipe and its stack output (or central input for patches) by reference; null recipe throws NPE, without registration. */
     public ResearchPage(InfusionRecipe recipe) {
         this.type = PageType.INFUSION_CRAFTING;
         this.recipe = recipe;
         this.recipeOutput = recipe.getRecipeOutput() instanceof ItemStack stack ? stack : recipe.getRecipeInput();
     }
 
+    /** Creates an enchantment infusion page retaining the nullable recipe reference; output stays null, with no registration. */
     public ResearchPage(InfusionEnchantmentRecipe recipe) {
         this.type = PageType.INFUSION_ENCHANTMENT;
         this.recipe = recipe;
     }
 
+    /** Creates an image page retaining nullable texture/caption references without loading an image or changing research. */
     public ResearchPage(ResourceLocation image, String caption) {
         this.type = PageType.IMAGE;
         this.image = image;
         this.text = caption;
     }
 
+    /** Creates an aspect page retaining the nullable aspect-unit list by reference; does not spend aspects or register research. */
     public ResearchPage(AspectList as) {
         this.type = PageType.ASPECTS;
         this.aspects = as;
@@ -172,6 +190,7 @@ public class ResearchPage {
         return net.minecraft.core.RegistryAccess.fromRegistryOfRegistries(net.minecraft.core.registries.BuiltInRegistries.REGISTRY);
     }
 
+    /** Display-kind tokens, not recipe registration hooks, numeric IDs or progression stages. */
     public static enum PageType {
         TEXT,
         TEXT_CONCEALED,

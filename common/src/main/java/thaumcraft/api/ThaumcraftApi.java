@@ -59,7 +59,9 @@ public final class ThaumcraftApi {
     public static Tier toolMatElemental = ThaumcraftEquipment.ELEMENTAL_TIER;
     /** Original armor materials; 1.21.1 registers them, so they are resolved through accessors. */
     public static ArmorMaterial armorMatThaumium() { return ThaumcraftEquipment.THAUMIUM_ARMOR_MATERIAL.get(); }
+    /** Resolves the registered fortress armor material; call after material registration, with no mutation. */
     public static ArmorMaterial armorMatThaumiumFortress() { return ThaumcraftEquipment.FORTRESS_ARMOR_MATERIAL.get(); }
+    /** Resolves the registered void armor material; call after material registration, with no mutation. */
     public static ArmorMaterial armorMatVoid() { return ThaumcraftEquipment.VOID_ARMOR_MATERIAL.get(); }
     /**
      * Original {@code armorMatSpecial} (oracle {@code thaumcraft/api/ThaumcraftApi.java:52}):
@@ -83,10 +85,25 @@ public final class ThaumcraftApi {
      * {@link #ENCHANTMENT_POTENCY}, {@link #ENCHANTMENT_WAND_FORTUNE}, {@link #ENCHANTMENT_HASTE} and
      * {@link #ENCHANTMENT_REPAIR}.</p>
      */
+    /** Mutable legacy 1.7.10 numeric enchantment sentinel, initially -1; no native identity is assigned.
+     * @deprecated Resolve {@link #ENCHANTMENT_FRUGAL} through the level's enchantment registry in 1.21.1. */
+    @Deprecated
     public static int enchantFrugal = -1;
+    /** Mutable legacy 1.7.10 numeric enchantment sentinel, initially -1; no native identity is assigned.
+     * @deprecated Resolve {@link #ENCHANTMENT_POTENCY} through the level's enchantment registry in 1.21.1. */
+    @Deprecated
     public static int enchantPotency = -1;
+    /** Mutable legacy 1.7.10 numeric enchantment sentinel, initially -1; no native identity is assigned.
+     * @deprecated Resolve {@link #ENCHANTMENT_WAND_FORTUNE} through the level's enchantment registry in 1.21.1. */
+    @Deprecated
     public static int enchantWandFortune = -1;
+    /** Mutable legacy 1.7.10 numeric enchantment sentinel, initially -1; no native identity is assigned.
+     * @deprecated Resolve {@link #ENCHANTMENT_HASTE} through the level's enchantment registry in 1.21.1. */
+    @Deprecated
     public static int enchantHaste = -1;
+    /** Mutable legacy 1.7.10 numeric enchantment sentinel, initially -1; no native identity is assigned.
+     * @deprecated Resolve {@link #ENCHANTMENT_REPAIR} through the level's enchantment registry in 1.21.1. */
+    @Deprecated
     public static int enchantRepair = -1;
     /** The identity of the original frugal enchantment (oracle {@code Config.enchFrugal}). */
     public static final ResourceKey<net.minecraft.world.item.enchantment.Enchantment> ENCHANTMENT_FRUGAL = enchantmentKey("frugal");
@@ -239,12 +256,20 @@ public final class ThaumcraftApi {
         keyCache.clear();
     }
 
+    /** Constructs and appends a live shaped recipe to the global programmatic list, returning it.
+     * Costs are whole primal vis, not centivis; nullable research/aspects are retained, result is copied.
+     * Null result/recipe throws NPE; malformed patterns/ingredients may throw before registration.
+     * Register during coordinated initialization, not concurrently with recipe iteration. */
     public static ShapedArcaneRecipe addArcaneCraftingRecipe(String research, ItemStack result, AspectList aspects, Object... recipe) {
         ShapedArcaneRecipe r = new ShapedArcaneRecipe(research, result, aspects, recipe);
         craftingRecipes.add(r);
         return r;
     }
 
+    /** Constructs and appends a live shapeless recipe to the global programmatic list, returning it.
+     * Costs are whole primal vis, not centivis; nullable research/aspects are retained, result is copied.
+     * Null result/recipe throws NPE and invalid/absent ingredients throw IAE before registration.
+     * Register during coordinated initialization, not concurrently with recipe iteration. */
     public static ShapelessArcaneRecipe addShapelessArcaneCraftingRecipe(String research, ItemStack result, AspectList aspects, Object... recipe) {
         ShapelessArcaneRecipe r = new ShapelessArcaneRecipe(research, result, aspects, recipe);
         craftingRecipes.add(r);
@@ -259,6 +284,9 @@ public final class ThaumcraftApi {
         return r;
     }
 
+    /** Appends and returns a live enchantment recipe with essentia-unit costs and dimensionless instability.
+     * Null enchantment returns null without registration; remaining copying/validation follows the recipe constructor.
+     * Mutates global registration state; use coordinated initialization, not concurrent iteration. */
     public static InfusionEnchantmentRecipe addInfusionEnchantmentRecipe(String research, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment, int instability, AspectList aspects, ItemStack[] recipe) {
         if (enchantment == null) return null;
         InfusionEnchantmentRecipe r = new InfusionEnchantmentRecipe(research, enchantment, instability, aspects, recipe);
@@ -266,6 +294,7 @@ public final class ThaumcraftApi {
         return r;
     }
 
+    /** Returns the first live infusion registration producing the same item/damage (not components/count), or null for null/no match; may initialize native views. */
     public static InfusionRecipe getInfusionRecipe(ItemStack res) {
         for (Object r : getCraftingRecipes()) {
             if (!(r instanceof InfusionRecipe recipe)) continue;
@@ -282,12 +311,16 @@ public final class ThaumcraftApi {
         return produced.getItem() == wanted.getItem() && produced.getDamageValue() == wanted.getDamageValue();
     }
 
+    /** Constructs and globally registers a live crucible recipe with essentia-unit costs, returning it.
+     * Retains result/tags references; null result/tags throws NPE, null/invalid catalyst throws IAE before registration.
+     * Use coordinated initialization, not concurrent recipe iteration. */
     public static CrucibleRecipe addCrucibleRecipe(String key, ItemStack result, Object catalyst, AspectList tags) {
         CrucibleRecipe rc = new CrucibleRecipe(key, result, catalyst, tags);
         craftingRecipes.add(rc);
         return rc;
     }
 
+    /** Returns the first live crucible registration producing the same item/damage (not components/count), or null for null/no match; may initialize native views. */
     public static CrucibleRecipe getCrucibleRecipe(ItemStack stack) {
         for (Object r : getCraftingRecipes()) {
             if (!(r instanceof CrucibleRecipe recipe) || !sameOutput(recipe.getRecipeOutput(), stack)) continue;
@@ -296,6 +329,7 @@ public final class ThaumcraftApi {
         return null;
     }
 
+    /** Returns the first live crucible recipe with this dimensionless hash, or null; hashes are not guaranteed unique or persistent identities. */
     public static CrucibleRecipe getCrucibleRecipeFromHash(int hash) {
         for (Object r : getCraftingRecipes()) {
             if (!(r instanceof CrucibleRecipe recipe) || recipe.hash != hash) continue;
@@ -369,16 +403,19 @@ public final class ThaumcraftApi {
 
     // ------------------------------------------------------------------ warp
 
+    /** Replaces the item/damage registration with signed warp points; null/empty stacks are ignored and no stack reference is retained. */
     public static void addWarpToItem(ItemStack craftresult, int amount) {
         if (craftresult == null || craftresult.isEmpty()) return;
         warpMap.put(List.of(craftresult.getItem(), craftresult.getDamageValue()), amount);
     }
 
+    /** Replaces the research registration with signed warp points; null keys are ignored, with no player mutation or packet. */
     public static void addWarpToResearch(String research, int amount) {
         if (research == null) return;
         warpMap.put(research, amount);
     }
 
+    /** Returns registered/catalogue warp points for an item/damage or research key; null, unsupported values and missing entries return zero. */
     public static int getWarp(Object in) {
         if (in == null) return 0;
         if (in instanceof ItemStack stack) {
@@ -415,7 +452,10 @@ public final class ThaumcraftApi {
         BuiltInRegistries.BLOCK.getTag(tag).ifPresent(holders -> holders.forEach(holder -> portableHoleBlackList.add(holder.value())));
     }
 
-    public static void registerScanEventhandler(IScanEventHandler handler) { scanEventhandlers.add(Objects.requireNonNull(handler, "handler")); }    public static void registerEntityTag(String entityName, AspectList aspects, EntityTagsNBT... nbt) {
+    /** Appends a live phenomena callback to the global list; null handler throws NPE, without invoking it at registration. */
+    public static void registerScanEventhandler(IScanEventHandler handler) { scanEventhandlers.add(Objects.requireNonNull(handler, "handler")); }
+    /** Appends a live entity-tag registration retaining nullable aspects/filter arrays; null/empty entity name throws IAE, and registration does not scan entities. */
+    public static void registerEntityTag(String entityName, AspectList aspects, EntityTagsNBT... nbt) {
         if (entityName == null || entityName.isEmpty()) throw new IllegalArgumentException("An entity tag requires its original or native registry name");
         scanEntities.add(new EntityTags(entityName, aspects, nbt));
     }
@@ -425,13 +465,21 @@ public final class ThaumcraftApi {
         if (item == null || item.isEmpty()) return;
         registerObjectTag(item.getItem(), item.getDamageValue(), aspects);
     }
+    /** Registers item aspect amounts using native damage points (32767 is wildcard), not 1.7.10 subtype metadata.
+     * Use distinct native item IDs or {@link #registerObjectTag(TagKey, AspectList)} for flattened variants;
+     * this is not a component predicate. Null item is ignored, null aspects stores a new empty list;
+     * otherwise the live aspects reference replaces the global registration. */
     public static void registerObjectTag(Item item, int metadata, AspectList aspects) {
         ObjectAspectRegistry.register(objectTags, item, metadata, aspects);
     }
+    /** Resolves a native item ID then registers damage-point metadata, not old subtype IDs; unknown IDs throw IAE.
+     * In 1.21.1 use distinct item IDs or TagKey registration rather than 1.7.10 metadata variants. */
     public static void registerObjectTag(ResourceLocation item, int metadata, AspectList aspects) {
         if (!BuiltInRegistries.ITEM.containsKey(item)) throw new IllegalArgumentException("Unknown native object-tag item: " + item);
         registerObjectTag(BuiltInRegistries.ITEM.get(item), metadata, aspects);
     }
+    /** Registers a group of native damage-point keys; null/empty stack or null/empty metadata is ignored.
+     * Unlike 1.7.10 subtype metadata, these cannot select flattened variants: use native item IDs or TagKey registration. */
     public static void registerObjectTag(ItemStack item, int[] metadata, AspectList aspects) {
         if (item == null || item.isEmpty()) return;
         ObjectAspectRegistry.register(objectTags, groupedObjectTags, item.getItem(), metadata, aspects);
@@ -448,10 +496,15 @@ public final class ThaumcraftApi {
             throw new IllegalArgumentException("Use a native namespaced item tag or TagKey<Item>, not a legacy OreDictionary name: " + nativeItemTag);
         registerObjectTag(TagKey.create(Registries.ITEM, id), aspects);
     }
+    /** Tests ordinary/wildcard and bundled derived registrations using native damage points (32767 wildcard), not subtype metadata; null item throws NPE, with no registration mutation. */
     public static boolean exists(Item item, int metadata) {
         return ObjectAspectRegistry.exists(objectTags, item, metadata)
                 || ObjectAspectCatalog.hasDerivedRegistration(BuiltInRegistries.ITEM.getKey(item), metadata);
     }
+    /** Registers recipe-derived aspect-unit additions using the loaded server context; no vis is spent.
+     * Requires the server thread and loaded overworld, otherwise throws IllegalStateException before validating arguments;
+     * null/empty item then throws IAE and null aspects throws NPE. May mutate supplied aspects when no registration exists,
+     * initializes public tags, and stores the resulting live list. Prefer the Level overload for explicit lifecycle scope. */
     public static void registerComplexObjectTag(ItemStack item, AspectList aspects) {
         registerComplexObjectTag(item, aspects, ObjectAspectRegistry.requireContext());
     }
@@ -494,13 +547,16 @@ public final class ThaumcraftApi {
         public String entityName;
         public EntityTagsNBT[] nbts;
         public AspectList aspects;
+        /** Stores all nullable arguments by reference without validation or registration; subsequent edits remain visible. */
         public EntityTags(String entityName, AspectList aspects, EntityTagsNBT... nbts) {
             this.entityName = entityName; this.aspects = aspects; this.nbts = nbts;
         }
     }
+    /** Mutable entity-tag filter datum; this is entity NBT compatibility data, not an item component predicate. */
     public static class EntityTagsNBT {
         public String name;
         public Object value;
+        /** Stores nullable name/value references without validation or registration. */
         public EntityTagsNBT(String name, Object value) { this.name = name; this.value = value; }
     }
 }

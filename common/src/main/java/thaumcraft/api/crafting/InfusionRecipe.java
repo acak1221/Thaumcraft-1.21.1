@@ -31,6 +31,12 @@ public class InfusionRecipe {
     protected int instability;
     private InfusionStackRecipe nativeRecipe;
 
+    /** Builds an unregistered infusion recipe with dimensionless instability and essentia-unit costs (not centivis).
+     * Copies the central input and component array, but retains output/aspects and component stack references;
+     * null input throws IAE, null aspects means no native cost, null components means none.
+     * The 1.7.10 Object[] NBT-output form now recognizes only ADVANCEDGOLEM, HELMGOGGLES and the three MASK keys;
+     * other patch keys throw IAE. In 1.21.1 use named InfusionResultPatches/data-component changes,
+     * not arbitrary legacy NBT payloads (additional array values are not general NBT transforms). */
     public InfusionRecipe(String research, Object output, int inst, AspectList aspects, ItemStack input, ItemStack[] recipe) {
         this.research = research;
         this.recipeOutput = output;
@@ -70,6 +76,9 @@ public class InfusionRecipe {
         return result;
     }
 
+    /** Tests research and captured native ingredient/patch predicates without consuming supplied stacks.
+     * Null input/central returns false; null player fails nonempty research gates; the native stack matcher does not read world.
+     * Null component entries can throw when the input snapshot is created. */
     public boolean matches(ArrayList<ItemStack> input, ItemStack central, Level world, Player player) {
         if (this.getRecipeInput() == null) return false;
         if (this.research != null && !this.research.isEmpty() && !ThaumcraftApiHelper.isResearchComplete(player, this.research)) return false;
@@ -81,7 +90,10 @@ public class InfusionRecipe {
      * The original stack comparison.
      *
      * <p>Forced 1.21.1 change: the original ore-dictionary shortcut has no 1.21.1 equivalent, so the fuzzy
-     * flag only reports that the shortcut was requested.</p>
+     * flag is ignored entirely. Use native Ingredient/TagKey matching for 1.21.1 equivalence.</p>
+     * <p>Two nulls match, exactly one null does not. Otherwise compares item identity, damage
+     * (second-stack damage 32767 is wildcard), and requires the second stack's components in the first;
+     * count is ignored and neither stack is changed.</p>
      */
     public static boolean areItemStacksEqual(ItemStack stack0, ItemStack stack1, boolean fuzzy) {
         if (stack0 == null && stack1 != null) return false;
@@ -92,22 +104,31 @@ public class InfusionRecipe {
         return stack0.getItem() == stack1.getItem() && damage;
     }
 
+    /** Returns the live nullable output/patch via the input-aware overload; the base implementation makes no copy. */
     public Object getRecipeOutput() { return this.getRecipeOutput(this.getRecipeInput()); }
 
+    /** Returns the live nullable essentia-unit cost list via the input-aware overload; not centivis. */
     public AspectList getAspects() { return this.getAspects(this.getRecipeInput()); }
 
+    /** Returns dimensionless instability via the input-aware overload, without changing state. */
     public int getInstability() { return this.getInstability(this.getRecipeInput()); }
 
+    /** Returns the stored nullable research key without changing state. */
     public String getResearch() { return this.research; }
 
+    /** Returns the live central-input stack; editing it does not rebuild the native recipe predicate. */
     public ItemStack getRecipeInput() { return this.recipeInput; }
 
+    /** Returns the live component array and stacks; edits do not rebuild native recipe predicates. */
     public ItemStack[] getComponents() { return this.components; }
 
+    /** Returns the live nullable output/patch; this base implementation ignores input, including null. */
     public Object getRecipeOutput(ItemStack input) { return this.recipeOutput; }
 
+    /** Returns the live nullable essentia-unit cost list; this base implementation ignores input, including null. */
     public AspectList getAspects(ItemStack input) { return this.aspects; }
 
+    /** Returns stored dimensionless instability; this base implementation ignores input, including null. */
     public int getInstability(ItemStack input) { return this.instability; }
 
     /** The original result keys became named native result patches. */

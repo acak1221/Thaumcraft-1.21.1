@@ -36,6 +36,7 @@ public class ResearchCategory extends ResearchCategoryList {
         return applyFormula(input, 1.0D);
     }
 
+    /** Returns ceil(sqrt(weighted aspect-unit total)) for positive totals, applying multiplier squared; null formula/input returns zero without mutation. */
     public int applyFormula(AspectList input, double multiplier) {
         if (formula == null || input == null) {
             return 0;

@@ -10,8 +10,12 @@ import net.minecraft.world.level.Level;
  * <p>Forced 1.21.1 changes: {@code EntityPlayer} became {@link Player}, {@code World} became {@link Level},
  * {@code MovingObjectPosition} became {@link net.minecraft.world.phys.BlockHitResult}, the removed
  * {@code IIcon} became a {@link net.minecraft.resources.ResourceLocation} and the numeric enchantment id
- * became a {@link net.minecraft.resources.ResourceKey}.</p>
+     * became a {@link net.minecraft.resources.ResourceKey}.</p>
+     * <p>The 1.7.10 no-stack focus shape is retained but is not consumed/implemented by native
+     * 1.21.1 focus dispatch; implementing it alone does not register a working focus.</p>
+     * @deprecated Extend ItemFocusBasic using its stack/hand-aware methods and the supported FocusUpgradeData path instead.
  */
+@Deprecated
 public interface IWandFocus {
     int getFocusColor();
 

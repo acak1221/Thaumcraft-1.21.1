@@ -29,14 +29,17 @@ public class BlockCoordinates implements Comparable<BlockCoordinates> {
     /** the z coordinate */
     public int z;
 
+    /** Creates a mutable block coordinate at (0,0,0), without world access. */
     public BlockCoordinates() {}
 
+    /** Stores x/y/z block coordinates without bounds validation or world access. */
     public BlockCoordinates(int par1, int par2, int par3) {
         this.x = par1;
         this.y = par2;
         this.z = par3;
     }
 
+    /** Copies tile's block coordinates without retaining it; null tile throws NPE. */
     public BlockCoordinates(BlockEntity tile) {
         BlockPos pos = tile.getBlockPos();
         this.x = pos.getX();
@@ -44,6 +47,7 @@ public class BlockCoordinates implements Comparable<BlockCoordinates> {
         this.z = pos.getZ();
     }
 
+    /** Copies other's block coordinates without retaining it; null other throws NPE. */
     public BlockCoordinates(BlockCoordinates other) {
         this.x = other.x;
         this.y = other.y;

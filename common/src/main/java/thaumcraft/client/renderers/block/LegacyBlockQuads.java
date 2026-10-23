@@ -92,15 +92,18 @@ public final class LegacyBlockQuads {
             com.mojang.blaze3d.vertex.PoseStack poses,com.mojang.blaze3d.vertex.VertexConsumer vertices,
             List<BakedQuad> quads,int overlay) {
         poses.pushPose();
-        var offset=state.getOffset(world,pos);poses.translate(offset.x,offset.y,offset.z);
-        var minecraft=Minecraft.getInstance();
-        for(var quad:quads) {
-            int color=quad.isTinted()?minecraft.getBlockColors().getColor(state,world,pos,quad.getTintIndex()):0xffffff;
-            float shade=world.getShade(quad.getDirection(),quad.isShade());
-            int light=quad instanceof LitQuad lit?lit.light():LevelRenderer.getLightColor(world,state,pos.relative(quad.getDirection()));
-            vertices.putBulkData(poses.last(),quad,new float[]{shade,shade,shade,shade},(color>>16&255)/255F,
-                    (color>>8&255)/255F,(color&255)/255F,1F,new int[]{light,light,light,light},overlay,true);
+        try {
+            var offset=state.getOffset(world,pos);poses.translate(offset.x,offset.y,offset.z);
+            var minecraft=Minecraft.getInstance();
+            for(var quad:quads) {
+                int color=quad.isTinted()?minecraft.getBlockColors().getColor(state,world,pos,quad.getTintIndex()):0xffffff;
+                float shade=world.getShade(quad.getDirection(),quad.isShade());
+                int light=quad instanceof LitQuad lit?lit.light():LevelRenderer.getLightColor(world,state,pos.relative(quad.getDirection()));
+                vertices.putBulkData(poses.last(),quad,new float[]{shade,shade,shade,shade},(color>>16&255)/255F,
+                        (color>>8&255)/255F,(color&255)/255F,1F,new int[]{light,light,light,light},overlay,true);
+            }
+        } finally {
+            poses.popPose();
         }
-        poses.popPose();
     }
 }

@@ -25,7 +25,7 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
  * original {@code 190 + sin(ticks - random(2)) * 10 + 10}.
  *
  * <p>The original transform chain is kept: the inventory view turns the
- * thaumometer by 60 degrees about X, 30 degrees and 248 degrees about Z and
+ * thaumometer by 60 degrees about X, 30 degrees about -Z and 248 degrees about -Y and
  * halves it (original ItemThaumometerRenderer:137-146), the equipped view
  * moves it by {@code (1.6, 0.3, 2.0)} and turns it by 90 degrees about -X and
  * 30 degrees about -Z (original ItemThaumometerRenderer:138-141), and the first
@@ -47,6 +47,8 @@ public final class ItemThaumometerRenderer {
     private static final float FIRST_PERSON_SCALE = 0.8F;
     /** Original ItemThaumometerRenderer:154 - the scale of the scan screen quad. */
     private static final float SCREEN_SCALE = 2.5F;
+    /** Original ItemThaumometerRenderer:141-145 - final inventory rotation about -Y. */
+    private static final float INVENTORY_Y_ROTATION_DEGREES = 248.0F;
     private static final ModelThaumometer MODEL = new ModelThaumometer();
 
     private ItemThaumometerRenderer() {}
@@ -72,7 +74,7 @@ public final class ItemThaumometerRenderer {
                     // its back in the slot instead of showing its face.
                     pose.mulPose(Axis.XP.rotationDegrees(60.0F));
                     pose.mulPose(Axis.ZN.rotationDegrees(30.0F));
-                    pose.mulPose(Axis.YN.rotationDegrees(248.0F));
+                    pose.mulPose(Axis.YN.rotationDegrees(INVENTORY_Y_ROTATION_DEGREES));
                 }
             }
             // Original ItemThaumometerRenderer:148-149.

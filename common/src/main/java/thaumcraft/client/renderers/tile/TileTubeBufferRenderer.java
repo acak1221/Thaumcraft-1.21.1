@@ -70,13 +70,17 @@ public final class TileTubeBufferRenderer implements BlockEntityRenderer<TileTub
         for (Direction side : Direction.values()) {
             int choke = buffer.getChoke(side);
             if (choke == 0 || !buffer.isSideOpen(side) || !transportNeighbor(buffer, side)) continue;
-            pose.pushPose(); pose.translate(.5, .5, .5); orient(side.getOpposite(), pose);
-            pose.scale(1.2F, 1, 1.2F); pose.translate(0, -.5, 0);
-            // Nearest native 8-bit vertex colour to legacy (1,.3,.3) or
-            // (.3,.3,1). The mesh and retained valve texture are unchanged.
-            Model.STEM.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(STEM)), light, overlay,
-                    choke == 2 ? 0xFFFF4D4D : 0xFF4D4DFF);
-            pose.popPose();
+            pose.pushPose();
+            try {
+                pose.translate(.5, .5, .5); orient(side.getOpposite(), pose);
+                pose.scale(1.2F, 1, 1.2F); pose.translate(0, -.5, 0);
+                // Nearest native 8-bit vertex colour to legacy (1,.3,.3) or
+                // (.3,.3,1). The mesh and retained valve texture are unchanged.
+                Model.STEM.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(STEM)), light, overlay,
+                        choke == 2 ? 0xFFFF4D4D : 0xFF4D4DFF);
+            } finally {
+                pose.popPose();
+            }
         }
     }
 

@@ -58,6 +58,11 @@ public final class BossFightRuntimeChecks {
             boss.startSeenByPlayer(player);
             ServerBossEvent bar = bar(boss);
             boolean registeredViewer = bar!=null && bar.getPlayers().contains(player);
+            if (bars && bar!=null) {
+                boss.stopSeenByPlayer(player);
+                test.assertTrue(!bar.getPlayers().contains(player), "leaving tracking range removes praetor bar viewer");
+                boss.startSeenByPlayer(player);
+            }
             if (placement) test.assertTrue(BossPlacementRules.bossNear(level, lane.origin.getX(), lane.origin.getY(), lane.origin.getZ()), "live praetor is found by the placement rule");
             if (boss instanceof EntityEldritchWarden w) test.assertTrue(w.getAbsorptionAmount()>=132, "finalized warden starts with its original ward");
             if (boss instanceof EntityTaintacleGiant giant) {
@@ -81,6 +86,8 @@ public final class BossFightRuntimeChecks {
                 boss.setPos(lane.origin.getX()+.5, lane.origin.getY(), lane.origin.getZ()+.5);
                 boss.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
                 level.tickNonPassenger(boss);
+                if (bars && bar!=null) test.assertTrue(Math.abs(bar.getProgress()-boss.getHealth()/boss.getMaxHealth())<.0001F
+                        && bar.getName().equals(boss.getDisplayName()), "native bar follows live boss health and name");
                 if (boss instanceof EntityEldritchGolem g && g.isHeadless()) { headless=true; if(g.getBeamCharge()>0)beam=true; }
             }
             test.assertTrue(!boss.isAlive() && hits>0, kind+" can be killed by repeated uncapped sword-sized player damage; health="+boss.getHealth());

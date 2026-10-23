@@ -38,6 +38,12 @@ Baseline run: **8 tests, 4 failures**: golem/warden/giant pearl checks and praet
 boss registration. All six reached lethal damage; no phase/killability failure was observed.
 Ignored evidence: `.tmp/g23-reproduced.log`, `.tmp/g23-reproduced.xml`.
 
+After the pearl and praetor-bar fixes, all **8/8** selected cases passed in the
+Fabric dedicated server (`.tmp/g23-all-fixed.log`). Praetor callbacks register/unregister
+viewers, update name/health, and clear viewers on death/removal. The final fight checks also
+exercise warden drown/wither immunity, golem fire immunity/headless beam charging and giant
+heavy-hit enrage/capping. No gameplay phase threshold or damage immunity was changed.
+
 ### Placement lock: suspicion rejected, no gameplay change
 
 `g23BossDeathPlacement` confirms live praetor detection, detection during its death

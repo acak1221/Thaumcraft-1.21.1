@@ -93,6 +93,37 @@ public final class BossFightRuntimeChecks {
             test.assertTrue(!boss.isAlive() && hits>0, kind+" can be killed by repeated uncapped sword-sized player damage; health="+boss.getHealth());
             if (kind.equals("golem")) test.assertTrue(headless && beam, "golem actually enters headless phase and charges its new beam before death");
             if (kind.equals("warden")) test.assertTrue(frenzy, "warden actually rejects hits during ward-break frenzy and later becomes killable");
+            if (kind.equals("warden")) {
+                int rings=0;
+                net.minecraft.core.BlockPos field=null;
+                var observed=new java.util.TreeSet<Integer>();
+                for (int x=-4;x<=4;x++) for (int z=-4;z<=4;z++) {
+                    if (x==0 && z==0) continue;
+                    var state=level.getBlockState(lane.origin.offset(x,0,z));
+                    if (state.getBlock() instanceof thaumcraft.common.blocks.BlockAiry) {
+                        int metadata=thaumcraft.common.blocks.BlockAiry.variant(state);
+                        observed.add(metadata);
+                        if (metadata==11) { rings++; field=lane.origin.offset(x,0,z); }
+                    }
+                }
+                test.assertTrue(rings>0, "warden frenzy creates original damaging eldritch-field rings (metadata 11), observed="+observed);
+                var victim=lane.add(net.minecraft.world.entity.EntityType.PIG.create(level));
+                victim.setPos(field.getX()+.5,field.getY(),field.getZ()+.5);
+                victim.setNoAi(true);
+                level.addFreshEntity(victim);
+                victim.setDeltaMovement(1,.25,1);
+                var state=level.getBlockState(field);
+                state.entityInside(level,field,victim);
+                boolean collision=victim.hasEffect(net.minecraft.world.effect.MobEffects.WEAKNESS)
+                                && victim.getEffect(net.minecraft.world.effect.MobEffects.WEAKNESS).getAmplifier()==1
+                                && Math.abs(victim.getDeltaMovement().x-.66)<.00001
+                                && Math.abs(victim.getDeltaMovement().z-.66)<.00001
+                                && victim.getDeltaMovement().y==.25;
+                test.assertTrue(level.getBlockTicks().hasScheduledTick(field,state.getBlock()), "native frenzy scheduled field expiry");
+                state.tick(level,field,level.random);
+                boolean expired=level.getBlockState(field).isAir();
+                test.assertTrue(collision && expired, "actual frenzy field applies original drag/Weakness II and scheduled tick clears it: collision="+collision+", expired="+expired);
+            }
             if (kind.equals("golem") || kind.equals("warden") || kind.equals("giant"))
                 test.assertTrue(lane.dropped(ThaumcraftContent.PRIMORDIAL_PEARL.get())==1, kind+" death drops exactly one pearl");
             if (kind.equals("golem") || kind.equals("warden") || kind.equals("praetor"))

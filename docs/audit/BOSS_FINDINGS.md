@@ -28,7 +28,7 @@ Specification read directly from the private original 4.2.3.5 oracle under
 | Entity (6 total) | Driven / observed | GameTest | Finding / fix |
 |---|---|---|---|
 | Eldritch golem | Spawn protection; damage down to headless phase; second phase dies | `g23BossGolemFight` | **FAIL:** no pearl. Death lookup uses unregistered old metadata-family ID. Resolve original metadata 3 as native `primordial_pearl`. |
-| Eldritch warden | Spawn ward depleted; temporary frenzy rejects hits; later dies | `g23BossWardenFight` | **FAIL:** no pearl. Same lookup/fix. |
+| Eldritch warden | Spawn ward depleted; temporary frenzy rejects hits; later dies; inspect actual frenzy blocks | `g23BossWardenFight` | **FAIL:** no pearl (shared fix). **FAIL:** frenzy places nitor metadata 1, not field metadata 11. Resolve the actual native `airy_hole` hardness group and its `variant` property. |
 | Cultist leader / praetor | Armor-bearing finalized spawn, repeated damage, rare bag, death removal | `g23BossPraetorFight`, `g23BossPraetorBar` | Fight/loot pass. **FAIL:** no server boss event exists after tracking callback. Restore original inherited boss display contract using native server boss event. |
 | Taintacle | Repeated damage, original goo/tendril drop, death removal | `g23BossTaintacleFight` | PASS; no new gameplay fix. No original health phase or boss bar to invent. |
 | Giant taintacle | Repeated damage reaches death | `g23BossGiantFight` | **FAIL:** last giant drops no pearl. Same lookup/fix. No original boss-display bar to invent. |
@@ -43,6 +43,13 @@ Fabric dedicated server (`.tmp/g23-all-fixed.log`). Praetor callbacks register/u
 viewers, update name/health, and clear viewers on death/removal. The final fight checks also
 exercise warden drown/wither immunity, golem fire immunity/headless beam charging and giant
 heavy-hit enrage/capping. No gameplay phase threshold or damage immunity was changed.
+
+A stronger subsequent warden check failed against that intermediate version:
+`warden frenzy creates original damaging eldritch-field rings (metadata 11), observed=[1]`
+(`.tmp/g23-field-before.log`). The resolver queried nonexistent property `type` on the
+ordinary airy group and returned its nitor default. Metadata 11 belongs to `airy_hole`,
+whose actual property is the shared sparse `variant` property. Oracle warden:197-229
+requires metadata 11 for both the footprint and frenzy rings.
 
 ### Placement lock: suspicion rejected, no gameplay change
 

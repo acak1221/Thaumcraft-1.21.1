@@ -197,22 +197,24 @@ public class ThaumcraftApiHelper {
         return null;
     }
 
+    /** Returns a caller-owned mutable copy of the cached aspects for this amount. */
     public static AspectList getAllAspects(int amount) {
         AspectList cached = ALL_ASPECTS.get(amount);
-        if (cached != null) return cached;
+        if (cached != null) return cached.copy();
         AspectList al = new AspectList();
         for (Aspect aspect : Aspect.aspects.values()) al.add(aspect, amount);
         ALL_ASPECTS.put(amount, al);
-        return al;
+        return al.copy();
     }
 
+    /** Returns a caller-owned mutable copy of the cached compound aspects for this amount. */
     public static AspectList getAllCompoundAspects(int amount) {
         AspectList cached = ALL_COMPOUND_ASPECTS.get(amount);
-        if (cached != null) return cached;
+        if (cached != null) return cached.copy();
         AspectList al = new AspectList();
         for (Aspect aspect : Aspect.getCompoundAspects()) al.add(aspect, amount);
         ALL_COMPOUND_ASPECTS.put(amount, al);
-        return al;
+        return al.copy();
     }
 
     public static boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting) {

@@ -86,6 +86,16 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "api_cache_ownership")
+    public void apiRecipeFirstAnswerCannotPoisonLaterAnswers(GameTestHelper test) {
+        thaumcraft.common.testing.ApiCacheOwnershipRuntimeChecks.recipeAnswer(test, false);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "api_cache_ownership")
+    public void apiRecipeFirstAnswerCannotPoisonElementTypes(GameTestHelper test) {
+        thaumcraft.common.testing.ApiCacheOwnershipRuntimeChecks.recipeAnswer(test, true);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g23_golem")
     public void g23BossGolemFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "golem", false, false); }
 

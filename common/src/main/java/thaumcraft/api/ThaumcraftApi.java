@@ -311,6 +311,10 @@ public final class ThaumcraftApi {
      * corpus keeps the recipe references as keys, and the page is resolved through the native recipe of
      * the recipe manager. The answer is the research key and the index of its page, exactly as the
      * original returned them.</p>
+     *
+     * @return a caller-owned two-element array containing the research key ({@link String}) and
+     *         zero-based page index ({@link Integer}), or null if no visible recipe matches;
+     *         mutating the array never changes cached answers
      */
     public static Object[] getCraftingRecipeKey(net.minecraft.world.entity.player.Player player, ItemStack stack) {
         if (player == null || stack == null || stack.isEmpty()) return null;
@@ -329,7 +333,7 @@ public final class ThaumcraftApi {
                     if (output == null || !sameOutput(output, stack)) continue;
                     Object[] found = new Object[]{definition.key(), index};
                     keyCache.put(key, found);
-                    return researchVisible(player, found);
+                    return researchVisible(player, found.clone());
                 }
             }
         }

@@ -33,12 +33,6 @@ public abstract class NeoForgeLootPoolMixin implements NeoForgeLootPoolAccess {
 
     @Override
     @Unique
-    public List<LootPoolEntryContainer> thaumcraft$entries() {
-        return this.entries;
-    }
-
-    @Override
-    @Unique
     public void thaumcraft$appendEntries(List<LootPoolEntryContainer> extra) {
         var rows = new ArrayList<>(this.entries);
         rows.addAll(extra);

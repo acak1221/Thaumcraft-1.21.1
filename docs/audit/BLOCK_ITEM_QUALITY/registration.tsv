@@ -1,0 +1,985 @@
+file:line	registration/property expression
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:25	private static BlockBehaviour.Properties properties() { return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3,10.2F).sound(SoundType.METAL); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:26	public static final RegistrySupplier<Block> ADVANCED_CONSTRUCT = BLOCKS.register("advanced_alchemical_construct", () -> new Block(properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:27	public static final RegistrySupplier<Item> ADVANCED_CONSTRUCT_ITEM = ITEMS.register("advanced_alchemical_construct", () -> new BlockItem(ADVANCED_CONSTRUCT.get(),new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:28	public static final RegistrySupplier<BlockAdvancedAlchemyFurnace> FURNACE = BLOCKS.register("advanced_alchemical_furnace", () -> new BlockAdvancedAlchemyFurnace(properties().noOcclusion().lightLevel(state -> state.getValue(BlockAdvancedAlchemyFurnace.LIGHT))));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:29	public static final RegistrySupplier<Item> FURNACE_ITEM = ITEMS.register("advanced_alchemical_furnace", () -> new thaumcraft.common.items.ItemAdvancedAlchemyFurnace(FURNACE.get(),new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:30	public static final RegistrySupplier<BlockEntityType<TileAlchemyFurnaceAdvanced>> TILE = TILES.register("advanced_alchemical_furnace", () -> BlockEntityType.Builder.of(TileAlchemyFurnaceAdvanced::new,FURNACE.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:31	public static final RegistrySupplier<BlockEntityType<TileAlchemyFurnaceAdvancedNozzle>> NOZZLE = TILES.register("advanced_alchemical_furnace_nozzle", () -> BlockEntityType.Builder.of(TileAlchemyFurnaceAdvancedNozzle::new,FURNACE.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:32	public static final RegistrySupplier<BlockEntityType<TileAlchemyFurnaceAdvancedPart>> PART_TILE = TILES.register("advanced_alchemical_furnace_part", () -> BlockEntityType.Builder.of(TileAlchemyFurnaceAdvancedPart::new,FURNACE.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAdvancedFurnace.java:34	public static void register() { BLOCKS.register(); ITEMS.register(); TILES.register(); CreativeTabRegistry.append(ThaumcraftContent.TAB,ADVANCED_CONSTRUCT_ITEM,FURNACE_ITEM); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:31	public static final RegistrySupplier<BlockCrucible> CRUCIBLE = BLOCKS.register("crucible",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:32	() -> new BlockCrucible(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:35	.strength(3, 10.2F).sound(SoundType.METAL).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:36	public static final RegistrySupplier<Item> CRUCIBLE_ITEM = ITEMS.register("crucible",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:38	public static final RegistrySupplier<BlockEntityType<TileCrucible>> CRUCIBLE_BLOCK_ENTITY = BLOCK_ENTITIES.register("crucible",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:40	public static final RegistrySupplier<RecipeType<CrucibleRecipe>> CRUCIBLE_RECIPE_TYPE = RECIPE_TYPES.register("crucible",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:44	public static final RegistrySupplier<RecipeSerializer<CrucibleRecipe>> CRUCIBLE_SERIALIZER = SERIALIZERS.register("crucible",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:47	public static final RegistrySupplier<RecipeSerializer<StackSmeltingRecipe>> STACK_SMELTING_SERIALIZER = SERIALIZERS.register("stack_smelting",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:53	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:54	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:55	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:56	RECIPE_TYPES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:57	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:59	TickEvent.SERVER_LEVEL_POST.register(TileCrucible::tickOutputs);
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:18	/** Independently registered blockMetalDevice:1 slice; call after ThaumcraftContent.register(). */
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:24	public static final RegistrySupplier<BlockAlembic> ALEMBIC = BLOCKS.register("alembic",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:25	() -> new BlockAlembic(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:28	.strength(3, 10.2F).sound(SoundType.METAL).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:29	public static final RegistrySupplier<Item> ALEMBIC_ITEM = ITEMS.register("alembic",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:31	public static final RegistrySupplier<BlockEntityType<TileAlembic>> ALEMBIC_BLOCK_ENTITY = BLOCK_ENTITIES.register("alembic",
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:40	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:41	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java:42	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:26	/** Independently registered native arcane-workbench slice. Call after ThaumcraftContent.register(). */
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:35	public static final RegistrySupplier<BlockArcaneWorkbench> ARCANE_WORKBENCH = BLOCKS.register("arcane_workbench",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:36	() -> new BlockArcaneWorkbench(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:37	.strength(2.5F).sound(SoundType.WOOD).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:38	public static final RegistrySupplier<Item> ARCANE_WORKBENCH_ITEM = ITEMS.register("arcane_workbench",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:40	public static final RegistrySupplier<BlockEntityType<TileArcaneWorkbench>> ARCANE_WORKBENCH_BLOCK_ENTITY = BLOCK_ENTITIES.register("arcane_workbench",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:42	public static final RegistrySupplier<MenuType<ContainerArcaneWorkbench>> ARCANE_WORKBENCH_MENU = MENUS.register("arcane_workbench",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:44	public static final RegistrySupplier<RecipeType<NativeArcaneRecipe>> ARCANE_RECIPE_TYPE = RECIPE_TYPES.register("arcane",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:48	public static final RegistrySupplier<RecipeSerializer<ArcaneShapedRecipe>> ARCANE_SHAPED_SERIALIZER = SERIALIZERS.register("arcane_shaped",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:50	public static final RegistrySupplier<RecipeSerializer<ArcaneShapelessRecipe>> ARCANE_SHAPELESS_SERIALIZER = SERIALIZERS.register("arcane_shapeless",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:56	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:57	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:58	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:59	MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:60	RECIPE_TYPES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java:61	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:30	public static final RegistrySupplier<BlockArcaneBoreBase> ARCANE_BORE_BASE = BLOCKS.register("arcane_bore_base",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:31	() -> new BlockArcaneBoreBase(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:32	public static final RegistrySupplier<BlockArcaneBore> ARCANE_BORE = BLOCKS.register("arcane_bore",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:33	() -> new BlockArcaneBore(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:34	public static final RegistrySupplier<Item> ARCANE_BORE_BASE_ITEM = ITEMS.register("arcane_bore_base",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:36	public static final RegistrySupplier<Item> ARCANE_BORE_ITEM = ITEMS.register("arcane_bore",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:38	public static final RegistrySupplier<BlockEntityType<TileArcaneBoreBase>> ARCANE_BORE_BASE_BLOCK_ENTITY = BLOCK_ENTITIES.register("arcane_bore_base",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:40	public static final RegistrySupplier<BlockEntityType<TileArcaneBore>> ARCANE_BORE_BLOCK_ENTITY = BLOCK_ENTITIES.register("arcane_bore",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:42	public static final RegistrySupplier<MenuType<ContainerArcaneBore>> ARCANE_BORE_MENU = MENUS.register("arcane_bore",
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneBore.java:47	BLOCKS.register(); ITEMS.register(); BLOCK_ENTITIES.register(); MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:27	public static final RegistrySupplier<BlockArcaneEar> ARCANE_EAR = BLOCKS.register("arcane_ear", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:28	new BlockArcaneEar(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).instrument(NoteBlockInstrument.BASS)
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:29	.strength(2.5F, 6.0F).sound(SoundType.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:30	public static final RegistrySupplier<Item> ARCANE_EAR_ITEM = ITEMS.register("arcane_ear", () -> new BlockItem(ARCANE_EAR.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:31	public static final RegistrySupplier<BlockEntityType<TileSensor>> ARCANE_EAR_TILE = TILES.register("arcane_ear", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:38	BLOCKS.register(); ITEMS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:40	TickEvent.SERVER_LEVEL_POST.register(ArcaneEarNotes::clear);
+common/src/main/java/thaumcraft/common/config/ThaumcraftArcaneEar.java:41	LifecycleEvent.SERVER_LEVEL_UNLOAD.register(ArcaneEarNotes::clear);
+common/src/main/java/thaumcraft/common/config/ThaumcraftArchitect.java:13	public static final RegistrySupplier<DataComponentType<WandArchitect.Area>> AREA = COMPONENTS.register("architect_area", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftArchitect.java:17	public static void register() { if (!registered) { registered = true; COMPONENTS.register(); } }
+common/src/main/java/thaumcraft/common/config/ThaumcraftAspectOrbs.java:13	public static final RegistrySupplier<EntityType<EntityAspectOrb>> ORB = ENTITIES.register("aspect_orb", () -> EntityType.Builder
+common/src/main/java/thaumcraft/common/config/ThaumcraftAspectOrbs.java:16	public static void register() { ENTITIES.register(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:25	public static final RegistrySupplier<DataComponentType<VisAmuletData>> LESSER_VIS = COMPONENTS.register("lesser_amulet_vis", () -> DataComponentType.<VisAmuletData>builder()
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:27	public static final RegistrySupplier<DataComponentType<VisAmuletData>> VIS = COMPONENTS.register("amulet_vis", () -> DataComponentType.<VisAmuletData>builder()
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:29	public static final RegistrySupplier<ItemAmuletVis> VIS_AMULET_LESSER = ITEMS.register("vis_amulet_lesser", () -> new ItemAmuletVis(props(Rarity.UNCOMMON), true));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:30	public static final RegistrySupplier<ItemAmuletVis> VIS_AMULET = ITEMS.register("vis_amulet", () -> new ItemAmuletVis(props(Rarity.RARE), false));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:31	public static final RegistrySupplier<thaumcraft.common.items.baubles.ItemGirdleHover> HOVER_GIRDLE = ITEMS.register("hover_girdle", () -> new thaumcraft.common.items.baubles.ItemGirdleHover(props(Rarity.RARE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:49	for(var aspect:thaumcraft.api.aspects.Aspect.getPrimalAspects())result.put(aspect.getTag(),ITEMS.register("discount_ring_"+aspect.getTag(),()->new ItemBaubleBlank(props(Rarity.COMMON),BaubleType.RING,aspect)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:52	public static final RegistrySupplier<MenuType<ContainerAccessories>> MENU = MENUS.register("accessories", () -> MenuRegistry.ofExtended(ContainerAccessories::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:56	private static RegistrySupplier<ItemBaubleBlank> blank(String id, BaubleType type) { return ITEMS.register(id, () -> new ItemBaubleBlank(props(Rarity.COMMON), type)); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:58	return ITEMS.register(id, () -> new ItemRunicBauble(props(rarity), type, charge, upgrade));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java:62	COMPONENTS.register(); ITEMS.register(); MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java:23	public static final RegistrySupplier<BlockBellows> BELLOWS = BLOCKS.register("bellows", () -> new BlockBellows(
+common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java:24	BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F, 6).sound(SoundType.WOOD).noOcclusion().ignitedByLava()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java:25	public static final RegistrySupplier<Item> BELLOWS_ITEM = ITEMS.register("bellows", () -> new BlockItem(BELLOWS.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java:26	public static final RegistrySupplier<BlockEntityType<TileBellows>> BELLOWS_TILE = TILES.register("bellows",
+common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java:30	BLOCKS.register(); ITEMS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:23	private static BlockBehaviour.Properties properties() { return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:24	public static final RegistrySupplier<BlockEssentiaLamp> GROWTH_LAMP = BLOCKS.register("growth_lamp", () -> new BlockEssentiaLamp(properties(), true));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:25	public static final RegistrySupplier<BlockEssentiaLamp> FERTILITY_LAMP = BLOCKS.register("fertility_lamp", () -> new BlockEssentiaLamp(properties(), false));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:26	public static final RegistrySupplier<Item> GROWTH_LAMP_ITEM = ITEMS.register("growth_lamp", () -> new BlockItem(GROWTH_LAMP.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:27	public static final RegistrySupplier<Item> FERTILITY_LAMP_ITEM = ITEMS.register("fertility_lamp", () -> new BlockItem(FERTILITY_LAMP.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:28	public static final RegistrySupplier<BlockEntityType<TileArcaneLampGrowth>> GROWTH_TILE = TILES.register("growth_lamp", () -> BlockEntityType.Builder.of(TileArcaneLampGrowth::new, GROWTH_LAMP.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:29	public static final RegistrySupplier<BlockEntityType<TileArcaneLampFertility>> FERTILITY_TILE = TILES.register("fertility_lamp", () -> BlockEntityType.Builder.of(TileArcaneLampFertility::new, FERTILITY_LAMP.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiologicalLamps.java:34	registered = true; BLOCKS.register(); ITEMS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java:37	public static final RegistrySupplier<BlockVishroom> VISHROOM=BLOCKS.register("vishroom",()->new BlockVishroom(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java:38	.noCollission().noOcclusion().instabreak().sound(SoundType.GRASS).randomTicks().replaceable().lightLevel(state->8)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java:41	public static final RegistrySupplier<Item> VISHROOM_ITEM=ITEMS.register("vishroom",()->new BlockCustomPlant.PlantItem(VISHROOM.get(),new Item.Properties(),BlockCustomPlant.PlantType.CAVE));
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java:42	public static final RegistrySupplier<ThaumcraftBiomeDecorationFeature> DECORATION=FEATURES.register("tc4_biome_decoration",ThaumcraftBiomeDecorationFeature::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java:48	BLOCKS.register();ITEMS.register();FEATURES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java:50	LifecycleEvent.SETUP.register(()->((FireBlock)Blocks.FIRE).setFlammable(VISHROOM.get(),60,100));
+common/src/main/java/thaumcraft/common/config/ThaumcraftColoredCandles.java:28	var block=BLOCKS.register(id,()->new BlockColoredTallowCandle(BlockBehaviour.Properties.of()));blocks.add(block);
+common/src/main/java/thaumcraft/common/config/ThaumcraftColoredCandles.java:29	items.add(ITEMS.register(id,()->new BlockItem(block.get(),new Item.Properties())));
+common/src/main/java/thaumcraft/common/config/ThaumcraftColoredCandles.java:45	if(registered)return;registered=true;BLOCKS.register();ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:61	public static final RegistrySupplier<MenuType<ContainerResearchTable>> RESEARCH_TABLE_MENU = MENUS.register("research_table",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:75	public static final RegistrySupplier<DataComponentType<WandData>> WAND_DATA = COMPONENTS.register("wand_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:77	public static final RegistrySupplier<DataComponentType<ScanSession>> SCAN_SESSION = COMPONENTS.register("scan_session",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:79	public static final RegistrySupplier<DataComponentType<PhialData>> PHIAL_DATA = COMPONENTS.register("phial_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:81	public static final RegistrySupplier<DataComponentType<CrystalEssenceData>> CRYSTAL_ESSENCE_DATA = COMPONENTS.register("crystal_essence_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:83	public static final RegistrySupplier<DataComponentType<ResearchNoteData>> RESEARCH_NOTE_DATA = COMPONENTS.register("research_note_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:85	public static final RegistrySupplier<Item> INKWELL = ITEMS.register("inkwell", () -> new ItemInkwell(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:86	public static final RegistrySupplier<Item> RESEARCH_NOTE = ITEMS.register("research_note", () -> new ItemResearchNotes(new Item.Properties().rarity(Rarity.RARE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:87	public static final RegistrySupplier<Item> DISCOVERY = ITEMS.register("discovery", () -> new ItemResearchNotes(new Item.Properties().rarity(Rarity.EPIC)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:88	public static final RegistrySupplier<Item> EMPTY_PHIAL = ITEMS.register("phial_empty", () -> new ItemEssence(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:89	public static final RegistrySupplier<Item> FILLED_PHIAL = ITEMS.register("phial_filled", () -> new ItemEssence(new Item.Properties().component(PHIAL_DATA.get(), new PhialData("aer"))));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:92	public static final RegistrySupplier<Item> CRYSTAL_ESSENCE = ITEMS.register("crystal_essence",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:94	public static final RegistrySupplier<Item> THAUMOMETER = ITEMS.register("thaumometer", () -> new ItemThaumometer(new Item.Properties().stacksTo(1)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:95	public static final RegistrySupplier<Item> THAUMONOMICON = ITEMS.register("thaumonomicon", () -> new ItemThaumonomicon(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:96	public static final RegistrySupplier<Item> THAUMONOMICON_CHEAT = ITEMS.register("thaumonomicon_cheat", () -> new ItemThaumonomicon(new Item.Properties(), true));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:97	public static final RegistrySupplier<Item> PRIMORDIAL_PEARL = ITEMS.register("primordial_pearl", () -> new thaumcraft.common.items.ItemPrimordialPearl(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:98	public static final RegistrySupplier<Item> RESONATOR = ITEMS.register("resonator", () -> new ItemResonator(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:99	public static final RegistrySupplier<EntityType<EntitySpecialItem>> SPECIAL_ITEM = ENTITIES.register("special_item", () -> EntityType.Builder.<EntitySpecialItem>of(EntitySpecialItem::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("thaumcraft:special_item"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:100	public static final RegistrySupplier<EntityType<EntityInventoryItem>> INVENTORY_ITEM = ENTITIES.register("inventory_item", () -> EntityType.Builder.<EntityInventoryItem>of(EntityInventoryItem::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("thaumcraft:inventory_item"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:101	public static final RegistrySupplier<Item> IRON_WAND_CAP = ITEMS.register("wand_cap_iron", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:102	public static final RegistrySupplier<Item> WAND = ITEMS.register("wand", () -> new ItemWandCasting(new Item.Properties().stacksTo(1).component(WAND_DATA.get(), WandData.EMPTY)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:113	public static final RegistrySupplier<BlockJar> JAR = BLOCKS.register("jar", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> BlockJar.LIGHT).sound(JAR_SOUND).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:114	public static final RegistrySupplier<BlockJar> VOID_JAR = BLOCKS.register("jar_void", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> BlockJar.LIGHT).sound(JAR_SOUND).noOcclusion(), true));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:115	public static final RegistrySupplier<BlockAuraNode> AURA_NODE = BLOCKS.register("aura_node", () -> new BlockAuraNode(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).noOcclusion().noCollission().lightLevel(state -> 8)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:116	public static final RegistrySupplier<thaumcraft.common.blocks.BlockSilverwoodNode> SILVERWOOD_KNOT = BLOCKS.register("silverwood_knot",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:117	() -> new thaumcraft.common.blocks.BlockSilverwoodNode(BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).strength(2.5F).sound(SoundType.WOOD).lightLevel(state -> 7)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:118	public static final RegistrySupplier<BlockTable> TABLE = BLOCKS.register("table", () -> new BlockTable(
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:119	BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:120	public static final RegistrySupplier<Item> TABLE_ITEM = ITEMS.register("table", () -> new BlockItem(TABLE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:121	public static final RegistrySupplier<Item> RESEARCH_TABLE_ITEM = ITEMS.register("research_table", () -> new BlockItem(TABLE.get(), new Item.Properties()) {
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:128	public static final RegistrySupplier<BlockEntityType<TileTable>> TABLE_BLOCK_ENTITY = BLOCK_ENTITIES.register("table",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:130	public static final RegistrySupplier<BlockEntityType<TileResearchTable>> RESEARCH_TABLE_BLOCK_ENTITY = BLOCK_ENTITIES.register("research_table",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:132	public static final RegistrySupplier<BlockEntityType<TileJar>> JAR_BLOCK_ENTITY = BLOCK_ENTITIES.register("jar", () -> BlockEntityType.Builder.of((pos, state) -> new TileJar(ThaumcraftContent.JAR_BLOCK_ENTITY.get(), pos, state), JAR.get(), VOID_JAR.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:133	public static final RegistrySupplier<BlockEntityType<TileNode>> NODE_BLOCK_ENTITY = BLOCK_ENTITIES.register("aura_node", () -> BlockEntityType.Builder.of((pos, state) -> new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), pos, state), AURA_NODE.get(), SILVERWOOD_KNOT.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:143	public static final RegistrySupplier<CreativeModeTab> TAB = TABS.register("thaumcraft", () -> CreativeTabRegistry.create(Component.translatable("itemGroup.thaumcraft"), () -> new ItemStack(THAUMOMETER.get())));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:148	MATERIALS.put("quicksilver_drop", ITEMS.register("quicksilver_drop",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:154	MATERIALS.put("copper_nugget", ITEMS.register("copper_nugget",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:162	MATERIALS.put("thaumium_nugget", ITEMS.register("thaumium_nugget",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:164	MATERIALS.put("void_nugget", ITEMS.register("void_nugget",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:174	MATERIALS.put("tin_nugget", ITEMS.register("tin_nugget",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:176	MATERIALS.put("silver_nugget", ITEMS.register("silver_nugget",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:178	MATERIALS.put("lead_nugget", ITEMS.register("lead_nugget",
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:195	MATERIALS.put(id, ITEMS.register(id, () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), type)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:197	ITEMS.register("jar", () -> new ItemJar(JAR.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:198	ITEMS.register("jar_void", () -> new ItemJar(VOID_JAR.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:199	ITEMS.register("aura_node", () -> new BlockItem(AURA_NODE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:203	MATERIALS.put(id, ITEMS.register(id, () -> switch (id) {
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:222	SHARDS.put(tags[i], ITEMS.register(id, () -> new thaumcraft.common.items.ItemShard(new Item.Properties(), shardType)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:225	RegistrySupplier<Block> block = BLOCKS.register(crystalId, () -> new thaumcraft.common.blocks.BlockCrystal(ThaumcraftCrystalClusters.properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:227	ITEMS.register(crystalId, () -> new thaumcraft.common.blocks.BlockCrystalItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:244	COMPONENTS.register(); BLOCKS.register(); ITEMS.register(); BLOCK_ENTITIES.register(); ENTITIES.register(); TABS.register(); MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:29	public static final RegistrySupplier<BlockCosmeticWoodStairs> GREATWOOD_STAIRS = block("greatwood_stairs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:31	public static final RegistrySupplier<BlockCosmeticWoodStairs> SILVERWOOD_STAIRS = block("silverwood_stairs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:33	public static final RegistrySupplier<BlockArcaneStoneSlab> GREATWOOD_SLAB = block("greatwood_slab",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:35	public static final RegistrySupplier<BlockArcaneStoneSlab> SILVERWOOD_SLAB = block("silverwood_slab",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:41	private static BlockBehaviour.Properties stairs(MapColor color) { return BlockBehaviour.Properties.of().mapColor(color).strength(2.5F, 6.0F).sound(SoundType.WOOD); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:43	private static BlockBehaviour.Properties slab(MapColor color) { return BlockBehaviour.Properties.of().mapColor(color).strength(2.0F, 3.0F).sound(SoundType.WOOD); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:46	RegistrySupplier<T> block = BLOCKS.register(id, factory);
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:47	ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:51	/** Call after ThaumcraftNaturals.register(): the stairs are built over its planks. */
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:55	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:56	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java:30	public static final RegistrySupplier<BlockCrystal> MIXED = BLOCKS.register("crystal_mixed", () -> new BlockCrystal(properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java:31	public static final RegistrySupplier<Item> MIXED_ITEM = ITEMS.register("crystal_mixed", () -> new BlockCrystalItem(MIXED.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java:32	public static final RegistrySupplier<BlockEntityType<TileCrystal>> CRYSTAL_TILE = TILES.register("crystal_cluster", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java:37	public static BlockBehaviour.Properties properties() { return BlockBehaviour.Properties.of().strength(.7F, .6F).lightLevel(state -> 7).sound(SOUND).noOcclusion(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java:46	if (registered) return; registered = true; BLOCKS.register(); ITEMS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:29	public static final RegistrySupplier<EntityType<EntityCultistKnight>> CULTIST_KNIGHT = ENTITIES.register("cultist_knight",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:33	public static final RegistrySupplier<EntityType<EntityCultistCleric>> CULTIST_CLERIC = ENTITIES.register("cultist_cleric",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:37	public static final RegistrySupplier<EntityType<EntityCultistLeader>> CULTIST_LEADER = ENTITIES.register("cultist_leader",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:41	public static final RegistrySupplier<EntityType<EntityCultistPortal>> CULTIST_PORTAL = ENTITIES.register("cultist_portal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:45	public static final RegistrySupplier<EntityType<EntityCultistPortalGreater>> CULTIST_PORTAL_GREATER = ENTITIES.register("cultist_portal_greater",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:50	public static final RegistrySupplier<SpawnEggItem> KNIGHT_EGG = ITEMS.register("cultist_knight_spawn_egg",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:52	public static final RegistrySupplier<SpawnEggItem> CLERIC_EGG = ITEMS.register("cultist_cleric_spawn_egg",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:54	public static final RegistrySupplier<SpawnEggItem> LEADER_EGG = ITEMS.register("cultist_leader_spawn_egg",
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:64	ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java:65	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeconstruction.java:27	public static final RegistrySupplier<BlockDeconstructionTable> TABLE = BLOCKS.register("deconstruction_table", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeconstruction.java:28	new BlockDeconstructionTable(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeconstruction.java:29	public static final RegistrySupplier<Item> ITEM = ITEMS.register("deconstruction_table", () -> new BlockItem(TABLE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeconstruction.java:30	public static final RegistrySupplier<BlockEntityType<TileDeconstructionTable>> TILE = TILES.register("deconstruction_table", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeconstruction.java:32	public static final RegistrySupplier<MenuType<ContainerDeconstructionTable>> MENU = MENUS.register("deconstruction_table", () -> MenuRegistry.ofExtended(ContainerDeconstructionTable::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeconstruction.java:34	public static void register() { BLOCKS.register(); ITEMS.register(); TILES.register(); MENUS.register(); CreativeTabRegistry.append(ThaumcraftContent.TAB, ITEM); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeviceMenus.java:22	public static final RegistrySupplier<MenuType<ContainerMagicBox>> MAGIC_BOX = MENUS.register("magic_box", () -> MenuRegistry.ofExtended(ContainerMagicBox::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeviceMenus.java:23	public static final RegistrySupplier<MenuType<ContainerHandMirror>> HAND_MIRROR = MENUS.register("hand_mirror", () -> MenuRegistry.ofExtended(ContainerHandMirror::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeviceMenus.java:24	public static final RegistrySupplier<MenuType<ContainerGhostSlots>> GHOST_SLOTS = MENUS.register("ghost_slots", () -> MenuRegistry.ofExtended(ThaumcraftDeviceMenus::ghostSlotsMenu));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDeviceMenus.java:35	public static void register() { if (registered) return; registered = true; MENUS.register(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:28	public static final RegistrySupplier<BlockAlchemyFurnace> ALCHEMY_FURNACE = BLOCKS.register("alchemy_furnace",
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:29	() -> new BlockAlchemyFurnace(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:32	.strength(3, 10.2F).sound(SoundType.STONE).noOcclusion()
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:33	.lightLevel(state -> state.getValue(BlockAlchemyFurnace.LIT) ? 12 : 0)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:34	public static final RegistrySupplier<Item> ALCHEMY_FURNACE_ITEM = ITEMS.register("alchemy_furnace",
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:36	public static final RegistrySupplier<BlockEntityType<TileAlchemyFurnace>> ALCHEMY_FURNACE_BLOCK_ENTITY = BLOCK_ENTITIES.register("alchemy_furnace",
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:38	public static final RegistrySupplier<MenuType<ContainerAlchemyFurnace>> ALCHEMY_FURNACE_MENU = MENUS.register("alchemy_furnace",
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:40	public static final RegistrySupplier<Block> ALCHEMICAL_CONSTRUCT = BLOCKS.register("alchemical_construct",
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:43	() -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:44	.strength(3, 10.2F).sound(SoundType.METAL).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:45	public static final RegistrySupplier<Item> ALCHEMICAL_CONSTRUCT_ITEM = ITEMS.register("alchemical_construct",
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:50	/** Called by the common bootstrap after ThaumcraftContent.register(). */
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:52	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:53	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:54	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java:55	MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:121	public static final RegistrySupplier<BlockEldritch> ELDRITCH = BLOCKS.register("eldritch",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:124	public static final RegistrySupplier<BlockEldritch> ELDRITCH_CRUST = BLOCKS.register("eldritch_crust",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:127	public static final RegistrySupplier<BlockEldritch> ELDRITCH_DECO = BLOCKS.register("eldritch_deco",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:130	public static final RegistrySupplier<BlockEldritch> ELDRITCH_DOORWAY = BLOCKS.register("eldritch_doorway",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:133	public static final RegistrySupplier<BlockEldritch> ELDRITCH_SPAWNER = BLOCKS.register("eldritch_spawner",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:136	public static final RegistrySupplier<BlockEldritch> ELDRITCH_CRYSTAL = BLOCKS.register("eldritch_crystal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:139	public static final RegistrySupplier<BlockEldritchNothing> ELDRITCH_NOTHING = BLOCKS.register("eldritch_nothing",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:140	() -> new BlockEldritchNothing(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:143	.strength(-1.0F, EldritchBlockRules.ELDRITCH_NOTHING_RESISTANCE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:144	.sound(SoundType.STONE).noOcclusion().noCollission()
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:147	.lightLevel(state -> EldritchBlockRules.ELDRITCH_NOTHING_LIGHT)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:149	public static final RegistrySupplier<BlockEldritchPortal> ELDRITCH_PORTAL = BLOCKS.register("eldritch_portal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:150	() -> new BlockEldritchPortal(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_MAGENTA)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:151	.strength(-1.0F, 200000.0F).sound(SoundType.STONE).noOcclusion().noCollission()
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:152	.lightLevel(state -> 15)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:158	public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID = BLOCKS.register("cosmetic_solid",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:161	public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID_TOUGH = BLOCKS.register("cosmetic_solid_tough",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:164	public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID_THAUMIUM = BLOCKS.register("cosmetic_solid_thaumium",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:167	public static final RegistrySupplier<BlockCosmeticOpaque> COSMETIC_OPAQUE = BLOCKS.register("cosmetic_opaque",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:168	() -> BlockCosmeticOpaque.group(BlockCosmeticOpaque.GROUP_AMBER, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:169	.strength(EldritchBlockRules.COSMETIC_OPAQUE_HARDNESS, EldritchBlockRules.COSMETIC_OPAQUE_RESISTANCE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:170	.sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:175	public static final RegistrySupplier<BlockCosmeticOpaque> COSMETIC_OPAQUE_WARDED = BLOCKS.register("cosmetic_opaque_warded",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:176	() -> BlockCosmeticOpaque.group(BlockCosmeticOpaque.GROUP_WARDED, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:177	.strength(EldritchBlockRules.COSMETIC_OPAQUE_WARDED_HARDNESS, EldritchBlockRules.COSMETIC_OPAQUE_WARDED_RESISTANCE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:178	.sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:180	public static final RegistrySupplier<BlockCosmeticStoneSlab> COSMETIC_STONE_SLAB_ARCANE = BLOCKS.register("cosmetic_stone_slab_arcane",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:182	BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:184	public static final RegistrySupplier<BlockCosmeticStoneSlab> COSMETIC_STONE_SLAB_ELDRITCH = BLOCKS.register("cosmetic_stone_slab_eldritch",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:186	BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:188	public static final RegistrySupplier<BlockCosmeticWoodSlab> COSMETIC_WOOD_SLAB_GREATWOOD = BLOCKS.register("cosmetic_wood_slab_greatwood",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:190	BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:192	public static final RegistrySupplier<BlockCosmeticWoodSlab> COSMETIC_WOOD_SLAB_SILVERWOOD = BLOCKS.register("cosmetic_wood_slab_silverwood",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:194	BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:199	public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_WOOD_GREATWOOD = BLOCKS.register("cosmetic_double_slab_wood_greatwood",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:201	BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:203	public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_WOOD_SILVERWOOD = BLOCKS.register("cosmetic_double_slab_wood_silverwood",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:205	BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:207	public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_STONE_ARCANE = BLOCKS.register("cosmetic_double_slab_stone_arcane",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:209	BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:211	public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_STONE_ELDRITCH = BLOCKS.register("cosmetic_double_slab_stone_eldritch",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:213	BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:215	public static final RegistrySupplier<BlockArcaneDoor> ARCANE_DOOR = BLOCKS.register("arcane_door",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:216	() -> new BlockArcaneDoor(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:219	.strength(15.0F, 599.4F).sound(SoundType.METAL).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:221	public static final RegistrySupplier<BlockMagicBox> MAGIC_BOX = BLOCKS.register("magic_box",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:222	() -> new BlockMagicBox(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:225	.strength(2.5F, 0.0F).sound(SoundType.WOOD).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:227	public static final RegistrySupplier<BlockMirror> MIRROR = BLOCKS.register("mirror",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:228	() -> new BlockMirror(BlockBehaviour.Properties.of().mapColor(MapColor.ICE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:234	.strength(1.0F, 6.0F).sound(MIRROR_SOUND).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:236	public static final RegistrySupplier<BlockMetalDevice> METAL_DEVICE = BLOCKS.register("metal_device",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:237	() -> new BlockMetalDevice(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:238	.strength(EldritchBlockRules.DEVICE_METAL_HARDNESS, EldritchBlockRules.DEVICE_METAL_RESISTANCE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:239	.sound(SoundType.METAL).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:247	public static final RegistrySupplier<BlockArcanePressurePlate> ARCANE_PRESSURE_PLATE = BLOCKS.register("arcane_pressure_plate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:248	() -> new BlockArcanePressurePlate(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:249	.strength(EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_HARDNESS, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_RESISTANCE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:250	.sound(SoundType.WOOD).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:252	public static final RegistrySupplier<BlockWoodenDevice> WOODEN_DEVICE = BLOCKS.register("wooden_device",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:253	() -> new BlockWoodenDevice(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:254	.strength(EldritchBlockRules.DEVICE_WOOD_HARDNESS, EldritchBlockRules.DEVICE_WOOD_RESISTANCE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:255	.sound(SoundType.WOOD).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:257	public static final RegistrySupplier<BlockStoneDevice> STONE_DEVICE = BLOCKS.register("stone_device",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:258	() -> new BlockStoneDevice(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:259	.strength(EldritchBlockRules.DEVICE_STONE_HARDNESS, EldritchBlockRules.DEVICE_STONE_RESISTANCE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:260	.sound(SoundType.STONE).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:262	public static final RegistrySupplier<BlockLoot> LOOT_URN = BLOCKS.register("loot_urn",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:265	() -> new BlockLoot(BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.15F, 0.0F)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:266	.sound(LOOT_URN_SOUND).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:268	public static final RegistrySupplier<BlockLoot> LOOT_CRATE = BLOCKS.register("loot_crate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:269	() -> new BlockLoot(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.15F, 0.0F).sound(SoundType.WOOD).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:272	public static final RegistrySupplier<BlockAiry> AIRY = BLOCKS.register("airy",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:275	public static final RegistrySupplier<BlockAiry> AIRY_NODE = BLOCKS.register("airy_node",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:278	public static final RegistrySupplier<BlockAiry> AIRY_HOLE = BLOCKS.register("airy_hole",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:281	public static final RegistrySupplier<BlockAiry> AIRY_UNBREAKABLE = BLOCKS.register("airy_unbreakable",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:284	public static final RegistrySupplier<JarBlock> JAR_BRAIN = BLOCKS.register("jar_brain",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:288	() -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(thaumcraft.common.config.ThaumcraftContent.JAR_SOUND).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:290	public static final RegistrySupplier<JarBlock> JAR_NODE = BLOCKS.register("jar_node",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:294	() -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(thaumcraft.common.config.ThaumcraftContent.JAR_SOUND).noOcclusion().lightLevel(state -> 11)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:296	public static final RegistrySupplier<EtherealBloomBlock> ETHEREAL_BLOOM = BLOCKS.register("ethereal_bloom",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:297	() -> new EtherealBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:298	.noCollission().sound(SoundType.GRASS).lightLevel(state -> 15)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:310	return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:311	.strength(EldritchBlockRules.eldritchGroupHardness(group), EldritchBlockRules.eldritchGroupResistance(group))
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:312	.sound(SoundType.STONE).noOcclusion()
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:313	.lightLevel(state -> EldritchBlockRules.eldritchLight(BlockEldritch.variantOf(state, group)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:317	return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:318	.strength(EldritchBlockRules.cosmeticGroupHardness(group), EldritchBlockRules.cosmeticGroupResistance(group))
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:319	.sound(SoundType.STONE).noOcclusion()
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:320	.lightLevel(state -> EldritchBlockRules.cosmeticLight(BlockCosmeticSolid.variantOf(state, group)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:324	var properties = BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:325	.strength(EldritchBlockRules.airyGroupHardness(group), EldritchBlockRules.airyGroupResistance(group))
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:326	.sound(SoundType.WOOL).noOcclusion().noCollission()
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:327	.lightLevel(state -> EldritchBlockRules.airyLight(BlockAiry.variantOf(state, group)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:335	public static final RegistrySupplier<Item> ELDRITCH_ITEM = ITEMS.register("eldritch", () -> new BlockItem(ELDRITCH.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:336	public static final RegistrySupplier<Item> ELDRITCH_CRUST_ITEM = ITEMS.register("eldritch_crust", () -> new BlockItem(ELDRITCH_CRUST.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:337	public static final RegistrySupplier<Item> ELDRITCH_DECO_ITEM = ITEMS.register("eldritch_deco", () -> new BlockItem(ELDRITCH_DECO.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:338	public static final RegistrySupplier<Item> ELDRITCH_DOORWAY_ITEM = ITEMS.register("eldritch_doorway", () -> new BlockItem(ELDRITCH_DOORWAY.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:339	public static final RegistrySupplier<Item> ELDRITCH_SPAWNER_ITEM = ITEMS.register("eldritch_spawner", () -> new BlockItem(ELDRITCH_SPAWNER.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:340	public static final RegistrySupplier<Item> ELDRITCH_CRYSTAL_ITEM = ITEMS.register("eldritch_crystal", () -> new BlockItem(ELDRITCH_CRYSTAL.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:341	public static final RegistrySupplier<Item> ELDRITCH_NOTHING_ITEM = ITEMS.register("eldritch_nothing", () -> new BlockItem(ELDRITCH_NOTHING.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:342	public static final RegistrySupplier<Item> ELDRITCH_PORTAL_ITEM = ITEMS.register("eldritch_portal", () -> new BlockItem(ELDRITCH_PORTAL.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:343	public static final RegistrySupplier<Item> COSMETIC_SOLID_ITEM = ITEMS.register("cosmetic_solid", () -> new BlockItem(COSMETIC_SOLID.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:344	public static final RegistrySupplier<Item> COSMETIC_SOLID_TOUGH_ITEM = ITEMS.register("cosmetic_solid_tough", () -> new BlockItem(COSMETIC_SOLID_TOUGH.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:345	public static final RegistrySupplier<Item> COSMETIC_SOLID_THAUMIUM_ITEM = ITEMS.register("cosmetic_solid_thaumium", () -> new BlockItem(COSMETIC_SOLID_THAUMIUM.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:347	public static final RegistrySupplier<Item> PAVING_STONE_TRAVEL_ITEM = ITEMS.register("paving_stone_travel",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:350	public static final RegistrySupplier<Item> PAVING_STONE_WARDING_ITEM = ITEMS.register("paving_stone_warding",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:353	public static final RegistrySupplier<Item> WARDED_GLASS_ITEM = ITEMS.register("warded_glass",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:361	public static final RegistrySupplier<Item> OBSIDIAN_TILE_ITEM = ITEMS.register("obsidian_tile",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:363	public static final RegistrySupplier<Item> COSMETIC_OPAQUE_ITEM = ITEMS.register("cosmetic_opaque", () -> new BlockItem(COSMETIC_OPAQUE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:364	public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ARCANE_ITEM = ITEMS.register("cosmetic_stone_slab_arcane", () -> new BlockItem(COSMETIC_STONE_SLAB_ARCANE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:365	public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ELDRITCH_ITEM = ITEMS.register("cosmetic_stone_slab_eldritch", () -> new BlockItem(COSMETIC_STONE_SLAB_ELDRITCH.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:366	public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_GREATWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_greatwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_GREATWOOD.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:367	public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_silverwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_SILVERWOOD.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:369	public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_WOOD_GREATWOOD_ITEM = ITEMS.register("cosmetic_double_slab_wood_greatwood", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_WOOD_GREATWOOD.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:370	public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_WOOD_SILVERWOOD_ITEM = ITEMS.register("cosmetic_double_slab_wood_silverwood", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_WOOD_SILVERWOOD.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:371	public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_STONE_ARCANE_ITEM = ITEMS.register("cosmetic_double_slab_stone_arcane", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_STONE_ARCANE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:372	public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_STONE_ELDRITCH_ITEM = ITEMS.register("cosmetic_double_slab_stone_eldritch", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_STONE_ELDRITCH.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:377	public static final RegistrySupplier<Item> FLUX_SCRUBBER_ITEM = ITEMS.register("flux_scrubber",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:383	public static final RegistrySupplier<Item> ARCANE_PRESSURE_PLATE_ITEM = ITEMS.register("arcane_pressure_plate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:385	public static final RegistrySupplier<Item> ARCANE_DOOR_ITEM = ITEMS.register("arcane_door", () -> new ItemArcaneDoor(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:386	public static final RegistrySupplier<Item> MAGIC_BOX_ITEM = ITEMS.register("magic_box", () -> new BlockItem(MAGIC_BOX.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:387	public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new ItemMirrorBlock(MIRROR.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:388	public static final RegistrySupplier<Item> METAL_DEVICE_ITEM = ITEMS.register("metal_device", () -> new BlockItem(METAL_DEVICE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:389	public static final RegistrySupplier<Item> WOODEN_DEVICE_ITEM = ITEMS.register("wooden_device", () -> new BlockItem(WOODEN_DEVICE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:395	public static final RegistrySupplier<DataComponentType<BannerData>> BANNER_DATA = COMPONENTS.register("banner_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:398	public static final RegistrySupplier<Item> BANNER_ITEM = ITEMS.register("banner",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:400	public static final RegistrySupplier<Item> STONE_DEVICE_ITEM = ITEMS.register("stone_device", () -> new BlockItem(STONE_DEVICE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:401	public static final RegistrySupplier<Item> LOOT_URN_ITEM = ITEMS.register("loot_urn", () -> new BlockLootItem(LOOT_URN.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:402	public static final RegistrySupplier<Item> LOOT_CRATE_ITEM = ITEMS.register("loot_crate", () -> new BlockLootItem(LOOT_CRATE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:403	public static final RegistrySupplier<Item> AIRY_ITEM = ITEMS.register("airy", () -> new BlockItem(AIRY.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:404	public static final RegistrySupplier<Item> AIRY_NODE_ITEM = ITEMS.register("airy_node", () -> new BlockItem(AIRY_NODE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:405	public static final RegistrySupplier<Item> AIRY_HOLE_ITEM = ITEMS.register("airy_hole", () -> new BlockItem(AIRY_HOLE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:406	public static final RegistrySupplier<Item> JAR_BRAIN_ITEM = ITEMS.register("jar_brain", () -> new BlockItem(JAR_BRAIN.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:414	public static final RegistrySupplier<Item> JAR_NODE_ITEM = ITEMS.register("jar_node",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:416	public static final RegistrySupplier<Item> ETHEREAL_BLOOM_ITEM = ITEMS.register("ethereal_bloom", () -> new BlockItem(ETHEREAL_BLOOM.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:420	public static final RegistrySupplier<BlockEntityType<BlockEntity>> ELDRITCH_TILE = BLOCK_ENTITIES.register("eldritch",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:425	public static final RegistrySupplier<BlockEntityType<TileEldritchNothing>> ELDRITCH_NOTHING_TILE = BLOCK_ENTITIES.register("eldritch_nothing",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:428	public static final RegistrySupplier<BlockEntityType<TileEldritchPortal>> ELDRITCH_PORTAL_TILE = BLOCK_ENTITIES.register("eldritch_portal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:431	public static final RegistrySupplier<BlockEntityType<TileMirror>> MIRROR_TILE = BLOCK_ENTITIES.register("mirror",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:434	public static final RegistrySupplier<BlockEntityType<TileMirrorEssentia>> MIRROR_ESSENTIA_TILE = BLOCK_ENTITIES.register("mirror_essentia",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:437	public static final RegistrySupplier<BlockEntityType<TileMagicBox>> MAGIC_BOX_TILE = BLOCK_ENTITIES.register("magic_box",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:440	public static final RegistrySupplier<BlockEntityType<TileBanner>> BANNER_TILE = BLOCK_ENTITIES.register("banner",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:443	public static final RegistrySupplier<BlockEntityType<TileArcanePressurePlate>> PRESSURE_PLATE_TILE = BLOCK_ENTITIES.register("arcane_pressure_plate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:446	public static final RegistrySupplier<BlockEntityType<TileBrainbox>> BRAINBOX_TILE = BLOCK_ENTITIES.register("brainbox",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:456	public static final RegistrySupplier<BlockEntityType<TileWandPedestal>> WAND_PEDESTAL_TILE = BLOCK_ENTITIES.register("stone_device_wand_pedestal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:459	public static final RegistrySupplier<BlockEntityType<TileFluxScrubber>> FLUX_SCRUBBER_TILE = BLOCK_ENTITIES.register("flux_scrubber",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:462	public static final RegistrySupplier<BlockEntityType<TileWardingStone>> WARDING_STONE_TILE = BLOCK_ENTITIES.register("warding_stone",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:465	public static final RegistrySupplier<BlockEntityType<TileNode>> COSMETIC_NODE_TILE = BLOCK_ENTITIES.register("cosmetic_node",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:469	public static final RegistrySupplier<BlockEntityType<TileWardingStoneFence>> WARDING_FENCE_TILE = BLOCK_ENTITIES.register("warding_stone_fence",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:472	public static final RegistrySupplier<BlockEntityType<TileEtherealBloom>> ETHEREAL_BLOOM_TILE = BLOCK_ENTITIES.register("ethereal_bloom",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:475	public static final RegistrySupplier<BlockEntityType<TileJarBrain>> JAR_BRAIN_TILE = BLOCK_ENTITIES.register("jar_brain",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:478	public static final RegistrySupplier<BlockEntityType<TileJarNode>> JAR_NODE_TILE = BLOCK_ENTITIES.register("jar_node",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:481	public static final RegistrySupplier<BlockEntityType<TileOwned>> OWNED_TILE = BLOCK_ENTITIES.register("owned",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:490	public static final RegistrySupplier<BlockCosmeticStairs> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:492	BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:496	.strength(2.0F, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE).sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:498	public static final RegistrySupplier<Item> STAIRS_ELDRITCH_ITEM = ITEMS.register("eldritch_stairs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:660	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:661	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:662	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:663	MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:664	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchItems.java:15	public static final RegistrySupplier<ItemSanitySoap> SANITY_SOAP=ITEMS.register("sanity_soap",()->new ItemSanitySoap(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchItems.java:16	public static final RegistrySupplier<ItemCrimsonRites> CRIMSON_RITES=ITEMS.register("crimson_rites",()->new ItemCrimsonRites(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchItems.java:19	public static void register(){if(registered)return;registered=true;ITEMS.register();CreativeTabRegistry.append(ThaumcraftContent.TAB,SANITY_SOAP);CreativeTabRegistry.append(ThaumcraftContent.TAB,CRIMSON_RITES);}
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:27	public static final RegistrySupplier<EntityType<EntityEldritchWarden>> ELDRITCH_WARDEN=ENTITIES.register("eldritch_warden",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:30	public static final RegistrySupplier<EntityType<EntityEldritchGolem>> ELDRITCH_GOLEM=ENTITIES.register("eldritch_golem",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:33	public static final RegistrySupplier<EntityType<EntityEldritchCrab>> ELDRITCH_CRAB=ENTITIES.register("eldritch_crab",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:36	public static final RegistrySupplier<EntityType<EntityInhabitedZombie>> INHABITED_ZOMBIE=ENTITIES.register("inhabited_zombie",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:39	public static final RegistrySupplier<EntityType<EntityWatcher>> WATCHER=ENTITIES.register("watcher",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:42	public static final RegistrySupplier<EntityType<EntityThaumicSlime>> THAUMIC_SLIME=ENTITIES.register("thaum_slime",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:45	public static final RegistrySupplier<EntityType<EntityTaintacleGiant>> TAINTACLE_GIANT=ENTITIES.register("taintacle_giant",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:48	public static final RegistrySupplier<SpawnEggItem> ELDRITCH_WARDEN_EGG=ITEMS.register("eldritch_warden_spawn_egg",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:50	public static final RegistrySupplier<SpawnEggItem> ELDRITCH_GOLEM_EGG=ITEMS.register("eldritch_golem_spawn_egg",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:52	public static final RegistrySupplier<SpawnEggItem> ELDRITCH_CRAB_EGG=ITEMS.register("eldritch_crab_spawn_egg",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:54	public static final RegistrySupplier<SpawnEggItem> INHABITED_ZOMBIE_EGG=ITEMS.register("inhabited_zombie_spawn_egg",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:56	public static final RegistrySupplier<SpawnEggItem> WATCHER_EGG=ITEMS.register("watcher_spawn_egg",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:58	public static final RegistrySupplier<SpawnEggItem> THAUMIC_SLIME_EGG=ITEMS.register("thaum_slime_spawn_egg",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:60	public static final RegistrySupplier<SpawnEggItem> TAINTACLE_GIANT_EGG=ITEMS.register("taintacle_giant_spawn_egg",()->
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:77	ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java:78	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEmbers.java:17	public static final RegistrySupplier<EntityType<EntityEmber>> EMBER = ENTITIES.register("ember",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEmbers.java:27	ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:88	public static final RegistrySupplier<ArmorMaterial> THAUMIUM_ARMOR_MATERIAL = ARMOR_MATERIALS.register("thaumium", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:94	public static final RegistrySupplier<ArmorMaterial> VOID_ARMOR_MATERIAL = ARMOR_MATERIALS.register("void", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:103	public static final RegistrySupplier<ArmorMaterial> FORTRESS_ARMOR_MATERIAL = ARMOR_MATERIALS.register("fortress", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:108	public static final RegistrySupplier<DataComponentType<Boolean>> FORTRESS_GOGGLES = COMPONENTS.register("fortress_goggles",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:110	public static final RegistrySupplier<DataComponentType<Integer>> FORTRESS_MASK = COMPONENTS.register("fortress_mask",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:119	public static final RegistrySupplier<ArmorMaterial> VOID_ROBE_ARMOR_MATERIAL = ARMOR_MATERIALS.register("void_robe", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:124	public static final RegistrySupplier<ItemThaumiumSword> THAUMIUM_SWORD = ITEMS.register("thaumium_sword",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:126	public static final RegistrySupplier<ItemThaumiumPickaxe> THAUMIUM_PICKAXE = ITEMS.register("thaumium_pickaxe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:128	public static final RegistrySupplier<ItemThaumiumAxe> THAUMIUM_AXE = ITEMS.register("thaumium_axe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:131	public static final RegistrySupplier<ItemElementalAxe> ELEMENTAL_AXE = ITEMS.register("elemental_axe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:134	public static final RegistrySupplier<ItemElementalPickaxe> ELEMENTAL_PICKAXE = ITEMS.register("elemental_pickaxe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:137	public static final RegistrySupplier<ItemElementalHoe> ELEMENTAL_HOE = ITEMS.register("elemental_hoe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:140	public static final RegistrySupplier<ItemElementalShovel> ELEMENTAL_SHOVEL = ITEMS.register("elemental_shovel",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:143	public static final RegistrySupplier<DataComponentType<Integer>> SHOVEL_ORIENTATION = COMPONENTS.register("shovel_orientation",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:147	public static final RegistrySupplier<ItemElementalSword> ELEMENTAL_SWORD = ITEMS.register("elemental_sword",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:149	public static final RegistrySupplier<ItemThaumiumShovel> THAUMIUM_SHOVEL = ITEMS.register("thaumium_shovel",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:151	public static final RegistrySupplier<ItemThaumiumHoe> THAUMIUM_HOE = ITEMS.register("thaumium_hoe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:153	public static final RegistrySupplier<ItemThaumiumArmor> THAUMIUM_HELMET = ITEMS.register("thaumium_helmet",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:155	public static final RegistrySupplier<ItemThaumiumArmor> THAUMIUM_CHESTPLATE = ITEMS.register("thaumium_chestplate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:157	public static final RegistrySupplier<ItemThaumiumArmor> THAUMIUM_LEGGINGS = ITEMS.register("thaumium_leggings",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:159	public static final RegistrySupplier<ItemThaumiumArmor> THAUMIUM_BOOTS = ITEMS.register("thaumium_boots",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:162	public static final RegistrySupplier<ItemVoidSword> VOID_SWORD = ITEMS.register("void_sword",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:164	public static final RegistrySupplier<ItemVoidPickaxe> VOID_PICKAXE = ITEMS.register("void_pickaxe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:166	public static final RegistrySupplier<ItemVoidAxe> VOID_AXE = ITEMS.register("void_axe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:168	public static final RegistrySupplier<ItemVoidShovel> VOID_SHOVEL = ITEMS.register("void_shovel",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:170	public static final RegistrySupplier<ItemVoidHoe> VOID_HOE = ITEMS.register("void_hoe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:172	public static final RegistrySupplier<ItemVoidArmor> VOID_HELMET = ITEMS.register("void_helmet",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:174	public static final RegistrySupplier<ItemVoidArmor> VOID_CHESTPLATE = ITEMS.register("void_chestplate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:176	public static final RegistrySupplier<ItemVoidArmor> VOID_LEGGINGS = ITEMS.register("void_leggings",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:178	public static final RegistrySupplier<ItemVoidArmor> VOID_BOOTS = ITEMS.register("void_boots",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:180	public static final RegistrySupplier<ItemFortressArmor> FORTRESS_HELMET = ITEMS.register("fortress_helmet",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:182	public static final RegistrySupplier<ItemFortressArmor> FORTRESS_CHESTPLATE = ITEMS.register("fortress_chestplate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:184	public static final RegistrySupplier<ItemFortressArmor> FORTRESS_LEGGINGS = ITEMS.register("fortress_leggings",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:186	public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_HELMET = ITEMS.register("void_robe_helmet",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:188	public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_CHESTPLATE = ITEMS.register("void_robe_chestplate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:190	public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_LEGGINGS = ITEMS.register("void_robe_leggings",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:209	ARMOR_MATERIALS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:210	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:211	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEssences.java:18	public static final RegistrySupplier<DataComponentType<WispEssenceData>> WISP_ESSENCE_DATA = COMPONENTS.register("wisp_essence_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftEssences.java:20	public static final RegistrySupplier<ItemWispEssence> WISP_ESSENCE = ITEMS.register("wisp_essence", () -> new ItemWispEssence(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftEssences.java:28	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftEssences.java:29	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftExplosiveOrbs.java:14	public static final RegistrySupplier<EntityType<EntityExplosiveOrb>> EXPLOSIVE_ORB = ENTITIES.register("explosive_orb",
+common/src/main/java/thaumcraft/common/config/ThaumcraftExplosiveOrbs.java:19	public static void register() { if (!registered) { registered = true; ENTITIES.register(); } }
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:43	public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties(false)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:44	public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties(true)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:52	public static final RegistrySupplier<Item> FLUX_GAS_ITEM = ITEMS.register("flux_gas",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:54	public static final RegistrySupplier<Item> FLUX_GOO_ITEM = ITEMS.register("flux_goo",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:56	private static final RegistrySupplier<MobEffect> VIS_EXHAUST = EFFECTS.register("vis_exhaust", PotionVisExhaust::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:57	private static final RegistrySupplier<MobEffect> INFECTIOUS_VIS_EXHAUST = EFFECTS.register("infectious_vis_exhaust", PotionInfectiousVisExhaust::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:69	BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).noCollission().noOcclusion()
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:70	.randomTicks().noLootTable().pushReaction(PUSH_REACTION)
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:73	.lightLevel(state -> state.getValue(FluxFiniteBlock.LEVEL) * 7 / 8);
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:78	if (goo) properties = properties.sound(FLUX_GOO_SOUND);
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:83	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:84	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:85	EFFECTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:28	public static final RegistrySupplier<BlockFocalManipulator> FOCAL_MANIPULATOR = BLOCKS.register("focal_manipulator",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:29	() -> new BlockFocalManipulator(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:32	.strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:33	public static final RegistrySupplier<Item> FOCAL_MANIPULATOR_ITEM = ITEMS.register("focal_manipulator",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:35	public static final RegistrySupplier<BlockEntityType<TileFocalManipulator>> FOCAL_MANIPULATOR_BLOCK_ENTITY = BLOCK_ENTITIES.register("focal_manipulator",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:37	public static final RegistrySupplier<MenuType<ContainerFocalManipulator>> FOCAL_MANIPULATOR_MENU = MENUS.register("focal_manipulator",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:43	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:44	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:45	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java:46	MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:25	public static final RegistrySupplier<DataComponentType<FocusData>> WAND_FOCUS = COMPONENTS.register("wand_focus",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:28	public static final RegistrySupplier<DataComponentType<FocusUpgradeData>> FOCUS_UPGRADES = COMPONENTS.register("focus_upgrades",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:31	public static final RegistrySupplier<ItemFocusFire> FIRE_FOCUS = ITEMS.register("focus_fire",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:33	public static final RegistrySupplier<ItemFocusExcavation> EXCAVATION_FOCUS = ITEMS.register("focus_excavation",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:35	public static final RegistrySupplier<ItemFocusFrost> FROST_FOCUS = ITEMS.register("focus_frost",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:37	public static final RegistrySupplier<ItemFocusShock> SHOCK_FOCUS = ITEMS.register("focus_shock",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:39	public static final RegistrySupplier<ItemFocusPortableHole> PORTABLE_HOLE_FOCUS = ITEMS.register("focus_portable_hole",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:41	public static final RegistrySupplier<ItemFocusWarding> WARDING_FOCUS = ITEMS.register("focus_warding",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:43	public static final RegistrySupplier<ItemFocusTrade> TRADE_FOCUS = ITEMS.register("focus_trade",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:52	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java:53	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocusPouches.java:17	public static final RegistrySupplier<ItemFocusPouchBauble> FOCUS_POUCH=ITEMS.register("focus_pouch",()->new ItemFocusPouchBauble(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocusPouches.java:18	public static final RegistrySupplier<MenuType<ContainerFocusPouch>> MENU=MENUS.register("focus_pouch",()->MenuRegistry.ofExtended(ContainerFocusPouch::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftFocusPouches.java:21	public static void register() { if(registered)return;registered=true;ITEMS.register();MENUS.register();CreativeTabRegistry.append(ThaumcraftContent.TAB,FOCUS_POUCH); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftFrost.java:16	public static final RegistrySupplier<EntityType<EntityFrostShard>> FROST_SHARD = ENTITIES.register("frost_shard",
+common/src/main/java/thaumcraft/common/config/ThaumcraftFrost.java:26	ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:24	public static final RegistrySupplier<Block> THAUMIUM_BLOCK = BLOCKS.register("thaumium_block",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:26	public static final RegistrySupplier<Item> THAUMIUM_BLOCK_ITEM = ITEMS.register("thaumium_block",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:31	public static final RegistrySupplier<Block> TALLOW_BLOCK = BLOCKS.register("tallow_block",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:33	public static final RegistrySupplier<Item> TALLOW_BLOCK_ITEM = ITEMS.register("tallow_block",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:37	public static final RegistrySupplier<Block> FLESH_BLOCK = BLOCKS.register("flesh_block",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:38	() -> new BlockFlesh(BlockBehaviour.Properties.of()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:39	public static final RegistrySupplier<Item> FLESH_BLOCK_ITEM = ITEMS.register("flesh_block",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:49	return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(hardness, resistance)
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:50	.sound(SoundType.STONE).requiresCorrectToolForDrops().randomTicks();
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:53	/** Root calls after ThaumcraftContent.register(); cube JSONs need no renderer hook. */
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:57	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolemMaterials.java:58	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:40	public static final RegistrySupplier<DataComponentType<GolemData>> GOLEM_DATA = COMPONENTS.register("golem_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:42	public static final RegistrySupplier<EntityType<EntityGolemBase>> GOLEM = ENTITIES.register("golem",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:45	public static final RegistrySupplier<EntityType<EntityTravelingTrunk>> TRUNK = ENTITIES.register("traveling_trunk",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:48	public static final RegistrySupplier<EntityType<EntityDart>> DART = ENTITIES.register("dart",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:51	public static final RegistrySupplier<DataComponentType<Integer>> TRUNK_UPGRADE = COMPONENTS.register("trunk_upgrade",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:54	public static final RegistrySupplier<EntityType<EntityGolemBobber>> GOLEM_BOBBER = ENTITIES.register("golem_bobber",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:65	public static final RegistrySupplier<Item> CORE_BLANK = ITEMS.register("golem_core_blank",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:67	public static final RegistrySupplier<Item> CORE_FILL = ITEMS.register("golem_core_fill",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:69	public static final RegistrySupplier<Item> CORE_EMPTY = ITEMS.register("golem_core_empty",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:71	public static final RegistrySupplier<Item> CORE_GATHER = ITEMS.register("golem_core_gather",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:73	public static final RegistrySupplier<Item> CORE_SORTING = ITEMS.register("golem_core_sorting",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:75	public static final RegistrySupplier<Item> CORE_HARVEST = ITEMS.register("golem_core_harvest",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:77	public static final RegistrySupplier<Item> CORE_LUMBER = ITEMS.register("golem_core_lumber",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:79	public static final RegistrySupplier<Item> CORE_GUARD = ITEMS.register("golem_core_guard",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:81	public static final RegistrySupplier<Item> CORE_FISHING = ITEMS.register("golem_core_fishing",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:83	public static final RegistrySupplier<Item> CORE_LIQUID = ITEMS.register("golem_core_liquid",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:85	public static final RegistrySupplier<Item> CORE_ALCHEMY = ITEMS.register("golem_core_essentia",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:87	public static final RegistrySupplier<Item> CORE_BUTCHER = ITEMS.register("golem_core_butcher",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:89	public static final RegistrySupplier<Item> CORE_USE = ITEMS.register("golem_core_use",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:107	public static final RegistrySupplier<Item> GOLEM_BELL = ITEMS.register("golem_bell",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:109	public static final RegistrySupplier<Item> TRUNK_SPAWNER = ITEMS.register("trunk_spawner",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:111	public static final RegistrySupplier<MenuType<ContainerTravelingTrunk>> TRUNK_MENU = MENUS.register("traveling_trunk",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:113	public static final RegistrySupplier<MenuType<ContainerGolem>> GOLEM_MENU = MENUS.register("golem",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:119	return ITEMS.register(id, () -> new ItemGolemUpgrade(new Item.Properties().rarity(Rarity.UNCOMMON), kind));
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:123	return ITEMS.register(id, () -> new ItemGolemDecoration(new Item.Properties(), letter));
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:154	return ITEMS.register(id, () -> new ItemGolemPlacer(new Item.Properties().stacksTo(1)
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:196	COMPONENTS.register(); ENTITIES.register(); ITEMS.register(); MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:197	dev.architectury.event.events.common.PlayerEvent.CHANGE_DIMENSION.register(EntityTravelingTrunk::ownerChangedDimension);
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:23	* ThaumcraftContent.register() and after the eldritch block family, whose metal
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:31	public static final RegistrySupplier<BlockItemGrate> ITEM_GRATE = BLOCKS.register("item_grate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:33	() -> new BlockItemGrate(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0F, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:34	public static final RegistrySupplier<Item> ITEM_GRATE_ITEM = ITEMS.register("item_grate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:40	public static final RegistrySupplier<BlockEntityType<TileGrate>> GRATE_BLOCK_ENTITY = BLOCK_ENTITIES.register("item_grate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:50	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:51	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:52	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftHellbatFoci.java:14	public static final RegistrySupplier<ItemFocusHellbat> HELLBAT_FOCUS=ITEMS.register("focus_hellbat",()->new ItemFocusHellbat(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftHellbatFoci.java:17	public static void register() { if(registered)return;registered=true;ITEMS.register();CreativeTabRegistry.append(ThaumcraftContent.TAB,HELLBAT_FOCUS); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java:21	public static final RegistrySupplier<BlockHole> HOLE_BLOCK = BLOCKS.register("hole", () -> new BlockHole(
+common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java:22	BlockBehaviour.Properties.of().mapColor(MapColor.NONE).sound(SoundType.STONE).lightLevel(state -> HoleBlockRules.HOLE_LIGHT)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java:23	public static final RegistrySupplier<BlockEntityType<TileHole>> HOLE_BLOCK_ENTITY = BLOCK_ENTITIES.register("hole",
+common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java:32	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java:33	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftHungryChest.java:24	public static final RegistrySupplier<BlockChestHungry> HUNGRY_CHEST = BLOCKS.register("hungry_chest", () -> new BlockChestHungry(
+common/src/main/java/thaumcraft/common/config/ThaumcraftHungryChest.java:25	BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftHungryChest.java:26	public static final RegistrySupplier<Item> HUNGRY_CHEST_ITEM = ITEMS.register("hungry_chest",
+common/src/main/java/thaumcraft/common/config/ThaumcraftHungryChest.java:28	public static final RegistrySupplier<BlockEntityType<TileChestHungry>> HUNGRY_CHEST_BLOCK_ENTITY = TILES.register("hungry_chest",
+common/src/main/java/thaumcraft/common/config/ThaumcraftHungryChest.java:34	BLOCKS.register(); ITEMS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:42	return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3, 15)
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:43	.sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:46	public static final RegistrySupplier<BlockInfusionMatrix> MATRIX = BLOCKS.register("infusion_matrix",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:47	() -> new BlockInfusionMatrix(stone().lightLevel(state -> 10)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:48	public static final RegistrySupplier<BlockPedestal> PEDESTAL = BLOCKS.register("arcane_pedestal", () -> new BlockPedestal(stone()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:49	public static final RegistrySupplier<BlockInfusionPillar> PILLAR = BLOCKS.register("infusion_pillar", () -> new BlockInfusionPillar(stone()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:50	public static final RegistrySupplier<BlockTallowCandle> TALLOW_CANDLE = BLOCKS.register("tallow_candle",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:51	() -> new BlockTallowCandle(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:52	public static final RegistrySupplier<Item> MATRIX_ITEM = ITEMS.register("infusion_matrix", () -> new BlockItem(MATRIX.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:53	public static final RegistrySupplier<Item> PEDESTAL_ITEM = ITEMS.register("arcane_pedestal", () -> new BlockItem(PEDESTAL.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:54	public static final RegistrySupplier<Item> TALLOW_CANDLE_ITEM = ITEMS.register("tallow_candle", () -> new BlockItem(TALLOW_CANDLE.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:56	public static final RegistrySupplier<BlockEntityType<TileInfusionMatrix>> MATRIX_BLOCK_ENTITY = BLOCK_ENTITIES.register("infusion_matrix",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:58	public static final RegistrySupplier<BlockEntityType<TilePedestal>> PEDESTAL_BLOCK_ENTITY = BLOCK_ENTITIES.register("arcane_pedestal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:60	public static final RegistrySupplier<BlockEntityType<TileInfusionPillar>> PILLAR_BLOCK_ENTITY = BLOCK_ENTITIES.register("infusion_pillar",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:62	public static final RegistrySupplier<RecipeType<InfusionStackRecipe>> INFUSION_RECIPE_TYPE = RECIPE_TYPES.register("infusion_stack",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:66	public static final RegistrySupplier<RecipeSerializer<InfusionStackRecipe>> INFUSION_RECIPE_SERIALIZER = SERIALIZERS.register("infusion_stack",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:68	public static final RegistrySupplier<RecipeType<InfusionEnchantmentRecipe>> ENCHANTMENT_RECIPE_TYPE = RECIPE_TYPES.register("infusion_enchantment",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:72	public static final RegistrySupplier<RecipeSerializer<InfusionEnchantmentRecipe>> ENCHANTMENT_RECIPE_SERIALIZER = SERIALIZERS.register("infusion_enchantment",
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:74	public static final RegistrySupplier<MobEffect> FLUX_TAINT = EFFECTS.register("flux_taint", PotionFluxTaint::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:81	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:82	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:83	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:84	RECIPE_TYPES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:85	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:86	EFFECTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:87	LifecycleEvent.SERVER_STOPPED.register(server -> EssentiaHandler.clear());
+common/src/main/java/thaumcraft/common/config/ThaumcraftLabels.java:26	public static final RegistrySupplier<DataComponentType<JarLabelData>> JAR_LABEL_DATA = COMPONENTS.register("jar_label_data",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLabels.java:28	public static final RegistrySupplier<RecipeSerializer<BindRecipe>> BIND_SERIALIZER = SERIALIZERS.register("jar_label_bind",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLabels.java:30	public static final RegistrySupplier<RecipeSerializer<ClearRecipe>> CLEAR_SERIALIZER = SERIALIZERS.register("jar_label_clear",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLabels.java:36	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLabels.java:37	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:25	public static final RegistrySupplier<BlockArcaneLamp> ARCANE_LAMP = BLOCKS.register("arcane_lamp", () -> new BlockArcaneLamp(
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:26	BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().lightLevel(state -> 15).noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:27	public static final RegistrySupplier<BlockArcaneLight> ARCANE_LIGHT = BLOCKS.register("arcane_light", () -> new BlockArcaneLight(
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:28	BlockBehaviour.Properties.of().air().replaceable().noCollission().noOcclusion().noLootTable().lightLevel(state -> 15)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:29	public static final RegistrySupplier<Block> AMBER_BLOCK = BLOCKS.register("amber_block", () -> new BlockAmber(
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:30	BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(1.5F, 3).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:31	public static final RegistrySupplier<Block> AMBER_BRICKS = BLOCKS.register("amber_bricks", () -> new BlockAmber(
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:32	BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(1.5F, 3).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:33	public static final RegistrySupplier<Item> ARCANE_LAMP_ITEM = ITEMS.register("arcane_lamp", () -> new BlockItem(ARCANE_LAMP.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:34	public static final RegistrySupplier<Item> AMBER_BLOCK_ITEM = ITEMS.register("amber_block", () -> new BlockItem(AMBER_BLOCK.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:35	public static final RegistrySupplier<Item> AMBER_BRICKS_ITEM = ITEMS.register("amber_bricks", () -> new BlockItem(AMBER_BRICKS.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:36	public static final RegistrySupplier<BlockEntityType<TileArcaneLamp>> ARCANE_LAMP_TILE = TILES.register("arcane_lamp", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java:43	BLOCKS.register(); ITEMS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:95	public static final RegistrySupplier<DataComponentType<ItemHandMirror.MirrorLink>> MIRROR_LINK = COMPONENTS.register("mirror_link",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:107	public static final RegistrySupplier<DataComponentType<ItemKey.KeyLink>> KEY_LINK = COMPONENTS.register("key_link",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:111	public static final RegistrySupplier<ItemBowBone> BONE_BOW = ITEMS.register("bone_bow", () -> new ItemBowBone(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:113	public static final RegistrySupplier<ItemCrimsonSword> CRIMSON_SWORD = ITEMS.register("crimson_sword",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:116	public static final RegistrySupplier<ItemPrimalCrusher> PRIMAL_CRUSHER = ITEMS.register("primal_crusher",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:119	public static final RegistrySupplier<ItemHandMirror> HAND_MIRROR = ITEMS.register("hand_mirror",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:122	public static final RegistrySupplier<ItemSanityChecker> SANITY_CHECKER = ITEMS.register("sanity_checker",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:125	public static final RegistrySupplier<ItemBottleTaint> BOTTLE_TAINT = ITEMS.register("bottle_taint",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:128	public static final RegistrySupplier<ItemBucketDeath> BUCKET_DEATH = ITEMS.register("bucket_death",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:131	public static final RegistrySupplier<ItemKey> KEY_IRON = ITEMS.register("key_iron",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:134	public static final RegistrySupplier<ItemKey> KEY_GOLD = ITEMS.register("key_gold",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:137	public static final RegistrySupplier<ItemTripleMeatTreat> TRIPLE_MEAT_TREAT = ITEMS.register("triple_meat_treat",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:140	public static final RegistrySupplier<ItemCompassStone> COMPASS_STONE = ITEMS.register("compass_stone",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:143	public static final RegistrySupplier<ItemEldritchObject> ELDRITCH_TABLET = ITEMS.register("eldritch_tablet",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:146	public static final RegistrySupplier<ItemEldritchObject> ELDRITCH_PLACER = ITEMS.register("eldritch_placer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:161	result[type] = ITEMS.register(ids[type], () -> new ItemPrimalArrow(new Item.Properties(), metadata));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:172	result[type] = ITEMS.register(ids[type], () -> new ItemNuggetEdible(new Item.Properties(), metadata));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:183	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java:184	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:36	* Call {@link #register()} after {@code ThaumcraftContent.register()}.
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:46	FLUIDS.register("death_fluid", () -> new BlockFluidDeath.Source());
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:49	FLUIDS.register("death_fluid_flowing", () -> new BlockFluidDeath.Flowing());
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:51	public static final RegistrySupplier<BlockFluidDeath> DEATH_FLUID = BLOCKS.register("death_fluid",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:58	public static final RegistrySupplier<BlockArcaneFurnace> ARCANE_FURNACE = BLOCKS.register("arcane_furnace",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:62	public static final RegistrySupplier<BlockArcaneFurnaceNozzle> ARCANE_FURNACE_NOZZLE = BLOCKS.register("arcane_furnace_nozzle",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:66	public static final RegistrySupplier<BlockWandPedestal> WAND_PEDESTAL = BLOCKS.register("wand_pedestal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:71	BLOCK_ENTITIES.register("arcane_furnace",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:74	BLOCK_ENTITIES.register("arcane_furnace_nozzle",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:77	BLOCK_ENTITIES.register("wand_pedestal",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:84	return BlockBehaviour.Properties.of().mapColor(MapColor.WATER)
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:85	.strength(100.0F).noCollission().noOcclusion().dynamicShape().replaceable()
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:92	return BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:93	.strength(10.0F, 300.0F).sound(SoundType.STONE).noOcclusion()
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:95	.lightLevel(state -> state.getBlock() instanceof BlockArcaneFurnaceNozzle
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:102	return BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:103	.strength(3.0F, 15.0F).sound(SoundType.STONE).noOcclusion();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:111	FLUIDS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:112	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:113	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:114	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:117	items.add(ITEMS.register("wand_pedestal", () -> new BlockItem(WAND_PEDESTAL.get(), new Item.Properties())));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:120	items.add(ITEMS.register("arcane_furnace", () -> new BlockItem(ARCANE_FURNACE.get(), new Item.Properties())));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:123	items.add(ITEMS.register("wand_pedestal_focus", () -> new ItemWandPedestalFocus(WAND_PEDESTAL.get(), new Item.Properties())));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:18	/** The original blockLifter (the Arcane Levitator); call after ThaumcraftContent.register(). */
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:24	public static final RegistrySupplier<BlockLevitator> LEVITATOR = BLOCKS.register("levitator",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:26	() -> new BlockLevitator(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F, 9.0F).sound(SoundType.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:27	public static final RegistrySupplier<Item> LEVITATOR_ITEM = ITEMS.register("levitator",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:29	public static final RegistrySupplier<BlockEntityType<TileLevitator>> LEVITATOR_BLOCK_ENTITY = BLOCK_ENTITIES.register("levitator",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:38	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:39	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:40	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftLoot.java:23	public static final RegistrySupplier<ItemLootBag> LOOT_BAG_COMMON = ITEMS.register("loot_bag_common",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLoot.java:25	public static final RegistrySupplier<ItemLootBag> LOOT_BAG_UNCOMMON = ITEMS.register("loot_bag_uncommon",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLoot.java:27	public static final RegistrySupplier<ItemLootBag> LOOT_BAG_RARE = ITEMS.register("loot_bag_rare",
+common/src/main/java/thaumcraft/common/config/ThaumcraftLoot.java:36	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftManaBeans.java:30	public static final RegistrySupplier<DataComponentType<CrystalEssenceData>> MANA_BEAN_DATA=COMPONENTS.register("mana_bean_data",()->DataComponentType.<CrystalEssenceData>builder().persistent(CrystalEssenceData.CODEC).networkSynchronized(CrystalEssenceData.STREAM_CODEC).build());
+common/src/main/java/thaumcraft/common/config/ThaumcraftManaBeans.java:31	public static final RegistrySupplier<ItemManaBean> MANA_BEAN=ITEMS.register("mana_bean",()->new ItemManaBean(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftManaBeans.java:32	public static final RegistrySupplier<BlockManaPod> MANA_POD=BLOCKS.register("mana_pod",()->new BlockManaPod(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noOcclusion().instabreak().sound(SoundType.GRASS).randomTicks().lightLevel(state->state.getValue(BlockManaPod.AGE)).pushReaction(PushReaction.DESTROY)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftManaBeans.java:33	public static final RegistrySupplier<BlockEntityType<TileManaPod>> MANA_POD_BLOCK_ENTITY=BLOCK_ENTITIES.register("mana_pod",()->BlockEntityType.Builder.of(TileManaPod::new,MANA_POD.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftManaBeans.java:36	public static void register(){if(registered)return;registered=true;COMPONENTS.register();BLOCKS.register();ITEMS.register();BLOCK_ENTITIES.register();CreativeTabRegistry.append(ThaumcraftContent.TAB,MANA_BEAN);}
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:26	public static final RegistrySupplier<Block> ARCANE_STONE = block("arcane_stone",
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:28	public static final RegistrySupplier<Block> ARCANE_STONE_BRICKS = block("arcane_stone_bricks",
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:31	public static final RegistrySupplier<BlockArcaneStoneStairs> STAIRS = block("arcane_stone_brick_stairs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:34	public static final RegistrySupplier<BlockArcaneStoneSlab> SLAB = block("arcane_stone_brick_slab",
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:38	public static final RegistrySupplier<BlockGolemFetter> GOLEM_FETTER = block("golem_fetter",
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:46	return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(hardness, resistance)
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:47	.sound(SoundType.STONE).requiresCorrectToolForDrops();
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:51	RegistrySupplier<T> block = BLOCKS.register(id, factory);
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:52	ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:56	/** Call after ThaumcraftContent.register(); JSON models need no client initializer. */
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:58	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java:59	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:25	public static final RegistrySupplier<EntityType<EntityBrainyZombie>> BRAINY_ZOMBIE = ENTITIES.register("brainy_zombie", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:27	public static final RegistrySupplier<EntityType<EntityGiantBrainyZombie>> GIANT_BRAINY_ZOMBIE = ENTITIES.register("giant_brainy_zombie", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:29	public static final RegistrySupplier<EntityType<EntityFireBat>> FIREBAT = ENTITIES.register("firebat", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:31	public static final RegistrySupplier<EntityType<EntityWisp>> WISP = ENTITIES.register("wisp", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:33	public static final RegistrySupplier<SpawnEggItem> BRAINY_ZOMBIE_EGG = ITEMS.register("brainy_zombie_spawn_egg", () -> new SpawnEggItem(BRAINY_ZOMBIE.get(), 0xFFC0FF, 0x008000, new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:34	public static final RegistrySupplier<SpawnEggItem> GIANT_BRAINY_ZOMBIE_EGG = ITEMS.register("giant_brainy_zombie_spawn_egg", () -> new SpawnEggItem(GIANT_BRAINY_ZOMBIE.get(), 0xFFC0FF, 0x004000, new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:35	public static final RegistrySupplier<SpawnEggItem> WISP_EGG = ITEMS.register("wisp_spawn_egg", () -> new SpawnEggItem(WISP.get(), 0xFFC0FF, 0xFFFFFF, new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftMonsters.java:40	if (registered) return; registered = true; ENTITIES.register(); ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:40	public static final RegistrySupplier<BlockMagicalLog> GREATWOOD_LOG = BLOCKS.register("greatwood_log", () -> new BlockMagicalLog(logProperties(MapColor.COLOR_BROWN)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:42	public static final RegistrySupplier<Item> GREATWOOD_LOG_ITEM = ITEMS.register("greatwood_log", () -> new BlockItem(GREATWOOD_LOG.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:52	LOOT_FUNCTIONS.register("magical_leaf_sapling_chance", () -> new LootItemFunctionType<>(BlockMagicalLeaves.SaplingChance.CODEC));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:53	public static final RegistrySupplier<ThaumcraftTreeFeature> TREES = FEATURES.register("tc4_magical_trees", ThaumcraftTreeFeature::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:60	var block = BLOCKS.register(id, () -> new BlockMagicalLog(logProperties(color)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:61	ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:66	return BlockBehaviour.Properties.of().mapColor(color).strength(2.5F).sound(SoundType.WOOD);
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:70	var block = BLOCKS.register(id, () -> new Block(BlockBehaviour.Properties.of()
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:71	.mapColor(color).strength(2.5F, 6.0F).sound(SoundType.WOOD)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:72	ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:77	var block = BLOCKS.register(id, () -> new BlockMagicalLeaves(silverwood, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:78	.lightLevel(state -> silverwood ? 7 : 0)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:79	ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:84	var block = BLOCKS.register(id, () -> new BlockMagicalSapling(silverwood, BlockBehaviour.Properties.of()
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:85	.mapColor(MapColor.PLANT).noCollission().instabreak().sound(SoundType.GRASS).randomTicks()
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:86	.lightLevel(state -> silverwood ? 8 : 0)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:87	ITEMS.register(id, () -> new BlockMagicalSapling.SaplingItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:92	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:93	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:94	FEATURES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:95	LOOT_FUNCTIONS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:99	LifecycleEvent.SETUP.register(() -> {
+common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:102	FuelRegistry.register(ThaumcraftResources.MAGICAL_LOG_BURN_TIME, GREATWOOD_LOG_ITEM.get());
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:34	public static final RegistrySupplier<BlockNodeStabilizer> NODE_STABILIZER = BLOCKS.register("node_stabilizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:35	() -> new BlockNodeStabilizer(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:38	.strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:44	public static final RegistrySupplier<BlockNodeStabilizer> ADVANCED_NODE_STABILIZER = BLOCKS.register("advanced_node_stabilizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:45	() -> new BlockNodeStabilizer(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:48	.strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:49	public static final RegistrySupplier<Item> NODE_STABILIZER_ITEM = ITEMS.register("node_stabilizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:60	public static final RegistrySupplier<Item> ADVANCED_NODE_STABILIZER_ITEM = ITEMS.register("advanced_node_stabilizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:62	public static final RegistrySupplier<BlockEntityType<TileNodeStabilizer>> NODE_STABILIZER_BLOCK_ENTITY = BLOCK_ENTITIES.register("node_stabilizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:65	public static final RegistrySupplier<BlockNodeConverter> NODE_TRANSDUCER = BLOCKS.register("node_transducer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:66	() -> new BlockNodeConverter(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:69	.strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:70	public static final RegistrySupplier<Item> NODE_TRANSDUCER_ITEM = ITEMS.register("node_transducer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:72	public static final RegistrySupplier<BlockEntityType<TileNodeConverter>> NODE_TRANSDUCER_BLOCK_ENTITY = BLOCK_ENTITIES.register("node_transducer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:75	public static final RegistrySupplier<BlockNodeEnergized> ENERGIZED_NODE = BLOCKS.register("energized_node",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:76	() -> new BlockNodeEnergized(BlockBehaviour.Properties.of().strength(2, 200)
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:77	.noOcclusion().noCollission().lightLevel(state -> 8)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:78	public static final RegistrySupplier<BlockEntityType<TileNodeEnergized>> ENERGIZED_NODE_BLOCK_ENTITY = BLOCK_ENTITIES.register("energized_node",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:81	public static final RegistrySupplier<BlockVisRelay> VIS_RELAY = BLOCKS.register("vis_relay",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:82	() -> new BlockVisRelay(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:85	.strength(3, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:86	public static final RegistrySupplier<Item> VIS_RELAY_ITEM = ITEMS.register("vis_relay",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:88	public static final RegistrySupplier<BlockEntityType<TileVisRelay>> VIS_RELAY_BLOCK_ENTITY = BLOCK_ENTITIES.register("vis_relay",
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:94	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:95	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java:96	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodes.java:20	FEATURES.register("normal_aura_nodes", ThaumcraftNormalNodeFeature::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodes.java:26	FEATURES.register("aura_totem", ThaumcraftTotemFeature::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftNodes.java:35	public static void register() { FEATURES.register(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:27	public static final RegistrySupplier<LootItemFunctionType<OreDropCount>> ORE_DROP_COUNT = LOOT_FUNCTIONS.register(
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:43	RegistrySupplier<BlockCustomOre> block = BLOCKS.register(id, () -> new BlockCustomOre(originalVariant,
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:46	BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.5F, 3.0F)
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:47	.sound(SoundType.STONE).requiresCorrectToolForDrops()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:48	ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:53	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:54	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:55	LOOT_FUNCTIONS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:74	FEATURES.register("tc4_outer_lands_maze", OuterLandsProvider.OuterLandsMazeFeature::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:77	FEATURES.register("tc4_eldritch_ring", thaumcraft.common.lib.world.EldritchRingFeature::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:89	FEATURES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:114	return block("eldritch");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:161	Block block = block("stairs_eldritch");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:162	return block == null ? block("eldritch_stairs") : block;
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:166	return block("eldritch_nothing");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:203	Block block = block("airy");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:207	Block block = block("eldritch_portal");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:211	Block block = block("loot_urn");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:215	Block block = block("loot_crate");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:222	if (block == null) block = block("cosmetic_slab_stone");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:223	if (block == null) block = block("cosmetic_stone_slab_eldritch");
+common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:306	Block block = block("wooden_device");
+common/src/main/java/thaumcraft/common/config/ThaumcraftPech.java:24	public static final RegistrySupplier<EntityType<EntityPech>> PECH=ENTITIES.register("pech",()->EntityType.Builder.<EntityPech>of(EntityPech::new,MobCategory.MONSTER).sized(.6F,1.8F).eyeHeight(1.1880001F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:pech"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftPech.java:25	public static final RegistrySupplier<EntityType<EntityPechBlast>> PECH_BLAST=ENTITIES.register("pech_blast",()->EntityType.Builder.<EntityPechBlast>of(EntityPechBlast::new,MobCategory.MISC).sized(.25F,.25F).clientTrackingRange(4).updateInterval(20).build("thaumcraft:pech_blast"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftPech.java:26	public static final RegistrySupplier<ItemFocusPech> FOCUS_PECH=ITEMS.register("focus_pech",()->new ItemFocusPech(new Item.Properties().stacksTo(1)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftPech.java:27	public static final RegistrySupplier<SpawnEggItem> PECH_EGG=ITEMS.register("pech_spawn_egg",()->new SpawnEggItem(PECH.get(),0xFFC0FF,0x400040,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftPech.java:28	public static final RegistrySupplier<MenuType<ContainerPech>> PECH_MENU=MENUS.register("pech",()->MenuRegistry.ofExtended(ContainerPech::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftPech.java:31	public static void register(){if(registered)return;registered=true;ENTITIES.register();ITEMS.register();MENUS.register();CreativeTabRegistry.append(ThaumcraftContent.TAB,FOCUS_PECH);CreativeTabRegistry.append(ThaumcraftContent.TAB,PECH_EGG);}
+common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java:27	var block = BLOCKS.register(id, () -> new BlockCustomPlant(cinderpearl, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java:28	.noCollission().noOcclusion().instabreak().sound(SoundType.GRASS).randomTicks().replaceable().lightLevel(state -> 8)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java:31	ITEMS.register(id, () -> new BlockCustomPlant.PlantItem(block.get(), new Item.Properties(),
+common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java:36	BLOCKS.register(); ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java:39	LifecycleEvent.SETUP.register(() -> {
+common/src/main/java/thaumcraft/common/config/ThaumcraftPrimalFoci.java:18	public static final RegistrySupplier<ItemFocusPrimal> FOCUS_PRIMAL=ITEMS.register("focus_primal",()->new ItemFocusPrimal(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftPrimalFoci.java:19	public static final RegistrySupplier<EntityType<EntityPrimalOrb>> PRIMAL_ORB=ENTITIES.register("primal_orb",()->EntityType.Builder.<EntityPrimalOrb>of(EntityPrimalOrb::new,MobCategory.MISC)
+common/src/main/java/thaumcraft/common/config/ThaumcraftPrimalFoci.java:23	public static void register(){if(registered)return;registered=true;ITEMS.register();ENTITIES.register();CreativeTabRegistry.append(ThaumcraftContent.TAB,FOCUS_PRIMAL);}
+common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:28	public static final RegistrySupplier<EntityType<EntityBottleTaint>> BOTTLE_TAINT = ENTITIES.register("bottle_taint",
+common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:32	public static final RegistrySupplier<EntityType<EntityGolemOrb>> GOLEM_ORB = ENTITIES.register("golem_orb",
+common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:36	public static final RegistrySupplier<EntityType<EntityPrimalArrow>> PRIMAL_ARROW = ENTITIES.register("primal_arrow",
+common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:40	public static final RegistrySupplier<EntityType<EntityFollowingItem>> FOLLOW_ITEM = ENTITIES.register("follow_item",
+common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:44	public static final RegistrySupplier<EntityType<EntityPermanentItem>> PERMANENT_ITEM = ENTITIES.register("permanent_item",
+common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:48	public static final RegistrySupplier<EntityType<EntityItemGrate>> ITEM_GRATE = ENTITIES.register("item_grate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:59	ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:36	public static final RegistrySupplier<BlockNitor> NITOR = BLOCKS.register("nitor", () -> new BlockNitor(
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:37	BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0, 0)
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:38	.sound(new SoundType(0, 1, SoundEvents.WOOL_BREAK, SoundEvents.WOOL_STEP,
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:41	.lightLevel(state -> 15).pushReaction(PushReaction.DESTROY)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:42	public static final RegistrySupplier<BlockEntityType<TileNitor>> NITOR_BLOCK_ENTITY = BLOCK_ENTITIES.register("nitor",
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:44	public static final RegistrySupplier<EntityType<EntityAlumentum>> ALUMENTUM = ENTITIES.register("alumentum",
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:54	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:55	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:56	ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:60	FuelRegistry.register(ALUMENTUM_BURN_TIME, item);
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunic.java:20	public static final RegistrySupplier<DataComponentType<Integer>> HARDENING = COMPONENTS.register("runic_hardening", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunic.java:25	public static final RegistrySupplier<RecipeType<InfusionRunicAugmentRecipe>> AUGMENT_TYPE = TYPES.register("infusion_runic_augment", () -> new RecipeType<InfusionRunicAugmentRecipe>() {
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunic.java:28	public static final RegistrySupplier<RecipeSerializer<InfusionRunicAugmentRecipe>> AUGMENT_SERIALIZER = SERIALIZERS.register("infusion_runic_augment", () -> InfusionRunicAugmentRecipe.SERIALIZER);
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunic.java:33	COMPONENTS.register(); TYPES.register(); SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:55	public static final RegistrySupplier<ArmorMaterial> CULTIST_ROBE_ARMOR_MATERIAL = ARMOR_MATERIALS.register("cultist_robe", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:60	public static final RegistrySupplier<ArmorMaterial> CULTIST_PLATE_ARMOR_MATERIAL = ARMOR_MATERIALS.register("cultist_plate", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:64	public static final RegistrySupplier<ArmorMaterial> CULTIST_LEADER_ARMOR_MATERIAL = ARMOR_MATERIALS.register("cultist_leader", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:68	public static final RegistrySupplier<ArmorMaterial> CULTIST_BOOTS_ARMOR_MATERIAL = ARMOR_MATERIALS.register("cultist_boots", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:73	public static final RegistrySupplier<ItemCultistRobeArmor> CULTIST_ROBE_HOOD = ITEMS.register("cultist_robe_hood",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:75	public static final RegistrySupplier<ItemCultistRobeArmor> CULTIST_ROBE = ITEMS.register("cultist_robe",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:77	public static final RegistrySupplier<ItemCultistRobeArmor> CULTIST_ROBE_LEGS = ITEMS.register("cultist_robe_legs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:79	public static final RegistrySupplier<ItemCultistPlateArmor> CULTIST_PLATE_HELM = ITEMS.register("cultist_plate_helm",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:81	public static final RegistrySupplier<ItemCultistPlateArmor> CULTIST_PLATE = ITEMS.register("cultist_plate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:83	public static final RegistrySupplier<ItemCultistPlateArmor> CULTIST_PLATE_LEGS = ITEMS.register("cultist_plate_legs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:85	public static final RegistrySupplier<ItemCultistLeaderArmor> CULTIST_LEADER_HELM = ITEMS.register("cultist_leader_helm",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:87	public static final RegistrySupplier<ItemCultistLeaderArmor> CULTIST_LEADER = ITEMS.register("cultist_leader",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:89	public static final RegistrySupplier<ItemCultistLeaderArmor> CULTIST_LEADER_LEGS = ITEMS.register("cultist_leader_legs",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:91	public static final RegistrySupplier<ItemCultistBoots> CULTIST_BOOTS = ITEMS.register("cultist_boots",
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:155	ARMOR_MATERIALS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:156	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftRunicBaubles.java:157	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftShockOrbs.java:19	public static final RegistrySupplier<EntityType<EntityShockOrb>> SHOCK_ORB=ENTITIES.register("shock_orb",()->EntityType.Builder.<EntityShockOrb>of(EntityShockOrb::new,MobCategory.MISC)
+common/src/main/java/thaumcraft/common/config/ThaumcraftShockOrbs.java:21	public static final RegistrySupplier<BlockShockTrap> SHOCK_TRAP=BLOCKS.register("shock_trap",()->new BlockShockTrap(BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftShockOrbs.java:22	.strength(100,50).lightLevel(state->8).replaceable().noCollission().noOcclusion().randomTicks().noLootTable().pushReaction(PushReaction.DESTROY)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftShockOrbs.java:25	public static void register() { if(initialized)return;initialized=true;BLOCKS.register();ENTITIES.register(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftSounds.java:82	SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, name)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftSounds.java:84	public static void register() { SOUNDS.register(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:37	public static final RegistrySupplier<FlowingFluid> PURE_FLUID_SOURCE=FLUIDS.register("purifying_fluid",FluidPure.Source::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:38	public static final RegistrySupplier<FlowingFluid> PURE_FLUID_FLOWING=FLUIDS.register("flowing_purifying_fluid",FluidPure.Flowing::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:39	public static final RegistrySupplier<BlockFluidPure> PURE_WATER=BLOCKS.register("purifying_fluid",()->new BlockFluidPure(PURE_FLUID_SOURCE.get(),
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:40	BlockBehaviour.Properties.of().mapColor(MapColor.WATER).replaceable().noCollission().noOcclusion().strength(100)
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:41	.noLootTable().liquid().pushReaction(PushReaction.DESTROY).sound(SoundType.EMPTY)
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:42	.lightLevel(state->SpaRules.pureLight(state.getValue(LiquidBlock.LEVEL)))
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:44	public static final RegistrySupplier<BlockSpa> ARCANE_SPA=BLOCKS.register("arcane_spa",()->new BlockSpa(
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:45	BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3,15).sound(SoundType.STONE)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:46	public static final RegistrySupplier<Item> ARCANE_SPA_ITEM=ITEMS.register("arcane_spa",()->new BlockItem(ARCANE_SPA.get(),new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:47	public static final RegistrySupplier<ItemBucketPure> BUCKET_PURE=ITEMS.register("bucket_pure",()->new ItemBucketPure(new Item.Properties().stacksTo(1)));
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:48	public static final RegistrySupplier<ItemBathSalts> BATH_SALTS=ITEMS.register("bath_salts",()->new ItemBathSalts(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:49	public static final RegistrySupplier<BlockEntityType<TileSpa>> SPA_TILE=TILES.register("arcane_spa",()->BlockEntityType.Builder.of(TileSpa::new,ARCANE_SPA.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:50	public static final RegistrySupplier<MenuType<ContainerSpa>> SPA_MENU=MENUS.register("arcane_spa",()->MenuRegistry.ofExtended(ContainerSpa::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftSpa.java:54	if(registered)return;registered=true;FLUIDS.register();BLOCKS.register();ITEMS.register();TILES.register();MENUS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:41	public static final RegistrySupplier<BlockTaint> CRUST=BLOCKS.register("taint_crust",()->new BlockTaint(properties(TaintBlockRules.TAINT_FAMILY_HARDNESS,TaintBlockRules.TAINT_RESISTANCE),0));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:42	public static final RegistrySupplier<BlockTaint> SOIL=BLOCKS.register("taint_soil",()->new BlockTaint(properties(TaintBlockRules.TAINT_FAMILY_HARDNESS,TaintBlockRules.TAINT_RESISTANCE),1));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:45	public static final RegistrySupplier<BlockTaintFibres> FIBRES=BLOCKS.register("taint_fibres",()->new BlockTaintFibres(properties(TaintBlockRules.FIBRES_HARDNESS,TaintBlockRules.FIBRES_RESISTANCE).noOcclusion()
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:46	.lightLevel(state->TaintBlockRules.fibreLight(state.getValue(BlockTaintFibres.TYPE)))));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:47	public static final RegistrySupplier<Item> CRUST_ITEM=ITEMS.register("taint_crust",()->new BlockTaintItem(CRUST.get(),new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:48	public static final RegistrySupplier<Item> SOIL_ITEM=ITEMS.register("taint_soil",()->new BlockTaintItem(SOIL.get(),new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:53	for(int type=0;type<ids.length;type++) {final int metadata=type;items.add(ITEMS.register(ids[type],()->new BlockTaintFibresItem(FIBRES.get(),new Item.Properties(),metadata)));}
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:57	public static final RegistrySupplier<EntityType<EntityFallingTaint>> FALLING_TAINT=ENTITIES.register("falling_taint",()->EntityType.Builder.<EntityFallingTaint>of(EntityFallingTaint::new,MobCategory.MISC).sized(.98F,.98F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:falling_taint"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:58	public static final RegistrySupplier<EntityType<EntityTaintSpider>> TAINT_SPIDER=ENTITIES.register("taint_spider",()->EntityType.Builder.<EntityTaintSpider>of(EntityTaintSpider::new,MobCategory.MONSTER).sized(.4F,.3F).eyeHeight(.3F*.85F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:taint_spider"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:59	public static final RegistrySupplier<EntityType<EntityTaintSpore>> TAINT_SPORE=ENTITIES.register("taint_spore",()->EntityType.Builder.<EntityTaintSpore>of(EntityTaintSpore::new,MobCategory.MONSTER).sized(.5F,.5F).eyeHeight(.5F*.85F).clientTrackingRange(4).updateInterval(20).build("thaumcraft:taint_spore"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:60	public static final RegistrySupplier<EntityType<EntityTaintSporeSwarmer>> TAINT_SWARMER=ENTITIES.register("taint_swarmer",()->EntityType.Builder.<EntityTaintSporeSwarmer>of(EntityTaintSporeSwarmer::new,MobCategory.MONSTER).sized(1,1).eyeHeight(.85F).clientTrackingRange(4).updateInterval(20).build("thaumcraft:taint_swarmer"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:61	public static final RegistrySupplier<EntityType<EntityTaintSwarm>> TAINT_SWARM=ENTITIES.register("taint_swarm",()->EntityType.Builder.<EntityTaintSwarm>of(EntityTaintSwarm::new,MobCategory.MONSTER).sized(2,2).clientTrackingRange(4).updateInterval(3).build("thaumcraft:taint_swarm"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:62	public static final RegistrySupplier<EntityType<EntityTaintacle>> TAINTACLE=ENTITIES.register("taintacle",()->EntityType.Builder.<EntityTaintacle>of(EntityTaintacle::new,MobCategory.MONSTER).sized(.66F,3).eyeHeight(3F*.85F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:taintacle"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:63	public static final RegistrySupplier<EntityType<EntityTaintacleSmall>> TAINTACLE_SMALL=ENTITIES.register("taintacle_small",()->EntityType.Builder.<EntityTaintacleSmall>of(EntityTaintacleSmall::new,MobCategory.MONSTER).sized(.22F,1).eyeHeight(.85F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:taintacle_small"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:64	private static final RegistrySupplier<SpawnEggItem> SPIDER_EGG=ITEMS.register("taint_spider_spawn_egg",()->new SpawnEggItem(TAINT_SPIDER.get(),0xFFC0FF,0x404040,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:65	private static final RegistrySupplier<SpawnEggItem> SPORE_EGG=ITEMS.register("taint_spore_spawn_egg",()->new SpawnEggItem(TAINT_SPORE.get(),0xFFC0FF,0x800070,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:66	private static final RegistrySupplier<SpawnEggItem> SWARMER_EGG=ITEMS.register("taint_swarmer_spawn_egg",()->new SpawnEggItem(TAINT_SWARMER.get(),0xFFC0FF,0x800060,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:67	private static final RegistrySupplier<SpawnEggItem> SWARM_EGG=ITEMS.register("taint_swarm_spawn_egg",()->new SpawnEggItem(TAINT_SWARM.get(),0xFFC0FF,0x800050,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:68	private static final RegistrySupplier<SpawnEggItem> TENTACLE_EGG=ITEMS.register("taintacle_spawn_egg",()->new SpawnEggItem(TAINTACLE.get(),0xFFC0FF,0x800080,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:69	private static final RegistrySupplier<SpawnEggItem> SMALL_EGG=ITEMS.register("taintacle_small_spawn_egg",()->new SpawnEggItem(TAINTACLE_SMALL.get(),0xFFC0FF,0x800090,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:77	private static BlockBehaviour.Properties properties(float hardness,float resistance) {return BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).strength(hardness,resistance).sound(SOUND).randomTicks().pushReaction(PUSH_REACTION);}
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:79	if(registered)return;registered=true;BLOCKS.register();ENTITIES.register();ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:42	public static final RegistrySupplier<EntityType<EntityTaintChicken>> TAINT_CHICKEN=ENTITIES.register("tainted_chicken",()->EntityType.Builder.<EntityTaintChicken>of(EntityTaintChicken::new,MobCategory.MONSTER).sized(.5F,.8F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:tainted_chicken"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:43	public static final RegistrySupplier<EntityType<EntityTaintCow>> TAINT_COW=ENTITIES.register("tainted_cow",()->EntityType.Builder.<EntityTaintCow>of(EntityTaintCow::new,MobCategory.MONSTER).sized(.9F,1.3F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:tainted_cow"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:44	public static final RegistrySupplier<EntityType<EntityTaintPig>> TAINT_PIG=ENTITIES.register("tainted_pig",()->EntityType.Builder.<EntityTaintPig>of(EntityTaintPig::new,MobCategory.MONSTER).sized(.9F,.9F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:tainted_pig"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:45	public static final RegistrySupplier<EntityType<EntityTaintSheep>> TAINT_SHEEP=ENTITIES.register("tainted_sheep",()->EntityType.Builder.<EntityTaintSheep>of(EntityTaintSheep::new,MobCategory.MONSTER).sized(.9F,1.3F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:tainted_sheep"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:46	public static final RegistrySupplier<EntityType<EntityTaintVillager>> TAINT_VILLAGER=ENTITIES.register("tainted_villager",()->EntityType.Builder.<EntityTaintVillager>of(EntityTaintVillager::new,MobCategory.MONSTER).sized(.6F,1.8F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:tainted_villager"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:47	public static final RegistrySupplier<EntityType<EntityTaintCrawler>> TAINT_CRAWLER=ENTITIES.register("taint_crawler",()->EntityType.Builder.<EntityTaintCrawler>of(EntityTaintCrawler::new,MobCategory.MONSTER).sized(.5F,.4F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:taint_crawler"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:48	public static final RegistrySupplier<EntityType<EntityTaintSeed>> TAINT_SEED=ENTITIES.register("taint_seed",()->EntityType.Builder.<EntityTaintSeed>of(EntityTaintSeed::new,MobCategory.MONSTER).sized(1.5F,1.25F).clientTrackingRange(4).updateInterval(20).build("thaumcraft:taint_seed"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:49	public static final RegistrySupplier<EntityType<EntityTaintSeedPrime>> TAINT_SEED_PRIME=ENTITIES.register("taint_seed_prime",()->EntityType.Builder.<EntityTaintSeedPrime>of(EntityTaintSeedPrime::new,MobCategory.MONSTER).sized(2F,2F).clientTrackingRange(4).updateInterval(20).build("thaumcraft:taint_seed_prime"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:51	public static final RegistrySupplier<Item> FLUX_CRYSTAL=ITEMS.register("flux_crystal",()->new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:52	private static final RegistrySupplier<SpawnEggItem> CHICKEN_EGG=ITEMS.register("tainted_chicken_spawn_egg",()->new SpawnEggItem(TAINT_CHICKEN.get(),0xFFC0FF,0xC0C0C0,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:53	private static final RegistrySupplier<SpawnEggItem> COW_EGG=ITEMS.register("tainted_cow_spawn_egg",()->new SpawnEggItem(TAINT_COW.get(),0xFFC0FF,8272443,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:54	private static final RegistrySupplier<SpawnEggItem> PIG_EGG=ITEMS.register("tainted_pig_spawn_egg",()->new SpawnEggItem(TAINT_PIG.get(),0xFFC0FF,0xEF99EF,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:55	private static final RegistrySupplier<SpawnEggItem> SHEEP_EGG=ITEMS.register("tainted_sheep_spawn_egg",()->new SpawnEggItem(TAINT_SHEEP.get(),0xFFC0FF,0x808080,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:56	private static final RegistrySupplier<SpawnEggItem> VILLAGER_EGG=ITEMS.register("tainted_villager_spawn_egg",()->new SpawnEggItem(TAINT_VILLAGER.get(),0xFFC0FF,65535,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:57	private static final RegistrySupplier<SpawnEggItem> CRAWLER_EGG=ITEMS.register("taint_crawler_spawn_egg",()->new SpawnEggItem(TAINT_CRAWLER.get(),10618530,0x303030,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:70	ENTITIES.register();ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintAnimals.java:73	EntityEvent.LIVING_DEATH.register(ThaumcraftTaintAnimals::onLivingDeath);
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintCreeper.java:28	public static final RegistrySupplier<EntityType<EntityTaintCreeper>> TAINT_CREEPER = ENTITIES.register("taint_creeper",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintCreeper.java:32	private static final RegistrySupplier<SpawnEggItem> CREEPER_EGG = ITEMS.register("taint_creeper_spawn_egg",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintCreeper.java:42	ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftTaintCreeper.java:43	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:29	private static BlockBehaviour.Properties properties() { return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3, 10.2F).sound(SoundType.METAL).noOcclusion(); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:30	public static final RegistrySupplier<BlockThaumatorium> THAUMATORIUM = BLOCKS.register("thaumatorium", () -> new BlockThaumatorium(properties(), false));
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:31	public static final RegistrySupplier<BlockThaumatorium> THAUMATORIUM_TOP = BLOCKS.register("thaumatorium_top", () -> new BlockThaumatorium(properties(), true));
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:32	public static final RegistrySupplier<BlockEntityType<TileThaumatorium>> TILE = TILES.register("thaumatorium", () -> BlockEntityType.Builder.of(TileThaumatorium::new, THAUMATORIUM.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:33	public static final RegistrySupplier<BlockEntityType<TileThaumatoriumTop>> TOP_TILE = TILES.register("thaumatorium_top", () -> BlockEntityType.Builder.of(TileThaumatoriumTop::new, THAUMATORIUM_TOP.get()).build(null));
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:34	public static final RegistrySupplier<MenuType<ContainerThaumatorium>> MENU = MENUS.register("thaumatorium", () -> MenuRegistry.ofExtended(ContainerThaumatorium::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:35	public static final RegistrySupplier<BlockMnemonicMatrix> MNEMONIC_MATRIX = BLOCKS.register("mnemonic_matrix", () -> new BlockMnemonicMatrix(properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:36	public static final RegistrySupplier<Item> MNEMONIC_MATRIX_ITEM = ITEMS.register("mnemonic_matrix", () -> new BlockItem(MNEMONIC_MATRIX.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftThaumatorium.java:38	public static void register() { BLOCKS.register(); TILES.register(); MENUS.register(); ITEMS.register(); CreativeTabRegistry.append(ThaumcraftContent.TAB, MNEMONIC_MATRIX_ITEM); }
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:30	public static final RegistrySupplier<ArmorMaterial> TRAVELLER_MATERIAL=MATERIALS.register("traveller",()->material("traveller"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:31	public static final RegistrySupplier<ArmorMaterial> HARNESS_MATERIAL=MATERIALS.register("hover_harness",()->material("hover_harness"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:32	public static final RegistrySupplier<DataComponentType<Integer>> HOVER_CHARGE=COMPONENTS.register("hover_charge",()->DataComponentType.<Integer>builder().persistent(Codec.intRange(0,360)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:33	public static final RegistrySupplier<DataComponentType<Boolean>> HOVER_ENABLED=COMPONENTS.register("hover_enabled",()->DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:34	public static final RegistrySupplier<ItemBootsTraveller> BOOTS_TRAVELLER=ITEMS.register("boots_traveller",()->new ItemBootsTraveller(TRAVELLER_MATERIAL,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:35	public static final RegistrySupplier<ItemHoverHarness> HOVER_HARNESS=ITEMS.register("hover_harness",()->new ItemHoverHarness(HARNESS_MATERIAL,new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:36	public static final RegistrySupplier<MenuType<ContainerHoverHarness>> HARNESS_MENU=MENUS.register("hover_harness",()->MenuRegistry.ofExtended(ContainerHoverHarness::new));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTravelGear.java:41	public static void register() {if(registered)return;registered=true;MATERIALS.register();COMPONENTS.register();ITEMS.register();MENUS.register();CreativeTabRegistry.append(ThaumcraftContent.TAB,BOOTS_TRAVELLER);CreativeTabRegistry.append(ThaumcraftContent.TAB,HOVER_HARNESS);}
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:34	public static final RegistrySupplier<BlockTube> ESSENTIA_TUBE = BLOCKS.register("essentia_tube",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:36	() -> new BlockTube(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:37	.strength(.5F, 3).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().dynamicShape()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:38	public static final RegistrySupplier<BlockTube> ESSENTIA_VALVE = BLOCKS.register("essentia_valve",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:39	() -> new BlockTube(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:40	.strength(.5F, 3).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().dynamicShape(), true));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:41	public static final RegistrySupplier<BlockTube> ESSENTIA_FILTER = variant("essentia_filter", BlockTube.Kind.FILTER);
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:42	public static final RegistrySupplier<BlockTube> ESSENTIA_RESTRICT = variant("essentia_restrict", BlockTube.Kind.RESTRICT);
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:43	public static final RegistrySupplier<BlockTube> ESSENTIA_ONEWAY = variant("essentia_oneway", BlockTube.Kind.ONEWAY);
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:44	public static final RegistrySupplier<BlockTubeBuffer> ESSENTIA_BUFFER = BLOCKS.register("essentia_buffer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:45	() -> new BlockTubeBuffer(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:46	.strength(.5F, 3).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().dynamicShape()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:47	public static final RegistrySupplier<BlockCentrifuge> CENTRIFUGE = BLOCKS.register("centrifuge",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:48	() -> new BlockCentrifuge(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:49	.strength(.5F, 3).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:50	public static final RegistrySupplier<BlockEssentiaCrystalizer> ESSENTIA_CRYSTALLIZER = BLOCKS.register("essentia_crystallizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:51	() -> new BlockEssentiaCrystalizer(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:52	.strength(.5F, 3).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:53	public static final RegistrySupplier<BlockEssentiaReservoir> ESSENTIA_RESERVOIR = BLOCKS.register("essentia_reservoir",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:55	() -> new BlockEssentiaReservoir(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:56	.strength(2.0F, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:58	public static final RegistrySupplier<Item> ESSENTIA_TUBE_ITEM = ITEMS.register("essentia_tube",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:60	public static final RegistrySupplier<Item> ESSENTIA_VALVE_ITEM = ITEMS.register("essentia_valve",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:62	public static final RegistrySupplier<Item> ESSENTIA_FILTER_ITEM = ITEMS.register("essentia_filter",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:64	public static final RegistrySupplier<Item> ESSENTIA_RESTRICT_ITEM = ITEMS.register("essentia_restrict",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:66	public static final RegistrySupplier<Item> ESSENTIA_ONEWAY_ITEM = ITEMS.register("essentia_oneway",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:68	public static final RegistrySupplier<Item> ESSENTIA_BUFFER_ITEM = ITEMS.register("essentia_buffer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:70	public static final RegistrySupplier<Item> ESSENTIA_RESERVOIR_ITEM = ITEMS.register("essentia_reservoir",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:81	public static final RegistrySupplier<Item> CENTRIFUGE_ITEM = ITEMS.register("centrifuge",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:85	public static final RegistrySupplier<Item> ESSENTIA_CRYSTALLIZER_ITEM = ITEMS.register("essentia_crystallizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:96	public static final RegistrySupplier<BlockEntityType<TileTube>> TUBE_BLOCK_ENTITY = BLOCK_ENTITIES.register("essentia_tube",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:101	public static final RegistrySupplier<BlockEntityType<TileTubeBuffer>> BUFFER_BLOCK_ENTITY = BLOCK_ENTITIES.register("essentia_buffer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:103	public static final RegistrySupplier<BlockEntityType<TileCentrifuge>> CENTRIFUGE_BLOCK_ENTITY = BLOCK_ENTITIES.register("centrifuge",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:105	public static final RegistrySupplier<BlockEntityType<TileEssentiaCrystalizer>> CRYSTALLIZER_BLOCK_ENTITY = BLOCK_ENTITIES.register("essentia_crystallizer",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:108	public static final RegistrySupplier<BlockEntityType<TileEssentiaReservoir>> RESERVOIR_BLOCK_ENTITY = BLOCK_ENTITIES.register("essentia_reservoir",
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:112	return BLOCKS.register(id, () -> new BlockTube(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:113	.strength(.5F, 3).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().dynamicShape(), kind));
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:135	BLOCKS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:136	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:137	BLOCK_ENTITIES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftUnknownKnowledge.java:14	public static final RegistrySupplier<Item> UNKNOWN_NOTE = ITEMS.register("unknown_research_note", () -> new ItemUnknownResearchNotes(new Item.Properties().rarity(Rarity.RARE), 42));
+common/src/main/java/thaumcraft/common/config/ThaumcraftUnknownKnowledge.java:15	public static final RegistrySupplier<Item> UNKNOWN_NOTE_24 = ITEMS.register("unknown_research_note_24", () -> new ItemUnknownResearchNotes(new Item.Properties().rarity(Rarity.RARE), 24));
+common/src/main/java/thaumcraft/common/config/ThaumcraftUnknownKnowledge.java:18	public static void register() { if (!registered) { registered = true; ITEMS.register(); } }
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillageProfessions.java:35	PROFESSIONS.register("banker", () -> profession("banker"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillageProfessions.java:38	PROFESSIONS.register("wizard", () -> profession("wizard"));
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillageProfessions.java:59	PROFESSIONS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillages.java:54	FEATURES.register("village_banker_homes", VillageBankerManager::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillages.java:56	FEATURES.register("village_wizard_towers", VillageWizardManager::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillages.java:58	FEATURES.register("hilltop_stones", WorldGenHilltopStones::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillages.java:64	FEATURES.register("tc4_mound", WorldGenMound::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftVillages.java:108	FEATURES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftVisCharging.java:22	public static final RegistrySupplier<BlockMagicWorkbenchCharger> VIS_CHARGE_RELAY = BLOCKS.register("vis_charge_relay", () -> new BlockMagicWorkbenchCharger(
+common/src/main/java/thaumcraft/common/config/ThaumcraftVisCharging.java:23	BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftVisCharging.java:24	public static final RegistrySupplier<Item> VIS_CHARGE_RELAY_ITEM = ITEMS.register("vis_charge_relay", () -> new BlockItem(VIS_CHARGE_RELAY.get(), new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftVisCharging.java:25	public static final RegistrySupplier<BlockEntityType<TileMagicWorkbenchCharger>> VIS_CHARGE_RELAY_TILE = TILES.register("vis_charge_relay", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftVisCharging.java:32	BLOCKS.register(); ITEMS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWandEnchantments.java:35	SERIALIZERS.register("arcane_sceptre", ArcaneSceptreRecipe.Serializer::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWandEnchantments.java:38	SERIALIZERS.register("shapeless_nbt_ore", ShapelessNBTOreRecipe.Serializer::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWandEnchantments.java:44	public static final RegistrySupplier<DataComponentType<Boolean>> WAND_SCEPTRE = COMPONENTS.register("wand_sceptre",
+common/src/main/java/thaumcraft/common/config/ThaumcraftWandEnchantments.java:50	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWandEnchantments.java:51	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:28	public static final RegistrySupplier<Item> GREATWOOD_WAND_ROD = ITEMS.register("wand_rod_greatwood", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:29	public static final RegistrySupplier<Item> SILVERWOOD_WAND_ROD = ITEMS.register("wand_rod_silverwood", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:31	public static final RegistrySupplier<Item> OBSIDIAN_WAND_ROD = ITEMS.register("wand_rod_obsidian", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:32	public static final RegistrySupplier<Item> BLAZE_WAND_ROD = ITEMS.register("wand_rod_blaze", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:33	public static final RegistrySupplier<Item> ICE_WAND_ROD = ITEMS.register("wand_rod_ice", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:34	public static final RegistrySupplier<Item> QUARTZ_WAND_ROD = ITEMS.register("wand_rod_quartz", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:35	public static final RegistrySupplier<Item> BONE_WAND_ROD = ITEMS.register("wand_rod_bone", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:36	public static final RegistrySupplier<Item> REED_WAND_ROD = ITEMS.register("wand_rod_reed", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:38	public static final RegistrySupplier<Item> GREATWOOD_STAFF_ROD = ITEMS.register("staff_rod_greatwood", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:39	public static final RegistrySupplier<Item> OBSIDIAN_STAFF_ROD = ITEMS.register("staff_rod_obsidian", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:40	public static final RegistrySupplier<Item> SILVERWOOD_STAFF_ROD = ITEMS.register("staff_rod_silverwood", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:41	public static final RegistrySupplier<Item> ICE_STAFF_ROD = ITEMS.register("staff_rod_ice", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:42	public static final RegistrySupplier<Item> QUARTZ_STAFF_ROD = ITEMS.register("staff_rod_quartz", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:43	public static final RegistrySupplier<Item> REED_STAFF_ROD = ITEMS.register("staff_rod_reed", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:44	public static final RegistrySupplier<Item> BLAZE_STAFF_ROD = ITEMS.register("staff_rod_blaze", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:45	public static final RegistrySupplier<Item> BONE_STAFF_ROD = ITEMS.register("staff_rod_bone", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:46	public static final RegistrySupplier<Item> PRIMAL_STAFF_ROD = ITEMS.register("staff_rod_primal", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:47	public static final RegistrySupplier<Item> GOLD_WAND_CAP = ITEMS.register("wand_cap_gold", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:49	public static final RegistrySupplier<Item> COPPER_WAND_CAP = ITEMS.register("wand_cap_copper", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:50	public static final RegistrySupplier<Item> THAUMIUM_NUGGET = ITEMS.register("thaumium_nugget", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:51	public static final RegistrySupplier<Item> THAUMIUM_WAND_CAP_INERT = ITEMS.register("wand_cap_thaumium_inert", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:52	public static final RegistrySupplier<Item> THAUMIUM_WAND_CAP = ITEMS.register("wand_cap_thaumium", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:54	public static final RegistrySupplier<Item> VOID_NUGGET = ITEMS.register("void_nugget", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:55	public static final RegistrySupplier<Item> VOID_WAND_CAP_INERT = ITEMS.register("wand_cap_void_inert", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:56	public static final RegistrySupplier<Item> VOID_WAND_CAP = ITEMS.register("wand_cap_void", () -> new Item(new Item.Properties()));
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:59	public static final RegistrySupplier<DataComponentType<Integer>> WAND_CRAFT_COST = COMPONENTS.register("wand_craft_cost",
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:62	public static final RegistrySupplier<RecipeSerializer<ArcaneWandRecipe>> ARCANE_WAND_SERIALIZER = SERIALIZERS.register("arcane_wand", ArcaneWandRecipe.Serializer::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:67	COMPONENTS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:68	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java:69	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWards.java:20	public static final RegistrySupplier<BlockWarded> WARDED = BLOCKS.register("warded", () -> new BlockWarded(
+common/src/main/java/thaumcraft/common/config/ThaumcraftWards.java:21	BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(-1.0F, 599.4F).sound(SoundType.STONE)
+common/src/main/java/thaumcraft/common/config/ThaumcraftWards.java:22	.pushReaction(PushReaction.BLOCK).lightLevel(state -> state.getValue(BlockWarded.LIGHT)).noLootTable().dynamicShape()
+common/src/main/java/thaumcraft/common/config/ThaumcraftWards.java:24	public static final RegistrySupplier<BlockEntityType<TileWarded>> WARDED_TILE = TILES.register("warded", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftWards.java:31	BLOCKS.register(); TILES.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:33	public static final RegistrySupplier<MobEffect> THAUMARHIA = EFFECTS.register("thaumarhia", PotionThaumarhia::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:34	public static final RegistrySupplier<MobEffect> UNNATURAL_HUNGER = EFFECTS.register("unnatural_hunger", PotionUnnaturalHunger::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:35	public static final RegistrySupplier<MobEffect> SUN_SCORNED = EFFECTS.register("sun_scorned", PotionSunScorned::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:36	public static final RegistrySupplier<MobEffect> DEATH_GAZE = EFFECTS.register("death_gaze", PotionDeathGaze::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:37	public static final RegistrySupplier<MobEffect> BLURRED_VISION = EFFECTS.register("blurred_vision", PotionBlurredVision::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:38	public static final RegistrySupplier<MobEffect> WARP_WARD = EFFECTS.register("warp_ward", PotionWarpWard::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:39	public static final RegistrySupplier<EntityType<EntityMindSpider>> MIND_SPIDER = ENTITIES.register("mind_spider", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:41	public static final RegistrySupplier<EntityType<EntityEldritchGuardian>> ELDRITCH_GUARDIAN = ENTITIES.register("eldritch_guardian", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:43	public static final RegistrySupplier<EntityType<EntityEldritchOrb>> ELDRITCH_ORB = ENTITIES.register("eldritch_orb", () ->
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:46	public static final RegistrySupplier<Item> ELDRITCH_EYE = ITEMS.register("eldritch_eye", () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)) {
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:59	EFFECTS.register(); ENTITIES.register(); ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWarp.java:67	TickEvent.PLAYER_POST.register(player -> { if (player instanceof ServerPlayer server) WarpEvents.playerTick(server); });
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:31	public static final RegistrySupplier<ArmorMaterial> SPECIAL_ARMOR_MATERIAL = ARMOR_MATERIALS.register("special", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:36	public static final RegistrySupplier<ItemGoggles> GOGGLES = ITEMS.register("goggles_revealing",
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:42	public static final RegistrySupplier<ArmorMaterial> ROBE_ARMOR_MATERIAL = ARMOR_MATERIALS.register("robe", () -> new ArmorMaterial(
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:48	public static final RegistrySupplier<ItemRobeArmor> ROBE_CHESTPLATE = ITEMS.register("robe_chestplate",
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:50	public static final RegistrySupplier<ItemRobeArmor> ROBE_LEGGINGS = ITEMS.register("robe_leggings",
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:52	public static final RegistrySupplier<ItemRobeArmor> ROBE_BOOTS = ITEMS.register("robe_boots",
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:54	public static final RegistrySupplier<RecipeSerializer<RecipesRobeArmorDyes>> ROBE_DYE_RECIPE_SERIALIZER = SERIALIZERS.register("robe_dye",
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:63	ARMOR_MATERIALS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:64	ITEMS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWearables.java:65	SERIALIZERS.register();
+common/src/main/java/thaumcraft/common/config/ThaumcraftWorldgen.java:16	public static final RegistrySupplier<ThaumcraftOreFeature> ORES = FEATURES.register("tc4_ores", ThaumcraftOreFeature::new);
+common/src/main/java/thaumcraft/common/config/ThaumcraftWorldgen.java:21	public static void register() { FEATURES.register(); }

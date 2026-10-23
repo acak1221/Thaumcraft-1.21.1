@@ -36,6 +36,10 @@ import thaumcraft.common.lib.world.EldritchBlockRules;
  * mirror without a twin ejects it.
  */
 public final class TileMirror extends RetainedDataBlockEntity implements WorldlyContainer {
+    private static final String LINK_X_KEY = "linkX";
+    private static final String LINK_Y_KEY = "linkY";
+    private static final String LINK_Z_KEY = "linkZ";
+    private static final String LINK_DIM_KEY = "linkDim";
     /** The single slot of the original mirror. */
     private static final int[] SLOTS = {0};
     public boolean linked = false;
@@ -60,10 +64,10 @@ public final class TileMirror extends RetainedDataBlockEntity implements Worldly
     /** The link data of the mirror, used by the dropped item. */
     public CompoundTag linkData() {
         CompoundTag tag = new CompoundTag();
-        tag.putInt("linkX", linkX);
-        tag.putInt("linkY", linkY);
-        tag.putInt("linkZ", linkZ);
-        tag.putString("linkDim", linkDim);
+        tag.putInt(LINK_X_KEY, linkX);
+        tag.putInt(LINK_Y_KEY, linkY);
+        tag.putInt(LINK_Z_KEY, linkZ);
+        tag.putString(LINK_DIM_KEY, linkDim);
         return tag;
     }
 
@@ -300,10 +304,10 @@ public final class TileMirror extends RetainedDataBlockEntity implements Worldly
         if (retainMalformed(tag, () -> { for (Tag value:compoundList(tag,"Items")) requiredStack(registries,value); })) return;
         super.loadAdditional(tag, registries);
         linked = tag.getBoolean("linked");
-        linkX = tag.getInt("linkX");
-        linkY = tag.getInt("linkY");
-        linkZ = tag.getInt("linkZ");
-        linkDim = tag.getString("linkDim");
+        linkX = tag.getInt(LINK_X_KEY);
+        linkY = tag.getInt(LINK_Y_KEY);
+        linkZ = tag.getInt(LINK_Z_KEY);
+        linkDim = tag.getString(LINK_DIM_KEY);
         instability = tag.getInt("instability");
         outputStacks.clear();
         ListTag items = tag.getList("Items", Tag.TAG_COMPOUND);
@@ -317,10 +321,10 @@ public final class TileMirror extends RetainedDataBlockEntity implements Worldly
         if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         tag.putBoolean("linked", linked);
-        tag.putInt("linkX", linkX);
-        tag.putInt("linkY", linkY);
-        tag.putInt("linkZ", linkZ);
-        tag.putString("linkDim", linkDim);
+        tag.putInt(LINK_X_KEY, linkX);
+        tag.putInt(LINK_Y_KEY, linkY);
+        tag.putInt(LINK_Z_KEY, linkZ);
+        tag.putString(LINK_DIM_KEY, linkDim);
         tag.putInt("instability", instability);
         ListTag items = new ListTag();
         for (int i = 0; i < outputStacks.size(); i++) {

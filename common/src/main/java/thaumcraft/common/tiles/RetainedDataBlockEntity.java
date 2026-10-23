@@ -17,8 +17,6 @@ import thaumcraft.common.lib.utils.RejectedBlockEntityData;
 public abstract class RetainedDataBlockEntity extends BlockEntity {
     private CompoundTag rejectedData;
     protected RetainedDataBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type,pos,state); }
-    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) { super.loadAdditional(tag,registries); }
-    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) { super.saveAdditional(tag,registries); }
     public final boolean isDataRejected() { return rejectedData!=null; }
     protected final boolean retainMalformed(CompoundTag tag, Runnable validate) {
         try { validate.run(); rejectedData=null; return false; }

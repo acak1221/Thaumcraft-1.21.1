@@ -93,8 +93,8 @@ public class ThaumcraftApiHelper {
      * count of a stack is never part of the comparison.</p>
      *
      * <p>Forced 1.21.1 change: {@code ItemStack.isItemStackDamageable()} became
-     * {@link ItemStack#isDamageableItem()}. The native port also answers {@code false} for a missing stack
-     * instead of throwing the {@link NullPointerException} of the original.</p>
+     * {@link ItemStack#isDamageableItem()}. Null and EMPTY are equivalent; exactly one absent stack
+     * returns false, and components are ignored rather than validated.</p>
      */
     public static boolean areItemsEqual(ItemStack s1, ItemStack s2) {
         if (s1 == null || s1.isEmpty()) return s2 == null || s2.isEmpty();
@@ -165,7 +165,7 @@ public class ThaumcraftApiHelper {
         return false;
     }
 
-    /** Native data-component comparison of the original item NBT tag comparison. */
+    /** Rejects either null stack (even two nulls); otherwise tests recipe components as a subset, without item identity validation. */
     public static boolean areItemStackTagsEqualForCrafting(ItemStack slotItem, ItemStack recipeItem) {
         if (recipeItem == null || slotItem == null) return false;
         var recipe = recipeItem.getComponents();
@@ -178,6 +178,7 @@ public class ThaumcraftApiHelper {
         return true;
     }
 
+    /** Two nulls match, exactly one null fails; EMPTY uses ordinary item/damage comparison, ignoring components and count. */
     public static boolean itemMatches(ItemStack target, ItemStack input, boolean strict) {
         if (input == null && target != null || input != null && target == null) return false;
         if (input == null) return true;

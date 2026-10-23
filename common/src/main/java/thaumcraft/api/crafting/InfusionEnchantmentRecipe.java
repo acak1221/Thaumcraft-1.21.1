@@ -32,6 +32,7 @@ public class InfusionEnchantmentRecipe {
     private final Holder<Enchantment> enchantmentHolder;
     private thaumcraft.common.crafting.InfusionEnchantmentRecipe nativeRecipe;
 
+    /** Null enchantment throws IAE; null aspects/recipe mean zero costs/components; a holder without a registry key also throws IAE. */
     public InfusionEnchantmentRecipe(String research, Holder<Enchantment> input, int inst, AspectList aspects, ItemStack[] recipe) {
         if (input == null) throw new IllegalArgumentException("An enchantment infusion recipe needs an enchantment");
         this.research = research;

@@ -27,6 +27,7 @@ public interface IInternalMethodHandler {
 
     default AspectList getDiscoveredAspects(Player player) { return null; }
 
+    /** Default returns EMPTY for every input, including null/invalid cells; the dummy override returns null, so callers must handle both. */
     default ItemStack getStackInRowAndColumn(Object instance, int row, int column) { return net.minecraft.world.item.ItemStack.EMPTY; }
 
     default AspectList getObjectAspects(Level level, ItemStack stack) { return null; }

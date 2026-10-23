@@ -15,6 +15,7 @@ public class ScanningManager {
 
     private ScanningManager() {}
 
+    /** Ignores null; other handlers are registered without validation and their failures propagate from {@link #find}. */
     public static void addScannableThing(IScanThing thing) {
         if (thing != null) things.add(thing);
     }
@@ -22,7 +23,7 @@ public class ScanningManager {
     /** The registered handlers, in registration order. The registry itself stays private. */
     public static List<IScanThing> scannableThings() { return List.copyOf(things); }
 
-    /** The first registered handler that accepts the target, or null. */
+    /** Returns the first accepting handler or null; passes null/unsupported arguments through and propagates callback failures. */
     public static IScanThing find(Player player, Object thing) {
         for (IScanThing candidate : things) {
             if (candidate.checkThing(player, thing)) return candidate;

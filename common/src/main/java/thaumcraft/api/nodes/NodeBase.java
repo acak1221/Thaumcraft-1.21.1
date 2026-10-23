@@ -56,8 +56,10 @@ public class NodeBase implements INode {
         }
     }
 
+    /** Always true, even for null: this is a capability answer, not validation that an insertion will succeed. */
     @Override public boolean doesContainerAccept(Aspect aspect) { return true; }
 
+    /** Null aspects or nonpositive amounts return the full amount unchanged; other insertions return the unaccepted remainder. */
     @Override public int addToContainer(Aspect aspect, int amount) {
         if (aspect == null || amount <= 0) return amount;
         int left = Math.max(0, amount + aspects.getAmount(aspect) - aspectsBase.getAmount(aspect));
@@ -65,6 +67,7 @@ public class NodeBase implements INode {
         return left;
     }
 
+    /** Returns false for null aspects, nonpositive amounts or insufficient contents without removing anything. */
     @Override public boolean takeFromContainer(Aspect aspect, int amount) {
         if (aspect == null || amount <= 0) return false;
         return aspects.reduce(aspect, amount);

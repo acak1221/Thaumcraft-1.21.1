@@ -125,7 +125,9 @@ public final class VisNetHandler {
     }
     private static synchronized void forget(Network net) { NETWORKS.remove(net); }
     public static boolean isConsumeActive(Level level) { Network net = network(level, false); return net != null && net.consuming; }
+    /** Null/untracked levels return zero; reads cached topology without validating the level or enforcing server-thread access. */
     public static long getTopologyVersion(ServerLevel level) { Network net = network(level, false); return net == null ? 0 : net.version; }
+    /** Null/untracked levels return zero; reads cached lifetime without validating the level or enforcing server-thread access. */
     public static long getLevelLifetime(ServerLevel level) { Network net = network(level, false); return net == null ? 0 : net.lifetime; }
     public static List<WeakReference<TileVisNode>> getSources(ServerLevel level) {
         requireThread(level); Network net = network(level, false);
@@ -136,7 +138,8 @@ public final class VisNetHandler {
     }
 
     /** No overridable Level callback runs without a recursion fence. A subclass
-     * borrowing a real server is not that server's actual installed world. */
+     * borrowing a real server is not that server's actual installed world.
+     * Null/client/non-server levels return false; server levels without an owner or called off-thread throw IllegalStateException. */
     public static boolean isNativeServerLevel(Level level) {
         if (!(level instanceof ServerLevel server) || level.isClientSide) return false;
         Set<Level> checking = VALIDATING.get();
@@ -186,10 +189,12 @@ public final class VisNetHandler {
             return range > 0 && attunement >= -1 && attunement <= 5 && isCurrent(node) ? new Metadata(range, attunement, source) : null;
         } finally { checking.remove(node); if (checking.isEmpty()) CHECKING_METADATA.remove(); }
     }
+    /** Null/cleared/invalid nodes return false; server-backed validation may throw IllegalStateException off-thread or propagate callbacks. */
     public static boolean isNodeValid(WeakReference<TileVisNode> ref) {
         TileVisNode node = ref == null ? null : ref.get();
         return node != null && metadata(node) != null;
     }
+    /** Null returns false; otherwise invokes hasChunkAt without level/thread validation and propagates callback failures. */
     public static boolean isChunkLoaded(Level level, int x, int z) {
         return level != null && level.hasChunkAt(new BlockPos(x, level.getMinBuildHeight(), z));
     }

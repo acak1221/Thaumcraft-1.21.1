@@ -72,6 +72,7 @@ public class WandRod {
 
     public String getTag() { return this.tag; }
 
+    /** Stores null/malformed tags without validation or registry re-keying; a null tag can make {@link #byTag} throw NPE. */
     public void setTag(String tag) { this.tag = tag; }
 
     public int getCapacity() { return this.capacity; }
@@ -101,7 +102,7 @@ public class WandRod {
     /** The original research key of a rod. */
     public String getResearch() { return "ROD_" + this.getTag(); }
 
-    /** The rod of the native catalogue with this tag, or null. */
+    /** Null/unknown/malformed queries return null unless a stored null rod/tag causes NPE while scanning the mutable registry. */
     public static WandRod byTag(String tag) {
         for (WandRod rod : rods.values()) {
             if (rod.tag.equals(tag)) return rod;

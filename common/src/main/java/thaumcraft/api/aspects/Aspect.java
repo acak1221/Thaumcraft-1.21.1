@@ -71,9 +71,10 @@ public class Aspect {
     /**
      * Original Aspect:74-84. The original accepts any component array: a compound aspect with
      * three components is legal and is then reported as primal by {@link #isPrimal()}.
+     * Null/empty tags throw IllegalArgumentException; null images throw NPE and duplicate tags throw IAE before replacement.
      */
     public Aspect(String tag, int color, Aspect[] components, ResourceLocation image, int blend) {
-        this.tag = Objects.requireNonNull(tag, "tag");
+        this.tag = requireTag(tag);
         this.color = color;
         this.components = components == null ? null : components.clone();
         this.image = Objects.requireNonNull(image, "image");
@@ -83,18 +84,26 @@ public class Aspect {
         }
     }
 
+    /** Null/empty tags throw IAE; malformed native image paths throw ResourceLocationException; null components denote a primal aspect. */
     public Aspect(String tag, int color, Aspect[] components, int blend) {
         this(tag, color, components,
-                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/aspects/" + tag.toLowerCase(Locale.ROOT) + ".png"), blend);
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/aspects/" + requireTag(tag).toLowerCase(Locale.ROOT) + ".png"), blend);
     }
 
+    /** Uses default blend; null/empty tags throw IAE and malformed native image paths throw ResourceLocationException. */
     public Aspect(String tag, int color, Aspect[] components) {
         this(tag, color, components, 1);
     }
 
+    /** Null/empty tags throw IAE and malformed image paths throw ResourceLocationException; chatcolor accepts null/unvalidated strings. */
     public Aspect(String tag, int color, String chatcolor, int blend) {
         this(tag, color, (Aspect[]) null, blend);
         this.chatcolor = chatcolor;
+    }
+
+    private static String requireTag(String tag) {
+        if (tag == null || tag.isEmpty()) throw new IllegalArgumentException("tag must not be null or empty");
+        return tag;
     }
 
     public String getTag() { return this.tag; }
@@ -117,7 +126,7 @@ public class Aspect {
      */
     public boolean isPrimal() { return this.components == null || this.components.length != 2; }
 
-    /** Original Aspect:116 - the tag of an aspect can be retuned by an add-on. */
+    /** Accepts null/empty tags without validation or registry re-keying; subsequent {@link #getName()} calls fail for them. */
     public void setTag(String tag) { this.tag = tag; }
 
     /** Original Aspect:124 - the components of an aspect can be retuned by an add-on. */
@@ -126,7 +135,7 @@ public class Aspect {
     /** Original Aspect:140 - the blend of an aspect can be retuned by an add-on. */
     public void setBlend(int blend) { this.blend = blend; }
 
-    /** Original Aspect:172 - the chat colour of an aspect can be retuned by an add-on. */
+    /** Stores any chat colour, including null or malformed formatting strings, without validation. */
     public void setChatcolor(String chatcolor) { this.chatcolor = chatcolor; }
 
     public static Aspect getAspect(String tag) { return aspects.get(tag); }

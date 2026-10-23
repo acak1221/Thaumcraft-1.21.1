@@ -17,6 +17,7 @@ public class AspectList implements Serializable {
 
     /**
      * Original AspectList:25-36 - the object aspects of an item stack.
+     * Null/empty stacks are passed to the handler; Exceptions are swallowed (retaining any amounts already copied), but Errors escape.
      *
      * <p>The original wrapped the call in a try/catch and kept an empty list when the add-on
      * surface threw; the native keeps the same behaviour.</p>
@@ -89,6 +90,7 @@ public class AspectList implements Serializable {
 
     /**
      * The original addition: the amount of an aspect grows by the added one.
+     * Null aspects are ignored; signed amounts are summed without overflow checks.
      *
      * <p>Forced 1.21.1 change (documented deviation from the original): the original stored the aspect
      * under its own key, so a {@code null} aspect - the aspect of an unknown tag that
@@ -104,27 +106,34 @@ public class AspectList implements Serializable {
         return this;
     }
 
+    /** Rejects null other with IAE before mutation; otherwise adds signed amounts using {@link #add(Aspect, int)}. */
     public AspectList add(AspectList other) {
+        if (other == null) throw new IllegalArgumentException("other must not be null");
         for (Aspect aspect : other.getAspects()) add(aspect, other.getAmount(aspect));
         return this;
     }
 
+    /** Ignores null aspects; accepts signed amounts and retains the maximum for an existing aspect. */
     public AspectList merge(Aspect aspect, int amount) {
         if (aspect != null) this.aspects.put(aspect, this.aspects.containsKey(aspect) ? Math.max(getAmount(aspect), amount) : amount);
         return this;
     }
 
+    /** Rejects null other with IAE before mutation; otherwise merges signed amounts using {@link #merge(Aspect, int)}. */
     public AspectList merge(AspectList other) {
+        if (other == null) throw new IllegalArgumentException("other must not be null");
         for (Aspect aspect : other.getAspects()) merge(aspect, other.getAmount(aspect));
         return this;
     }
 
+    /** Returns false without mutation for a null aspect, negative amount or insufficient balance. */
     public boolean reduce(Aspect aspect, int amount) {
         if (aspect == null || amount < 0 || getAmount(aspect) < amount) return false;
         this.aspects.put(aspect, getAmount(aspect) - amount);
         return true;
     }
 
+    /** Ignores null aspects and negative amounts; otherwise subtracts and removes nonpositive balances. */
     public AspectList remove(Aspect aspect, int amount) {
         if (aspect == null || amount < 0) return this;
         int left = getAmount(aspect) - amount;
@@ -164,9 +173,12 @@ public class AspectList implements Serializable {
         tag.put(label, list);
     }
 
+    /** Null tag throws IAE without clearing state; malformed/missing Aspects lists load empty and unknown aspect names are ignored. */
     public void readFromNBT(CompoundTag tag) { readFromNBT(tag, "Aspects"); }
 
+    /** Null tag throws IAE before clearing state; missing/wrong-type lists load empty, unknown aspects are dropped, signed amounts remain valid. */
     public void readFromNBT(CompoundTag tag, String label) {
+        if (tag == null) throw new IllegalArgumentException("tag must not be null");
         this.aspects.clear();
         ListTag list = tag.getList(label, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {

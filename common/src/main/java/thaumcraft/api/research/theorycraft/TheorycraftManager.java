@@ -13,6 +13,7 @@ public class TheorycraftManager {
 
     private TheorycraftManager() {}
 
+    /** Ignores null aids; otherwise registers the first instance per class name without further validation. */
     public static void registerAid(ITheorycraftAid aid) {
         if (aid == null) return;
         aids.putIfAbsent(aid.getClass().getName(), aid);

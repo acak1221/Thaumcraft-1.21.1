@@ -17,18 +17,22 @@ public final class WorldCoordinates implements Comparable<WorldCoordinates> {
     public final int x, y, z;
     public final ResourceKey<Level> dimension;
 
+    /** Null position throws NPE; null/noncanonical dimension or out-of-bounds position throws IllegalArgumentException. */
     public WorldCoordinates(ResourceKey<Level> dimension, BlockPos pos) {
         this(pos.getX(), pos.getY(), pos.getZ(), dimension);
     }
+    /** Rejects null/noncanonical dimensions and out-of-bounds coordinates with IllegalArgumentException. */
     public WorldCoordinates(int x, int y, int z, ResourceKey<Level> dimension) {
         if (!isCanonicalDimension(dimension) || !Level.isInSpawnableBounds(new BlockPos(x, y, z))) {
             throw new IllegalArgumentException("Canonical dimension and native world coordinates required");
         }
         this.x = x; this.y = y; this.z = z; this.dimension = dimension;
     }
+    /** Null or unbound tiles throw NPE; invalid dimensions/coordinates throw IllegalArgumentException. */
     public WorldCoordinates(BlockEntity tile) {
         this(Objects.requireNonNull(tile.getLevel(), "Unbound block entity").dimension(), tile.getBlockPos());
     }
+    /** Copies a valid location; null throws NPE. */
     public WorldCoordinates(WorldCoordinates other) { this(other.x, other.y, other.z, other.dimension); }
     public BlockPos pos() { return new BlockPos(x, y, z); }
     public ResourceKey<Level> dimension() { return dimension; }
@@ -40,6 +44,7 @@ public final class WorldCoordinates implements Comparable<WorldCoordinates> {
         double dx = (double) this.x - x, dy = (double) this.y - y, dz = (double) this.z - z;
         return dx * dx + dy * dy + dz * dz;
     }
+    /** Null or different-dimension locations return positive infinity rather than a distance. */
     public double getDistanceSquaredToWorldCoordinates(WorldCoordinates other) {
         return other != null && dimension == other.dimension ? getDistanceSquared(other.x, other.y, other.z) : Double.POSITIVE_INFINITY;
     }
@@ -47,18 +52,20 @@ public final class WorldCoordinates implements Comparable<WorldCoordinates> {
         return other instanceof WorldCoordinates at && dimension == at.dimension && x == at.x && y == at.y && z == at.z;
     }
     @Override public int hashCode() { return Objects.hash(dimension, x, y, z); }
+    /** Orders dimension then y/z/x; null throws NPE, as required by Comparable. */
     @Override public int compareTo(WorldCoordinates other) {
         int c = dimension.location().compareTo(other.dimension.location());
         if (c == 0) c = Integer.compare(y, other.y);
         if (c == 0) c = Integer.compare(z, other.z);
         return c == 0 ? Integer.compare(x, other.x) : c;
     }
+    /** Same ordering as {@link #compareTo}; null throws NPE. */
     public int compareWorldCoordinate(WorldCoordinates other) { return compareTo(other); }
     public void writeNBT(CompoundTag tag) {
         tag.putInt("w_x", x); tag.putInt("w_y", y); tag.putInt("w_z", z);
         tag.putString("w_dim", dimension.location().toString());
     }
-    /** Whole-value refusal: no missing/default coordinates or numeric dim IDs. */
+    /** Null, missing/wrong-type fields, malformed IDs or out-of-bounds coordinates return Optional.empty; numeric dim IDs are refused. */
     public static Optional<WorldCoordinates> readNBT(CompoundTag tag) {
         if (tag == null || !tag.contains("w_x", Tag.TAG_INT) || !tag.contains("w_y", Tag.TAG_INT)
                 || !tag.contains("w_z", Tag.TAG_INT) || !tag.contains("w_dim", Tag.TAG_STRING)) return Optional.empty();

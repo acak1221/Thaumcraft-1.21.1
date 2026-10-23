@@ -19,20 +19,20 @@ import thaumcraft.common.config.ThaumcraftContent;
 public final class BlocksTC {
     private BlocksTC() {}
 
-    /** The native registry identifier of a name. */
+    /** Null/empty names throw IllegalArgumentException; malformed namespaced IDs return null, malformed plain paths throw ResourceLocationException. */
     public static ResourceLocation id(String name) {
         if (name == null || name.isEmpty()) throw new IllegalArgumentException("A block needs a name");
         return name.contains(":") ? ResourceLocation.tryParse(name) : ResourceLocation.fromNamespaceAndPath("thaumcraft", name);
     }
 
-    /** The registered block of a name, or null when it does not exist in this runtime. */
+    /** Missing blocks return null; null/empty and malformed names follow {@link #id(String)} rather than a uniformly forgiving lookup. */
     public static Block get(String name) {
         ResourceLocation id = id(name);
         if (id == null || !BuiltInRegistries.BLOCK.containsKey(id)) return null;
         return BuiltInRegistries.BLOCK.get(id);
     }
 
-    /** The registered block of a name; a missing block is an error. */
+    /** Null/empty or missing names throw IllegalArgumentException; malformed plain paths throw ResourceLocationException. */
     public static Block require(String name) {
         Block block = get(name);
         if (block == null) throw new IllegalArgumentException("Unknown block: " + name);

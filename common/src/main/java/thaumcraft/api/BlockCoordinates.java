@@ -105,7 +105,7 @@ public class BlockCoordinates implements Comparable<BlockCoordinates> {
         return this.compareWorldCoordinate(other);
     }
 
-    /** The original NBT keys of the class. */
+    /** Null NBT leaves coordinates unchanged; missing/wrong-type b_x/b_y/b_z fields default individually to zero. */
     public void readNBT(CompoundTag nbt) {
         if (nbt == null) return;
         this.x = nbt.getInt("b_x");

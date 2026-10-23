@@ -21,6 +21,7 @@ public class DummyInternalMethodHandler implements IInternalMethodHandler {
 
     @Override public AspectList getDiscoveredAspects(String username) { return null; }
 
+    /** Always returns null, including null instances or invalid coordinates, unlike the interface default's EMPTY sentinel. */
     @Override public ItemStack getStackInRowAndColumn(Object instance, int row, int column) { return null; }
 
     @Override public AspectList getObjectAspects(ItemStack is) { return null; }

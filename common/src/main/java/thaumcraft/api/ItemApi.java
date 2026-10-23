@@ -26,7 +26,7 @@ public class ItemApi {
 
     private ItemApi() {}
 
-    /** Returns the named item, or null when it does not exist in this runtime. */
+    /** Null/empty names return null; malformed namespaced IDs fall back to reflection, but malformed plain paths throw ResourceLocationException. */
     public static ItemStack getItem(String itemString, int meta) {
         if (itemString == null || itemString.isEmpty()) return null;
         ResourceLocation id = id(itemString);
@@ -38,7 +38,7 @@ public class ItemApi {
         return null;
     }
 
-    /** Returns the named block, or null when it does not exist in this runtime. */
+    /** Null/empty names return null; malformed namespaced IDs fall back to reflection, but malformed plain paths throw ResourceLocationException. */
     public static ItemStack getBlock(String itemString, int meta) {
         if (itemString == null || itemString.isEmpty()) return null;
         ResourceLocation id = id(itemString);
@@ -62,7 +62,7 @@ public class ItemApi {
         return stack;
     }
 
-    /** The block item of a named block, when the block itself has one. */
+    /** Null/empty or malformed namespaced IDs return null; malformed plain paths throw ResourceLocationException. */
     public static ItemStack getBlockItem(String itemString) {
         if (itemString == null || itemString.isEmpty()) return null;
         ResourceLocation id = id(itemString);

@@ -19,20 +19,20 @@ import thaumcraft.common.config.ThaumcraftContent;
 public final class ItemsTC {
     private ItemsTC() {}
 
-    /** The native registry identifier of a name. */
+    /** Null/empty names throw IllegalArgumentException; malformed namespaced IDs return null, malformed plain paths throw ResourceLocationException. */
     public static ResourceLocation id(String name) {
         if (name == null || name.isEmpty()) throw new IllegalArgumentException("An item needs a name");
         return name.contains(":") ? ResourceLocation.tryParse(name) : ResourceLocation.fromNamespaceAndPath("thaumcraft", name);
     }
 
-    /** The registered item of a name, or null when it does not exist in this runtime. */
+    /** Missing items return null; null/empty and malformed names follow {@link #id(String)} rather than a uniformly forgiving lookup. */
     public static Item get(String name) {
         ResourceLocation id = id(name);
         if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) return null;
         return BuiltInRegistries.ITEM.get(id);
     }
 
-    /** The registered item of a name; a missing item is an error. */
+    /** Null/empty or missing names throw IllegalArgumentException; malformed plain paths throw ResourceLocationException. */
     public static Item require(String name) {
         Item item = get(name);
         if (item == null) throw new IllegalArgumentException("Unknown item: " + name);

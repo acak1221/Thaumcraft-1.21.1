@@ -251,7 +251,7 @@ public final class ThaumcraftApi {
         return r;
     }
 
-    /** Original guard: only an item stack or an object array may be an infusion output. */
+    /** Null/unsupported result classes return null; Object[] results with unknown patches throw IllegalArgumentException in the constructor. */
     public static InfusionRecipe addInfusionCraftingRecipe(String research, Object result, int instability, AspectList aspects, ItemStack input, ItemStack[] recipe) {
         if (!(result instanceof ItemStack) && !(result instanceof Object[])) return null;
         InfusionRecipe r = new InfusionRecipe(research, result, instability, aspects, input, recipe);
@@ -259,6 +259,7 @@ public final class ThaumcraftApi {
         return r;
     }
 
+    /** Null enchantments return null; other arguments use constructor validation (null aspects mean zero costs, null recipe means no components). */
     public static InfusionEnchantmentRecipe addInfusionEnchantmentRecipe(String research, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment, int instability, AspectList aspects, ItemStack[] recipe) {
         if (enchantment == null) return null;
         InfusionEnchantmentRecipe r = new InfusionEnchantmentRecipe(research, enchantment, instability, aspects, recipe);
@@ -415,16 +416,20 @@ public final class ThaumcraftApi {
         BuiltInRegistries.BLOCK.getTag(tag).ifPresent(holders -> holders.forEach(holder -> portableHoleBlackList.add(holder.value())));
     }
 
-    public static void registerScanEventhandler(IScanEventHandler handler) { scanEventhandlers.add(Objects.requireNonNull(handler, "handler")); }    public static void registerEntityTag(String entityName, AspectList aspects, EntityTagsNBT... nbt) {
+    /** Null handlers throw NPE naming handler; non-null handlers are registered without further validation. */
+    public static void registerScanEventhandler(IScanEventHandler handler) { scanEventhandlers.add(Objects.requireNonNull(handler, "handler")); }
+
+    public static void registerEntityTag(String entityName, AspectList aspects, EntityTagsNBT... nbt) {
         if (entityName == null || entityName.isEmpty()) throw new IllegalArgumentException("An entity tag requires its original or native registry name");
         scanEntities.add(new EntityTags(entityName, aspects, nbt));
     }
 
-    /** Item identity and native damage metadata only: count, names and other NBT/components never narrow this registration. */
+    /** Null/empty items are ignored and null aspects become empty; only item identity and damage metadata narrow registration. */
     public static void registerObjectTag(ItemStack item, AspectList aspects) {
         if (item == null || item.isEmpty()) return;
         registerObjectTag(item.getItem(), item.getDamageValue(), aspects);
     }
+    /** Null items are ignored, null aspects become empty, and signed metadata is stored without validation. */
     public static void registerObjectTag(Item item, int metadata, AspectList aspects) {
         ObjectAspectRegistry.register(objectTags, item, metadata, aspects);
     }
@@ -432,11 +437,12 @@ public final class ThaumcraftApi {
         if (!BuiltInRegistries.ITEM.containsKey(item)) throw new IllegalArgumentException("Unknown native object-tag item: " + item);
         registerObjectTag(BuiltInRegistries.ITEM.get(item), metadata, aspects);
     }
+    /** Null/empty items or metadata arrays are ignored; null aspects become empty, and metadata values are not validated. */
     public static void registerObjectTag(ItemStack item, int[] metadata, AspectList aspects) {
         if (item == null || item.isEmpty()) return;
         ObjectAspectRegistry.register(objectTags, groupedObjectTags, item.getItem(), metadata, aspects);
     }
-    /** Current native tag membership is snapshotted immediately, as original OreDictionary membership was. */
+    /** Snapshots native membership; null aspects become empty, null tags are not guarded, and absent tags register nothing. */
     public static void registerObjectTag(TagKey<Item> tag, AspectList aspects) {
         AspectList shared = aspects == null ? new AspectList() : aspects;
         BuiltInRegistries.ITEM.getTag(tag).ifPresent(items -> items.forEach(item -> registerObjectTag(item.value(), 0, shared)));
@@ -452,13 +458,16 @@ public final class ThaumcraftApi {
         return ObjectAspectRegistry.exists(objectTags, item, metadata)
                 || ObjectAspectCatalog.hasDerivedRegistration(BuiltInRegistries.ITEM.getKey(item), metadata);
     }
+    /** Requires a live server context first (else IllegalStateException), then applies the world-scoped overload's null validation. */
     public static void registerComplexObjectTag(ItemStack item, AspectList aspects) {
         registerComplexObjectTag(item, aspects, ObjectAspectRegistry.requireContext());
     }
+    /** Null/empty item throws IAE; null/invalid world throws IllegalStateException before null aspects throw NPE. */
     public static void registerComplexObjectTag(ItemStack item, AspectList aspects, Level world) {
         if (item == null || item.isEmpty()) throw new IllegalArgumentException("Complex object tags require an item");
         registerComplexObjectTag(item, item.getDamageValue(), aspects, world);
     }
+    /** Null item throws IAE; null/invalid world throws IllegalStateException before null aspects throw NPE; metadata is not validated. */
     public static void registerComplexObjectTag(Item item, int metadata, AspectList aspects, Level world) {
         if (item == null) throw new IllegalArgumentException("Complex object tags require an item");
         registerComplexObjectTag(new ItemStack(item), metadata, aspects, world);

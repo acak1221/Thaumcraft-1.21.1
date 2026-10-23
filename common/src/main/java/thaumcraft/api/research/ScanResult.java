@@ -21,19 +21,23 @@ public class ScanResult {
     public BlockPos nodePosition;
     public ResourceKey<Level> nodeDimension;
 
+    /** Stores all arguments, including nulls and inconsistent type/payload combinations, without validation. */
     public ScanResult(byte type, int itemId, int itemMeta, Entity entity, String phenomena) {
         this.type = type; this.id = itemId; this.meta = itemMeta; this.entity = entity; this.phenomena = phenomena;
     }
 
+    /** Rejects null/empty items with IllegalArgumentException; other stacks are copied with count one. */
     public static ScanResult item(ItemStack item) {
         if (item == null || item.isEmpty()) throw new IllegalArgumentException("A scan requires an item");
         var result = new ScanResult((byte) 1, BuiltInRegistries.ITEM.getId(item.getItem()), item.getDamageValue(), null, "");
         result.stack = item.copyWithCount(1); return result;
     }
+    /** Rejects null with NullPointerException naming entity; any non-null entity is accepted without further validation. */
     public static ScanResult entity(Entity entity) {
         if (entity == null) throw new NullPointerException("entity");
         return new ScanResult((byte) 2, 0, 0, entity, "");
     }
+    /** Rejects null with NullPointerException naming node; an unbound node is accepted with a null dimension. */
     public static ScanResult node(TileNode node) {
         if (node == null) throw new NullPointerException("node");
         var result = new ScanResult((byte) 3, 0, 0, null, "NODE" + node.getScanId());

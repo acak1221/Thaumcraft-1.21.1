@@ -24,7 +24,10 @@ public class CrucibleRecipe {
     public int hash;
     private final Ingredient catalystIngredient;
 
+    /** Null result/tags throw named IAE before conversion; null/unsupported catalysts use the ingredient converter's existing rules. */
     public CrucibleRecipe(String researchKey, ItemStack result, Object cat, AspectList tags) {
+        if (result == null) throw new IllegalArgumentException("result must not be null");
+        if (tags == null) throw new IllegalArgumentException("tags must not be null");
         this.recipeOutput = result;
         this.aspects = tags;
         this.key = researchKey;
@@ -53,7 +56,7 @@ public class CrucibleRecipe {
                 NativeRecipes.aspects(recipe.aspects()));
     }
 
-    /** True when the catalyst and the essence both fit this recipe. */
+    /** Null contents or null/empty/nonmatching catalyst return false; otherwise tests whether all required amounts are present. */
     public boolean matches(AspectList itags, ItemStack cat) {
         if (!catalystMatches(cat)) return false;
         if (itags == null) return false;
@@ -69,8 +72,9 @@ public class CrucibleRecipe {
         return catalystIngredient.test(cat);
     }
 
-    /** The original removal of the recipe's essence from the crucible's contents. */
+    /** Rejects null itags with named IAE; otherwise copies contents and removes required amounts without checking a match first. */
     public AspectList removeMatching(AspectList itags) {
+        if (itags == null) throw new IllegalArgumentException("itags must not be null");
         AspectList temptags = new AspectList();
         temptags.aspects.putAll(itags.aspects);
         for (Aspect tag : this.aspects.getAspects()) {

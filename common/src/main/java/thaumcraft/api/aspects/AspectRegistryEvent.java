@@ -18,7 +18,7 @@ public class AspectRegistryEvent {
 
     private static final List<Consumer<AspectRegistryEvent>> LISTENERS = new CopyOnWriteArrayList<>();
 
-    /** Subscribes to the event; listeners run in registration order. */
+    /** Ignores null listeners; other listeners run in registration order without registration-time validation. */
     public static void addListener(Consumer<AspectRegistryEvent> listener) {
         if (listener != null) LISTENERS.add(listener);
     }
@@ -31,7 +31,7 @@ public class AspectRegistryEvent {
     /** The number of registered listeners; a listener may unregister itself while the event runs. */
     public static int listenerCount() { return LISTENERS.size(); }
 
-    /** Raises the event. A listener that throws does not stop the remaining listeners. */
+    /** Logs listener RuntimeExceptions and continues; Errors escape, and null listeners cannot be registered here. */
     public static void post() {
         AspectRegistryEvent event = new AspectRegistryEvent();
         for (Consumer<AspectRegistryEvent> listener : LISTENERS) {

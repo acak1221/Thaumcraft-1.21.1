@@ -73,6 +73,7 @@ public class WandCap {
 
     public String getTag() { return this.tag; }
 
+    /** Stores null/malformed tags without validation or registry re-keying; a null tag can make {@link #byTag} throw NPE. */
     public void setTag(String tag) { this.tag = tag; }
 
     public ItemStack getItem() { return this.item; }
@@ -86,7 +87,7 @@ public class WandCap {
     /** The original research key of a cap. */
     public String getResearch() { return "CAP_" + this.getTag(); }
 
-    /** The cap of the native catalogue with this tag, or null. */
+    /** Null/unknown/malformed queries return null unless a stored null cap/tag causes NPE while scanning the mutable registry. */
     public static WandCap byTag(String tag) {
         for (WandCap cap : caps.values()) {
             if (cap.tag.equals(tag)) return cap;

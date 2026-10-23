@@ -7,6 +7,7 @@ logs
 .gradle_home/
 .gradle-fix4/
 # private Gradle homes of the parallel agents
+.gradle-e1/
 .gradle-c5fix/
 .gradle-g32/
 .gradle-g31/

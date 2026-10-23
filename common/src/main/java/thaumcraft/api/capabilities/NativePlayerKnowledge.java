@@ -97,6 +97,7 @@ public class NativePlayerKnowledge implements IPlayerKnowledge {
         return set != null && set.contains(flag);
     }
 
+    /** Returns false for null/non-OBSERVATION types, null categories/formulas, nonpositive amounts or formulas without a target. */
     @Override public boolean addKnowledge(EnumKnowledgeType type, ResearchCategory category, int amount) {
         if (type != EnumKnowledgeType.OBSERVATION || category == null || category.formula == null || amount <= 0) return false;
         Aspect target = category.formula.getAspectsSortedAmount().length > 0 ? category.formula.getAspectsSortedAmount()[0] : null;
@@ -105,11 +106,13 @@ public class NativePlayerKnowledge implements IPlayerKnowledge {
         return true;
     }
 
+    /** Null type is read as THEORY; null category/formula yields zero, and other formulas are applied without validation. */
     @Override public int getKnowledge(EnumKnowledgeType type, ResearchCategory category) {
         if (category == null) return 0;
         return category.applyFormula(rawAspects(type, category));
     }
 
+    /** Null type is read as THEORY; null category/formula yields zero, and other formulas are summed without validation. */
     @Override public int getKnowledgeRaw(EnumKnowledgeType type, ResearchCategory category) {
         if (category == null || category.formula == null) return 0;
         int total = 0;

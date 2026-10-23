@@ -31,6 +31,7 @@ public class InfusionRecipe {
     protected int instability;
     private InfusionStackRecipe nativeRecipe;
 
+    /** Null input throws IAE; null aspects/recipe mean zero costs/components; null/other outputs use an input sample, but unknown array patches throw IAE. */
     public InfusionRecipe(String research, Object output, int inst, AspectList aspects, ItemStack input, ItemStack[] recipe) {
         this.research = research;
         this.recipeOutput = output;

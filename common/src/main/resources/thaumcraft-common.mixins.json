@@ -75,7 +75,8 @@
     "LevelChunkPendingBlockEntityMixin",
     "PerStateBlockEntityMixin",
     "PistonPushabilityMixin",
-    "Tc4ChunkRegenerationMarkerMixin"
+    "Tc4ChunkRegenerationMarkerMixin",
+    "EntityTypeSchemaNoticeMixin"
   ],
   "client": [
     "client.Tc4ParticleEngineMixin",

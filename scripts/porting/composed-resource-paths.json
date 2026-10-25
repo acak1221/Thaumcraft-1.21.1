@@ -84,7 +84,7 @@
         "thaumcraft:textures/models/void_robe_armor.png",
         "thaumcraft:textures/models/void_robe_armor_overlay.png"
       ],
-      "note": "Reviewed 2026-10-25 follow-up: focus drawing delegates to the public depth-icon hook renderer and armor copies the original zombie/skeleton arm pose after the wearer pose. Rod/cap and armor sheet suppliers and finite expansions are unchanged; four built-in depth sheets are literal PNG requests checked by the literal-resource verifier."
+      "note": "Reviewed 2026-10-25 follow-up: focus drawing delegates to the public depth-icon hook renderer and armor copies the original zombie/skeleton arm pose after the wearer pose. Rod/cap and armor sheet suppliers and finite expansions are unchanged; four built-in depth sheets are literal PNG requests checked by the literal-resource verifier. Re-reviewed 2026-10-25 bebe0a7: only the wand use-pose matrix chain moved into WandUsePose.apply; no ResourceLocation supplier, bound or expansion changed."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java",
@@ -1358,6 +1358,17 @@
       "ResourceLocation.parse(tag.getString(\"Recipe\"))",
       "ResourceLocation.parse(row.getString(\"id\"))"
     ],
+    "fabric/src/main/java/thaumcraft/fabric/compat/emi/AspectEmiStack.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",aspect.getTag())"
+    ],
+    "fabric/src/main/java/thaumcraft/fabric/compat/emi/EmiAspectCombinationRecipe.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+aspect.getTag())"
+    ],
+    "fabric/src/main/java/thaumcraft/fabric/compat/emi/ThaumcraftEmiPlugin.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/\"+(sceptre?\"sceptre\":\"wand\")+\"/\"+rod.tag()+\"/\"+cap.tag())",
+      "ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(),\"/\"+holder.id().getPath()+\"/hardening_\"+hardening)"
+    ],
     "fabric/src/main/java/thaumcraft/fabric/world/FabricBiomeSpawns.java": [
       "ResourceLocation.parse(row.entity())"
     ],
@@ -1421,7 +1432,7 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "6471c99c018271104ad721ccc61332275023a36b16983acfaee85a34e70f6d68",
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
     "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "8a82c324559a31c13e51f1bfe8dabbf9b3cabad505e7bdc3c1749c480bf76bae",
-    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "106b5819f2fb323c7cf8cc0e8c727c5320bbf32941a71264e11e84cb25bbec41",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "0f457422d7cf69dfabfa26a0eb9e87b7bed3acd861ad33f3de91218dce21e7c9",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
     "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "9a482d65fb0eaa1005d9110f130ff3f1ea4e772f8d419256f2e39748ee7c3efe",
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",

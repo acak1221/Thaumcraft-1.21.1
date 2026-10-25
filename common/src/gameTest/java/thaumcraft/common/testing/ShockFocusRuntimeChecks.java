@@ -271,7 +271,9 @@ public final class ShockFocusRuntimeChecks {
             T entity = type.create(test.getLevel()); test.assertTrue(entity != null, "native target fixture exists");
             targets.add(entity); entity.setPos(origin.add(offset, height, 0)); entity.setNoGravity(true);
             if (entity instanceof Mob mob) mob.setNoAi(true);
-            test.assertTrue(test.getLevel().addFreshEntity(entity), "target fixture is in the actual native entity index");
+            // The armoured zombie asserts exact native armour reduction: declare the original
+            // champion join roll, or a warded champion's ward silently absorbs the hit.
+            test.assertTrue(ChampionJoinRoll.join(test.getLevel(), entity), "target fixture is in the actual native entity index");
             return entity;
         }
 

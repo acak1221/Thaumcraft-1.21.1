@@ -15,6 +15,8 @@ subprojects {
   maven { url = 'https://maven.architectury.dev/' }
   maven { url = 'https://maven.fabricmc.net/' }
   maven { url = 'https://maven.neoforged.net/releases/' }
+  // Optional recipe viewer API (EMI); compile-only, never bundled.
+  maven { url = 'https://maven.terraformersmc.com/releases/'; content { includeGroup 'dev.emi'; includeGroup 'com.terraformersmc' } }
  }
  dependencies {
   minecraft "com.mojang:minecraft:$rootProject.minecraft_version"

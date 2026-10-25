@@ -45,6 +45,7 @@ The reference tree is not part of the 1.21.1 build: `settings.gradle` includes o
 - Architectury API: LGPL-3.0; referenced as an external runtime dependency, not shaded into the mod.
 - MixinExtras0.4.1 by LlamaLad7: MIT, <https://github.com/LlamaLad7/MixinExtras>. Its common annotations/processor are compile-only inputs; Fabric Loader supplies the external runtime. No MixinExtras implementation is shaded into the mod.
 - Fabric Loader and Fabric API, NeoForge and their dependencies: external loader/runtime dependencies with their own notices.
+- EMI by Emi (MIT, <https://github.com/emilyploszaj/emi>) and Mod Menu by TerraformersMC (MIT, <https://github.com/TerraformersMC/ModMenu>): optional integrations. Only their public API jars are compile-only inputs; neither is shaded into the mod or required at runtime.
 - Gradle wrapper, Architectury Loom and Shadow: build tooling only. Wrapper/build patterns adapted from the Architectury reference; its MIT notice is retained below.
 - Eclipse Temurin Java 21 and CFR: local inspection/build tools, not bundled.
 

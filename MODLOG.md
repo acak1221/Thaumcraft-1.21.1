@@ -1,3 +1,18 @@
+## 2026-10-25 — 1.21.1 integrations: EMI, Mod Menu, config screen, tag translations
+
+Optional EMI plugin in the Fabric module: arcane workbench (every rod x cap the
+registered wand/sceptre recipes accept), crucible, infusion incl. runic
+augmentation, infusion enchantment and aspect combinations; aspects are EMI
+stacks and "+" fills the workbench grid. Mod Menu opens the config screen, now
+rebuilt on 1.21.1 widgets (scrolling list, readable names, tooltips; file format
+unchanged). Tag translations silence the Fabric/EMI warnings, a narrow mixin
+removes the 55 `No data fixer registered for thaumcraft:*` errors, and the Shock
+focus GameTest fixture declares its champion roll. Verified: 2571 JUnit, Fabric
+build/isolation, 467/467 Fabric GameTests on a fresh world, 112 Python tests and
+the asset check; a real client with EMI and Mod Menu was inspected frame by
+frame. Ledger check (needs the private oracle) and NeoForge were not run. See
+[the report](docs/analysis/2026-10-25-emi-modmenu-config-ru.md).
+
 ## 2026-10-25 — shared wand and thaumometer framing
 
 Restore the missing original caller transforms, fit/center GUI icons, mirror the

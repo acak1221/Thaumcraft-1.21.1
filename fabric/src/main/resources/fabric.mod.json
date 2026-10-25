@@ -3,12 +3,18 @@
   "id": "thaumcraft",
   "version": "${version}",
   "name": "Thaumcraft 4.2 FOREVA",
-  "description": "Unofficial TC4.2 port; Minecraft 1.21.1 migration in progress.",
+  "description": "Unofficial port of Thaumcraft 4.2.3.5 (Minecraft 1.7.10) to Minecraft 1.21.1.",
   "authors": [
     "Azanor (original Thaumcraft)",
     "FOREVA contributors"
   ],
+  "contact": {
+    "homepage": "https://github.com/acak1221/Thaumcraft-1.21.1",
+    "sources": "https://github.com/acak1221/Thaumcraft-1.21.1",
+    "issues": "https://github.com/acak1221/Thaumcraft-1.21.1/issues"
+  },
   "environment": "*",
+  "icon": "assets/thaumcraft/icon.png",
   "accessWidener": "thaumcraft.accesswidener",
   "entrypoints": {
     "main": [
@@ -16,6 +22,12 @@
     ],
     "client": [
       "thaumcraft.fabric.ThaumcraftFabricClient"
+    ],
+    "emi": [
+      "thaumcraft.fabric.compat.emi.ThaumcraftEmiPlugin"
+    ],
+    "modmenu": [
+      "thaumcraft.fabric.compat.ThaumcraftModMenu"
     ]
   },
   "mixins": [
@@ -30,5 +42,9 @@
     "architectury": ">=13.0.11",
     "fabric-api": "*"
   },
-  "license": "See THIRD_PARTY_NOTICES.md"
+  "license": "See THIRD_PARTY_NOTICES.md",
+  "suggests": {
+    "emi": "*",
+    "modmenu": "*"
+  }
 }

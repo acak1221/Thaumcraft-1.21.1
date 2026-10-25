@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  * about Z, lifted by six tenths and shifted for a staff.</p>
  *
  * <p>The expected matrices are frozen column-major fixtures from the oracle rows, compared with the matrix that
- * {@link WandContextPose#apply} produces, so the order of the original is asserted and not only
+ * {@link WandContextPose#applyLegacy} produces, so the order of the original is asserted and not only
  * its numbers.</p>
  *
  * <p>No test constructs a {@code Block}: every rule under test is a pure function of
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 class WandContextPoseParityTest {
     private static Matrix4f applied(ItemDisplayContext context, boolean staff) {
         PoseStack pose = new PoseStack();
-        WandContextPose.apply(pose, context, staff);
+        WandContextPose.applyLegacy(pose, context, staff);
         return new Matrix4f(pose.last().pose());
     }
 

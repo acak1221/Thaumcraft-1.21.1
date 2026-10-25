@@ -85,6 +85,7 @@
     "client.OreAnisotropyMixin",
     "client.PositionBlockModelMixin",
     "client.WandRenderContextMixin",
+    "client.ThaumometerEmptyHandArmMixin",
     "client.BoneBowHeldPoseMixin",
     "client.OuterLandsDimensionEffectsMixin",
     "client.TableOutlineMixin",

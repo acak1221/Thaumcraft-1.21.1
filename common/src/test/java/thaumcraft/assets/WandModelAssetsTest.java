@@ -71,8 +71,8 @@ class WandModelAssetsTest {
     @Test void theShapeChainReachesTheBuiltinItemRendererWithoutADisplayTransform() throws Exception {
         // A wand model only reaches the builtin item renderer when its root model is
         // minecraft:builtin/entity (BlockModel.bake returns BuiltInModel for exactly that root),
-        // and the renderer then applies the context pose and the use pose of the original itself,
-        // so the display transform of the model has to be the identity.
+        // and the renderer owns both the old-to-modern caller adaptation and the original's
+        // context/use poses. A JSON display transform here would apply that adaptation twice.
         for (String kind : List.of("wand", "staff")) {
             JsonObject shape = json("assets/thaumcraft/models/item/" + kind + "_shape.json");
             assertEquals("minecraft:builtin/entity", shape.get("parent").getAsString(), kind + " shape root");

@@ -1,3 +1,10 @@
+## 2026-10-25 — shared wand and thaumometer framing
+
+Restore the missing original caller transforms, fit/center GUI icons, mirror the
+left view and suppress only the scanner's duplicate empty-hand arm. Verified
+2571 common JUnit,22 NeoForge JUnit, both builds and inspected both physical clients.
+See [the framing report](docs/analysis/2026-10-25-item-framing-ru.md).
+
 ## 2026-10-25 — 0.1.0-alpha.6: review fixes and Fabric release preparation
 
 The gameplay fixes in `61c8a3c6` restore mirror links and pedestal resource

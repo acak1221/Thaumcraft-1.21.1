@@ -9,3 +9,8 @@ pluginManagement {
 }
 rootProject.name = 'Thaumcraft-4.2-FOREVA'
 include 'common', 'fabric', 'neoforge'
+// Forbidden Magic addon (separate mod id, depends on :common's thaumcraft.api only).
+// Deliberately NOT wired into the root `build`/`check` aggregate tasks below so addon
+// work in progress can never regress core Thaumcraft CI; build/test it explicitly via
+// its own module path, e.g. `./gradlew :forbiddenmagic-common:build`.
+include 'forbiddenmagic-common'

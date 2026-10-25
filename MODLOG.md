@@ -1,3 +1,19 @@
+## 2026-10-25 — 0.1.0-alpha.6: review fixes and Fabric release preparation
+
+The gameplay fixes in `61c8a3c6` restore mirror links and pedestal resource
+accounting, addon recipe hooks, the wand HUD/depth layers, canonical champion
+identity/attributes, worldgen policies, bucket transactions and Oculus rollback.
+Maze cell serialization now has a stable order. The follow-up review report
+records every candidate, including original quirks and retained compatibility code.
+
+Verified gameplay inputs: 2561 JUnit, 467 Fabric GameTests on a fresh world and 112
+Python tests; Fabric build/isolation, asset and ledger checks passed. The alpha.6
+release changes only the version metadata and documentation after that checkpoint.
+Its package is rebuilt locally; the release verification compares every JAR entry
+with the accepted gameplay build. No NeoForge build, physical client inspection
+or new multiplayer acceptance is claimed. Release notes are in
+`docs/RELEASE_NOTES_0.1.0-alpha.6.md`.
+
 ## 2026-10-23 — Repository audit: ledger closed, integrated acceptance still pending
 
 At base `c6feeda7`, recomputing every ledger unit gives **1044/1044

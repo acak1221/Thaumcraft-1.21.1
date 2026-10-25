@@ -2,17 +2,24 @@
 
 Порт **Thaumcraft 4.2.3.5** (Minecraft 1.7.10) на **Java 21 / Architectury / Fabric / NeoForge 1.21.1**.
 
+Текущая версия — **0.1.0-alpha.6**, Fabric. [Примечания к выпуску](docs/RELEASE_NOTES_0.1.0-alpha.6.md).
+Для запуска нужны Minecraft 1.21.1, Java 21, Fabric Loader 0.16.14 или новее,
+Fabric API (проверено с 0.116.17+1.21.1) и Architectury API 13.0.11 или новее.
+Fabric API и Architectury API устанавливаются отдельно в `mods` вместе с JAR мода.
+
 ## Состояние
 
 | | |
 |---|---|
 | Покрытие оригинала | **1044 из 1044** единиц `parity_verified` |
-| JUnit | **2531** тест, 0 падений |
-| GameTest (Fabric) | **445** сценариев, все проходят |
-| Python (скрипты портирования) | **111** тестов |
+| JUnit | **2561** тест, 0 падений |
+| GameTest (Fabric) | **467** сценариев на свежем мире, все проходят |
+| Python (скрипты портирования) | **112** тестов |
 | Ассеты | 285 составных путей проверены, `missing_references: 0` |
 
 Счётчик покрытия пересчитан из самого `docs/porting/scope-ledger.json`, а не взят из отчёта.
+Это учёт кода, а не полное игровое прохождение. Результаты исправлений и границы
+проверок: [отчёт от 25.10.2026](docs/analysis/2026-10-25-followup-review-fixes-ru.md).
 
 ## Что проверено, а что нет
 
@@ -30,10 +37,12 @@
 ## Сборка
 
 ```bash
-./gradlew build
+./gradlew :common:test :fabric:build
 ```
 
-Артефакты: `fabric/build/libs/`, `neoforge/build/libs/`.
+Артефакт Fabric: `fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.6.jar`.
+NeoForge сохраняется в проекте; его сборка и игровая проверка пока отложены
+согласно Fabric-first приоритету в `AGENTS.md`.
 
 Тесты:
 

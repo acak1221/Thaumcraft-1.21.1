@@ -103,18 +103,18 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
         if (level == null) return null;
         if (selected != null && isRecipeSelected(selected)) {
             CrucibleRecipe active = resolve(selected);
-            if (active != null && active.catalyst().test(input)) return active;
+            if (active != null && active.catalystMatches(input)) return active;
         }
-        for (Job job : jobs) { CrucibleRecipe recipe = resolve(job.id()); if (recipe != null && recipe.catalyst().test(input)) return recipe; }
+        for (Job job : jobs) { CrucibleRecipe recipe = resolve(job.id()); if (recipe != null && recipe.catalystMatches(input)) return recipe; }
         return null;
     }
-    private CrucibleRecipe resolve(ResourceLocation id) { return level == null || id == null ? null : level.getRecipeManager().byKey(id).map(RecipeHolder::value).filter(CrucibleRecipe.class::isInstance).map(CrucibleRecipe.class::cast).orElse(null); }
+    private CrucibleRecipe resolve(ResourceLocation id) { return level == null || id == null ? null : thaumcraft.common.crafting.ProgrammaticRecipes.crucible(level.getRecipeManager(), id); }
     public boolean toggleRecipe(ServerPlayer player, ResourceLocation id) {
         if (!canMutate() || !stillValid(player) || id == null) return false;
         if (isRecipeSelected(id)) { jobs = jobs.stream().filter(job -> !job.id().equals(id)).toList(); selected = null; suction = null; changed(); return true; }
         if (jobs.size() >= maxRecipes) return false;
-        CrucibleRecipe recipe = level.getRecipeManager().byKey(id).map(RecipeHolder::value).filter(CrucibleRecipe.class::isInstance).map(CrucibleRecipe.class::cast).orElse(null);
-        if (recipe == null || !recipe.catalyst().test(input) || !KnowledgeAccess.get(player).isResearchComplete(recipe.research())) return false;
+        CrucibleRecipe recipe = thaumcraft.common.crafting.ProgrammaticRecipes.crucible(level.getRecipeManager(), id);
+        if (recipe == null || !recipe.catalystMatches(input) || !recipe.research().isEmpty() && !KnowledgeAccess.get(player).isResearchComplete(recipe.research())) return false;
         var after = new java.util.ArrayList<>(jobs); after.add(new Job(id, player.getUUID())); jobs = List.copyOf(after);
         if (selected == null) selected = id;
         suction = null; changed(); return true;
@@ -163,7 +163,7 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
         if (!ThaumatoriumRules.workTick(counter, heated, powered()) || !physicalOutput.isEmpty()) return;
         if (input.isEmpty()) { suction = null; return; }
         CrucibleRecipe recipe = recipe();
-        if (recipe == null || !recipe.catalyst().test(input)) { suction = null; return; }
+        if (recipe == null || !recipe.catalystMatches(input)) { suction = null; return; }
         for (Job job : jobs) if (resolve(job.id()) == recipe) { selected = job.id(); break; }
         ItemStack output = recipe.getResultItem(level.registryAccess());
         if (output.isEmpty() || !output.isItemEnabled(level.enabledFeatures())) return;
@@ -345,7 +345,10 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
                 for (Tag raw : tag.getList("Recipes", Tag.TAG_COMPOUND)) { var row = (CompoundTag) raw; ResourceLocation id = ResourceLocation.parse(row.getString("id"));
                     if (!seen.add(id)) throw new IllegalArgumentException("Duplicate selected formula"); parsedJobs.add(new Job(id, row.hasUUID("author") ? row.getUUID("author") : null)); }
                 jobs = List.copyOf(parsedJobs);
-            } else if (selected != null) jobs = List.of(new Job(selected, tag.hasUUID("Author") ? tag.getUUID("Author") : null));
+            } else if (selected != null) {
+                // Recipe is only a readable single-recipe hint. Native writers store ownership in Recipes[].author.
+                jobs = List.of(new Job(selected, null));
+            }
             maxRecipes = Math.clamp(tag.getInt("MaxRecipes"), 1, ThaumatoriumRules.MAX_RECIPES);
             if (tag.contains("Essentia") && (!(tag.get("Essentia") instanceof ListTag list) || !list.isEmpty() && list.getElementType() != Tag.TAG_COMPOUND)) throw new IllegalArgumentException("Invalid essentia rows");
             var parsed = new LinkedHashMap<Aspect, Integer>();

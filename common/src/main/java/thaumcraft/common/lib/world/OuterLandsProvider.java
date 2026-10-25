@@ -113,7 +113,13 @@ public final class OuterLandsProvider {
         @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
             if (rejected!=null) return rejected.copy();
             ListTag list = new ListTag();
-            for (Map.Entry<Long, Short> entry : cells.entrySet()) {
+            // Hash-bin iteration changes after growth/reload, even when every
+            // coordinate and value is preserved. Freeze each row and serialize
+            // in coordinate-key order so native save/load yields stable NBT.
+            var snapshot = new java.util.ArrayList<Map.Entry<Long, Short>>(cells.size());
+            cells.forEach((key, value) -> snapshot.add(Map.entry(key, value)));
+            snapshot.sort(Map.Entry.comparingByKey());
+            for (Map.Entry<Long, Short> entry : snapshot) {
                 CompoundTag cell = new CompoundTag();
                 cell.putInt(X_KEY, (int) (entry.getKey() >> 32));
                 cell.putInt(Z_KEY, (int) (entry.getKey() & 0xFFFFFFFFL));

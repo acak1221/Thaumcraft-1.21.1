@@ -57,6 +57,8 @@ public class ItemFocusBasic extends Item {
      * returns the icon of the depth layer and answers {@code null} for a focus without one.</p>
      *
      * <p>Forced 1.21.1 change: the removed {@code IIcon} became a {@link net.minecraft.resources.ResourceLocation}.</p>
+     * <p>Return the full PNG texture path, such as {@code addon:textures/items/focus_depth.png}.
+     * Adjacent {@code .png.mcmeta} animation metadata supplies frame sizes, order and durations.</p>
      */
     public net.minecraft.resources.ResourceLocation getFocusDepthLayerIcon(ItemStack focusstack) { return null; }
 

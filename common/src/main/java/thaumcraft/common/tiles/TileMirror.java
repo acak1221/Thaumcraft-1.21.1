@@ -115,8 +115,8 @@ public final class TileMirror extends RetainedDataBlockEntity implements Worldly
             changed();
             return false;
         }
-        if (!EldritchBlockRules.mirrorLinksMatch(linked, mirror.linked, mirror.linkX, mirror.linkY, mirror.linkZ,
-                dimensionId(mirror.linkDim), worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), dimensionId(linkDim))) {
+        if (mirror.linkX != worldPosition.getX() || mirror.linkY != worldPosition.getY()
+                || mirror.linkZ != worldPosition.getZ() || !mirror.linkDim.equals(level.dimension().location().toString())) {
             linked = false;
             changed();
             return false;
@@ -133,7 +133,7 @@ public final class TileMirror extends RetainedDataBlockEntity implements Worldly
         if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror)) return false;
         if (mirror.isDataRejected() || !mirror.linked) return false;
         return mirror.linkX == worldPosition.getX() && mirror.linkY == worldPosition.getY()
-                && mirror.linkZ == worldPosition.getZ() && mirror.linkDim.equals(linkDim);
+                && mirror.linkZ == worldPosition.getZ() && mirror.linkDim.equals(level.dimension().location().toString());
     }
 
     /** Original TileMirror:186-196 - the destination must not be linked itself. */
@@ -254,22 +254,13 @@ public final class TileMirror extends RetainedDataBlockEntity implements Worldly
         setChanged();
     }
 
-    /** The world of the linked mirror. */
-    private ServerLevel targetWorld() {        if (level == null || level.getServer() == null) return null;
-        MinecraftServer server = level.getServer();
-        ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
-                ResourceLocation.tryParse(linkDim));
-        if (key == null) return null;
-        ServerLevel target = server.getLevel(key);
-        if (target == null) return null;
-        return target;
-    }
-
-    /** The numeric dimension id of a dimension key, used by the link rules. */
-    private static int dimensionId(String dimension) {
-        ResourceLocation location = ResourceLocation.tryParse(dimension);
-        if (location == null) return -1;
-        return location.hashCode();
+    /** The world of the linked mirror; an unbound item has no destination yet. */
+    private ServerLevel targetWorld() {
+        if (level == null || level.getServer() == null) return null;
+        ResourceLocation location = ResourceLocation.tryParse(linkDim);
+        if (location == null) return null;
+        ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, location);
+        return level.getServer().getLevel(key);
     }
 
     /** The mirror reports its change to the client. */

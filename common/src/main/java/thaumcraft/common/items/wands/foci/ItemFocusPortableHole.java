@@ -32,6 +32,9 @@ import thaumcraft.common.lib.world.PortableHoles;
  * Lands refuse it. The payment is taken even when nothing could be made a hole.
  */
 public final class ItemFocusPortableHole extends ItemFocusBasic {
+    @Override public ResourceLocation getFocusDepthLayerIcon(ItemStack focus) {
+        return ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/focus_portablehole_depth.png");
+    }
     private static final SoundEvent WANDFAIL = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "wandfail"));
 
     public ItemFocusPortableHole(Properties properties) { super(properties); }

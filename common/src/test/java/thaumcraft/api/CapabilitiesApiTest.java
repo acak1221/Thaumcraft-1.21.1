@@ -1,5 +1,6 @@
 package thaumcraft.api;
 
+import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -89,5 +90,31 @@ class CapabilitiesApiTest {
         knowledge.addResearch(rootResearch());
         knowledge.clear();
         assertTrue(knowledge.getResearchList().isEmpty());
+    }
+
+    @Test void theoryReportsCompletedResearchCostsWithoutAcceptingIndependentCredits() {
+        var nativeState = new PlayerKnowledge();
+        IPlayerKnowledge knowledge = new NativePlayerKnowledge(nativeState);
+        ResearchDefinition researched = ResearchCatalog.all().stream()
+                .filter(definition -> definition.aspectCost().values().stream().anyMatch(amount -> amount > 0))
+                .findFirst().orElseThrow();
+        var cost = researched.aspectCost().entrySet().stream().filter(entry -> entry.getValue() > 0).findFirst().orElseThrow();
+        var aspect = thaumcraft.api.aspects.Aspect.getAspect(cost.getKey());
+        assertNotNull(aspect);
+        ResearchCategory category = new ResearchCategory("THEORY_VIEW", null,
+                new thaumcraft.api.aspects.AspectList().add(aspect, 1), null, null);
+        assertEquals(0, knowledge.getKnowledgeRaw(IPlayerKnowledge.EnumKnowledgeType.THEORY, category));
+        nativeState.addResearch(researched.key());
+        assertEquals(cost.getValue().intValue(), knowledge.getKnowledgeRaw(IPlayerKnowledge.EnumKnowledgeType.THEORY, category));
+        int reportedTheory = knowledge.getKnowledge(IPlayerKnowledge.EnumKnowledgeType.THEORY, category);
+        assertTrue(reportedTheory > 0);
+        var completed = Set.copyOf(knowledge.getResearchList());
+        assertFalse(knowledge.addKnowledge(IPlayerKnowledge.EnumKnowledgeType.THEORY, category, 100));
+        assertEquals(cost.getValue().intValue(), knowledge.getKnowledgeRaw(IPlayerKnowledge.EnumKnowledgeType.THEORY, category));
+        assertEquals(reportedTheory, knowledge.getKnowledge(IPlayerKnowledge.EnumKnowledgeType.THEORY, category));
+        assertEquals(0, knowledge.getKnowledgeRaw(IPlayerKnowledge.EnumKnowledgeType.OBSERVATION, category));
+        assertEquals(completed, knowledge.getResearchList());
+        nativeState.removeResearch(researched.key());
+        assertEquals(0, knowledge.getKnowledgeRaw(IPlayerKnowledge.EnumKnowledgeType.THEORY, category));
     }
 }

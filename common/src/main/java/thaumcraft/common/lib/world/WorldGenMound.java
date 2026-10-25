@@ -74,7 +74,7 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
 
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
-        if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         int chunkX = context.origin().getX() >> 4;
         int chunkZ = context.origin().getZ() >> 4;
         // Oracle ThaumcraftWorldGenerator:423-428 - the position inside the chunk and the
@@ -88,6 +88,7 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
 
     /** Regeneration continues its caller's stream; fresh generation keeps its original stream above. */
     public boolean placeSelected(WorldGenLevel level, RandomSource random, StructurePlacementRules.Draw draw) {
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         if (draw.kind() != StructurePlacementRules.Kind.MOUND) return false;
         int i = draw.x();
         int k = draw.z();
@@ -147,7 +148,7 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
      * built (oracle ThaumcraftWorldGenerator:434).</p>
      */
     public static boolean preflight(WorldGenLevel level, int chunkX, int chunkZ) {
-        if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(
                 RandomSource.create(StructurePlacementRules.chunkSeed(
                         level.getLevel().getSeed(), chunkX, chunkZ)), chunkX, chunkZ);

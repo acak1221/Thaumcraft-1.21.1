@@ -1,6 +1,7 @@
 package thaumcraft.common.items.wands.foci;
 
 import java.util.Map;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +19,9 @@ import thaumcraft.common.lib.world.WardingCasts;
 /** TC4 ownership warding: an exact remembered block, quarter-vis earth/order and tenth-vis water; owner undo is free. */
 public final class ItemFocusWarding extends ItemFocusBasic implements IArchitect {
     public ItemFocusWarding(Properties properties) { super(properties); }
+    @Override public ResourceLocation getFocusDepthLayerIcon(ItemStack focus) {
+        return ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/focus_warding_depth.png");
+    }
     @Override public AspectList getVisCost(ItemStack focus) {
         return new AspectList().add(Aspect.EARTH, WardingRules.EARTH).add(Aspect.ORDER, WardingRules.ORDER).add(Aspect.WATER, WardingRules.WATER);
     }

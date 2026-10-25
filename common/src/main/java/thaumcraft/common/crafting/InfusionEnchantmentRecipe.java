@@ -117,7 +117,8 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
         return result;
     }
     public List<InfusionComponentPredicate> selectedComponents() { return components.stream().map(InfusionComponentPredicate::new).toList(); }
-    @Override public boolean matches(InfusionRecipeInput offered, Level level) {
+    /** Native cost/category guards shared with original virtual-comparator recipes. */
+    public boolean matchesAdmission(InfusionRecipeInput offered, Level level) {
         try {
             if (!canApply(offered.central(), enchantment(level.registryAccess())) || calculatedInstability(offered.central()) > 24
                     || offered.components().size() != components.size()) return false;
@@ -125,6 +126,11 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
             AspectList cost = aspectCost(offered.central(), level.registryAccess());
             if (java.util.Arrays.stream(cost.getAspects()).mapToLong(cost::getAmount).sum() > Integer.MAX_VALUE) return false;
         } catch (RuntimeException missingEnchantment) { return false; }
+        return true;
+    }
+
+    @Override public boolean matches(InfusionRecipeInput offered, Level level) {
+        if (!matchesAdmission(offered, level)) return false;
         List<ItemStack> remaining = new ArrayList<>(offered.components());
         for (Ingredient required : components) {
             int found = -1;

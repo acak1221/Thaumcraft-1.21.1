@@ -25,9 +25,7 @@ public final class CrucibleCrafting {
         // dissolving remains available in TileCrucible without any knowledge gate.
         if (player == null) return null;
         var input = new CrucibleRecipeInput(entity.getItem(), aspects);
-        var ordered = level.getRecipeManager().getAllRecipesFor(ThaumcraftAlchemy.CRUCIBLE_RECIPE_TYPE.get()).stream()
-                .sorted(Comparator.<RecipeHolder<CrucibleRecipe>>comparingInt(holder -> holder.value().sourceOrder())
-                        .thenComparing(holder -> holder.id().toString())).toList();
+        var ordered = ProgrammaticRecipes.crucibles(level.getRecipeManager());
         RecipeHolder<CrucibleRecipe> best = null;
         int highest = 0;
         for (var holder : ordered) {
@@ -35,7 +33,7 @@ public final class CrucibleCrafting {
             // CraftingManager:127-144: count DISTINCT aspects; equal counts do
             // not replace the first registered match. source_order records the
             // ConfigRecipes order explicitly; it is not a weighted priority.
-            if (recipe.aspects().size() <= highest || !KnowledgeAccess.get(player).isResearchComplete(recipe.research())
+            if (recipe.aspects().size() <= highest || !recipe.research().isEmpty() && !KnowledgeAccess.get(player).isResearchComplete(recipe.research())
                     || !recipe.matches(input, level)) continue;
             if (recipe.getResultItem(level.registryAccess()).isEmpty()
                     || !recipe.getResultItem(level.registryAccess()).isItemEnabled(level.enabledFeatures())) continue;

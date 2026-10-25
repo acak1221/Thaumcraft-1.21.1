@@ -23,8 +23,7 @@ public class AspectEventProxy {
     /**
      * Registers every member of a native item tag.
      *
-     * <p>Forced 1.21.1 change: the original took a Forge ore name; the native port takes a namespaced
-     * item tag, because 1.21.1 has no ore dictionary.</p>
+     * <p>Native namespaced item tags replace Forge ore names; legacy names require an explicit mapping.</p>
      */
     public void registerObjectTag(String nativeItemTag, AspectList aspects) {
         ThaumcraftApi.registerObjectTag(nativeItemTag, aspects);
@@ -38,10 +37,11 @@ public class AspectEventProxy {
     /**
      * Registers every member of a native item tag, including its recipe-derived base.
      *
-     * <p>Forced 1.21.1 change: the original took a Forge ore name; the native port takes a namespaced
-     * item tag, because 1.21.1 has no ore dictionary.</p>
+     * <p>This TC6-shaped convenience overload applies TC4's complex-item registration to each native
+     * tag member. It requires the loaded server recipe lifecycle, preserves the original existing-tag
+     * branch, and copies additions per member. Legacy Forge ore names require an explicit mapping.</p>
      */
     public void registerComplexObjectTag(String nativeItemTag, AspectList aspects) {
-        ThaumcraftApi.registerObjectTag(nativeItemTag, aspects);
+        ThaumcraftApi.registerComplexObjectTag(nativeItemTag, aspects);
     }
 }

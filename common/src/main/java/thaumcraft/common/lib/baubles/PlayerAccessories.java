@@ -36,6 +36,9 @@ public final class PlayerAccessories {
             old.load(empty(),oldPlayer.registryAccess());
         });
         PlayerEvent.PLAYER_RESPAWN.register((player,wonGame,reason) -> AccessoryNetworking.sync(player));
+        // A dimension transition retains the ServerPlayer but replaces the LocalPlayer.
+        // The unchanged server inventory must therefore bypass syncChanged's last-sent cache.
+        PlayerEvent.CHANGE_DIMENSION.register((player,oldLevel,newLevel) -> AccessoryNetworking.sync(player));
     }
     private static CompoundTag empty() { CompoundTag tag=new CompoundTag();tag.put("Items",new net.minecraft.nbt.ListTag());return tag; }
     public static void tick(Player player) {

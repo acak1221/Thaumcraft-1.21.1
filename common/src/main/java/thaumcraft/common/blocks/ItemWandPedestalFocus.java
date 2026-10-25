@@ -11,8 +11,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>The original focus was the metadata eight of the stone device family and it had no tile of
  * its own: the wand pedestal looked at the block above it and asked whether it was a focus
  * (TileWandPedestal:337-358). The native port keeps the focus as the {@code focus} block state of
- * the wand pedestal block, so the focus needs an item of its own: a 1.21.1 recipe result cannot
- * carry a block state.
+ * the wand pedestal block. Its dedicated item chooses the focus state before the native
+ * block entity is created; the focus itself must not acquire the pedestal's tile.
  *
  * <p>Original sources: {@code thaumcraft/common/blocks/BlockStoneDevice.java}:271 (the metadata
  * eight has no tile), {@code thaumcraft/common/config/ConfigRecipes.java}:342 (the WandPedFocus

@@ -268,6 +268,7 @@ public final class ChampionRules {
          */
         public static int makeChampion(LivingEntity mob, RandomSource random, boolean creeper) {
             ChampionModifier modifier = ChampionRules.rollModifier(new WorldRandom(random), creeper);
+            if (mob instanceof net.minecraft.world.entity.Mob entity) ChampionHooks.setChampionModifier(entity, modifier.id);
             promote(mob, modifier.id);
             return modifier.id;
         }
@@ -301,8 +302,8 @@ public final class ChampionRules {
                     health.removeModifier(CHAMPION_HEALTH_ID);
                     health.addPermanentModifier(new AttributeModifier(CHAMPION_HEALTH_ID, modifier.healthBonus(), AttributeModifier.Operation.ADD_VALUE));
                 }
-                // The original 1.7 operation two multiplied the total by its amount, the native
-                // operation multiplies the total by one plus its amount.
+                // Both original and native operation two multiply the total by one plus the
+                // modifier amount: original amount 2 means three times the attack damage.
                 if (damage != null) {
                     damage.removeModifier(CHAMPION_DAMAGE_ID);
                     damage.addPermanentModifier(new AttributeModifier(CHAMPION_DAMAGE_ID, modifier.damageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
@@ -316,12 +317,12 @@ public final class ChampionRules {
                 damage.removeModifier(MIGHTY_DAMAGE_ID);
                 damage.addPermanentModifier(new AttributeModifier(MIGHTY_DAMAGE_ID, modifier.extraDamageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             }
-            // The original 1.7 operation one was the percentage of the running total.
+            // Original operation one adds a percentage of the base, alongside other base multipliers.
             if (modifier.id == ChampionModifier.BOLD) {
                 AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
                 if (speed != null) {
                     speed.removeModifier(BOLD_SPEED_ID);
-                    speed.addPermanentModifier(new AttributeModifier(BOLD_SPEED_ID, modifier.speedMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                    speed.addPermanentModifier(new AttributeModifier(BOLD_SPEED_ID, modifier.speedMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
                 }
             }
             if (modifier.id == ChampionModifier.WARDED && health != null) {

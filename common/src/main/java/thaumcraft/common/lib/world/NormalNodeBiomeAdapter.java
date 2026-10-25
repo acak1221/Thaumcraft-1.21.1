@@ -9,6 +9,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.common.lib.world.biomes.OriginalBiomeTypes;
 
 /**
  * Native biome/tag adapter, not a claim of 1.7 biome/seed identity. Every matched
@@ -18,23 +19,8 @@ import thaumcraft.api.aspects.Aspect;
  * unknown biomes use the original 100/null fallback, never ore depth weights.
  */
 public final class NormalNodeBiomeAdapter {
-    private static final List<BiomeType> TYPES = List.of(
-            type("water", 100, Aspect.WATER), type("ocean", 120, Aspect.WATER),
-            type("river", 100, Aspect.WATER), type("wet", 80, Aspect.WATER),
-            type("hot", 100, Aspect.FIRE), type("desert", 100, Aspect.FIRE),
-            type("nether", 120, Aspect.FIRE), type("mesa", 80, Aspect.FIRE),
-            type("dense", 100, Aspect.ORDER), type("snowy", 80, Aspect.ORDER),
-            type("cold", 80, Aspect.ORDER), type("frozen", 100, Aspect.ORDER),
-            type("mushroom", 140, Aspect.ORDER), type("coniferous", 100, Aspect.EARTH),
-            type("forest", 120, Aspect.EARTH), type("sandy", 80, Aspect.EARTH),
-            type("beach", 80, Aspect.EARTH), type("savanna", 80, Aspect.AIR),
-            type("mountain", 100, Aspect.AIR), type("hills", 120, Aspect.AIR),
-            type("plains", 80, Aspect.AIR), type("dry", 80, Aspect.ENTROPY),
-            type("sparse", 80, Aspect.ENTROPY), type("swamp", 120, Aspect.ENTROPY),
-            type("wasteland", 80, Aspect.ENTROPY), type("jungle", 100, Aspect.PLANT),
-            type("lush", 100, Aspect.PLANT), type("magical", 100, null),
-            type("end", 80, Aspect.VOID), type("spooky", 80, Aspect.SOUL),
-            type("dead", 50, Aspect.DEATH));
+    private static final List<BiomeType> TYPES = OriginalBiomeTypes.all().stream()
+            .map(type -> type(type.name(), type.aura(), type.aspect())).toList();
 
     private NormalNodeBiomeAdapter() {}
 

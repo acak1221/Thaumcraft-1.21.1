@@ -43,7 +43,7 @@ public final class EldritchBestiaryRuntimeChecks {
             // EntityUtils.makeChampion:236). The fixture declares both draws: the warden keeps the
             // own numbers of a boss, because the original skipped the ordinary champion bonuses
             // for a boss (oracle EntityUtils.makeChampion:243-254), and it carries the mighty
-            // modifier of the original, which tripled the attack damage of every champion
+            // modifier of the original, whose operation-two amount3 quadrupled the attack damage of every champion
             // (oracle EntityUtils.makeChampion:265-270).
             var heavy = lane.add(ThaumcraftEldritchMobs.ELDRITCH_WARDEN.get().create(level));
             var plain = lane.add(ThaumcraftEldritchMobs.ELDRITCH_WARDEN.get().create(level));
@@ -52,11 +52,11 @@ public final class EldritchBestiaryRuntimeChecks {
             ChampionJoinRoll.join(level, heavy, ChampionModifier.MIGHTY);
             ChampionJoinRoll.join(level, plain, ChampionModifier.MIGHTY);
 
-            test.assertTrue(heavy.getMaxHealth() == 200F && heavy.getAttributeValue(Attributes.ATTACK_DAMAGE) == 30F
+            test.assertTrue(heavy.getMaxHealth() == 200F && heavy.getAttributeValue(Attributes.ATTACK_DAMAGE) == 40F
                             && Math.abs(heavy.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.33D) < 1e-6D && heavy.getArmorValue() == 4
                             && heavy.getAttributeValue(Attributes.FOLLOW_RANGE) == 40F
                             && Math.abs(heavy.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) - 0.95D) < 1e-6D,
-                    "the warden keeps the original 200 health, 30 damage, 0.33 speed, 4 armour, 40 follow range and 0.95 knockback resistance: "
+                    "the warden keeps the original 200 health, Mighty40 damage, 0.33 speed, 4 armour, 40 follow range and 0.95 knockback resistance: "
                             + heavy.getMaxHealth() + " " + heavy.getAttributeValue(Attributes.ATTACK_DAMAGE) + " "
                             + heavy.getAttributeValue(Attributes.MOVEMENT_SPEED) + " " + heavy.getArmorValue() + " "
                             + heavy.getAttributeValue(Attributes.FOLLOW_RANGE) + " " + heavy.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
@@ -115,15 +115,15 @@ public final class EldritchBestiaryRuntimeChecks {
             // EntityUtils.makeChampion:236). The fixture declares both draws: the golem keeps the
             // own numbers of a boss, because the original skipped the ordinary champion bonuses
             // for a boss (oracle EntityUtils.makeChampion:243-254), and it carries the mighty
-            // modifier of the original, which tripled the attack damage of every champion
+            // modifier of the original, whose operation-two amount3 quadrupled the attack damage of every champion
             // (oracle EntityUtils.makeChampion:265-270).
             var golem = lane.add(ThaumcraftEldritchMobs.ELDRITCH_GOLEM.get().create(level));
             golem.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
             ChampionJoinRoll.join(level, golem, ChampionModifier.MIGHTY);
-            test.assertTrue(golem.getMaxHealth() == 250F && golem.getAttributeValue(Attributes.ATTACK_DAMAGE) == 30F
+            test.assertTrue(golem.getMaxHealth() == 250F && golem.getAttributeValue(Attributes.ATTACK_DAMAGE) == 40F
                             && Math.abs(golem.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.30D) < 1e-6D && golem.getArmorValue() == 6
                             && golem.getAttributeValue(Attributes.FOLLOW_RANGE) == 40F,
-                    "the golem keeps the original 250 health, 30 damage, 0.30 speed, 6 armour and 40 follow range: "
+                    "the golem keeps the original 250 health, Mighty40 damage, 0.30 speed, 6 armour and 40 follow range: "
                             + golem.getMaxHealth() + " " + golem.getAttributeValue(Attributes.ATTACK_DAMAGE) + " "
                             + golem.getAttributeValue(Attributes.MOVEMENT_SPEED) + " " + golem.getArmorValue());
             test.assertTrue(golem.getCustomName() != null && golem.getCustomName().getString().startsWith("Mighty"),
@@ -148,15 +148,15 @@ public final class EldritchBestiaryRuntimeChecks {
             var pig = lane.add(EntityType.PIG.create(level));
             pig.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 2.5D, 0F, 0F);
             pig.setNoAi(true);
-            // The mighty champion of the original hits for twenty two and a half, so the pig of
+            // The mighty champion of the original hits for thirty, so the pig of
             // the lane needs more health than its own ten to measure the hit.
             pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
             pig.setHealth(1000F);
             level.addFreshEntity(pig);
             float before = pig.getHealth();
             boolean hit = golem.doHurtTarget(pig);
-            test.assertTrue(hit && Math.abs(before - pig.getHealth() - 22.5F) < 1e-3F,
-                    "the golem melee deals three quarters of its thirty attack damage: " + (before - pig.getHealth()));
+            test.assertTrue(hit && Math.abs(before - pig.getHealth() - 30F) < 1e-3F,
+                    "the golem melee deals three quarters of its Mighty40 attack damage: " + (before - pig.getHealth()));
             test.assertTrue(!golem.doHurtTarget(pig), "the second swing inside the ten tick cooldown is refused");
             test.assertTrue(golem.getAttackTimer() == 10, "the melee cooldown is the original ten ticks: " + golem.getAttackTimer());
         } finally {

@@ -1,4 +1,16 @@
-## Текущее состояние — аудит 23.10.2026, базис `c6feeda7`
+## Дополнительный список 27 замечаний — 25.10.2026, базис `c4a8f7a8`
+
+Подтверждённые ошибки дополнительного списка исправлены: единая сохраняемая система чемпиона претора и исходные множители, dimension/biome gates, четыре depth-фокуса, banners/thaumometer/armor pose, complex-tag aspects, loot/datapack parity, Repair, bucket transaction и Oculus NBT rollback. Убраны дубли биомной таблицы, стабилизирована сериализация карты лабиринта. Уже исправленные пункты, dead compatibility и особенности оригинала отделены в [подробном отчёте по всем 27 пунктам](analysis/2026-10-25-followup-review-fixes-ru.md).
+
+Проверки окончательных входов: **2561 JUnit, Fabric build и production isolation, полный Fabric GameTest467/467 на свежем мире, 112 Python, assets/ledger — PASS**. Общий Gradle-запуск завершился успешно за3m32s; сервер нормально сохранился/остановился. Предыдущая тестовая карта сохранена отдельно: первый повторный запуск на ней выявил consumed maze lock и зависимые от накопленного состояния fixtures; красные результаты не удалены. Строгие проверки сохранения/ресурсов не ослаблены. NeoForge builds/tests и физическая visual/multiplayer приёмка не выполнялись.
+
+## Исторические исправления первой волны — 25.10.2026, базис `c4a8f7a8`
+
+Исправления R01–R18 из [углублённого ревью](analysis/2026-10-25-deep-review-ru.md) внесены в рабочее дерево; исправлен кэш essentia mirror D1 и добавлена его survival-доступность D2. Подробная матрица изменений/проверок — [отчёт об исправлениях](analysis/2026-10-25-review-fixes-ru.md). Исторические утверждения ledger ниже не заменяют проверку достижимых путей.
+
+Проверено на source/test/resource inputs первой волны: **2544 JUnit, Fabric build и изоляция production JAR, 14/14 новых native регрессий, полный Fabric GameTest459/459, 112 Python — PASS**; asset verify и ledger check прошли. Полный серверный прогон завершился нормальным save/stop, Gradle exit0. NeoForge HUD/Spa исправлены и независимо проверены статически; его builds/tests не запускались. Физический клиент/два клиента и визуальная приёмка не выполнены.
+
+## Историческое состояние — аудит 23.10.2026, базис `c6feeda7`
 
 Пересчёт `review.native_coverage` в `docs/porting/scope-ledger.json`: **1044 из 1044 `parity_verified`; 0 `partial`, 0 `missing`, 0 `not_assessed`**. Disposition: 327 replace / 291 port / 263 adapt / 163 exclude. Это закрытие кода по ledger, **не новая интегрированная игровая приёмка**.
 

@@ -10,11 +10,15 @@ import thaumcraft.common.crafting.ArcaneCrafting;
 import thaumcraft.common.crafting.ArcaneVis;
 
 /**
- * Original SlotCraftingArcaneWorkbench: the output slot of the arcane
- * workbench. Taking the result fires the crafting event, pays the wand vis of
- * the matching arcane recipe and empties the nine matrix cells, returning
- * every container item to the player.
+ * Retained compatibility implementation of the old output slot.
+ *
+ * <p>The native workbench uses the server-atomic result transaction in
+ * {@link ContainerArcaneWorkbench}; it does not instantiate this class. New
+ * integrations must use that menu rather than extract a result before payment.</p>
+ *
+ * @deprecated retained for source compatibility; not the active native result slot
  */
+@Deprecated(forRemoval = false)
 public class SlotCraftingArcaneWorkbench extends Slot {
     /** Original ContainerArcaneWorkbench:57 - the wand lives beside the matrix. */
     public static final int WAND_SLOT = 10;

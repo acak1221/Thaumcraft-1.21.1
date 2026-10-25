@@ -1,17 +1,26 @@
 package thaumcraft.common.lib.fluid;
 
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.Nullable;
 import thaumcraft.common.blocks.BlockFluidDeath;
 import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
@@ -32,7 +41,41 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
  * empty bucket and gave nothing away.</p>
  */
 public final class DeathBucketActions {
+    private static final Set<UUID> USING = new HashSet<>();
+    private static final Map<ServerLevel, Set<BlockPos>> CELLS = new IdentityHashMap<>();
     private DeathBucketActions() {}
+
+    private static boolean canonical(ServerLevel level) {
+        return level.getServer().isSameThread() && level.getServer().getLevel(level.dimension()) == level;
+    }
+    private static boolean actor(ServerLevel level, Player player) {
+        return canonical(level) && player instanceof ServerPlayer server
+                && server.server.getPlayerList().getPlayer(player.getUUID()) == player && player.level() == level
+                && !player.isRemoved() && player.isAlive() && !player.isSpectator();
+    }
+    private static boolean loaded(ServerLevel level, BlockPos pos) {
+        return !level.isOutsideBuildHeight(pos) && level.getWorldBorder().isWithinBounds(pos) && level.hasChunkAt(pos);
+    }
+    private static boolean claim(ServerLevel level, BlockPos pos) {
+        return CELLS.computeIfAbsent(level, ignored -> new HashSet<>()).add(pos.immutable());
+    }
+    private static void release(ServerLevel level, BlockPos pos) {
+        var cells = CELLS.get(level);
+        if (cells != null) { cells.remove(pos); if (cells.isEmpty()) CELLS.remove(level); }
+    }
+
+    /** Native BucketPickup shares the same source claim as the empty-bucket interaction. */
+    public static ItemStack capture(@Nullable Player player, LevelAccessor world, BlockPos pos, BlockState expected) {
+        if (!(world instanceof ServerLevel level) || !canonical(level) || !loaded(level, pos)
+                || !BlockFluidDeath.isBucketCell(expected) || level.getBlockState(pos) != expected
+                || player != null && !actor(level, player) || !claim(level, pos)) return ItemStack.EMPTY;
+        try {
+            if (level.getBlockState(pos) != expected) return ItemStack.EMPTY;
+            boolean changed = level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+            return changed && level.getBlockState(pos).isAir()
+                    ? new ItemStack(ThaumcraftLegacyItems.BUCKET_DEATH.get()) : ItemStack.EMPTY;
+        } finally { release(level, pos); }
+    }
 
     /**
      * The original refill of the bucket of death.
@@ -51,18 +94,31 @@ public final class DeathBucketActions {
             return InteractionResultHolder.fail(held);
         }
         if (world.isClientSide) return InteractionResultHolder.success(held);
-        if (!(world instanceof ServerLevel level)) return InteractionResultHolder.fail(held);
-        // The original event removed the cell first and only then decided what the player gets.
-        level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-        // The Forge ALLOW branch of the original ItemBucket keeps the empty bucket in creative mode and
-        // gives the result away only when the bucket was really spent.
-        if (!player.getAbilities().instabuild) {
-            ItemStack filled = new ItemStack(ThaumcraftLegacyItems.BUCKET_DEATH.get());
-            held.shrink(1);
-            if (held.isEmpty()) player.setItemInHand(hand, filled);
-            else if (!player.getInventory().add(filled)) DeferredItemDrops.enqueueBucketReturn(level, player, filled);
-            player.getInventory().setChanged();
-        }
-        return InteractionResultHolder.consume(player.getItemInHand(hand));
+        if (!(world instanceof ServerLevel level) || !actor(level, player) || !USING.add(player.getUUID())) return InteractionResultHolder.fail(held);
+        ItemStack expected = held.copy();
+        try {
+            if (!loaded(level, pos) || player.getItemInHand(hand) != held || !ItemStack.matches(held, expected)) return InteractionResultHolder.fail(held);
+            // Reserve the physical input before native removal notifications can change the hand or reenter.
+            boolean creative = player.getAbilities().instabuild;
+            ItemStack paid = creative ? ItemStack.EMPTY : held.copyWithCount(1);
+            ItemStack remainder = held;
+            if (!creative) {
+                remainder = held.copy(); remainder.shrink(1); held.shrink(1); player.setItemInHand(hand, remainder);
+            }
+            ItemStack filled = capture(player, level, pos, level.getBlockState(pos));
+            if (filled.isEmpty()) {
+                if (!paid.isEmpty()) credit(level, player, hand, remainder, paid);
+                return InteractionResultHolder.fail(player.getItemInHand(hand));
+            }
+            // Original Forge ALLOW creative removes the source, keeps its empty bucket and produces no filled item.
+            if (!creative) credit(level, player, hand, remainder, filled);
+            return InteractionResultHolder.consume(player.getItemInHand(hand));
+        } finally { USING.remove(player.getUUID()); }
+    }
+
+    private static void credit(ServerLevel level, Player player, InteractionHand hand, ItemStack remainder, ItemStack output) {
+        if (remainder.isEmpty() && player.getItemInHand(hand) == remainder) { player.setItemInHand(hand, output); return; }
+        if (!player.getInventory().add(output)) DeferredItemDrops.enqueueBucketReturn(level, player, output);
+        player.getInventory().setChanged();
     }
 }

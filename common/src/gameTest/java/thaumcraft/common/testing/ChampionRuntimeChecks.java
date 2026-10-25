@@ -15,7 +15,7 @@ import thaumcraft.common.lib.mods.ChampionRules;
 
 /**
  * The original TC4 champion system inside a real dedicated server: the spawn roll of the original
- * whitelist, the original thirty health and double damage bonus of a promoted champion, the
+ * whitelist, the original thirty health and triple damage bonus of a promoted champion, the
  * original name, the persistent champion id and the three original triggers of the modifiers:
  * the tick of the warded champion, the hit of the venomous champion and the wound of the
  * infested champion.
@@ -174,7 +174,7 @@ public final class ChampionRuntimeChecks {
             test.assertTrue(rolled == ChampionRules.NO_CHAMPION || (rolled >= 0 && rolled < ChampionRules.modifierCount()),
                     "the watcher carries one of the original thirteen modifiers or none: " + rolled);
 
-            // The original promotion: thirty health, double damage and the original name.
+            // The original promotion: thirty health, triple damage and the original name.
             var champion = lane.add(EntityType.ZOMBIE.create(level));
             champion.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 2.5D, 0F, 0F);
             level.addFreshEntity(champion);
@@ -184,8 +184,8 @@ public final class ChampionRuntimeChecks {
             ChampionRules.Adapter.promote(champion, ChampionModifier.MIGHTY);
             test.assertTrue(Math.abs(champion.getAttributeValue(Attributes.MAX_HEALTH) - (baseHealth + 30D)) < 1e-6D,
                     "a champion keeps the original thirty health bonus: " + champion.getAttributeValue(Attributes.MAX_HEALTH));
-            test.assertTrue(Math.abs(champion.getAttributeValue(Attributes.ATTACK_DAMAGE) - baseDamage * 6D) < 1e-6D,
-                    "the mighty champion keeps the original double and triple damage: " + champion.getAttributeValue(Attributes.ATTACK_DAMAGE));
+            test.assertTrue(Math.abs(champion.getAttributeValue(Attributes.ATTACK_DAMAGE) - baseDamage * 12D) < 1e-6D,
+                    "the mighty champion keeps the original operation-two factors three and four: " + champion.getAttributeValue(Attributes.ATTACK_DAMAGE));
             test.assertTrue(champion.getCustomName() != null && champion.getCustomName().getString().startsWith("Mighty"),
                     "a champion is named after its original modifier: " + champion.getCustomName());
             test.assertTrue(champion.getHealth() > baseHealth,
@@ -235,16 +235,16 @@ public final class ChampionRuntimeChecks {
             lane.floor(4);
 
             // The original warded champion: the original promotion gave it thirty health more,
-            // double damage and the name of its modifier (oracle EntityUtils.makeChampion:243-254),
+            // triple damage and the name of its modifier (oracle EntityUtils.makeChampion:243-254),
             // the original makeChampion case five gave it half of its base maximum health as its ward
             // (oracle EntityUtils.makeChampion:271-274) and the original modifier regained one
             // point of that ward on every twenty fifth tick (oracle ChampionModWarded:25-30).
             var warded = lane.add(EntityType.SPIDER.create(level));
             warded.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
             ChampionJoinRoll.join(level, warded, ChampionModifier.WARDED);
-            test.assertTrue(warded.getMaxHealth() == 46F && warded.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4F
+            test.assertTrue(warded.getMaxHealth() == 46F && warded.getAttributeValue(Attributes.ATTACK_DAMAGE) == 6F
                             && warded.getCustomName() != null && warded.getCustomName().getString().startsWith("Warded"),
-                    "the warded champion keeps the original thirty health, double damage and name: "
+                    "the warded champion keeps the original thirty health, triple damage and name: "
                             + warded.getMaxHealth() + " " + warded.getAttributeValue(Attributes.ATTACK_DAMAGE)
                             + " " + warded.getCustomName());
             test.assertTrue(Math.abs(warded.getAbsorptionAmount() - 8F) < 1e-4F,

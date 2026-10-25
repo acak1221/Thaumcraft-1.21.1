@@ -223,6 +223,7 @@ public final class Thaumcraft {
             VisNetFxNetworking.clearLevel(level);
         });
         LifecycleEvent.SERVER_STOPPED.register(server -> {
+            thaumcraft.api.internal.ThaumcraftInternalMethods.serverStopped(server);
             thaumcraft.common.lib.events.ChunkRegeneration.clearServer(server);
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStopped(server);
             thaumcraft.common.lib.bore.BoreNativeContext.clearServer(server);
@@ -235,6 +236,7 @@ public final class Thaumcraft {
             thaumcraft.api.ThaumcraftApi.installRecipeManager(null, null);
         });
         LifecycleEvent.SERVER_STARTED.register(server -> {
+            thaumcraft.api.internal.ThaumcraftInternalMethods.serverStarted(server);
             ObjectAspectCatalog.validateAgainstRegistries();
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);

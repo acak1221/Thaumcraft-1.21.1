@@ -135,8 +135,10 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
             if (center == null || center.getItem(0).isEmpty()) return false;
             ItemStack central = center.getItem(0).copy();
             List<ItemStack> components = new ArrayList<>();
+            java.util.Map<BlockPos, java.util.Map.Entry<TilePedestal, ItemStack>> offeredSources = new java.util.LinkedHashMap<>();
             for (BlockPos pos : pedestals) {
                 TilePedestal pedestal = pedestal(pos);
+                if (pedestal != null) offeredSources.put(pos.immutable(), java.util.Map.entry(pedestal, pedestal.getItem(0).copy()));
                 if (pedestal != null && !pedestal.getItem(0).isEmpty()) components.add(pedestal.getItem(0).copy());
             }
             if (components.isEmpty()) return false;
@@ -170,6 +172,22 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                 sendEffect(0, worldPosition, 0);
                 return true;
             }
+            for (var holder : server.getRecipeManager().getAllRecipesFor(ThaumcraftRunic.AUGMENT_TYPE.get())) {
+                InfusionRunicAugmentRecipe recipe = holder.value();
+                if (!KnowledgeAccess.get(player).isResearchComplete(recipe.research()) || !recipe.matches(offered,server) || !current()) continue;
+                ItemStack output = recipe.assemble(offered,server.registryAccess());
+                if (output.isEmpty() || !output.isItemEnabled(server.enabledFeatures()) || !current()) continue;
+                // Original runic recipe is an ordinary prepared STACK output, not an enchantment/XP ritual.
+                recipeInput = central.copy(); recipeIngredients.clear(); recipeIngredients.addAll(recipe.selectedComponents(central));
+                recipeOutput = output.copy(); recipeOutputLabel = ""; recipeInstability = recipe.instability(central);
+                recipeType = 0; recipeXP = 0; recipeEnchantment = null;
+                recipeEssentia = recipe.aspectCost(central); recipeCost = recipeEssentia.copy();
+                recipePlayer = player.getUUID(); recipePlayerName = player.getGameProfile().getName();
+                instability = symmetry + recipeInstability; ingredientTarget = null; crafting = true;
+                changed(); sendEffect(0,worldPosition,0); return true;
+            }
+            ProgrammaticStart addonStack = startProgrammatic(false, offered, server, player, center, central, offeredSources);
+            if (addonStack != ProgrammaticStart.NO_MATCH) return addonStack == ProgrammaticStart.STARTED;
             for (var holder : server.getRecipeManager().getAllRecipesFor(ThaumcraftInfusion.ENCHANTMENT_RECIPE_TYPE.get())) {
                 InfusionEnchantmentRecipe recipe = holder.value();
                 if (!recipe.research().isEmpty() && !KnowledgeAccess.get(player).isResearchComplete(recipe.research())
@@ -194,24 +212,48 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                 sendEffect(0, worldPosition, 0);
                 return true;
             }
-            for (var holder : server.getRecipeManager().getAllRecipesFor(ThaumcraftRunic.AUGMENT_TYPE.get())) {
-                InfusionRunicAugmentRecipe recipe = holder.value();
-                if (!KnowledgeAccess.get(player).isResearchComplete(recipe.research()) || !recipe.matches(offered,server) || !current()) continue;
-                ItemStack output = recipe.assemble(offered,server.registryAccess());
-                if (output.isEmpty() || !output.isItemEnabled(server.enabledFeatures()) || !current()) continue;
-                // Original runic recipe is an ordinary prepared STACK output, not an enchantment/XP ritual.
-                recipeInput = central.copy(); recipeIngredients.clear(); recipeIngredients.addAll(recipe.selectedComponents(central));
-                recipeOutput = output.copy(); recipeOutputLabel = ""; recipeInstability = recipe.instability(central);
-                recipeType = 0; recipeXP = 0; recipeEnchantment = null;
-                recipeEssentia = recipe.aspectCost(central); recipeCost = recipeEssentia.copy();
-                recipePlayer = player.getUUID(); recipePlayerName = player.getGameProfile().getName();
-                instability = symmetry + recipeInstability; ingredientTarget = null; crafting = true;
-                changed(); sendEffect(0,worldPosition,0); return true;
-            }
-            return false;
+            return startProgrammatic(true, offered, server, player, center, central, offeredSources) == ProgrammaticStart.STARTED;
         } finally {
             inCycle = false;
         }
+    }
+
+    private enum ProgrammaticStart { NO_MATCH, STARTED, STALE }
+
+    private ProgrammaticStart startProgrammatic(boolean enchantment, InfusionRecipeInput offered, ServerLevel server, ServerPlayer player,
+            TilePedestal center, ItemStack central, java.util.Map<BlockPos, java.util.Map.Entry<TilePedestal, ItemStack>> offeredSources) {
+        for (Object registration : thaumcraft.common.crafting.ProgrammaticRecipes.registrations()) {
+            if (enchantment ? !(registration instanceof thaumcraft.api.crafting.InfusionEnchantmentRecipe)
+                    : !(registration instanceof thaumcraft.api.crafting.InfusionRecipe)) continue;
+            var prepared = thaumcraft.common.crafting.ProgrammaticRecipes.prepareInfusion(registration, offered, server, player);
+            // Every virtual callback, including a refusal, may synchronously edit the world.
+            if (!current() || pedestal(getCenterPos()) != center || !ItemStack.matches(central, center.getItem(0))) return ProgrammaticStart.STALE;
+            for (var source : offeredSources.entrySet()) {
+                if (pedestal(source.getKey()) != source.getValue().getKey()
+                        || !ItemStack.matches(source.getValue().getValue(), source.getValue().getKey().getItem(0))) return ProgrammaticStart.STALE;
+            }
+            if (prepared == null) continue;
+            recipeInput = central.copy();
+            recipeIngredients.clear();
+            recipeIngredients.addAll(prepared.components());
+            recipeOutput = prepared.output().copy();
+            recipeOutputLabel = "";
+            recipeEnchantment = prepared.enchantment();
+            recipeInstability = prepared.instability();
+            recipeType = recipeEnchantment == null ? 0 : 1;
+            recipeXP = prepared.xp();
+            recipeEssentia = prepared.cost().copy();
+            recipeCost = recipeEssentia.copy();
+            recipePlayer = player.getUUID();
+            recipePlayerName = player.getGameProfile().getName();
+            instability = symmetry + recipeInstability;
+            ingredientTarget = null;
+            crafting = true;
+            changed();
+            sendEffect(0, worldPosition, 0);
+            return ProgrammaticStart.STARTED;
+        }
+        return ProgrammaticStart.NO_MATCH;
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, TileInfusionMatrix matrix) {

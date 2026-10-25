@@ -47,6 +47,18 @@ public final class ArcaneCrafting {
             return new Match(holder, grid, output, recipe.getRemainingItems(grid),
                     ArcaneVis.price(recipe.vis(grid), contents.getItem(TileArcaneWorkbench.WAND_SLOT), player), true);
         }
+        int registration = 0;
+        for (Object candidate : ProgrammaticRecipes.registrations()) {
+            int index = registration++;
+            if (!(candidate instanceof thaumcraft.api.crafting.IArcaneRecipe original)
+                    || !original.matches(grid, level, player)) continue;
+            var recipe = new ProgrammaticArcaneRecipe(original);
+            ItemStack output = recipe.assemble(grid, level.registryAccess());
+            if (output.isEmpty() || !output.isItemEnabled(level.enabledFeatures())) continue;
+            var holder = new RecipeHolder<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "api/arcane/" + index), recipe);
+            return new Match(holder, grid, output, recipe.getRemainingItems(grid),
+                    ArcaneVis.price(recipe.vis(grid), contents.getItem(TileArcaneWorkbench.WAND_SLOT), player), true);
+        }
         return null;
     }
 }

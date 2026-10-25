@@ -12,11 +12,14 @@ import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.CrucibleRecipe;
+import thaumcraft.api.crafting.ArcaneRecipes;
 import thaumcraft.api.crafting.InfusionRecipe;
 import thaumcraft.api.crafting.ShapedArcaneRecipe;
 import thaumcraft.api.crafting.ShapelessArcaneRecipe;
@@ -113,5 +116,61 @@ class CraftingApiTest {
         // stack: ItemStack.copy() of it returns the shared ItemStack.EMPTY, so the
         // native registry keeps the amount the addon registered.
         assertEquals(2, bonus.getCount());
+    }
+
+    @Test void requiredArcaneDataIsNotLostAndPlainRequirementsStillAllowExtraData() {
+        ItemStack required = new ItemStack(Items.STONE);
+        required.set(DataComponents.CUSTOM_NAME, Component.literal("required"));
+        ItemStack wrong = required.copy();
+        wrong.set(DataComponents.CUSTOM_NAME, Component.literal("wrong"));
+        var shaped = new ShapedArcaneRecipe("", new ItemStack(Items.DIAMOND), new AspectList().add(Aspect.AIR, 1), "A", 'A', required);
+        var shapeless = new ShapelessArcaneRecipe("", new ItemStack(Items.DIAMOND), new AspectList().add(Aspect.AIR, 1), required);
+        for (var recipe : List.<thaumcraft.api.crafting.IArcaneRecipe>of(shaped, shapeless)) {
+            assertTrue(recipe.matches(matrix(required), null, null));
+            assertFalse(recipe.matches(matrix(new ItemStack(Items.STONE)), null, null));
+            assertFalse(recipe.matches(matrix(wrong), null, null));
+        }
+        var plain = new ShapelessArcaneRecipe("", new ItemStack(Items.DIAMOND), new AspectList().add(Aspect.AIR, 1), Items.STONE);
+        assertTrue(plain.matches(matrix(required), null, null));
+        var requiredData = new net.minecraft.nbt.CompoundTag(); requiredData.putInt("a", 1);
+        var extraData = requiredData.copy(); extraData.putInt("b", 2);
+        ItemStack dataRequirement = new ItemStack(Items.STONE), dataOffer = new ItemStack(Items.STONE);
+        dataRequirement.set(DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(requiredData));
+        dataOffer.set(DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(extraData));
+        var subset = new ShapelessArcaneRecipe("", new ItemStack(Items.DIAMOND), new AspectList().add(Aspect.AIR, 1), dataRequirement);
+        assertTrue(subset.matches(matrix(dataOffer), null, null));
+        extraData.putInt("a", 9); dataOffer.set(DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(extraData));
+        assertFalse(subset.matches(matrix(dataOffer), null, null));
+    }
+
+    @Test void theModernProtectedArcaneComparatorsParticipateInMatching() {
+        int[] calls = {0, 0};
+        var shaped = new ShapedArcaneRecipe("", new ItemStack(Items.DIAMOND), new AspectList().add(Aspect.AIR, 1), "A", 'A', Items.STONE) {
+            @Override protected boolean checkItemEquals(ItemStack required, ItemStack offered) { calls[0]++; return false; }
+        };
+        var shapeless = new ShapelessArcaneRecipe("", new ItemStack(Items.DIAMOND), new AspectList().add(Aspect.AIR, 1), Items.STONE) {
+            @Override protected boolean checkItemEquals(ItemStack required, ItemStack offered) { calls[1]++; return false; }
+        };
+        assertFalse(shaped.matches(matrix(new ItemStack(Items.STONE)), null, null));
+        assertFalse(shapeless.matches(matrix(new ItemStack(Items.STONE)), null, null));
+        assertTrue(calls[0] > 0 && calls[1] > 0);
+    }
+
+    @Test void acceptedInfusionSnapshotsRetainRequiredDataThroughTheirCodec() {
+        ItemStack accepted = new ItemStack(Items.STONE);
+        accepted.set(DataComponents.CUSTOM_NAME, Component.literal("accepted"));
+        var predicate = thaumcraft.common.crafting.InfusionComponentPredicate.snapshot(accepted);
+        accepted.remove(DataComponents.CUSTOM_NAME);
+        assertFalse(predicate.matches(accepted));
+        ItemStack exposed = predicate.requiredStack().orElseThrow();
+        exposed.remove(DataComponents.CUSTOM_NAME);
+        assertFalse(predicate.matches(exposed));
+        var ops = ArcaneRecipes.registries().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+        var encoded = thaumcraft.common.crafting.InfusionComponentPredicate.CODEC.encodeStart(ops, predicate).getOrThrow();
+        var restored = thaumcraft.common.crafting.InfusionComponentPredicate.CODEC.parse(ops, encoded).getOrThrow();
+        ItemStack matching = new ItemStack(Items.STONE);
+        matching.set(DataComponents.CUSTOM_NAME, Component.literal("accepted"));
+        assertTrue(restored.matches(matching));
+        assertFalse(restored.matches(new ItemStack(Items.STONE)));
     }
 }

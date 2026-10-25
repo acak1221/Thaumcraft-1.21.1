@@ -121,6 +121,10 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
             refreshResult();
             return ItemStack.EMPTY;
         }
+        // TC4's crafting event observed the inputs before debit. Keep payment before
+        // arbitrary addon callbacks, but give them an independent pre-craft inventory.
+        var eventInputs = new SimpleContainer(contents.getContainerSize());
+        for (int slot = 0; slot < contents.getContainerSize(); slot++) eventInputs.setItem(slot, contents.getItem(slot).copy());
         ItemStack wand = contents.getItem(TileArcaneWorkbench.WAND_SLOT).copy();
         if (match.arcane() && !ArcaneVis.debit(wand, match.prices())) return ItemStack.EMPTY;
         var matrix = new ArrayList<ItemStack>(9);
@@ -143,7 +147,7 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
         }
         ItemStack output = match.output().copy();
         output.onCraftedBy(viewer.level(), viewer, output.getCount());
-        dev.architectury.event.events.common.PlayerEvent.CRAFT_ITEM.invoker().craft(viewer, output, contents);
+        dev.architectury.event.events.common.PlayerEvent.CRAFT_ITEM.invoker().craft(viewer, output, eventInputs);
         result.setRecipeUsed(match.recipe());
         result.awardUsedRecipes(viewer, match.input().items());
         viewer.getInventory().setChanged();

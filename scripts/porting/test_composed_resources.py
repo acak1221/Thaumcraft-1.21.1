@@ -45,6 +45,17 @@ class ComposedResourcesTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Missing composed resource thaumcraft:textures/models/ripple15.png'):
                 self.validate()
 
+    def test_reaudited_research_navigation_and_both_backgrounds_stay_required(self):
+        # Native geometry changes reuse these sheets; reviewing the supplier
+        # contract must never make their removal an accepted new baseline.
+        exists = Path.is_file
+        for filename in ('gui_researchbook.png', 'gui_researchback.png', 'gui_researchbackeldritch.png'):
+            suffix = '/textures/gui/' + filename
+            with self.subTest(filename=filename), patch.object(
+                    Path, 'is_file', lambda p, suffix=suffix: False if str(p).endswith(suffix) else exists(p)):
+                with self.assertRaisesRegex(ValueError, 'Missing (?:composed|literal client) resource .*' + filename):
+                    self.validate()
+
     def test_extensionless_warded_glass_request_is_not_mistaken_for_existing_png(self):
         contract = copy.deepcopy(self.contract)
         site = next(s for s in contract['sites'] if s['site'].endswith('/TileWardedGlassRenderer.java'))

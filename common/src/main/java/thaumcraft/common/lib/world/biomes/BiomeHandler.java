@@ -28,7 +28,8 @@ import thaumcraft.common.lib.world.biomes.BiomeSurfaceRules.Generator;
  * folders. The native runtime consumers of that table are
  * {@code thaumcraft.common.lib.world.NormalNodeBiomeAdapter} and
  * {@code thaumcraft.common.lib.world.MagicalTreeBiomeAdapter}; they read the same tags
- * at runtime and are not changed by this class.
+ * at runtime. All three consumers share the immutable original values in
+ * {@link OriginalBiomeTypes}; later public registrations change only this compatibility registry.
  *
  * <p>Original values: {@code thaumcraft.common.lib.world.biomes.BiomeHandler} lines 22-65
  * and {@code thaumcraft.common.config.Config} lines 778-812.
@@ -47,37 +48,8 @@ public final class BiomeHandler {
     private static final Map<String,Info> BIOME_INFO=new LinkedHashMap<>();
 
     static {
-        registerBiomeInfo("water",100,Aspect.WATER,false,0.0F);
-        registerBiomeInfo("ocean",120,Aspect.WATER,false,0.0F);
-        registerBiomeInfo("river",100,Aspect.WATER,false,0.0F);
-        registerBiomeInfo("wet",80,Aspect.WATER,false,0.0F);
-        registerBiomeInfo("hot",100,Aspect.FIRE,false,0.0F);
-        registerBiomeInfo("desert",100,Aspect.FIRE,false,0.0F);
-        registerBiomeInfo("nether",120,Aspect.FIRE,false,0.0F);
-        registerBiomeInfo("mesa",80,Aspect.FIRE,false,0.0F);
-        registerBiomeInfo("dense",100,Aspect.ORDER,false,0.0F);
-        registerBiomeInfo("snowy",80,Aspect.ORDER,false,0.0F);
-        registerBiomeInfo("cold",80,Aspect.ORDER,false,0.0F);
-        registerBiomeInfo("frozen",100,Aspect.ORDER,false,0.0F);
-        registerBiomeInfo("mushroom",140,Aspect.ORDER,false,0.0F);
-        registerBiomeInfo("coniferous",100,Aspect.EARTH,true,0.2F);
-        registerBiomeInfo("forest",120,Aspect.EARTH,true,1.0F);
-        registerBiomeInfo("sandy",80,Aspect.EARTH,false,0.0F);
-        registerBiomeInfo("beach",80,Aspect.EARTH,false,0.0F);
-        registerBiomeInfo("savanna",80,Aspect.AIR,true,0.2F);
-        registerBiomeInfo("mountain",100,Aspect.AIR,false,0.0F);
-        registerBiomeInfo("hills",120,Aspect.AIR,false,0.0F);
-        registerBiomeInfo("plains",80,Aspect.AIR,true,0.2F);
-        registerBiomeInfo("dry",80,Aspect.ENTROPY,false,0.0F);
-        registerBiomeInfo("sparse",80,Aspect.ENTROPY,false,0.0F);
-        registerBiomeInfo("swamp",120,Aspect.ENTROPY,true,0.2F);
-        registerBiomeInfo("wasteland",80,Aspect.ENTROPY,false,0.0F);
-        registerBiomeInfo("jungle",100,Aspect.PLANT,false,0.0F);
-        registerBiomeInfo("lush",100,Aspect.PLANT,true,0.5F);
-        registerBiomeInfo("magical",100,null,true,1.0F);
-        registerBiomeInfo("end",80,Aspect.VOID,false,0.0F);
-        registerBiomeInfo("spooky",80,Aspect.SOUL,false,0.0F);
-        registerBiomeInfo("dead",50,Aspect.DEATH,false,0.0F);
+        for (OriginalBiomeTypes.Type type : OriginalBiomeTypes.all())
+            registerBiomeInfo(type.name(), type.aura(), type.aspect(), type.greatwood(), type.greatwoodChance());
     }
 
     private BiomeHandler() {}

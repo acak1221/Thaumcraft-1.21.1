@@ -105,10 +105,7 @@ public final class ThaumcraftFocusClient {
 
     /** Main hand wins; offhand is the explicit native two-hand adaptation. */
     public static InteractionHand wandHand(Player player) {
-        if (player == null || !player.isAlive() || player.isSpectator()) return null;
-        if (player.getMainHandItem().getItem() instanceof ItemWandCasting) return InteractionHand.MAIN_HAND;
-        if (player.getOffhandItem().getItem() instanceof ItemWandCasting) return InteractionHand.OFF_HAND;
-        return null;
+        return thaumcraft.common.items.wands.WandHands.select(player);
     }
 
     /** The main-hand item action wins, as with wand selection's two-hand adaptation. */

@@ -43,7 +43,7 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
 
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
-        if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         int chunkX = context.origin().getX() >> 4;
         int chunkZ = context.origin().getZ() >> 4;
         // Oracle ThaumcraftWorldGenerator:423-424 - the position inside the chunk and the
@@ -58,6 +58,7 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
     /** Regeneration continues its caller's stream; fresh generation keeps its original stream above. */
     public boolean placeSelected(WorldGenLevel level, RandomSource random, StructurePlacementRules.Draw draw,
                                  int chunkX, int chunkZ) {
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         if (draw.kind() != StructurePlacementRules.Kind.HILLTOP_STONES) return false;
         // The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
         // footprint of the cluster has to stay inside it.
@@ -96,7 +97,7 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
      * built (oracle ThaumcraftWorldGenerator:451).</p>
      */
     public static boolean preflight(WorldGenLevel level, int chunkX, int chunkZ) {
-        if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(
                 RandomSource.create(StructurePlacementRules.chunkSeed(
                         level.getLevel().getSeed(), chunkX, chunkZ)), chunkX, chunkZ);

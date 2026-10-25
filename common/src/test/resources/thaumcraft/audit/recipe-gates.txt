@@ -87,6 +87,8 @@ MASKANGRYGHOST=MaskAngryGhost
 MASKGRINNINGDEVIL=MaskGrinningDevil
 MASKSIPPINGFIEND=MaskSippingFiend
 MIRROR=Mirror
+# Original ConfigRecipes:362, newly native metadata-six mirror.
+MIRRORESSENTIA=MirrorEssentia
 MIRRORHAND=MirrorHand
 NITOR=Nitor
 NODESTABILIZER=NodeStabilizer

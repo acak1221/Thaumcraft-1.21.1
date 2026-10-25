@@ -149,7 +149,8 @@ public final class BlockMirror extends BaseEntityBlock {
 
     /** BlockMirror:186-217 - the drop keeps the link of a linked mirror. */
     @Override protected List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootParams.Builder params) {
-        ItemStack drop = new ItemStack(this);
+        ItemStack drop = new ItemStack(state.getValue(ESSENTIA)
+                ? ThaumcraftEldritchBlocks.MIRROR_ESSENTIA_ITEM.get() : ThaumcraftEldritchBlocks.MIRROR_ITEM.get());
         drop.set(DataComponents.ITEM_NAME, Component.translatable(state.getValue(ESSENTIA)
                 ? "block.thaumcraft.mirror_essentia" : "block.thaumcraft.mirror"));
         if (params.getLevel() == null) return List.of(drop);
@@ -160,6 +161,11 @@ public final class BlockMirror extends BaseEntityBlock {
             drop.set(DataComponents.CUSTOM_DATA, CustomData.of(mirror.linkData()));
         }
         return List.of(drop);
+    }
+
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
+        return new ItemStack(state.getValue(ESSENTIA)
+                ? ThaumcraftEldritchBlocks.MIRROR_ESSENTIA_ITEM.get() : ThaumcraftEldritchBlocks.MIRROR_ITEM.get());
     }
 
     /** BlockMirror:227-235 - the original right click is consumed without opening a container. */

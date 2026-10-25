@@ -78,14 +78,14 @@ public class ShapelessArcaneRecipe implements IArcaneRecipe {
 
     /** Returns a fresh assembled result without consuming inventory; inventory is not read by the native assembly path, including null. */
     @Override public ItemStack getCraftingResult(ArcaneRecipeInput inventory) {
-        return nativeRecipe().assemble(inventory, ArcaneRecipes.registries());
+        return getRecipeOutput().copy();
     }
 
     /** Tests research and captured unordered ingredients without spending vis/items.
      * Inventory must be non-null (native matching may throw otherwise); level is unused by matching, and null player fails a nonempty research gate. */
     @Override public boolean matches(ArcaneRecipeInput inventory, Level level, Player player) {
         if (this.research != null && !this.research.isEmpty() && !ThaumcraftApiHelper.isResearchComplete(player, this.research)) return false;
-        return nativeRecipe().matches(inventory, level);
+        return nativeRecipe().matches(inventory, level, this::checkItemEquals);
     }
 
     /** The original ingredient list of the recipe. */
@@ -102,11 +102,7 @@ public class ShapelessArcaneRecipe implements IArcaneRecipe {
      * shortcut of the original is gone; the tags are compared with the native data components.</p>
      */
     protected boolean checkItemEquals(ItemStack stack0, ItemStack stack1) {
-        if (stack0 == null || stack1 == null) return stack0 == null && stack1 == null;
-        if (stack0.getItem() != stack1.getItem()) return false;
-        if (!stack0.getComponents().isEmpty() && !ThaumcraftApiHelper.areItemStackTagsEqualForCrafting(stack0, stack1)) return false;
-        if (stack0.getDamageValue() == Short.MAX_VALUE) return true;
-        return stack0.getDamageValue() == stack1.getDamageValue();
+        return thaumcraft.common.crafting.ArcaneIngredientMatching.matchesStack(stack0, stack1);
     }
 
     /** Returns the live nullable primal vis-cost list in whole vis, not centivis; no copy is made. */

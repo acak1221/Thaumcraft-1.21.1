@@ -103,8 +103,8 @@ public final class ScanApiRuntimeChecks {
         try (var f = new Fixture(test, player)) {
             var first = EntityType.COW.create(f.level); var second = EntityType.COW.create(f.level);
             test.assertTrue(first != null && second != null, "two identical native mobs exist");
-            for (var cow : List.of(first, second)) { cow.setNoAi(true); cow.setNoGravity(true); cow.setSilent(true); f.add(cow); }
             first.setPos(f.front); second.setPos(f.side);
+            for (var cow : List.of(first, second)) { cow.setNoAi(true); cow.setNoGravity(true); cow.setSilent(true); f.add(cow); }
             test.assertTrue(EntityAspectBindings.describe(first).signature().equals(EntityAspectBindings.describe(second).signature()), "fixture mobs share the same persistent knowledge key");
             aim(player, first.getEyePosition()); f.start(); String original = f.tool.get(ThaumcraftContent.SCAN_SESSION.get()).signature();
             first.setPos(f.side); second.setPos(f.front); aim(player, second.getEyePosition()); f.tick();
@@ -121,6 +121,7 @@ public final class ScanApiRuntimeChecks {
             for (var drop : List.of(drop1, drop2)) { drop.setNoGravity(true); drop.setNeverPickUp(); f.add(drop); }
             aim(player, drop1.getEyePosition()); f.start();
             var api1 = ScanCallbacks.resolve(f.level, ScanResult.entity(drop1)); var api2 = ScanCallbacks.resolve(f.level, ScanResult.entity(drop2));
+            test.assertTrue(api1 != null && api2 != null, "both indexed physical drops resolve through the real native callback API");
             test.assertTrue(api1.signature().equals(api2.signature()) && !api1.sessionKey().equals(api2.sessionKey()) && api1.kind() == ScanManager.ScanKind.ITEM,
                     "two original type2 item drops share item knowledge but retain separate entity session identities");
             drop1.setPos(f.side.add(0, 1, 0)); drop2.setPos(f.front.add(0, 1, 0)); aim(player, drop2.getEyePosition()); f.tick();
@@ -194,26 +195,41 @@ public final class ScanApiRuntimeChecks {
         final thaumcraft.common.lib.research.PlayerKnowledge knowledge, oldKnowledge;
         final ArrayList<IScanEventHandler> oldHandlers; final Vec3 oldPosition, front, side; final float oldYaw, oldPitch;
         final GameType oldGameType; final List<ItemStack> inventory = new ArrayList<>(); final List<Entity> entities = new ArrayList<>();
-        final ItemStack tool; final ChunkPos chunk; final boolean forced;
+        final ItemStack tool; final List<ChunkPos> ownedForcedChunks = new ArrayList<>();
         Fixture(GameTestHelper test, ServerPlayer player) {
             this.test = test; this.player = player; level = test.getLevel(); knowledge = KnowledgeAccess.get(player); oldKnowledge = knowledge.copy();
             oldHandlers = ThaumcraftApi.scanEventhandlers; oldPosition = player.position(); oldYaw = player.getYRot(); oldPitch = player.getXRot(); oldGameType = player.gameMode.getGameModeForPlayer();
             for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) inventory.add(player.getInventory().getItem(slot).copy());
-            var origin = test.absolutePos(new BlockPos(3, 12, 3)); chunk = new ChunkPos(origin); forced = !level.getForcedChunks().contains(chunk.toLong());
-            if (forced) level.setChunkForced(chunk.x, chunk.z, true);
+            var origin = test.absolutePos(new BlockPos(3, 12, 3));
+            var position = Vec3.atBottomCenterOf(origin);
+            front = position.add(0, 0, 4); side = position.add(12, 0, 0);
+            // The parking target can be in a different chunk. addFreshEntity returning true does
+            // not make an entity in an inaccessible section visible through ServerLevel.getEntity.
+            // Own all fixture chunks before adding either cows or drops; do not depend on a prior test's tickets.
+            for (var target : List.of(position, front, side)) {
+                var chunk = new ChunkPos(BlockPos.containing(target));
+                if (!level.getForcedChunks().contains(chunk.toLong())) {
+                    ownedForcedChunks.add(chunk);
+                    level.setChunkForced(chunk.x, chunk.z, true);
+                }
+                level.getChunk(chunk.x, chunk.z);
+            }
             player.stopUsingItem(); player.setGameMode(GameType.SURVIVAL); player.getInventory().clearContent(); player.setPos(Vec3.atBottomCenterOf(origin));
-            front = player.position().add(0, 0, 4); side = player.position().add(12, 0, 0);
             knowledge.reset(); for (var aspect : Aspect.aspects.values()) knowledge.addDiscoveredAspect(aspect.getTag());
             tool = new ItemStack(ThaumcraftContent.THAUMOMETER.get()); player.setItemInHand(InteractionHand.MAIN_HAND, tool);
         }
-        void add(Entity entity) { entities.add(entity); test.assertTrue(level.addFreshEntity(entity), "fixture entity enters actual native index"); }
+        void add(Entity entity) {
+            entities.add(entity);
+            test.assertTrue(level.addFreshEntity(entity), "fixture entity is accepted by the native world");
+            test.assertTrue(level.getEntity(entity.getId()) == entity, "fixture target is accessible in the actual native entity index");
+        }
         void start() { test.assertTrue(player.gameMode.useItem(player, level, tool, InteractionHand.MAIN_HAND).consumesAction() && tool.has(ThaumcraftContent.SCAN_SESSION.get()), "real native RMB starts a valid held-tool scan"); }
         void tick() { tool.getItem().onUseTick(level, player, tool, player.getUseItemRemainingTicks()); }
         @Override public void close() {
             player.stopUsingItem(); for (var entity : entities) entity.discard(); ThaumcraftApi.scanEventhandlers = oldHandlers;
             player.getInventory().clearContent(); for (int slot = 0; slot < inventory.size(); slot++) player.getInventory().setItem(slot, inventory.get(slot));
             player.setGameMode(oldGameType); player.setPos(oldPosition); player.setYRot(oldYaw); player.setXRot(oldPitch); knowledge.copyFrom(oldKnowledge);
-            if (forced) level.setChunkForced(chunk.x, chunk.z, false);
+            for (var chunk : ownedForcedChunks) level.setChunkForced(chunk.x, chunk.z, false);
         }
     }
 }

@@ -91,11 +91,11 @@ class ChampionModifierTest {
     @Test void originalChampionBonusesAreSharedAndOnlyTwoModifiersAddMore() {
         for (ChampionModifier modifier : ChampionModifier.mods) {
             assertEquals(30.0, modifier.healthBonus(), 0.0);
-            assertEquals(2.0, modifier.damageMultiplier(), 0.0);
+            assertEquals(3.0, modifier.damageMultiplier(), 0.0);
         }
         assertEquals(1.3, ChampionModifier.mods[ChampionModifier.BOLD].speedMultiplier(), 0.0);
         assertEquals(1.0, ChampionModifier.mods[ChampionModifier.ARMOR].speedMultiplier(), 0.0);
-        assertEquals(3.0, ChampionModifier.mods[ChampionModifier.MIGHTY].extraDamageMultiplier(), 0.0);
+        assertEquals(4.0, ChampionModifier.mods[ChampionModifier.MIGHTY].extraDamageMultiplier(), 0.0);
         assertEquals(1.0, ChampionModifier.mods[ChampionModifier.BOLD].extraDamageMultiplier(), 0.0);
         assertEquals(25.0f, ChampionModifier.CHAMPION_HEAL, 0.0f);
     }

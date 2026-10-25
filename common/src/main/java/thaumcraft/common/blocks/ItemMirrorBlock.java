@@ -21,6 +21,7 @@ import thaumcraft.common.items.relics.ItemHandMirror.MirrorLink;
 import thaumcraft.common.lib.crafting.DeviceContainerRules;
 import thaumcraft.common.lib.crafting.DeviceContainerRules.MirrorLinkAction;
 import thaumcraft.common.tiles.TileMirror;
+import thaumcraft.common.tiles.TileMirrorEssentia;
 
 /**
  * Original BlockMirrorItem: the item of the magic mirror.
@@ -35,8 +36,28 @@ import thaumcraft.common.tiles.TileMirror;
 public final class ItemMirrorBlock extends BlockItem {
     private static final SoundEvent JAR = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "jar"));
 
-    public ItemMirrorBlock(Block block, Properties properties) {
+    private final boolean essentia;
+
+    public ItemMirrorBlock(Block block, Properties properties) { this(block, false, properties); }
+
+    public ItemMirrorBlock(Block block, boolean essentia, Properties properties) {
         super(block, properties);
+        this.essentia = essentia;
+    }
+
+    /** Original metadata 0/6 becomes an item-owned placement kind, before the BE is created. */
+    @Override protected net.minecraft.world.level.block.state.BlockState getPlacementState(BlockPlaceContext context) {
+        var state = super.getPlacementState(context);
+        return state == null ? null : state.setValue(BlockMirror.ESSENTIA, essentia);
+    }
+
+    @Override public String getDescriptionId() {
+        return essentia ? "block.thaumcraft.mirror_essentia" : super.getDescriptionId();
+    }
+
+    /** The shared block keeps its existing ordinary item identity. */
+    @Override public void registerBlocks(java.util.Map<Block, net.minecraft.world.item.Item> map, net.minecraft.world.item.Item item) {
+        if (!essentia) super.registerBlocks(map, item);
     }
 
     /**
@@ -48,10 +69,14 @@ public final class ItemMirrorBlock extends BlockItem {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.PASS;
-        if (!(level.getBlockState(pos).getBlock() instanceof BlockMirror)) return super.useOn(context);
+        var state = level.getBlockState(pos);
+        if (!(state.getBlock() instanceof BlockMirror) || state.getValue(BlockMirror.ESSENTIA) != essentia) return super.useOn(context);
         if (level.isClientSide) return InteractionResult.SUCCESS;
-        TileMirror mirror = level.getBlockEntity(pos) instanceof TileMirror tile ? tile : null;
-        MirrorLinkAction action = DeviceContainerRules.mirrorItemLink(true, mirror != null, mirror != null && mirror.isLinkValid());
+        var tile = level.getBlockEntity(pos);
+        boolean matching = essentia ? tile instanceof TileMirrorEssentia : tile instanceof TileMirror;
+        boolean valid = tile instanceof TileMirror mirror ? mirror.isLinkValid()
+                : tile instanceof TileMirrorEssentia essentiaMirror && essentiaMirror.isLinkValid();
+        MirrorLinkAction action = DeviceContainerRules.mirrorItemLink(true, matching, valid);
         if (action == MirrorLinkAction.ALREADY_LINKED) {
             // Oracle BlockMirrorItem:112 - a mirror with a valid partner refuses another one.
             player.displayClientMessage(Component.translatable("tc.mirroralreadylinked")
@@ -74,18 +99,20 @@ public final class ItemMirrorBlock extends BlockItem {
      * the item and links the pair.
      */
     @Override public InteractionResult place(BlockPlaceContext context) {
+        // BlockItem.place consumes the last survival item before returning; an empty stack exposes no components.
+        MirrorLink link = linkOf(context.getItemInHand());
         InteractionResult result = super.place(context);
         if (!result.consumesAction() || context.getLevel().isClientSide) return result;
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
-        MirrorLink link = linkOf(context.getItemInHand());
         if (link == null) return result;
-        if (!(level.getBlockEntity(pos) instanceof TileMirror mirror)) return result;
-        mirror.linkX = link.x();
-        mirror.linkY = link.y();
-        mirror.linkZ = link.z();
-        mirror.linkDim = link.dimension();
-        mirror.restoreLink();
+        if (!essentia && level.getBlockEntity(pos) instanceof TileMirror mirror) {
+            mirror.linkX = link.x(); mirror.linkY = link.y(); mirror.linkZ = link.z(); mirror.linkDim = link.dimension();
+            mirror.restoreLink();
+        } else if (essentia && level.getBlockEntity(pos) instanceof TileMirrorEssentia mirror) {
+            mirror.linkX = link.x(); mirror.linkY = link.y(); mirror.linkZ = link.z(); mirror.linkDim = link.dimension();
+            mirror.restoreLink();
+        }
         return result;
     }
 

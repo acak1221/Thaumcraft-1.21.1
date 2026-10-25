@@ -62,6 +62,7 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
      * @return the {@code auraGen} value of the original, the return of the wild node pass
      */
     public static boolean placeAuraPass(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ) {
+        if (!AuraDimensionRules.supportsWildNodes(level.getLevel().dimension())) return false;
         boolean scatteredPlaced = false;
         // Oracle ThaumcraftWorldGenerator:413-418 - the node of a vanilla scattered feature sits
         // three blocks above the surface of its centre.
@@ -148,7 +149,8 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
      */
     public static boolean wildNodeDecision(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ,
                                            boolean auraGen) {
-        if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
+        if (!level.getLevel().dimension().equals(Level.OVERWORLD)
+                || !AuraDimensionRules.supportsWildNodes(level.getLevel().dimension())) return false;
         if (random.nextInt(NODE_RARITY) != 0) return false;
         if (auraGen) return false;
         int x = chunkX * 16 + random.nextInt(16);

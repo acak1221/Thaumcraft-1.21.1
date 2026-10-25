@@ -75,7 +75,7 @@ public final class EssentiaHandler {
      */
     public static boolean drainEssentiaForMirror(BlockEntity source, Aspect aspect, Direction direction, int range, boolean ignoreMirror) {
         if (source == null || aspect == null || direction == null || range <= 0) return false;
-        if (!(source.getLevel() instanceof ServerLevel level)) return false;
+        if (!(source.getLevel() instanceof ServerLevel level) || !current(source, level)) return false;
         if (!level.getServer().isSameThread()) throw new IllegalStateException("Mirror essentia drains require the server thread");
         BlockPos origin = source.getBlockPos();
         for (BlockPos sourcePos : mirrorSources(level, origin, direction, range)) {
@@ -89,6 +89,10 @@ public final class EssentiaHandler {
             if (!aspectSource.takeFromContainer(aspect, 1)) continue;
             return true;
         }
+        // Original H57-59: a failed scan must discover new sources after the real-time backoff.
+        LevelSources cache = LEVELS.get(level);
+        cache.mirrorSources.remove(origin);
+        cache.mirrorRetryAfter.putIfAbsent(origin.immutable(), System.currentTimeMillis() + DELAY_MILLIS);
         return false;
     }
 

@@ -41,16 +41,23 @@ public final class BlockLootItem extends BlockItem {
     @Override public void appendHoverText(ItemStack stack, Item.TooltipContext context, java.util.List<net.minecraft.network.chat.Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
         Rarity rarity = rarityOf(stack);
-        if (rarity == Rarity.COMMON) return;
-        tooltip.add(net.minecraft.network.chat.Component.translatable("item.minecraft.rarity." + rarity.getSerializedName())
-                .withStyle(rarity.color()));
+        // EnumRarity.rarityName in the original is an English label, including Common.
+        // Minecraft 1.21.1 has no item.minecraft.rarity.* translation keys.
+        String name = switch (rarity) {
+            case UNCOMMON -> "Uncommon";
+            case RARE -> "Rare";
+            default -> "Common";
+        };
+        tooltip.add(net.minecraft.network.chat.Component.literal(name).withStyle(rarity.color()));
     }
 
     /** Stores the rarity of the container in the item stack. */
     public static void setRarity(ItemStack stack, int rarity) {
+        rarity = thaumcraft.common.lib.world.EldritchBlockRules.lootRarity(rarity);
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         CompoundTag tag = data == null ? new CompoundTag() : data.copyTag();
         tag.putInt("rarity", rarity);
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        stack.set(DataComponents.RARITY, rarityOf(stack));
     }
 }

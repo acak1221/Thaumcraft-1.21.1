@@ -382,8 +382,8 @@ public final class EntityUtils {
     public static void makeChampion(LivingEntity entity, int type, boolean persist) {
         if (!(entity instanceof Monster mob)) return;
         if (ChampionModifier.byId(type) == null) return;
-        ChampionRules.Adapter.promote(mob, type);
         ChampionHooks.setChampionModifier(mob, type);
+        ChampionRules.Adapter.promote(mob, type);
         if (persist) mob.setPersistenceRequired();
     }
 

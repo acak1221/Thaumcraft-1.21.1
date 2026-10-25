@@ -46,11 +46,10 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.api.entities.IThaumcraftBoss;
 import thaumcraft.common.config.ThaumcraftLoot;
-import thaumcraft.common.lib.WarpEvents;
 import thaumcraft.common.lib.cult.CultistEquipmentRules;
 import thaumcraft.common.lib.cult.CultistRules;
 import thaumcraft.common.lib.loot.OriginalLootEnchantments;
-import thaumcraft.common.lib.ward.WardRules;
+import thaumcraft.common.lib.mods.ChampionHooks;
 
 /**
  * Original TC4 cultist praetor: a hundred and twenty-five health, a crimson praetor
@@ -62,7 +61,6 @@ import thaumcraft.common.lib.ward.WardRules;
  */
 public class EntityCultistLeader extends Monster implements RangedAttackMob, IThaumcraftBoss {
     private static final EntityDataAccessor<Integer> TITLE = SynchedEntityData.defineId(EntityCultistLeader.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> CHAMPION = SynchedEntityData.defineId(EntityCultistLeader.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> ANGER = SynchedEntityData.defineId(EntityCultistLeader.class, EntityDataSerializers.INT);
     private static final AttributeModifier[] HP_BUFFS = {
             new AttributeModifier(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "boss_health_1"), CultistRules.BOSS_HEALTH_BUFF, AttributeModifier.Operation.ADD_VALUE),
@@ -78,8 +76,6 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
             new AttributeModifier(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "boss_damage_4"), CultistRules.BOSS_DAMAGE_BUFF, AttributeModifier.Operation.ADD_VALUE),
             new AttributeModifier(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "boss_damage_5"), CultistRules.BOSS_DAMAGE_BUFF, AttributeModifier.Operation.ADD_VALUE)
     };
-    private static final AttributeModifier BOLD_SPEED = new AttributeModifier(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "champion_bold_speed"), 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
-    private static final AttributeModifier MIGHTY_DAMAGE = new AttributeModifier(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "champion_mighty_damage"), 3.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
     private final Map<Integer, Integer> aggro = new HashMap<>();
     private final ServerBossEvent bossEvent;
     private int spawnTimer;
@@ -140,7 +136,6 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(TITLE, 0);
-        builder.define(CHAMPION, -1);
         builder.define(ANGER, 0);
     }
 
@@ -172,10 +167,13 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
 
     public void setTitle(int title) { entityData.set(TITLE, Math.max(0, Math.min(title, CultistRules.LEADER_TITLES.length - 1))); }
 
-    public int getChampionModifier() { return entityData.get(CHAMPION); }
+    /** One shared champion identity drives the name, effects, client particles and saved tc.mobmod. */
+    public int getChampionModifier() {
+        return level().isClientSide ? ChampionHooks.clientChampionId(this) : ChampionHooks.championId(this);
+    }
 
     public void setChampionModifier(int modifier) {
-        entityData.set(CHAMPION, modifier < 0 || modifier >= CultistRules.CHAMPION_COUNT ? -1 : modifier);
+        ChampionHooks.setChampionModifier(this, modifier < 0 || modifier >= CultistRules.CHAMPION_COUNT ? -1 : modifier);
     }
 
     public int getAnger() { return entityData.get(ANGER); }
@@ -186,13 +184,14 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
 
     @Override public Component getName() {
         if (hasCustomName()) return getCustomName();
+        if (getChampionModifier() < 0) return super.getName();
         return Component.translatable("entity.thaumcraft.cultistleader.name", getTitle(), championName());
     }
 
-    /** Original ChampionModifier.getModNameLocalized with the original display name as the fallback. */
+    /** Original ChampionModifier.getModNameLocalized, using the shared modifier id. */
     public Component championName() {
         int modifier = getChampionModifier();
-        if (modifier < 0) return Component.literal(CultistRules.CHAMPION_MOD_DISPLAY_NAMES[CultistRules.CHAMPION_BOLD]);
+        if (modifier < 0) return Component.empty();
         return Component.translatable("champion.mod." + CultistRules.CHAMPION_MOD_NAMES[modifier]);
     }
 
@@ -214,7 +213,7 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
         SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data);
         // Original EntityThaumcraftBoss.onSpawnWithEgg anchors the boss to its spawn point.
         restrictTo(blockPosition(), CultistRules.BOSS_HOME_RADIUS);
-        applyChampionIdentity();
+        initializeTitle();
         return result;
     }
 
@@ -222,15 +221,13 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
     public void originalSpawnEquipment(ServerLevelAccessor level, DifficultyInstance difficulty) {
         populateDefaultEquipmentSlots(random, difficulty);
         populateDefaultEquipmentEnchantments(level, random, difficulty);
-        applyChampionIdentity();
+        initializeTitle();
     }
 
-    /** Original EntityUtils.makeChampion gives every boss a random champion modifier. */
-    private void applyChampionIdentity() {
+    /** Original spawn initializes the title; the shared entity-add hook rolls its champion exactly once. */
+    private void initializeTitle() {
         setTitle(random.nextInt(CultistRules.LEADER_TITLES.length));
-        setChampionModifier(random.nextInt(CultistRules.CHAMPION_COUNT));
-        applyChampionStats();
-        setCustomName(Component.translatable("entity.thaumcraft.cultistleader.name", getTitle(), championName()));
+        generateName();
     }
 
     /** Original EntityCultistLeader.addRandomArmor: the crimson praetor armour and the blade. */
@@ -256,23 +253,6 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
         if (random.nextFloat() < CultistRules.leaderEnchantChance(tension)) {
             int power = CultistRules.leaderEnchantPower(tension, random.nextInt(22));
             OriginalLootEnchantments.enchant(level.getLevel(), held, random, power);
-        }
-    }
-
-    /** Original EntityUtils.makeChampion: bold, mighty and warded change the praetor's own numbers. */
-    public void applyChampionStats() {
-        int modifier = getChampionModifier();
-        AttributeInstance speed = getAttribute(Attributes.MOVEMENT_SPEED);
-        AttributeInstance damage = getAttribute(Attributes.ATTACK_DAMAGE);
-        if (speed != null) speed.removeModifier(BOLD_SPEED);
-        if (damage != null) damage.removeModifier(MIGHTY_DAMAGE);
-        if (modifier == CultistRules.CHAMPION_BOLD && speed != null) speed.addPermanentModifier(BOLD_SPEED);
-        if (modifier == CultistRules.CHAMPION_MIGHTY && damage != null) damage.addPermanentModifier(MIGHTY_DAMAGE);
-        if (modifier == CultistRules.CHAMPION_WARDED) {
-            // Oracle EntityUtils.makeChampion:271-274 - the warded champion takes half of its maximum
-            // health as its ward, and the ward joins its absorption. 1.21.1 clamps the absorption by the
-            // max absorption attribute, so the ward raises that attribute first.
-            WardRules.setWard(this, CultistRules.championAbsorption((float) getAttributeValue(Attributes.MAX_HEALTH)));
         }
     }
 
@@ -417,20 +397,6 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob, ITh
         EntityCultist.originalShoot(blast, dx, dy + 2.0, dz, 0.66F, 3.0F);
         playSound(EntityCultist.sound("egattack"), 1.0F, 1.0F + random.nextFloat() * 0.1F);
         level().addFreshEntity(blast);
-    }
-
-    @Override public boolean doHurtTarget(Entity victim) {
-        boolean hit = super.doHurtTarget(victim);
-        if (hit && victim instanceof LivingEntity living) applyChampionHit(living);
-        return hit;
-    }
-
-    /** Original ChampionModWarp: the warped praetor warps a third of the players it strikes. */
-    public void applyChampionHit(LivingEntity target) {
-        if (getChampionModifier() != CultistRules.CHAMPION_WARP) return;
-        if (!(target instanceof ServerPlayer player)) return;
-        if (random.nextFloat() >= CultistRules.WARP_REWARD_CHANCE) return;
-        WarpEvents.addTemporaryWarp(player, CultistRules.warpReward(random.nextInt(3)));
     }
 
     /** Original EntityCultistLeader.isOnSameTeam: the praetor never attacks its own faction. */

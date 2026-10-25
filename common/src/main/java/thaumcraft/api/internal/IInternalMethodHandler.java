@@ -28,10 +28,10 @@ public interface IInternalMethodHandler {
     @Deprecated
     default void generateVisEffect(ServerLevel level, int x, int y, int z, int x2, int y2, int z2, int color) {}
 
-    /** Returns false by default, including null arguments, without mutation; the installed handler inherits this inert overload.
-     * @deprecated Use thaumcraft.common.lib.InternalMethodHandler.INSTANCE.isResearchComplete(Player, String). */
-    @Deprecated
-    default boolean isResearchComplete(Player player, String researchKey) { return false; }
+    /** Player-scoped service. Old addon handlers retain their username override through this default. */
+    default boolean isResearchComplete(Player player, String researchKey) {
+        return player != null && isResearchComplete(player.getGameProfile().getName(), researchKey);
+    }
 
     /** Returns false by default, including null arguments, without mutation; the installed handler inherits this inert overload.
      * @deprecated Use thaumcraft.common.lib.InternalMethodHandler.INSTANCE.hasDiscoveredAspect(Player, Aspect). */

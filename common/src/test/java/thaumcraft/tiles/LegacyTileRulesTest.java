@@ -180,15 +180,26 @@ class LegacyTileRulesTest {
         assertEquals(3, LegacyTileRules.deathFluidLevelForOriginalMetadata(0));
     }
 
-    @Test void theDeathFluidCellTakesTheLevelOfItsStrongestNeighbour() {
-        // A cell that still has a stronger neighbour keeps the level of that neighbour plus one, so
-        // a cell next to the source stays at level one.
-        assertEquals(1, LegacyTileRules.deathFluidNextLevel(1, 0));
-        assertEquals(2, LegacyTileRules.deathFluidNextLevel(3, 1));
-        // A cell without a stronger neighbour loses one quanta on every step and dries up again.
-        assertEquals(2, LegacyTileRules.deathFluidNextLevel(1, 4));
-        assertEquals(3, LegacyTileRules.deathFluidNextLevel(2, 4));
-        assertEquals(4, LegacyTileRules.deathFluidNextLevel(3, 4));
+    @Test void finiteDeathFluidConservesEveryFourQuantumNeighborhood() {
+        // The former strongest-neighbor expectation encoded an inexhaustible source. TC4 actually
+        // inherits Forge1.7 BlockFluidFinite:94-131,231: a sum is distributed, never copied or dried away.
+        for (int amount = 1; amount <= 4; amount++) for (int n = -1; n <= 4; n++)
+            for (int s = -1; s <= 4; s++) for (int w = -1; w <= 4; w++) for (int e = -1; e <= 4; e++) {
+                int[] before = {amount, n, s, w, e};
+                for (boolean lastRandom : new boolean[] {false, true}) {
+                    int[] after = LegacyTileRules.deathFluidDistribution(amount, new int[] {n, s, w, e},
+                            bound -> lastRandom ? bound - 1 : 0);
+                    int beforeStock = java.util.Arrays.stream(before).filter(q -> q >= 0).sum();
+                    int afterStock = java.util.Arrays.stream(after).filter(q -> q >= 0).sum();
+                    assertEquals(beforeStock, afterStock, "finite stock: " + java.util.Arrays.toString(before));
+                    for (int i = 1; i < after.length; i++) {
+                        assertTrue(after[i] >= -1 && after[i] <= 4, "finite cell capacity");
+                        if (before[i] < 0 || before[i] >= amount - 1)
+                            assertEquals(before[i], after[i], "only strict-lower cells participate");
+                    }
+                    assertTrue(after[0] >= 0 && after[0] <= 4, "finite source capacity");
+                }
+            }
     }
 
     @Test void aCellWithoutTheLevelPropertyNeverReceivesOne() {

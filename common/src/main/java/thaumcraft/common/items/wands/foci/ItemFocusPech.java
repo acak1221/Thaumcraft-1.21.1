@@ -23,6 +23,9 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 public final class ItemFocusPech extends ItemFocusBasic {
     private static final SoundEvent ICE=SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft","ice"));
     public ItemFocusPech(Properties properties) {super(properties);}
+    @Override public ResourceLocation getFocusDepthLayerIcon(ItemStack focus) {
+        return ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/focus_pech_depth.png");
+    }
     private static AspectList baseCost() {return new AspectList().add(Aspect.EARTH,10).add(Aspect.ENTROPY,10).add(Aspect.WATER,10);}
     @Override public AspectList getVisCost(ItemStack focus) {
         return focus.getItem() instanceof ItemFocusPech&&isUpgradedWith(focus,FocusUpgradeType.nightshade)?new AspectList().add(Aspect.AIR,10).add(Aspect.FIRE,10).add(Aspect.EARTH,10).add(Aspect.ORDER,10).add(Aspect.ENTROPY,10).add(Aspect.WATER,10):baseCost();

@@ -68,13 +68,19 @@ public interface IPlayerKnowledge {
 
     boolean hasResearchFlag(String key, EnumResearchFlag flag);
 
-    /** Adds knowledge of the category to the player. */
+    /** Adds writable knowledge and reports whether it was accepted.
+     * The native TC4 view accepts OBSERVATION as aspect-pool credit. THEORY is a read-only
+     * projection of completed research costs, so NativePlayerKnowledge returns false for it
+     * without changing player state; it is not a separate TC6 progression balance.
+     */
     boolean addKnowledge(EnumKnowledgeType type, ResearchCategory category, int amount);
 
     /** The knowledge of the category, as the category formula reports it. */
     int getKnowledge(EnumKnowledgeType type, ResearchCategory category);
 
-    /** The raw knowledge of the category, before the category formula. */
+    /** The raw knowledge of the category, before the category formula.
+     * In the native view THEORY sums the category's aspects across completed TC4 research costs.
+     */
     int getKnowledgeRaw(EnumKnowledgeType type, ResearchCategory category);
 
     /** Sends the current knowledge to the client. */

@@ -14,6 +14,10 @@ public record ResearchSettings(boolean cheatSheet, boolean wardedStone, boolean 
         return new ResearchSettings(cheatSheet, wards, allowMirrors, hardNodes, wuss, difficulty, aspectCap);
     }
 
+    /** Keeps original Config:390's getInt(8) fallback for malformed research_difficulty.
+     * The normal documented modes are -1..1; other integers, including that original fallback,
+     * deliberately take the note path in purchases rather than introducing a new mode.
+     */
     public static ResearchSettings read(Properties properties) {
         return new ResearchSettings(bool(properties, "allow_cheat_sheet", false), bool(properties, "allow_warded_stone", true, false),
                 bool(properties, "allow_mirrors", true), bool(properties, "hard_mode_nodes", true),

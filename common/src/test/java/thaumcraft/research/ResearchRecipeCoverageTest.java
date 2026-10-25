@@ -22,19 +22,11 @@ class ResearchRecipeCoverageTest {
     /**
      * The original recipes that still have no native recipe.
      *
-     * <p>Two groups remain:
-     * <ul>
-     *   <li>{@link #THIRD_PARTY_ORE} - the eight original recipes the oracle registers only when another mod
-     *       supplies the matching ore (Config.foundTinIngot, foundSilverIngot, foundLeadIngot).
-     *       Vanilla 1.21.1 has no tin, no silver and no lead at all, so the original never registers them
-     *       either. They stay deferred on purpose. Copper is vanilla, so its three original recipes
-     *       (PureCopper, TransCopper and WandCapCopper) are carried by this port.</li>
-     *   <li>The remaining entry is blocked on a native BLOCK that still does not exist; the reason for
-     *       it is kept in {@link ResearchRecipeCoverage#deferredRecipes()}.</li>
-     * </ul>
+     * <p>The remaining eight recipes require a third-party tin/silver/lead ore registration.
+     * The original does not register these in a vanilla-only world either. Essentia mirrors now have
+     * a native item, recipe, placement kind and transfer path and are no longer a deferral.
      */
     private static final List<String> EXPECTED_MISSING = List.of(
-            "MirrorEssentia",
             "PureLead",
             "PureSilver",
             "PureTin",
@@ -55,7 +47,7 @@ class ResearchRecipeCoverageTest {
 
     /** The research entries whose pages still show an unresolved original recipe. */
     private static final List<String> EXPECTED_RESEARCH = List.of(
-            "CAP_silver", "MIRRORESSENTIA", "PURELEAD", "PURESILVER", "PURETIN",
+            "CAP_silver", "PURELEAD", "PURESILVER", "PURETIN",
             "TRANSLEAD", "TRANSSILVER", "TRANSTIN");
 
     /** The original keys the corpus itself stores as a plain List, not as a recipe. */
@@ -161,9 +153,9 @@ class ResearchRecipeCoverageTest {
         assertEquals(new TreeSet<>(ORIGINAL_CATALOGUE), classified,
                 "The classified original keys are not the 308 keys of the oracle ConfigRecipes.");
         assertEquals(308, ORIGINAL_CATALOGUE.size());
-        assertEquals(293, ResearchRecipeCoverage.nativeRecipeIds().size());
+        assertEquals(294, ResearchRecipeCoverage.nativeRecipeIds().size());
         assertEquals(9, ResearchRecipeCoverage.constructBlueprints().size());
-        assertEquals(9, ResearchRecipeCoverage.deferredRecipes().size());
+        assertEquals(8, ResearchRecipeCoverage.deferredRecipes().size());
         // Every key of the catalogue is either resolved or has exactly one documented reason.
         for (String key : ORIGINAL_CATALOGUE) {
             boolean resolved = ResearchRecipeCoverage.isResolved(key);
@@ -188,7 +180,7 @@ class ResearchRecipeCoverageTest {
     @Test
     void everyMappedOriginalKeyResolvesToAPackagedNativeRecipe() {
         Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
-        assertEquals(293, ids.size());
+        assertEquals(294, ids.size());
         Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
         for (Map.Entry<String, String> entry : ids.entrySet()) {
             String id = entry.getValue();
@@ -331,7 +323,7 @@ class ResearchRecipeCoverageTest {
                 for (String key : fields[1].split(",")) assertNull(expected.put(key, fields[0]), "duplicate fixture " + key);
             }
         }
-        assertEquals(244, expected.size(), "nonempty, frozen original gate corpus");
+        assertEquals(245, expected.size(), "nonempty, frozen original gate corpus");
         Set<String> gatedTypes = Set.of("thaumcraft:arcane_shaped", "thaumcraft:arcane_shapeless",
                 "thaumcraft:crucible", "thaumcraft:infusion_stack", "thaumcraft:infusion_enchantment",
                 "thaumcraft:infusion_runic_augment");

@@ -1,0 +1,202 @@
+Итоговый Git status и новые файлы — дополнительное исправление 27 пунктов
+UTC: 2026-10-25T08:17:23.210584+00:00
+Repository: /workspace/Thaumcraft-1.21.1
+Branch: work
+HEAD: c4a8f7a8cc5f56458d6afe7a5551aa31d6957eff
+Remote main: c4a8f7a8cc5f56458d6afe7a5551aa31d6957eff (проверено git ls-remote origin refs/heads/main; tracking origin/main не обновлялся)
+Commit/push/PR/publication: не выполнялись
+Состояние: 107 tracked modified, 30 untracked, всего 137 строк. Сюда входят сохранённые изменения предыдущей волны.
+
+$ git status --short --untracked-files=all
+ M common/src/gameTest/java/thaumcraft/common/testing/ChampionRuntimeChecks.java
+ M common/src/gameTest/java/thaumcraft/common/testing/EldritchBestiaryRuntimeChecks.java
+ M common/src/gameTest/java/thaumcraft/common/testing/EquipmentEnchantmentRuntimeChecks.java
+ M common/src/gameTest/java/thaumcraft/common/testing/ObjectAspectApiRuntimeChecks.java
+ M common/src/gameTest/java/thaumcraft/common/testing/ScanApiRuntimeChecks.java
+ M common/src/gameTest/java/thaumcraft/common/testing/ThaumatoriumRuntimeChecks.java
+ M common/src/main/java/thaumcraft/api/ThaumcraftApi.java
+ M common/src/main/java/thaumcraft/api/ThaumcraftApiHelper.java
+ M common/src/main/java/thaumcraft/api/aspects/AspectEventProxy.java
+ M common/src/main/java/thaumcraft/api/capabilities/IPlayerKnowledge.java
+ M common/src/main/java/thaumcraft/api/capabilities/NativePlayerKnowledge.java
+ M common/src/main/java/thaumcraft/api/crafting/InfusionEnchantmentRecipe.java
+ M common/src/main/java/thaumcraft/api/crafting/InfusionRecipe.java
+ M common/src/main/java/thaumcraft/api/crafting/ShapedArcaneRecipe.java
+ M common/src/main/java/thaumcraft/api/crafting/ShapelessArcaneRecipe.java
+ M common/src/main/java/thaumcraft/api/internal/IInternalMethodHandler.java
+ M common/src/main/java/thaumcraft/api/internal/ThaumcraftInternalMethods.java
+ M common/src/main/java/thaumcraft/api/wands/ItemFocusBasic.java
+ M common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java
+ M common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java
+ M common/src/main/java/thaumcraft/client/gui/ResearchIconDisplay.java
+ M common/src/main/java/thaumcraft/client/lib/CastingWandHud.java
+ M common/src/main/java/thaumcraft/client/renderers/item/ItemBannerRenderer.java
+ M common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java
+ M common/src/main/java/thaumcraft/client/renderers/item/ThaumometerReadout.java
+ M common/src/main/java/thaumcraft/client/renderers/models/gear/ModelGearArmor.java
+ M common/src/main/java/thaumcraft/client/renderers/tile/TileBannerRenderer.java
+ M common/src/main/java/thaumcraft/common/Thaumcraft.java
+ M common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java
+ M common/src/main/java/thaumcraft/common/blocks/BlockLoot.java
+ M common/src/main/java/thaumcraft/common/blocks/BlockLootItem.java
+ M common/src/main/java/thaumcraft/common/blocks/BlockMirror.java
+ M common/src/main/java/thaumcraft/common/blocks/BlockThaumatorium.java
+ M common/src/main/java/thaumcraft/common/blocks/BlockWandPedestal.java
+ M common/src/main/java/thaumcraft/common/blocks/ItemMirrorBlock.java
+ M common/src/main/java/thaumcraft/common/blocks/ItemWandPedestalFocus.java
+ M common/src/main/java/thaumcraft/common/config/ResearchSettings.java
+ M common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java
+ M common/src/main/java/thaumcraft/common/container/ContainerArcaneWorkbench.java
+ M common/src/main/java/thaumcraft/common/container/ContainerThaumatorium.java
+ M common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java
+ M common/src/main/java/thaumcraft/common/crafting/ArcaneCrafting.java
+ M common/src/main/java/thaumcraft/common/crafting/ArcaneIngredientMatching.java
+ M common/src/main/java/thaumcraft/common/crafting/ArcaneShapedRecipe.java
+ M common/src/main/java/thaumcraft/common/crafting/ArcaneShapelessRecipe.java
+ M common/src/main/java/thaumcraft/common/crafting/CrucibleCrafting.java
+ M common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java
+ M common/src/main/java/thaumcraft/common/crafting/InfusionComponentPredicate.java
+ M common/src/main/java/thaumcraft/common/crafting/InfusionEnchantmentRecipe.java
+ M common/src/main/java/thaumcraft/common/entities/monster/EntityCultistLeader.java
+ M common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPech.java
+ M common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java
+ M common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPrimal.java
+ M common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java
+ M common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusWarding.java
+ M common/src/main/java/thaumcraft/common/lib/baubles/PlayerAccessories.java
+ M common/src/main/java/thaumcraft/common/lib/eldritch/OculusFormation.java
+ M common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentRepair.java
+ M common/src/main/java/thaumcraft/common/lib/events/EssentiaHandler.java
+ M common/src/main/java/thaumcraft/common/lib/fluid/DeathBucketActions.java
+ M common/src/main/java/thaumcraft/common/lib/mods/ChampionModifier.java
+ M common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java
+ M common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java
+ M common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java
+ M common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java
+ M common/src/main/java/thaumcraft/common/lib/world/AuraDimensionRules.java
+ M common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java
+ M common/src/main/java/thaumcraft/common/lib/world/MagicalTreeBiomeAdapter.java
+ M common/src/main/java/thaumcraft/common/lib/world/NormalNodeBiomeAdapter.java
+ M common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java
+ M common/src/main/java/thaumcraft/common/lib/world/ThaumcraftNormalNodeFeature.java
+ M common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTotemFeature.java
+ M common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTreeFeature.java
+ M common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java
+ M common/src/main/java/thaumcraft/common/lib/world/WorldGenMound.java
+ M common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeHandler.java
+ M common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java
+ M common/src/main/java/thaumcraft/common/tiles/TileMirror.java
+ M common/src/main/java/thaumcraft/common/tiles/TileMirrorEssentia.java
+ M common/src/main/java/thaumcraft/common/tiles/TileNode.java
+ M common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java
+ M common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java
+ M common/src/main/resources/assets/thaumcraft/lang/en_us.json
+ M common/src/main/resources/assets/thaumcraft/lang/ru_ru.json
+ M common/src/test/java/thaumcraft/api/CapabilitiesApiTest.java
+ M common/src/test/java/thaumcraft/api/CraftingApiTest.java
+ M common/src/test/java/thaumcraft/assets/EldritchAndDeviceAssetsTest.java
+ M common/src/test/java/thaumcraft/assets/GapRecipesAssetsTest.java
+ M common/src/test/java/thaumcraft/common/blocks/FluidFamilyParityTest.java
+ M common/src/test/java/thaumcraft/mods/ChampionModifierTest.java
+ M common/src/test/java/thaumcraft/research/ResearchRecipeCoverageTest.java
+ M common/src/test/java/thaumcraft/research/ResearchSettingsTest.java
+ M common/src/test/java/thaumcraft/tiles/LegacyTileRulesTest.java
+ M common/src/test/java/thaumcraft/tiles/MazeSaveIntegrityTest.java
+ M common/src/test/java/thaumcraft/world/NodeEcologyPolicyTest.java
+ M common/src/test/resources/META-INF/services/org.junit.platform.launcher.LauncherSessionListener
+ M common/src/test/resources/thaumcraft/audit/recipe-gates.txt
+ M docs/HANDOFF.md
+ M docs/MIGRATION_STATUS.md
+ M fabric/src/gameTest/java/thaumcraft/fabric/testing/ThaumcraftGameTestBootstrap.java
+ M fabric/src/gameTest/java/thaumcraft/fabric/testing/ThaumcraftGameTests.java
+ M fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java
+ M fabric/src/main/java/thaumcraft/fabric/loot/FabricThaumcraftLoot.java
+ M neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java
+ M neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java
+ M scripts/porting/composed-resource-paths.json
+ M scripts/porting/test_composed_resources.py
+?? common/src/gameTest/java/thaumcraft/common/testing/DeathFluidRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/LootContainerRarityRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/MirrorRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/ProgrammaticRecipeRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/ResourceSafetyRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/ReviewRegressionRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/WandHandSelectionRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/WandSceptreGrindstoneRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/testing/WorldBossFollowupRuntimeChecks.java
+?? common/src/gameTest/java/thaumcraft/common/tiles/WandPedestalRegressionChecks.java
+?? common/src/main/java/thaumcraft/client/renderers/BannerPose.java
+?? common/src/main/java/thaumcraft/common/crafting/CrucibleRecipeDisplay.java
+?? common/src/main/java/thaumcraft/common/crafting/ProgrammaticArcaneRecipe.java
+?? common/src/main/java/thaumcraft/common/crafting/ProgrammaticRecipes.java
+?? common/src/main/java/thaumcraft/common/items/wands/WandHands.java
+?? common/src/main/java/thaumcraft/common/lib/world/biomes/OriginalBiomeTypes.java
+?? common/src/main/resources/assets/thaumcraft/models/item/mirror_essentia.json
+?? common/src/main/resources/data/thaumcraft/recipe/infusion/mirror_essentia.json
+?? common/src/test/java/thaumcraft/client/BannerPoseParityTest.java
+?? common/src/test/java/thaumcraft/client/lib/CastingWandHudTest.java
+?? common/src/test/java/thaumcraft/client/renderers/item/FocusRenderingTestRegistry.java
+?? common/src/test/java/thaumcraft/client/renderers/item/ThaumometerAspectLayoutParityTest.java
+?? common/src/test/java/thaumcraft/client/renderers/item/WandFocusRenderingTest.java
+?? common/src/test/java/thaumcraft/gear/GearZombiePoseParityTest.java
+?? docs/analysis/2026-10-25-deep-review-ru.md
+?? docs/analysis/2026-10-25-followup-files.txt
+?? docs/analysis/2026-10-25-followup-review-fixes-ru.md
+?? docs/analysis/2026-10-25-review-fixes-ru.md
+?? fabric/src/gameTest/java/thaumcraft/fabric/testing/LootSourceRegressionChecks.java
+?? neoforge/src/main/java/thaumcraft/neoforge/client/NeoForgeSpaClient.java
+
+Созданы этой волной: 12 source/test файлов и 2 отчётных файла (сравнение manifest с предыдущей волной):
+common/src/gameTest/java/thaumcraft/common/testing/LootContainerRarityRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/ResourceSafetyRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/WandSceptreGrindstoneRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/WorldBossFollowupRuntimeChecks.java
+common/src/main/java/thaumcraft/client/renderers/BannerPose.java
+common/src/main/java/thaumcraft/common/lib/world/biomes/OriginalBiomeTypes.java
+common/src/test/java/thaumcraft/client/BannerPoseParityTest.java
+common/src/test/java/thaumcraft/client/renderers/item/FocusRenderingTestRegistry.java
+common/src/test/java/thaumcraft/client/renderers/item/ThaumometerAspectLayoutParityTest.java
+common/src/test/java/thaumcraft/client/renderers/item/WandFocusRenderingTest.java
+common/src/test/java/thaumcraft/gear/GearZombiePoseParityTest.java
+fabric/src/gameTest/java/thaumcraft/fabric/testing/LootSourceRegressionChecks.java
+docs/analysis/2026-10-25-followup-files.txt
+docs/analysis/2026-10-25-followup-review-fixes-ru.md
+
+Все текущие untracked файлы (часть существовала до этой волны; не выдаются за новые этой волны):
+common/src/gameTest/java/thaumcraft/common/testing/DeathFluidRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/LootContainerRarityRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/MirrorRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/ProgrammaticRecipeRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/ResourceSafetyRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/ReviewRegressionRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/WandHandSelectionRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/WandSceptreGrindstoneRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/testing/WorldBossFollowupRuntimeChecks.java
+common/src/gameTest/java/thaumcraft/common/tiles/WandPedestalRegressionChecks.java
+common/src/main/java/thaumcraft/client/renderers/BannerPose.java
+common/src/main/java/thaumcraft/common/crafting/CrucibleRecipeDisplay.java
+common/src/main/java/thaumcraft/common/crafting/ProgrammaticArcaneRecipe.java
+common/src/main/java/thaumcraft/common/crafting/ProgrammaticRecipes.java
+common/src/main/java/thaumcraft/common/items/wands/WandHands.java
+common/src/main/java/thaumcraft/common/lib/world/biomes/OriginalBiomeTypes.java
+common/src/main/resources/assets/thaumcraft/models/item/mirror_essentia.json
+common/src/main/resources/data/thaumcraft/recipe/infusion/mirror_essentia.json
+common/src/test/java/thaumcraft/client/BannerPoseParityTest.java
+common/src/test/java/thaumcraft/client/lib/CastingWandHudTest.java
+common/src/test/java/thaumcraft/client/renderers/item/FocusRenderingTestRegistry.java
+common/src/test/java/thaumcraft/client/renderers/item/ThaumometerAspectLayoutParityTest.java
+common/src/test/java/thaumcraft/client/renderers/item/WandFocusRenderingTest.java
+common/src/test/java/thaumcraft/gear/GearZombiePoseParityTest.java
+docs/analysis/2026-10-25-deep-review-ru.md
+docs/analysis/2026-10-25-followup-files.txt
+docs/analysis/2026-10-25-followup-review-fixes-ru.md
+docs/analysis/2026-10-25-review-fixes-ru.md
+fabric/src/gameTest/java/thaumcraft/fabric/testing/LootSourceRegressionChecks.java
+neoforge/src/main/java/thaumcraft/neoforge/client/NeoForgeSpaClient.java
+
+Локальный сборочный артефакт (ignored): fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.5.jar
+SHA256 fd3c05f064aac850b3c65307ac7a82a8c31bd433d0bd38183b86b981a04456db; 15291266 bytes
+Временные доказательства/журналы/backup (ignored): .tmp/fix-followup/
+Сохранён старый тестовый мир: .tmp/fix-followup/reused-gametest-world-before-fresh/
+Сохранён предыдущий прошедший JAR: .tmp/fix-followup/previous-Thaumcraft-fabric-0.1.0-alpha.5-3b36bab7.jar
+Новые файлы Gradle caches/build/run-world не перечисляются рекурсивно как исходники.

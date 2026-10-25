@@ -10,6 +10,7 @@ import thaumcraft.common.testing.ExcavationRemovalFailureRuntimeChecks;
  * source set and its entrypoint are excluded from production artifacts. */
 public final class ThaumcraftGameTestBootstrap implements ModInitializer {
     @Override public void onInitialize() {
+        thaumcraft.common.testing.ResourceSafetyRuntimeChecks.registerTestProbes();
         NodeTransductionRuntimeChecks.registerTestProbes();
         thaumcraft.common.testing.VisAmuletRuntimeChecks.registerTestProbes();
         FluxOverfullRuntimeChecks.registerTestProbes();

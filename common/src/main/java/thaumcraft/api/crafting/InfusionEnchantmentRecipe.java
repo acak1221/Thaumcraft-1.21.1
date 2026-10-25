@@ -31,6 +31,7 @@ public class InfusionEnchantmentRecipe {
     public int instability;
     private final Holder<Enchantment> enchantmentHolder;
     private thaumcraft.common.crafting.InfusionEnchantmentRecipe nativeRecipe;
+    private boolean nativeView;
 
     /** Builds an unregistered enchantment recipe with dimensionless instability and essentia-unit costs, not centivis.
      * Null/unregistered enchantment holders throw IAE; nullable aspects are retained (native cost empty), null recipe means no components.
@@ -65,6 +66,7 @@ public class InfusionEnchantmentRecipe {
         InfusionEnchantmentRecipe view = new InfusionEnchantmentRecipe(recipe.research(), holder, recipe.instability(),
                 NativeRecipes.aspects(recipe.aspects()), samples(recipe.components()));
         view.nativeRecipe = recipe;
+        view.nativeView = true;
         return view;
     }
 
@@ -77,13 +79,25 @@ public class InfusionEnchantmentRecipe {
     /** The registry holder of the enchanted effect. */
     public Holder<Enchantment> enchantmentHolder() { return enchantmentHolder; }
 
-    /** Tests research, enchantment admission and component predicates without consuming supplied stacks.
-     * Null input/central or null world returns false; null player fails nonempty research gates.
-     * Null component entries can throw while constructing the native input snapshot. */
+    /** Tests research, native enchantment admission and the virtual component comparator on copies.
+     * Datapack views retain native ingredient predicates. Null input/central/world returns false;
+     * null player fails nonempty research gates; invalid component entries may throw. */
     public boolean matches(ArrayList<ItemStack> input, ItemStack central, Level world, Player player) {
         if (this.research != null && !this.research.isEmpty() && !ThaumcraftApiHelper.isResearchComplete(player, this.research)) return false;
         if (input == null || central == null) return false;
-        return nativeRecipe.matches(new InfusionRecipeInput(central, input), world);
+        if (nativeView) return nativeRecipe.matches(new InfusionRecipeInput(central, input), world);
+        if (world == null || !thaumcraft.common.crafting.InfusionEnchantmentRecipe.canApply(central, enchantmentHolder)
+                || calcInstability(central) > 24 || calcXP(central) < 0) return false;
+        ArrayList<ItemStack> remaining = new ArrayList<>(input.stream().map(ItemStack::copy).toList());
+        for (ItemStack required : components) {
+            int match = -1;
+            for (int index = 0; index < remaining.size(); index++) {
+                if (areItemStacksEqual(remaining.get(index).copy(), required, true)) { match = index; break; }
+            }
+            if (match < 0) return false;
+            remaining.remove(match);
+        }
+        return remaining.isEmpty();
     }
 
     /** The original stack comparison; the ore-dictionary shortcut has no 1.21.1 equivalent. */

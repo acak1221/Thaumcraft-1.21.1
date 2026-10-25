@@ -3,6 +3,7 @@ package thaumcraft.common.lib.eldritch;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -100,10 +101,14 @@ public final class OculusFormation {
         Map<String, Integer> price = ArcaneVis.price(oculusVisCost(), held, actor);
         ItemStack paid = held.copy();
         if (!ArcaneVis.debit(paid, price)) return InteractionResult.FAIL;
-        // Original WandManager.java:436-440 - the gate replaces the dark node.
-        server.removeBlock(above, false);
-        if (!server.setBlock(above, ThaumcraftEldritchBlocks.ELDRITCH_PORTAL.get().defaultBlockState(), Block.UPDATE_ALL)) {
-            server.setBlock(above, node.getBlockState(), Block.UPDATE_ALL);
+        // Replace directly: removing the node first destroys its block entity even
+        // when the following placement is refused. Retain its complete data for a
+        // partial native replacement, rather than recreating a default aura node.
+        BlockState originalNodeState = node.getBlockState();
+        CompoundTag originalNodeData = node.saveWithFullMetadata(server.registryAccess());
+        BlockState portal = ThaumcraftEldritchBlocks.ELDRITCH_PORTAL.get().defaultBlockState();
+        if (!server.setBlock(above, portal, Block.UPDATE_ALL) || server.getBlockState(above) != portal) {
+            restoreNode(server, above, node, originalNodeState, originalNodeData, portal);
             return InteractionResult.FAIL;
         }
         held.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(paid));
@@ -113,5 +118,19 @@ public final class OculusFormation {
         server.playSound(null, pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D,
                 SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand")), SoundSource.BLOCKS, 1, 1);
         return InteractionResult.CONSUME;
+    }
+
+    private static void restoreNode(ServerLevel level, BlockPos pos, TileNode original, BlockState state,
+                                    CompoundTag data, BlockState portal) {
+        if (level.getBlockEntity(pos) == original) return;
+        BlockState current = level.getBlockState(pos);
+        // A notification may deliberately install another owner; do not erase it.
+        if (current != portal && !current.isAir()) return;
+        if (!level.setBlock(pos, state, Block.UPDATE_KNOWN_SHAPE)) return;
+        if (level.getBlockEntity(pos) instanceof TileNode restored) {
+            restored.loadWithComponents(data, level.registryAccess());
+            restored.setChanged();
+            level.sendBlockUpdated(pos, current, state, Block.UPDATE_CLIENTS);
+        }
     }
 }

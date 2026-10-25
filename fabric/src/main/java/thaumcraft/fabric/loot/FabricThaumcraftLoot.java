@@ -28,7 +28,9 @@ public final class FabricThaumcraftLoot {
 
     public static void init() {
         LootTableEvents.MODIFY.register((key, table, source, registries) -> {
-            if (!source.isBuiltin() || !key.location().getNamespace().equals("minecraft")) return;
+            // Match NeoForge's LootTableLoadEvent, which also includes user datapacks:
+            // replacing a vanilla chest table must not silently disable its TC4 rows.
+            if (!key.location().getNamespace().equals("minecraft")) return;
             String category = CATEGORIES.get(key.location().getPath());
             if (category == null) return;
             var additions = ThaumcraftLoot.chestAdditions(category);

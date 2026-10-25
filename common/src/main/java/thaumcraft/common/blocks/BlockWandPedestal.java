@@ -68,7 +68,10 @@ public final class BlockWandPedestal extends BaseEntityBlock implements StateDep
     }
 
     /** Whether the block is the focus that sits on top of a pedestal. */
-    public boolean isFocus() { return defaultBlockState().getValue(FOCUS); }
+    public boolean isFocus(BlockState state) { return state.is(this) && state.getValue(FOCUS); }
+
+    /** Retained default-state query; use the state overload for a placed focus. */
+    public boolean isFocus() { return isFocus(defaultBlockState()); }
 
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {

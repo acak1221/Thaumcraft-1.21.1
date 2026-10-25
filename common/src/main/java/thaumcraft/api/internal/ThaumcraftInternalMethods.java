@@ -26,11 +26,17 @@ import thaumcraft.common.lib.research.PlayerKnowledge;
  * <p>Everything the original {@code DummyInternalMethodHandler} refused to answer is answered here from the
  * live native state: the player's own knowledge, the native object-tag registry, the native wand payment and
  * the native warp bookkeeping. Nothing is cached across a player or world change; the server reference used to
- * resolve a player name is weak and is captured from real player traffic only.</p>
+ * resolve a player name is weak and follows the native server lifecycle.</p>
  */
 public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     private static final AtomicReference<WeakReference<MinecraftServer>> SERVER = new AtomicReference<>(new WeakReference<>(null));
     public ThaumcraftInternalMethods() {}
+
+    public static void serverStarted(MinecraftServer server) { SERVER.set(new WeakReference<>(server)); }
+    public static void serverStopped(MinecraftServer server) {
+        WeakReference<MinecraftServer> current = SERVER.get();
+        if (current.get() == server) SERVER.compareAndSet(current, new WeakReference<>(null));
+    }
 
     /**
      * @deprecated Inert: numeric Forge dimensions cannot select a native server level. Use
@@ -45,6 +51,11 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     @Override public boolean isResearchComplete(String username, String researchkey) {
         PlayerKnowledge knowledge = knowledge(username);
         return knowledge != null && knowledge.isResearchComplete(researchkey);
+    }
+
+    @Override public boolean isResearchComplete(Player player, String researchKey) {
+        PlayerKnowledge knowledge = knowledge(player);
+        return knowledge != null && knowledge.isResearchComplete(researchKey);
     }
 
     @Override public boolean hasDiscoveredAspect(String username, Aspect aspect) {
@@ -145,11 +156,6 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
 
     private static PlayerKnowledge knowledge(Player player) {
         if (player == null) return null;
-        Level level = player.level();
-        if (level != null) {
-            MinecraftServer server = level.getServer();
-            if (server != null) SERVER.set(new WeakReference<>(server));
-        }
         try {
             return KnowledgeAccess.get(player);
         } catch (RuntimeException unavailable) {

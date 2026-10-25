@@ -74,6 +74,10 @@ public record ArcaneShapelessRecipe(String research, List<Ingredient> ingredient
     }
 
     @Override public boolean matches(ArcaneRecipeInput input, Level level) {
+        return matches(input, level, ArcaneIngredientMatching::matchesStack);
+    }
+
+    public boolean matches(ArcaneRecipeInput input, Level level, java.util.function.BiPredicate<ItemStack, ItemStack> comparison) {
         var remaining = new ArrayList<>(ingredients);
         // Oracle ShapelessArcaneRecipe:93-117 visits slots0..8, removing the FIRST
         // remaining matching ingredient. Preserve that greedy overlap quirk: no
@@ -86,7 +90,7 @@ public record ArcaneShapelessRecipe(String research, List<Ingredient> ingredient
             if (stack.getItem() instanceof ItemJar && !ItemJar.isEmptyIngredient(stack)) return false;
             int matched = -1;
             for (int index = 0; index < remaining.size(); index++) {
-                if (ArcaneIngredientMatching.matches(remaining.get(index), stack)) { matched = index; break; }
+                if (ArcaneIngredientMatching.matches(remaining.get(index), stack, comparison)) { matched = index; break; }
             }
             if (matched < 0) return false;
             remaining.remove(matched);

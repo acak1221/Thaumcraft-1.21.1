@@ -26,6 +26,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftEquipment;
 import thaumcraft.common.config.ThaumcraftInfusion;
+import thaumcraft.common.config.ThaumcraftTravelGear;
 import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.crafting.InfusionRecipeInput;
 import thaumcraft.common.items.wands.ItemWandCasting;
@@ -90,6 +91,9 @@ public final class EquipmentEnchantmentRuntimeChecks {
             player.getInventory().clearContent();
             ItemStack sword = new ItemStack(ThaumcraftEquipment.THAUMIUM_SWORD.get()); sword.enchant(repair, 2); sword.setDamageValue(10);
             ItemStack boots = new ItemStack(ThaumcraftEquipment.THAUMIUM_BOOTS.get()); boots.enchant(repair, 1); boots.setDamageValue(10);
+            ItemStack harness = new ItemStack(ThaumcraftTravelGear.HOVER_HARNESS.get()); harness.enchant(repair, 1); harness.setDamageValue(10);
+            test.assertTrue(EnchantmentRepair.cost(harness, player, 1).size() > 0,
+                    "the damaged enchanted hotbar harness has a genuine payable Repair cost, so its exclusion is exercised");
             var swordBase = ObjectAspectResolver.baseTags(sword, level);
             test.assertTrue(swordBase.size() == 2 && swordBase.getAmount(Aspect.METAL) == 6 && swordBase.getAmount(Aspect.MAGIC) == 3,
                     "Repair sees original .75-scaled sword recipe tags, before enchantment/equipment bonuses");
@@ -100,6 +104,7 @@ public final class EquipmentEnchantmentRuntimeChecks {
                     && cost.getAmount(Aspect.ORDER) == 8 && cost.getAmount(Aspect.ENTROPY) == 4 && cost.getAmount(Aspect.WATER) == 0,
                     "sum primal decomposition and floor-square-root payment use raw centivis");
             player.getInventory().items.set(0, sword); player.getInventory().items.set(9, sword.copy());
+            player.getInventory().items.set(1, harness);
             player.setItemSlot(EquipmentSlot.OFFHAND, sword.copy()); player.setItemSlot(EquipmentSlot.FEET, boots);
             ItemStack full = new ItemStack(ThaumcraftContent.WAND.get()), partial = new ItemStack(ThaumcraftContent.WAND.get());
             var all = new java.util.LinkedHashMap<String, Integer>(); for (String primal : WandData.PRIMALS) all.put(primal, 100);
@@ -117,14 +122,23 @@ public final class EquipmentEnchantmentRuntimeChecks {
                 try {
                     if (sword.getDamageValue() == 10) return;
                     test.assertTrue(sword.getDamageValue() == 8 && boots.getDamageValue() == 9
-                            && player.getInventory().items.get(9).getDamageValue() == 10 && player.getOffhandItem().getDamageValue() == 10,
-                            "ordinary living ticks repair hotbar and worn armor, excluding main slot9 and offhand");
+                            && player.getInventory().items.get(9).getDamageValue() == 10 && player.getOffhandItem().getDamageValue() == 10
+                            && harness.getDamageValue() == 10,
+                            "ordinary living ticks repair hotbar and worn armor, excluding the hotbar hover harness, main slot9 and offhand");
                     var paid = ItemWandCasting.data(full);
                     test.assertTrue(paid.amount("aer") == 93 && paid.amount("terra") == 86 && paid.amount("ignis") == 93
                             && paid.amount("aqua") == 100 && paid.amount("ordo") == 86 && paid.amount("perditio") == 93,
                             "one real gold wand pays the exact two raw-centivis repair vectors once");
                     test.assertTrue(ItemWandCasting.data(partial).amount("aer") == 100 && ItemWandCasting.data(partial).amount("terra") == 0,
                             "the later-slot insufficient wand loses no partial payment");
+                    player.getInventory().items.set(0, ItemStack.EMPTY); player.getInventory().items.set(1, ItemStack.EMPTY);
+                    player.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY); player.setItemSlot(EquipmentSlot.CHEST, harness);
+                    var charged = new java.util.LinkedHashMap<String, Integer>();
+                    for (String primal : WandData.PRIMALS) charged.put(primal, 10000);
+                    ItemWandCasting.withData(full, new WandData("primal_staff", "gold", charged));
+                    EnchantmentRepair.tick(player);
+                    test.assertTrue(harness.getDamageValue() == 9,
+                            "moving the exact same harness from hotbar to worn chest armor enables the original separate armor Repair pass");
                     finish.run(); test.succeed();
                 } catch (RuntimeException | Error failure) { finish.run(); throw failure; }
             });

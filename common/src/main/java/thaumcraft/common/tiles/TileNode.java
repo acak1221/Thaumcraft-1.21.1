@@ -234,6 +234,24 @@ public final class TileNode extends BlockEntity implements INode {
         return taken;
     }
 
+    /** One whole node vis pays a prepared pedestal credit before notification callbacks run. */
+    boolean drawForPedestal(TileWandPedestal pedestal, Aspect aspect) {
+        AspectList stock = aspects;
+        int amount = stock.getAmount(aspect);
+        if (transducing || ticking || notifying || pearlPlanning || orbIntent != null
+                || !(level instanceof ServerLevel server) || !server.getServer().isSameThread()
+                || server.getServer().getLevel(server.dimension()) != server || !current()
+                || !pedestal.readyForNodeDraw(this, aspect) || !current()) return false;
+        if (transducing || ticking || notifying || pearlPlanning || orbIntent != null
+                || aspects != stock || stock.getAmount(aspect) != amount
+                || !pedestal.preparedNodeDrawCurrent(this, aspect)) return false;
+        if (!aspects.reduce(aspect, 1)) return false;
+        pedestal.acceptNodeDraw(this, aspect);
+        try { changed(); }
+        finally { pedestal.finishNodeDraw(); }
+        return true;
+    }
+
     /**
      * Original {@code TileNode:265-271}: the base of the node becomes the given amount and the
      * current essence of the node does NOT change.

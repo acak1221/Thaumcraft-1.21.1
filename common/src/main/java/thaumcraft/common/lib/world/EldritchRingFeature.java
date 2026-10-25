@@ -45,7 +45,7 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
         if (!(level.getLevel() instanceof ServerLevel server)) return false;
-        if (OuterLandsProvider.isOuterLands(level.getLevel())) return false;
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         int chunkX = context.origin().getX() >> 4;
         int chunkZ = context.origin().getZ() >> 4;
         // Oracle ThaumcraftWorldGenerator:423-453 - the original draws the position inside
@@ -62,6 +62,7 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
     public boolean placeSelected(WorldGenLevel level, RandomSource random, StructurePlacementRules.Draw draw,
                                  int chunkX, int chunkZ) {
         if (!(level.getLevel() instanceof ServerLevel server)) return false;
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         if (draw.kind() != StructurePlacementRules.Kind.ELDRITCH_RING) return false;
         int centreX = inside(draw.x(), chunkX);
         int centreZ = inside(draw.z(), chunkZ);
@@ -103,7 +104,7 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
      */
     public static boolean preflight(WorldGenLevel level, int chunkX, int chunkZ) {
         if (!(level.getLevel() instanceof ServerLevel server)) return false;
-        if (OuterLandsProvider.isOuterLands(level.getLevel())) return false;
+        if (!ThaumcraftTotemFeature.permitsStructures(level)) return false;
         RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
                 level.getLevel().getSeed(), chunkX, chunkZ));
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);

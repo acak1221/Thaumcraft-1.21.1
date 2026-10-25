@@ -110,7 +110,7 @@ public class ThaumcraftApiHelper {
     /** Native player-scoped form of {@link #isResearchComplete(String, String)}. */
     public static boolean isResearchComplete(Player player, String researchkey) {
         if (player == null) return false;
-        return ThaumcraftApi.internalMethods.isResearchComplete(player.getGameProfile().getName(), researchkey);
+        return ThaumcraftApi.internalMethods.isResearchComplete(player, researchkey);
     }
 
     public static boolean hasDiscoveredAspect(String username, Aspect aspect) {

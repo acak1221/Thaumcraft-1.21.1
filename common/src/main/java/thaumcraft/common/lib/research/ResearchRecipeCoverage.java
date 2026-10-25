@@ -384,6 +384,7 @@ public final class ResearchRecipeCoverage {
         ids.put("MaskGrinningDevil", "thaumcraft:infusion/fortress_mask_devil");
         ids.put("MaskSippingFiend", "thaumcraft:infusion/fortress_mask_fiend");
         ids.put("Mirror", "thaumcraft:infusion/mirror");
+        ids.put("MirrorEssentia", "thaumcraft:infusion/mirror_essentia");
         ids.put("MirrorGlass", "thaumcraft:arcane/mirrored_glass");
         ids.put("MirrorHand", "thaumcraft:infusion/hand_mirror");
         ids.put("MnemonicMatrix", "thaumcraft:arcane/mnemonic_matrix");
@@ -599,21 +600,6 @@ public final class ResearchRecipeCoverage {
 
     private static Map<String, String> buildDeferred() {
         Map<String, String> reasons = new LinkedHashMap<>();
-        // The reason of this one is NOT the recipe format. A 1.21.1 recipe result CAN carry a block
-        // state: the minecraft:block_state component of the item stack holds the block state
-        // properties (BlockItemStateProperties.CODEC is a map of string to string, and
-        // BlockItem.updateBlockStateFromTag applies them to the placed state). The blocker is the
-        // port's own mirror block: it has one item, thaumcraft:mirror, and the essentia mirror is
-        // the same block with the essentia property true. The block entity of the mirror is chosen
-        // by that property (BlockMirror.createBlockEntity), but Level.setBlock keeps the block
-        // entity of a block whose type did not change, so a mirror placed with the block state
-        // component would keep the tile of the ordinary mirror and would never tick. A separate
-        // essentia mirror item (and the block entity it needs) is the missing part.
-        reasons.put("MirrorEssentia", "the original result is blockMirror metadata 6, the essentia mirror; the native mirror block keeps the essentia mirror as the essentia block state and has no separate essentia mirror item. "
-                + "A 1.21.1 recipe result CAN carry a block state (the minecraft:block_state component holds the block state properties), "
-                + "but the mirror block entity is chosen by the essentia property (BlockMirror.createBlockEntity) and Level.setBlock keeps "
-                + "the block entity of a block whose type did not change, so a mirror placed with that component would keep the tile of the "
-                + "ordinary mirror and would never tick. The missing part is a separate essentia mirror item, not a recipe format");
         // The original registers these eight recipes only when another mod supplies the matching metal
         // (Config.foundTinIngot, foundSilverIngot, foundLeadIngot). Vanilla 1.21.1 has no tin, no silver
         // and no lead at all, so the original never registers them either. Copper is vanilla, so its

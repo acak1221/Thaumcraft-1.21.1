@@ -7,7 +7,10 @@ import net.minecraft.world.level.Level;
 public final class AuraDimensionRules {
     private AuraDimensionRules() {}
     public static boolean supportsWildNodes(ResourceKey<Level> dimension) {
-        return dimension.equals(Level.OVERWORLD) || dimension.equals(Level.NETHER);
+        // Original generateNether:548-555 bypasses the surface blacklist; generateSurface:412
+        // admits aura only at levels other than zero and two. Keep that asymmetry.
+        return dimension.equals(Level.NETHER) || dimension.equals(Level.OVERWORLD)
+                && NodeEcologyPolicy.permitsLevel(NodeEcologyPolicy.dimensionLevel(dimension));
     }
     public static boolean netherReplayAura(boolean generationEnabled, boolean regenerationEnabled) {
         return generationEnabled && regenerationEnabled;

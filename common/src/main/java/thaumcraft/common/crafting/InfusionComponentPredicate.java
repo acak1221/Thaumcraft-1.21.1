@@ -17,7 +17,12 @@ import thaumcraft.common.lib.crafting.InfusionMatching;
 
 /** One selected pedestal requirement, not a general component/NBT predicate engine. */
 public record InfusionComponentPredicate(Ingredient ingredient, Optional<Integer> damage,
-                                         boolean waterPotion, boolean emptyJar, Optional<String> potion) {
+                                         boolean waterPotion, boolean emptyJar, Optional<String> potion,
+                                         Optional<ItemStack> requiredStack) {
+    public InfusionComponentPredicate {
+        requiredStack = requiredStack.map(stack -> stack.copyWithCount(1));
+    }
+    public Optional<ItemStack> requiredStack() { return requiredStack.map(ItemStack::copy); }
     public static final int MAX_COMPONENTS = 4096;
     // The existing selected-session ingredient key is retained. Missing damage
     // and false typed flags mean the old semantics, including old disk saves.
@@ -26,15 +31,27 @@ public record InfusionComponentPredicate(Ingredient ingredient, Optional<Integer
             Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("damage").forGetter(InfusionComponentPredicate::damage),
             Codec.BOOL.optionalFieldOf("water_potion", false).forGetter(InfusionComponentPredicate::waterPotion),
             Codec.BOOL.optionalFieldOf("empty_jar", false).forGetter(InfusionComponentPredicate::emptyJar),
-            Codec.STRING.optionalFieldOf("potion").forGetter(InfusionComponentPredicate::potion)
+            Codec.STRING.optionalFieldOf("potion").forGetter(InfusionComponentPredicate::potion),
+            ItemStack.STRICT_CODEC.optionalFieldOf("required_stack").forGetter(InfusionComponentPredicate::requiredStack)
     ).apply(instance, InfusionComponentPredicate::new)).flatXmap(InfusionComponentPredicate::validate, InfusionComponentPredicate::validate);
 
     public InfusionComponentPredicate(Ingredient ingredient) { this(ingredient, Optional.empty()); }
+
+    public InfusionComponentPredicate(Ingredient ingredient, Optional<Integer> damage, boolean waterPotion, boolean emptyJar, Optional<String> potion) {
+        this(ingredient, damage, waterPotion, emptyJar, potion, Optional.empty());
+    }
+
+    /** A virtual recipe is checked once, then its accepted physical components form a serializable session. */
+    public static InfusionComponentPredicate snapshot(ItemStack stack) {
+        ItemStack required = stack.copyWithCount(1);
+        return new InfusionComponentPredicate(Ingredient.of(required), Optional.empty(), false, false, Optional.empty(), Optional.of(required));
+    }
 
     public InfusionComponentPredicate(Ingredient ingredient, Optional<Integer> damage) { this(ingredient, damage, false, false,Optional.empty()); }
     public InfusionComponentPredicate(Ingredient ingredient,Optional<Integer> damage,boolean waterPotion,boolean emptyJar) { this(ingredient,damage,waterPotion,emptyJar,Optional.empty()); }
 
     public boolean matches(ItemStack offered) {
+        if (requiredStack.isPresent() && !ArcaneIngredientMatching.matchesStack(requiredStack.get(), offered)) return false;
         if (validate().error().isPresent() || !InfusionMatching.matches(ingredient, damage, offered)) return false;
         if (waterPotion && (!offered.is(Items.POTION)
                 || !new PotionContents(Potions.WATER).equals(offered.get(DataComponents.POTION_CONTENTS)))) return false;
@@ -60,6 +77,8 @@ public record InfusionComponentPredicate(Ingredient ingredient, Optional<Integer
     }
 
     private DataResult<InfusionComponentPredicate> validate() {
+        if (requiredStack.isPresent() && (requiredStack.get().isEmpty() || !ingredient.test(requiredStack.get())))
+            return DataResult.error(() -> "Programmatic infusion snapshot must satisfy its ingredient");
         if ((waterPotion && emptyJar) || potion.isPresent() && (waterPotion || emptyJar || !knownPotion(potion.get())))
             return DataResult.error(() -> "Incompatible or unknown typed infusion component requirements");
         if (damage.isPresent()) {

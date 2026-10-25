@@ -54,7 +54,14 @@ public final class BlockThaumatorium extends BaseEntityBlock {
     private InteractionResult open(Level level, BlockPos pos, Player player) {
         TileThaumatorium tile = machine(level, pos);
         if (tile == null || player.isShiftKeyDown() || player.isSpectator()) return InteractionResult.PASS;
-        if (player instanceof ServerPlayer sender && tile.stillValid(sender)) MenuRegistry.openExtendedMenu(sender, tile, data -> data.writeBlockPos(tile.getBlockPos()));
+        if (player instanceof ServerPlayer sender && tile.stillValid(sender)) {
+            var recipes = thaumcraft.common.crafting.ProgrammaticRecipes.crucibles(level.getRecipeManager());
+            MenuRegistry.openExtendedMenu(sender, new net.minecraft.world.SimpleMenuProvider(
+                    (id, inventory, viewer) -> new thaumcraft.common.container.ContainerThaumatorium(id, inventory, tile, recipes), tile.getDisplayName()), data -> {
+                data.writeBlockPos(tile.getBlockPos());
+                thaumcraft.common.crafting.CrucibleRecipeDisplay.write(data, level.registryAccess(), recipes);
+            });
+        }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) { return open(level, pos, player); }

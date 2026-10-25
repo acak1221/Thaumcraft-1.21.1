@@ -1,4 +1,18 @@
-## Текущий handoff — аудит 23.10.2026, базис `c6feeda7`
+## Handoff дополнительного списка 27 замечаний — 25.10.2026, базис `c4a8f7a8`
+
+Подтверждённые ошибки исправлены, важные изменения независимо проверены; прежние незакоммиченные правки сохранены. [Отчёт](analysis/2026-10-25-followup-review-fixes-ru.md) разбирает все 27 пунктов, отличает новые ошибки от предыдущих исправлений, dead code и исходных особенностей TC4. Также исправлены обнаруженные неверные champion multipliers и нестабильный порядок сериализации maze cells. Полный Git status и новые файлы — [инвентарь](analysis/2026-10-25-followup-files.txt).
+
+Окончательная проверка: **2561 JUnit, Fabric build/isolation, полный467/467 Fabric GameTest на свежем мире,112 Python, assets/ledger/diff — PASS**. Единый Gradle run exit0 за3m32s, normal save/stop. Логи, SHA входов/JAR и красные промежуточные результаты — ignored `.tmp/fix-followup/`. Старая тестовая карта полностью сохранена перед fresh run. Ограничение Fabric-first/запрет NeoForge builds/tests соблюдено; его source-правки проверены статически. Физический клиент, кадры GPU и multiplayer не приняты. Commit/push/PR/публикация не выполнялись.
+
+## Исторический handoff первой волны исправлений — 25.10.2026, базис `c4a8f7a8`
+
+В рабочем дереве реализованы R01–R18 из [ревью](analysis/2026-10-25-deep-review-ru.md), D1 (инвалидация живого mirror cache) и D2 (placeable/craftable essentia mirror). См. [отчёт исправлений](analysis/2026-10-25-review-fixes-ru.md) для кода, регрессий, новых обнаруженных причин и ограничений. Original/donor JAR и `thaumcraft_src` не изменены; commit/push/PR не выполнялись.
+
+Верификация первой волны: **2544 JUnit, Fabric build/isolation, 14/14 native регрессий, полный Fabric GameTest459/459, 112 Python, assets/ledger — PASS**. Нефильтрованный серверный прогон завершён нормальным save/stop, Gradle exit0. Все compile/runtime проверки использовали реальный JDK21 и Fabric; NeoForge не собирался/не запускался. Два его client integration исправления проверены статически. Нет новой visual/multiplayer acceptance; зелёные headless проверки не закрывают эти области.
+
+Логи/manifest входов и результатов: ignored `.tmp/fix-review/`; подготовленный JDK — `.tmp/fix-review/jdk21`. Ограничение Fabric-first/запрет NeoForge builds/tests сохраняется. Старые checkpoints ниже читать как историю их точных входов.
+
+## Исторический handoff — аудит 23.10.2026, базис `c6feeda7`
 
 **Ledger: 1044/1044 `parity_verified`, 0 `partial`, 0 `missing`, 0 `not_assessed`**, пересчитано по каждой unit, не по сводке. Disposition: 327 replace / 291 port / 263 adapt / 163 exclude. Старое 1017/27 и прежние 976/55/10/3, 969/62/10/3, 945/86/10/3 — история, не текущая очередь.
 

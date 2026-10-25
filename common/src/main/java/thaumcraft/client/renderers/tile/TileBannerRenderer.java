@@ -2,7 +2,6 @@ package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -10,6 +9,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.client.renderers.BannerPose;
 import thaumcraft.client.renderers.models.ModelBanner;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileBanner;
@@ -27,8 +27,8 @@ import thaumcraft.common.tiles.TileBanner;
  * the banner hangs from the top face of the block, that is one and a half
  * blocks above the block origin (original TileBannerRenderer:41), the original
  * rotate 180 degrees about X follows and the facing of a banner that stands in
- * a world is the original rotate 180 degrees about Z plus the original
- * {@code facing * 360 / 16} degrees about Z (original TileBannerRenderer:44-48).
+ * a world is the original rotate 180 degrees about Y plus the original
+ * {@code facing * 360 / 16} degrees about Y (original TileBannerRenderer:44-48).
  * A banner that has no world - the banner item of original ItemBannerRenderer -
  * skips those two rotations.
  */
@@ -74,14 +74,7 @@ public final class TileBannerRenderer implements BlockEntityRenderer<TileBanner>
         var out = buffers.getBuffer(RenderType.entityCutoutNoCull(plain ? CULTIST : BLANK));
         pose.pushPose();
         try {
-            // Original TileBannerRenderer:41-43.
-            pose.translate(.5F, 1.5F, .5F);
-            pose.mulPose(Axis.XP.rotationDegrees(180.0F));
-            if (hasWorld) {
-                // Original TileBannerRenderer:44-48.
-                pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
-                pose.mulPose(Axis.ZP.rotationDegrees(originalFacing * 360.0F / 16.0F));
-            }
+            BannerPose.model(pose, originalFacing, hasWorld);
             if (!onWall) {
                 MODEL.renderPole(pose, out, light, overlay);
             } else {
@@ -119,10 +112,7 @@ public final class TileBannerRenderer implements BlockEntityRenderer<TileBanner>
     private static void drawTag(PoseStack pose, MultiBufferSource buffers, Aspect aspect, float wave, int light, int overlay) {
         pose.pushPose();
         try {
-            pose.translate(0.0F, 0.0F, .05001F);
-            pose.scale(.0375F, .0375F, .0375F);
-            pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
-            pose.mulPose(Axis.XP.rotationDegrees(-wave * 57.295776F * 2.0F));
+            BannerPose.aspect(pose, wave);
             var out = buffers.getBuffer(RenderType.entityTranslucent(aspect.getImage()));
             int colour = aspect.getColor();
             int red = (colour >> 16) & 255, green = (colour >> 8) & 255, blue = colour & 255;

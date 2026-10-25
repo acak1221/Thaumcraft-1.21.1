@@ -17,7 +17,8 @@ import thaumcraft.common.lib.research.PlayerKnowledge;
  *
  * <p>The completed research, the discovered aspects and the warp live in the native
  * {@link PlayerKnowledge}; only the per-research stage and flag markers are kept here, because the original
- * surface had no native counterpart for them.</p>
+ * surface had no native counterpart for them. OBSERVATION exposes the writable aspect pool;
+ * THEORY only reports the costs of completed TC4 research and cannot be credited independently.</p>
  */
 public class NativePlayerKnowledge implements IPlayerKnowledge {
     private final PlayerKnowledge knowledge;

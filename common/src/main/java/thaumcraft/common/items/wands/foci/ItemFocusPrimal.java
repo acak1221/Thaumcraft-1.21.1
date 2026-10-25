@@ -24,6 +24,9 @@ import thaumcraft.common.lib.primal.PrimalFocusRules;
 public final class ItemFocusPrimal extends ItemFocusBasic {
     private static final SoundEvent ICE=SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft","ice"));
     public ItemFocusPrimal(Properties properties){super(properties);}
+    @Override public ResourceLocation getFocusDepthLayerIcon(ItemStack focus) {
+        return ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/focus_primal_depth.png");
+    }
     public static AspectList costAtMillis(long millis){
         var cost=PrimalFocusRules.costAtMillis(millis);
         return new AspectList().add(Aspect.WATER,cost.aqua()).add(Aspect.AIR,cost.aer()).add(Aspect.EARTH,cost.terra())

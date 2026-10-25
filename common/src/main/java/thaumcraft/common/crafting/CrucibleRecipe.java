@@ -24,7 +24,8 @@ import thaumcraft.common.config.ThaumcraftAlchemy;
 
 /** Native recipe-manager representation of TC4's crucible recipe, not a crafting-table recipe. */
 public record CrucibleRecipe(String research, Ingredient catalyst, ItemStack result,
-                             Map<String, Integer> aspects, int sourceOrder) implements Recipe<CrucibleRecipeInput> {
+                             Map<String, Integer> aspects, int sourceOrder,
+                             thaumcraft.api.crafting.CrucibleRecipe programmatic) implements Recipe<CrucibleRecipeInput> {
     private static final Codec<String> ASPECT_CODEC = Codec.STRING.comapFlatMap(tag -> Aspect.getAspect(tag) == null
             ? DataResult.error(() -> "Unknown crucible aspect: " + tag) : DataResult.success(tag), tag -> tag);
     public static final MapCodec<CrucibleRecipe> CODEC = RecordCodecBuilder.<CrucibleRecipe>mapCodec(instance -> instance.group(
@@ -40,12 +41,28 @@ public record CrucibleRecipe(String research, Ingredient catalyst, ItemStack res
         aspects = Collections.unmodifiableMap(new LinkedHashMap<>(aspects));
     }
 
+    public CrucibleRecipe(String research, Ingredient catalyst, ItemStack result, Map<String, Integer> aspects, int sourceOrder) {
+        this(research, catalyst, result, aspects, sourceOrder, null);
+    }
+
+    /** Runtime-only adapter. It never enters RecipeManager/network recipe serialization. */
+    public static CrucibleRecipe programmatic(thaumcraft.api.crafting.CrucibleRecipe recipe) {
+        CrucibleRecipe nativeView = recipe.nativeRecipe();
+        return new CrucibleRecipe(nativeView.research(), nativeView.catalyst(), nativeView.result(),
+                nativeView.aspects(), nativeView.sourceOrder(), recipe);
+    }
+
+    public String research() { return programmatic == null ? research : java.util.Objects.toString(programmatic.key, ""); }
+    public Map<String, Integer> aspects() { return programmatic == null ? aspects : thaumcraft.api.crafting.ArcaneRecipes.aspectCosts(programmatic.aspects); }
+    public boolean catalystMatches(ItemStack stack) { return programmatic == null ? catalyst.test(stack) : programmatic.catalystMatches(stack); }
+
     private DataResult<CrucibleRecipe> validate() {
         return result.isEmpty() || aspects.isEmpty() || research.isEmpty()
                 ? DataResult.error(() -> "Crucible recipe requires a result, research and aspect cost") : DataResult.success(this);
     }
 
     @Override public boolean matches(CrucibleRecipeInput input, Level level) {
+        if (programmatic != null) return programmatic.matches(input.aspects(), input.catalyst());
         if (!catalyst.test(input.catalyst())) return false;
         for (var entry : aspects.entrySet()) {
             if (input.aspects().getAmount(Aspect.getAspect(entry.getKey())) < entry.getValue()) return false;
@@ -54,13 +71,14 @@ public record CrucibleRecipe(String research, Ingredient catalyst, ItemStack res
     }
 
     public AspectList removeMatching(AspectList contents) {
+        if (programmatic != null) return programmatic.removeMatching(contents);
         AspectList remaining = contents.copy();
         for (var entry : aspects.entrySet()) remaining.remove(Aspect.getAspect(entry.getKey()), entry.getValue());
         return remaining;
     }
 
-    @Override public ItemStack assemble(CrucibleRecipeInput input, HolderLookup.Provider registries) { return result.copy(); }
-    @Override public ItemStack getResultItem(HolderLookup.Provider registries) { return result.copy(); }
+    @Override public ItemStack assemble(CrucibleRecipeInput input, HolderLookup.Provider registries) { return getResultItem(registries); }
+    @Override public ItemStack getResultItem(HolderLookup.Provider registries) { return (programmatic == null ? result : programmatic.getRecipeOutput()).copy(); }
     @Override public boolean canCraftInDimensions(int width, int height) { return false; }
     @Override public NonNullList<Ingredient> getIngredients() { return NonNullList.of(Ingredient.EMPTY, catalyst); }
     @Override public boolean isSpecial() { return true; }

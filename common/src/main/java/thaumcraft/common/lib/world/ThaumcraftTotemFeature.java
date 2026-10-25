@@ -51,7 +51,7 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         // the original, the dimension zero. The native adapter also accepts a dimension
         // of the overworld type, the way the 1.7.10 world generation mod changed the
         // overworld of a world without changing its dimension id.
-        if (!isOverworld(level.getLevel())) return false;
+        if (!permitsStructures(level)) return false;
         // Oracle ThaumcraftWorldGenerator:420-421 - the totem lives inside the structure branch
         // of the original, so Config.genStructure and the flat exclusion gate it too.
         if (!ThaumcraftBiomeSettings.worldgen().structures()) return false;
@@ -75,6 +75,7 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
      * port.</p>
      */
     public static boolean placePass(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ) {
+        if (!permitsStructures(level)) return false;
         // Oracle ThaumcraftWorldGenerator:414-419 - the scattered node first, then the wild node
         // pass, whose return value overwrites the scattered flag. A scattered temple therefore
         // does not suppress the totem (:455 tests the overwritten value). Both live behind
@@ -175,6 +176,12 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         var registry = level.getServer().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DIMENSION_TYPE);
         var overworld = registry.get(OVERWORLD_TYPE);
         return overworld != null && overworld.equals(level.dimensionType());
+    }
+
+    /** Original generateSurface:420 gates the complete exclusive chain, including each structure's node. */
+    public static boolean permitsStructures(WorldGenLevel level) {
+        return ThaumcraftOreFeature.isSurfaceDimension(level) && isOverworld(level.getLevel())
+                && NodeEcologyPolicy.dimensionLevel(level.getLevel().dimension()) == -1;
     }
 
     /** The dimension type of the overworld of the original. */

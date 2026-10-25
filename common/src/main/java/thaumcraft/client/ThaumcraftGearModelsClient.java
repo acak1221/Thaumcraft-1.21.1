@@ -6,13 +6,14 @@ import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +36,6 @@ import thaumcraft.common.items.armor.ItemVoidRobeArmor;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandMaterials;
 import thaumcraft.common.items.wands.foci.FocusData;
-import thaumcraft.common.items.wands.foci.ItemFocusPrimal;
 
 /**
  * Client-only bindings of the ported 1.7.10 gear models: the taumaturge robe
@@ -204,22 +204,8 @@ public final class ThaumcraftGearModelsClient {
             } finally { pose.popPose(); }
             var focusStack = FocusData.get(stack);
             if (!focusStack.isEmpty() && focusStack.getItem() instanceof ItemFocusBasic basic) {
-                // Original ModelWand:173-181 - the animated depth layer of a focus precedes the
-                // focus cube, so the translucent cube of the original shows it.
-                if (focusStack.getItem() instanceof ItemFocusPrimal) {
-                    int tick = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
-                    PrimalWandFocusRenderer.renderDepthLayer(pose, buffers, light, overlay, tick, staff);
-                }
-                int rgb = basic.getFocusColor(focusStack);
-                int tint = (int) (0.95F * 255) << 24 | (rgb & 0xFFFFFF);
-                pose.pushPose();
-                try {
-                    if (staff) {
-                        pose.translate(0, ModelWand.Geometry.STAFF_FOCUS_SHIFT, 0);
-                        pose.scale(ModelWand.Geometry.STAFF_FOCUS_XZ, ModelWand.Geometry.STAFF_FOCUS_Y, ModelWand.Geometry.STAFF_FOCUS_XZ);
-                    } else pose.scale(ModelWand.Geometry.WAND_FOCUS, ModelWand.Geometry.WAND_FOCUS, ModelWand.Geometry.WAND_FOCUS);
-                    model.renderFocus(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(ModelWand.FOCUS_TEXTURE)), LightTexture.FULL_BRIGHT, overlay, tint);
-                } finally { pose.popPose(); }
+                int tick = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
+                PrimalWandFocusRenderer.renderFocus(model, basic, focusStack, pose, buffers, light, overlay, tick, staff);
             }
         } finally { pose.popPose(); }
     }
@@ -400,6 +386,7 @@ public final class ThaumcraftGearModelsClient {
     private static void renderGear(PoseStack pose, MultiBufferSource buffers, ModelGearArmor model,
                                    ResourceLocation texture, Entity entity, EquipmentSlot slot, int light, HumanoidModel<?> context,
                                    int tint, RenderType type) {
+        float ageInTicks = 0;
         if (entity instanceof LivingEntity living) {
             // The original cloth swing uses the same limb swing and limb swing
             // amount as the worn model; the wearer's own animation supplies them.
@@ -408,12 +395,12 @@ public final class ThaumcraftGearModelsClient {
             model.young = living.isBaby();
             model.swimAmount = living.getSwimAmount(partial);
             model.attackTime = living.getAttackAnim(partial);
+            ageInTicks = living.tickCount + partial;
             model.setupAnim(living, living.walkAnimation.position(partial), living.walkAnimation.speed(partial),
-                    living.tickCount + partial, 0, 0);
+                    ageInTicks, 0, 0);
         }
-        // The wearer's own humanoid pose wins over the model's own animation,
-        // exactly as the original copies the biped rotations of the player model.
-        model.copyPose(context);
+        // TC4's gear render method overrides zombie/skeleton arms after the ordinary biped pose.
+        model.copyPose(context, entity instanceof Zombie || entity instanceof AbstractSkeleton, ageInTicks);
         model.showSlot(slot);
         var buffer = buffers.getBuffer(type);
         model.renderToBuffer(pose, buffer, light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, tint);

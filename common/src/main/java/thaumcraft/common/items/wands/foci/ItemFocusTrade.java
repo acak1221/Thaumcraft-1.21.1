@@ -71,7 +71,7 @@ public final class ItemFocusTrade extends ItemFocusBasic implements IArchitect {
 
     @Override public ItemStack onFocusRightClick(ItemStack wand, Level level, Player player, InteractionHand hand) {
         if (!(player instanceof ServerPlayer actor) || level.isClientSide || !TradeSwaps.actor(actor, wand)) return wand;
-        HitResult ray = player.pick(5, 1, false);
+        HitResult ray = player.pick(player.blockInteractionRange(), 1, false);
         if (!(ray instanceof BlockHitResult hit) || ray.getType() != HitResult.Type.BLOCK) return wand;
         if (player.isShiftKeyDown()) TradeSwaps.remember(actor, wand, hit.getBlockPos());
         else if (WandArchitect.enabled(wand)) {
@@ -87,7 +87,7 @@ public final class ItemFocusTrade extends ItemFocusBasic implements IArchitect {
     public static boolean leftClick(ServerPlayer player, ItemStack wand, net.minecraft.core.BlockPos pos) {
         // Original ItemFocusTrade:168-181 - the swing of the wand swaps the targeted block only.
         if (!TradeSwaps.actor(player, wand)) return false;
-        HitResult ray = player.pick(5, 1, false);
+        HitResult ray = player.pick(player.blockInteractionRange(), 1, false);
         return ray instanceof BlockHitResult hit && ray.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(pos)
                 && TradeSwaps.enqueue(player, wand, pos, 0);
     }

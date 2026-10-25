@@ -223,10 +223,7 @@ public final class LegacyTileRules {
         return DEATH_FLUID_QUANTA - 1 - metadata;
     }
 
-    /**
-     * The quanta a native death fluid cell holds: four in the source cell and one less in every step away
-     * from it.
-     */
+    /** The stored finite quantity represented by a native death-fluid level. */
     public static int deathFluidQuanta(int level) {
         if (level <= 0) return DEATH_FLUID_QUANTA;
         return Math.max(0, DEATH_FLUID_QUANTA - level);
@@ -242,13 +239,36 @@ public final class LegacyTileRules {
     public static boolean deathFluidHurts(boolean clientSide) { return !clientSide; }
 
     /**
-     * The level a death fluid cell takes from the strongest cell around it. A cell that has no stronger
-     * neighbour loses one quanta on every step, so it dries up again once it reaches the quanta of the
-     * block.
+     * Forge1.7 BlockFluidFinite:84-231. Shares existing stock only with cells strictly below amount-1;
+     * blocked cells are -1. Result order is source,N,S,W,E. The unusual remainder test and RNG bound
+     * are original, not an independently randomized distribution or an inexhaustible feeder rule.
      */
-    public static int deathFluidNextLevel(int current, int strongestNeighbour) {
-        int next = strongestNeighbour >= DEATH_FLUID_QUANTA ? current + 1 : strongestNeighbour + 1;
-        return Math.min(next, DEATH_FLUID_QUANTA);
+    public static int[] deathFluidDistribution(int amount, int[] neighbors, java.util.function.IntUnaryOperator nextInt) {
+        if (amount < 1 || amount > DEATH_FLUID_QUANTA || neighbors.length != 4)
+            throw new IllegalArgumentException("One finite death-fluid cell and four neighbors required");
+        int[] result = new int[5];
+        result[0] = amount;
+        int total = amount, count = 1;
+        for (int i = 0; i < neighbors.length; i++) {
+            if (neighbors[i] < -1 || neighbors[i] > DEATH_FLUID_QUANTA)
+                throw new IllegalArgumentException("Invalid neighboring finite quantity");
+            result[i + 1] = neighbors[i];
+            if (neighbors[i] >= 0 && neighbors[i] < amount - 1) { total += neighbors[i]; count++; }
+        }
+        if (count == 1) return result;
+        int each = total / count, remainder = total % count;
+        for (int i = 0; i < neighbors.length; i++) {
+            if (neighbors[i] < 0 || neighbors[i] >= amount - 1) continue;
+            int shared = each;
+            if (remainder == count || remainder > 1 && nextInt.applyAsInt(count - remainder) != 0) {
+                shared++;
+                remainder--;
+            }
+            result[i + 1] = shared;
+            count--;
+        }
+        result[0] = each + (remainder > 0 ? 1 : 0);
+        return result;
     }
 
     /**

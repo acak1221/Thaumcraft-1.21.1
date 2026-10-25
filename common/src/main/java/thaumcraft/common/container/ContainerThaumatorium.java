@@ -31,12 +31,17 @@ public final class ContainerThaumatorium extends AbstractContainerMenu {
     private final BlockPos pos;
     private final List<RecipeHolder<CrucibleRecipe>> recipes;
     private final ContainerData data;
-    public ContainerThaumatorium(int id, Inventory inventory, TileThaumatorium tile) { this(id, inventory, tile, tile.getBlockPos(), tile); }
-    public ContainerThaumatorium(int id, Inventory inventory, FriendlyByteBuf data) { this(id, inventory, new SimpleContainer(1), data.readBlockPos(), null); }
-    private ContainerThaumatorium(int id, Inventory inventory, Container contents, BlockPos pos, TileThaumatorium tile) {
+    public ContainerThaumatorium(int id, Inventory inventory, TileThaumatorium tile) { this(id, inventory, tile, tile.getBlockPos(), tile, null); }
+    public ContainerThaumatorium(int id, Inventory inventory, TileThaumatorium tile, List<RecipeHolder<CrucibleRecipe>> recipes) {
+        this(id, inventory, tile, tile.getBlockPos(), tile, recipes);
+    }
+    public ContainerThaumatorium(int id, Inventory inventory, FriendlyByteBuf data) {
+        this(id, inventory, new SimpleContainer(1), data.readBlockPos(), null,
+                thaumcraft.common.crafting.CrucibleRecipeDisplay.read(data, inventory.player.registryAccess()));
+    }
+    private ContainerThaumatorium(int id, Inventory inventory, Container contents, BlockPos pos, TileThaumatorium tile, List<RecipeHolder<CrucibleRecipe>> openingRecipes) {
         super(ThaumcraftThaumatorium.MENU.get(), id); this.tile = tile; this.pos = pos.immutable(); viewer = inventory.player;
-        recipes = viewer.level().getRecipeManager().getAllRecipesFor(ThaumcraftAlchemy.CRUCIBLE_RECIPE_TYPE.get()).stream()
-                .sorted(Comparator.<RecipeHolder<CrucibleRecipe>>comparingInt(holder -> holder.value().sourceOrder()).thenComparing(holder -> holder.id().toString())).toList();
+        recipes = openingRecipes == null ? thaumcraft.common.crafting.ProgrammaticRecipes.crucibles(viewer.level().getRecipeManager()) : List.copyOf(openingRecipes);
         int recipeFields = recipes.size() + 1;
         int size = recipeFields + ASPECTS.size() * 2;
         data = tile == null ? new SimpleContainerData(size) : new ContainerData() {
@@ -48,7 +53,7 @@ public final class ContainerThaumatorium extends AbstractContainerMenu {
                 }
                 var recipe = recipes.get(index - 1);
                 if (tile.isRecipeSelected(recipe.id())) return 2;
-                return KnowledgeAccess.get((ServerPlayer) viewer).isResearchComplete(recipe.value().research()) && recipe.value().catalyst().test(tile.getItem(0)) ? 1 : 0;
+                return (recipe.value().research().isEmpty() || KnowledgeAccess.get((ServerPlayer) viewer).isResearchComplete(recipe.value().research())) && recipe.value().catalystMatches(tile.getItem(0)) ? 1 : 0;
             }
             @Override public void set(int index, int value) {}
             @Override public int getCount() { return size; }

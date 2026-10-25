@@ -74,6 +74,15 @@ public abstract class ModelGearArmor extends HumanoidModel<LivingEntity> {
     }
 
     /**
+     * Original gear render methods replace the copied arm rotations for zombie and skeleton
+     * wearers. Modern vanilla zombie attack angles are different, so copying alone loses that pose.
+     */
+    public void copyPose(HumanoidModel<?> context, boolean zombieWearer, float ageInTicks) {
+        copyPose(context);
+        if (zombieWearer) zombieArms(attackTime, ageInTicks);
+    }
+
+    /**
      * Original ItemCultistRobeArmor:108-113 and the same rule in the fortress,
      * knight and leader armor: the head shows for the helm, the body for the
      * chest and the legs, the arms for the chest, the legs for the greaves.

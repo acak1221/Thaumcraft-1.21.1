@@ -22,12 +22,12 @@ public class ChampionModifier {
 
     /** Original champion health bonus: the champion modifier added thirty max health. */
     public static final double CHAMPION_HEALTH_BONUS = 30.0;
-    /** Original champion damage multiplier: the champion modifier multiplied attack damage by two. */
-    public static final double CHAMPION_DAMAGE_MULTIPLIER = 2.0;
+    /** Original operation-two amount 2: attack damage is multiplied by 1 + 2. */
+    public static final double CHAMPION_DAMAGE_MULTIPLIER = 3.0;
     /** Original bold movement speed multiplier: thirty percent over the base speed. */
     public static final double BOLD_SPEED_MULTIPLIER = 1.3;
-    /** Original mighty damage multiplier: attack damage multiplied by three. */
-    public static final double MIGHTY_DAMAGE_MULTIPLIER = 3.0;
+    /** Original operation-two amount 3: mighty attack damage is multiplied by 1 + 3. */
+    public static final double MIGHTY_DAMAGE_MULTIPLIER = 4.0;
     /** Original promotion heal: a new champion was healed for twenty five health. */
     public static final float CHAMPION_HEAL = 25.0f;
 
@@ -88,7 +88,7 @@ public class ChampionModifier {
     public double damageMultiplier() { return CHAMPION_DAMAGE_MULTIPLIER; }
     /** The movement speed multiplier of the modifier, one for every modifier but bold. */
     public double speedMultiplier() { return id == BOLD ? BOLD_SPEED_MULTIPLIER : 1.0; }
-    /** The extra attack damage multiplier of the modifier, three for mighty and one otherwise. */
+    /** The extra attack damage multiplier of the modifier, four for mighty and one otherwise. */
     public double extraDamageMultiplier() { return id == MIGHTY ? MIGHTY_DAMAGE_MULTIPLIER : 1.0; }
     /** The original modifier acts on every living update. */
     public boolean ticks() { return type == IChampionModifierEffect.TRIGGER_TICK; }

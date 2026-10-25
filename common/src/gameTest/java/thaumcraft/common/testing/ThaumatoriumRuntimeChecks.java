@@ -176,6 +176,11 @@ public final class ThaumatoriumRuntimeChecks {
             var saved = tile.saveWithoutMetadata(level.registryAccess());
             var restored = new TileThaumatorium(base, level.getBlockState(base)); restored.loadWithComponents(saved, level.registryAccess());
             test.assertTrue(restored.getItem(0).getCount() == 3 && restored.containerContains(Aspect.METAL) == 1 && restored.selectedRecipe().equals(tile.selectedRecipe()), "input, partial payment and selected recipe survive real NBT");
+            var savedAuthor = saved.getList("Recipes", net.minecraft.nbt.Tag.TAG_COMPOUND).getCompound(0);
+            var restoredAuthor = restored.saveWithoutMetadata(level.registryAccess()).getList("Recipes", net.minecraft.nbt.Tag.TAG_COMPOUND).getCompound(0);
+            test.assertTrue(savedAuthor.hasUUID("author") && savedAuthor.getUUID("author").equals(player.getUUID())
+                            && restoredAuthor.hasUUID("author") && restoredAuthor.getUUID("author").equals(player.getUUID())
+                            && !saved.contains("Author"), "the selected formula's real author survives the native Recipes row without an unsupported root Author field");
             test.assertTrue(tile.takeFromContainer(Aspect.METAL, 1), "remove the declared partial payment for the physical-output test");
             var plan = ThaumatoriumOutput.prepare(level, base.north(), Direction.SOUTH, new ItemStack(Items.IRON_NUGGET, 3));
             test.assertTrue(plan != null && !plan.commit(tile), "an external native-output plan has no unpaid craft authority");

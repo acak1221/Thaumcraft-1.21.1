@@ -70,17 +70,21 @@ public record ArcaneShapedRecipe(String research, List<String> pattern, Map<Stri
     }
 
     @Override public boolean matches(ArcaneRecipeInput input, Level level) {
+        return matches(input, level, ArcaneIngredientMatching::matchesStack);
+    }
+
+    public boolean matches(ArcaneRecipeInput input, Level level, java.util.function.BiPredicate<ItemStack, ItemStack> comparison) {
         int width = pattern.getFirst().length(), height = pattern.size();
         // Source: ShapedArcaneRecipe:130-172. Do not shrink explicit blank borders.
         for (int x = 0; x <= 3 - width; x++) {
             for (int y = 0; y <= 3 - height; y++) {
-                if (matchesAt(input, x, y, false) || mirrored && matchesAt(input, x, y, true)) return true;
+                if (matchesAt(input, x, y, false, comparison) || mirrored && matchesAt(input, x, y, true, comparison)) return true;
             }
         }
         return false;
     }
 
-    private boolean matchesAt(ArcaneRecipeInput input, int offsetX, int offsetY, boolean mirror) {
+    private boolean matchesAt(ArcaneRecipeInput input, int offsetX, int offsetY, boolean mirror, java.util.function.BiPredicate<ItemStack, ItemStack> comparison) {
         int width = pattern.getFirst().length(), height = pattern.size();
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 3; y++) {
@@ -92,7 +96,7 @@ public record ArcaneShapedRecipe(String research, List<String> pattern, Map<Stri
                     if (!symbol.equals(" ")) ingredient = key.get(symbol);
                 }
                 ItemStack stack = input.getItem(x + y * 3);
-                if (!ArcaneIngredientMatching.matches(ingredient, stack)) return false;
+                if (!ArcaneIngredientMatching.matches(ingredient, stack, comparison)) return false;
                 // Original filled OR labelled jars were ItemJarFilled, not the
                 // blockJar item named by plain shaped ingredients (e.g. JarVoid).
                 // Flattening them to one native Item must not erase contents.

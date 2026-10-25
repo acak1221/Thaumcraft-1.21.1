@@ -144,6 +144,25 @@ public final class ObjectAspectApiRuntimeChecks {
             var ear = ObjectAspectResolver.baseTags(new ItemStack(ThaumcraftArcaneEar.ARCANE_EAR_ITEM.get()), level);
             test.assertTrue(ear.getAmount(Aspect.SENSES) == 4, "actually available Arcane Ear gets its original434 raw complex senses4 on top of the real recipe");
 
+            test.assertTrue(new ItemStack(Items.OAK_STAIRS).is(ItemTags.WOODEN_STAIRS)
+                            && new ItemStack(Items.BIRCH_STAIRS).is(ItemTags.WOODEN_STAIRS), "the loaded native tag contains two different recipe outputs");
+            ThaumcraftApi.objectTags.keySet().removeIf(key -> key.getFirst() == Items.OAK_STAIRS || key.getFirst() == Items.BIRCH_STAIRS);
+            var oakBase = ObjectAspectResolver.generatedTags(Items.OAK_STAIRS, level);
+            var birchBase = ObjectAspectResolver.generatedTags(Items.BIRCH_STAIRS, level);
+            test.assertTrue(oakBase.visSize() > 0 && birchBase.visSize() > 0, "both native tag members have actual generated recipe bases");
+            var tagAdditions = new AspectList().add(Aspect.FIRE, 4);
+            new thaumcraft.api.aspects.AspectEventProxy().registerComplexObjectTag("minecraft:wooden_stairs", tagAdditions);
+            var oak = ThaumcraftApi.objectTags.get(List.of(Items.OAK_STAIRS, 0));
+            var birch = ThaumcraftApi.objectTags.get(List.of(Items.BIRCH_STAIRS, 0));
+            test.assertTrue(oak.aspects.equals(oakBase.copy().add(Aspect.FIRE, 4).aspects)
+                            && birch.aspects.equals(birchBase.copy().add(Aspect.FIRE, 4).aspects)
+                            && oak != birch && oak != tagAdditions && birch != tagAdditions
+                            && tagAdditions.size() == 1 && tagAdditions.getAmount(Aspect.FIRE) == 4,
+                    "the actual String proxy resolves each tag member's recipe and does not share or cumulatively enrich additions");
+            ThaumcraftApi.registerComplexObjectTag(ItemTags.WOODEN_STAIRS, new AspectList().add(Aspect.ELDRITCH, 99), level);
+            test.assertTrue(ObjectAspectResolver.baseTags(new ItemStack(Items.OAK_STAIRS), level).getAmount(Aspect.ELDRITCH) == 0,
+                    "the new tag overload retains the original existing-item complex branch instead of crediting supplied99eldritch");
+
             ObjectAspectRegistry.serverStopped(server); boolean rejected = false;
             try { ThaumcraftApi.registerComplexObjectTag(new ItemStack(Items.STONE), new AspectList().add(Aspect.FIRE, 1)); }
             catch (IllegalStateException expectedFailure) { rejected = expectedFailure.getMessage().contains("server recipe"); }

@@ -48,6 +48,28 @@ import thaumcraft.common.lib.research.ResearchRecipeCoverage;
  */
 public final class ThaumcraftApi {
     /**
+     * Native-key equivalent of the original world generator's numeric dimension blacklist.
+     * Level zero or two suppress surface ores/aura; every registered level suppresses surface
+     * vegetation/structures. Nether keeps the original independent aura pass.
+     */
+    public static void addDimBlacklist(ResourceKey<Level> dimension, int level) {
+        thaumcraft.common.lib.world.NodeEcologyPolicy.dimensionBlacklist.put(Objects.requireNonNull(dimension), level);
+    }
+
+    public static int getDimBlacklist(ResourceKey<Level> dimension) {
+        return thaumcraft.common.lib.world.NodeEcologyPolicy.dimensionLevel(Objects.requireNonNull(dimension));
+    }
+
+    /** Original biome blacklist gates vegetation and ores, not the creation of aura nodes. */
+    public static void addBiomeBlacklist(ResourceKey<net.minecraft.world.level.biome.Biome> biome, int level) {
+        thaumcraft.common.lib.world.NodeEcologyPolicy.biomeBlacklist.put(Objects.requireNonNull(biome), level);
+    }
+
+    public static int getBiomeBlacklist(ResourceKey<net.minecraft.world.level.biome.Biome> biome) {
+        return thaumcraft.common.lib.world.NodeEcologyPolicy.biomeBlacklist.getOrDefault(Objects.requireNonNull(biome), -1);
+    }
+
+    /**
      * Original TC4 tool materials.
      *
      * <p>Forced 1.21.1 change: {@code Item.ToolMaterial} no longer exists, so the three original materials are
@@ -250,6 +272,30 @@ public final class ThaumcraftApi {
         return result;
     }
 
+    /** Server runtime snapshot of initialization-time registrations; excludes datapack views. */
+    public static List<Object> getProgrammaticCraftingRecipes() { return List.copyOf(craftingRecipes); }
+
+    /** Registers an original recipe object, retaining its virtual callbacks and registration order. */
+    public static <T> T registerCraftingRecipe(T recipe) {
+        if (!(recipe instanceof thaumcraft.api.crafting.IArcaneRecipe) && !(recipe instanceof CrucibleRecipe)
+                && !(recipe instanceof InfusionRecipe) && !(recipe instanceof InfusionEnchantmentRecipe))
+            throw new IllegalArgumentException("Unsupported programmatic recipe " + recipe);
+        craftingRecipes.add(recipe);
+        keyCache.clear();
+        return recipe;
+    }
+
+    /** Removes the exact initialization registration, e.g. when an addon replaces its own recipe. */
+    public static boolean unregisterCraftingRecipe(Object recipe) {
+        for (int index = 0; index < craftingRecipes.size(); index++) if (craftingRecipes.get(index) == recipe) {
+            craftingRecipes.remove(index);
+            thaumcraft.common.crafting.ProgrammaticRecipes.forget(recipe);
+            keyCache.clear();
+            return true;
+        }
+        return false;
+    }
+
     /** The runtime installs the recipe manager of the level it loaded; the cached answers belong to it. */
     public static void installRecipeManager(RecipeManager manager, net.minecraft.core.HolderLookup.Provider registries) {
         NativeRecipes.install(manager, registries);
@@ -262,8 +308,7 @@ public final class ThaumcraftApi {
      * Register during coordinated initialization, not concurrently with recipe iteration. */
     public static ShapedArcaneRecipe addArcaneCraftingRecipe(String research, ItemStack result, AspectList aspects, Object... recipe) {
         ShapedArcaneRecipe r = new ShapedArcaneRecipe(research, result, aspects, recipe);
-        craftingRecipes.add(r);
-        return r;
+        return registerCraftingRecipe(r);
     }
 
     /** Constructs and appends a live shapeless recipe to the global programmatic list, returning it.
@@ -272,16 +317,14 @@ public final class ThaumcraftApi {
      * Register during coordinated initialization, not concurrently with recipe iteration. */
     public static ShapelessArcaneRecipe addShapelessArcaneCraftingRecipe(String research, ItemStack result, AspectList aspects, Object... recipe) {
         ShapelessArcaneRecipe r = new ShapelessArcaneRecipe(research, result, aspects, recipe);
-        craftingRecipes.add(r);
-        return r;
+        return registerCraftingRecipe(r);
     }
 
     /** Null/unsupported result classes return null; Object[] results with unknown patches throw IllegalArgumentException in the constructor. */
     public static InfusionRecipe addInfusionCraftingRecipe(String research, Object result, int instability, AspectList aspects, ItemStack input, ItemStack[] recipe) {
         if (!(result instanceof ItemStack) && !(result instanceof Object[])) return null;
         InfusionRecipe r = new InfusionRecipe(research, result, instability, aspects, input, recipe);
-        craftingRecipes.add(r);
-        return r;
+        return registerCraftingRecipe(r);
     }
 
     /** Appends and returns a live enchantment recipe with essentia-unit costs and dimensionless instability.
@@ -290,8 +333,7 @@ public final class ThaumcraftApi {
     public static InfusionEnchantmentRecipe addInfusionEnchantmentRecipe(String research, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment, int instability, AspectList aspects, ItemStack[] recipe) {
         if (enchantment == null) return null;
         InfusionEnchantmentRecipe r = new InfusionEnchantmentRecipe(research, enchantment, instability, aspects, recipe);
-        craftingRecipes.add(r);
-        return r;
+        return registerCraftingRecipe(r);
     }
 
     /** Returns the first live infusion registration producing the same item/damage (not components/count), or null for null/no match; may initialize native views. */
@@ -316,8 +358,7 @@ public final class ThaumcraftApi {
      * Use coordinated initialization, not concurrent recipe iteration. */
     public static CrucibleRecipe addCrucibleRecipe(String key, ItemStack result, Object catalyst, AspectList tags) {
         CrucibleRecipe rc = new CrucibleRecipe(key, result, catalyst, tags);
-        craftingRecipes.add(rc);
-        return rc;
+        return registerCraftingRecipe(rc);
     }
 
     /** Returns the first live crucible registration producing the same item/damage (not components/count), or null for null/no match; may initialize native views. */
@@ -491,10 +532,13 @@ public final class ThaumcraftApi {
     }
     /** Native namespaced item tags replace the unavailable Forge OreDictionary; old ore names require an explicit caller mapping. */
     public static void registerObjectTag(String nativeItemTag, AspectList aspects) {
+        registerObjectTag(nativeItemTag(nativeItemTag), aspects);
+    }
+    private static TagKey<Item> nativeItemTag(String nativeItemTag) {
         ResourceLocation id = ResourceLocation.tryParse(nativeItemTag);
         if (id == null || !nativeItemTag.contains(":"))
             throw new IllegalArgumentException("Use a native namespaced item tag or TagKey<Item>, not a legacy OreDictionary name: " + nativeItemTag);
-        registerObjectTag(TagKey.create(Registries.ITEM, id), aspects);
+        return TagKey.create(Registries.ITEM, id);
     }
     /** Tests ordinary/wildcard and bundled derived registrations using native damage points (32767 wildcard), not subtype metadata; null item throws NPE, with no registration mutation. */
     public static boolean exists(Item item, int metadata) {
@@ -507,6 +551,30 @@ public final class ThaumcraftApi {
      * initializes public tags, and stores the resulting live list. Prefer the Level overload for explicit lifecycle scope. */
     public static void registerComplexObjectTag(ItemStack item, AspectList aspects) {
         registerComplexObjectTag(item, aspects, ObjectAspectRegistry.requireContext());
+    }
+    /** Snapshots native tag membership and applies the original complex-item branch to each member.
+     * Requires the loaded server thread, as the ItemStack overload does. Each member receives an independent
+     * copy of the additions, so generated bases cannot leak into another member or mutate the caller's list.
+     * Existing registrations retain the original complex branch's amounts rather than adding supplied amounts.
+     */
+    public static void registerComplexObjectTag(TagKey<Item> tag, AspectList aspects) {
+        registerComplexObjectTag(tag, aspects, ObjectAspectRegistry.requireContext());
+    }
+    /** Explicit lifecycle-scoped variant; validates the loaded server context and nonnull arguments before registration. */
+    public static void registerComplexObjectTag(TagKey<Item> tag, AspectList aspects, Level world) {
+        var level = ObjectAspectRegistry.requireContext(world);
+        Objects.requireNonNull(tag, "Complex native item tag");
+        Objects.requireNonNull(aspects, "Complex object-tag additions");
+        BuiltInRegistries.ITEM.getTag(tag).ifPresent(items -> items.forEach(item ->
+                registerComplexObjectTag(new ItemStack(item.value()), aspects.copy(), level)));
+    }
+    /** Native namespaced tag counterpart of the complex ItemStack overload; requires loaded server recipes. */
+    public static void registerComplexObjectTag(String nativeItemTag, AspectList aspects) {
+        registerComplexObjectTag(nativeItemTag, aspects, ObjectAspectRegistry.requireContext());
+    }
+    /** Explicit lifecycle-scoped native tag counterpart. Legacy OreDictionary names are rejected. */
+    public static void registerComplexObjectTag(String nativeItemTag, AspectList aspects, Level world) {
+        registerComplexObjectTag(nativeItemTag(nativeItemTag), aspects, world);
     }
     /** Null/empty item throws IAE; null/invalid world throws IllegalStateException before null aspects throw NPE. */
     public static void registerComplexObjectTag(ItemStack item, AspectList aspects, Level world) {

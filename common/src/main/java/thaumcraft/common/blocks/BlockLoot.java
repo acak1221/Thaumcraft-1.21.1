@@ -4,9 +4,11 @@ import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -34,6 +36,30 @@ public final class BlockLoot extends Block {
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(RARITY); }
 
     public static int rarityOf(BlockState state) { return state.getValue(RARITY); }
+
+    /** Original ItemBlock metadata becomes the placed container's loot tier. */
+    @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
+        Integer rarity = BlockLootItem.rarity(context.getItemInHand());
+        return defaultBlockState().setValue(RARITY, EldritchBlockRules.lootRarity(rarity == null ? 0 : rarity));
+    }
+
+    /** Original BlockLoot.damageDropped preserves metadata for creative pick-block. */
+    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        ItemStack result = new ItemStack(this);
+        BlockLootItem.setRarity(result, state.getValue(RARITY));
+        return result;
+    }
+
+    /** Original BlockLoot:101-105 exposes all three metadata tiers in the creative tab. */
+    public static List<ItemStack> creativeVariants(net.minecraft.world.item.Item item) {
+        List<ItemStack> variants = new ArrayList<>();
+        for (int rarity = 0; rarity <= 2; rarity++) {
+            ItemStack stack = new ItemStack(item);
+            BlockLootItem.setRarity(stack, rarity);
+            variants.add(stack);
+        }
+        return variants;
+    }
 
     /** BlockLoot:78-84 - the container drops one to three plus rarity items. */
     @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {

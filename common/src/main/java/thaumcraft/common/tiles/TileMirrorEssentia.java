@@ -73,6 +73,7 @@ public final class TileMirrorEssentia extends BlockEntity implements IAspectSour
         mirror.linkY = worldPosition.getY();
         mirror.linkZ = worldPosition.getZ();
         mirror.linkDim = level.dimension().location().toString();
+        mirror.linkedFacing = getFacing();
         mirror.setChanged();
         target.sendBlockUpdated(mirror.getBlockPos(), mirror.getBlockState(), mirror.getBlockState(), 3);
         linkedFacing = mirror.getFacing();
@@ -108,7 +109,7 @@ public final class TileMirrorEssentia extends BlockEntity implements IAspectSour
             return false;
         }
         if (mirror.linkX != worldPosition.getX() || mirror.linkY != worldPosition.getY()
-                || mirror.linkZ != worldPosition.getZ() || !mirror.linkDim.equals(linkDim)) {
+                || mirror.linkZ != worldPosition.getZ() || !mirror.linkDim.equals(level.dimension().location().toString())) {
             linked = false;
             changed();
             return false;
@@ -124,7 +125,7 @@ public final class TileMirrorEssentia extends BlockEntity implements IAspectSour
         if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirrorEssentia mirror)) return false;
         if (!mirror.linked) return false;
         return mirror.linkX == worldPosition.getX() && mirror.linkY == worldPosition.getY()
-                && mirror.linkZ == worldPosition.getZ() && mirror.linkDim.equals(linkDim);
+                && mirror.linkZ == worldPosition.getZ() && mirror.linkDim.equals(level.dimension().location().toString());
     }
 
     /** Original TileMirrorEssentia:126-145 - the destination must not be linked itself. */
@@ -213,9 +214,9 @@ public final class TileMirrorEssentia extends BlockEntity implements IAspectSour
     private ServerLevel targetWorld() {
         if (level == null || level.getServer() == null) return null;
         MinecraftServer server = level.getServer();
-        ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
-                ResourceLocation.tryParse(linkDim));
-        if (key == null) return null;
+        ResourceLocation location = ResourceLocation.tryParse(linkDim);
+        if (location == null) return null;
+        ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, location);
         return server.getLevel(key);
     }
 

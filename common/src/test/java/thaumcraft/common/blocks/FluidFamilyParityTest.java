@@ -58,21 +58,16 @@ class FluidFamilyParityTest {
         assertEquals(3, LegacyTileRules.deathFluidOriginalMetadata(0), "the original metadata of the source cell");
     }
 
-    /**
-     * The quanta rule of a cell: a cell without a stronger neighbour loses one quanta on every
-     * step and dries up again once it reaches the quanta of the block.
-     */
-    @Test void theDeathFluidCellTakesItsLevelFromTheStrongestNeighbour() {
-        // A cell next to the source (the native level zero) is fed to the level one.
-        assertEquals(1, LegacyTileRules.deathFluidNextLevel(0, 0));
-        // A cell that already has that level keeps it.
-        assertEquals(1, LegacyTileRules.deathFluidNextLevel(1, 0));
-        // A cell without a stronger neighbour loses one quanta on every step.
-        assertEquals(1, LegacyTileRules.deathFluidNextLevel(2, 0));
-        // A cell whose strongest neighbour is the source takes the level of that neighbour.
-        assertEquals(2, LegacyTileRules.deathFluidNextLevel(0, 1));
-        // A cell that reached the quanta of the block dries up.
-        assertEquals(4, LegacyTileRules.deathFluidNextLevel(3, 4));
+    /** The original finite parent shares a sum and retains its asymmetric remainder/RNG convention. */
+    @Test void theDeathFluidSharesExistingStockInsteadOfFeedingNeighbors() {
+        int[] shared = LegacyTileRules.deathFluidDistribution(4, new int[] {0, 0, 0, 0}, bound -> 0);
+        assertEquals(4, java.util.Arrays.stream(shared).sum(), "one bucket is still four quanta across five cells");
+        assertEquals(List.of(1, 0, 1, 1, 1), java.util.Arrays.stream(shared).boxed().toList(),
+                "Forge finite N/S/W/E remainder allocation, with the zero draw");
+        assertEquals(List.of(1, 0, 0, 0, 0), java.util.Arrays.stream(
+                LegacyTileRules.deathFluidDistribution(1, new int[] {0, 0, 0, 0}, bound -> 0)).boxed().toList(),
+                "an isolated final quantum does not evaporate or copy itself");
+        assertEquals(7, BlockFluidDeath.TICK_DELAY, "Forge viscosity1500 divided by200 ticks");
         // The level of a cell never leaves the range of the four quanta.
         assertEquals(3, LegacyTileRules.deathFluidCellLevel(true, 9));
         assertEquals(0, LegacyTileRules.deathFluidCellLevel(true, -3));

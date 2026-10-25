@@ -67,6 +67,7 @@ public final class ThaumcraftNeoForgeClient {
     private ThaumcraftNeoForgeClient() {}
 
     public static void register(IEventBus bus) {
+        NeoForgeSpaClient.init();
         bus.addListener(ThaumcraftNeoForgeClient::onRegisterShaders);
         bus.addListener(ThaumcraftNeoForgeClient::onRegisterClientExtensions);
         bus.addListener(ThaumcraftNeoForgeClient::onRegisterReloadListeners);
@@ -204,6 +205,7 @@ public final class ThaumcraftNeoForgeClient {
     }
 
     private static void resetClientState() {
+        thaumcraft.client.renderers.item.PrimalWandFocusRenderer.reset();
         ThaumcraftWarpClient.reset();
         ThaumcraftRunicClient.reset();
         PlayerNotifications.reset();
@@ -214,6 +216,7 @@ public final class ThaumcraftNeoForgeClient {
     /** The HUD overlay of the Fabric HudRenderCallback. */
     private static void onRenderGui(RenderGuiEvent.Post event) {
         var graphics = event.getGuiGraphics();
+        thaumcraft.client.lib.CastingWandHud.render(graphics);
         ThaumcraftWarpClient.renderHud(graphics);
         ThaumcraftRunicClient.renderHud(graphics);
         PlayerNotifications.renderHud(graphics);

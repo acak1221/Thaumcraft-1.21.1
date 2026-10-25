@@ -6,6 +6,7 @@ import thaumcraft.api.IRepairable;
 import thaumcraft.api.IRepairableExtended;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.common.items.armor.ItemHoverHarness;
 import thaumcraft.common.lib.foci.FocalUpgradeCosts;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
 
@@ -14,7 +15,12 @@ public final class EnchantmentRepair {
     private EnchantmentRepair() {}
     public static void tick(Player player) {
         // Original func_70451_h is getHotbarSize()==9, not the whole main inventory.
-        for (int slot = 0; slot < 9; slot++) repair(player.getInventory().items.get(slot), player);
+        for (int slot = 0; slot < 9; slot++) {
+            ItemStack stack = player.getInventory().items.get(slot);
+            // Original EventHandlerEntity:300 excludes an unequipped harness;
+            // the separate worn-armor pass below deliberately still repairs it.
+            if (!(stack.getItem() instanceof ItemHoverHarness)) repair(stack, player);
+        }
         for (ItemStack armor : player.getInventory().armor) repair(armor, player);
     }
     public static AspectList cost(ItemStack stack, Player player, int repairLevel) {

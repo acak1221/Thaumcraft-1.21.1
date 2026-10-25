@@ -150,10 +150,7 @@ public final class ThaumometerReadout {
      * below, initially five per row and then one fewer in each successive row.</p>
      */
     private static void icons(PoseStack pose, MultiBufferSource buffers, Font font, AspectList aspects, int light) {
-        int count = aspects.size();
-        int posX = 0, posY = 0;
-        int baseX = firstRowOffset(count);
-        int remaining = count;
+        AspectLayout layout = new AspectLayout(aspects.size());
         for (Aspect aspect : aspects.getAspectsSortedAmount()) {
             pose.pushPose();
             try {
@@ -168,7 +165,7 @@ public final class ThaumometerReadout {
                 float[] points = {0.0F, 16.0F, 0.01F, 16.0F, 16.0F, 0.01F, 16.0F, 0.0F, 0.01F, 0.0F, 0.0F, 0.01F};
                 float[] uv = {0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F};
                 for (int index = 0; index < 4; index++) {
-                    out.addVertex(pose.last(), points[index * 3] - baseX + posX * 16, points[index * 3 + 1] - 8 + posY * 16, points[index * 3 + 2])
+                    out.addVertex(pose.last(), points[index * 3] + layout.x(), points[index * 3 + 1] + layout.y(), points[index * 3 + 2])
                             .setColor(r, g, b, 1.0F)
                             .setUv(uv[index * 2], uv[index * 2 + 1]).setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
                             .setLight(light)
@@ -188,11 +185,22 @@ public final class ThaumometerReadout {
             } finally {
                 pose.popPose();
             }
-            if (++posX >= ICONS_PER_ROW - posY) {
-                posX = 0;
-                posY++;
-                remaining -= ICONS_PER_ROW - (posY - 1);
-                baseX = Math.min(ICONS_PER_ROW - (posY - 1), remaining) * 8;
+            layout.next();
+        }
+    }
+
+    /** The original JAR's bytecode1490-1529; CFR's combined expression changes evaluation order. */
+    static final class AspectLayout {
+        private int column, row, remaining, offset;
+        AspectLayout(int count) { remaining = count; offset = firstRowOffset(count); }
+        int x() { return -offset + column * 16; }
+        int y() { return -8 + row * 16; }
+        void next() {
+            if (++column >= ICONS_PER_ROW - row) {
+                column = 0;
+                row++;
+                remaining -= ICONS_PER_ROW - row;
+                offset = Math.min(ICONS_PER_ROW - row, remaining) * 8;
             }
         }
     }

@@ -86,6 +86,116 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_followup_resources")
+    public void followupDeathBucketConservesInputs(GameTestHelper test) {
+        thaumcraft.common.testing.ResourceSafetyRuntimeChecks.deathBucketConservesInputs(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_followup_resources")
+    public void followupOculusPreservesNodeOnFailure(GameTestHelper test) {
+        thaumcraft.common.testing.ResourceSafetyRuntimeChecks.oculusPreservesNodeOnFailure(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_followup_rarity")
+    public void followupLootContainerRarity(GameTestHelper test) {
+        thaumcraft.common.testing.LootContainerRarityRuntimeChecks.pickPlaceAndTooltip(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_followup_boss")
+    public void followupPraetorHasOnePersistentChampion(GameTestHelper test) {
+        thaumcraft.common.testing.WorldBossFollowupRuntimeChecks.praetorHasOnePersistentChampion(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_followup_boss")
+    public void followupRestoredPraetorWarpHitsOnce(GameTestHelper test) {
+        thaumcraft.common.testing.WorldBossFollowupRuntimeChecks.restoredPraetorWarpHitsOnce(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_followup_generation")
+    public void followupGenerationRespectsDimensionPolicies(GameTestHelper test) {
+        thaumcraft.common.testing.WorldBossFollowupRuntimeChecks.generationRespectsDimensionPolicies(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_followup_grindstone")
+    public void followupSceptreGrindstonePreservesCapacity(GameTestHelper test) {
+        thaumcraft.common.testing.WandSceptreGrindstoneRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_followup_loot")
+    public void followupLootIncludesDatapackOverrides(GameTestHelper test) {
+        LootSourceRegressionChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "review_api_thaumatorium")
+    public void reviewThaumatoriumUsesServerRecipeSnapshot(GameTestHelper test) {
+        thaumcraft.common.testing.ProgrammaticRecipeRuntimeChecks.thaumatoriumOpeningSnapshot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "review_api_recipes")
+    public void reviewProgrammaticArcaneAndCrucibleRecipes(GameTestHelper test) {
+        thaumcraft.common.testing.ProgrammaticRecipeRuntimeChecks.arcaneAndCrucible(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "review_api_infusion")
+    public void reviewProgrammaticInfusionsAndVirtualComparator(GameTestHelper test) {
+        thaumcraft.common.testing.ProgrammaticRecipeRuntimeChecks.infusionsAndVirtualComparator(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_death_fluid")
+    public void reviewDeathFluidConservationAndDamage(GameTestHelper test) {
+        thaumcraft.common.testing.DeathFluidRuntimeChecks.conservationAndDamage(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal")
+    public void reviewPedestalConservesWholeNodeVis(GameTestHelper test) {
+        thaumcraft.common.tiles.WandPedestalRegressionChecks.conservesWholeNodeVis(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal")
+    public void reviewPedestalPartialAndCompoundCharge(GameTestHelper test) {
+        thaumcraft.common.tiles.WandPedestalRegressionChecks.fillsPartialVisAndConvertsOnlyWithFocus(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal_sync")
+    public void reviewPedestalInventoryUpdatesClients(GameTestHelper test) {
+        thaumcraft.common.tiles.WandPedestalRegressionChecks.inventoryChangesQueueNativeClientUpdates(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_regressions")
+    public void reviewWandHandSelection(GameTestHelper test) {
+        thaumcraft.common.testing.WandHandSelectionRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_mirrors")
+    public void reviewSingletonMirrorPlacement(GameTestHelper test) {
+        thaumcraft.common.testing.MirrorRuntimeChecks.singletonPlacementRetainsBothMirrorKinds(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_mirrors")
+    public void reviewCrossDimensionMirrors(GameTestHelper test) {
+        thaumcraft.common.testing.MirrorRuntimeChecks.crossDimensionPairsTransferWithoutLosingStock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 500000, batch = "review_mirror_cache")
+    public void reviewEssentiaMirrorRefreshesSources(GameTestHelper test) {
+        thaumcraft.common.testing.MirrorRuntimeChecks.essentiaMirrorDiscoversReplacementSourceAfterBackoff(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_regressions")
+    public void reviewCraftingEventSeesUnpaidInputs(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewRegressionRuntimeChecks.craftingEventInputs(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_regressions")
+    public void reviewAccessoryDimensionResendsUnchangedContents(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewRegressionRuntimeChecks.accessoryDimensionSnapshot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_regressions")
+    public void reviewTradeUsesNativeInteractionRange(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewRegressionRuntimeChecks.tradeNativeReach(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "api_cache_ownership")
     public void apiRecipeFirstAnswerCannotPoisonLaterAnswers(GameTestHelper test) {
         thaumcraft.common.testing.ApiCacheOwnershipRuntimeChecks.recipeAnswer(test, false);

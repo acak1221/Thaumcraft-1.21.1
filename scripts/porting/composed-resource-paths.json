@@ -84,7 +84,7 @@
         "thaumcraft:textures/models/void_robe_armor.png",
         "thaumcraft:textures/models/void_robe_armor_overlay.png"
       ],
-      "note": ""
+      "note": "Reviewed 2026-10-25 follow-up: focus drawing delegates to the public depth-icon hook renderer and armor copies the original zombie/skeleton arm pose after the wearer pose. Rod/cap and armor sheet suppliers and finite expansions are unchanged; four built-in depth sheets are literal PNG requests checked by the literal-resource verifier."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java",
@@ -182,7 +182,7 @@
         "thaumcraft:textures/misc/r_runicupg.png",
         "thaumcraft:textures/misc/r_warp.png"
       ],
-      "note": ""
+      "note": "Re-reviewed against 3ae61ca7: pane/pan/tab geometry and connectors changed; the two category-background filenames, fixed sheets and corpus/category icon sources are unchanged. Both background expansions and all declared corpus icons remain required."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java",
@@ -235,7 +235,7 @@
         "thaumcraft:textures/misc/research4.png",
         "thaumcraft:textures/misc/research5.png"
       ],
-      "note": ""
+      "note": "Re-reviewed against 3ae61ca7: page geometry, textured navigation and rules reuse the fixed gui_researchbook.png sheet; image.texture still comes from the same language-image corpus. No new computed filename or image-source family."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java",
@@ -1175,6 +1175,12 @@
     "common/src/main/java/thaumcraft/common/config/ThaumcraftWorldgen.java": [
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"tc4_ores\")"
     ],
+    "common/src/main/java/thaumcraft/common/crafting/ArcaneCrafting.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/arcane/\"+index)"
+    ],
+    "common/src/main/java/thaumcraft/common/crafting/ProgrammaticRecipes.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/crucible/\"+Integer.toUnsignedString(recipe.hash,16)+\"_\"+collision)"
+    ],
     "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
       "ResourceLocation.tryParse(tag)"
@@ -1198,9 +1204,7 @@
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_2\")",
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_3\")",
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_4\")",
-      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_5\")",
-      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"champion_bold_speed\")",
-      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"champion_mighty_damage\")"
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"boss_damage_5\")"
     ],
     "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchCrab.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",EldritchMobRules.CULTIST_PLATE_CHEST_ID)",
@@ -1342,8 +1346,7 @@
       "ResourceLocation.tryParse(tag.getString(\"RecipeEnchantment\"))"
     ],
     "common/src/main/java/thaumcraft/common/tiles/TileMirror.java": [
-      "ResourceLocation.tryParse(linkDim)",
-      "ResourceLocation.tryParse(dimension)"
+      "ResourceLocation.tryParse(linkDim)"
     ],
     "common/src/main/java/thaumcraft/common/tiles/TileMirrorEssentia.java": [
       "ResourceLocation.tryParse(linkDim)"
@@ -1418,7 +1421,7 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "6471c99c018271104ad721ccc61332275023a36b16983acfaee85a34e70f6d68",
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
     "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "8a82c324559a31c13e51f1bfe8dabbf9b3cabad505e7bdc3c1749c480bf76bae",
-    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "8d3ac9a7aa42a7624fa82235f1a246c5094a5cca5be1432362250838b4187925",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "106b5819f2fb323c7cf8cc0e8c727c5320bbf32941a71264e11e84cb25bbec41",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
     "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "9a482d65fb0eaa1005d9110f130ff3f1ea4e772f8d419256f2e39748ee7c3efe",
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",
@@ -1428,9 +1431,9 @@
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
     "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",
     "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "7b79ce511e397760b8b05c7cd35df2be79d5d695cf6f0f1426513fd25dd8fef6",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "c35f2e3a39cef0185c63e78784a89f7be0aa1649cd67b596880cf78bef0ddbf2",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "ad7fc6c58e5e8e0980fb0e0e3c4b2830665b7fd3737a35f20cce5265252e34a2",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "c6ea5cb6f2205a947f622cea15ffb463063678ca5adc4dafb6b6ebd813bb5343",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "27036df65f1b9c792a9ea98d12401bb8569257a662e0b65c80d2340008419ed5",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "de6e8e67c4b4dce253e678f022ca967673e125ea87932b00246cfc11523e90db",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "9b7c4f16de3d9430ebed599a5b895ffcf6f2a69ca7bddc890e8e0b2f18549bde",
     "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "73e8c2b51da90c42dfb5087d21d9e0f4d4943d02d335e09a664df72f0c3a451d",
     "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "310799552cea6c938b10a8070cbfd59dbe3c23d2bc376f7f5d760d298a8f8a0d",

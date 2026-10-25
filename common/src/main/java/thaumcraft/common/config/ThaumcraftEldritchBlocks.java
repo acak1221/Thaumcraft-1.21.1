@@ -385,6 +385,9 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> ARCANE_DOOR_ITEM = ITEMS.register("arcane_door", () -> new ItemArcaneDoor(new Item.Properties()));
     public static final RegistrySupplier<Item> MAGIC_BOX_ITEM = ITEMS.register("magic_box", () -> new BlockItem(MAGIC_BOX.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new ItemMirrorBlock(MIRROR.get(), new Item.Properties()));
+    /** Original mirror metadata six. The kind is set before placement creates its block entity. */
+    public static final RegistrySupplier<Item> MIRROR_ESSENTIA_ITEM = ITEMS.register("mirror_essentia",
+            () -> new ItemMirrorBlock(MIRROR.get(), true, new Item.Properties()));
     public static final RegistrySupplier<Item> METAL_DEVICE_ITEM = ITEMS.register("metal_device", () -> new BlockItem(METAL_DEVICE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> WOODEN_DEVICE_ITEM = ITEMS.register("wooden_device", () -> new BlockItem(WOODEN_DEVICE.get(), new Item.Properties()));
     /**
@@ -670,9 +673,15 @@ public final class ThaumcraftEldritchBlocks {
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,
                 FLUX_SCRUBBER_ITEM, ARCANE_PRESSURE_PLATE_ITEM,
-                STAIRS_ELDRITCH_ITEM, ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
+                STAIRS_ELDRITCH_ITEM, ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM, MIRROR_ESSENTIA_ITEM,
                 METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM, BANNER_ITEM,
                 AIRY_ITEM, AIRY_NODE_ITEM, JAR_BRAIN_ITEM, JAR_NODE_ITEM, ETHEREAL_BLOOM_ITEM);
         // The original listed the sixteen coloured banners in the creative tab (BlockWoodenDevice:117-125).
+        ThaumcraftCreativeTabs.publish(ThaumcraftContent.TAB, () -> {
+            var stacks = new java.util.ArrayList<ItemStack>();
+            stacks.addAll(BlockLoot.creativeVariants(LOOT_URN_ITEM.get()));
+            stacks.addAll(BlockLoot.creativeVariants(LOOT_CRATE_ITEM.get()));
+            return stacks;
+        });
     }
 }

@@ -47,7 +47,8 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
         int originZ = chunkZ << 4;
         if (!level.hasChunkAt(new BlockPos(originX + 8, level.getMinBuildHeight(), originZ + 8))) return false;
         int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, originX + 8, originZ + 8);
-        if (biome(level, originX + 8, top, originZ + 8).is(BLACKLIST)) return false;
+        var centreBiome = biome(level, originX + 8, top, originZ + 8);
+        if (centreBiome.is(BLACKLIST) || NodeEcologyPolicy.biomeLevel(centreBiome) != -1) return false;
         boolean placed = false;
         // Not two independent placed features: silverwood generation consumes
         // this stream BEFORE the greatwood rarity draw, exactly as in TC4.

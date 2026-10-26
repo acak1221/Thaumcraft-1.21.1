@@ -174,6 +174,20 @@ public final class ItemGolemBell extends Item {
         }
     }
 
+    /** Read-only bell selection for the client overlays: the golem, its home and home face, and its markers. */
+    public record SelectedGolem(UUID golem, ResourceLocation dimension, BlockPos home, Direction face, List<GolemMarker> markers) {}
+
+    /** The selection of a bell, or null for a bell without one or with invalid data; never resolves the golem. */
+    public static SelectedGolem selectedGolem(ItemStack stack) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof ItemGolemBell)) return null;
+        try {
+            Selection selected = readSelection(stack);
+            return selected == null ? null : new SelectedGolem(selected.golem, selected.dimension, selected.home, selected.face, selected.markers);
+        } catch (IllegalArgumentException malformed) {
+            return null;
+        }
+    }
+
     private static Selection selectionFor(ServerLevel level, EntityGolemBase golem) {
         return new Selection(golem.getUUID(), level.dimension().location(), golem.getHomePosition(), golem.getHomeFacing(), golem.getMarkers());
     }

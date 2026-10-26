@@ -927,6 +927,17 @@
         "thaumcraft:textures/misc/r_thaumaturgy.png"
       ],
       "note": ""
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/empty.png",
+        "thaumcraft:textures/misc/home.png",
+        "thaumcraft:textures/misc/mark.png",
+        "thaumcraft:textures/misc/script.png"
+      ],
+      "note": "Golem bell marks: oracle RenderEventHandler.renderMarkedBlocks and its four overlay helpers."
     }
   ],
   "external_dependencies": {
@@ -1005,6 +1016,9 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+layer.sheet())"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path+\".png\")"
     ],
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/misc/p_\"+size+\".png\")"
@@ -1433,6 +1447,7 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
     "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "8a82c324559a31c13e51f1bfe8dabbf9b3cabad505e7bdc3c1749c480bf76bae",
     "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "8701423958ad9d641bbdac3aabd22f4d5bbef8877604ea331ed88cf329c7ea41",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": "7ed2c201abea159fca1baa780c3f7334bb01c6a410fd4b6ce45ecc1c98b500a5",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
     "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "9a482d65fb0eaa1005d9110f130ff3f1ea4e772f8d419256f2e39748ee7c3efe",
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",
@@ -1449,7 +1464,7 @@
     "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "73e8c2b51da90c42dfb5087d21d9e0f4d4943d02d335e09a664df72f0c3a451d",
     "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "310799552cea6c938b10a8070cbfd59dbe3c23d2bc376f7f5d760d298a8f8a0d",
     "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": "31b8d3d0aaba9681cd58196b93deea847235550776a74fc71ee12d7169d71cde",
-    "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": "b850c890fdfe2dd96712703456cfe3adeec974823339ce98fbd0a7d61d289a97",
+    "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": "4a35fa5d288173a6d968271c88f9c35c9863112b1d2080b055afa0c10c6bf482",
     "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java": "c681c1eb91f2ab06bbdafa4c1b00c0b9a05bb2c31590846db073a9a9ea21e517",
     "common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java": "929d264b2b14947d22cf5156cfa6ce0f0c11a021d5d7518eb998aaf0797803eb",
     "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java": "6d7e1d3ff571c8d64181e3ee7f113f7727eb3b2991faef5598a502fc3a060b6f",

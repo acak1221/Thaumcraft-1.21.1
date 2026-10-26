@@ -100,7 +100,12 @@ public final class ScanApiRuntimeChecks {
     }
 
     public static void identicalPhysicalTargetsCancelOldSession(GameTestHelper test, ServerPlayer player) {
-        try (var f = new Fixture(test, player)) {
+        var fixture = new Fixture(test, player);
+        fixture.whenEntitiesVisible(() -> identicalPhysicalTargets(test, player, fixture));
+    }
+
+    private static void identicalPhysicalTargets(GameTestHelper test, ServerPlayer player, Fixture fixture) {
+        try (var f = fixture) {
             var first = EntityType.COW.create(f.level); var second = EntityType.COW.create(f.level);
             test.assertTrue(first != null && second != null, "two identical native mobs exist");
             first.setPos(f.front); second.setPos(f.side);
@@ -131,7 +136,12 @@ public final class ScanApiRuntimeChecks {
     }
 
     public static void callbacksRespectOcclusionAndTwentyTickSession(GameTestHelper test, ServerPlayer player) {
-        var f = new Fixture(test, player); int[] calls = {0}; boolean[] closed = {false};
+        var fixture = new Fixture(test, player);
+        fixture.whenEntitiesVisible(() -> callbacks(test, player, fixture));
+    }
+
+    private static void callbacks(GameTestHelper test, ServerPlayer player, Fixture f) {
+        int[] calls = {0}; boolean[] closed = {false};
         Runnable cleanup = () -> { if (!closed[0]) { closed[0] = true; f.close(); } };
         try {
             ThaumcraftApi.scanEventhandlers = new ArrayList<>();
@@ -193,7 +203,7 @@ public final class ScanApiRuntimeChecks {
     private static final class Fixture implements AutoCloseable {
         final GameTestHelper test; final ServerPlayer player; final net.minecraft.server.level.ServerLevel level;
         final thaumcraft.common.lib.research.PlayerKnowledge knowledge, oldKnowledge;
-        final ArrayList<IScanEventHandler> oldHandlers; final Vec3 oldPosition, front, side; final float oldYaw, oldPitch;
+        final ArrayList<IScanEventHandler> oldHandlers; final Vec3 oldPosition, position, front, side; final float oldYaw, oldPitch;
         final GameType oldGameType; final List<ItemStack> inventory = new ArrayList<>(); final List<Entity> entities = new ArrayList<>();
         final ItemStack tool; final List<ChunkPos> ownedForcedChunks = new ArrayList<>();
         Fixture(GameTestHelper test, ServerPlayer player) {
@@ -201,7 +211,7 @@ public final class ScanApiRuntimeChecks {
             oldHandlers = ThaumcraftApi.scanEventhandlers; oldPosition = player.position(); oldYaw = player.getYRot(); oldPitch = player.getXRot(); oldGameType = player.gameMode.getGameModeForPlayer();
             for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) inventory.add(player.getInventory().getItem(slot).copy());
             var origin = test.absolutePos(new BlockPos(3, 12, 3));
-            var position = Vec3.atBottomCenterOf(origin);
+            position = Vec3.atBottomCenterOf(origin);
             front = position.add(0, 0, 4); side = position.add(12, 0, 0);
             // The parking target can be in a different chunk. addFreshEntity returning true does
             // not make an entity in an inaccessible section visible through ServerLevel.getEntity.
@@ -218,6 +228,20 @@ public final class ScanApiRuntimeChecks {
             knowledge.reset(); for (var aspect : Aspect.aspects.values()) knowledge.addDiscoveredAspect(aspect.getTag());
             tool = new ItemStack(ThaumcraftContent.THAUMOMETER.get()); player.setItemInHand(InteractionHand.MAIN_HAND, tool);
         }
+        /**
+         * Runs the scenario once every fixture position is entity ticking. A chunk this fixture forces
+         * is loaded at once, but the entity section of a fresh chunk becomes visible a tick or more
+         * later: under load an entity added before that was missing from ServerLevel.getEntity. The
+         * wait is a GameTest sequence, so the scenario may still schedule its own delayed checks.
+         */
+        void whenEntitiesVisible(Runnable scenario) {
+            test.startSequence().thenWaitUntil(() -> {
+                for (var target : List.of(position, front, side))
+                    if (!level.isPositionEntityTicking(BlockPos.containing(target)))
+                        throw new net.minecraft.gametest.framework.GameTestAssertException("fixture chunk is not entity ticking yet: " + target);
+            }).thenExecute(scenario);
+        }
+
         void add(Entity entity) {
             entities.add(entity);
             test.assertTrue(level.addFreshEntity(entity), "fixture entity is accepted by the native world");

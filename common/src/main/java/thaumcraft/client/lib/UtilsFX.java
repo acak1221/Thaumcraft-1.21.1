@@ -40,6 +40,16 @@ import net.minecraft.world.item.ItemStack;
  * </ul>
  */
 public final class UtilsFX {
+    /**
+     * The sixteen colours of the original, in the vanilla dye order White .. Black (oracle UtilsFX
+     * {@code <clinit>} 228-338, {@code UtilsFX.colors}): the golem marker colours of the Order upgrade.
+     */
+    private static final int[] COLORS = {0xF0F0F0, 0xEB8844, 0xC354CD, 0x6689D3, 0xDECF2A, 0x41CD34, 0xD88198, 0x434343,
+            0xA0A0A0, 0x287697, 0x7B2FBE, 0x253192, 0x51301A, 0x3B511A, 0xB3312C, 0x1E1B1B};
+
+    /** One of the sixteen original colours. */
+    public static int color(int index) { return COLORS[index]; }
+
     /** The original fallback of the texture helpers (oracle UtilsFX.java:485,505). */
     public static final int TEXTURE_SIZE_FALLBACK = 16;
     /**

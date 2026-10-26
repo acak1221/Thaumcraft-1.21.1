@@ -1,3 +1,19 @@
+## 2026-10-26 — unwired tickers, golem bell marks, entity visibility race
+
+After the ethereal bloom defect the port was swept for code that is written but
+never called: block entity tickers (checked against the original
+updateEntity/canUpdate), random ticks, init/register calls, mixin configs and
+entity renderers. One new defect: the arcane furnace nozzle never ticked, so it
+never found its core, never connected to tubes and never drew fire essentia. The
+block now hands the nozzle its ticker; a new GameTest builds the furnace with a
+wand and fails without it. The golem bell now draws the original marks from the
+RenderEventHandler bytecode: home mark, face marks (rainbow or Order colour),
+dashed outline of a marked air block, script ribbons from the golem's head. The
+scan GameTests wait for the entity sections of their forced chunks through a
+GameTest sequence. Verified: 2587 JUnit, both builds, 475/475 Fabric and 463/463
+NeoForge GameTests on fresh worlds, 115 Python tests; marks seen on a Fabric
+client. See [the report](docs/analysis/2026-10-26-unwired-tickers-golem-marks-ru.md).
+
 ## 2026-10-26 — ethereal bloom, seven blend mismatches, two-client acceptance
 
 The ethereal bloom never ticked: its block had no ticker, so it neither grew nor

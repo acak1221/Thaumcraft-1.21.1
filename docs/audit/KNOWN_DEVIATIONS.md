@@ -158,8 +158,8 @@ colours, depth writes), the eldritch orb rays (depth writes), node items (drawn 
 Added: the sceptre and primal staff runes. Seen and in order: the thaumometer screen and scan,
 the block sparkles, the projective mirror (no shader error), the infusion essentia streams.
 Still different, not fixed: the deconstruction table ghost item is drawn solid (original additive,
-alpha 0.75); golem markers are lines instead of the original textured quads. (The eldritch portal
-depth writes and the cut-out jar and alembic labels listed here before are fixed, see 7.4.)
+alpha 0.75). (The eldritch portal depth writes and the cut-out jar and alembic labels listed here
+before are fixed, see 7.4; the golem markers, see 7.5.)
 
 ### 7.4 Now seen on a real frame (2026-10-26, round 3)
 
@@ -170,6 +170,14 @@ the additive bloom crystal, the see-through ice and quartz wand rods, the additi
 arrow shaft, blended aspect icons on jars and alembics, the research table inkwell and parchment,
 and the eldritch portal without depth writes. The bloom now restores each quart of a column to the
 biome its generator gives it; 1.7.10 had one biome per column, 1.21.1 has one per quart height.
+
+### 7.5 Golem bell marks (2026-10-26)
+
+The golem bell now draws the original marks instead of line boxes: the home mark, the face marks
+(rainbow or Order colour), the dashed outline of a marked air block and the wobbling script ribbon
+from the golem's head to every marker (`docs/analysis/2026-10-26-unwired-tickers-golem-marks-ru.md`).
+Like the architect overlay they are drawn at full brightness; the original tessellator's lightmap
+brightness 200 is not reproduced. Seen on a Fabric client only.
 
 ---
 

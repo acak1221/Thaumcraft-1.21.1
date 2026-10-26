@@ -1414,6 +1414,11 @@ public final class ThaumcraftGameTests {
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    public void arcane_furnace_nozzle_feeds_the_furnace_fire_essentia(GameTestHelper test) {
+        thaumcraft.common.testing.ArcaneFurnaceNozzleRuntimeChecks.nozzleFeedsTheFurnaceFireEssentia(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
     public void theOriginalSmeltingBonusesAreRegistered(GameTestHelper test) {
         thaumcraft.common.testing.SmeltingBonusRuntimeChecks.run(test);
     }

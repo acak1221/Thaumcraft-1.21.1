@@ -153,7 +153,7 @@ public final class ResearchRecipeCoverage {
     public static List<String> missingRecipeKeys() {
         ResearchCatalog.loadBundled();
         Set<String> missing = new TreeSet<>();
-        for (ResearchDefinition definition : ResearchCatalog.all()) {
+        for (ResearchDefinition definition : ResearchCatalog.bundled()) {
             for (ResearchDefinition.Page page : definition.pages()) {
                 String key = page.recipeKey();
                 if (key != null && !isResolved(key)) missing.add(key);
@@ -166,7 +166,7 @@ public final class ResearchRecipeCoverage {
     public static List<String> missingResearchKeys() {
         ResearchCatalog.loadBundled();
         Set<String> missing = new TreeSet<>();
-        for (ResearchDefinition definition : ResearchCatalog.all()) {
+        for (ResearchDefinition definition : ResearchCatalog.bundled()) {
             for (ResearchDefinition.Page page : definition.pages()) {
                 String key = page.recipeKey();
                 if (key != null && !isResolved(key)) { missing.add(definition.key()); break; }
@@ -179,7 +179,7 @@ public final class ResearchRecipeCoverage {
     public static Map<String, Integer> recipeKeyCounts() {
         ResearchCatalog.loadBundled();
         Map<String, Integer> counts = new TreeMap<>();
-        for (ResearchDefinition definition : ResearchCatalog.all()) {
+        for (ResearchDefinition definition : ResearchCatalog.bundled()) {
             for (ResearchDefinition.Page page : definition.pages()) {
                 String key = page.recipeKey();
                 if (key != null) counts.merge(key, 1, Integer::sum);

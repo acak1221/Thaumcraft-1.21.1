@@ -2379,6 +2379,24 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.arcaneFurnaceIsBuiltByAWandAndPaysTheMeatNuggets(test);
     }
 
+    // Research an add-on registers through the public API joins the book, the research table, purchase, clues,
+    // completion and saves; a change to an original entry through its public view is laid over the corpus.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "api_addon_research")
+    public void addonResearchJoinsGameplay(GameTestHelper test) {
+        thaumcraft.common.testing.AddonResearchRuntimeChecks.addonResearchJoinsGameplay(test, test.makeMockServerPlayerInLevel());
+    }
+
+    // The IThaumcraftAddon hook ran before the world, and 1.7.10 ore dictionary names reach the tags of the world.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "api_addon_lifecycle")
+    public void addonHookRanBeforeTheWorld(GameTestHelper test) {
+        thaumcraft.common.testing.AddonApiRuntimeChecks.addonHookRanBeforeTheWorld(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "api_ore_dictionary")
+    public void oreDictionaryNamesReachTheTagsOfTheWorld(GameTestHelper test) {
+        thaumcraft.common.testing.AddonApiRuntimeChecks.oreDictionaryNamesReachTheTagsOfTheWorld(test);
+    }
+
     private static net.minecraft.server.level.ServerPlayer notePlayer(GameTestHelper test) {
         test.assertTrue(NetworkRegistry.getCodec(ResearchNoteRequestPayload.TYPE.id(),
                         ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,

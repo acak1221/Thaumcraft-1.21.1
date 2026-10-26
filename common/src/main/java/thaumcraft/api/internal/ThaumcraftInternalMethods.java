@@ -48,6 +48,45 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
         // The original integer dimension has no 1.21.1 equivalent; the native vis-net owns the effect itself.
     }
 
+    // ------------------------------------------------------------------ 1.21.1 forms of the same services
+    // The native-looking overloads of the interface answer from the same native state as the internal handler
+    // of the mod; an add-on never needs thaumcraft.common to reach them.
+
+    @Override public void generateVisEffect(net.minecraft.server.level.ServerLevel level, int x, int y, int z, int x2, int y2, int z2, int color) {
+        if (level != null) thaumcraft.common.lib.InternalMethodHandler.INSTANCE.generateVisEffect(level, x, y, z, x2, y2, z2, color);
+    }
+
+    @Override public void generateVisEffect(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos from,
+                                            net.minecraft.core.BlockPos to, Aspect aspect) {
+        if (level instanceof net.minecraft.server.level.ServerLevel server && from != null && to != null && aspect != null)
+            thaumcraft.api.visnet.VisNetHandler.generateVisEffect(server, from, to, aspect);
+    }
+
+    @Override public boolean hasDiscoveredAspect(Player player, Aspect aspect) {
+        PlayerKnowledge knowledge = knowledge(player);
+        return knowledge != null && aspect != null && knowledge.hasDiscoveredAspect(aspect.getTag());
+    }
+
+    @Override public AspectList getDiscoveredAspects(Player player) {
+        PlayerKnowledge knowledge = knowledge(player);
+        return knowledge == null ? null : discovered(knowledge);
+    }
+
+    @Override public AspectList getObjectAspects(net.minecraft.world.level.Level level, ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return new AspectList();
+        return thaumcraft.common.lib.InternalMethodHandler.INSTANCE.getObjectAspects(level, stack);
+    }
+
+    @Override public AspectList getBonusObjectTags(net.minecraft.world.level.Level level, ItemStack stack, AspectList bonus) {
+        if (stack == null || stack.isEmpty()) return bonus == null ? new AspectList() : bonus.copy();
+        return thaumcraft.common.lib.InternalMethodHandler.INSTANCE.getBonusObjectTags(level, stack, bonus);
+    }
+
+    @Override public AspectList generateTags(net.minecraft.world.level.Level level, Item item, int metadata) {
+        if (item == null) return new AspectList();
+        return thaumcraft.common.lib.InternalMethodHandler.INSTANCE.generateTags(level, item, metadata);
+    }
+
     @Override public boolean isResearchComplete(String username, String researchkey) {
         PlayerKnowledge knowledge = knowledge(username);
         return knowledge != null && knowledge.isResearchComplete(researchkey);
@@ -65,7 +104,10 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
 
     @Override public AspectList getDiscoveredAspects(String username) {
         PlayerKnowledge knowledge = knowledge(username);
-        if (knowledge == null) return null;
+        return knowledge == null ? null : discovered(knowledge);
+    }
+
+    private static AspectList discovered(PlayerKnowledge knowledge) {
         AspectList result = new AspectList();
         for (Map.Entry<String, Integer> entry : knowledge.getAspectsDiscovered().entrySet()) {
             Aspect aspect = Aspect.getAspect(entry.getKey());
@@ -139,6 +181,35 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
 
     @Override public void addStickyWarpToPlayer(Player player, int amount) {
         thaumcraft.common.lib.InternalMethodHandler.INSTANCE.addStickyWarpToPlayer(player, amount);
+    }
+
+    @Override public boolean completeResearch(Player player, String researchKey) {
+        if (!(player instanceof ServerPlayer) || researchKey == null || researchKey.startsWith("@")) return false;
+        return thaumcraft.common.lib.research.ResearchManager.INSTANCE.completeResearch(player, researchKey);
+    }
+
+    @Override public java.util.Set<String> getCompletedResearch(Player player) {
+        PlayerKnowledge knowledge = knowledge(player);
+        if (knowledge == null) return java.util.Set.of();
+        java.util.Set<String> result = new java.util.LinkedHashSet<>();
+        for (String key : knowledge.getResearchComplete()) if (!key.startsWith("@")) result.add(key);
+        return result;
+    }
+
+    @Override public void addAspectPool(Player player, Aspect aspect, int amount) {
+        if (!(player instanceof ServerPlayer) || aspect == null || amount == 0) return;
+        short clamped = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, amount));
+        thaumcraft.common.lib.research.ResearchManager.INSTANCE.completeAspect(player, aspect, clamped);
+    }
+
+    @Override public int getAspectPool(Player player, Aspect aspect) {
+        PlayerKnowledge knowledge = knowledge(player);
+        return knowledge == null || aspect == null ? 0 : knowledge.getAspectPoolFor(aspect.getTag());
+    }
+
+    @Override public int[] getWarp(Player player) {
+        PlayerKnowledge knowledge = knowledge(player);
+        return knowledge == null ? new int[3] : new int[] {knowledge.getWarpPerm(), knowledge.getWarpSticky(), knowledge.getWarpTemp()};
     }
 
     private static boolean consume(ItemStack wand, AspectList cost, boolean doit) {

@@ -298,6 +298,17 @@ public final class ThaumcraftRecipeDisplay {
     private final ItemStack syntheticResult;
     /** The synthetic inputs of such a page, in the order of the original recipe. */
     private final List<ItemStack> syntheticInputs;
+    /** The content of an add-on aspect, smelting or image page, null for every other page. */
+    private final AddonPage addon;
+
+    /** The add-on pages the original drew without a recipe holder of their own. */
+    private sealed interface AddonPage permits Aspects, Smelting, Image {}
+    /** Original GuiResearchRecipe.drawAspectPage: the aspects of the list, sorted, one row each. */
+    private record Aspects(thaumcraft.api.aspects.AspectList aspects) implements AddonPage {}
+    /** Original GuiResearchRecipe.drawSmeltingPage: the furnace input and its result. */
+    private record Smelting(ItemStack input, ItemStack result) implements AddonPage {}
+    /** An IMAGE page: the texture over the page width and its caption. */
+    private record Image(ResourceLocation texture, String caption) implements AddonPage {}
 
     /**
      * The items this page makes: its synthetic result, the result of every alternative, or the
@@ -305,6 +316,8 @@ public final class ThaumcraftRecipeDisplay {
      */
     public List<ItemStack> results(Level level) {
         if (syntheticResult != null && !syntheticResult.isEmpty()) return List.of(syntheticResult);
+        if (addon instanceof Smelting smelting) return List.of(smelting.result());
+        if (addon != null) return List.of();
         if (!alternatives.isEmpty()) {
             List<ItemStack> all = new ArrayList<>();
             for (ThaumcraftRecipeDisplay alternative : alternatives) all.addAll(alternative.results(level));
@@ -330,6 +343,7 @@ public final class ThaumcraftRecipeDisplay {
         sceptreVariants = null;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
+        addon = null;
     }
 
     private ThaumcraftRecipeDisplay(List<ThaumcraftRecipeDisplay> alternatives) {
@@ -345,6 +359,7 @@ public final class ThaumcraftRecipeDisplay {
         sceptreVariants = null;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
+        addon = null;
     }
 
     private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe, boolean thaumatorium) {
@@ -363,6 +378,7 @@ public final class ThaumcraftRecipeDisplay {
         sceptreVariants = null;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
+        addon = null;
     }
 
     /**
@@ -387,6 +403,7 @@ public final class ThaumcraftRecipeDisplay {
         sceptreVariants = variants;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
+        addon = null;
     }
 
     /**
@@ -405,6 +422,23 @@ public final class ThaumcraftRecipeDisplay {
         sceptreVariants = null;
         syntheticResult = result;
         syntheticInputs = List.copyOf(inputs);
+        addon = null;
+    }
+
+    /** An add-on aspect, smelting or image page. */
+    private ThaumcraftRecipeDisplay(AddonPage page) {
+        recipe = null;
+        ingredients = List.of();
+        gridWidth = 3;
+        shapeless = false;
+        alternatives = List.of();
+        infusionAltar = false;
+        thaumatorium = false;
+        advancedFurnace = false;
+        sceptreVariants = null;
+        syntheticResult = ItemStack.EMPTY;
+        syntheticInputs = List.of();
+        addon = page;
     }
 
     private static Map.Entry<String, ResourceLocation> alias(String original, String nativeId) {
@@ -445,6 +479,7 @@ public final class ThaumcraftRecipeDisplay {
     public static Map<String, ResourceLocation> aliases() { return RESOLVED; }
     public RecipeHolder<?> recipe() { return recipe; }
     public boolean sameRecipes(ThaumcraftRecipeDisplay other) {
+        if (addon != null || other.addon != null) return sameAddonPage(addon, other.addon);
         if (recipe != other.recipe || infusionAltar != other.infusionAltar || thaumatorium != other.thaumatorium || alternatives.size() != other.alternatives.size()) return false;
         if (!ItemStack.matches(syntheticResult, other.syntheticResult)) return false;
         if (syntheticInputs.size() != other.syntheticInputs.size()) return false;
@@ -452,6 +487,13 @@ public final class ThaumcraftRecipeDisplay {
         if (sceptreVariants == null ? other.sceptreVariants != null : !java.util.Arrays.equals(sceptreVariants, other.sceptreVariants)) return false;
         for (int i = 0; i < alternatives.size(); i++) if (!alternatives.get(i).sameRecipes(other.alternatives.get(i))) return false;
         return true;
+    }
+
+    private static boolean sameAddonPage(AddonPage first, AddonPage second) {
+        if (first instanceof Smelting a && second instanceof Smelting b)
+            return ItemStack.matches(a.input(), b.input()) && ItemStack.matches(a.result(), b.result());
+        if (first instanceof Aspects a && second instanceof Aspects b) return a.aspects() == b.aspects();
+        return first != null && first.equals(second);
     }
 
     /** Null means unavailable/unsupported, never an empty crafting page. No extra research gates are added here. */
@@ -541,6 +583,9 @@ public final class ThaumcraftRecipeDisplay {
      */
     public static ThaumcraftRecipeDisplay resolve(ResearchDefinition.Page page, String researchKey, Level level) {
         if (level == null) return null;
+        if ("api".equals(page.kind())) {
+            return page.source() instanceof thaumcraft.api.research.ResearchPage source ? resolveAddon(source, level) : null;
+        }
         // ConfigResearch:250-254 explicitly constructs this six-recipe array.
         // This is a literal whitelist entry, NOT evaluation of extracted Java.
         if ("legacy_expression".equals(page.kind()) && "cruc.toArray(new CrucibleRecipe[0])".equals(page.javaExpression())) {
@@ -623,6 +668,81 @@ public final class ThaumcraftRecipeDisplay {
         return resolve(holder, level);
     }
 
+    /**
+     * A page an add-on registered through {@code ResearchItem.setPages}.
+     *
+     * <p>Original GuiResearchRecipe.drawPage draws the recipe objects of the page; a recipe array is shown one
+     * entry per second (oracle :647-655). An API recipe is drawn through its native recipe, a vanilla recipe
+     * object or holder through the native diagram of its type, and the recipes of
+     * {@code ResearchPage.recipe(ids)} through the recipe manager of the world. COMPOUND_CRAFTING (the wand
+     * construct diagrams of the original) has no add-on counterpart and is not shown.</p>
+     */
+    private static ThaumcraftRecipeDisplay resolveAddon(thaumcraft.api.research.ResearchPage page, Level level) {
+        List<ThaumcraftRecipeDisplay> choices = new ArrayList<>();
+        if (page.recipeIds != null) {
+            for (ResourceLocation id : page.recipeIds) {
+                if (id == null) continue;
+                var holder = level.getRecipeManager().byKey(id).orElse(null);
+                var choice = holder == null ? null : resolve(holder, level);
+                if (choice != null) choices.add(choice);
+            }
+            return choices.isEmpty() ? null : choices.size() == 1 ? choices.getFirst() : new ThaumcraftRecipeDisplay(choices);
+        }
+        switch (page.type) {
+            case ASPECTS -> {
+                return page.aspects == null || page.aspects.size() == 0 ? null : new ThaumcraftRecipeDisplay(new Aspects(page.aspects));
+            }
+            case SMELTING -> {
+                if (!(page.recipe instanceof ItemStack input) || input.isEmpty()) return null;
+                var smelting = level.getRecipeManager().getRecipeFor(RecipeType.SMELTING,
+                        new net.minecraft.world.item.crafting.SingleRecipeInput(input), level).orElse(null);
+                ItemStack result = smelting == null ? ItemStack.EMPTY : smelting.value().getResultItem(level.registryAccess());
+                return result.isEmpty() ? null : new ThaumcraftRecipeDisplay(new Smelting(input.copyWithCount(1), result.copy()));
+            }
+            case IMAGE -> {
+                return page.image == null ? null : new ThaumcraftRecipeDisplay(new Image(page.image, page.text));
+            }
+            case COMPOUND_CRAFTING, TEXT, TEXT_CONCEALED -> {
+                return null;
+            }
+            default -> {
+                addonRecipes(page.recipe, level, choices);
+                return choices.isEmpty() ? null : choices.size() == 1 ? choices.getFirst() : new ThaumcraftRecipeDisplay(choices);
+            }
+        }
+    }
+
+    /** One stable holder per recipe object, so an open book does not lay its pages out again every frame. */
+    private static final Map<Object, RecipeHolder<?>> ADDON_HOLDERS = java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+
+    private static void addonRecipes(Object recipe, Level level, List<ThaumcraftRecipeDisplay> choices) {
+        switch (recipe) {
+            case null -> { }
+            case Object[] array -> { for (Object element : array) addonRecipes(element, level, choices); }
+            case Iterable<?> list -> { for (Object element : list) addonRecipes(element, level, choices); }
+            case RecipeHolder<?> holder -> addResolved(resolve(holder, level), choices);
+            case thaumcraft.api.crafting.ShapedArcaneRecipe arcane -> addNative(arcane.nativeRecipe(), level, choices);
+            case thaumcraft.api.crafting.ShapelessArcaneRecipe arcane -> addNative(arcane.nativeRecipe(), level, choices);
+            case thaumcraft.api.crafting.CrucibleRecipe crucible -> addNative(crucible.nativeRecipe(), level, choices);
+            case thaumcraft.api.crafting.InfusionRecipe infusion -> addNative(infusion.nativeRecipe(), level, choices);
+            case thaumcraft.api.crafting.InfusionEnchantmentRecipe infusion -> addNative(infusion.nativeRecipe(), level, choices);
+            case net.minecraft.world.item.crafting.Recipe<?> vanilla -> addNative(vanilla, level, choices);
+            default -> { }
+        }
+    }
+
+    private static void addNative(net.minecraft.world.item.crafting.Recipe<?> recipe, Level level, List<ThaumcraftRecipeDisplay> choices) {
+        if (recipe == null) return;
+        RecipeHolder<?> holder = ADDON_HOLDERS.computeIfAbsent(recipe, value -> new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath(
+                "thaumcraft", "api/page/" + Integer.toHexString(System.identityHashCode(value))),
+                (net.minecraft.world.item.crafting.Recipe<?>) value));
+        addResolved(resolve(holder, level), choices);
+    }
+
+    private static void addResolved(ThaumcraftRecipeDisplay display, List<ThaumcraftRecipeDisplay> choices) {
+        if (display != null) choices.add(display);
+    }
+
     private static ThaumcraftRecipeDisplay resolve(RecipeHolder<?> holder, Level level) {
         var nativeRecipe = holder.value();
         if (nativeRecipe instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe infusion
@@ -696,6 +816,9 @@ public final class ThaumcraftRecipeDisplay {
      */
     public Hover render(GuiGraphics graphics, Font font, Level level, Player player,
                          int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
+        if (addon instanceof Aspects aspects) return renderAspects(aspects.aspects(), graphics, font, x, y, width, height, mouseX, mouseY);
+        if (addon instanceof Smelting smelting) return renderSmelting(smelting, graphics, font, x, y, width, height, mouseX, mouseY);
+        if (addon instanceof Image image) return renderImage(image, graphics, font, x, y, width, height);
         if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);
         if (sceptreVariants != null) return renderSceptre(graphics, font, level, player,
@@ -1126,6 +1249,156 @@ public final class ThaumcraftRecipeDisplay {
             graphics.pose().popPose();
         }
         return hover;
+    }
+
+    /**
+     * Original GuiResearchRecipe.drawAspectPage (oracle :550-603): one row of fifty pixels per aspect of
+     * {@code getAspectsSorted()}, the aspect at twice its size with its amount and its name below, then, for a
+     * compound, its two components at one and a half times their size with their names in italics, joined by
+     * "=" and "+"; a primal reads "tc.aspect.primal". The hovered aspect gets the {@code _back} highlight. The
+     * original hover grid of the scanned items holding the aspect (oracle :605-640) is not drawn; the hover
+     * shows the name and the description of the aspect instead.
+     */
+    private static Hover renderAspects(thaumcraft.api.aspects.AspectList list, GuiGraphics graphics, Font font,
+                                       int x, int y, int width, int height, int mouseX, int mouseY) {
+        Aspect[] sorted = list.getAspectsSorted();
+        if (sorted.length == 0) return null;
+        // A name is centred under its glyph and a long one ("Praecantatio") reaches past the glyph's left edge;
+        // the block moves right by that much so the name stays on the page.
+        int overflow = 0;
+        for (Aspect aspect : sorted) if (aspect != null) overflow = Math.max(overflow, font.width(aspect.getName()) / 2 - 16);
+        float scale = Math.min(1, Math.min(width / (132F + overflow), height / (50F * sorted.length)));
+        float originX = x + overflow * scale, originY = y + 2;
+        float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
+        Hover hover = null;
+        graphics.pose().pushPose();
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            for (int row = 0; row < sorted.length; row++) {
+                Aspect aspect = sorted[row];
+                if (aspect == null || aspect.getImage() == null) continue;
+                int top = row * 50;
+                boolean hovered = inside(mx, my, 0, top, 40, 40);
+                if (hovered) {
+                    graphics.flush();
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
+                    graphics.blit(ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/aspects/_back.png"),
+                            -5, top - 5, 40, 40, 0, 0, 16, 16, 16, 16);
+                    hover = new Hover(ItemStack.EMPTY, List.of(Component.literal(aspect.getName()),
+                            Component.translatable("tc.aspect." + aspect.getTag()).withStyle(ChatFormatting.GRAY)));
+                }
+                drawAspectTag(graphics, font, aspect, list.getAmount(aspect), 0, top, 2F);
+                String name = aspect.getName();
+                graphics.drawString(font, name, 16 - font.width(name) / 2, top + 33, 0xFF505050, false);
+                Aspect[] components = aspect.getComponents();
+                if (components != null && components.length >= 2 && components[0] != null && components[1] != null) {
+                    drawAspectTag(graphics, font, components[0], 0, 54, top + 4, 1.5F);
+                    drawAspectTag(graphics, font, components[1], 0, 96, top + 4, 1.5F);
+                    String first = components[0].getName(), second = components[1].getName();
+                    graphics.drawString(font, Component.literal(first).withStyle(ChatFormatting.ITALIC),
+                            16 - font.width(first) / 2 + 50, top + 30, 0xFF505050, false);
+                    graphics.drawString(font, Component.literal(second).withStyle(ChatFormatting.ITALIC),
+                            16 - font.width(second) / 2 + 92, top + 30, 0xFF505050, false);
+                    graphics.drawString(font, "=", 7 + 32, top + 12, 0xFF999999, false);
+                    graphics.drawString(font, "+", 4 + 79, top + 12, 0xFF999999, false);
+                } else {
+                    graphics.drawString(font, Component.translatable("tc.aspect.primal"), 48, top + 12, 0xFF444444, false);
+                }
+            }
+        } finally {
+            graphics.pose().popPose();
+        }
+        return hover;
+    }
+
+    /** Original UtilsFX.drawTag: the tinted aspect glyph of sixteen pixels and, above zero, its amount. */
+    private static void drawAspectTag(GuiGraphics graphics, Font font, Aspect aspect, int amount, int x, int y, float scale) {
+        graphics.pose().pushPose();
+        try {
+            graphics.pose().translate(x, y, 0);
+            graphics.pose().scale(scale, scale, 1);
+            graphics.flush();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            int color = aspect.getColor();
+            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+            graphics.blit(aspect.getImage(), 0, 0, 0, 0, 16, 16, 16, 16);
+            graphics.setColor(1, 1, 1, 1);
+            if (amount > 0) {
+                graphics.pose().pushPose();
+                graphics.pose().translate(16, 11, 200);
+                graphics.pose().scale(.5F, .5F, 1);
+                String text = Integer.toString(amount);
+                graphics.drawString(font, text, -font.width(text), 0, 0xFFFFFFFF, true);
+                graphics.pose().popPose();
+            }
+        } finally {
+            graphics.pose().popPose();
+        }
+    }
+
+    /**
+     * Original GuiResearchRecipe.drawSmeltingPage: the title, the furnace frame of the overlay sheet
+     * (u 0, v 192, 56 by 64 at twice its size), the input at (48, 64) and the result at (48, 144).
+     */
+    private static Hover renderSmelting(Smelting smelting, GuiGraphics graphics, Font font,
+                                        int x, int y, int width, int height, int mouseX, int mouseY) {
+        float scale = Math.min(width / 112F, height / 160F);
+        if (scale <= 0) return null;
+        float originX = x + (width - 112 * scale) / 2, originY = y + (height - 160 * scale) / 2;
+        float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
+        Hover hover = null;
+        graphics.pose().pushPose();
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.smelting"), 56, 0, 112, 0xFF505050);
+            graphics.flush();
+            RenderSystem.enableBlend();
+            graphics.blit(OVERLAY, 0, 28, 112, 128, 0, 384, 112, 128, 512, 512);
+            RenderSystem.disableBlend();
+            drawItem(graphics, font, smelting.input(), 48, 64);
+            if (inside(mx, my, 48, 64, 16, 16)) hover = new Hover(smelting.input(), List.of());
+            drawItem(graphics, font, smelting.result(), 48, 144);
+            if (inside(mx, my, 48, 144, 16, 16)) hover = new Hover(smelting.result(), List.of());
+        } finally {
+            graphics.pose().popPose();
+        }
+        return hover;
+    }
+
+    private static final Map<ResourceLocation, int[]> IMAGE_SIZES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * An IMAGE page. Original 4.2.3.5 drawPage has no IMAGE branch and leaves the page blank; the port draws
+     * the texture over the page width, keeping its proportions, with the translated caption below it.
+     */
+    private static Hover renderImage(Image image, GuiGraphics graphics, Font font, int x, int y, int width, int height) {
+        int[] size = IMAGE_SIZES.computeIfAbsent(image.texture(), ThaumcraftRecipeDisplay::imageSize);
+        if (size[0] <= 0 || size[1] <= 0) return null;
+        int captionHeight = image.caption() == null ? 0 : font.lineHeight + 4;
+        float scale = Math.min(width / (float) size[0], (height - captionHeight) / (float) size[1]);
+        int drawnWidth = Math.max(1, Math.round(size[0] * scale)), drawnHeight = Math.max(1, Math.round(size[1] * scale));
+        graphics.flush();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        graphics.blit(image.texture(), x + (width - drawnWidth) / 2, y, drawnWidth, drawnHeight, 0, 0, size[0], size[1], size[0], size[1]);
+        if (image.caption() != null) {
+            drawCenteredFit(graphics, font, Component.translatable(image.caption()), x + width / 2, y + drawnHeight + 4, width, 0xFF505050);
+        }
+        return null;
+    }
+
+    private static int[] imageSize(ResourceLocation texture) {
+        var resource = net.minecraft.client.Minecraft.getInstance().getResourceManager().getResource(texture).orElse(null);
+        if (resource == null) return new int[] {0, 0};
+        try (var stream = resource.open(); var read = com.mojang.blaze3d.platform.NativeImage.read(stream)) {
+            return new int[] {read.getWidth(), read.getHeight()};
+        } catch (java.io.IOException | RuntimeException unreadable) {
+            return new int[] {0, 0};
+        }
     }
 
     private static void drawItem(GuiGraphics graphics, Font font, ItemStack stack, int x, int y) {

@@ -42,7 +42,7 @@ public final class GuiResearchPopup {
                 try { graphics.pose().translate(30,frame.y()+16+2F/scale,0);graphics.pose().scale(scale,scale,scale);graphics.drawString(client.font,name,0,0,-1,false); }
                 finally { graphics.pose().popPose(); }
             }
-            if(!ResearchIconDisplay.render(graphics,client.font,research.iconExpression(),8,frame.y()+8)) {
+            if(!AddonResearchIcons.render(graphics,research.key(),8,frame.y()+8)&&!ResearchIconDisplay.render(graphics,client.font,research.iconExpression(),8,frame.y()+8)) {
                 var match=TEXTURE.matcher(research.iconExpression()==null?"":research.iconExpression());
                 var texture=match.matches()?ResourceLocation.fromNamespaceAndPath("thaumcraft",match.group(1).toLowerCase(java.util.Locale.ROOT)):
                         ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/items/thaumonomicon.png");

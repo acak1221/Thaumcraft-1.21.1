@@ -23,6 +23,9 @@
     "client": [
       "thaumcraft.fabric.ThaumcraftFabricClient"
     ],
+    "server": [
+      "thaumcraft.fabric.ThaumcraftFabricServer"
+    ],
     "emi": [
       "thaumcraft.compat.emi.ThaumcraftEmiPlugin"
     ],

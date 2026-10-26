@@ -319,6 +319,12 @@ public final class GuiResearchBrowser extends Screen {
     private void drawCategoryBackground(GuiGraphics graphics, int mapX, int mapY, int[] bounds) {
         ResourceLocation sheet = texture("textures/gui/"
                 + (category.equals("ELDRITCH") ? "gui_researchbackeldritch.png" : "gui_researchback.png"));
+        // Original GuiResearchBrowser binds the background of the selected category; an add-on category
+        // brings its own sheet, read with the same geometry.
+        if (!ResearchBrowserData.isOriginalCategory(category)) {
+            var list = thaumcraft.api.research.ResearchCategories.getResearchList(category);
+            if (list != null && list.background != null) sheet = list.background;
+        }
         // Oracle :287-291: normalized pan, NOT raw pixel pan and NOT wrapping.
         int vx = backgroundOffset(mapX, bounds[0], bounds[2], 288);
         int vy = backgroundOffset(mapY, bounds[1], bounds[3], 316);
@@ -509,6 +515,7 @@ public final class GuiResearchBrowser extends Screen {
     }
 
     private void drawIcon(GuiGraphics graphics, ResearchDefinition research, int x, int y) {
+        if (AddonResearchIcons.render(graphics, research.key(), x, y)) return;
         if (ResearchIconDisplay.render(graphics, font, research.iconExpression(), x, y)) return;
         // Original GuiResearchBrowser:404-412 draws the icon of the research only
         // when its expression is a texture of the mod. An expression that names

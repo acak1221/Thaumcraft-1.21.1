@@ -49,9 +49,20 @@ public final class ResearchBrowserData {
                 .toList();
     }
 
+    /**
+     * The tabs of the book: the six original categories, then the categories add-ons registered, in
+     * registration order (original GuiResearchBrowser walks {@code ResearchCategories.researchCategories}).
+     */
     public static List<String> categories(Set<String> completed) {
-        return CATEGORY_ORDER.stream().filter(category -> isCategoryVisible(category, completed)).toList();
+        List<String> ordered = new java.util.ArrayList<>(CATEGORY_ORDER);
+        for (String key : thaumcraft.api.research.ResearchCategories.categoryKeys()) {
+            if (key != null && !ordered.contains(key)) ordered.add(key);
+        }
+        return ordered.stream().filter(category -> isCategoryVisible(category, completed)).toList();
     }
+
+    /** True for one of the six categories of the original. */
+    public static boolean isOriginalCategory(String category) { return CATEGORY_ORDER.contains(category); }
 
     /** Text-only compatibility view; native recipe availability is client-side. */
     public static List<ResearchDefinition.Page> readablePages(ResearchDefinition research, Set<String> completed) {
@@ -74,7 +85,8 @@ public final class ResearchBrowserData {
                 .filter(page -> page.isVisible(completed))
                 .filter(page -> "text".equals(page.kind()) && page.textKey() != null
                         || ("recipe_reference".equals(page.kind()) && page.recipeKey() != null
-                        || "legacy_expression".equals(page.kind()) && page.javaExpression() != null) && recipeAvailable.test(page))
+                        || "legacy_expression".equals(page.kind()) && page.javaExpression() != null
+                        || "api".equals(page.kind()) && page.source() != null) && recipeAvailable.test(page))
                 .toList();
     }
 

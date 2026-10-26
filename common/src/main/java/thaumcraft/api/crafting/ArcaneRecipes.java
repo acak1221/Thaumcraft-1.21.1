@@ -60,7 +60,10 @@ public final class ArcaneRecipes {
         if (value instanceof Block block) return Ingredient.of(block.asItem());
         if (value instanceof Ingredient ingredient) return ingredient;
         if (value instanceof String name) {
-            ResourceLocation id = name.contains(":") ? ResourceLocation.tryParse(name) : ResourceLocation.fromNamespaceAndPath("thaumcraft", name);
+            // A 1.7.10 ore dictionary name ("ingotCopper", "logWood") or a namespaced tag id; a plain lower-case
+            // path that is neither stays a thaumcraft:<path> tag, as before.
+            ResourceLocation id = thaumcraft.api.OreDictionaryNames.tagId(name);
+            if (id == null) id = ResourceLocation.tryBuild("thaumcraft", name);
             if (id == null) throw new IllegalArgumentException("Invalid recipe tag: " + name);
             Ingredient ingredient = Ingredient.of(TagKey.create(Registries.ITEM, id));
             if (ingredient.isEmpty()) throw new IllegalArgumentException("Unknown recipe item tag: " + name);

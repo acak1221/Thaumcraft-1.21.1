@@ -403,6 +403,16 @@ public final class ThaumcraftApi {
         for (ResearchDefinition definition : ResearchCatalog.all()) {
             List<ResearchDefinition.Page> pages = definition.pages();
             for (int index = 0; index < pages.size(); index++) {
+                // An add-on page carries its recipe objects or recipe ids, as the original pages did.
+                if (pages.get(index).source() instanceof thaumcraft.api.research.ResearchPage page) {
+                    for (ItemStack output : thaumcraft.common.lib.research.AddonResearch.outputs(page)) {
+                        if (!sameOutput(output, stack)) continue;
+                        Object[] found = new Object[]{definition.key(), index};
+                        keyCache.put(key, found);
+                        return researchVisible(player, found.clone());
+                    }
+                    continue;
+                }
                 for (String recipeKey : pageRecipeKeys(definition, pages.get(index))) {
                     ItemStack output = nativeResult(recipeKey);
                     if (output == null || !sameOutput(output, stack)) continue;
@@ -415,6 +425,21 @@ public final class ThaumcraftApi {
         keyCache.put(key, null);
         return null;
     }
+
+    // ------------------------------------------------------------------ add-on lifecycle
+
+    /**
+     * Runs {@code callback} once every mod is initialized and Thaumcraft registered its content: immediately when that
+     * moment has passed, later otherwise. The loader-independent form of {@link IThaumcraftAddon}; see there for the
+     * exact moment and the thread. Not a 1.7.10 member.
+     */
+    public static void whenReady(Runnable callback) { thaumcraft.common.lib.AddonLifecycle.whenReady(callback); }
+
+    /** True once the {@link IThaumcraftAddon} hooks ran. */
+    public static boolean isReady() { return thaumcraft.common.lib.AddonLifecycle.isReady(); }
+
+    /** Forgets the answers of {@link #getCraftingRecipeKey}; the runtime calls it when research is added or changed. */
+    public static void clearRecipeKeyCache() { keyCache.clear(); }
 
     /** The original recipe keys a research page shows: its own recipe, or the array of the original page. */
     private static List<String> pageRecipeKeys(ResearchDefinition definition, ResearchDefinition.Page page) {
@@ -525,20 +550,48 @@ public final class ThaumcraftApi {
         if (item == null || item.isEmpty()) return;
         ObjectAspectRegistry.register(objectTags, groupedObjectTags, item.getItem(), metadata, aspects);
     }
-    /** Snapshots native membership; null aspects become empty, null tags are not guarded, and absent tags register nothing. */
+    /** Tag registrations in call order, applied again whenever the tags of a world are bound. */
+    private static final List<Map.Entry<TagKey<Item>, AspectList>> tagObjectTags = new ArrayList<>();
+
+    /**
+     * Registers the aspects of every member of an item tag; null aspects become empty, null tags are not guarded.
+     *
+     * <p>The members a tag has now are registered at once, like the 1.7.10 ore dictionary call. Tags are data: at mod
+     * initialization, when an add-on of 1.7.10 made this call, no tag is bound yet. The registration is therefore
+     * kept and applied again when a world starts (and on a client joining a server), and then it fills every member
+     * that has no registration of its own: a registration of the item itself wins over a tag, and a later tag
+     * registration wins over an earlier one.</p>
+     */
     public static void registerObjectTag(TagKey<Item> tag, AspectList aspects) {
         AspectList shared = aspects == null ? new AspectList() : aspects;
+        synchronized (tagObjectTags) { tagObjectTags.add(Map.entry(tag, shared)); }
         BuiltInRegistries.ITEM.getTag(tag).ifPresent(items -> items.forEach(item -> registerObjectTag(item.value(), 0, shared)));
     }
-    /** Native namespaced item tags replace the unavailable Forge OreDictionary; old ore names require an explicit caller mapping. */
+
+    /** The runtime calls it once the item tags of a world are bound; see {@link #registerObjectTag(TagKey, AspectList)}. */
+    public static void applyTagObjectTags() {
+        List<Map.Entry<TagKey<Item>, AspectList>> registered;
+        synchronized (tagObjectTags) { registered = List.copyOf(tagObjectTags); }
+        for (int index = registered.size() - 1; index >= 0; index--) {
+            var registration = registered.get(index);
+            BuiltInRegistries.ITEM.getTag(registration.getKey()).ifPresent(items -> items.forEach(item ->
+                    objectTags.putIfAbsent(List.of(item.value(), 0), registration.getValue())));
+        }
+    }
+
+    /**
+     * The 1.7.10 ore dictionary form: {@code registerObjectTag("ingotCopper", aspects)}. The name is a 1.7.10 ore
+     * dictionary name or a namespaced item tag id, resolved by {@link OreDictionaryNames}; see
+     * {@link #registerObjectTag(TagKey, AspectList)} for when the members are registered.
+     */
     public static void registerObjectTag(String nativeItemTag, AspectList aspects) {
         registerObjectTag(nativeItemTag(nativeItemTag), aspects);
     }
     private static TagKey<Item> nativeItemTag(String nativeItemTag) {
-        ResourceLocation id = ResourceLocation.tryParse(nativeItemTag);
-        if (id == null || !nativeItemTag.contains(":"))
-            throw new IllegalArgumentException("Use a native namespaced item tag or TagKey<Item>, not a legacy OreDictionary name: " + nativeItemTag);
-        return TagKey.create(Registries.ITEM, id);
+        TagKey<Item> tag = OreDictionaryNames.itemTag(nativeItemTag);
+        if (tag == null)
+            throw new IllegalArgumentException("Not a namespaced item tag nor a known 1.7.10 ore dictionary name (see OreDictionaryNames): " + nativeItemTag);
+        return tag;
     }
     /** Tests ordinary/wildcard and bundled derived registrations using native damage points (32767 wildcard), not subtype metadata; null item throws NPE, with no registration mutation. */
     public static boolean exists(Item item, int metadata) {

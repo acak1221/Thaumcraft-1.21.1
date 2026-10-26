@@ -237,6 +237,10 @@ public final class Thaumcraft {
         });
         LifecycleEvent.SERVER_STARTED.register(server -> {
             thaumcraft.api.internal.ThaumcraftInternalMethods.serverStarted(server);
+            // Research an add-on registered or changed after registering it joins the live catalogue.
+            thaumcraft.common.lib.research.AddonResearch.refresh();
+            // Object tags an add-on registered for an item tag at mod initialization, before tags were bound.
+            thaumcraft.api.ThaumcraftApi.applyTagObjectTags();
             ObjectAspectCatalog.validateAgainstRegistries();
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);

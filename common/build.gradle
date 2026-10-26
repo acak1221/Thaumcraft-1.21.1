@@ -216,3 +216,6 @@ ext.configureTestIsolation = { Project loader, Map<String, String> isolatedRuns 
  loader.tasks.named('check') { dependsOn verifyJar }
  loader.tasks.withType(net.fabricmc.loom.task.AbstractRunTask).configureEach { dependsOn verifyScopes }
 }
+
+// ExampleAddonApiOnlyTest reads the example add-on's sources: a change there has to run it again.
+tasks.named('test') { inputs.dir(rootProject.file('examples')).withPropertyName('exampleAddonSources') }

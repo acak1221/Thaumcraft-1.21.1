@@ -2404,4 +2404,22 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void survival_arcane_furnace_builds_and_pays_the_meat_nuggets(GameTestHelper test) {
         thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.arcaneFurnaceIsBuiltByAWandAndPaysTheMeatNuggets(test);
     }
+
+    // Research an add-on registers through the public API joins the book, the research table, purchase, clues,
+    // completion and saves; a change to an original entry through its public view is laid over the corpus.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_addon_research")
+    public void addonResearchJoinsGameplay(GameTestHelper test) {
+        thaumcraft.common.testing.AddonResearchRuntimeChecks.addonResearchJoinsGameplay(test, test.makeMockServerPlayerInLevel());
+    }
+
+    // The IThaumcraftAddon hook ran before the world, and 1.7.10 ore dictionary names reach the tags of the world.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "api_addon_lifecycle")
+    public void addonHookRanBeforeTheWorld(GameTestHelper test) {
+        thaumcraft.common.testing.AddonApiRuntimeChecks.addonHookRanBeforeTheWorld(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "api_ore_dictionary")
+    public void oreDictionaryNamesReachTheTagsOfTheWorld(GameTestHelper test) {
+        thaumcraft.common.testing.AddonApiRuntimeChecks.oreDictionaryNamesReachTheTagsOfTheWorld(test);
+    }
 }

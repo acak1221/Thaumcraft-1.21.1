@@ -25,6 +25,8 @@ public final class ThaumcraftNeoForge {
         // creative tab and network packet; it must run before the loader wiring so the
         // platform bridges can already resolve the shared catalogues.
         Thaumcraft.init();
+        // The add-on hooks (IThaumcraftAddon) run from common setup, after every mod filled the registries.
+        NeoForgeAddons.register(bus);
         NeoForgeEntityAttributes.register(bus);
         NeoForgeSpawnPlacements.register(bus);
         NeoForgeBiomeSpawns.register(bus);

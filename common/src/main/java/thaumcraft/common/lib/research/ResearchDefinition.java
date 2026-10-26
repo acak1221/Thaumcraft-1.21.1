@@ -45,8 +45,19 @@ public record ResearchDefinition(
     public String nameKey() { return "tc.research_name." + this.key; }
     public String textKey() { return "tc.research_text." + this.key; }
 
+    /**
+     * One page of a research entry.
+     *
+     * <p>{@code source} is the {@code thaumcraft.api.research.ResearchPage} an add-on registered, for a page of
+     * kind {@code "api"}: its recipe objects, aspects or image are drawn from that page. It is null for every
+     * page of the original corpus.</p>
+     */
     public record Page(String kind, String textKey, String recipeKey,
-                       String requiredResearch, String javaExpression) {
+                       String requiredResearch, String javaExpression, Object source) {
+        public Page(String kind, String textKey, String recipeKey, String requiredResearch, String javaExpression) {
+            this(kind, textKey, recipeKey, requiredResearch, javaExpression, null);
+        }
+
         public boolean isVisible(Set<String> completed) {
             return this.requiredResearch == null || completed.contains(this.requiredResearch);
         }

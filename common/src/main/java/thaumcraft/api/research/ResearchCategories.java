@@ -31,7 +31,7 @@ public class ResearchCategories {
         nativeBuilding = true;
         try {
             ResearchCatalog.loadBundled();
-            for (ResearchDefinition definition : ResearchCatalog.all()) {
+            for (ResearchDefinition definition : ResearchCatalog.bundled()) {
                 if (!researchCategories.containsKey(definition.category())) {
                     // Original ConfigResearch.initCategories:67-73 registers every
                     // category with the texture of its tab icon and its background
@@ -39,7 +39,7 @@ public class ResearchCategories {
                     researchCategories.put(definition.category(), ThaumcraftResearchCategories.create(definition.category()));
                 }
             }
-            for (ResearchDefinition definition : ResearchCatalog.all()) {
+            for (ResearchDefinition definition : ResearchCatalog.bundled()) {
                 addResearch(ResearchItem.of(definition));
             }
         } finally {
@@ -77,16 +77,39 @@ public class ResearchCategories {
         return result;
     }
 
-    /** Initializes native research then registers a category only if absent, retaining nullable key/icon/background without copying or validation. */
-    public static void registerCategory(String key, ResourceLocation icon, ResourceLocation background) {
+    /**
+     * Initializes native research then registers a category only if absent, retaining nullable key/icon/background without copying or validation.
+     *
+     * <p>An add-on category gets its own tab in the Thaumonomicon after the six original ones, in registration
+     * order, as in the original. {@code icon} is drawn over the whole 16x16 tab icon whatever its pixel size;
+     * {@code background} is the scrolling map sheet, read with the geometry of the original 512x512 sheet
+     * ({@code thaumcraft:textures/gui/gui_researchback.png}). The tab tooltip is the translation of
+     * {@code tc.research_category.<key>}.</p>
+     */
+    public static synchronized void registerCategory(String key, ResourceLocation icon, ResourceLocation background) {
         loadNative();
         if (researchCategories.get(key) == null) {
             researchCategories.put(key, new ResearchCategoryList(icon, background));
         }
     }
 
-    /** The original registration: a cell may only be used once, unless the research is virtual. */
-    public static void addResearch(ResearchItem ri) {
+    /** The keys of every category, the six original ones first, then add-on categories in registration order. */
+    public static java.util.List<String> categoryKeys() {
+        loadNative();
+        return java.util.List.copyOf(researchCategories.keySet());
+    }
+
+    /**
+     * The original registration: a cell may only be used once, unless the research is virtual.
+     *
+     * <p>An add-on entry registered here is research of the game, not only of this map: the Thaumonomicon,
+     * the research table, the purchase of secondary research, scan clues ({@code setItemTriggers},
+     * {@code setEntityTriggers}, {@code setAspectTriggers}), completion and sync read it. Its name and text are the
+     * translations of {@code tc.research_name.<key>} and {@code tc.research_text.<key>}; its page texts are
+     * translation keys. Register on both sides during mod initialization, like the original, so a client and
+     * its server know the same keys.</p>
+     */
+    public static synchronized void addResearch(ResearchItem ri) {
         loadNative();
         if (ri == null || ri.key == null) return;
         ResearchCategoryList rl = researchCategories.get(ri.category);
@@ -103,5 +126,6 @@ public class ResearchCategories {
         if (ri.displayRow < rl.minDisplayRow) rl.minDisplayRow = ri.displayRow;
         if (ri.displayColumn > rl.maxDisplayColumn) rl.maxDisplayColumn = ri.displayColumn;
         if (ri.displayRow > rl.maxDisplayRow) rl.maxDisplayRow = ri.displayRow;
+        if (ri.definition() == null && !nativeBuilding) thaumcraft.common.lib.research.AddonResearch.refresh();
     }
 }

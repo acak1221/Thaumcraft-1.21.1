@@ -29,6 +29,13 @@ public class ResearchPage {
     public ItemStack recipeOutput = null;
     /** The native corpus recipe reference of this page, when it has one. */
     public String recipeKey = null;
+    /**
+     * The ids of the 1.21.1 recipes this page shows, for a page made by {@link #recipe(ResourceLocation...)};
+     * null otherwise. Several ids are shown one per second, like an original recipe array.
+     */
+    public ResourceLocation[] recipeIds = null;
+    /** The corpus page this object is the public view of; null for a page an add-on made. */
+    private thaumcraft.common.lib.research.ResearchDefinition.Page corpusPage;
 
     /** Creates an unregistered text page retaining the nullable translation key; does not translate or change research state. */
     public ResearchPage(String text) {
@@ -94,10 +101,10 @@ public class ResearchPage {
         this.recipeOutput = recipe.getRecipeOutput();
     }
 
-    /** Stores the nullable input reference as a smelting display page, leaving recipeOutput null.
-     * In 1.7.10 a global furnace registry resolved the output; 1.21.1 needs a loaded level.
-     * @deprecated Use {@link #ResearchPage(ItemStack, Level)} for a resolvable native smelting page. */
-    @Deprecated
+    /** The original smelting page: the furnace input and its result.
+     * In 1.7.10 the global furnace registry resolved the output here; 1.21.1 keeps smelting recipes per world, so
+     * recipeOutput stays null and the book resolves the result in the recipe manager of the client world when the
+     * page is drawn. Use {@link #ResearchPage(ItemStack, Level)} when the output is needed on the server. */
     public ResearchPage(ItemStack input) {
         this.type = PageType.SMELTING;
         this.recipe = input;
@@ -142,9 +149,27 @@ public class ResearchPage {
         this.aspects = as;
     }
 
+    /**
+     * A page that shows the 1.21.1 recipes with these ids: crafting, arcane, crucible, infusion or
+     * enchantment infusion recipes, data-driven or not. This is the native way to show an add-on's JSON
+     * recipes; the recipe objects of the original constructors still work for recipes registered through
+     * {@code ThaumcraftApi}. The ids are resolved in the recipe manager of the client world when the page is
+     * drawn; a page none of whose ids resolves is not shown. Not a 1.7.10 constructor.
+     */
+    public static ResearchPage recipe(ResourceLocation... ids) {
+        ResearchPage page = new ResearchPage((String) null);
+        page.type = PageType.NORMAL_CRAFTING;
+        page.recipeIds = ids == null ? new ResourceLocation[0] : ids.clone();
+        return page;
+    }
+
+    /** The corpus page this object is the public view of, or null for a page an add-on made. */
+    public thaumcraft.common.lib.research.ResearchDefinition.Page corpusPage() { return corpusPage; }
+
     /** The native corpus page behind this view. */
     public static ResearchPage of(thaumcraft.common.lib.research.ResearchDefinition.Page page) {
         ResearchPage result = new ResearchPage(page.textKey() == null ? "" : page.textKey());
+        result.corpusPage = page;
         result.type = switch (page.kind() == null ? "text" : page.kind()) {
             case "text" -> PageType.TEXT;
             case "recipe_reference" -> PageType.ARCANE_CRAFTING;

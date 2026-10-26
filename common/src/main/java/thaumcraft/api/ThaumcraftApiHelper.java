@@ -249,6 +249,56 @@ public class ThaumcraftApiHelper {
         ThaumcraftApi.internalMethods.addStickyWarpToPlayer(player, amount);
     }
 
+    // ------------------------------------------------------------------ knowledge of a player
+    // Not members of the 1.7.10 helper: an add-on of the original reached these through
+    // thaumcraft.common.lib.research.ResearchManager or Thaumcraft.proxy.getPlayerKnowledge(). They take the player
+    // because 1.21.1 keeps knowledge on the player, and read the same native state as the rest of the mod.
+
+    /** Original ResearchManager.completeResearch: completes the research with its parents and siblings, pays its warp
+     * and syncs. Server side only; returns false on a client and for an unknown or disabled key. */
+    public static boolean completeResearch(Player player, String researchKey) {
+        return ThaumcraftApi.internalMethods.completeResearch(player, researchKey);
+    }
+
+    /** The research keys the player completed, as a new set without "@" clue markers. Works on both sides for the
+     * client's own player. */
+    public static java.util.Set<String> getCompletedResearch(Player player) {
+        return ThaumcraftApi.internalMethods.getCompletedResearch(player);
+    }
+
+    /** Player-scoped form of {@link #hasDiscoveredAspect(String, Aspect)}. */
+    public static boolean hasDiscoveredAspect(Player player, Aspect aspect) {
+        return ThaumcraftApi.internalMethods.hasDiscoveredAspect(player, aspect);
+    }
+
+    /** Player-scoped form of {@link #getDiscoveredAspects(String)}: a new list, or null for a null player. */
+    public static AspectList getDiscoveredAspects(Player player) {
+        return ThaumcraftApi.internalMethods.getDiscoveredAspects(player);
+    }
+
+    /** Original ResearchManager.completeAspect: adds research points of an aspect to the player's pool and syncs.
+     * Server side only. Discovering the aspect itself is a separate step of the original (scanning). */
+    public static void addAspectPool(Player player, Aspect aspect, int amount) {
+        ThaumcraftApi.internalMethods.addAspectPool(player, aspect, amount);
+    }
+
+    /** The research points of an aspect in the player's pool. */
+    public static int getAspectPool(Player player, Aspect aspect) {
+        return ThaumcraftApi.internalMethods.getAspectPool(player, aspect);
+    }
+
+    /** Permanent warp of the player (original PlayerKnowledge.getWarpPerm). */
+    public static int getWarpPermanent(Player player) { return ThaumcraftApi.internalMethods.getWarp(player)[0]; }
+    /** Sticky warp of the player (original PlayerKnowledge.getWarpSticky). */
+    public static int getWarpSticky(Player player) { return ThaumcraftApi.internalMethods.getWarp(player)[1]; }
+    /** Temporary warp of the player (original PlayerKnowledge.getWarpTemp). */
+    public static int getWarpTemporary(Player player) { return ThaumcraftApi.internalMethods.getWarp(player)[2]; }
+    /** Total warp of the player: permanent, sticky and temporary (original PlayerKnowledge.getWarpTotal). */
+    public static int getWarpTotal(Player player) {
+        int[] warp = ThaumcraftApi.internalMethods.getWarp(player);
+        return warp[0] + warp[1] + warp[2];
+    }
+
     /**
      * Original TC4 voxel ray that ignores the cell the ray starts in.
      *

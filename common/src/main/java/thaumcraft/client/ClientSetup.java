@@ -52,8 +52,13 @@ public final class ClientSetup {
         // ClientProxy.setupEntityRenderers (oracle thaumcraft/client/ClientProxy.java:464-517).
         thaumcraft.client.renderers.entity.ThaumcraftEntityRenderers.registerAll();
         // The public recipe API answers from the recipe manager of the loaded world.
-        dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level ->
-                thaumcraft.api.ThaumcraftApi.installRecipeManager(level.getRecipeManager(), level.registryAccess()));
+        dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level -> {
+            thaumcraft.api.ThaumcraftApi.installRecipeManager(level.getRecipeManager(), level.registryAccess());
+            // The client lays the research of add-ons over the corpus like the server does.
+            thaumcraft.common.lib.research.AddonResearch.refresh();
+            // A remote server's tags are bound now; the integrated server applied them already.
+            if (!net.minecraft.client.Minecraft.getInstance().hasSingleplayerServer()) thaumcraft.api.ThaumcraftApi.applyTagObjectTags();
+        });
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initClient();
         // The original block visual channels: the arc lightning, the node bolt and the crucible bubbles.
         thaumcraft.common.lib.network.BlockFxNetworking.initClient(thaumcraft.client.fx.BlockFxClientEffects::accept);

@@ -99,6 +99,7 @@ public final class ResearchTriggerBindings {
     public static boolean matches(String researchKey, ResearchClues.Context context) {
         var research = ResearchCatalog.get(researchKey);
         if (research == null) return false;
+        if (!ResearchCatalog.isBundled(researchKey)) return AddonResearch.matchesTrigger(researchKey, context);
         if (context.entityName() != null) return research.entityTriggers().contains(context.entityName());
         ItemStack stack = context.item();
         if (stack.isEmpty()) return false;

@@ -9,7 +9,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-/** Original category registration plus each FULL default HashMap's values order, shared by hidden-note and clue RNG. */
+/**
+ * Original category registration plus each FULL default HashMap's values order, shared by hidden-note and clue RNG.
+ * Add-on categories follow the six original ones in registration order, and add-on entries join the HashMap of
+ * their category, as they did in the original registry.
+ */
 public final class ResearchRegistrationOrder {
     private static final List<String> CATEGORIES = List.of("BASICS", "THAUMATURGY", "ALCHEMY", "ARTIFICE", "GOLEMANCY", "ELDRITCH");
     private static volatile List<String> registrationKeys;
@@ -21,6 +25,15 @@ public final class ResearchRegistrationOrder {
         for (String key : originalRegistration()) {
             var definition = ResearchCatalog.get(key);
             if (definition != null && definition.isEnabled()) categories.get(definition.category()).put(key, definition);
+        }
+        var addons = ResearchCatalog.addons();
+        if (!addons.isEmpty()) {
+            for (String category : thaumcraft.api.research.ResearchCategories.categoryKeys())
+                categories.computeIfAbsent(category, ignored -> new HashMap<>());
+            for (var definition : addons) {
+                if (!definition.isEnabled()) continue;
+                categories.computeIfAbsent(definition.category(), ignored -> new HashMap<>()).put(definition.key(), definition);
+            }
         }
         var ordered = new ArrayList<ResearchDefinition>();
         for (var category : categories.values()) ordered.addAll(category.values());
@@ -43,7 +56,7 @@ public final class ResearchRegistrationOrder {
                     rows.add(new Row(row.get("key").getAsString(), row.getAsJsonObject("source").get("line").getAsInt()));
                 }
                 rows.sort(Comparator.comparingInt(Row::line));
-                if (rows.size() != ResearchCatalog.all().size()) throw new IllegalStateException("Incomplete original research-order provenance");
+                if (rows.size() != ResearchCatalog.bundled().size()) throw new IllegalStateException("Incomplete original research-order provenance");
                 registrationKeys = rows.stream().map(Row::key).toList();
                 return registrationKeys;
             } catch (java.io.IOException invalid) { throw new IllegalStateException("Cannot load original research-order provenance", invalid); }

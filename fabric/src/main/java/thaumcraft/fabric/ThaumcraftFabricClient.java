@@ -25,6 +25,8 @@ import thaumcraft.common.config.ThaumcraftNodeDevices;
 
 public final class ThaumcraftFabricClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
+        // Every mod's main initializer has run: the add-on hooks may refer to any item now.
+        FabricAddons.fire();
         CoreShaderRegistrationCallback.EVENT.register(context -> context.register(
                 net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "linked_mirror"),
                 DefaultVertexFormat.POSITION_TEX_COLOR, thaumcraft.client.renderers.tile.LinkedMirrorField::setShader));

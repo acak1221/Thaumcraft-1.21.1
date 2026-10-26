@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "tc4_example",
+  "version": "1.0.0",
+  "name": "Thaumcraft 4 Reload example add-on",
+  "description": "A small add-on written only against the public Thaumcraft 4 Reload API (thaumcraft.api). Development runs only.",
+  "authors": ["Thaumcraft 4 Reload contributors"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.example.tc4addon.ExampleAddon"],
+    "thaumcraft": ["com.example.tc4addon.ExampleAddon"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "1.21.1",
+    "thaumcraft": "*"
+  }
+}

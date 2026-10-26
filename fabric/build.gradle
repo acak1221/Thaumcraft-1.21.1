@@ -64,7 +64,16 @@ sourceSets {
   compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
   runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
  }
+ // The example add-on of docs/api/PORTING.md: a separate mod written against thaumcraft.api only
+ // (ExampleAddonApiOnlyTest enforces it). Compiled by every build, loaded only by runExampleClient.
+ exampleAddon {
+  java.srcDir rootProject.file('examples/example-addon/src/main/java')
+  resources.srcDir rootProject.file('examples/example-addon/src/main/resources')
+  compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+  runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+ }
 }
+tasks.named('check') { dependsOn 'compileExampleAddonJava' }
 // Loom 1.11's runs.mods is Forge-only. Fabric's equivalent grouping must be a
 // run VM property, not loom.mods (which writes into the shared launch.cfg).
 def gameTestModRoots = files(sourceSets.gameTest.output, project(':common').sourceSets.gameTest.output)
@@ -263,6 +272,7 @@ if (!(clientSmokeScope in ['full', 'researchhands', 'visuals'])) {
       }
 }
 def clientTestModRoots = files(sourceSets.clientTest.output)
+def exampleAddonModRoots = files(sourceSets.exampleAddon.output)
 def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
 // The heap of the GameTest server.
 //
@@ -288,6 +298,14 @@ def multiplayerAllowPartial = providers.gradleProperty('multiplayerAllowPartial'
 // acceptance processes has to stay small enough to survive the OOM killer.
 def multiplayerHeap = providers.gradleProperty('multiplayerHeap').getOrElse('768M')
 loom.runs {
+ // The development client with the example add-on loaded next to the mod.
+ exampleClient {
+  client()
+  source sourceSets.exampleAddon
+  name 'Thaumcraft example add-on client'
+  runDir 'run'
+  vmArg "-Dfabric.classPathGroups=${exampleAddonModRoots.asPath}"
+ }
  gameTest {
   server()
   // The GameTest server generates real chunks for the world generation and
@@ -617,3 +635,23 @@ tasks.named('runMultiplayerPeerClient') {
  }
 }
 project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+
+// Add-on authors compile against the mod jar; its sources jar carries the shared code too, the public
+// thaumcraft.api among it, so an IDE shows the documented API rather than decompiled classes.
+sourcesJar {
+ def commonSources = project(':common').tasks.named('sourcesJar')
+ dependsOn commonSources
+ from(commonSources.flatMap { it.archiveFile }.map { zipTree(it) }) { include '**/*.java' }
+ duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// `./gradlew :fabric:publishToMavenLocal` installs the remapped jar and its sources for an add-on build.
+publishing {
+ publications {
+  mavenFabric(MavenPublication) {
+   artifactId = rootProject.archives_name + '-fabric'
+   from components.java
+  }
+ }
+}
+

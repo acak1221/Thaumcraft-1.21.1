@@ -1,0 +1,13 @@
+{
+  "item.tc4_example.vis_shard": "Vis Shard",
+  "tc.research_category.EXAMPLE": "Example Add-on",
+  "tc.research_name.EXAMPLE_SHARDS": "Vis Shards",
+  "tc.research_text.EXAMPLE_SHARDS": "Crystallised magic",
+  "tc4_example.research_page.EXAMPLE_SHARDS.1": "This entry was registered by an add-on through ResearchCategories, exactly like a 1.7.10 add-on did.<BR>The next pages hold an arcane recipe object, a crucible recipe object, a data-driven crafting recipe shown by its id, and an aspect page.",
+  "tc.research_name.EXAMPLE_INFUSION": "Echoing Infusion",
+  "tc.research_text.EXAMPLE_INFUSION": "Sound bound in crystal",
+  "tc4_example.research_page.EXAMPLE_INFUSION.1": "An infusion recipe registered with ThaumcraftApi.addInfusionCraftingRecipe. Its parents are an add-on entry and the original INFUSION entry.",
+  "tc.research_name.EXAMPLE_SECRET": "Copper Secrets",
+  "tc.research_text.EXAMPLE_SECRET": "Revealed by scanning an echo shard",
+  "tc4_example.research_page.EXAMPLE_SECRET.1": "A hidden entry: scanning its trigger item gives the clue that lets you research it. The next page is an original smelting page."
+}

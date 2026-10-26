@@ -116,3 +116,6 @@ javac.*.args
 /Thaumcraft-1.12.2-6.1.BETA26.jar
 # A stray Gradle distribution download that was once committed.
 .gradle-g21/
+
+# Local agent worktrees
+/.claude/worktrees/

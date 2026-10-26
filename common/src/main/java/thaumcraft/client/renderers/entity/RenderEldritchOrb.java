@@ -21,7 +21,7 @@ public final class RenderEldritchOrb extends EntityRenderer<EntityEldritchOrb> {
         pose.pushPose();
         try {
             Random random=new Random(entity.getId());
-            VertexConsumer ray=buffers.getBuffer(RenderType.lightning());
+            VertexConsumer ray=buffers.getBuffer(RAYS);
             for (int i=0;i<12;i++) {
                 pose.mulPose(Axis.XP.rotationDegrees(random.nextFloat()*360));
                 pose.mulPose(Axis.YP.rotationDegrees(random.nextFloat()*360));
@@ -50,6 +50,15 @@ public final class RenderEldritchOrb extends EntityRenderer<EntityEldritchOrb> {
             vertex(out,pose,.5F,.5F,end,v);vertex(out,pose,-.5F,.5F,u,v);
         } finally { pose.popPose(); }
         super.render(entity,yaw,partial,pose,buffers,light);
+    }
+    /** Original renderEntityAt: additive, culled, glDepthMask(false) - unlike RenderType.lightning(), which writes depth
+     * and punched holes into the billboard drawn after it. */
+    private static final RenderType RAYS=new Rays();
+    private static final class Rays extends RenderType {
+        private Rays(){super("thaumcraft_eldritch_orb_rays",com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR,
+                com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS,4096,false,false,Rays::begin,Rays::end);}
+        private static void begin(){RENDERTYPE_LIGHTNING_SHADER.setupRenderState();NO_TEXTURE.setupRenderState();LIGHTNING_TRANSPARENCY.setupRenderState();CULL.setupRenderState();LEQUAL_DEPTH_TEST.setupRenderState();COLOR_WRITE.setupRenderState();}
+        private static void end(){COLOR_WRITE.clearRenderState();LEQUAL_DEPTH_TEST.clearRenderState();CULL.clearRenderState();LIGHTNING_TRANSPARENCY.clearRenderState();NO_TEXTURE.clearRenderState();RENDERTYPE_LIGHTNING_SHADER.clearRenderState();}
     }
     private static void vertex(VertexConsumer out,PoseStack pose,float x,float y,float u,float v) {
         out.addVertex(pose.last(),x,y,0).setColor(255,255,255,255).setUv(u,v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(15728880).setNormal(pose.last(),0,1,0);

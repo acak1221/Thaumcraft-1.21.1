@@ -195,6 +195,11 @@ public final class ItemWandCasting extends Item {
     }
 
     @Override public InteractionResult useOn(UseOnContext context) {
+        // The original answered all of these in onItemUseFirst, outside Forge's block snapshot capture.
+        return WandUseCapture.outside(context.getLevel(), () -> blockTriggers(context));
+    }
+
+    private InteractionResult blockTriggers(UseOnContext context) {
         // Original ItemWandCasting:onItemUseFirst - the IWandable contract of the
         // clicked block and of its block entity answers the wand click first.
         InteractionResult wandable = dispatchWandable(context);

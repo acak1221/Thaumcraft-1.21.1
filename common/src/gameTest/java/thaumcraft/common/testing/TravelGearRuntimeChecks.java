@@ -151,6 +151,26 @@ public final class TravelGearRuntimeChecks {
             a.player.setGameMode(GameType.SPECTATOR);nativeStep(a);a.require(a.player.getAbilities().mayfly&&a.player.getAbilities().flying,"retiring a survival grant preserves newly intrinsic spectator rights");Hover.forget(a.player);
         }test.succeed();
     }
+    /**
+     * Original Hover: a hovering player mines as fast as on the ground, the native airborne fifth is
+     * undone. Measured through the native break progress, which NeoForge computes through its own
+     * {@code getDigSpeed} and the break speed event rather than {@code Player.getDestroySpeed}.
+     */
+    public static void harnessMining(GameTestHelper test) {
+        try(var a=actor(test)) {
+            var stone=Blocks.STONE.defaultBlockState();
+            equip(a,harness(2),6);
+            a.player.setOnGround(true);float ground=stone.getDestroyProgress(a.player,a.level,a.root);
+            a.player.setOnGround(false);float air=stone.getDestroyProgress(a.player,a.level,a.root);
+            a.require(ground>0&&Math.abs(air-ground/5F)<1e-7F,"without hover the native airborne player mines at a fifth: "+ground+" "+air);
+            a.require(Hover.toggleHover(a.player)&&Hover.getHover(a.player),"the funded worn harness hovers");
+            a.player.setOnGround(false);float hover=stone.getDestroyProgress(a.player,a.level,a.root);
+            a.require(Math.abs(hover-ground)<1e-7F,"a hovering player mines at the ground speed of the original: "+ground+" "+hover);
+            a.player.setOnGround(true);
+            a.require(stone.getDestroyProgress(a.player,a.level,a.root)==ground,"on the ground the hover changes nothing");
+            Hover.forget(a.player);
+        }test.succeed();
+    }
     public static void harnessMenu(GameTestHelper test) {
         try(var a=actor(test)) {
             a.clearLane();ItemStack armor=new ItemStack(ThaumcraftTravelGear.HOVER_HARNESS.get()),fuel=jar(3);a.player.setItemInHand(InteractionHand.MAIN_HAND,armor);a.player.getInventory().setItem(9,fuel.copy());

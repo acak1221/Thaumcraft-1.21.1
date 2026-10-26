@@ -148,17 +148,17 @@ public final class ThaumcraftGameTests implements FabricGameTest {
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal")
     public void reviewPedestalConservesWholeNodeVis(GameTestHelper test) {
-        thaumcraft.common.tiles.WandPedestalRegressionChecks.conservesWholeNodeVis(test);
+        thaumcraft.common.testing.WandPedestalRegressionChecks.conservesWholeNodeVis(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal")
     public void reviewPedestalPartialAndCompoundCharge(GameTestHelper test) {
-        thaumcraft.common.tiles.WandPedestalRegressionChecks.fillsPartialVisAndConvertsOnlyWithFocus(test);
+        thaumcraft.common.testing.WandPedestalRegressionChecks.fillsPartialVisAndConvertsOnlyWithFocus(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal_sync")
     public void reviewPedestalInventoryUpdatesClients(GameTestHelper test) {
-        thaumcraft.common.tiles.WandPedestalRegressionChecks.inventoryChangesQueueNativeClientUpdates(test);
+        thaumcraft.common.testing.WandPedestalRegressionChecks.inventoryChangesQueueNativeClientUpdates(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_regressions")
@@ -317,7 +317,8 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void g21ButcherLeavesBreedingPair(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.butcherLeavesBreedingPair(test); }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void sound_registry_covers_bundled_events(GameTestHelper helper) {
-        try (var input = ThaumcraftGameTests.class.getResourceAsStream("/assets/thaumcraft/sounds.json")) {
+        // The mod's own class: on NeoForge this harness is a separate JPMS module.
+        try (var input = thaumcraft.common.Thaumcraft.class.getResourceAsStream("/assets/thaumcraft/sounds.json")) {
             if (input == null) throw new IllegalStateException("Bundled sounds.json missing");
             var sounds = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(input,
                     java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
@@ -497,12 +498,12 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "mound_boundary")
     public void moundBoundaryIsCompleteOrRefused(GameTestHelper test) {
-        thaumcraft.common.lib.world.MoundBoundaryRuntimeChecks.run(test);
+        thaumcraft.common.testing.MoundBoundaryRuntimeChecks.run(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "mound_rng_isolation")
     public void moundGenerationRandomIsIsolated(GameTestHelper test) {
-        thaumcraft.common.lib.world.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);
+        thaumcraft.common.testing.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "bore_chunk_envelope_native_prerequisite")
@@ -1412,6 +1413,16 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void original_object_aspects_and_aspect_inference(GameTestHelper test) {
+        thaumcraft.common.testing.AspectCoverageRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void arcane_furnace_nozzle_feeds_the_furnace_fire_essentia(GameTestHelper test) {
+        thaumcraft.common.testing.ArcaneFurnaceNozzleRuntimeChecks.nozzleFeedsTheFurnaceFireEssentia(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void theOriginalSmeltingBonusesAreRegistered(GameTestHelper test) {
         thaumcraft.common.testing.SmeltingBonusRuntimeChecks.run(test);
     }
@@ -1727,6 +1738,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.AccessoriesRuntimeChecks.menuPersistenceAndDeath(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100)
+    public void accessories_right_click_equip(GameTestHelper test) {
+        thaumcraft.common.testing.AccessoriesRuntimeChecks.rightClickEquip(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m09_vis_amulet")
     public void visAmuletsTransferAndPayThroughActualNativeRelay(GameTestHelper test) {
         thaumcraft.common.testing.VisAmuletRuntimeChecks.nativeWornTransferAndRelayPayment(test);
@@ -1821,6 +1837,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "m08_hover_fuel")
     public void hoverHarnessConsumesNativeFuelAndRestoresFlightPermissions(GameTestHelper test) {
         thaumcraft.common.testing.TravelGearRuntimeChecks.harnessFuelAndPermissions(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_hover_mining")
+    public void hoverHarnessMinesAtGroundSpeedWhileAirborne(GameTestHelper test) {
+        thaumcraft.common.testing.TravelGearRuntimeChecks.harnessMining(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_hover_menu")
@@ -1956,6 +1977,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "r14_biome_source")
     public void originalBiomesUseActualRegistrySourcesAndSpawnRows(GameTestHelper test) {
         thaumcraft.common.testing.BiomeRuntimeChecks.source(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600)
+    public void generated_chunk_biomes_follow_the_world_seed(GameTestHelper test) {
+        thaumcraft.common.testing.BiomeRuntimeChecks.generatedChunkBiomesFollowSeed(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r14_biome_trees")
@@ -2153,6 +2179,16 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.altarTakesEyesAndSwitchesItsSpawnType(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void eldritch_glyphed_stone_gives_its_experience(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.glyphedStoneGivesItsExperience(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void eldritch_ethereal_bloom_cleanses_back_to_the_generated_biome(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.etherealBloomCleansesBackToTheGeneratedBiome(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
     public void eldritch_obelisk_slows_only_the_eldritch_mobs(GameTestHelper test) {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.obeliskSlowsOnlyTheEldritchMobs(test);
@@ -2231,6 +2267,27 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
     public void relics_and_reliquaries_keep_their_original_rules(GameTestHelper test) {
         thaumcraft.common.testing.EquipmentItemRuntimeChecks.relicsAndReliquariesKeepTheirOriginalRules(test);
+    }
+
+    // The settings adopted from TC4Tweaks, each with the tweak and with the original rule.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc4tweaks_loot")
+    public void tweakLootRerollsBooksAndAmulets(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.loot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc4tweaks_shock")
+    public void tweakEarthShockSparesItemsAndExperience(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.earthShock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void tweakInfusionKeepsCentreItemData(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.infusionData(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc4tweaks_phial")
+    public void tweakFilledPhialStaysInHand(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.filledToHand(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)

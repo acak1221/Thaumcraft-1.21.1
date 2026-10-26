@@ -64,7 +64,7 @@
 2. **Дрейф документации.** README («211 JUnit / 95 Fabric», «последний срез — стабилизатор») и
    `docs/porting/verification.json` (238/113, 17.10) отстают от факта 384/151; работа после focal (Hungry Chest,
    големы, улучшения) в verification.json не записана; `VALIDATION.md` говорит о 41 GameTest; `GOAL.md` — закрытая цель
-   Forge 1.12/Java 8, противоречит AGENTS.md; `settings.gradle`: `rootProject.name = 'Thaumcraft-4.2-FOREVA'`; шаг CI
+   Forge 1.12/Java 8, противоречит AGENTS.md; `settings.gradle`: `rootProject.name = 'Thaumcraft-4-Reload'`; шаг CI
    «both native GameTest servers» при Fabric-only `validate`; HANDOFF.md 548 КБ с шапкой 16.10.
 3. **Верификация уже кода.** Hungry Chest, големы и улучшения: implemented/built/game-tested, seen = нет; только
    одиночный серверный GameTest (нет сети с двумя игроками, нет реального save/reload мира); Bore-экспорт

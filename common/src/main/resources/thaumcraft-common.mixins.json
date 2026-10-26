@@ -58,6 +58,7 @@
     "Tc4BiomeParameterListMixin",
     "Tc4ClimateSamplerMixin",
     "Tc4RandomStateMixin",
+    "Tc4NoiseChunkSeedMixin",
     "Tc4MultiNoiseBiomeSourceMixin",
     "Tc4OuterLandsFlatGeneratorMixin",
     "BathSaltExpiryMixin",
@@ -75,7 +76,8 @@
     "LevelChunkPendingBlockEntityMixin",
     "PerStateBlockEntityMixin",
     "PistonPushabilityMixin",
-    "Tc4ChunkRegenerationMarkerMixin"
+    "Tc4ChunkRegenerationMarkerMixin",
+    "EntityTypeSchemaNoticeMixin"
   ],
   "client": [
     "client.Tc4ParticleEngineMixin",
@@ -85,6 +87,7 @@
     "client.OreAnisotropyMixin",
     "client.PositionBlockModelMixin",
     "client.WandRenderContextMixin",
+    "client.ThaumometerEmptyHandArmMixin",
     "client.BoneBowHeldPoseMixin",
     "client.OuterLandsDimensionEffectsMixin",
     "client.TableOutlineMixin",

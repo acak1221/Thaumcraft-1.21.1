@@ -86,13 +86,17 @@ public final class FocusCastingAuditChecks {
             a.player.gameMode.useItem(a.player, a.level, a.wand, InteractionHand.MAIN_HAND);
             a.require(a.projectiles(EntityFrostShard.class).size() == 9 && ItemStack.matches(paid, a.wand),
                     "immediate scatter RMB replay cannot cast or debit twice");
-            try (var peer = new FocusUpgradeRuntimeChecks.Actor(test, new BlockPos(36, 180, 4))) {
+            try (var peer = new FocusUpgradeRuntimeChecks.Actor(test, new BlockPos(4, 160, 4))) {
+                // The test's own chunk column: a fresh chunk 32 blocks away made the peer's shard depend on the
+                // asynchronous entity section load (found nowhere in one environment, everywhere in another).
                 peer.clearLane(); peer.equip(new ItemStack(ThaumcraftFoci.FROST_FOCUS.get()), "gold", 1000);
                 // equip clears ONLY peer's cooldown, not the first actor's.
                 a.require(WandFocusActions.cooldownMillis(a.player) > 0, "first player still cooling down");
                 peer.begin();
-                peer.require(peer.projectiles(EntityFrostShard.class).size() == 1,
-                        "second player in same real world casts during first player's cooldown");
+                var peerShards = peer.projectiles(EntityFrostShard.class);
+                peer.require(peerShards.size() == 1,
+                        "second player in same real world casts during first player's cooldown: " + peerShards.size()
+                                + " shards, peer cooldown " + WandFocusActions.cooldownMillis(peer.player) + " ms");
             }
         }
         test.succeed();

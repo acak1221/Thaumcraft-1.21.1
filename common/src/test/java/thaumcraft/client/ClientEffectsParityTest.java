@@ -57,7 +57,9 @@ class ClientEffectsParityTest {
     }
 
     @Test void theConfigurationScreenShowsTheFiveOriginalCategories() {
-        assertEquals(5, ThaumcraftConfigStore.Category.values().length);
+        // The five original categories, then the port's own Tweaks category.
+        assertEquals(6, ThaumcraftConfigStore.Category.values().length);
+        assertEquals("Tweaks", ThaumcraftConfigStore.Category.TWEAKS.id());
         assertEquals("general", ThaumcraftConfigStore.Category.GENERAL.id());
         assertEquals("Monster_Spawning", ThaumcraftConfigStore.Category.MONSTER_SPAWNING.id());
         assertEquals("World_Generation", ThaumcraftConfigStore.Category.WORLD_GENERATION.id());
@@ -76,6 +78,7 @@ class ClientEffectsParityTest {
                 "aspect_total_cap");
         for (ThaumcraftConfigStore.Entry entry : ThaumcraftConfigStore.ENTRIES) {
             if ("shaders".equals(entry.key())) continue; // the original general category, oracle Config.java:410
+            if (entry.category() == ThaumcraftConfigStore.Category.TWEAKS) continue; // the port's own settings
             assertTrue(original.contains(entry.key()), entry.key() + " is not an original configuration key");
         }
     }

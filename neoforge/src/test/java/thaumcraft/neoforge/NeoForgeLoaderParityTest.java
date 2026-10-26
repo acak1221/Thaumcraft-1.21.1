@@ -320,14 +320,14 @@ class NeoForgeLoaderParityTest {
     // ------------------------------------------------------------------ the access transformer
 
     /**
-     * NeoForge has no access widener. The three entries of the shared access widener must be the
-     * three entries of the NeoForge access transformer, or the shared module throws an
+     * NeoForge has no access widener. The six entries of the shared access widener must be the
+     * six entries of the NeoForge access transformer, or the shared module throws an
      * {@code IllegalAccessError} on NeoForge.
      */
     @Test void theAccessTransformerIsTheSharedAccessWidener() {
         List<String> widener = accessWidener();
         List<String> transformer = accessTransformer();
-        assertEquals(3, widener.size(), "the shared access widener owns three entries");
+        assertEquals(6, widener.size(), "the shared access widener owns six entries");
         assertEquals(widener, transformer,
                 "the NeoForge access transformer is the shared access widener, entry by entry");
     }
@@ -343,7 +343,7 @@ class NeoForgeLoaderParityTest {
                 found.add(method.group(1).replace('/', '.') + "#" + method.group(2) + "(" + method.group(3) + ")V");
                 continue;
             }
-            Matcher field = Pattern.compile("^accessible\\s+field\\s+(\\S+)\\s+(\\S+)\\s+I$").matcher(text);
+            Matcher field = Pattern.compile("^accessible\\s+field\\s+(\\S+)\\s+(\\S+)\\s+(?:I|L[^;\\s]+;)$").matcher(text);
             if (field.matches()) {
                 found.add(field.group(1).replace('/', '.') + "#" + field.group(2));
                 continue;
@@ -406,8 +406,8 @@ class NeoForgeLoaderParityTest {
         String fabric = read("fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java");
         String neoforge = read("neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java");
 
-        // The two core shaders of the Fabric CoreShaderRegistrationCallback.
-        for (String shader : List.of("monster_lit_particle", "node_stabilizer_bubble")) {
+        // The core shaders of the Fabric CoreShaderRegistrationCallback.
+        for (String shader : List.of("linked_mirror", "monster_lit_particle", "node_stabilizer_bubble", "architect_overlay")) {
             assertTrue(fabric.contains(shader), "the Fabric client registers the core shader " + shader);
             assertTrue(neoforge.contains(shader), "the NeoForge client registers the core shader " + shader);
         }
@@ -506,6 +506,30 @@ class NeoForgeLoaderParityTest {
         assertTrue(mixin.contains("require = 1"), "the NeoForge mixin fails closed");
         String config = read("neoforge/src/main/resources/thaumcraft-neoforge-client.mixins.json");
         assertTrue(config.contains("NeoForgeGearArmorMixin"), "the NeoForge client mixin is registered");
+    }
+
+    /**
+     * The shared client setup runs before NeoForge collects menu screens, model layers and
+     * entity renderers.
+     *
+     * <p>NeoForge posts RegisterMenuScreensEvent, RegisterLayerDefinitions and RegisterRenderers
+     * from ClientHooks.initClientHooks in the Minecraft constructor, before FMLClientSetupEvent,
+     * and the Architectury registries apply those three only inside the events. From client
+     * setup they were lost: no Thaumcraft GUI opened, gear layers were missing and the first
+     * Thaumcraft entity drawn crashed the client (seen on a real NeoForge client, 2026-10-26).</p>
+     */
+    @Test void theSharedClientSetupRunsBeforeTheClientHookEvents() {
+        String bootstrap = read("neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java");
+        String client = read("neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java");
+        assertTrue(!bootstrap.contains("import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;")
+                        && !bootstrap.contains("ClientSetup::init"),
+                "the shared client setup is not deferred to FMLClientSetupEvent");
+        int handler = client.indexOf("private static void onRegisterClientExtensions(");
+        assertTrue(handler >= 0, "the NeoForge client handles RegisterClientExtensionsEvent");
+        String body = client.substring(client.indexOf('{', handler) + 1).replaceAll("(?m)^\\s*//.*$", "");
+        String head = body.substring(0, body.indexOf(';') + 1).trim();
+        assertEquals("thaumcraft.client.ClientSetup.init();", head,
+                "the shared client setup is the first thing the first client hook event does");
     }
 
     /**

@@ -19,7 +19,7 @@ from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
 ORIGINAL_ALIAS = "tc4_4_2_3_5_oracle"
-LEGACY_ALIAS = "legacy_foreva"
+LEGACY_ALIAS = "legacy_1_12"
 INVENTORY_PATH = "docs/porting/class-inventory.json"
 LEDGER_PATH = "docs/porting/scope-ledger.json"
 HASH_POLICY = "UTF-8 without BOM; CRLF and lone CR normalized to LF; other characters and final newline preserved"

@@ -6,50 +6,33 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.PacketFlow;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
-import thaumcraft.common.lib.network.ResearchPurchasePayload;
 import thaumcraft.common.lib.network.ResearchNoteRequestPayload;
-import thaumcraft.common.testing.RuntimeChecks;
-import thaumcraft.common.testing.ResearchPurchaseRuntimeChecks;
-import thaumcraft.common.testing.ResearchNoteRuntimeChecks;
-import thaumcraft.common.testing.ResearchNoteIssuanceRuntimeChecks;
-import thaumcraft.common.testing.ResearchTableRuntimeChecks;
-import thaumcraft.common.testing.DeferredDropRuntimeChecks;
-import thaumcraft.common.testing.TableDropCancellationRuntimeChecks;
-import thaumcraft.common.testing.ResearchTableEditingRuntimeChecks;
-import thaumcraft.common.testing.ResearchAspectCombinationRuntimeChecks;
-import thaumcraft.common.testing.OreRuntimeChecks;
-import thaumcraft.common.testing.NaturalOreGenerationRuntimeChecks;
-import thaumcraft.common.testing.ArcaneWorkbenchRuntimeChecks;
-import thaumcraft.common.testing.NaturalNodeRuntimeChecks;
-import thaumcraft.common.testing.CrucibleRuntimeChecks;
-import thaumcraft.common.testing.AlchemyResourceRuntimeChecks;
-import thaumcraft.common.testing.FluxRuntimeChecks;
-import thaumcraft.common.testing.ObjectAspectRuntimeChecks;
-import thaumcraft.common.testing.MagicalTreeRuntimeChecks;
-import thaumcraft.common.testing.ArcaneStoneRuntimeChecks;
+import thaumcraft.common.lib.network.ResearchPurchasePayload;
 import thaumcraft.common.testing.AlchemyFurnaceRuntimeChecks;
+import thaumcraft.common.testing.AlchemyResourceRuntimeChecks;
 import thaumcraft.common.testing.AlembicRuntimeChecks;
-import thaumcraft.common.testing.WandAssemblyRuntimeChecks;
+import thaumcraft.common.testing.ArcaneStoneRuntimeChecks;
+import thaumcraft.common.testing.ArcaneWorkbenchRuntimeChecks;
 import thaumcraft.common.testing.BellowsRuntimeChecks;
-import thaumcraft.common.testing.JarLabelRuntimeChecks;
-import thaumcraft.common.testing.PlantRuntimeChecks;
-import thaumcraft.common.testing.FocusRuntimeChecks;
-import thaumcraft.common.testing.EmberRuntimeChecks;
-import thaumcraft.common.testing.TubeRuntimeChecks;
-import thaumcraft.common.testing.JarTransportRuntimeChecks;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 import thaumcraft.common.testing.BufferAtomicRuntimeChecks;
 import thaumcraft.common.testing.CentrifugeAtomicRuntimeChecks;
 import thaumcraft.common.testing.CentrifugeRuntimeChecks;
+import thaumcraft.common.testing.CrucibleRuntimeChecks;
 import thaumcraft.common.testing.CrystallizerOutputRuntimeChecks;
 import thaumcraft.common.testing.CrystallizerRuntimeChecks;
+import thaumcraft.common.testing.DeferredDropRuntimeChecks;
+import thaumcraft.common.testing.EmberRuntimeChecks;
 import thaumcraft.common.testing.ExcavationFocusRuntimeChecks;
 import thaumcraft.common.testing.ExcavationHarvestRuntimeChecks;
 import thaumcraft.common.testing.ExcavationRemovalFailureRuntimeChecks;
 import thaumcraft.common.testing.ExcavationUpgradeRuntimeChecks;
+import thaumcraft.common.testing.FamilyBlockStatesRuntimeChecks;
 import thaumcraft.common.testing.FluxOverfullRuntimeChecks;
+import thaumcraft.common.testing.FluxRuntimeChecks;
 import thaumcraft.common.testing.FocalManipulatorRuntimeChecks;
 import thaumcraft.common.testing.FocalRecipeRuntimeChecks;
+import thaumcraft.common.testing.FocusRuntimeChecks;
 import thaumcraft.common.testing.FocusUpgradeRuntimeChecks;
 import thaumcraft.common.testing.FrostFocusRuntimeChecks;
 import thaumcraft.common.testing.FrostShardRuntimeChecks;
@@ -67,358 +50,480 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.InfusionRuntimeChecks;
 import thaumcraft.common.testing.InfusionStructureRuntimeChecks;
 import thaumcraft.common.testing.JarItemRuntimeChecks;
+import thaumcraft.common.testing.JarLabelRuntimeChecks;
+import thaumcraft.common.testing.JarTransportRuntimeChecks;
 import thaumcraft.common.testing.LumberGolemRuntimeChecks;
+import thaumcraft.common.testing.MagicalTreeRuntimeChecks;
+import thaumcraft.common.testing.NaturalNodeRuntimeChecks;
+import thaumcraft.common.testing.NaturalOreGenerationRuntimeChecks;
 import thaumcraft.common.testing.NodeStabilizerLifecycleChecks;
 import thaumcraft.common.testing.NodeStabilizerRuntimeChecks;
 import thaumcraft.common.testing.NodeTransductionRuntimeChecks;
+import thaumcraft.common.testing.ObjectAspectRuntimeChecks;
+import thaumcraft.common.testing.OreRuntimeChecks;
+import thaumcraft.common.testing.PlantRuntimeChecks;
+import thaumcraft.common.testing.ResearchAspectCombinationRuntimeChecks;
+import thaumcraft.common.testing.ResearchNoteIssuanceRuntimeChecks;
+import thaumcraft.common.testing.ResearchNoteRuntimeChecks;
+import thaumcraft.common.testing.ResearchPurchaseRuntimeChecks;
+import thaumcraft.common.testing.ResearchTableEditingRuntimeChecks;
+import thaumcraft.common.testing.ResearchTableRuntimeChecks;
 import thaumcraft.common.testing.RobeRuntimeChecks;
+import thaumcraft.common.testing.RuntimeChecks;
 import thaumcraft.common.testing.ShapelessResonatorRuntimeChecks;
 import thaumcraft.common.testing.ShockFocusRuntimeChecks;
 import thaumcraft.common.testing.StreamAxeRuntimeChecks;
 import thaumcraft.common.testing.SurfaceStructurePlacementRuntimeChecks;
+import thaumcraft.common.testing.TableDropCancellationRuntimeChecks;
 import thaumcraft.common.testing.ThaumiumEquipmentRuntimeChecks;
 import thaumcraft.common.testing.TubeBufferRuntimeChecks;
 import thaumcraft.common.testing.TubeFilterLabelRuntimeChecks;
+import thaumcraft.common.testing.TubeRuntimeChecks;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks;
 import thaumcraft.common.testing.ValveRuntimeChecks;
 import thaumcraft.common.testing.VillageComponentPlacementRuntimeChecks;
+import thaumcraft.common.testing.VillageTradeRuntimeChecks;
 import thaumcraft.common.testing.VisNetLifecycleChecks;
 import thaumcraft.common.testing.VisNetRuntimeChecks;
 import thaumcraft.common.testing.VisPowerRecipeRuntimeChecks;
 import thaumcraft.common.testing.VoidJarRuntimeChecks;
+import thaumcraft.common.testing.WandAssemblyRuntimeChecks;
 import thaumcraft.common.testing.WispEssenceRuntimeChecks;
 
 @PrefixGameTestTemplate(false)
 public final class ThaumcraftGameTests {
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "review_followup_resources")
+    public void followupDeathBucketConservesInputs(GameTestHelper test) {
+        thaumcraft.common.testing.ResourceSafetyRuntimeChecks.deathBucketConservesInputs(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "review_followup_resources")
+    public void followupOculusPreservesNodeOnFailure(GameTestHelper test) {
+        thaumcraft.common.testing.ResourceSafetyRuntimeChecks.oculusPreservesNodeOnFailure(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_followup_rarity")
+    public void followupLootContainerRarity(GameTestHelper test) {
+        thaumcraft.common.testing.LootContainerRarityRuntimeChecks.pickPlaceAndTooltip(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_followup_boss")
+    public void followupPraetorHasOnePersistentChampion(GameTestHelper test) {
+        thaumcraft.common.testing.WorldBossFollowupRuntimeChecks.praetorHasOnePersistentChampion(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_followup_boss")
+    public void followupRestoredPraetorWarpHitsOnce(GameTestHelper test) {
+        thaumcraft.common.testing.WorldBossFollowupRuntimeChecks.restoredPraetorWarpHitsOnce(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_followup_generation")
+    public void followupGenerationRespectsDimensionPolicies(GameTestHelper test) {
+        thaumcraft.common.testing.WorldBossFollowupRuntimeChecks.generationRespectsDimensionPolicies(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_followup_grindstone")
+    public void followupSceptreGrindstonePreservesCapacity(GameTestHelper test) {
+        thaumcraft.common.testing.WandSceptreGrindstoneRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "review_api_thaumatorium")
+    public void reviewThaumatoriumUsesServerRecipeSnapshot(GameTestHelper test) {
+        thaumcraft.common.testing.ProgrammaticRecipeRuntimeChecks.thaumatoriumOpeningSnapshot(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "review_api_recipes")
+    public void reviewProgrammaticArcaneAndCrucibleRecipes(GameTestHelper test) {
+        thaumcraft.common.testing.ProgrammaticRecipeRuntimeChecks.arcaneAndCrucible(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "review_api_infusion")
+    public void reviewProgrammaticInfusionsAndVirtualComparator(GameTestHelper test) {
+        thaumcraft.common.testing.ProgrammaticRecipeRuntimeChecks.infusionsAndVirtualComparator(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "review_death_fluid")
+    public void reviewDeathFluidConservationAndDamage(GameTestHelper test) {
+        thaumcraft.common.testing.DeathFluidRuntimeChecks.conservationAndDamage(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_pedestal")
+    public void reviewPedestalConservesWholeNodeVis(GameTestHelper test) {
+        thaumcraft.common.testing.WandPedestalRegressionChecks.conservesWholeNodeVis(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_pedestal")
+    public void reviewPedestalPartialAndCompoundCharge(GameTestHelper test) {
+        thaumcraft.common.testing.WandPedestalRegressionChecks.fillsPartialVisAndConvertsOnlyWithFocus(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_pedestal_sync")
+    public void reviewPedestalInventoryUpdatesClients(GameTestHelper test) {
+        thaumcraft.common.testing.WandPedestalRegressionChecks.inventoryChangesQueueNativeClientUpdates(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_regressions")
+    public void reviewWandHandSelection(GameTestHelper test) {
+        thaumcraft.common.testing.WandHandSelectionRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_mirrors")
+    public void reviewSingletonMirrorPlacement(GameTestHelper test) {
+        thaumcraft.common.testing.MirrorRuntimeChecks.singletonPlacementRetainsBothMirrorKinds(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_mirrors")
+    public void reviewCrossDimensionMirrors(GameTestHelper test) {
+        thaumcraft.common.testing.MirrorRuntimeChecks.crossDimensionPairsTransferWithoutLosingStock(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 500000, batch = "review_mirror_cache")
+    public void reviewEssentiaMirrorRefreshesSources(GameTestHelper test) {
+        thaumcraft.common.testing.MirrorRuntimeChecks.essentiaMirrorDiscoversReplacementSourceAfterBackoff(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_regressions")
+    public void reviewCraftingEventSeesUnpaidInputs(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewRegressionRuntimeChecks.craftingEventInputs(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_regressions")
+    public void reviewAccessoryDimensionResendsUnchangedContents(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewRegressionRuntimeChecks.accessoryDimensionSnapshot(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "review_regressions")
+    public void reviewTradeUsesNativeInteractionRange(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewRegressionRuntimeChecks.tradeNativeReach(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "api_cache_ownership")
+    public void apiRecipeFirstAnswerCannotPoisonLaterAnswers(GameTestHelper test) {
+        thaumcraft.common.testing.ApiCacheOwnershipRuntimeChecks.recipeAnswer(test, false);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "api_cache_ownership")
+    public void apiRecipeFirstAnswerCannotPoisonElementTypes(GameTestHelper test) {
+        thaumcraft.common.testing.ApiCacheOwnershipRuntimeChecks.recipeAnswer(test, true);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "nugget_ownership")
+    public void nuggetOwnership(GameTestHelper test) { thaumcraft.common.testing.NuggetOwnershipRuntimeChecks.run(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_golem")
+    public void g23BossGolemFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "golem", false, false); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g28_gear")
+    public void g28GearDiscountPayments(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.discountPayments(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g28_gear")
+    public void g28GearCrimsonAttack(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.crimsonAttack(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g28_gear")
+    public void g28GearCrusherBreak(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.crusherBreak(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g28_gear")
+    public void g28GearCreativeRepair(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.creativeRepair(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g28_gear")
+    public void g28GearNativeUseAndAmulets(GameTestHelper test) { thaumcraft.common.testing.GearHookAuditChecks.nativeUseAndAmulets(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_warden")
+    public void g23BossWardenFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "warden", false, false); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_praetor")
+    public void g23BossPraetorFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "praetor", false, false); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_giant")
+    public void g23BossGiantFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "giant", false, false); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_taintacle")
+    public void g23BossTaintacleFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "taintacle", false, false); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_pech")
+    public void g23BossPechFight(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "pech", false, false); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_bar")
+    public void g23BossPraetorBar(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "praetor", true, false); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g23_lock")
+    public void g23BossDeathPlacement(GameTestHelper test) { thaumcraft.common.testing.BossFightRuntimeChecks.fight(test, "praetor", false, true); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "g26_world_powered_bore")
+    public void deviceWorldPoweredBoreMinesAndReturnsItem(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.poweredBore(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1160, batch = "g26_world_tube_buffer")
+    public void deviceWorldTubeAndBufferDeliverToConsumer(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.tubeAndBuffer(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 80, batch = "g26_world_hungry_chest")
+    public void deviceWorldHungryChestCollectsPhysicalInput(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.hungryChest(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 180, batch = "g26_world_relay")
+    public void deviceWorldRelayPaysActualConsumer(GameTestHelper test) {
+        thaumcraft.common.testing.VisNetLifecycleChecks.worldScheduled(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 360, batch = "g26_world_advanced_furnace")
+    public void deviceWorldAdvancedFurnacePaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.AdvancedFurnaceRuntimeChecks.worldScheduled(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 140, batch = "g26_world_thaumatorium")
+    public void deviceWorldThaumatoriumPaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.ThaumatoriumRuntimeChecks.worldScheduled(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 90, batch = "g26_world_deconstruction")
+    public void deviceWorldDeconstructionPaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.deconstruction(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 260, batch = "g26_world_furnace")
+    public void deviceWorldFurnacePaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.furnace(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 160, batch = "g26_world_centrifuge")
+    public void deviceWorldCentrifugePaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.centrifuge(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1120, batch = "g26_world_crystallizer")
+    public void deviceWorldCrystallizerPaysAndDelivers(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceWorldRuntimeChecks.crystallizer(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1550, batch = "g21_carry")
+    public void g21CarryAndRefusals(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.carryAndRefusals(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 120, batch = "goal_lifecycle")
+    public void goalLifecycleDecorationClosesGate(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.decorationClosesRunningGate(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1050, batch = "g21_gather")
+    public void g21GatherAndAir(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.gatherAndAir(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1550, batch = "g21_harvest_lumber")
+    public void g21HarvestAndLumberDelivery(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.harvestAndLumberDelivery(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 550, batch = "g21_fractional_drops")
+    public void g21GatherFractionalDropPositions(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.gatherFractionalDropPositions(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 750, batch = "g21_use")
+    public void g21UsePlantsExactlyOneSeed(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.usePlantsExactlyOneSeed(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 750, batch = "g21_use_empty_space")
+    public void g21UseEmptySpacePlantsExactlyOneSeed(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.useEmptySpacePlantsExactlyOneSeed(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1150, batch = "g21_water_measurement")
+    public void g21MeasuredWaterPickupRadius(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.measuredWaterPickupRadius(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1350, batch = "g21_butcher")
+    public void g21ButcherLeavesBreedingPair(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.butcherLeavesBreedingPair(test); }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void essentiaTubesPullConserveAndToggleSides(GameTestHelper test) {
-        TubeRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void sound_registry_covers_bundled_events(GameTestHelper helper) {
+        // The mod's own class: on NeoForge this harness is a separate JPMS module.
+        try (var input = thaumcraft.common.Thaumcraft.class.getResourceAsStream("/assets/thaumcraft/sounds.json")) {
+            if (input == null) throw new IllegalStateException("Bundled sounds.json missing");
+            var sounds = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(input,
+                    java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+            for (String id : sounds.keySet()) {
+                var key = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", id);
+                helper.assertTrue(net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.containsKey(key),
+                        "Unregistered bundled sound " + key);
+                helper.assertTrue(net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.get(key).getLocation().equals(key),
+                        "Registered sound points at a different audio location: " + key);
+            }
+            helper.succeed();
+        } catch (java.io.IOException failure) {
+            throw new IllegalStateException(failure);
+        }
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g12_gui")
+    public void guiMagicBoxRejectedShiftConservesItems(GameTestHelper test) {
+        thaumcraft.common.testing.GuiRejectionRuntimeChecks.magicBox(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1200, batch = "g7_save_chunks")
+    public void saveCycleChunkDiskReload(GameTestHelper test) {
+        thaumcraft.common.testing.SaveCycleRuntimeChecks.chunks(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g7_save_player")
+    public void saveCyclePlayerDiskRelogin(GameTestHelper test) {
+        thaumcraft.common.testing.SaveCycleRuntimeChecks.player(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "g7_save_world")
+    public void saveCycleWorldDiskReload(GameTestHelper test) {
+        thaumcraft.common.testing.SaveCycleRuntimeChecks.savedData(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void jarsPullFromNativeTransportAndKeepManualActions(GameTestHelper test) {
-        JarTransportRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void interactionPickaxeConsumesPaidScan(GameTestHelper test) {
+        thaumcraft.common.testing.InteractionResultRuntimeChecks.pickaxeConsumesPaidScan(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void fireFocusSelectsPersistsAndPays(GameTestHelper test) {
-        FocusRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void interactionShovelConsumesOnlyPaidPlacement(GameTestHelper test) {
+        thaumcraft.common.testing.InteractionResultRuntimeChecks.shovelConsumesOnlyPaidPlacement(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void embersFlyDamageIgniteAndExpire(GameTestHelper test) {
-        EmberRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropAspectJar(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.jarRemoval(test, false);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void magicalFlowersGrowHarvestAndRefine(GameTestHelper test) {
-        PlantRuntimeChecks.run(test);
+    public void blockDropVoidJar(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.jarRemoval(test, true);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void jarLabelsBindFilterAndPreserveContents(GameTestHelper test) {
-        JarLabelRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropHungryChest(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "hungry_chest");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void magicalTreesGrowDropAndCraft(GameTestHelper test) {
-        MagicalTreeRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropPedestal(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "arcane_pedestal");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void arcaneStoneCraftsAndPreservesHalfBlocks(GameTestHelper test) {
-        ArcaneStoneRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropDeconstruction(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "deconstruction_table");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void alchemyFurnaceDistillsIntoRealAlembics(GameTestHelper test) {
-        AlchemyFurnaceRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropWorkbench(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "arcane_workbench");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void alembicPreservesPhialsAndOrientation(GameTestHelper test) {
-        AlembicRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropAlchemyFurnace(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "alchemy_furnace");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void wandAssemblyUsesMaterialsAndResearch(GameTestHelper test) {
-        WandAssemblyRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropFocalManipulator(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "focal_manipulator");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void bellowsHeatAndRespectNativeCompletion(GameTestHelper test) {
-        BellowsRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropThaumatorium(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "thaumatorium");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void crucibleDissolvesAndCraftsWithOriginalCosts(GameTestHelper test) {
-        CrucibleRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropMagicBoxCreative(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxRemoval(test, "creative");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void alchemyResourcesPlaceBurnAndExplode(GameTestHelper test) {
-        AlchemyResourceRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropMagicBoxSilk(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxRemoval(test, "silk");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void fluxMovesAndExhaustsWithOriginalRules(GameTestHelper test) {
-        FluxRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropMagicBoxExplosion(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxRemoval(test, "explosion");
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void objectAspectsUseRecipesAndRealComponents(GameTestHelper test) {
-        ObjectAspectRuntimeChecks.run(test);
+    public void blockDropMagicBoxDestroy(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxNonPlayerRemoval(test, false);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void infusedOresHarvestAndSmelt(GameTestHelper test) {
-        OreRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    public void blockDropMagicBoxSetBlock(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxNonPlayerRemoval(test, true);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
-    public void naturalOresFeedThaumometerRecipe(GameTestHelper test) {
-        NaturalOreGenerationRuntimeChecks.run(test);
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_trunk_other_viewer")
+    public void permissionTrunkOtherViewer(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsOtherViewer(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void researchAspectsCombineAndBonusesRegenerate(GameTestHelper test) {
-        ResearchAspectCombinationRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_trunk_closed_menu")
+    public void permissionTrunkClosedMenu(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsClosedMenu(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void arcaneWorkbenchCraftsWithVisAndPersists(GameTestHelper test) {
-        ArcaneWorkbenchRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_trunk_dead")
+    public void permissionTrunkDeadViewer(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsDeadViewer(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void naturalNodesDrainAndRegenerate(GameTestHelper test) {
-        NaturalNodeRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_denied_break")
+    public void permissionSpectatorCannotBreakContainers(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.spectatorCannotBreakContainers(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void researchTableEditsSolveAndPreserveResources(GameTestHelper test) {
-        ResearchTableEditingRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_research_conversion")
+    public void permissionResearchConversionSpectator(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.researchConversionRejectsSpectator(test);
     }
 
-    // Isolate retry timing from unrelated tests' initial inventory enqueues.
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", setupTicks = 80, timeoutTicks = 200)
-    public void canceledTableOutputRetriesAfterCooldown(GameTestHelper test) {
-        TableDropCancellationRuntimeChecks.canceledTableOutputRetriesAfterCooldown(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_crucible_remote")
+    public void permissionCrucibleRemoteWand(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.crucibleRejectsRemoteWand(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", setupTicks = 80)
-    public void tableSpawnCallbackPreservesReplacementInventory(GameTestHelper test) {
-        TableDropCancellationRuntimeChecks.tableSpawnCallbackPreservesReplacementInventory(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_trunk_spectator")
+    public void permissionTrunkSpectator(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsSpectator(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void rejectedSpawnPreservesExistingHiddenUuidOwner(GameTestHelper test) {
-        TableDropCancellationRuntimeChecks.rejectedSpawnPreservesExistingHiddenUuidOwner(test);
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "permission_trunk_remote")
+    public void permissionTrunkRemote(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsRemote(test);
     }
 
-    // The cross-boundary NBT case and actual far-chunk unload/reload are separate checks.
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void originalTableCraftPlacementAndDrops(GameTestHelper test) {
-        ResearchTableRuntimeChecks.originalTableCraftPlacementAndDrops(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "rejected_session_custody")
+    public void rejectedInfusionSurvivesPhysicalBlockRemoval(GameTestHelper test) {
+        thaumcraft.common.testing.RejectedOwnerRuntimeChecks.infusion(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void tableConversionDirectionsAndCosts(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tableConversionDirectionsAndCosts(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "rejected_owner_custody")
+    public void rejectedPedestalSurvivesPhysicalBlockRemoval(GameTestHelper test) {
+        thaumcraft.common.testing.RejectedOwnerRuntimeChecks.pedestal(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void tableSecondaryQuirksAndSearchOrder(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tableSecondaryQuirksAndSearchOrder(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 20, batch = "event_lifecycle")
+    public void regenerationQueueLifecycle(GameTestHelper test) {
+        thaumcraft.common.testing.EventLifecycleRuntimeChecks.regenerationQueueLifecycle(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void sharedTableMenusFiltersAndQuickMove(GameTestHelper test) {
-        ResearchTableRuntimeChecks.sharedTableMenusFiltersAndQuickMove(test, NetworkedGameTestPlayer.create(test), NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "perf_cache_retirement")
+    public void mirrorCacheRetirement(GameTestHelper test) {
+        thaumcraft.common.testing.PerformanceRuntimeChecks.mirrorCacheRetirement(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void tableMenuDistanceAndStaleIdentity(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tableMenuDistanceAndStaleIdentity(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "perf_chunk_footprint")
+    public void regenerationFootprint(GameTestHelper test) {
+        thaumcraft.common.testing.PerformanceRuntimeChecks.regenerationFootprint(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void tableInventoryComponentsAndCountsPersist(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tableInventoryComponentsAndCountsPersist(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "perf_structure_candidates")
+    public void structureCandidateFootprint(GameTestHelper test) {
+        thaumcraft.common.testing.PerformanceRuntimeChecks.structureCandidateFootprint(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void tableBreakEvacuatesEachHalfOnce(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tableBreakEvacuatesEachHalfOnce(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "mound_boundary")
+    public void moundBoundaryIsCompleteOrRefused(GameTestHelper test) {
+        thaumcraft.common.testing.MoundBoundaryRuntimeChecks.run(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void tablePairAcrossChunkBoundaryPersists(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tablePairAcrossChunkBoundaryPersists(test, NetworkedGameTestPlayer.create(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
-    public void tablePairActuallyUnloadsAndReloads(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tablePairActuallyUnloadsAndReloads(test, NetworkedGameTestPlayer.create(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void tableFirstNativeTickRepairsReloadedOrphans(GameTestHelper test) {
-        ResearchTableRuntimeChecks.tableFirstNativeTickRepairsReloadedOrphans(test, NetworkedGameTestPlayer.create(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void pendingDropSurvivesCollisionAndPersistence(GameTestHelper test) {
-        DeferredDropRuntimeChecks.pendingDropSurvivesCollisionAndPersistence(test);
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void quarantineRetainsUnknownData(GameTestHelper test) {
-        DeferredDropRuntimeChecks.quarantineRetainsUnknownData(test);
-    }
-
-    // Negotiated native players exercise the shared handler/service. This does
-    // not simulate C2S dispatch or claim ItemTossEvent cancellation coverage.
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void primaryRequestConsumesPaperAndLastInk(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.primaryRequestConsumesPaperAndLastInk(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void existingNotesReuseWithoutResourcesOrRandomness(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.existingNotesReuseWithoutResourcesOrRandomness(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void primaryRequestRefusalsAreAtomic(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.primaryRequestRefusalsAreAtomic(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void primaryRequestUsesOnlyOrderedMainInventory(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.primaryRequestUsesOnlyOrderedMainInventory(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void fullInventoryReusesFreedPaperSlotOrDrops(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.fullInventoryReusesFreedPaperSlotOrDrops(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void nativeInkPreservesCreativeAndUnbreakable(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.nativeInkPreservesCreativeAndUnbreakable(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void nativeUnbreakingUsesExactlyOnePlayerDraw(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.nativeUnbreakingUsesExactlyOnePlayerDraw(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void invalidGenerationLeavesResourcesAndKnowledgeUnchanged(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.invalidGenerationLeavesResourcesAndKnowledgeUnchanged(test, notePlayer(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void deliveryFailurePreservesPaperInkAndKnowledge(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.deliveryFailurePreservesPaperInkAndKnowledge(test, notePlayer(test));
-    }
-
-    private static net.minecraft.server.level.ServerPlayer notePlayer(GameTestHelper test) {
-        test.assertTrue(NetworkRegistry.getCodec(ResearchNoteRequestPayload.TYPE.id(),
-                        ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,
-                "note-request key payload is registered for serverbound play");
-        return NetworkedGameTestPlayer.create(test);
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void noteComponentsPersistAndEncode(GameTestHelper test) { ResearchNoteRuntimeChecks.noteComponentsPersistAndEncode(test); }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void solvedNoteLearnsOnceAndTransfers(GameTestHelper test) {
-        var session = NetworkedGameTestPlayer.createSession(test);
-        ResearchNoteRuntimeChecks.solvedNoteLearnsOnceAndTransfers(test, session.player(),
-                (expected, required) -> session.captureKnowledge(test, expected, required));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void noteRefusalsAndWarpUseOriginalRules(GameTestHelper test) {
-        var session = NetworkedGameTestPlayer.createSession(test);
-        ResearchNoteRuntimeChecks.noteRefusalsAndWarpUseOriginalRules(test, session.player(),
-                (expected, required) -> session.captureKnowledge(test, expected, required));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void originalScribingRecipesAndInkBounds(GameTestHelper test) { ResearchNoteRuntimeChecks.originalScribingRecipesAndInkBounds(test); }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(GameTestHelper test) {
-        var session = purchaseSession(test);
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(test, session.player(),
-                (expected, required) -> session.captureKnowledge(test, expected, required));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void secondaryPurchaseRejectsPartialFundsAtomically(GameTestHelper test) {
-        var session = purchaseSession(test);
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseRejectsPartialFundsAtomically(test, session.player(),
-                (expected, required) -> session.captureKnowledge(test, expected, required));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void secondaryPurchaseRequiresClueAndHiddenParents(GameTestHelper test) {
-        var session = purchaseSession(test);
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseRequiresClueAndHiddenParents(test, session.player(),
-                (expected, required) -> session.captureKnowledge(test, expected, required));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void secondaryPurchaseWarpAndPlayerPersistence(GameTestHelper test) {
-        var session = purchaseSession(test);
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseWarpAndPlayerPersistence(test, session.player(),
-                (expected, required) -> session.captureKnowledge(test, expected, required));
-    }
-
-    private static NetworkedGameTestPlayer.Session purchaseSession(GameTestHelper test) {
-        test.assertTrue(NetworkRegistry.getCodec(ResearchPurchasePayload.TYPE.id(),
-                        ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,
-                "purchase key payload is registered for serverbound play");
-        return NetworkedGameTestPlayer.createSession(test);
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc_isolated_bookshelf_wand")
-    public void bookshelfWandCreatesOneFloatingBook(GameTestHelper test) { RuntimeChecks.bookshelfWandCreatesOneFloatingBook(test); }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void normalBookOpensWithoutGrantingArbitraryResearch(GameTestHelper test) {
-        RuntimeChecks.normalBookOpensWithoutGrantingArbitraryResearch(test, NetworkedGameTestPlayer.create(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void originalEntryRecipes(GameTestHelper test) { RuntimeChecks.originalEntryRecipes(test); }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void bootstrapAndItemComponents(GameTestHelper test) { RuntimeChecks.bootstrapAndItemComponents(test); }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void playerKnowledgeMixinPersists(GameTestHelper test) { RuntimeChecks.playerKnowledgeMixinPersists(test); }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void jarDropRetainsEssentia(GameTestHelper test) { RuntimeChecks.jarDropRetainsEssentia(test); }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void nodeDrainPreservesTc4Rounding(GameTestHelper test) {
-        RuntimeChecks.nodeDrainPreservesTc4Rounding(test, NetworkedGameTestPlayer.create(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void thaumometerNodeScanUsesTc4Rewards(GameTestHelper test) {
-        RuntimeChecks.thaumometerNodeScanUsesTc4Rewards(test, NetworkedGameTestPlayer.create(test));
-    }
-
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
-    public void thaumometerBlockPickSharesDroppedItemIdentity(GameTestHelper test) {
-        RuntimeChecks.thaumometerBlockPickSharesDroppedItemIdentity(test, NetworkedGameTestPlayer.create(test));
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "mound_rng_isolation")
+    public void moundGenerationRandomIsIsolated(GameTestHelper test) {
+        thaumcraft.common.testing.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "bore_chunk_envelope_native_prerequisite")
@@ -546,11 +651,23 @@ public final class ThaumcraftGameTests {
         FocusUpgradeRuntimeChecks.run(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g31_focus_launches")
+    public void g31FocusCastingLaunchesAndPlayerCooldowns(GameTestHelper test) {
+        thaumcraft.common.testing.FocusCastingAuditChecks.launches(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g31_focus_impact")
+    public void g31PechCastImpactCannotReenter(GameTestHelper test) {
+        thaumcraft.common.testing.FocusCastingAuditChecks.pechImpactReentry(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "m08_excavation_upgrades")
     public void excavationUpgradeTreasureAndEnlarge(GameTestHelper test) {
         ExcavationUpgradeRuntimeChecks.run(test);
     }
 
+    // These native fixtures temporarily own level-wide callback/visibility state.
+    // Distinct batches keep them separate from one another and every old case.
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "m09b_vispower_recipes")
     public void visPowerRecipesPlacementAndAttunement(GameTestHelper test) {
         VisPowerRecipeRuntimeChecks.recipesPlacementAndAttunement(test);
@@ -636,7 +753,7 @@ public final class ThaumcraftGameTests {
         CrystallizerOutputRuntimeChecks.durableEscrowCallbacksAndSpawnRetries(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1200)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1200, batch = "tc_isolated_construct_centrifuge")
     public void constructAndCentrifugeRecipesAndPlainNativeBlocks(GameTestHelper test) {
         CentrifugeRuntimeChecks.recipesAndPlainNativeBlocks(test);
     }
@@ -736,6 +853,11 @@ public final class ThaumcraftGameTests {
         GolemWaterRangeRuntimeChecks.run(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 2400, batch = "m10_golem_fire_order")
+    public void fireIgnitesGuardTargetsAndOrderReplantsHarvestedCrops(GameTestHelper test) {
+        GolemFireOrderRuntimeChecks.run(test, GolemPlacementProbe::open);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1000, batch = "m10_ghost_slots")
     public void fireUpgradesAddPagesOfGhostSlotsToItemFilterGolems(GameTestHelper test) {
         GolemGhostSlotsRuntimeChecks.run(test);
@@ -766,6 +888,11 @@ public final class ThaumcraftGameTests {
         GolemFishingLiveRuntimeChecks.run(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100)
+    public void everyStateOfTheVariantBlocksHasAModelEntryAndTheGroupBlocksOwnOnlyTheirMetadata(GameTestHelper test) {
+        FamilyBlockStatesRuntimeChecks.run(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
     public void streamAxeChopsEndpointVacuumsAndFollowsDrops(GameTestHelper test) {
         StreamAxeRuntimeChecks.run(test);
@@ -781,6 +908,8 @@ public final class ThaumcraftGameTests {
         RobeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    // The dedicated GameTest clock runs far faster than20TPS; this case
+    // deliberately waits on eleven real250ms cooldowns, not fake game time.
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 36000)
     public void shockFocusPaysTargetsAndRespectsCooldown(GameTestHelper test) {
         ShockFocusRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
@@ -806,9 +935,184 @@ public final class ThaumcraftGameTests {
         InfusionRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "g24_comparator")
+    public void g24InfusionComparator(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.comparator(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "g24_payment")
+    public void g24InfusionProgressivePayment(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.progressivePaymentAndFinish(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "g24_interrupt")
+    public void g24InfusionInterruptions(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.interruptions(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "g24_measure")
+    public void g24InfusionMeasuredInstability(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.measuredInstability(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "g24_missing")
+    public void g24InfusionMissingIngredientRate(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionRitualAuditChecks.measuredMissingIngredients(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "tc_isolated_infusion_altar")
     public void infusionAltarFormsAndExecutesAllInstabilityOutcomes(GameTestHelper test) {
         InfusionStructureRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void essentiaTubesPullConserveAndToggleSides(GameTestHelper test) {
+        TubeRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "g5_vis_essentia")
+    public void furnaceAlembicCallbackConservesEssentia(GameTestHelper test) {
+        thaumcraft.common.testing.VisEssentiaAccountingChecks.furnaceAlembicCallback(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "g5_vis_network")
+    public void g5PrimalNetworkAccounting(GameTestHelper test) {
+        thaumcraft.common.testing.VisEssentiaAccountingChecks.primalNetwork(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "g5_vis_caps")
+    public void g5CapsAndSpendingAccounting(GameTestHelper test) {
+        thaumcraft.common.testing.VisEssentiaAccountingChecks.capsAndSpending(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void jarsPullFromNativeTransportAndKeepManualActions(GameTestHelper test) {
+        JarTransportRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void fireFocusSelectsPersistsAndPays(GameTestHelper test) {
+        FocusRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void embersFlyDamageIgniteAndExpire(GameTestHelper test) {
+        EmberRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void magicalFlowersGrowHarvestAndRefine(GameTestHelper test) {
+        PlantRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void jarLabelsBindFilterAndPreserveContents(GameTestHelper test) {
+        JarLabelRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void magicalTreesGrowDropAndCraft(GameTestHelper test) {
+        MagicalTreeRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void arcaneStoneCraftsAndPreservesHalfBlocks(GameTestHelper test) {
+        ArcaneStoneRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void alchemyFurnaceDistillsIntoRealAlembics(GameTestHelper test) {
+        AlchemyFurnaceRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void alembicPreservesPhialsAndOrientation(GameTestHelper test) {
+        AlembicRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void wandAssemblyUsesMaterialsAndResearch(GameTestHelper test) {
+        WandAssemblyRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void bellowsHeatAndRespectNativeCompletion(GameTestHelper test) {
+        BellowsRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void crucibleDissolvesAndCraftsWithOriginalCosts(GameTestHelper test) {
+        CrucibleRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void alchemyResourcesPlaceBurnAndExplode(GameTestHelper test) {
+        AlchemyResourceRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void fluxMovesAndExhaustsWithOriginalRules(GameTestHelper test) {
+        FluxRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void objectAspectsUseRecipesAndRealComponents(GameTestHelper test) {
+        ObjectAspectRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void infusedOresHarvestAndSmelt(GameTestHelper test) {
+        OreRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
+    public void naturalOresFeedThaumometerRecipe(GameTestHelper test) {
+        NaturalOreGenerationRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void researchAspectsCombineAndBonusesRegenerate(GameTestHelper test) {
+        ResearchAspectCombinationRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void arcaneWorkbenchCraftsWithVisAndPersists(GameTestHelper test) {
+        ArcaneWorkbenchRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "crafting_audit_grid")
+    public void craftingAuditGridBoundaries(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingAuditRuntimeChecks.gridBoundaries(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "crafting_audit_shaped")
+    public void craftingAuditShapedDamage(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingAuditRuntimeChecks.damagedIngredient(test, false);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "crafting_audit_shapeless")
+    public void craftingAuditShapelessDamage(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingAuditRuntimeChecks.damagedIngredient(test, true);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "node_time_audit_curves")
+    public void nodeTimeAuditCurves(GameTestHelper test) {
+        thaumcraft.common.testing.NodeTimeAuditRuntimeChecks.curves(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "node_time_audit_zero")
+    public void nodeTimeAuditZeroCapacityDecay(GameTestHelper test) {
+        thaumcraft.common.testing.NodeTimeAuditRuntimeChecks.zeroCapacityDecay(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "node_time_audit_growth")
+    public void nodeTimeAuditGrowth(GameTestHelper test) {
+        thaumcraft.common.testing.NodeTimeAuditRuntimeChecks.growth(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void naturalNodesDrainAndRegenerate(GameTestHelper test) {
+        NaturalNodeRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 2400)
@@ -821,7 +1125,230 @@ public final class ThaumcraftGameTests {
         VillageComponentPlacementRuntimeChecks.run(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1700)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 2400)
+    public void villageTradesReachTheVillagers(GameTestHelper test) {
+        VillageTradeRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void researchTableEditsSolveAndPreserveResources(GameTestHelper test) {
+        ResearchTableEditingRuntimeChecks.run(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    // Isolate retry timing from unrelated tests' initial inventory enqueues.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", setupTicks = 80, timeoutTicks = 200)
+    public void canceledTableOutputRetriesAfterCooldown(GameTestHelper test) {
+        TableDropCancellationRuntimeChecks.canceledTableOutputRetriesAfterCooldown(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", setupTicks = 80)
+    public void tableSpawnCallbackPreservesReplacementInventory(GameTestHelper test) {
+        TableDropCancellationRuntimeChecks.tableSpawnCallbackPreservesReplacementInventory(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void rejectedSpawnPreservesExistingHiddenUuidOwner(GameTestHelper test) {
+        TableDropCancellationRuntimeChecks.rejectedSpawnPreservesExistingHiddenUuidOwner(test);
+    }
+
+    // The cross-boundary NBT case and actual far-chunk unload/reload are separate checks.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void originalTableCraftPlacementAndDrops(GameTestHelper test) {
+        ResearchTableRuntimeChecks.originalTableCraftPlacementAndDrops(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void tableConversionDirectionsAndCosts(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tableConversionDirectionsAndCosts(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void tableSecondaryQuirksAndSearchOrder(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tableSecondaryQuirksAndSearchOrder(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void sharedTableMenusFiltersAndQuickMove(GameTestHelper test) {
+        ResearchTableRuntimeChecks.sharedTableMenusFiltersAndQuickMove(test, NetworkedGameTestPlayer.create(test), NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void tableMenuDistanceAndStaleIdentity(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tableMenuDistanceAndStaleIdentity(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void tableInventoryComponentsAndCountsPersist(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tableInventoryComponentsAndCountsPersist(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc_isolated_table_break")
+    public void tableBreakEvacuatesEachHalfOnce(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tableBreakEvacuatesEachHalfOnce(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void tablePairAcrossChunkBoundaryPersists(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tablePairAcrossChunkBoundaryPersists(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
+    public void tablePairActuallyUnloadsAndReloads(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tablePairActuallyUnloadsAndReloads(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc_isolated_table_orphan_repair")
+    public void tableFirstNativeTickRepairsReloadedOrphans(GameTestHelper test) {
+        ResearchTableRuntimeChecks.tableFirstNativeTickRepairsReloadedOrphans(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void pendingDropSurvivesCollisionAndPersistence(GameTestHelper test) {
+        DeferredDropRuntimeChecks.pendingDropSurvivesCollisionAndPersistence(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void quarantineRetainsUnknownData(GameTestHelper test) {
+        DeferredDropRuntimeChecks.quarantineRetainsUnknownData(test);
+    }
+
+    // R06 invokes the shared handler/native service; these calls are not C2S dispatch.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void primaryRequestConsumesPaperAndLastInk(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.primaryRequestConsumesPaperAndLastInk(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void existingNotesReuseWithoutResourcesOrRandomness(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.existingNotesReuseWithoutResourcesOrRandomness(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void primaryRequestRefusalsAreAtomic(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.primaryRequestRefusalsAreAtomic(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void primaryRequestUsesOnlyOrderedMainInventory(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.primaryRequestUsesOnlyOrderedMainInventory(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void fullInventoryReusesFreedPaperSlotOrDrops(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.fullInventoryReusesFreedPaperSlotOrDrops(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void nativeInkPreservesCreativeAndUnbreakable(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.nativeInkPreservesCreativeAndUnbreakable(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void nativeUnbreakingUsesExactlyOnePlayerDraw(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.nativeUnbreakingUsesExactlyOnePlayerDraw(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void invalidGenerationLeavesResourcesAndKnowledgeUnchanged(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.invalidGenerationLeavesResourcesAndKnowledgeUnchanged(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void deliveryFailurePreservesPaperInkAndKnowledge(GameTestHelper test) {
+        ResearchNoteIssuanceRuntimeChecks.deliveryFailurePreservesPaperInkAndKnowledge(test, notePlayer(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void noteComponentsPersistAndEncode(GameTestHelper test) { ResearchNoteRuntimeChecks.noteComponentsPersistAndEncode(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void solvedNoteLearnsOnceAndTransfers(GameTestHelper test) {
+        var session = NetworkedGameTestPlayer.createSession(test);
+        ResearchNoteRuntimeChecks.solvedNoteLearnsOnceAndTransfers(test, session.player(),
+                (expected, required) -> session.captureKnowledge(test, expected, required));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void noteRefusalsAndWarpUseOriginalRules(GameTestHelper test) {
+        var session = NetworkedGameTestPlayer.createSession(test);
+        ResearchNoteRuntimeChecks.noteRefusalsAndWarpUseOriginalRules(test, session.player(),
+                (expected, required) -> session.captureKnowledge(test, expected, required));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void originalScribingRecipesAndInkBounds(GameTestHelper test) { ResearchNoteRuntimeChecks.originalScribingRecipesAndInkBounds(test); }
+
+    // Vanilla Fabric mock proves the actual shared handler's state transitions;
+    // negotiated S2C bytes are separately asserted by the NeoForge wrappers.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(GameTestHelper test) {
+        var session = purchaseSession(test);
+        ResearchPurchaseRuntimeChecks.secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(test, session.player(),
+                (expected, required) -> session.captureKnowledge(test, expected, required));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void secondaryPurchaseRejectsPartialFundsAtomically(GameTestHelper test) {
+        var session = purchaseSession(test);
+        ResearchPurchaseRuntimeChecks.secondaryPurchaseRejectsPartialFundsAtomically(test, session.player(),
+                (expected, required) -> session.captureKnowledge(test, expected, required));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void secondaryPurchaseRequiresClueAndHiddenParents(GameTestHelper test) {
+        var session = purchaseSession(test);
+        ResearchPurchaseRuntimeChecks.secondaryPurchaseRequiresClueAndHiddenParents(test, session.player(),
+                (expected, required) -> session.captureKnowledge(test, expected, required));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void secondaryPurchaseWarpAndPlayerPersistence(GameTestHelper test) {
+        var session = purchaseSession(test);
+        ResearchPurchaseRuntimeChecks.secondaryPurchaseWarpAndPlayerPersistence(test, session.player(),
+                (expected, required) -> session.captureKnowledge(test, expected, required));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc_isolated_bookshelf_wand")
+    public void bookshelfWandCreatesOneFloatingBook(GameTestHelper test) { RuntimeChecks.bookshelfWandCreatesOneFloatingBook(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void normalBookOpensWithoutGrantingArbitraryResearch(GameTestHelper test) {
+        RuntimeChecks.normalBookOpensWithoutGrantingArbitraryResearch(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void originalEntryRecipes(GameTestHelper test) { RuntimeChecks.originalEntryRecipes(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void bootstrapAndItemComponents(GameTestHelper test) { RuntimeChecks.bootstrapAndItemComponents(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void playerKnowledgeMixinPersists(GameTestHelper test) { RuntimeChecks.playerKnowledgeMixinPersists(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void jarDropRetainsEssentia(GameTestHelper test) { RuntimeChecks.jarDropRetainsEssentia(test); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void nodeDrainPreservesTc4Rounding(GameTestHelper test) {
+        RuntimeChecks.nodeDrainPreservesTc4Rounding(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void thaumometerNodeScanUsesTc4Rewards(GameTestHelper test) {
+        RuntimeChecks.thaumometerNodeScanUsesTc4Rewards(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void thaumometerBlockPickSharesDroppedItemIdentity(GameTestHelper test) {
+        RuntimeChecks.thaumometerBlockPickSharesDroppedItemIdentity(test, NetworkedGameTestPlayer.create(test));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400)
+    public void advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag(GameTestHelper test) {
+        thaumcraft.common.testing.GolemAdvancedRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1700, batch = "tc_isolated_golem_decorations")
     public void golemAccessoriesInstallChangeStatsAndSurviveTheBell(GameTestHelper test) {
         thaumcraft.common.testing.GolemDecorationsRuntimeChecks.run(test);
     }
@@ -836,22 +1363,22 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.GolemLiquidQueueRuntimeChecks.run(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1600)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1600, batch = "tc_isolated_golem_fetter")
     public void golemFetterHoldsGolemsWhileItsRedstoneSignalLasts(GameTestHelper test) {
         thaumcraft.common.testing.GolemFetterRuntimeChecks.run(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "tc_isolated_traveling_trunk_item")
     public void travelingTrunkItemUpgradesMenuBellDamageAndSaving(GameTestHelper test) {
         thaumcraft.common.testing.TravelingTrunkRuntimeChecks.basics(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1600)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1600, batch = "tc_isolated_traveling_trunk_phases")
     public void travelingTrunkFollowsTeleportsDefendsAndPullsItems(GameTestHelper test) {
         thaumcraft.common.testing.TravelingTrunkRuntimeChecks.behavior(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1500)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1500, batch = "tc_isolated_golem_dart")
     public void golemDartLauncherShootsAtItsIntervalAndHurtsWhatItHits(GameTestHelper test) {
         thaumcraft.common.testing.GolemDartRuntimeChecks.run(test);
     }
@@ -887,8 +1414,23 @@ public final class ThaumcraftGameTests {
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    public void original_object_aspects_and_aspect_inference(GameTestHelper test) {
+        thaumcraft.common.testing.AspectCoverageRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    public void arcane_furnace_nozzle_feeds_the_furnace_fire_essentia(GameTestHelper test) {
+        thaumcraft.common.testing.ArcaneFurnaceNozzleRuntimeChecks.nozzleFeedsTheFurnaceFireEssentia(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
     public void theOriginalSmeltingBonusesAreRegistered(GameTestHelper test) {
         thaumcraft.common.testing.SmeltingBonusRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    public void thePublicRecipeListHoldsEveryRecipeOfTheLevel(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingRecipeApiRuntimeChecks.run(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
@@ -906,7 +1448,7 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.ElementalShovelRuntimeChecks.run(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "tc_isolated_zephyr_sword")
     public void swordOfTheZephyrLiftsBlowsAndSweeps(GameTestHelper test) {
         thaumcraft.common.testing.ElementalSwordRuntimeChecks.run(test);
     }
@@ -926,7 +1468,7 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.FortressRuntimeChecks.run(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "tc_isolated_essentia_reservoir")
     public void essentiaReservoirHoldsMixedEssentiaPullsAndBursts(GameTestHelper test) {
         thaumcraft.common.testing.ReservoirRuntimeChecks.run(test);
     }
@@ -990,6 +1532,18 @@ public final class ThaumcraftGameTests {
     public void warpDispatchesOriginalBranchesWithNativeEffects(GameTestHelper test) {
         thaumcraft.common.testing.WarpRuntimeChecks.run(test);
     }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g27_warp_sources")
+    public void g27WarpOriginalSources(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "sources"); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g27_warp_craft")
+    public void g27WarpRegisteredCraft(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "craft"); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g27_warp_research")
+    public void g27WarpRegisteredResearch(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "research"); }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g27_warp_rules")
+    public void g27WarpDecayCapAndPersistence(GameTestHelper test) { thaumcraft.common.testing.WarpRuntimeChecks.audit(test, "rules"); }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m11_brainy_zombies")
     public void brainyZombiesFightRageCureAndDropOriginalLoot(GameTestHelper test) {
@@ -1111,6 +1665,26 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.ShockOrbRuntimeChecks.run(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 120, batch = "g25_scan_container")
+    public void scanKnowledgePreservesContainerBonusAboveBaseCap(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.containerBonusIsNotCappedAfterBase(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 350, batch = "g25_scan_kinds")
+    public void scanKnowledgePhysicalKindsAndRules(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.physicalKindsRecordExactKnowledge(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 120, batch = "g25_scan_discovery")
+    public void scanKnowledgeMissingParentsAndDiscovery(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.missingParentsBlockThenDiscoverOnce(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 120, batch = "g25_scan_advanced")
+    public void scanKnowledgeAdvancedMarkersSuppressThaumometer(GameTestHelper test) {
+        thaumcraft.common.testing.ScanKnowledgeRuntimeChecks.advancedMarkersSuppressThaumometer(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "m04_scan_api_locators")
     public void scanApiUsesNativeNbtAndNodeLocators(GameTestHelper test) {
         thaumcraft.common.testing.ScanApiRuntimeChecks.nativeApiUsesWorldNbtAndNodeLocators(test, test.makeMockServerPlayerInLevel());
@@ -1166,6 +1740,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.AccessoriesRuntimeChecks.menuPersistenceAndDeath(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100)
+    public void accessories_right_click_equip(GameTestHelper test) {
+        thaumcraft.common.testing.AccessoriesRuntimeChecks.rightClickEquip(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m09_vis_amulet")
     public void visAmuletsTransferAndPayThroughActualNativeRelay(GameTestHelper test) {
         thaumcraft.common.testing.VisAmuletRuntimeChecks.nativeWornTransferAndRelayPayment(test);
@@ -1216,7 +1795,7 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.CrystalClustersRuntimeChecks.sevenRecipesPlaceOnSixFacesAndRecoverTheirSixShards(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600, batch = "m00_crystal_clusters_lifecycle")
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 1400, batch = "m00_crystal_clusters_lifecycle")
     public void mixedCrystalOrientationSurvivesActualChunkUnload(GameTestHelper test) {
         thaumcraft.common.testing.CrystalClustersRuntimeChecks.mixedOrientationActuallyUnloadsAndReloadsFromChunkNbt(test);
     }
@@ -1261,6 +1840,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.TravelGearRuntimeChecks.harnessFuelAndPermissions(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m08_hover_mining")
+    public void hoverHarnessMinesAtGroundSpeedWhileAirborne(GameTestHelper test) {
+        thaumcraft.common.testing.TravelGearRuntimeChecks.harnessMining(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m08_hover_menu")
     public void hoverHarnessMenuPreservesActualJarCustody(GameTestHelper test) {
         thaumcraft.common.testing.TravelGearRuntimeChecks.harnessMenu(test);
@@ -1284,6 +1868,11 @@ public final class ThaumcraftGameTests {
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 120, batch = "m02_taint_blocks")
     public void taintBlocksPreserveOriginalSpreadLootAndFallingCustody(GameTestHelper test) {
         thaumcraft.common.testing.TaintBlockRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 120, batch = "g22_taint_distribution")
+    public void taintSpreadMeasuresOracleDistributionAndTargets(GameTestHelper test) {
+        thaumcraft.common.testing.TaintBlockRuntimeChecks.audit(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m08_taint_spore_growth")
@@ -1356,9 +1945,44 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.NodeBiomeStorageRuntimeChecks.run(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "g13_spawn_pools")
+    public void spawnAuditNativeBiomePools(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.pools(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "g13_spawn_guardian")
+    public void spawnAuditGuardianIsolation(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.guardianIsolation(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "g13_spawn_special")
+    public void spawnAuditSpecialPaths(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.specialPaths(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "g13_spawn_champion")
+    public void spawnAuditChampionNaturalLifecycle(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.championNaturalLifecycle(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "g13_spawn_light")
+    public void spawnAuditOriginalCombinedDaylight(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnLightAuditRuntimeChecks.daylight(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "g13_spawn_inhabited")
+    public void spawnAuditInhabitedPlacement(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnLightAuditRuntimeChecks.inhabitedPlacement(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "r14_biome_source")
     public void originalBiomesUseActualRegistrySourcesAndSpawnRows(GameTestHelper test) {
         thaumcraft.common.testing.BiomeRuntimeChecks.source(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
+    public void generated_chunk_biomes_follow_the_world_seed(GameTestHelper test) {
+        thaumcraft.common.testing.BiomeRuntimeChecks.generatedChunkBiomesFollowSeed(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "r14_biome_trees")
@@ -1385,7 +2009,6 @@ public final class ThaumcraftGameTests {
     public void spaPreservesOriginalContainersFluidPatchesAndInventory(GameTestHelper test) {
         thaumcraft.common.testing.SpaBackendRuntimeChecks.containerQuirksPatchIdentityAndNativePersistence(test);
     }
-
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "m14_spa_menu")
     public void spaMenuPreservesNativeOwnershipAndOriginalQuickMove(GameTestHelper test) {
@@ -1417,7 +2040,6 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.PureBucketRuntimeChecks.run(test);
     }
 
-
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m09_alchemy_leftovers")
     public void alchemyLeftoversBrewFromTheirCatalystsAtTheOriginalCost(GameTestHelper test) {
         thaumcraft.common.testing.AlchemyLeftoversRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
@@ -1428,6 +2050,9 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.GrateRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    // ---- the new content wave: the eldritch bestiary, the cultists, the tainted animals,
+    // ---- the champion system, the eldritch blocks, the Outer Lands, the projectiles,
+    // ---- the device containers, the new items and the runic accessories.
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
     public void eldritch_warden_caps_its_hits_and_keeps_its_ward(GameTestHelper test) {
         thaumcraft.common.testing.EldritchBestiaryRuntimeChecks.wardenDamageCapAndEnrage(test);
@@ -1489,6 +2114,36 @@ public final class ThaumcraftGameTests {
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
+    public void champion_effects_reach_player_victims_once(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.effectsReachPlayerVictimsOnce(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
+    public void champion_warp_reaches_player_victim_once(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.warpedHitReachesPlayer(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
+    public void infusion_jar_brain_awards_warp_once(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionWarpAuditChecks.jarBrainAwardsWarpOnce(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
+    public void infusion_compass_stone_awards_warp_once(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionWarpAuditChecks.compassStoneAwardsWarpOnce(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
+    public void champion_ward_uses_original_base_health(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.wardUsesBaseHealth(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
+    public void public_warp_api_preserves_original_guards(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionWarpAuditChecks.publicWarpApiPreservesOriginalGuards(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
     public void champion_whitelist_covers_the_cave_spider(GameTestHelper test) {
         thaumcraft.common.testing.ChampionRuntimeChecks.caveSpiderIsAChampionCandidate(test);
     }
@@ -1496,6 +2151,16 @@ public final class ThaumcraftGameTests {
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
     public void eldritch_altar_takes_eyes_and_switches_its_spawn_type(GameTestHelper test) {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.altarTakesEyesAndSwitchesItsSpawnType(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    public void eldritch_glyphed_stone_gives_its_experience(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.glyphedStoneGivesItsExperience(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    public void eldritch_ethereal_bloom_cleanses_back_to_the_generated_biome(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.etherealBloomCleansesBackToTheGeneratedBiome(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 2400)
@@ -1578,6 +2243,27 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.EquipmentItemRuntimeChecks.relicsAndReliquariesKeepTheirOriginalRules(test);
     }
 
+    // The settings adopted from TC4Tweaks, each with the tweak and with the original rule.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc4tweaks_loot")
+    public void tweakLootRerollsBooksAndAmulets(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.loot(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc4tweaks_shock")
+    public void tweakEarthShockSparesItemsAndExperience(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.earthShock(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    public void tweakInfusionKeepsCentreItemData(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.infusionData(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc4tweaks_phial")
+    public void tweakFilledPhialStaysInHand(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.filledToHand(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
     public void runic_accessories_keep_their_original_charge_and_slot(GameTestHelper test) {
         thaumcraft.common.testing.RunicBaubleRuntimeChecks.runicAccessoriesKeepTheirOriginalChargeAndSlot(test);
@@ -1598,15 +2284,64 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.OuterLandsRuntimeChecks.labyrinth(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "worldgen_crash_biome")
+    public void worldgenCrashMissingBiomeRefusesFeature(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.missingBiomeFeature(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "worldgen_crash_column")
+    public void worldgenCrashMissingBiomeRefusesColumn(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.missingBiomeColumn(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "worldgen_crash_rooms")
+    public void worldgenCrashMalformedMazeSkipsRooms(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.malformedMazeRooms(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "worldgen_crash_ring")
+    public void worldgenCrashMalformedMazeSkipsRing(GameTestHelper test) {
+        thaumcraft.common.testing.WorldgenCrashRuntimeChecks.malformedMazeRing(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "g30_maze")
+    public void mazeAuditGeneratesRealRegionAndReloadsMap(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.generation(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "g30_return")
+    public void mazeAuditReturnsThroughNearestHomeGate(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.nearestReturnGate(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "g30_unexplored")
+    public void mazeAuditFindsUnexploredDestinationGate(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.unexploredGate(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "g30_bounds")
+    public void mazeAuditReturnSearchUsesExactOracleBounds(GameTestHelper test) {
+        thaumcraft.common.testing.MazeAuditRuntimeChecks.returnGateBounds(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m13_outer_lands")
     public void outerLandsIsARealRegisteredDimension(GameTestHelper test) {
         thaumcraft.common.testing.OuterLandsRuntimeChecks.levelStemKeepsTheOriginalValues(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m13_outer_lands")
+    public void outerLandsGenerationWritesNoBlockEntityWarnings(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.generationLogsNoBlockEntityWarnings(test);
+    }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400)
-    public void advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag(GameTestHelper test) {
-        thaumcraft.common.testing.GolemAdvancedRuntimeChecks.run(test);
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "m13_block_entity_markers")
+    public void stateDependentBlockEntitiesKeepTheirEntityAndOnlyTheirOwnWarningIsDropped(GameTestHelper test) {
+        thaumcraft.common.testing.BlockEntityMarkerRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "r14_decoration_write_area")
+    public void forestDecorationStaysInsideTheWriteAreaOfTheFeaturesStep(GameTestHelper test) {
+        thaumcraft.common.testing.DecorationWriteAreaRuntimeChecks.run(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "survival_progression")
@@ -1642,5 +2377,19 @@ public final class ThaumcraftGameTests {
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "survival_progression")
     public void survival_arcane_furnace_builds_and_pays_the_meat_nuggets(GameTestHelper test) {
         thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.arcaneFurnaceIsBuiltByAWandAndPaysTheMeatNuggets(test);
+    }
+
+    private static net.minecraft.server.level.ServerPlayer notePlayer(GameTestHelper test) {
+        test.assertTrue(NetworkRegistry.getCodec(ResearchNoteRequestPayload.TYPE.id(),
+                        ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,
+                "note-request key payload is registered for serverbound play");
+        return NetworkedGameTestPlayer.create(test);
+    }
+
+    private static NetworkedGameTestPlayer.Session purchaseSession(GameTestHelper test) {
+        test.assertTrue(NetworkRegistry.getCodec(ResearchPurchasePayload.TYPE.id(),
+                        ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,
+                "purchase key payload is registered for serverbound play");
+        return NetworkedGameTestPlayer.createSession(test);
     }
 }

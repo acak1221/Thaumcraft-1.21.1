@@ -1,5 +1,6 @@
 package thaumcraft.common.testing;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -194,13 +195,30 @@ public final class EquipmentItemRuntimeChecks {
             victim.setNoAi(true);
             level.addFreshEntity(victim);
             var bottle = new ItemStack(ThaumcraftLegacyItems.BOTTLE_TAINT.get());
-            ItemBottleTaint.burst(level, lane.origin, player);
-            test.assertTrue(victim.hasEffect(fluxTaint),
-                    "the bottle of taint poisons every living thing around it: " + victim.getEffect(fluxTaint));
-            int fibres = 0;
+            // The original burst skips a column that already is taint biome. A GameTest lands wherever
+            // the run places it, sometimes in a generated taint biome, so the lane's columns get a known
+            // non-taint biome for the burst and their own biome back afterwards.
+            var biomes = new java.util.LinkedHashMap<BlockPos, net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome>>();
             for (int dx = -4; dx <= 4; dx++)
-                for (int dz = -4; dz <= 4; dz++)
-                    if (level.getBlockState(lane.origin.offset(dx, 0, dz)).is(thaumcraft.common.config.ThaumcraftTaint.FIBRES.get())) fibres++;
+                for (int dz = -4; dz <= 4; dz++) {
+                    BlockPos column = lane.origin.offset(dx, 0, dz);
+                    var holder = thaumcraft.common.lib.world.BiomeColumns.surfaceHolder(level, column.getX(), column.getZ());
+                    test.assertTrue(holder != null, "the lane holds the chunk of every burst column");
+                    holder.unwrapKey().ifPresent(key -> biomes.put(column, key));
+                    thaumcraft.common.lib.world.BiomeColumns.set(level, column.getX(), column.getZ(),
+                            net.minecraft.world.level.biome.Biomes.PLAINS);
+                }
+            int fibres = 0;
+            try {
+                ItemBottleTaint.burst(level, lane.origin, player);
+                test.assertTrue(victim.hasEffect(fluxTaint),
+                        "the bottle of taint poisons every living thing around it: " + victim.getEffect(fluxTaint));
+                for (int dx = -4; dx <= 4; dx++)
+                    for (int dz = -4; dz <= 4; dz++)
+                        if (level.getBlockState(lane.origin.offset(dx, 0, dz)).is(thaumcraft.common.config.ThaumcraftTaint.FIBRES.get())) fibres++;
+            } finally {
+                biomes.forEach((column, key) -> thaumcraft.common.lib.world.BiomeColumns.set(level, column.getX(), column.getZ(), key));
+            }
             test.assertTrue(fibres >= 1, "the bottle of taint grows the original taint fibres: " + fibres);
             test.assertTrue(bottle.getMaxStackSize() == EquipmentRules.BOTTLE_TAINT_MAX_STACK_SIZE,
                     "the bottle of taint keeps its original stack size: " + bottle.getMaxStackSize());

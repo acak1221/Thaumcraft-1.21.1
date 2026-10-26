@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:silver_nugget",
+    {
+      "id": "#c:nuggets/silver",
+      "required": false
+    }
+  ]
+}

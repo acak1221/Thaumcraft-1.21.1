@@ -724,11 +724,12 @@
       "registration": "direct",
       "original_target": "Blocks.field_150417_aV",
       "original_metadata": 1,
-      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata0; 1.21.1 splits the four original stonebrick metadata variants into four blocks",
+      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata1; the original copies new AspectList(stonebrick metadata0) = the wildcard terra2, removes terra1 and adds one aspect (jar ConfigAspects bytecode, scripts/porting/extract_config_aspects.py); 1.21.1 splits the four original stonebrick metadata variants into four blocks",
       "modern_ids": [
         "minecraft:mossy_stone_bricks"
       ],
       "aspects": {
+        "terra": 1,
         "herba": 1
       }
     },
@@ -737,11 +738,12 @@
       "registration": "direct",
       "original_target": "Blocks.field_150417_aV",
       "original_metadata": 2,
-      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata0; 1.21.1 splits the four original stonebrick metadata variants into four blocks",
+      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata2; the original copies new AspectList(stonebrick metadata0) = the wildcard terra2, removes terra1 and adds one aspect (jar ConfigAspects bytecode, scripts/porting/extract_config_aspects.py); 1.21.1 splits the four original stonebrick metadata variants into four blocks",
       "modern_ids": [
         "minecraft:cracked_stone_bricks"
       ],
       "aspects": {
+        "terra": 1,
         "perditio": 1
       }
     },
@@ -750,11 +752,12 @@
       "registration": "direct",
       "original_target": "Blocks.field_150417_aV",
       "original_metadata": 3,
-      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata0; 1.21.1 splits the four original stonebrick metadata variants into four blocks",
+      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata3; the original copies new AspectList(stonebrick metadata0) = the wildcard terra2, removes terra1 and adds one aspect (jar ConfigAspects bytecode, scripts/porting/extract_config_aspects.py); 1.21.1 splits the four original stonebrick metadata variants into four blocks",
       "modern_ids": [
         "minecraft:chiseled_stone_bricks"
       ],
       "aspects": {
+        "terra": 1,
         "ordo": 1
       }
     },
@@ -763,11 +766,13 @@
       "registration": "direct",
       "original_target": "Blocks.field_150322_A",
       "original_metadata": 1,
-      "identifier_evidence": "Blocks.field_150322_A / Blocks.sandstone metadata0; 1.21.1 splits the original sandstone metadata variants into three blocks",
+      "identifier_evidence": "Blocks.field_150322_A / Blocks.sandstone metadata1; the original copies new AspectList(sandstone metadata0), the complex row generated from four sand (terra3 perditio3), removes terra1 and adds one aspect (jar ConfigAspects bytecode, scripts/porting/extract_config_aspects.py); the 1.13 flattening made metadata1 chiseled_sandstone",
       "modern_ids": [
         "minecraft:chiseled_sandstone"
       ],
       "aspects": {
+        "terra": 2,
+        "perditio": 3,
         "praecantatio": 1
       }
     },
@@ -776,11 +781,13 @@
       "registration": "direct",
       "original_target": "Blocks.field_150322_A",
       "original_metadata": 2,
-      "identifier_evidence": "Blocks.field_150322_A / Blocks.sandstone metadata0; 1.21.1 splits the original sandstone metadata variants into three blocks",
+      "identifier_evidence": "Blocks.field_150322_A / Blocks.sandstone metadata2; the original copies new AspectList(sandstone metadata0), the complex row generated from four sand (terra3 perditio3), removes terra1 and adds one aspect (jar ConfigAspects bytecode, scripts/porting/extract_config_aspects.py); the 1.13 flattening made metadata2 cut_sandstone, not the later smooth_sandstone",
       "modern_ids": [
-        "minecraft:smooth_sandstone"
+        "minecraft:cut_sandstone"
       ],
       "aspects": {
+        "terra": 2,
+        "perditio": 3,
         "ordo": 1
       }
     },

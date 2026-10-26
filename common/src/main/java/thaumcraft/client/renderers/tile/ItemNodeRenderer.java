@@ -126,8 +126,9 @@ public final class ItemNodeRenderer {
             float size = stripSize(stripPulse(ticks(), count), amount);
             // Original ItemNodeRenderer:117 - the alpha of an aspect strip.
             float opacity = stripAlpha(brightness, aspects.size());
+            // The original item node keeps the depth test: glDepthMask(false) and no culling only.
             TileNodeRenderer.quad(pose, buffers.getBuffer(aspect.getBlend() == 771
-                            ? TileNodeRenderer.TRANSLUCENT : TileNodeRenderer.ADDITIVE),
+                            ? TileNodeRenderer.TRANSLUCENT_DEPTH : TileNodeRenderer.ADDITIVE_DEPTH),
                     size, opacity, aspect.getColor(), frame, 0);
             ++count;
         }
@@ -143,7 +144,7 @@ public final class ItemNodeRenderer {
         float core = coreSize(total, aspects.size());
         if (type == NodeType.HUNGRY) core *= 0.75F;
         boolean dark = type == NodeType.DARK || type == NodeType.TAINTED;
-        TileNodeRenderer.quad(pose, buffers.getBuffer(dark ? TileNodeRenderer.TRANSLUCENT : TileNodeRenderer.ADDITIVE),
+        TileNodeRenderer.quad(pose, buffers.getBuffer(dark ? TileNodeRenderer.TRANSLUCENT_DEPTH : TileNodeRenderer.ADDITIVE_DEPTH),
                 core, value, 0xFFFFFF, frame, strip);
     }
 

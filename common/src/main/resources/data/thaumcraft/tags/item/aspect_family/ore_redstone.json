@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:redstone_ore",
+    "minecraft:deepslate_redstone_ore",
+    {
+      "id": "#c:ores/redstone",
+      "required": false
+    }
+  ]
+}

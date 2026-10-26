@@ -1,6 +1,9 @@
 package thaumcraft.client.renderers.item;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemDisplayContext;
 
 /**
  * The use pose of the wand of the original.
@@ -38,6 +41,20 @@ public final class WandUsePose {
     public static final float CHARGE_DEGREES = 1.0F;
 
     private WandUsePose() {}
+
+    /** Actual original matrix chain, with mirrored roll for the modern left-hand extension. */
+    public static void apply(PoseStack pose, ItemDisplayContext context, float useTicks, float focusRoll, float focusPitch) {
+        float side = WandContextPose.leftHand(context) ? -1 : 1;
+        pose.translate(0, PIVOT_Y, 0);
+        if (context.firstPerson()) {
+            pose.mulPose(Axis.XP.rotationDegrees(FIRST_PERSON_PITCH));
+            pose.mulPose(Axis.ZP.rotationDegrees(side * FIRST_PERSON_ROLL));
+        } else pose.mulPose(Axis.ZP.rotationDegrees(side * THIRD_PERSON_ROLL));
+        pose.mulPose(Axis.XN.rotationDegrees(raiseDegrees(useTicks)));
+        pose.mulPose(Axis.ZP.rotationDegrees(side * focusRoll));
+        pose.mulPose(Axis.XP.rotationDegrees(focusPitch));
+        pose.translate(0, -PIVOT_Y, 0);
+    }
 
     /**
      * Original ItemWandRenderer:89-92: the elapsed use time, capped at three ticks.

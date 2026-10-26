@@ -36,7 +36,8 @@ public final class TileResearchTableRenderer implements BlockEntityRenderer<Tile
             model.root.render(pose, wood, light, overlay);
             // Exhausted tools remain visible, just as in the original renderer.
             if (!tile.getItem(0).isEmpty() && tile.getItem(0).getItem() instanceof IScribeTools) {
-                model.inkwell.render(pose, wood, light, overlay);
+                // Original ModelResearchTable.renderInkwell:3-30 blends (770, 771): the ink (alpha 140) shows through.
+                model.inkwell.render(pose, buffers.getBuffer(RenderType.entityTranslucent(TABLE)), light, overlay);
                 pose.pushPose();
                 try {
                     pose.mulPose(Axis.YP.rotationDegrees(-90));
@@ -56,7 +57,8 @@ public final class TileResearchTableRenderer implements BlockEntityRenderer<Tile
                     pose.mulPose(Axis.XP.rotationDegrees(-90));
                     pose.mulPose(Axis.ZP.rotationDegrees(15 + a % 3 * 2));
                     pose.scale(.5F, .6F, .6F);
-                    quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(PARCHMENT)), light, overlay,
+                    // Original renderTileEntityAt:351-357, UtilsFX.renderQuad(parchment, 771, 1): blended edges.
+                    quad(pose, buffers.getBuffer(RenderType.entityTranslucent(PARCHMENT)), light, overlay,
                             new float[][]{{0,1,0,0,1}, {1,1,0,1,1}, {1,0,0,1,0}, {0,0,0,0,0}}, 0, 0, -1);
                 } finally {
                     pose.popPose();

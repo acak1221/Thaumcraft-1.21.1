@@ -18,13 +18,16 @@ import thaumcraft.common.blocks.BlockCosmeticSolid;
 import thaumcraft.common.blocks.BlockEldritch;
 import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWoodenDevice;
+import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.config.ThaumcraftEldritchMobs;
 import thaumcraft.common.config.ThaumcraftWarp;
+import thaumcraft.common.lib.world.BiomeColumns;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileBanner;
 import thaumcraft.common.tiles.TileEldritchAltar;
 import thaumcraft.common.tiles.TileEldritchObelisk;
+import thaumcraft.common.tiles.TileEtherealBloom;
 import thaumcraft.common.tiles.TileFluxScrubber;
 import thaumcraft.common.tiles.TileMagicBox;
 import thaumcraft.common.tiles.TileWardingStone;
@@ -85,6 +88,110 @@ public final class EldritchBlockRuntimeChecks {
         }
         lane.clean();
         test.succeed();
+    }
+
+    /**
+     * BlockEldritch:197-205 - breaking glyphed eldritch stone gives one to four experience. NeoForge
+     * awards block experience only through its getExpDrop hook, never through spawnAfterBreak.
+     */
+    public static void glyphedStoneGivesItsExperience(GameTestHelper test) {
+        var lane = new WaveLane(test, 3, 2, 3);
+        try {
+            ServerLevel level = lane.level;
+            ServerPlayer player = test.makeMockServerPlayerInLevel();
+            player.setGameMode(GameType.SURVIVAL);
+            lane.floor(3);
+            BlockPos pos = lane.origin;
+            var bounds = new net.minecraft.world.phys.AABB(pos).inflate(3);
+            for (int round = 0; round < 4; round++) {
+                lane.put(pos, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.ELDRITCH_CRUST.get().defaultBlockState(),
+                        EldritchBlockRules.ELDRITCH_GLYPHED));
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE));
+                test.assertTrue(player.gameMode.destroyBlock(pos) && level.getBlockState(pos).isAir(),
+                        "survival mining removes the glyphed eldritch stone");
+                int experience = 0;
+                for (var orb : level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, bounds)) {
+                    CompoundTag tag = new CompoundTag();
+                    orb.addAdditionalSaveData(tag);
+                    experience += orb.getValue() * Math.max(1, tag.getInt("Count"));
+                    orb.discard();
+                }
+                test.assertTrue(experience >= 1 && experience <= 4,
+                        "glyphed eldritch stone gives the original one to four experience: " + experience);
+            }
+        } catch (RuntimeException | Error failure) {
+            lane.clean();
+            throw failure;
+        }
+        lane.clean();
+        test.succeed();
+    }
+
+    /**
+     * TileEtherealBloom.updateEntity: the bloom ticks on both sides, and on the server turns a taint,
+     * eerie or magical forest column within reach back into the biome the world generated there,
+     * plains where that was taint itself. Until 2026-10-26 the bloom had no ticker in the port, so it
+     * neither grew nor cleansed anything.
+     */
+    public static void etherealBloomCleansesBackToTheGeneratedBiome(GameTestHelper test) {
+        var lane = new WaveLane(test, 3, 2, 3);
+        ServerLevel level = lane.level;
+        BlockPos pos = lane.origin;
+        BlockPos tainted = pos.offset(3, 0, 2), forest = pos.offset(-2, 0, -1);
+        var saved = new java.util.LinkedHashMap<BlockPos, net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome>>();
+        try {
+            for (BlockPos column : java.util.List.of(tainted, forest)) {
+                var holder = BiomeColumns.surfaceHolder(level, column.getX(), column.getZ());
+                test.assertTrue(holder != null && holder.unwrapKey().isPresent(), "the lane holds the chunk of " + column);
+                saved.put(column, holder.unwrapKey().get());
+            }
+            lane.floor(1);
+            lane.put(pos, ThaumcraftEldritchBlocks.ETHEREAL_BLOOM.get().defaultBlockState());
+            test.assertTrue(level.getBlockEntity(pos) instanceof TileEtherealBloom, "the bloom is a real block entity");
+            var bloom = (TileEtherealBloom) level.getBlockEntity(pos);
+            BiomeColumns.set(level, tainted.getX(), tainted.getZ(), ThaumcraftBiomes.TAINT);
+            test.assertTrue(TileEtherealBloom.cleanse(level, pos, 3, 2), "the bloom cleanses a tainted column three and two blocks away");
+            var expected = generated(level, tainted);
+            test.assertTrue(BiomeColumns.surfaceHolder(level, tainted.getX(), tainted.getZ()) == expected && !expected.is(ThaumcraftBiomes.TAINT),
+                    "the column gets back the biome generated there, plains for generated taint: " + expected.unwrapKey().orElseThrow());
+            test.assertTrue(!TileEtherealBloom.cleanse(level, pos, 3, 2), "a column that has its generated biome stays as it is");
+            BiomeColumns.set(level, forest.getX(), forest.getZ(), ThaumcraftBiomes.MAGICAL_FOREST);
+            var forestGenerated = generated(level, forest);
+            test.assertTrue(TileEtherealBloom.cleanse(level, pos, -2, -1) == !forestGenerated.is(ThaumcraftBiomes.MAGICAL_FOREST)
+                            && BiomeColumns.surfaceHolder(level, forest.getX(), forest.getZ()) == forestGenerated,
+                    "a column a pure node turned into magical forest goes back as well: " + forestGenerated.unwrapKey().orElseThrow());
+            int counter = bloom.counter, growth = bloom.growthCounter;
+            test.runAfterDelay(2, () -> {
+                try {
+                    test.assertTrue(bloom.growthCounter == growth + 2 && bloom.counter >= counter + 2 && bloom.counter <= counter + 2 + EldritchBlockRules.ETHEREAL_BLOOM_START_PHASE,
+                            "the bloom ticks on the server: growth " + growth + " -> " + bloom.growthCounter + ", counter " + counter + " -> " + bloom.counter);
+                } finally {
+                    restore(level, saved);
+                    lane.clean();
+                }
+                test.succeed();
+            });
+        } catch (RuntimeException | Error failure) {
+            restore(level, saved);
+            lane.clean();
+            throw failure;
+        }
+    }
+
+    /** The generated biome of a column at its surface, plains for generated taint, as the bloom puts it back. */
+    private static net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> generated(ServerLevel level, BlockPos column) {
+        var chunk = level.getChunk(column);
+        int surface = net.minecraft.util.Mth.clamp(chunk.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, column.getX() & 15, column.getZ() & 15),
+                level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
+        var biome = level.getChunkSource().getGenerator().getBiomeSource().getNoiseBiome(net.minecraft.core.QuartPos.fromBlock(column.getX()),
+                net.minecraft.core.QuartPos.fromBlock(surface), net.minecraft.core.QuartPos.fromBlock(column.getZ()), level.getChunkSource().randomState().sampler());
+        return biome.is(ThaumcraftBiomes.TAINT)
+                ? level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME).getHolderOrThrow(TileEtherealBloom.OVERWORLD_PLAINS)
+                : biome;
+    }
+
+    private static void restore(ServerLevel level, java.util.Map<BlockPos, net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome>> saved) {
+        saved.forEach((column, key) -> BiomeColumns.set(level, column.getX(), column.getZ(), key));
     }
 
     /** The original eldritch obelisk only buffs the eldritch mobs around it. */

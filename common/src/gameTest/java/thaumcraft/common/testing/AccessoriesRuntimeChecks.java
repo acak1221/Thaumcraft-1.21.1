@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -126,6 +127,45 @@ public final class AccessoriesRuntimeChecks {
         var thirteen = thaumcraft.common.items.wands.FocusVis.price(new AspectList().add(Aspect.FIRE, 15), wand, null);
         test.assertTrue(thirteen.equals(Map.of("ignis", 13)) && thaumcraft.common.items.wands.FocusVis.debit(wand, thirteen)
                 && ItemWandCasting.getVis(wand, "ignis") == 87, "one Frugal truncates 13.5 to 13 and debits it");
+    }
+    /**
+     * The port's right-click equip through the real use path: each bauble fills the first free slot of
+     * its kind, a full kind and the focus pouch (which opens instead) take nothing.
+     */
+    public static void rightClickEquip(GameTestHelper test) {
+        var f=new TubeVariantsRuntimeChecks.Fixture(test);
+        try {
+            f.open();
+            ServerPlayer player=f.player;var level=f.level;var inventory=PlayerAccessories.get(player);
+            ItemStack[] used={new ItemStack(ThaumcraftBaubles.DISCOUNT_RINGS.get("aer").get(),2),new ItemStack(ThaumcraftBaubles.DISCOUNT_RINGS.get("aer").get(),2),
+                    new ItemStack(ThaumcraftBaubles.MUNDANE_BELT.get()),new ItemStack(ThaumcraftBaubles.MUNDANE_AMULET.get())};
+            for(ItemStack stack:used)use(player,stack);
+            test.assertTrue(inventory.getItem(0).is(ThaumcraftBaubles.MUNDANE_AMULET.get())&&inventory.getItem(1).is(ThaumcraftBaubles.DISCOUNT_RINGS.get("aer").get())
+                    &&inventory.getItem(2).is(ThaumcraftBaubles.DISCOUNT_RINGS.get("aer").get())&&inventory.getItem(3).is(ThaumcraftBaubles.MUNDANE_BELT.get())
+                    &&inventory.getItem(1).getCount()==1&&inventory.getItem(2).getCount()==1,"each used bauble fills one free slot of its kind, one item at a time");
+            test.assertTrue(used[0].getCount()==1&&used[1].getCount()==1&&used[2].isEmpty()&&used[3].isEmpty(),"a survival player gives exactly one item of each used stack");
+            ItemStack third=new ItemStack(ThaumcraftBaubles.DISCOUNT_RINGS.get("ignis").get());
+            use(player,third);
+            test.assertTrue(third.getCount()==1&&inventory.getItem(1).is(ThaumcraftBaubles.DISCOUNT_RINGS.get("aer").get())
+                    &&inventory.getItem(2).is(ThaumcraftBaubles.DISCOUNT_RINGS.get("aer").get()),"two worn rings: a third stays in the hand and replaces nothing");
+            inventory.setItem(3,ItemStack.EMPTY);
+            ItemStack pouch=new ItemStack(thaumcraft.common.config.ThaumcraftFocusPouches.FOCUS_POUCH.get());
+            use(player,pouch);
+            test.assertTrue(inventory.getItem(3).isEmpty()&&pouch.getCount()==1,"the focus pouch keeps its own use and is not put on");
+            player.closeContainer();
+            f.mode(net.minecraft.world.level.GameType.SPECTATOR);
+            inventory.setItem(0,ItemStack.EMPTY);
+            ItemStack amulet=new ItemStack(ThaumcraftBaubles.MUNDANE_AMULET.get());
+            player.getInventory().setItem(0,amulet);player.getInventory().selected=0;
+            test.assertTrue(PlayerAccessories.freeSlotFor(player,amulet)==-1,"a spectator puts nothing on");
+        } finally {
+            f.close();
+        }
+        test.succeed();
+    }
+    private static void use(ServerPlayer player,ItemStack stack) {
+        player.getInventory().setItem(player.getInventory().selected,stack);
+        player.gameMode.useItem(player,player.serverLevel(),stack,InteractionHand.MAIN_HAND);
     }
     private static void click(ServerPlayer player,int slot,ClickType type){
         var menu=player.containerMenu;

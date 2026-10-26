@@ -76,6 +76,8 @@ class OrphanMobOracleContractTest {
 
     private static ZipFile oracle() throws Exception {
         Path path = ROOT.resolve("Thaumcraft-1.7.10-4.2.3.5.jar");
+        // The original JAR is Azanor's release and is not tracked; it is checked where it is present.
+        org.junit.jupiter.api.Assumptions.assumeTrue(Files.isRegularFile(path), "TC4 4.2.3.5 JAR not present at the repository root");
         assertEquals(SHA256, HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
                 .digest(Files.readAllBytes(path))), "Oracle citation requires the exact TC4 4.2.3.5 artifact");
         return new ZipFile(path.toFile());

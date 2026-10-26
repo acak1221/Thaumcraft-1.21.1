@@ -24,7 +24,10 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
  * ItemThaumometerRenderer:148-154). The brightness of the screen is the
  * original {@code 190 + sin(ticks - random(2)) * 10 + 10}.
  *
- * <p>The original transform chain is kept: the inventory view turns the
+ * <p>The original transform chain is kept inside the original caller's basis:
+ * the model display restores the first-person caller's 45 degree Y turn and
+ * 0.4 scale, and the inventory helper's 10/16 scale and orientation. Those
+ * caller transforms are absent from the modern builtin-item hook. The inventory view turns the
  * thaumometer by 60 degrees about X, 30 degrees about -Z and 248 degrees about -Y and
  * halves it (original ItemThaumometerRenderer:137-146), the equipped view
  * moves it by {@code (1.6, 0.3, 2.0)} and turns it by 90 degrees about -X and
@@ -59,23 +62,9 @@ public final class ItemThaumometerRenderer {
         pose.pushPose();
         try {
             if (context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND) {
-                firstPerson(pose, buffers, light, overlay);
+                firstPerson(pose, buffers, light, overlay, context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
             } else {
-                // Original ItemThaumometerRenderer:136-146.
-                pose.scale(0.5F, 0.5F, 0.5F);
-                if (context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND) {
-                    pose.translate(1.6F, 0.3F, 2.0F);
-                    pose.mulPose(Axis.XN.rotationDegrees(90.0F));
-                    pose.mulPose(Axis.ZN.rotationDegrees(30.0F));
-                } else if (context == ItemDisplayContext.GUI) {
-                    // Original ItemThaumometerRenderer:141-145 - the inventory chain. Note the
-                    // LAST rotation turns about the Y axis with a negative angle, not about Z:
-                    // glRotatef(248, 0, -1, 0) is Axis.YN 248, and Z would lay the scanner on
-                    // its back in the slot instead of showing its face.
-                    pose.mulPose(Axis.XP.rotationDegrees(60.0F));
-                    pose.mulPose(Axis.ZN.rotationDegrees(30.0F));
-                    pose.mulPose(Axis.YN.rotationDegrees(INVENTORY_Y_ROTATION_DEGREES));
-                }
+                staticPose(pose, context);
             }
             // Original ItemThaumometerRenderer:148-149.
             MODEL.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(ModelThaumometer.TEXTURE)), light, overlay);
@@ -89,7 +78,7 @@ public final class ItemThaumometerRenderer {
                 // Original ItemThaumometerRenderer:155-259 - the scan readout, drawn in the
                 // world space of the screen of the scanner.
                 if (context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND) {
-                    readout(pose, buffers);
+                    readout(stack, pose, buffers);
                 }
             } finally {
                 pose.popPose();
@@ -106,29 +95,15 @@ public final class ItemThaumometerRenderer {
      * with the view of the player, the arm of the player is drawn twice and
      * mirrored and the thaumometer itself is drawn twice as large.
      */
-    private static void firstPerson(PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+    private static void firstPerson(PoseStack pose, MultiBufferSource buffers, int light, int overlay, boolean leftHand) {
         var mc = Minecraft.getInstance();
         var player = mc.player;
         if (player == null) return;
         float partial = mc.getTimer().getGameTimeDeltaPartialTick(false);
-        // Original ItemThaumometerRenderer:99-100.
-        pose.translate(1.0F, 0.75F, -1.0F);
-        pose.mulPose(Axis.YN.rotationDegrees(135.0F));
-        // Oracle :101-104. LocalPlayer's xBob/yBob are the native arm pitch/yaw lag.
-        pose.mulPose(Axis.XP.rotationDegrees(ThaumometerArmPose.lagDegrees(
-                player.getXRot(), player.xBobO, player.xBob, partial)));
-        pose.mulPose(Axis.YP.rotationDegrees(ThaumometerArmPose.lagDegrees(
-                player.getYRot(), player.yBobO, player.yBob, partial)));
-        // Original ItemThaumometerRenderer:107, the equip progress of the item in the hand.
-        // The 1.7.10 client read the private fields of its ItemRenderer; the native port
-        // reproduces the original curve, see thaumcraft.client.lib.UtilsFX.
-        float progress = thaumcraft.client.lib.UtilsFX.getEquippedProgress(partial);
-        pose.translate(-0.7F * FIRST_PERSON_SCALE,
-                -(-0.65F * FIRST_PERSON_SCALE) + (1.0F - progress) * 1.5F,
-                0.9F * FIRST_PERSON_SCALE);
-        pose.mulPose(Axis.YP.rotationDegrees(90.0F));
-        pose.translate(0.0F, 0.0F, -0.9F * FIRST_PERSON_SCALE);
-        pose.mulPose(Axis.YP.rotationDegrees(90.0F));
+        firstPersonBase(pose, leftHand,
+                ThaumometerArmPose.lagDegrees(player.getXRot(), player.xBobO, player.xBob, partial),
+                ThaumometerArmPose.lagDegrees(player.getYRot(), player.yBobO, player.yBob, partial),
+                thaumcraft.client.lib.UtilsFX.getEquippedProgress(partial));
         // Original ItemThaumometerRenderer:113-131: the arm of the player, twice.
         pose.pushPose();
         try {
@@ -150,10 +125,71 @@ public final class ItemThaumometerRenderer {
         } finally {
             pose.popPose();
         }
+        firstPersonBody(pose, leftHand);
+    }
+
+    /** Pure pose operations, also exercised with the actual model display and native caller basis. */
+    static void firstPersonBase(PoseStack pose, boolean leftHand, float pitchLag, float yawLag, float progress) {
+        beginHand(pose, leftHand);
+        // Original ItemThaumometerRenderer:99-100.
+        pose.translate(1.0F, 0.75F, -1.0F);
+        pose.mulPose(Axis.YN.rotationDegrees(135.0F));
+        // Oracle :101-104. LocalPlayer's xBob/yBob are the native arm pitch/yaw lag.
+        pose.mulPose(Axis.XP.rotationDegrees(pitchLag));
+        pose.mulPose(Axis.YP.rotationDegrees(yawLag));
+        // Original ItemThaumometerRenderer:107, the equip progress of the item in the hand.
+        // The 1.7.10 client read the private fields of its ItemRenderer; the native port
+        // reproduces the original curve, see thaumcraft.client.lib.UtilsFX.
+        pose.translate(-0.7F * FIRST_PERSON_SCALE,
+                -(-0.65F * FIRST_PERSON_SCALE) + (1.0F - progress) * 1.5F,
+                0.9F * FIRST_PERSON_SCALE);
+        pose.mulPose(Axis.YP.rotationDegrees(90.0F));
+        pose.translate(0.0F, 0.0F, -0.9F * FIRST_PERSON_SCALE);
+        pose.mulPose(Axis.YP.rotationDegrees(90.0F));
+    }
+
+    static void firstPersonBody(PoseStack pose, boolean leftHand) {
         // Original ItemThaumometerRenderer:132-135.
         pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
         pose.translate(0.4F, -0.4F, 0.0F);
         pose.scale(2.0F, 2.0F, 2.0F);
+        endHand(pose, leftHand);
+    }
+
+    static void staticPose(PoseStack pose, ItemDisplayContext context) {
+        boolean leftHand = context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
+        if (context == ItemDisplayContext.GUI) {
+            // GuiGraphics already centres the slot. The legacy INVENTORY_BLOCK helper
+            // has no equipped -0.5 translation; its scale and rotations live in the model.
+            pose.translate(0.5F, 0.5F, 0.5F);
+        } else beginHand(pose, leftHand);
+        // Original ItemThaumometerRenderer:136-146.
+        pose.scale(0.5F, 0.5F, 0.5F);
+        if (context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND || leftHand) {
+            pose.translate(1.6F, 0.3F, 2.0F);
+            pose.mulPose(Axis.XN.rotationDegrees(90.0F));
+            pose.mulPose(Axis.ZN.rotationDegrees(30.0F));
+        } else if (context == ItemDisplayContext.GUI) {
+            pose.mulPose(Axis.XP.rotationDegrees(60.0F));
+            pose.mulPose(Axis.ZN.rotationDegrees(30.0F));
+            pose.mulPose(Axis.YN.rotationDegrees(INVENTORY_Y_ROTATION_DEGREES));
+        }
+        endHand(pose, leftHand);
+    }
+
+    private static void beginHand(PoseStack pose, boolean leftHand) {
+        if (!leftHand) return;
+        // ItemTransform mirrors the display rotation but the builtin renderer's
+        // custom chain is still right-handed. Reflect about the centred item, not
+        // the native hook's -0.5 corner (which otherwise adds a whole unit of drift).
+        pose.translate(1.0F, 0.0F, 0.0F);
+        pose.scale(-1.0F, 1.0F, 1.0F);
+    }
+
+    private static void endHand(PoseStack pose, boolean leftHand) {
+        // The scanner's horizontal screen axis is model Z. This second reflection
+        // keeps a proper body basis and makes text read left-to-right in either hand.
+        if (leftHand) pose.scale(1.0F, 1.0F, -1.0F);
     }
 
     /**
@@ -164,14 +200,14 @@ public final class ItemThaumometerRenderer {
      * scanner. It shows the name of the target, the aspect icons of a target that was already
      * scanned and the type of a node.</p>
      */
-    private static void readout(PoseStack pose, MultiBufferSource buffers) {
+    private static void readout(ItemStack stack, PoseStack pose, MultiBufferSource buffers) {
         var mc = Minecraft.getInstance();
         var player = mc.player;
         if (player == null) return;
         // Original ItemThaumometerRenderer:98 - the readout belongs to the first person view.
         if (!mc.options.getCameraType().isFirstPerson()) return;
         // Original ItemThaumometerRenderer:161 - the target of the scan.
-        var target = ItemThaumometer.readout(player, player.getMainHandItem());
+        var target = ItemThaumometer.readout(player, stack);
         if (target == null) return;
         // Original ItemThaumometerRenderer:169,179,183 - the icons are only drawn for a target
         // that was already scanned.

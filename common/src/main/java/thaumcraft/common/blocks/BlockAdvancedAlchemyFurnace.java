@@ -61,6 +61,14 @@ public final class BlockAdvancedAlchemyFurnace extends BaseEntityBlock {
     }
     @Override protected void onRemove(BlockState state,Level level,BlockPos pos,BlockState replacement,boolean moving) {
         if(!replacement.is(this) || replacement.getValue(PART)!=state.getValue(PART)) AdvancedFurnaceFormation.broken(level,pos,state.getValue(PART));
+        if(state.hasBlockEntity() && !state.is(replacement.getBlock()) && AdvancedFurnaceFormation.removalNoticeReachesUnknown(level,pos)) {
+            // Vanilla Level.removeBlockEntity is exactly this chunk removal. NeoForge also notifies comparators
+            // there, and that notice reads the block behind a solid neighbour without a loaded-chunk check, so a
+            // part at a chunk edge synchronously loaded the unavailable half of the machine. The retirement is
+            // already quiet (flags 18) in that case; the chunk still retires the entity and its capabilities.
+            level.getChunkAt(pos).removeBlockEntity(pos);
+            return;
+        }
         super.onRemove(state,level,pos,replacement,moving);
     }
     @Override public void animateTick(BlockState state,Level level,BlockPos pos,RandomSource random) {

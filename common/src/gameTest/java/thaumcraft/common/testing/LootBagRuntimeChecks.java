@@ -64,7 +64,10 @@ public final class LootBagRuntimeChecks {
         Check check=new Check(test);
         try { check.prepare(); } catch(RuntimeException|Error failure) { check.finish();throw failure; }
         test.runAfterDelay(5,()->{
-            try { check.poolsAndPotions();check.drawOrderAndAliases();check.nativeChests();check.paidCancellation(); }
+            // The original rules, including the shared book conversion the loot tweak replaces.
+            try (var original=thaumcraft.common.config.ThaumcraftTweaks.override(thaumcraft.common.config.ThaumcraftTweaks.ORIGINAL)) {
+                check.poolsAndPotions();check.drawOrderAndAliases();check.nativeChests();check.paidCancellation();
+            }
             catch(RuntimeException|Error failure) { check.finish();throw failure; }
         });
     }

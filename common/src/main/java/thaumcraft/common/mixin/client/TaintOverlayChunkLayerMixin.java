@@ -30,7 +30,11 @@ public abstract class TaintOverlayChunkLayerMixin {
 
     // Both vanilla and patched NeoForge compile methods pop the block's local pose
     // immediately after renderBatched; unlike its signature, this call is unchanged.
-    @Inject(method="compile",at=@At(value="INVOKE",target="Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"))
+    // NeoForge keeps the vanilla signature only as a delegate to an overload with an
+    // extra renderer list, and a bare "compile" selects just the first (the delegate),
+    // which crashed every NeoForge client on joining a world. "compile*" selects both;
+    // only the method that renders the blocks has the pop.
+    @Inject(method="compile*",at=@At(value="INVOKE",target="Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"))
     private void thaumcraft$transparentTaint(CallbackInfoReturnable<SectionCompiler.Results> ci,
             @Local(argsOnly=true) RenderChunkRegion world,@Local(argsOnly=true) SectionBufferBuilderPack pack,
             @Local(ordinal=2) BlockPos pos,@Local BlockState state,@Local PoseStack poses,

@@ -3,7 +3,7 @@ docs/analysis/2026-10-15-CODE_ANALYSIS_RU.md
 docs/analysis/2026-10-15-api-compatibility.md
 docs/analysis/2026-10-15-build-tests.md
 docs/analysis/2026-10-15-client-assets.md
-docs/analysis/2026-10-15-inventory-FOREVA.json
+docs/analysis/2026-10-15-inventory-legacy-1.12.json
 docs/analysis/2026-10-15-inventory-OpenTC4-Architectury-upstream.json
 docs/analysis/2026-10-15-inventory-OpenTC4-Architectury.json
 docs/analysis/2026-10-15-inventory-OpenTC4.json

@@ -257,8 +257,18 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
     @Override protected void spawnAfterBreak(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience) {
         super.spawnAfterBreak(state, level, pos, tool, dropExperience);
         if (!dropExperience) return;
-        int experience = EldritchBlockRules.eldritchExperience(variant(state), new java.util.Random());
+        int experience = getExpDrop(state, level, pos, null, null, tool);
         if (experience > 0) popExperience(level, pos, experience);
+    }
+
+    /**
+     * Also the native NeoForge IBlockExtension hook, intentionally without @Override so common
+     * compiles against vanilla (as {@link BlockCustomOre}). NeoForge awards block experience only
+     * through this hook and calls spawnAfterBreak(..., false); Fabric calls spawnAfterBreak(..., true).
+     */
+    public int getExpDrop(BlockState state, net.minecraft.world.level.LevelAccessor level, BlockPos pos,
+                          BlockEntity blockEntity, net.minecraft.world.entity.Entity breaker, ItemStack tool) {
+        return EldritchBlockRules.eldritchExperience(variant(state), new java.util.Random());
     }
 
     /** BlockEldritch:155-175 - the six original block entities. */

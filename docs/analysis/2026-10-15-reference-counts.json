@@ -3,10 +3,10 @@
   "date": "2026-10-15",
   "method": "git archive of the exact commit recorded per corpus (committed snapshot only; concurrent working-tree edits and untracked files excluded); LF/CRLF-normalized UTF-8 Java hashes; lines include comments/blank lines; findings are lexical markers, not compile status",
   "repositories": {
-    "FOREVA": {
-      "root": "C:\\Users\\Acak\\Documents\\Codex\\2026-10-15\\new-chat\\Thaumcraft-4.2-FOREVA",
+    "legacy-1.12": {
+      "root": "C:\\Users\\Acak\\Documents\\Codex\\2026-10-15\\new-chat\\Thaumcraft-4-Reload",
       "commit": "8abb7febda5e4aceac5304277b17154760fc1d38",
-      "origin": "https://github.com/0FL01/Thaumcraft-4.2-FOREVA.git",
+      "origin": "Forge 1.12.2 baseline, see docs/porting/source-lock.json",
       "tracked_existing_files": 5562,
       "tracked_bytes": 70429641,
       "file_types": {
@@ -3438,12 +3438,12 @@
     }
   },
   "java_path_overlap": {
-    "FOREVA__OpenTC4": {
+    "legacy-1.12__OpenTC4": {
       "same_package_path": 716,
       "identical_normalized_content": 0,
       "identical_paths": []
     },
-    "FOREVA__OpenTC4-Architectury": {
+    "legacy-1.12__OpenTC4-Architectury": {
       "same_package_path": 405,
       "identical_normalized_content": 0,
       "identical_paths": []

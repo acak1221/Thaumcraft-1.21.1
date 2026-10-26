@@ -27,14 +27,51 @@ public final class WorldGenBigMagicTree {
     public static final int MAX_HEIGHT_LIMIT = MIN_HEIGHT_LIMIT + HEIGHT_LIMIT_ROLLS - 1;
     private static final int[] OTHER_COORDS = {2, 0, 0, 1, 2, 1};
     private static final Map<ServerLevel, HeightState[]> WORLD_HEIGHTS = new WeakHashMap<>();
-    private static final class HeightState { int value; }
+    private static final class HeightState { int value, pinned; }
     private final boolean taint;
     public WorldGenBigMagicTree(boolean notify) { this(notify,false); }
     public WorldGenBigMagicTree(boolean notify,boolean taint) {this.taint=taint;}
     public boolean generate(WorldGenLevel level, RandomSource callerRandom, BlockPos origin) {
-        HeightState state;
-        synchronized (WORLD_HEIGHTS) { state = WORLD_HEIGHTS.computeIfAbsent(level.getLevel(), key -> new HeightState[]{new HeightState(),new HeightState()})[taint?1:0]; }
-        synchronized (state) { return new Generator().generate(level, callerRandom, origin, state); }
+        HeightState state = state(level.getLevel(), taint);
+        synchronized (state) {
+            if (state.pinned != 0) state.value = state.pinned;
+            return new Generator().generate(level, callerRandom, origin, state);
+        }
+    }
+
+    private static HeightState state(ServerLevel level, boolean taint) {
+        synchronized (WORLD_HEIGHTS) { return WORLD_HEIGHTS.computeIfAbsent(level, key -> new HeightState[]{new HeightState(),new HeightState()})[taint?1:0]; }
+    }
+
+    /**
+     * The height limit every later tree of the level starts from: {@code 0} until the first tree rolls
+     * its height, then only ever shortened by an obstructed trunk. GameTests only, with
+     * {@link #setSharedHeight} and {@link #pinHeight}.
+     */
+    public static int sharedHeight(ServerLevel level, boolean taint) {
+        HeightState state = state(level, taint);
+        synchronized (state) { return state.value; }
+    }
+
+    /** GameTests only: puts back a value read with {@link #sharedHeight}. */
+    public static void setSharedHeight(ServerLevel level, boolean taint, int value) {
+        HeightState state = state(level, taint);
+        synchronized (state) { state.value = value; }
+    }
+
+    /**
+     * GameTests only: every tree starts from {@code height} until it is released with {@code 0}.
+     *
+     * <p>Which tree of a region rolls the shared height, and which obstructed trunk shortens it for
+     * the rest, depends on the order in which the worker threads decorate the chunks, so the same
+     * region of the same seed grows 346 or 1738 oak logs, none or nine mana pods. A scenario that
+     * observes the decoration of a region pins the height to take that order out of its result;
+     * the rule itself (one height for the level, oracle {@code BiomeGenMagicalForest.bigTree}) is
+     * untouched in play.</p>
+     */
+    public static void pinHeight(ServerLevel level, boolean taint, int height) {
+        HeightState state = state(level, taint);
+        synchronized (state) { state.pinned = height; }
     }
 
     /**

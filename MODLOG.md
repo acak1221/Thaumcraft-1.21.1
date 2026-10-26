@@ -1,3 +1,237 @@
+## 2026-10-26 — history without the original JARs, PR to main, alpha.7
+
+At the owner's request the original Thaumcraft 4.2.3.5 and 6.1 beta jars and a stray Gradle
+download (`.gradle-g21/`) were removed from every commit with git filter-repo and all branches
+were force-pushed (116.5 → 40.1 MiB; every hash changed, map in
+`docs/porting/history-rewrite-2026-10-26.txt`). The jars stay local and ignored; the tests and
+scripts that read them skip or fall back to `thaumcraft_src` without them (the shader fallback
+no longer loses the original CRLF). AGENTS.md and THIRD_PARTY_NOTICES.md record the decision to
+publish. Version 0.1.0-alpha.7 with release notes. Verified without the jars: 2590 JUnit (5
+skipped), 120 Python tests, both builds; with them: 2590 JUnit, GameTest 478/478 Fabric and
+466/466 NeoForge on fresh worlds. Left to the owner: the six tags (this session's proxy denies tag
+pushes), GitHub's own refs of the closed PRs, the release and the visibility switch. See
+[the report](docs/analysis/2026-10-26-public-release-ru.md).
+
+## 2026-10-26 — public README
+
+README.md (English) and README.ru.md (Russian) rewritten for a public page: new 1.21.1 screenshots
+taken on a Fabric client in a fresh world (aura node over an infusion altar, a running runic
+infusion, the Magical Forest, the Thaumonomicon map and a research page, research notes on the
+research table, a node through the thaumometer) under `docs/images/readme`, content overview,
+quality-of-life settings, installation for both loaders, status, build, FAQ and credits. The
+1.12.2 screenshots in `raw/` are removed: they showed the earlier Forge 1.12.2 build.
+
+## 2026-10-26 — TC4 biome patches follow the world seed
+
+Chunk generation fills biomes through the NoiseChunk's own climate sampler, which lacked the world
+seed, so the magical forest and taint patches of generated chunks followed seed 0 in every world
+while `/locate` used the real seed. `Tc4NoiseChunkSeedMixin` carries the seed over. The GameTest
+world has seed 0, which hid the defect; the new GameTest uses seed 912873 and fails without the
+fix. Verified: biome tests on Fabric 9/9 and NeoForge 9/9, 2590 JUnit, both builds.
+
+## 2026-10-26 — accessories: where to wear the rings
+
+The four accessory slots (amulet, two rings, belt) had a menu that was nearly unreachable: no
+button in the creative inventory, a tiny one in the corner of the survival window, and no key. A
+key (B, as in the Baubles mod TC4 relied on) and a B button beside the player in the survival and
+creative inventories now open it; empty slots show a faded amulet, ring or belt and name their
+kind. Using a bauble from the hand puts it into the first free slot of its kind (the port's own
+convenience, KNOWN_DEVIATIONS §8). Verified: 2590 JUnit, both builds, the new equip GameTest and
+the menu test on Fabric 2/2 and NeoForge 2/2; seen on a Fabric client.
+
+## 2026-10-26 — Jade and JEI integrations
+
+Optional integrations for Fabric and NeoForge (`compat/jade`, `compat/jei`). Jade shows container
+essentia behind the goggles of revealing (as TC4 does; a Jade option drops the requirement),
+machine state without them, and a golem's master, core and upgrades. JEI lists the same five
+categories as EMI with aspects as JEI ingredients; the non-grid pages come from the shared
+`RecipeViews`, which EMI now uses too. Verified: 2590 JUnit, NeoForge JUnit, both builds, 120
+Python tests; Jade, JEI and EMI seen on a Fabric client.
+
+## 2026-10-26 — aspects for every item: the remaining TC4 rows and automatic inference
+
+`scripts/porting/extract_config_aspects.py` accounts for all 326 ConfigAspects registrations from
+the jar bytecode; the 217 ported rows matched except five copy rows (stone bricks, sandstone), now
+fixed. The 75 missing original rows are added and replace the divergent 1.12 legacy values. A new
+server setting `aspect_inference` (on by default, synced to the client) adds ore dictionary aspect
+families as tags with 1.21.1 and `c:` members, a port table for post-1.7 raw materials, copper
+weathering, stonecutting/smithing/cooking recipes, a one-point residue and spawn eggs. Items
+without aspects: 808 of 1737 before, 117 after. Verified: 2590 JUnit, NeoForge JUnit, both builds,
+GameTest Fabric 476/476 and NeoForge 464/464 on fresh worlds, 120 Python tests.
+
+## 2026-10-26 — quality-of-life batch (in progress): Thaumcraft 4 Reload, Thaumonomicon
+
+The project is renamed to Thaumcraft 4 Reload (metadata, README, AGENTS, Gradle, docs; links to
+the 1.12 baseline repository stay as provenance; ids and saves unchanged). The Thaumonomicon gets
+three client settings, on by default: reopen the last page (the inventory key on a page closes the
+book), keyboard navigation (page keys, Backspace to the map, arrows and Tab on the map) and up to
+nine bookmarks (a ribbon on the page, a column beside the map, config/thaumcraft-bookmarks.txt).
+Seen on a Fabric client. Verified: 2590 JUnit, both builds, 115 Python tests. See
+[the report](docs/analysis/2026-10-26-qol-batch-ru.md).
+
+## 2026-10-26 — unwired tickers, golem bell marks, entity visibility race
+
+After the ethereal bloom defect the port was swept for code that is written but
+never called: block entity tickers (checked against the original
+updateEntity/canUpdate), random ticks, init/register calls, mixin configs and
+entity renderers. One new defect: the arcane furnace nozzle never ticked, so it
+never found its core, never connected to tubes and never drew fire essentia. The
+block now hands the nozzle its ticker; a new GameTest builds the furnace with a
+wand and fails without it. The golem bell now draws the original marks from the
+RenderEventHandler bytecode: home mark, face marks (rainbow or Order colour),
+dashed outline of a marked air block, script ribbons from the golem's head. The
+scan GameTests wait for the entity sections of their forced chunks through a
+GameTest sequence. Verified: 2587 JUnit, both builds, 475/475 Fabric and 463/463
+NeoForge GameTests on fresh worlds, 115 Python tests; marks seen on a Fabric
+client. See [the report](docs/analysis/2026-10-26-unwired-tickers-golem-marks-ru.md).
+
+## 2026-10-26 — ethereal bloom, seven blend mismatches, two-client acceptance
+
+The ethereal bloom never ticked: its block had no ticker, so it neither grew nor
+cleansed taint. It now ticks on both sides and follows the original updateEntity
+from the bytecode: random start phase, nextInt(8) - nextInt(8) offsets, squared
+reach from the tile centre, the roots sound, and taint, eerie or magical forest
+columns restored to the biome the generator gave them (generated taint becomes
+plains). A new GameTest fails without the ticker. A Sonnet subagent found, and
+javap confirmed, textures the port cut out where the original blended. The thaumic
+slime outer shell was missing, with an invented inner body drawn instead. Also
+fixed: the additive bloom crystal, see-through ice and quartz wand rods, the
+additive fading primal arrow shaft, blended aspect icons on jars and alembics, the
+research table inkwell and parchment, and a portal without depth writes. The
+magical forest GameTest pins the shared oak height (the original rule is
+untouched), so it no longer swings between 0 and 9 pods. In the two-client harness
+the wisps stay with the player, the golem is not summoned into the bore and the
+script stops its server. Verified: 2587 JUnit, both builds, 474/474 Fabric and
+462/462 NeoForge GameTests on fresh worlds, 115 Python tests, and a dedicated
+server with two Fabric clients 37/37. See
+[the report](docs/analysis/2026-10-26-bloom-blend-multiplayer-ru.md).
+
+## 2026-10-26 — visual checks round 2: eight rendering defects and the wand runes
+
+The invisible architect overlay showed that unseen effects can hide defects, so the
+remaining ones went through real Fabric and NeoForge clients while a Sonnet
+subagent compared renderer GL state with the original bytecode. Fixed, each from
+the bytecode and with before/after frames: thaumometer aspect amounts all drawn at
+one point; the held bone bow 2.5 blocks large and off the arm; every late world
+effect on NeoForge drawn without the camera rotation; warded block runes without
+GL_ADD; primal arrow trails with wrong colours (setColor overload) and depth
+writes; eldritch orb rays writing depth; node items drawn through walls; the
+FloatyLine state cached by texture only; bolt halos cut by a 0.1 alpha test.
+Added the sceptre and primal staff runes. Seen and in order: the thaumometer
+screen, sparkles, the mirror and the infusion essentia streams. The g31 GameTest no
+longer depends on asynchronous entity loading. Verified: 2586 JUnit, both builds,
+473/473 Fabric and 461/461 NeoForge GameTests on fresh worlds, 115 Python tests.
+Open: magical forest decoration depends on thread order. See
+[the report](docs/analysis/2026-10-26-visual-checks-round2-ru.md).
+
+## 2026-10-26 — review agents: NeoForge fluids, hover mining and XP, invisible architect overlay, performance
+
+Read-only Sonnet subagents gathered the leads; every claim was checked against
+code or bytecode and every defect by a test that fails before the fix. NeoForge:
+the pure fluid bucket is now a fluid container, crucible and spa drains honour
+maxDrain, the spa answers a sideless lookup, and the crucible handler only moves
+water for its live tile on the server thread (3 NeoForge-only GameTests). Hover
+Harness mining speed and eldritch block experience never applied on NeoForge;
+fixed through the BreakSpeed event (the mixin is now Fabric only) and getExpDrop.
+The architect focus overlay was never visible: per the original REHWandHandler
+bytecode it now draws without depth test or depth writes, unculled, additive,
+grown by 0.001, with GL_ADD texturing in a new core shader; seen before and after
+in a real Fabric client. Behaviour-neutral performance work: VisNet recursion
+fences no longer allocate per call, aspect resolution no longer copies all 35
+complex bindings, the ordered crucible recipe list is cached per RecipeManager,
+and research conditions use one compiled Pattern. Verified: 2580 JUnit, 13
+NeoForge JUnit, both builds, 473/473 Fabric and 461/461 NeoForge GameTests on
+fresh worlds, 115 Python tests. See
+[the report](docs/analysis/2026-10-26-review-agents-fixes-ru.md).
+
+## 2026-10-26 — TC4Tweaks wave 2: Thaumonomicon search and counter, notification clear button
+
+Three client improvements from TC4Tweaks, each a setting in the Tweaks tab, on by
+default (KNOWN_DEVIATIONS §8): a Thaumonomicon search box that only lists
+completed research, by name or by the items its recipe pages make; a completed
+research counter that never reveals hidden research; and a Clear button above
+the notification stack while chat is open; the mouse wheel also pages the
+research table palette. A real client run found and fixed
+research icons drawing over the result list and infusion-enchantment sample items
+polluting item results. Verified: 2580 JUnit, both builds, 471/471 Fabric and
+456/456 NeoForge GameTests on fresh worlds, 115 Python tests; inspected in a real
+Fabric client. See [the report](docs/analysis/2026-10-26-tc4tweaks-wave2-ru.md).
+
+## 2026-10-26 — TC4Tweaks wave 1: four gameplay improvements as settings
+
+At the user's request, TC4Tweaks (AGPL-3.0; ideas only, no code copied) was
+triaged against the port. Four improvements are adopted, each a setting in the
+new Tweaks tab, on by default like in TC4Tweaks and documented as an accepted
+deviation (KNOWN_DEVIATIONS §8): varied loot (books and vis amulets rolled per
+draw), earth shock that spares items and experience, infusion that keeps the
+centre armour or tool's enchantments, name and other data, and a filled phial
+(or alembic jar) that stays in the emptied hand. The exploit fixes of TC4Tweaks
+are already closed in the port; Thaumonomicon search, completion counter and the
+notification clear button are wave 2. Verified: 2577 JUnit, both builds,
+471/471 Fabric and 456/456 NeoForge GameTests on fresh worlds (every setting
+both ways), 115 Python tests; the tab was inspected in English and Russian. See
+[the report](docs/analysis/2026-10-26-tc4tweaks-wave1-ru.md).
+
+## 2026-10-26 — real NeoForge client: two defects that broke every client; EMI on NeoForge
+
+First run of a real NeoForge client. Two shared-code defects broke every
+NeoForge client: `TaintOverlayChunkLayerMixin` selected NeoForge's delegating
+`SectionCompiler.compile` and crashed on joining a world (now `compile*`; a Mixin
+audit then applied every target), and `ClientSetup.init()` ran from
+FMLClientSetupEvent, after the events in which Architectury registers menu
+screens, model layers and entity renderers, so all 17 GUIs, 8 gear layers and
+every entity renderer were lost. The setup now runs from the first client hook
+event, pinned by a loader parity test. The EMI plugin moved to a shared
+`compat/emi` source folder and works on both loaders. The relic GameTest fixture
+now sets its own biome, since a natural taint biome legitimately grows no
+fibres. Verified: 2571 JUnit, 13 NeoForge JUnit, both builds, 467/467 Fabric
+and 452/452 NeoForge GameTests on fresh worlds, 115 Python tests. Not run: NeoForge multiplayer. See
+[the report](docs/analysis/2026-10-26-neoforge-client-ru.md).
+
+## 2026-10-26 — NeoForge GameTest parity and three NeoForge-only defects
+
+NeoForge built and ran on the current shared code for the first time since the
+content waves. Its GameTest catalogue no longer compiled and covered 307 of 469
+wrappers; it is now regenerated from Fabric by
+`scripts/porting/neoforge_gametests.py`, and a Python test catches drift. The
+17 wrappers on Fabric-only APIs (Transfer API, Fabric loot and protection events)
+are skipped and their NeoForge counterparts stay untested. Harness: three check
+classes moved out of mod packages (JPMS split packages; four mod methods became
+public), disk-reload checks wait for NeoForge's asynchronous SavedData writes,
+sounds.json is read through the mod's class. Shared-code fixes: the Primal
+Crusher no longer charges and breaks the centre block a second time on NeoForge;
+removing an advanced alchemical furnace part at a chunk edge no longer loads the
+unavailable neighbour chunk through NeoForge's comparator notice; wand block
+triggers run outside NeoForge's block snapshot capture, as the original's
+onItemUseFirst did, so the Oculus keeps its dark node when a neighbour undoes
+the gate. NeoForge also registers the config screen. Verified: NeoForge build,
+12 NeoForge JUnit, 452/452 NeoForge GameTests and 467/467 Fabric GameTests on
+fresh worlds, 2571 JUnit, 115 Python tests. Not run: a real NeoForge client,
+EMI on NeoForge (no plugin yet), multiplayer. See
+[the report](docs/analysis/2026-10-26-neoforge-gametest-parity-ru.md).
+
+## 2026-10-25 — 1.21.1 integrations: EMI, Mod Menu, config screen, tag translations
+
+Optional EMI plugin in the Fabric module: arcane workbench (every rod x cap the
+registered wand/sceptre recipes accept), crucible, infusion incl. runic
+augmentation, infusion enchantment and aspect combinations; aspects are EMI
+stacks and "+" fills the workbench grid. Mod Menu opens the config screen, now
+rebuilt on 1.21.1 widgets (scrolling list, readable names, tooltips; file format
+unchanged). Tag translations silence the Fabric/EMI warnings, a narrow mixin
+removes the 55 `No data fixer registered for thaumcraft:*` errors, and the Shock
+focus GameTest fixture declares its champion roll. Verified: 2571 JUnit, Fabric
+build/isolation, 467/467 Fabric GameTests on a fresh world, 112 Python tests and
+the asset check; a real client with EMI and Mod Menu was inspected frame by
+frame. Ledger check (needs the private oracle) and NeoForge were not run. See
+[the report](docs/analysis/2026-10-25-emi-modmenu-config-ru.md).
+
+## 2026-10-25 — shared wand and thaumometer framing
+
+Restore the missing original caller transforms, fit/center GUI icons, mirror the
+left view and suppress only the scanner's duplicate empty-hand arm. Verified
+2571 common JUnit,22 NeoForge JUnit, both builds and inspected both physical clients.
+See [the framing report](docs/analysis/2026-10-25-item-framing-ru.md).
+
 ## 2026-10-25 — 0.1.0-alpha.6: review fixes and Fabric release preparation
 
 The gameplay fixes in `61c8a3c6` restore mirror links and pedestal resource
@@ -460,7 +694,7 @@ and native Bore repair; Ward behaviour and Excavation Silk/Dowsing; Growth/Ferti
 Deconstruction table, Brainy/Giant zombies. Local 620 JUnit and 78 Python pass; full server
 validation is offloaded to GitHub CI for the next commit. Client/NeoForge acceptance remains pending.
 
-# MODLOG — анализ Thaumcraft 4.2 FOREVA
+# MODLOG — анализ Thaumcraft 4 Reload
 
 ## 2026-10-20: интеграция исследований, инфузии, устройств и Warp — CI passed
 
@@ -490,7 +724,7 @@ validation is offloaded to GitHub CI for the next commit. Client/NeoForge accept
 
 ## 2026-10-15: начальный системный анализ
 
-- Полный клон `0FL01/Thaumcraft-4.2-FOREVA`, ветка `master`, baseline `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
+- Полный клон исходного порта Forge 1.12.2, ветка `master`, baseline `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
 - Production code и original/donor JAR не изменялись; новый commit не создан.
 - Инвентаризация: 934 main Java + 530 Java test files, 1199 test annotations, 1676 resource paths.
 - Original behavioral oracle: CFR 0.152, 859 Java files вне Git-репозитория; `thaumcraft_src` здесь содержит ресурсы.
@@ -519,7 +753,7 @@ validation is offloaded to GitHub CI for the next commit. Client/NeoForge accept
 ## 2026-10-15: таумономикон, актуальные refs и Git checkpoint
 
 - Продолжен существующий checkpoint `8abb7feb` на ветке `port/minecraft-1.21.1`; полный порт всё ещё не завершён.
-- Три субагента независимо проверили active gameplay, build/packaging и оба reference corpora. Созданы пофайловые inventories pinned FOREVA/OpenTC4/Architectury и свежего Architectury upstream3a836a39, delta45; пины gameplay/reference не заменены.
+- Три субагента независимо проверили active gameplay, build/packaging и оба reference corpora. Созданы пофайловые inventories pinned legacy-1.12/OpenTC4/Architectury и свежего Architectury upstream3a836a39, delta45; пины gameplay/reference не заменены.
 - Добавлены normal Thaumonomicon, bookshelf wand trigger без vis cost, native floating/fire-resistant item entity, server snapshot/open, original single-pass sibling effects, category/research graph visibility и completed/gated text+illustration pages с EN/RU pagination.
 - Исправлены original node rewards max(4,vis/10), block picked-item identity/redstone duplicates и HexUtils original fixed orientation с расходом RNG draw. PowerShell single-task splatting исправлен; оба remapped JAR включают проверенные canonical notices+LICENSE.
 - Реальные проверки final production source: `.tmp/session-book-final-validate.log` exit0;61 JUnit,9 Fabric и9 NeoForge GameTests,0 failures/errors. Python tooling24PASS; extractor/resource checksPASS;492 sprites/59 refs/66 events/111 sounds/missing0.
@@ -532,7 +766,7 @@ validation is offloaded to GitHub CI for the next commit. Client/NeoForge accept
 
 - После user steering про дополнительных субагентов и Git продолжен read-only original audit: записаны research-unlock-spec и research-notes-spec, production исходники не менялись.
 - Установлены original default difficulty0, Secondary-only point purchase, exact cost/prerequisite/clue/warp rules; native purchase обязана атомарно recheck баланс на сервере вместо original authority defect.
-- Сопоставлены note NBT/data kinds, solved vs learned flags, endpoint/RNG/HashMap ordering, paper/tool costs, original copy ink_sac и расхождение legacy FOREVA FEATHER. Эти документы — specification/test plan, не реализованная research note механика.
+- Сопоставлены note NBT/data kinds, solved vs learned flags, endpoint/RNG/HashMap ordering, paper/tool costs, original copy ink_sac и расхождение legacy 1.12 FEATHER. Эти документы — specification/test plan, не реализованная research note механика.
 - Проверенная playable book unit сохранена локально в commit85e22827; следующий docs commit отделяет план будущей unit от реализации. Никакой public push не выполнялся.
 
 ## 2026-10-15: покупка вторичных исследований

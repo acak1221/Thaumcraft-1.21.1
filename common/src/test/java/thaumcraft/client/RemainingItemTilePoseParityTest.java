@@ -19,6 +19,26 @@ class RemainingItemTilePoseParityTest {
         assertEquals(90, BoneBowPose.OUTER_PITCH);
         assertEquals(-60, BoneBowPose.SECOND_ROLL);
     }
+    @Test void theOriginalOuterTurnsOnlyCancelTheFlatItemBranch() {
+        // Oracle ItemBowBoneRenderer:50-56 undo exactly what RenderBiped's flat item branch applied
+        // before it, so a pose without that branch must not carry the outer scale or turns.
+        var pose = new com.mojang.blaze3d.vertex.PoseStack();
+        BoneBowPose.flatItemBranch(pose);
+        BoneBowPose.undoFlatItemBranch(pose);
+        var matrix = pose.last().pose();
+        var identity = new org.joml.Matrix4f();
+        for (int column = 0; column < 4; column++) for (int row = 0; row < 4; row++)
+            assertEquals(identity.get(column, row), matrix.get(column, row), 1.0E-5F, "matrix " + column + "," + row);
+    }
+
+    @Test void theHeldBowIsAboutOneBlockFromTheHand() {
+        // 0.625 * 1.5: the size of the 1.7.10 equipped bow, not the 2.5 blocks of the outer scale too.
+        var pose = new com.mojang.blaze3d.vertex.PoseStack();
+        BoneBowPose.apply(pose);
+        var axis = pose.last().pose().getColumn(0, new org.joml.Vector3f());
+        assertEquals(.9375F, axis.length(), 1.0E-5F);
+    }
+
     @Test void scannerInterpolatesArmThenTakesOneTenthOfViewDifference() {
         // Oracle ItemThaumometerRenderer:101-104, not interpolated player view.
         assertEquals(2, ThaumometerArmPose.lagDegrees(40, 10, 30, .5F));

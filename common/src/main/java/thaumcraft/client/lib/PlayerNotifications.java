@@ -47,11 +47,50 @@ public final class PlayerNotifications {
             Thaumcraft.LOG.error("Cannot read Thaumcraft client notifications at {}; using original defaults", file, failure);
             queue = new NotificationQueue(5000); maximum = 15;
         }
+        dev.architectury.event.events.client.ClientGuiEvent.INIT_POST.register((screen, access) -> {
+            if (screen instanceof net.minecraft.client.gui.screens.ChatScreen && thaumcraft.common.config.ThaumcraftTweaks.clearNotifications())
+                access.addRenderableWidget(new ClearButton(screen));
+        });
         WarpMessageNetworking.initClient(PlayerNotifications::receive);
         thaumcraft.common.lib.network.KnowledgeNotificationNetworking.initClient(PlayerNotifications::receivePool,
                 PlayerNotifications::receiveDiscovery, ResearchNotifications::receive);
     }
     public static void reset() { queue.clear(); FLIGHTS.clear(); ResearchNotifications.reset(); level = null; lastSound=0; }
+
+    /** The rows the HUD draws now. */
+    public static int visibleRows() { return Math.min(queue.update(now()).size(), maximum); }
+
+    /** Tweak (TC4Tweaks): the clear button of open chat empties the notification stack. */
+    public static void clearStack() { queue.clear(); FLIGHTS.clear(); }
+
+    /**
+     * The button open chat shows over the notification stack while it has rows; a setting adopted
+     * from TC4Tweaks. TC4 has no way to dismiss its notifications.
+     */
+    private static final class ClearButton extends net.minecraft.client.gui.components.Button {
+        private final net.minecraft.client.gui.screens.Screen screen;
+
+        ClearButton(net.minecraft.client.gui.screens.Screen screen) {
+            super(0, 0, Minecraft.getInstance().font.width(net.minecraft.network.chat.Component.translatable("tc.port.notifications.clear")) + 10, 12,
+                    net.minecraft.network.chat.Component.translatable("tc.port.notifications.clear"), button -> clearStack(), DEFAULT_NARRATION);
+            this.screen = screen;
+        }
+
+        @Override protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+            int rows = visibleRows();
+            // Above the stack: row i of the HUD sits about twelve plus eight times i above the bottom.
+            setPosition(screen.width - width - 2, Math.max(0, screen.height - 26 - rows * 8));
+            if (rows > 0) super.renderWidget(graphics, mouseX, mouseY, delta);
+        }
+
+        @Override public boolean mouseClicked(double x, double y, int button) {
+            return visibleRows() > 0 && super.mouseClicked(x, y, button);
+        }
+
+        @Override public boolean isMouseOver(double x, double y) {
+            return visibleRows() > 0 && super.isMouseOver(x, y);
+        }
+    }
     static boolean current() {
         var client = Minecraft.getInstance();
         if (level != client.level) { queue.clear(); FLIGHTS.clear(); ResearchNotifications.reset(); level = client.level; lastSound=0; }

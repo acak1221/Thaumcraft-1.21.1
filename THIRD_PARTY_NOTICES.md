@@ -1,15 +1,16 @@
 # Sources and attribution
 
-Thaumcraft 4.2.3.5 was created by Azanor. This is an unofficial local port and must not be presented as an official version.
+Thaumcraft 4.2.3.5 was created by Azanor. This is an unofficial port and must not be presented as an official version.
 
 ## Pinned sources
 
-- Behavioral oracle: `Thaumcraft-1.7.10-4.2.3.5.jar` retained in the baseline repository. Hashes and the baseline commit are recorded in the migration source lock.
-- Audited Forge 1.12.2 baseline: <https://github.com/0FL01/Thaumcraft-4.2-FOREVA>, commit `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
+- Behavioral oracle: `Thaumcraft-1.7.10-4.2.3.5.jar`, Azanor's original release. It is kept locally by the maintainers and is not part of this repository: on 2026-10-26 it and `Thaumcraft-1.12.2-6.1.BETA26.jar` were removed from the whole git history before publication. Its hashes and the baseline commit are recorded in the migration source lock (`docs/porting/source-lock.json`).
+- Audited Forge 1.12.2 baseline: the Forge 1.12.2 port by Andrey Bash and contributors (MIT; its notice is the root `LICENSE`), commit `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
 - Original-source reference: <https://github.com/IgnoreLicensesCN/OpenTC4>, commit `80aac29c52543ef51766c4b0788fba782abb3b0b`.
 - Platform-pattern reference: <https://github.com/IgnoreLicensesCN/OpenTC4-Architectury>, commit `1509b3192910aaca0af8bba1b55d189a675010bf`, target Minecraft 1.20.1. Its root `LICENSE.txt` claims MIT, while its README explicitly says the author did not obtain permission from Azanor. Its build/license statements are not treated as permission for the original Thaumcraft code or assets.
 - Selective modern-API reference: <https://github.com/EugeneHeisst/thaumcraft-port>, commit `a9b7a613c9c3e5a4418f30e0cf38553ac328b1e6`. No gameplay code/assets from this incomplete reference were copied; its MDK-template notice is not treated as a licence for original Thaumcraft material.
 - Read-only TC4 Reforged implementation reference: <https://github.com/notlikethiss/thaumcraft-4-reforged>, branch `mc/1.21.1` at `d1e64cc527a8fa0c99ae738cc9c0bd0370d4bd7e`; separately inspected newer `main` at `15c4ac0e9198049228a1d102137fd07fce44c5eb`. Original: Azanor; port credits: overseas/notlikethiss. Observed `All Rights Reserved` and README personal-use restriction; permission to copy or distribute their code/assets has not been established. No donor code/assets copied.
+- Idea reference for optional improvements: TC4Tweaks by Glease, <https://github.com/Glease/TC4Tweaks>, commit `03fa4fa6c1db86cbaa9b267d1318d9d1c5cc7b3f`, AGPL-3.0 with a Forge exception. Read only to learn which TC4 behaviours it changes and its defaults. No code, assets or text copied: TC4Tweaks patched 1.7.10 bytecode, and each adopted idea is re-implemented on the port's own code (`thaumcraft.common.config.ThaumcraftTweaks`, documented in `docs/audit/KNOWN_DEVIATIONS.md` §8).
 - Read-only TC6 modern-API reference: <https://github.com/DJDMM/Thaumcraft-6-1.20.1-port>, commit `3ee6ed6ec5a55520cc9f599a944e46f89ac3ba74`. Original: Azanor; adaptation: DJDMM, with upstream TheDarkTower314 credited by that repository. Observed `All rights reserved`; the translation-only MIT notice does not license gameplay code/assets. No donor code/assets copied; TC6 mechanics do not replace the TC4 specification.
 
 ## Forge 1.7.10 behavior adapter
@@ -18,9 +19,9 @@ The native finite-flux adapter follows the finite-fluid algorithms and curative-
 
 The bounded native magical-plant soil adapter also follows the same pinned Forge revision's `patches/minecraft/net/minecraft/block/Block.java.patch` (`canSustainPlant`: inherited bush soils before the Plains/Desert type branches). Original Forge/Minecraft classes are not copied or bundled; modern block IDs replace old dirt/sand metadata explicitly.
 
-That pinned Forge source supplies the [Minecraft Forge Public Licence version 1.0](https://github.com/MinecraftForge/MinecraftForge/blob/9274e4fe435cb415099a8216c1b42235f185443e/MinecraftForge-License.txt), not the current Forge project's licence. Upstream source remains available at the pinned links; original Forge/Minecraft classes and MCP data files are not bundled in the mod. No external distribution is authorized by this local port task.
+That pinned Forge source supplies the [Minecraft Forge Public Licence version 1.0](https://github.com/MinecraftForge/MinecraftForge/blob/9274e4fe435cb415099a8216c1b42235f185443e/MinecraftForge-License.txt), not the current Forge project's licence. Upstream source remains available at the pinned links; original Forge/Minecraft classes and MCP data files are not bundled in the mod.
 
-The retained baseline root MIT notice applies according to its provenance; it does not establish ownership of Azanor's original material. Original assets are locally reused from this checkout, with per-file hashes in `docs/porting/resource-manifest.json`. The new migration does not publish a repository, push source, or release a JAR externally. Publication rights have not been established by this task.
+The retained baseline root MIT notice applies according to its provenance; it does not establish ownership of Azanor's original material. Original assets are reused from this checkout, with per-file hashes in `docs/porting/resource-manifest.json`. On 2026-10-26 the repository owner decided to publish this repository and its releases. That is the owner's decision; it does not establish any right to Azanor's material, which remains his and is not relicensed by `LICENSE`.
 
 The native Taint Poison status icon `common/src/main/resources/assets/thaumcraft/textures/mob_effect/flux_taint.png` (SHA256 `ac11cb4f90ca145fb316a861efffce3296ecf94daea4459f0d6feac0d3c64121`) is a crop of Azanor's retained `textures/misc/potions.png`, rectangle `(54,216)`–`(72,234)`, corresponding to the original icon index `(3,1)`. It is not newly authored art or donor-port artwork. This standalone-icon adaptation is documented in `docs/analysis/2026-10-16-infusion-first-unit.md`; it changes neither attribution nor publication rights.
 
@@ -45,6 +46,8 @@ The reference tree is not part of the 1.21.1 build: `settings.gradle` includes o
 - Architectury API: LGPL-3.0; referenced as an external runtime dependency, not shaded into the mod.
 - MixinExtras0.4.1 by LlamaLad7: MIT, <https://github.com/LlamaLad7/MixinExtras>. Its common annotations/processor are compile-only inputs; Fabric Loader supplies the external runtime. No MixinExtras implementation is shaded into the mod.
 - Fabric Loader and Fabric API, NeoForge and their dependencies: external loader/runtime dependencies with their own notices.
+- EMI by Emi (MIT, <https://github.com/emilyploszaj/emi>) and Mod Menu by TerraformersMC (MIT, <https://github.com/TerraformersMC/ModMenu>): optional integrations. Only their public API jars are compile-only inputs; neither is shaded into the mod or required at runtime.
+- JEI by mezz (MIT, <https://github.com/mezz/JustEnoughItems>) and Jade by Snownee (CC BY-NC-SA 4.0, <https://github.com/Snownee/Jade>): optional integrations, compiled against their published jars as compile-only inputs. Neither is shaded into the mod or required at runtime; the plugins (`compat/jei`, `compat/jade`) only call their public APIs.
 - Gradle wrapper, Architectury Loom and Shadow: build tooling only. Wrapper/build patterns adapted from the Architectury reference; its MIT notice is retained below.
 - Eclipse Temurin Java 21 and CFR: local inspection/build tools, not bundled.
 

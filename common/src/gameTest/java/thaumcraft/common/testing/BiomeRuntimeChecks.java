@@ -79,6 +79,46 @@ public final class BiomeRuntimeChecks {
         for(int x=512;x>=-512;x-=64)for(int z=512;z>=-512;z-=64)test.assertTrue(source.getNoiseBiome(x,16,z,noise.sampler()).unwrapKey().equals(copy.getNoiseBiome(x,16,z,sameNoise.sampler()).unwrapKey()),"real seeded source result survives independent sampler and reverse query order");
         test.succeed();
     }
+    /**
+     * The biomes chunk generation writes are the biomes the source answers for the world's own seed.
+     * Generation samples the climate through the NoiseChunk's own sampler, and the GameTest world has
+     * seed 0, so only a nonzero seed shows whether that sampler carries the seed as well.
+     */
+    public static void generatedChunkBiomesFollowSeed(GameTestHelper test) {
+        var registries=test.getLevel().registryAccess();
+        var presets=registries.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        var source=MultiNoiseBiomeSource.createFromPreset(presets.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD));
+        var settings=registries.registryOrThrow(Registries.NOISE_SETTINGS).getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
+        var generator=new net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator(source,settings);
+        var noise=RandomState.create(settings.value(),registries.lookupOrThrow(Registries.NOISE),912873);
+        // Quart y 18 is block 72, the surface of an ordinary inland chunk.
+        List<net.minecraft.world.level.ChunkPos> patches=new ArrayList<>();
+        for(int cx=-256;cx<=256&&patches.size()<6;cx+=16)for(int cz=-256;cz<=256&&patches.size()<6;cz+=16) {
+            var expected=source.getNoiseBiome(cx*4+2,18,cz*4+2,noise.sampler());
+            if(expected.is(ThaumcraftBiomes.MAGICAL_FOREST)||expected.is(ThaumcraftBiomes.TAINT))patches.add(new net.minecraft.world.level.ChunkPos(cx,cz));
+        }
+        test.assertTrue(patches.size()==6,"seed 912873 has TC4 biome patches in the searched area");
+        List<java.util.concurrent.CompletableFuture<net.minecraft.world.level.chunk.ChunkAccess>> chunks=new ArrayList<>();
+        for(var pos:patches) {
+            var chunk=new net.minecraft.world.level.chunk.ProtoChunk(pos,net.minecraft.world.level.chunk.UpgradeData.EMPTY,test.getLevel(),
+                    registries.registryOrThrow(Registries.BIOME),null);
+            // Biome filling runs on the worker pool and asks this level for structure references, so the
+            // server thread keeps ticking while the sequence waits for it.
+            chunks.add(generator.createBiomes(noise,net.minecraft.world.level.levelgen.blending.Blender.empty(),test.getLevel().structureManager(),chunk));
+        }
+        test.startSequence().thenWaitUntil(()->test.assertTrue(chunks.stream().allMatch(java.util.concurrent.CompletableFuture::isDone),"chunk biomes are filled"))
+                .thenExecute(()->{
+                    for(var future:chunks) {
+                        var chunk=future.join();var pos=chunk.getPos();
+                        var expected=source.getNoiseBiome(pos.x*4+2,18,pos.z*4+2,noise.sampler());
+                        // The proto chunk stays at status EMPTY, so read its filled section directly.
+                        var actual=chunk.getSection(chunk.getSectionIndex(72)).getNoiseBiome(2,2,2);
+                        thaumcraft.common.Thaumcraft.LOG.info("Seeded biome check {}: chunk {}, source {}",pos,actual.unwrapKey().orElse(null),expected.unwrapKey().orElse(null));
+                        test.assertTrue(actual.unwrapKey().equals(expected.unwrapKey()),"generated chunk "+pos+" holds "+actual.unwrapKey().map(Object::toString).orElse("?")
+                                +" where the seeded source answers "+expected.unwrapKey().map(Object::toString).orElse("?"));
+                    }
+                }).thenSucceed();
+    }
     private static void darkPlants(GameTestHelper test,BlockPos origin) {
         var level=test.getLevel();Map<BlockPos,BlockState> saved=new LinkedHashMap<>();
         var bounds=new net.minecraft.world.phys.AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(origin.offset(-2,-1,-2)),net.minecraft.world.phys.Vec3.atLowerCornerOf(origin.offset(3,3,3)));

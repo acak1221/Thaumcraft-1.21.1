@@ -42,8 +42,9 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
     /** The alpha blended sheet of the node strips. */
     static final RenderType TRANSLUCENT = new NodeRenderType("revealed_translucent", true, true);
     /** The original node of a node jar keeps the depth test: only the revealed node ignores it. */
-    private static final RenderType ADDITIVE_DEPTH = new NodeRenderType("jar_additive", false, false);
-    private static final RenderType TRANSLUCENT_DEPTH = new NodeRenderType("jar_translucent", false, true);
+    /** With the depth test: the jar node and the item forms (original ItemNodeRenderer never disables it). */
+    static final RenderType ADDITIVE_DEPTH = new NodeRenderType("jar_additive", false, false);
+    static final RenderType TRANSLUCENT_DEPTH = new NodeRenderType("jar_translucent", false, true);
     /** The original view distance of a node jar: the same sixty four blocks as a node. */
     public static final double JAR_VIEW_DISTANCE = 64.0D;
     /** The original size of the node inside a node jar. */
@@ -172,8 +173,8 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
      * The original {@code ItemNodeRenderer.renderItemNode}: the node of the item form.
      *
      * <p>Oracle {@code thaumcraft/client/renderers/tile/ItemNodeRenderer.java:72-170}: the node of the
-     * item is drawn in the plane of the item and not facing the camera, it ignores the depth test and it
-     * uses the frame {@code (nanoTime / 40000000 + 1) % 32}. The caller draws it three times, so the
+     * item is drawn in the plane of the item and not facing the camera, it keeps the depth test (it
+     * only switches off depth writes and culling) and it uses the frame {@code (nanoTime / 40000000 + 1) % 32}. The caller draws it three times, so the
      * item shows the three crossed planes of the original.</p>
      */
     public static void drawItemNode(PoseStack pose, MultiBufferSource buffers,
@@ -181,7 +182,7 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
                                     NodeModifier modifier, float alpha, float size, float age) {
         long now = System.nanoTime();
         int frame = (int) Math.floorMod(now / 40000000L + 1L, 32L);
-        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, true, age, now, true);
+        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, false, age, now, true);
     }
 
     /** The body of the node, without the camera rotation of the world. */

@@ -76,7 +76,11 @@ public final class BlockArcaneFurnace extends BaseEntityBlock implements StateDe
     }
 
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, ThaumcraftLegacyTiles.ARCANE_FURNACE_BLOCK_ENTITY.get(), TileArcaneFurnace::tick);
+        BlockEntityTicker<T> core = createTickerHelper(type, ThaumcraftLegacyTiles.ARCANE_FURNACE_BLOCK_ENTITY.get(), TileArcaneFurnace::tick);
+        // The essentia nozzles tick as well: the original nozzle starts with the facing UNKNOWN, so its
+        // canUpdate() is true and updateEntity finds the core and draws fire essentia on both sides.
+        return core != null ? core : createTickerHelper(type, ThaumcraftLegacyTiles.ARCANE_FURNACE_NOZZLE_BLOCK_ENTITY.get(),
+                thaumcraft.common.tiles.TileArcaneFurnaceNozzle::tick);
     }
 
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }

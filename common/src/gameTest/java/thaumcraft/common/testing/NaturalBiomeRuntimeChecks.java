@@ -37,6 +37,7 @@ import thaumcraft.common.config.ThaumcraftNaturals;
 import thaumcraft.common.entities.monster.EntityPech;
 import thaumcraft.common.items.ItemManaBean;
 import thaumcraft.common.items.wands.ItemWandCasting;
+import thaumcraft.common.lib.world.WorldGenBigMagicTree;
 import thaumcraft.common.tiles.TileManaPod;
 
 /** Fresh canonical native noise source -> actual forest features -> survival
@@ -44,6 +45,8 @@ import thaumcraft.common.tiles.TileManaPod;
  * rebinding, fixture plant/tree insertion or forced Pech type/spawn predicate.
  * Uses the existing test-only normal-noise dimension, not new smoke machinery. */
 public final class NaturalBiomeRuntimeChecks {
+    /** A height the first oak of a world can roll (11 + nextInt(12)): the middle of the range. */
+    private static final int PINNED_OAK_HEIGHT=17;
     private NaturalBiomeRuntimeChecks() {}
     public static void run(GameTestHelper test) {
         var key=ResourceKey.create(Registries.DIMENSION,ResourceLocation.fromNamespaceAndPath("thaumcraft_gametest","natural"));
@@ -75,9 +78,22 @@ public final class NaturalBiomeRuntimeChecks {
         // answer with the pods of that run, so the test-only dimension of the
         // harness loses the chunk data of the region it is about to generate.
         forgetRegion(level,minX,minZ);
-        // Finish the whole declared region before observing it: a later
-        // neighbor's genuine feature pass may write into an earlier chunk.
-        for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++)level.getChunk(cx,cz);
+        // The BigMagic oaks of a level share one height limit (oracle
+        // WorldGenBigMagicTree:354, one bigTree per biome): the first tree rolls
+        // it and every obstructed trunk shortens it for the rest. Which tree that
+        // is depends on the order of the worker threads, so this region grew 346
+        // to 1738 oak logs and none to nine pods. The trees of the region start
+        // from one pinned height, and the level gets its own value back after.
+        int earlierHeight=WorldGenBigMagicTree.sharedHeight(level,false);
+        WorldGenBigMagicTree.pinHeight(level,false,PINNED_OAK_HEIGHT);
+        try {
+            // Finish the whole declared region before observing it: a later
+            // neighbor's genuine feature pass may write into an earlier chunk.
+            for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++)level.getChunk(cx,cz);
+        } finally {
+            WorldGenBigMagicTree.pinHeight(level,false,0);
+            WorldGenBigMagicTree.setSharedHeight(level,false,earlierHeight);
+        }
         int oak=0,magicalLogs=0,vishrooms=0;List<BlockPos> pods=new ArrayList<>(),ground=new ArrayList<>();
         for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++) {
             var chunk=level.getChunk(cx,cz);
@@ -107,7 +123,7 @@ public final class NaturalBiomeRuntimeChecks {
                 }
             }
         }
-        Thaumcraft.LOG.info("TC4 fresh forest core {}: oakLogs={}, magicalLogs={}, vishrooms={}, typedPods={}",centre,oak,magicalLogs,vishrooms,pods.size());
+        Thaumcraft.LOG.info("TC4 fresh forest core {}: oakLogs={}, magicalLogs={}, vishrooms={}, typedPods={}, pinned oak height={}",centre,oak,magicalLogs,vishrooms,pods.size(),PINNED_OAK_HEIGHT);
         test.assertTrue(oak>0&&magicalLogs>0,"real fresh forest decoration produces actual BigMagic oak and original magical tree species");
         test.assertTrue(vishrooms>0&&!pods.isEmpty(),"real25-chunk forest decoration produces actual Vishrooms and typed ManaPods without fixture insertion");
         test.assertTrue(!ground.isEmpty(),"naturally generated forest contains real supported open ground for native population");

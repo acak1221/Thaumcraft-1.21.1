@@ -7,5 +7,5 @@ pluginManagement {
   mavenCentral()
  }
 }
-rootProject.name = 'Thaumcraft-4.2-FOREVA'
+rootProject.name = 'Thaumcraft-4-Reload'
 include 'common', 'fabric', 'neoforge'

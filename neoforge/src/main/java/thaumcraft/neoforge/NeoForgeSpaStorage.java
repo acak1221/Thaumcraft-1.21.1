@@ -8,6 +8,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.wrappers.FluidBucketWrapper;
 import thaumcraft.common.config.ThaumcraftSpa;
 import thaumcraft.common.tiles.TileSpa;
 
@@ -16,8 +17,13 @@ import thaumcraft.common.tiles.TileSpa;
  *
  * <p>Fabric exposes the spa tank through the transfer API of Fabric, so other mods can fill and
  * drain it. NeoForge owns the {@link IFluidHandler} capability; this adapter publishes the very
- * same tank, with the same side rules (never from the top) and the same native transaction
- * boundary of the shared tile.</p>
+ * same tank, with the same side rules (never from the top, but also without a side, as the
+ * Fabric lookup) and the same native transaction boundary of the shared tile.</p>
+ *
+ * <p>The bucket of purifying fluid is a fluid container too: the original pairs it with one
+ * thousand millibuckets of the fluid and the empty bucket in the Forge
+ * {@code FluidContainerRegistry}. Fabric derives that from every {@code BucketItem}; NeoForge
+ * wraps only the exact vanilla bucket class, so the subclass is registered here.</p>
  */
 final class NeoForgeSpaStorage {
     private NeoForgeSpaStorage() {}
@@ -28,7 +34,9 @@ final class NeoForgeSpaStorage {
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ThaumcraftSpa.SPA_TILE.get(),
-                (tile, side) -> side == null || side == Direction.UP ? null : new SpaFluidHandler(tile, side));
+                (tile, side) -> side == Direction.UP || !tile.isLiveOwner() ? null : new SpaFluidHandler(tile, side));
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, context) -> new FluidBucketWrapper(stack),
+                ThaumcraftSpa.BUCKET_PURE.get());
     }
 
     private static final class SpaFluidHandler implements IFluidHandler {
@@ -74,8 +82,8 @@ final class NeoForgeSpaStorage {
                     (int) drained.getAmount(), drained.getComponents().asPatch());
         }
 
-        @Override public net.neoforged.neoforge.fluids.FluidStack drain(int tank, FluidAction action) {
-            FluidStack drained = tile.drain(side, Long.MAX_VALUE, action.execute());
+        @Override public net.neoforged.neoforge.fluids.FluidStack drain(int maxDrain, FluidAction action) {
+            FluidStack drained = tile.drain(side, maxDrain, action.execute());
             if (drained.isEmpty()) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
             return new net.neoforged.neoforge.fluids.FluidStack(BuiltInRegistries.FLUID.wrapAsHolder(drained.getFluid()),
                     (int) drained.getAmount(), drained.getComponents().asPatch());

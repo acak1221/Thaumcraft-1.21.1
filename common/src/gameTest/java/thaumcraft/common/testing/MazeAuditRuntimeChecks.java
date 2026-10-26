@@ -137,7 +137,7 @@ public final class MazeAuditRuntimeChecks {
                 + " head=" + outer.getBlockState(start.above()));
         openedWardenArena(test, outer, ox + bossX, oz + bossZ);
         // A fresh disk cache, not an NBT-only round trip, must retain every real generated cell.
-        test.getLevel().getServer().overworld().getDataStorage().save();
+        SavedDataFlush.save(test.getLevel().getServer().overworld().getDataStorage());
         var directory = outer.getServer().getWorldPath(LevelResource.ROOT).resolve("data").toFile();
         var fresh = new DimensionDataStorage(directory, outer.getServer().getFixerUpper(), outer.registryAccess());
         var factory = new SavedData.Factory<>(OuterLandsProvider.MazeSavedData::new, OuterLandsProvider.MazeSavedData::load,

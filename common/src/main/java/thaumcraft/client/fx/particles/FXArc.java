@@ -9,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -93,9 +92,9 @@ public final class FXArc extends Particle {
         var eye = camera.getPosition();
         pose.translate(Mth.lerp(partial, xo, x) - eye.x, Mth.lerp(partial, yo, y) - eye.y, Mth.lerp(partial, zo, z) - eye.z);
         int colour = (int) (red * 255) << 16 | (int) (green * 255) << 8 | (int) (blue * 255);
-        VisNetRender.drawStrip(TEXTURE, GL11.GL_ONE, false, GameRenderer.getPositionTexColorShader(),
+        VisNetRender.drawStrip(TEXTURE, GL11.GL_ONE, false, VisNetRender.lowAlphaShader(),
                 out -> strip(out, pose, colour, true));
-        VisNetRender.drawStrip(TEXTURE, GL11.GL_ONE, false, GameRenderer.getPositionTexColorShader(),
+        VisNetRender.drawStrip(TEXTURE, GL11.GL_ONE, false, VisNetRender.lowAlphaShader(),
                 out -> strip(out, pose, colour, false));
     }
 

@@ -30,7 +30,10 @@ public final class BlockShockTrap extends Block {
     @Override protected VoxelShape getCollisionShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context) { return Shapes.empty(); }
     @Override protected VoxelShape getOcclusionShape(BlockState state,BlockGetter level,BlockPos pos) { return Shapes.empty(); }
     @Override protected void entityInside(BlockState state,Level level,BlockPos pos,Entity entity) {
-        entity.hurt(level.damageSources().magic(),1+level.random.nextInt(2));
+        // Tweak (TC4Tweaks): by default only creatures take the field's damage; the original
+        // destroyed dropped items and XP orbs inside it. The slowdown below applies to all.
+        if(thaumcraft.common.config.ThaumcraftTweaks.earthShockHurts(entity))
+            entity.hurt(level.damageSources().magic(),1+level.random.nextInt(2));
         Vec3 motion=entity.getDeltaMovement();entity.setDeltaMovement(motion.x*.8,motion.y,motion.z*.8);
         if(level instanceof ServerLevel server&&server.random.nextInt(100)==0)server.removeBlock(pos,false);
     }

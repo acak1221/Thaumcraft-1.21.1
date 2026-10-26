@@ -283,15 +283,23 @@ public final class GrateRuntimeChecks {
         ((HopperBlockEntity) level.getBlockEntity(blocked.above())).setItem(0, new ItemStack(Items.STICK, 3));
         ItemEntity[] items = new ItemEntity[2];
         BlockPos[] drop = {open, closed};
-        for (int index = 0; index < 2; index++) {
-            items[index] = new ItemEntity(level, drop[index].getX() + .5, drop[index].getY() + 1.6, drop[index].getZ() + .5, new ItemStack(Items.APPLE));
-            items[index].setDeltaMovement(Vec3.ZERO);
-            items[index].setNoPickUpDelay();
-            items[index].setUnlimitedLifetime();
-            level.addFreshEntity(items[index]);
-            spawned.add(items[index]);
-        }
-        test.runAfterDelay(60, () -> {
+        // The chunks were forced a moment ago: their entity sections start ticking a tick or more later,
+        // and later still under the load of the whole suite. Start the sixty ticks only once the apples
+        // and the hoppers tick (the same race as the scan fixture, docs/analysis/2026-10-26-unwired-tickers-golem-marks-ru.md).
+        test.startSequence().thenWaitUntil(() -> {
+            for (BlockPos spot : List.of(open, closed, fed, blocked)) {
+                if (!level.isPositionEntityTicking(spot)) throw new net.minecraft.gametest.framework.GameTestAssertException("waiting for the grate chunks to tick: " + spot);
+            }
+        }).thenExecute(() -> {
+            for (int index = 0; index < 2; index++) {
+                items[index] = new ItemEntity(level, drop[index].getX() + .5, drop[index].getY() + 1.6, drop[index].getZ() + .5, new ItemStack(Items.APPLE));
+                items[index].setDeltaMovement(Vec3.ZERO);
+                items[index].setNoPickUpDelay();
+                items[index].setUnlimitedLifetime();
+                level.addFreshEntity(items[index]);
+                spawned.add(items[index]);
+            }
+        }).thenIdle(60).thenExecute(() -> {
             try {
                 test.assertTrue(items[0].getY() < open.getY() - 1.5D && items[0].getY() > open.getY() - 2.2D, "an apple dropped on an open grate falls through to the floor three blocks down: " + (items[0].getY() - open.getY()));
                 test.assertTrue(Math.abs(items[1].getY() - (closed.getY() + 1.0D)) < 0.05D, "an apple dropped on a closed grate rests on its plate: " + (items[1].getY() - closed.getY()));
@@ -302,10 +310,9 @@ public final class GrateRuntimeChecks {
                 AABB under = new AABB(blocked).inflate(1.5D, 0.0D, 1.5D).setMinY(blocked.getY() - 3.5D).setMaxY(blocked.getY() + 0.9D);
                 test.assertTrue(dropped(level, under, Items.STICK) == 0 && ((HopperBlockEntity) level.getBlockEntity(blocked.above())).getItem(0).getCount() == 3,
                         "a hopper over a closed grate keeps everything: " + dropped(level, under, Items.STICK));
-                test.succeed();
             } finally {
                 cleanup(level, forced, spawned);
             }
-        });
+        }).thenSucceed();
     }
 }

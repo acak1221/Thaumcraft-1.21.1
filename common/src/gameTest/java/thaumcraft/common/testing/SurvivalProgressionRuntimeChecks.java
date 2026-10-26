@@ -627,7 +627,7 @@ public final class SurvivalProgressionRuntimeChecks {
     }
 
     /** The shell of the original arcane furnace: oracle WandManager.java:351-372. */
-    private static void buildShell(GameTestHelper test, BlockPos base) {
+    static void buildShell(GameTestHelper test, BlockPos base) {
         for (int layer = 0; layer < 3; layer++) {
             for (int dx = 0; dx < 3; dx++) {
                 for (int dz = 0; dz < 3; dz++) {
@@ -661,7 +661,7 @@ public final class SurvivalProgressionRuntimeChecks {
                 label + " pays the original bonus " + output + ": " + bonus);
     }
 
-    private static net.minecraft.world.phys.BlockHitResult hit(BlockPos absolute) {
+    static net.minecraft.world.phys.BlockHitResult hit(BlockPos absolute) {
         return new net.minecraft.world.phys.BlockHitResult(
                 net.minecraft.world.phys.Vec3.atCenterOf(absolute), net.minecraft.core.Direction.UP, absolute, false);
     }

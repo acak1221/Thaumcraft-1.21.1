@@ -66,6 +66,10 @@ public class ItemPrimalCrusher extends DiggerItem implements IRepairable, IWarpi
         int[] offsets = EquipmentRules.primalCrusherOffsets(face.ordinal());
         for (int i = 0; i < offsets.length; i += 3) {
             BlockPos target = pos.offset(offsets[i], offsets[i + 1], offsets[i + 2]);
+            // The centre is the block the player mined: the loader breaks it with the tool, its drops and
+            // its one point of wear (super.mineBlock). Fabric removes it before mineBlock, NeoForge after,
+            // so without this skip NeoForge charged a tenth point and dropped the centre without the tool.
+            if (target.equals(pos)) continue;
             if (!level.isLoaded(target) || !level.mayInteract(player, target)) continue;
             BlockState targetState = level.getBlockState(target);
             if (targetState.isAir() || targetState.getDestroySpeed(level, target) < 0.0F) continue;

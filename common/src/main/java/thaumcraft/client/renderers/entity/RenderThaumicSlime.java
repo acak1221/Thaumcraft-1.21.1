@@ -6,22 +6,28 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import thaumcraft.common.entities.monster.EntityThaumicSlime;
 
 /**
  * Original TC4 RenderThaumicSlime: the vanilla slime mesh with the thaumic sheet, the
- * original squash scaling and the original inner body pass.
+ * original squash scaling and the original translucent outer shell.
+ *
+ * <p>Oracle {@code ClientProxy} registers {@code new RenderThaumicSlime(new ModelSlime(16),
+ * new ModelSlime(0), 0.25F)}: the main model is the inner body with the face, and the render pass
+ * model is the eight-cube outer shell, drawn by {@code shouldSlimeRenderPass} (pass 0) with the
+ * blend {@code (770, 771)} in the same frame as the body. 1.21.1 splits the same two meshes into
+ * {@code SLIME} and {@code SLIME_OUTER}.</p>
  */
 public final class RenderThaumicSlime extends MobRenderer<EntityThaumicSlime, SlimeModel<EntityThaumicSlime>> {
     private static final ResourceLocation SKIN = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/tslime.png");
 
     public RenderThaumicSlime(EntityRendererProvider.Context context) {
         super(context, new SlimeModel<>(context.bakeLayer(ModelLayers.SLIME)), .25F);
-        addLayer(new InnerLayer(this));
+        addLayer(new OuterLayer(this, new SlimeModel<>(context.bakeLayer(ModelLayers.SLIME_OUTER))));
     }
 
     @Override public ResourceLocation getTextureLocation(EntityThaumicSlime slime) { return SKIN; }
@@ -34,23 +40,23 @@ public final class RenderThaumicSlime extends MobRenderer<EntityThaumicSlime, Sl
         pose.scale(inverse * size + .1F, 1.0F / inverse * size + .1F, inverse * size + .1F);
     }
 
-    /** Original shouldSlimeRenderPass:17-31, the inner body pass. */
-    private static final class InnerLayer extends RenderLayer<EntityThaumicSlime, SlimeModel<EntityThaumicSlime>> {
-        private final SlimeModel<EntityThaumicSlime> inner = new SlimeModel<>(SlimeModel.createInnerBodyLayer().bakeRoot());
+    /** Original shouldSlimeRenderPass:9-43: the outer shell, alpha blended, nothing while invisible. */
+    private static final class OuterLayer extends RenderLayer<EntityThaumicSlime, SlimeModel<EntityThaumicSlime>> {
+        private final SlimeModel<EntityThaumicSlime> outer;
 
-        private InnerLayer(RenderThaumicSlime renderer) { super(renderer); }
+        private OuterLayer(RenderThaumicSlime renderer, SlimeModel<EntityThaumicSlime> outer) {
+            super(renderer);
+            this.outer = outer;
+        }
 
         @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, EntityThaumicSlime slime,
                                      float walkPhase, float walkSpeed, float partialTick, float age, float headYaw, float headPitch) {
             if (slime.isInvisible()) return;
-            pose.pushPose();
-            try {
-                pose.scale(.7F, .7F, .7F);
-                pose.translate(0.0D, -1.2D, 0.0D);
-                inner.prepareMobModel(slime, walkPhase, walkSpeed, partialTick);
-                inner.setupAnim(slime, walkPhase, walkSpeed, age, headYaw, headPitch);
-                inner.renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(SKIN)), light, OverlayTexture.NO_OVERLAY, 0xffffffff);
-            } finally { pose.popPose(); }
+            getParentModel().copyPropertiesTo(outer);
+            outer.prepareMobModel(slime, walkPhase, walkSpeed, partialTick);
+            outer.setupAnim(slime, walkPhase, walkSpeed, age, headYaw, headPitch);
+            outer.renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(SKIN)), light,
+                    LivingEntityRenderer.getOverlayCoords(slime, 0.0F));
         }
     }
 }

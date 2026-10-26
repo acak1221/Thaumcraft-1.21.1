@@ -33,7 +33,14 @@ class ConfigDeclarationAuditTest {
             Map.entry("infused_stone", "false"), Map.entry("trees", "false"),
             Map.entry("runic_recharge_speed", "2000"), Map.entry("runic_recharge_delay", "80"),
             Map.entry("runic_cost", "50"), Map.entry("notification_delay", "5000"),
-            Map.entry("notification_max", "15"));
+            Map.entry("notification_max", "15"),
+            // The port's own Tweaks category (ThaumcraftTweaks.DEFAULTS), not oracle keys.
+            Map.entry("aspect_inference", "true"),
+            Map.entry("more_randomized_loot", "true"), Map.entry("earth_shock_targets", "2"),
+            Map.entry("infusion_keeps_item_data", "true"), Map.entry("filled_container_to_hand", "true"),
+            Map.entry("research_search", "true"), Map.entry("research_counter", "true"),
+            Map.entry("notification_clear_button", "true"), Map.entry("research_remember_page", "true"),
+            Map.entry("research_keyboard", "true"), Map.entry("research_bookmarks", "true"));
 
     @Test void everyEditableKeyHasAnExplicitRuntimeParserNotJustAnEditor() throws Exception {
         Path root = Path.of("src/main/java/thaumcraft/common/config");
@@ -45,6 +52,7 @@ class ConfigDeclarationAuditTest {
         }
         parsers.append(Files.readString(Path.of("src/main/java/thaumcraft/common/lib/runic/RunicSettings.java")));
         parsers.append(Files.readString(Path.of("src/main/java/thaumcraft/client/lib/PlayerNotifications.java")));
+        parsers.append(Files.readString(Path.of("src/main/java/thaumcraft/common/config/ThaumcraftTweaks.java")));
         for (String key : DEFAULTS.keySet()) {
             assertTrue(parsers.toString().contains("\"" + key + "\""), "no runtime reader: " + key);
         }
@@ -53,8 +61,8 @@ class ConfigDeclarationAuditTest {
             assertTrue(keys.add(entry.key()), "duplicate key " + entry.key());
             assertTrue(parsers.toString().contains("\"" + entry.key() + "\""), "no runtime reader: " + entry.key());
         }
-        assertEquals(25, keys.size());
-        assertEquals(39, DEFAULTS.size());
+        assertEquals(36, keys.size());
+        assertEquals(50, DEFAULTS.size());
     }
 
     @Test void editorDefaultsMatchTheOracleAndDoNotSilentlyDisableGlowingTaint(@TempDir Path directory) {
@@ -71,7 +79,7 @@ class ConfigDeclarationAuditTest {
 
     @Test void allRuntimeParserDefaultsMatchTheOracle() {
         Properties empty = new Properties();
-        assertEquals(new ResearchSettings(false, true, true, true, false, 0, 100), ResearchSettings.read(empty));
+        assertEquals(new ResearchSettings(false, true, true, true, false, 0, 100, true), ResearchSettings.read(empty));
         assertEquals(new BiomeSettings(5, 2, true, true, false), BiomeSettings.read(empty));
         assertEquals(new OriginalSpawnSettings(true, true, true, true, true, true), OriginalSpawnSettings.read(empty));
         assertEquals(new OriginalWorldgenSettings(true, true, true, true, true), OriginalWorldgenSettings.read(empty));
@@ -79,6 +87,17 @@ class ConfigDeclarationAuditTest {
         assertEquals(new ThaumcraftTaintSettings.Values(200, true, true), ThaumcraftTaintSettings.DEFAULTS);
         assertEquals(new thaumcraft.common.lib.runic.RunicSettings(2000, 80, 50),
                 thaumcraft.common.lib.runic.RunicSettings.DEFAULTS);
-        assertEquals(39, DEFAULTS.size());
+        assertEquals(ThaumcraftTweaks.DEFAULTS, readTweaks(empty));
+        assertEquals(50, DEFAULTS.size());
+    }
+
+    private static ThaumcraftTweaks.Values readTweaks(Properties properties) {
+        ThaumcraftTweaks.Values before = ThaumcraftTweaks.values();
+        try {
+            ThaumcraftTweaks.load(properties);
+            return ThaumcraftTweaks.values();
+        } finally {
+            ThaumcraftTweaks.configure(before);
+        }
     }
 }

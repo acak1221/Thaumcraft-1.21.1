@@ -8,7 +8,7 @@ place→erase→solve→take→learn, dedicated scenario обоих loaders; evi
 
 Аудит 15.10.2026. Это **спецификация будущей R08**, не реализация и не результат runtime R08. Прочитаны private original TC4 4.2.3.5 и текущие native API. Для этой работы изменён только данный документ; source sets, общие status/evidence, resources/build не изменялись, Gradle не запускался. Проверки R07, выполняемые ведущим, не доказывают ни placement, ни erase, ни solving через GUI R08.
 
-`O` — private `../work/thaumcraft-4.2.3.5-oracle`, `N` — `common/src/main/java`. Исходные тела декомпиляции остаются вне Git. Спецификация относится к свежим мирам Minecraft 1.21.1, Java21, Fabric и NeoForge. Legacy FOREVA и OpenTC4 не подменяют original gameplay oracle.
+`O` — private `../work/thaumcraft-4.2.3.5-oracle`, `N` — `common/src/main/java`. Исходные тела декомпиляции остаются вне Git. Спецификация относится к свежим мирам Minecraft 1.21.1, Java21, Fabric и NeoForge. Legacy 1.12 и OpenTC4 не подменяют original gameplay oracle.
 
 ## 1. Граница unit
 

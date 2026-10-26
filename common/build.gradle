@@ -25,7 +25,8 @@ dependencies {
 // Audit the actual production archive and resolved runtime artifacts, not a class's package name.
 tasks.named('test') {
  dependsOn tasks.named('jar')
- inputs.file(rootProject.file('Thaumcraft-1.7.10-4.2.3.5.jar')).withPropertyName('orphanMobOriginalOracle')
+ // The original JAR is not tracked; a checkout that has it locally runs the oracle tests too.
+ inputs.files(rootProject.files('Thaumcraft-1.7.10-4.2.3.5.jar').filter { it.exists() }).withPropertyName('orphanMobOriginalOracle')
  inputs.file(tasks.named('jar').flatMap { it.archiveFile }).withPropertyName('productionArchiveAudit')
  doFirst {
   systemProperty 'thaumcraft.audit.productionJar', tasks.named('jar').get().archiveFile.get().asFile.absolutePath

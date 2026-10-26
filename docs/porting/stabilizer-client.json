@@ -5824,7 +5824,7 @@
       "actual_cached_lock_transitions": 5,
       "at600_regained": 0
     },
-    "actual_owned_world": "C:\\Users\\Acak\\Documents\\Codex\\2026-10-15\\new-chat\\Thaumcraft-4.2-FOREVA\\fabric\\run-clienttest\\saves\\stabilizer-smoke-412b7979-9a6d-4ab4-bac8-0715023c191f",
+    "actual_owned_world": "C:\\Users\\Acak\\Documents\\Codex\\2026-10-15\\new-chat\\Thaumcraft-4-Reload\\fabric\\run-clienttest\\saves\\stabilizer-smoke-412b7979-9a6d-4ab4-bac8-0715023c191f",
     "declared_primary_knowledge_fixture": {
       "acquisition_replayed": false,
       "after_RAW_snbt": "{dataVersion:1,discoveredAspects:[{amount:0,key:\"aer\"},{amount:17,key:\"terra\"},{amount:2,key:\"ignis\"},{amount:0,key:\"aqua\"},{amount:18,key:\"ordo\"},{amount:15,key:\"perditio\"},{amount:3,key:\"pannus\"},{amount:3,key:\"praecantatio\"},{amount:0,key:\"lux\"},{amount:0,key:\"potentia\"},{amount:3,key:\"tempestas\"}],initializedAspects:1b,researchComplete:[\"ARCANESTONE\",\"ARCTABLE\",\"ASPECTS\",\"BASICARTIFACE\",\"BASICTHAUMATURGY\",\"CAP_iron\",\"CRUCIBLE\",\"ENCHANT\",\"GRATE\",\"KNOWFRAG\",\"NODES\",\"ORE\",\"PECH\",\"PHIAL\",\"PLANTS\",\"RESEARCH\",\"RESTABLE\",\"ROD_wood\",\"TABLE\",\"THAUMOMETER\",\"THAUMONOMICON\",\"WARP\",\"DISTILESSENTIA\",\"CAP_gold\",\"ROD_greatwood\",\"JARLABEL\",\"FOCUSFIRE\",\"TUBES\",\"INFUSION\",\"ROD_silverwood\",\"NODEPRESERVE\",\"ENCHFABRIC\",\"NITOR\",\"THAUMIUM\",\"CAP_thaumium\",\"GOGGLES\",\"FOCUSSHOCK\",\"FOCUSEXCAVATION\",\"FOCUSFROST\",\"JARVOID\",\"TUBEFILTER\",\"CENTRIFUGE\",\"ESSENTIACRYSTAL\",\"NODESTABILIZER\"],scannedEntities:[],scannedItems:[],scannedPhenomena:[],warpCounter:0,warpPerm:0,warpSticky:0,warpTemp:0}",

@@ -53,6 +53,18 @@ public final class AdvancedFurnaceFormation {
         return Block.UPDATE_ALL;
     }
 
+    /**
+     * Whether a comparator notice for a removal at {@code pos} would read a block in an unavailable chunk. The
+     * notice looks one block out horizontally and, behind a solid block, a second one, the second without a
+     * loaded-chunk check (Level.updateNeighbourForOutputSignal).
+     */
+    public static boolean removalNoticeReachesUnknown(Level level,BlockPos pos) {
+        if(!(level instanceof ServerLevel world)) return false;
+        for(var direction:net.minecraft.core.Direction.Plane.HORIZONTAL)
+            if(!loaded(world,pos.relative(direction,2))) return true;
+        return false;
+    }
+
     private static boolean loaded(ServerLevel world,BlockPos pos) { return !world.isOutsideBuildHeight(pos) && world.getChunkSource().getChunkNow(pos.getX()>>4,pos.getZ()>>4)!=null; }
     private static BlockEntity existing(ServerLevel world,BlockPos pos) { var chunk=world.getChunkSource().getChunkNow(pos.getX()>>4,pos.getZ()>>4); return chunk==null?null:chunk.getBlockEntity(pos); }
     public static Status structure(TileAlchemyFurnaceAdvanced core) {

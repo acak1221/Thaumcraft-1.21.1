@@ -6,7 +6,7 @@
 
 | Корпус | Проверенный commit | Target в исходниках |
 |---|---|---|
-| FOREVA | `8abb7febda5e4aceac5304277b17154760fc1d38` | Активные common/Fabric/NeoForge: 1.21.1; сохранённый `src/`: 1.12 reference |
+| legacy-1.12 | `8abb7febda5e4aceac5304277b17154760fc1d38` | Активные common/Fabric/NeoForge: 1.21.1; сохранённый `src/`: 1.12 reference |
 | [OpenTC4](https://github.com/IgnoreLicensesCN/OpenTC4/tree/80aac29c52543ef51766c4b0788fba782abb3b0b) | `80aac29c52543ef51766c4b0788fba782abb3b0b` | Forge 1.7.10, ForgeGradle 1.2.11 |
 | [OpenTC4-Architectury](https://github.com/IgnoreLicensesCN/OpenTC4-Architectury/tree/1509b3192910aaca0af8bba1b55d189a675010bf) | `1509b3192910aaca0af8bba1b55d189a675010bf` | 1.20.1, Fabric + Forge, Java 21 |
 
@@ -14,7 +14,7 @@
 
 Полные файлы с путями, byte size, subsystem, Java line count и нормализованным SHA-256:
 
-- [FOREVA](2026-10-15-inventory-FOREVA.json).
+- [legacy-1.12](2026-10-15-inventory-legacy-1.12.json).
 - [OpenTC4](2026-10-15-inventory-OpenTC4.json).
 - [OpenTC4-Architectury](2026-10-15-inventory-OpenTC4-Architectury.json).
 - [Сводные счётчики, extensions, source sets и lexical markers](2026-10-15-reference-counts.json).
@@ -39,7 +39,7 @@ Java hashes нормализуют UTF-8 BOM и CRLF/CR к LF. Java line counts 
 
 ## Размер и размещение
 
-| Показатель | FOREVA | OpenTC4 | Architectury ref |
+| Показатель | legacy-1.12 | OpenTC4 | Architectury ref |
 |---|---:|---:|---:|
 | Все committed файлы | 5 562 | 2 050 | 6 129 |
 | Java-файлы | 1 511 | 911 | 1 989 |
@@ -48,15 +48,15 @@ Java hashes нормализуют UTF-8 BOM и CRLF/CR к LF. Java line counts 
 | OGG | 333 | 111 | 111 |
 | JSON | 673 | 9 | 2 633 |
 
-FOREVA содержит 934 legacy main Java и 530 legacy test Java. Активная основа до текущей рабочей итерации: 29 common main, 12 common tests, 3 Fabric main, 3 NeoForge main. Поэтому большое число старых тестов и классов нельзя считать покрытием 1.21.1.
+legacy-1.12 содержит 934 legacy main Java и 530 legacy test Java. Активная основа до текущей рабочей итерации: 29 common main, 12 common tests, 3 Fabric main, 3 NeoForge main. Поэтому большое число старых тестов и классов нельзя считать покрытием 1.21.1.
 
 OpenTC4 содержит 911 main Java, без `src/test`. Architectury содержит 1 957 common main Java, 9 Fabric, 4 Forge, ещё 19 Java templates вне main source roots; test source set отсутствует.
 
 ### Java по основным subsystem packages
 
-Счётчики включают main source sets; FOREVA в этой таблице содержит одновременно legacy и active sources. Остальные утилиты, loader bootstrap и корневые classes подробно перечислены в JSON.
+Счётчики включают main source sets; legacy-1.12 в этой таблице содержит одновременно legacy и active sources. Остальные утилиты, loader bootstrap и корневые classes подробно перечислены в JSON.
 
-| Package/subsystem | FOREVA | OpenTC4 | Architectury ref |
+| Package/subsystem | legacy-1.12 | OpenTC4 | Architectury ref |
 |---|---:|---:|---:|
 | API | 91 | 101 | 302 |
 | GUI | 20 | 20 | 20 |
@@ -85,7 +85,7 @@ OpenTC4 содержит 911 main Java, без `src/test`. Architectury соде
 | Область | Полезный reference | Действие |
 |---|---|---|
 | Original numbers, tags, research keys и quirks | Только pinned TC4 4.2.3.5 oracle | Сохранить как gameplay specification |
-| Сопоставление старых классов и поведение исправленного FOREVA | Legacy `src/` | Читать как вторичный reference; переносить только проверенные fixes |
+| Сопоставление старых классов и поведение исправленного legacy-1.12 | Legacy `src/` | Читать как вторичный reference; переносить только проверенные fixes |
 | Читаемые имена, old registry/recipe call sites | OpenTC4 1.7 | Использовать для поиска и сравнения; отдельно проверять Hodgepodge/TC4Tweaks changes |
 | Loader module layout и отдельные modern mapping patterns | Architectury ref | Изучать точечно, реализацию сверять с 1.21.1 target |
 | Main research runtime и GUI | Existing extracted catalog + original GUI/manager/item | Реализовать нативно, с server authority и реальным клиентом |

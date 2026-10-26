@@ -1,12 +1,18 @@
 modLoader="javafml"
 loaderVersion="[4,)"
 license="See THIRD_PARTY_NOTICES.md"
+issueTrackerURL="https://github.com/acak1221/Thaumcraft-1.21.1/issues"
 [[mods]]
 modId="thaumcraft"
 version="${version}"
-displayName="Thaumcraft 4.2 FOREVA"
-authors="Azanor (original Thaumcraft), FOREVA contributors"
-description='''Unofficial TC4.2 port. Minecraft 1.21.1 migration in progress.'''
+displayName="Thaumcraft 4 Reload"
+authors="Azanor (original Thaumcraft), Thaumcraft 4 Reload contributors"
+description='''Unofficial port of Thaumcraft 4.2.3.5 (Minecraft 1.7.10) to Minecraft 1.21.1.'''
+displayURL="https://github.com/acak1221/Thaumcraft-1.21.1"
+# The original Thaumonomicon item texture, copied by processResources; pixel art, so the mod
+# list must not blur it.
+logoFile="assets/thaumcraft/icon.png"
+logoBlur=false
 [[dependencies.thaumcraft]]
 modId="neoforge"
 type="required"
@@ -25,13 +31,34 @@ type="required"
 versionRange="[13.0.11,)"
 ordering="AFTER"
 side="BOTH"
+# Optional recipe viewer; the plugin is loaded by EMI only when EMI is installed.
+[[dependencies.thaumcraft]]
+modId="emi"
+type="optional"
+versionRange="*"
+ordering="NONE"
+side="CLIENT"
+# Optional recipe viewer; the plugin is loaded by JEI only when JEI is installed.
+[[dependencies.thaumcraft]]
+modId="jei"
+type="optional"
+versionRange="*"
+ordering="NONE"
+side="CLIENT"
+# Optional block and entity tooltips; the plugin is loaded by Jade only when Jade is installed.
+[[dependencies.thaumcraft]]
+modId="jade"
+type="optional"
+versionRange="*"
+ordering="NONE"
+side="BOTH"
 [[mixins]]
 config="thaumcraft-common.mixins.json"
 [[mixins]]
 config="thaumcraft-neoforge.mixins.json"
 [[mixins]]
 config="thaumcraft-neoforge-client.mixins.json"
-# NeoForge has no access widener. This file carries the exact three entries of
+# NeoForge has no access widener. This file carries the exact six entries of
 # the shared Fabric access widener so the shared module keeps its behaviour.
 [[accessTransformers]]
 file="META-INF/accesstransformer.cfg"

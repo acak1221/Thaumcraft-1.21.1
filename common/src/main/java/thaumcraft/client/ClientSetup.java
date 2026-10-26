@@ -197,7 +197,7 @@ public final class ClientSetup {
                     var minecraft = Minecraft.getInstance();
                     if (minecraft.player == null) return;
                     minecraft.player.playSound(SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "page")), 1, 1);
-                    minecraft.setScreen(new GuiResearchBrowser());
+                    minecraft.setScreen(GuiResearchBrowser.open());
                 }));
         ColorHandlerRegistry.registerItemColors((stack, tint) -> {
             var data = ItemEssence.data(stack);

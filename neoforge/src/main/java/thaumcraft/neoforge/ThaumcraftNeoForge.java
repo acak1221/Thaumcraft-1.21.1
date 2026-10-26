@@ -1,12 +1,11 @@
 package thaumcraft.neoforge;
 
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import thaumcraft.common.Thaumcraft;
-import thaumcraft.client.ClientSetup;
 
 /**
  * NeoForge bootstrap of the shared TC4 4.2.3.5 port.
@@ -18,7 +17,7 @@ import thaumcraft.client.ClientSetup;
  */
 @Mod(Thaumcraft.MODID)
 public final class ThaumcraftNeoForge {
-    public ThaumcraftNeoForge(IEventBus bus) {
+    public ThaumcraftNeoForge(IEventBus bus, ModContainer container) {
         // The native creative tab sink must be installed before the shared module
         // publishes its tab stacks.
         NeoForgeCreativeTabs.init(bus);
@@ -37,6 +36,7 @@ public final class ThaumcraftNeoForge {
         NeoForgeBorePlatform.init();
         NeoForgeGolemHarvestPlatform.init();
         NeoForgeGolemUsePlatform.init();
+        NeoForgeWandUseCapture.init();
         // The shared Architectury break event must reach the shared protection for
         // every break attempt, also for the three refusals NeoForge posts its
         // native break event already cancelled for.
@@ -46,9 +46,16 @@ public final class ThaumcraftNeoForge {
         NeoForgeGolemFluidAccess.init();
         // Original TileCrucible:373-410 - the water tank of the crucible that other mods may read and fill.
         NeoForgeCrucibleFluidHandler.init(bus);
+        // Original Hover: a hovering player mines at the ground speed. NeoForge breaks blocks through
+        // Player.getDigSpeed, which posts this event after the airborne fifth, as Forge 1.7.10 did.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                (net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed event) -> event.setNewSpeed(
+                        thaumcraft.common.items.armor.Hover.miningSpeed(event.getEntity(), event.getNewSpeed())));
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(ClientSetup::init));
+            // ClientSetup.init runs from the first client hook event, not FMLClientSetupEvent:
+            // see ThaumcraftNeoForgeClient.onRegisterClientExtensions.
             thaumcraft.neoforge.client.ThaumcraftNeoForgeClient.register(bus);
+            thaumcraft.neoforge.client.NeoForgeConfigScreen.register(container);
         }
     }
 }

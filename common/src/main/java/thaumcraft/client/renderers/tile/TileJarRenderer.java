@@ -39,7 +39,9 @@ public final class TileJarRenderer implements BlockEntityRenderer<TileJar> {
                 // result; a future config toggle must not invent a new random roll.
                 float crooked = (filter.getTag().hashCode() + blockX + facing.get3DDataValue()) % 4 - 2;
                 label(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(LABEL)), .25F, -.315F, crooked, 0xffffff, light, overlay);
-                label(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(filter.getImage())), .168F, -.316F, crooked,
+                // Original UtilsFX.drawTag blends the icon (SRC_ALPHA, ONE_MINUS_SRC_ALPHA); a cutout
+                // type would draw its soft edges, most of the icon, fully opaque.
+                label(pose, buffers.getBuffer(RenderType.entityTranslucent(filter.getImage())), .168F, -.316F, crooked,
                         filter.getColor(), light, overlay);
             } finally {
                 pose.popPose();

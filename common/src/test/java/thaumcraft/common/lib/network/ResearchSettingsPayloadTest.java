@@ -11,9 +11,9 @@ class ResearchSettingsPayloadTest {
     @Test void allFlagsAndSignedIntegerBoundariesRoundTripWithoutTheLegacyDifficultyByteTruncation() {
         var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
         try {
-            for (int flags = 0; flags < 32; flags++) for (int value : new int[]{Integer.MIN_VALUE, -1, 0, 1, 256, Integer.MAX_VALUE}) {
+            for (int flags = 0; flags < 64; flags++) for (int value : new int[]{Integer.MIN_VALUE, -1, 0, 1, 256, Integer.MAX_VALUE}) {
                 var expected = new ResearchSettingsPayload(new ResearchSettings((flags & 1) != 0, (flags & 2) != 0, (flags & 4) != 0,
-                        (flags & 8) != 0, (flags & 16) != 0, value, ~value));
+                        (flags & 8) != 0, (flags & 16) != 0, value, ~value, (flags & 32) != 0));
                 buffer.clear(); ResearchSettingsPayload.STREAM_CODEC.encode(buffer, expected);
                 assertTrue(buffer.readableBytes() <= 11); assertEquals(expected, ResearchSettingsPayload.STREAM_CODEC.decode(buffer)); assertFalse(buffer.isReadable());
             }
@@ -22,7 +22,7 @@ class ResearchSettingsPayloadTest {
     @Test void unknownFlagsAndTruncatedFieldsCannotBecomePartialClientSettings() {
         var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
         try {
-            buffer.writeByte(32); buffer.writeVarInt(0); buffer.writeVarInt(100);
+            buffer.writeByte(64); buffer.writeVarInt(0); buffer.writeVarInt(100);
             assertThrows(IllegalArgumentException.class, () -> ResearchSettingsPayload.STREAM_CODEC.decode(buffer));
             buffer.clear(); buffer.writeByte(0); buffer.writeVarInt(0);
             assertThrows(IndexOutOfBoundsException.class, () -> ResearchSettingsPayload.STREAM_CODEC.decode(buffer));

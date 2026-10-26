@@ -76,7 +76,7 @@ public final class ThaumcraftNeoForgeClient {
         NeoForge.EVENT_BUS.addListener(ThaumcraftNeoForgeClient::onLoggingOut);
     }
 
-    /** The two core shaders of the Fabric CoreShaderRegistrationCallback. */
+    /** The core shaders of the Fabric CoreShaderRegistrationCallback. */
     private static void onRegisterShaders(RegisterShadersEvent event) {
         try {
             var mirror = new ShaderInstance(event.getResourceProvider(),
@@ -94,6 +94,10 @@ public final class ThaumcraftNeoForgeClient {
                 TileNodeStabilizerRenderer.setBubbleShader(shader);
                 VisNetClientEffects.setShader(shader);
             });
+            var architect = new ShaderInstance(event.getResourceProvider(),
+                    ResourceLocation.fromNamespaceAndPath("thaumcraft", "architect_overlay"),
+                    DefaultVertexFormat.POSITION_TEX_COLOR);
+            event.registerShader(architect, ThaumcraftArchitectClient::setShader);
         } catch (java.io.IOException failure) {
             throw new IllegalStateException("TC4 core shaders could not be created", failure);
         }
@@ -101,6 +105,13 @@ public final class ThaumcraftNeoForgeClient {
 
     /** The builtin item renderers of the Fabric BuiltinItemRendererRegistry. */
     private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        // The shared client setup must run before NeoForge collects menu screens, model layers
+        // and entity renderers. ClientHooks.initClientHooks posts those events from the Minecraft
+        // constructor, long before FMLClientSetupEvent, and the Architectury registries apply
+        // these three only inside the events. Run from client setup, every Thaumcraft GUI, gear
+        // model layer and entity renderer was lost, and the first Thaumcraft entity drawn crashed
+        // the client. This event is the first initClientHooks posts; registries are filled by then.
+        thaumcraft.client.ClientSetup.init();
         // The original robe dye in the native armour layer. It is not an item
         // renderer but the NeoForge native colour hook of the robe items.
         NeoForgeRobeDye.register(event);
@@ -223,20 +234,38 @@ public final class ThaumcraftNeoForgeClient {
         if (Minecraft.getInstance().screen == null) GuiResearchPopup.renderHud(graphics);
     }
 
-    /** The late world render of the Fabric WorldRenderEvents.LAST. */
+    /**
+     * The late world render of the Fabric WorldRenderEvents.LAST.
+     *
+     * <p>NeoForge posts AFTER_LEVEL from GameRenderer, after LevelRenderer.renderLevel has popped the
+     * camera rotation off the model view stack, with a new identity pose stack. Drawn as they were,
+     * every late effect (revealed nodes, bolts, beams, the Architect area, golem markers, scan
+     * overlay) ignored the view rotation. Fabric's LAST runs inside renderLevel with the camera
+     * rotation still on the model view stack and an identity pose stack, so the same state is
+     * restored here for the duration of the late render.</p>
+     */
     private static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
         var pose = event.getPoseStack();
         if (pose == null) return;
-        var buffers = Minecraft.getInstance().renderBuffers().bufferSource();
-        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
-        ThaumcraftGogglesClient.render(pose, buffers, partialTick, event.getCamera());
-        ThaumcraftShockClient.render(pose, buffers, partialTick, event.getCamera());
-        ThaumcraftExcavationClient.render(pose, buffers, partialTick, event.getCamera());
-        ThaumcraftArchitectClient.render(pose, buffers, partialTick, event.getCamera());
-        ThaumcraftGolemClient.renderMarkers(pose, buffers, partialTick, event.getCamera());
-        buffers.endBatch(RenderType.lines());
-        thaumcraft.client.lib.ScanOverlay.render(pose, partialTick);
+        var modelView = com.mojang.blaze3d.systems.RenderSystem.getModelViewStack();
+        modelView.pushMatrix();
+        try {
+            modelView.mul(event.getModelViewMatrix());
+            com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
+            var buffers = Minecraft.getInstance().renderBuffers().bufferSource();
+            float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+            ThaumcraftGogglesClient.render(pose, buffers, partialTick, event.getCamera());
+            ThaumcraftShockClient.render(pose, buffers, partialTick, event.getCamera());
+            ThaumcraftExcavationClient.render(pose, buffers, partialTick, event.getCamera());
+            ThaumcraftArchitectClient.render(pose, buffers, partialTick, event.getCamera());
+            ThaumcraftGolemClient.renderMarkers(pose, buffers, partialTick, event.getCamera());
+            buffers.endBatch(RenderType.lines());
+            thaumcraft.client.lib.ScanOverlay.render(pose, partialTick);
+        } finally {
+            modelView.popMatrix();
+            com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
+        }
     }
 
     /** The disconnect reset of the Fabric ClientPlayConnectionEvents.DISCONNECT. */

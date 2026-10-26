@@ -160,10 +160,14 @@ public final class ResourceSafetyRuntimeChecks {
             };
             try {
                 InteractionResult result = f.use(f.base);
-                f.check(result == InteractionResult.FAIL && f.level.getBlockEntity(f.base.above()) instanceof TileNode restored
-                                && original.equals(restored.saveWithFullMetadata(f.level.registryAccess()))
+                var after = f.level.getBlockEntity(f.base.above());
+                boolean sameData = after instanceof TileNode restored && original.equals(restored.saveWithFullMetadata(f.level.registryAccess()));
+                f.check(result == InteractionResult.FAIL && after instanceof TileNode && sameData
                                 && ItemStack.matches(unpaid, gate.wand) && !gate.altar.isOpen() && notice.calls == 1,
-                        "cancelled partial gate replacement restores complete node NBT including non-default aura/type/modifier/identity, without vis payment or open altar");
+                        "cancelled partial gate replacement restores complete node NBT including non-default aura/type/modifier/identity, without vis payment or open altar"
+                                + "; result=" + result + ", entity=" + after + ", sameData=" + sameData + ", unpaid=" + ItemStack.matches(unpaid, gate.wand)
+                                + ", altarOpen=" + gate.altar.isOpen() + ", notices=" + notice.calls
+                                + (sameData || !(after instanceof TileNode node) ? "" : ", before=" + original + ", after=" + node.saveWithFullMetadata(f.level.registryAccess())));
             } finally { notice.clear(); }
 
             f.reset(); gate = gate(f, maze); unpaid = gate.wand.copy();

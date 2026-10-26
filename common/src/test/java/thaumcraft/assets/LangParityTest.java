@@ -30,7 +30,7 @@ class LangParityTest {
             "itemGroup.thaumcraft", "item.Wand.name", "item.thaumcraft.resource.14.name", "item.thaumcraft.resource.dust.name",
             "item.thaumcraft.salis_mundus", "golemblurb.3.text", "golemblurb.6.text", "golemblurb.7.text",
             "tc.port.research.cost", "tc.port.wand.name", "tc.port.focus.page",
-            "tc.architect.axis.1", "tc.architect.axis.2", "tc.architect.axis.3");
+            "tc.architect.axis.1", "tc.architect.axis.2", "tc.architect.axis.3", "tc.port.jade.capacity");
 
     private static JsonObject lang(String path) throws Exception { return ResourceTree.object(path); }
 

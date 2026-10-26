@@ -66,7 +66,7 @@ public final class ThaumcraftSettings {
                 Files.writeString(file, "# Thaumcraft server research settings; restart required.\n"
                         + "# research_difficulty: -1 purchases all, 0 purchases Secondary, 1 uses notes for all.\n"
                         + "allow_cheat_sheet=false\nallow_warded_stone=true\nallow_mirrors=true\nhard_mode_nodes=true\n"
-                        + "wuss_mode=false\nresearch_difficulty=0\naspect_total_cap=100\n"
+                        + "wuss_mode=false\nresearch_difficulty=0\naspect_total_cap=100\naspect_inference=true\n"
                         + "biome_taint_spread=200\nspawn_taint_spores=true\nglowing_taint=true\n"
                         + "magical_forest_biome_weight=5\ntaint_biome_weight=2\nblue_magical_forest=false\n"
                         + "spawn_angry_zombies=true\nspawn_pechs=true\nspawn_fire_bats=true\nspawn_wisps=true\n"
@@ -77,12 +77,19 @@ public final class ThaumcraftSettings {
                         + "# regeneration of the original never touches a chunk until one of them is on.\n"
                         + "regen_key=DEFAULT\naura_nodes=false\nstructures=false\ncinnibar_ore=false\n"
                         + "amber_ore=false\ninfused_stone=false\ntrees=false\n"
-                        + "shaders=true\n",
+                        + "shaders=true\n"
+                        + "# Improvements adopted from TC4Tweaks; false (earth_shock_targets=0) is the original rule.\n"
+                        + "more_randomized_loot=true\nearth_shock_targets=2\ninfusion_keeps_item_data=true\n"
+                        + "filled_container_to_hand=true\nresearch_search=true\nresearch_counter=true\n"
+                        + "notification_clear_button=true\n"
+                        + "# The port's own Thaumonomicon conveniences; false is the original book.\n"
+                        + "research_remember_page=true\nresearch_keyboard=true\nresearch_bookmarks=true\n",
                         StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }
             configureServer(ResearchSettings.read(properties));
             ThaumcraftTaintSettings.load(properties);
             ThaumcraftBiomeSettings.configure(properties);
+            ThaumcraftTweaks.load(properties);
             // Original Config.shaders: a local rendering switch, not a server fact.
             shaders = !"false".equalsIgnoreCase(properties.getProperty("shaders", "true").strip());
             Config.shaders = shaders;
@@ -91,6 +98,7 @@ public final class ThaumcraftSettings {
             configureServer(ResearchSettings.DEFAULTS);
             ThaumcraftTaintSettings.configure(ThaumcraftTaintSettings.DEFAULTS);
             ThaumcraftBiomeSettings.defaults();
+            ThaumcraftTweaks.configure(ThaumcraftTweaks.DEFAULTS);
             shaders = true;
             Config.shaders = true;
         }

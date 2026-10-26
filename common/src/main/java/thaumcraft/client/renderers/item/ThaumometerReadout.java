@@ -171,14 +171,15 @@ public final class ThaumometerReadout {
                             .setLight(light)
                             .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
                 }
-                // Original UtilsFX.drawTag:583-600: the amount of the aspect below the glyph,
-                // in white and at half the size.
+                // Original UtilsFX.drawTag: the amount of the aspect in white at half the size, at the
+                // lower right corner of ITS glyph; the thaumometer passes the blend 1, which draws no
+                // black outline.
                 String amount = Integer.toString(aspects.getAmount(aspect));
                 pose.pushPose();
                 try {
                     pose.scale(0.5F, 0.5F, 0.5F);
-                    font.drawInBatch(amount, -font.width(amount), 8.0F, 0xFFFFFFFF, false, pose.last().pose(), buffers,
-                            Font.DisplayMode.NORMAL, 0, light);
+                    font.drawInBatch(amount, amountX(font.width(amount), layout.x()), amountY(font.lineHeight, layout.y()),
+                            0xFFFFFFFF, false, pose.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, light);
                 } finally {
                     pose.popPose();
                 }
@@ -188,6 +189,16 @@ public final class ThaumometerReadout {
             layout.next();
         }
     }
+
+    /**
+     * The x of an amount, in the half size space of the text: original {@code UtilsFX.drawTag}
+     * draws it at {@code 32 - width + x * 2}, right-aligned to the right edge of the glyph at
+     * {@code x}.
+     */
+    public static int amountX(int textWidth, int iconX) { return 32 - textWidth + iconX * 2; }
+
+    /** The y of an amount: {@code 32 - FONT_HEIGHT + y * 2}, on the bottom edge of the glyph at {@code y}. */
+    public static int amountY(int lineHeight, int iconY) { return 32 - lineHeight + iconY * 2; }
 
     /** The original JAR's bytecode1490-1529; CFR's combined expression changes evaluation order. */
     static final class AspectLayout {

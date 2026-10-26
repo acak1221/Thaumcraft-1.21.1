@@ -1062,11 +1062,25 @@ public final class EldritchBlockRules {
     /** TileEtherealBloom:36 - the bloom converts a tainted column back to the overworld. */
     public static final int ETHEREAL_BLOOM_CONVERT_PERIOD = 20;
 
-    /** TileEtherealBloom:37-38 - the random column offset is minus eight to plus eight. */
+    /**
+     * TileEtherealBloom:37-38 (bytecode 57-108) - each offset is {@code nextInt(8) - nextInt(8)}:
+     * minus seven to plus seven, most often zero.
+     */
     public static final int ETHEREAL_BLOOM_OFFSET = 8;
+
+    /** TileEtherealBloom:12 (bytecode 4-24) - a bloom whose counter is zero starts it at {@code nextInt(100)}. */
+    public static final int ETHEREAL_BLOOM_START_PHASE = 100;
 
     /** TileEtherealBloom:41 - the conversion reaches nine blocks around the bloom. */
     public static final double ETHEREAL_BLOOM_RADIUS_SQUARED = 81.0D;
+
+    /**
+     * TileEtherealBloom:41 (bytecode 194-228) - {@code getDistanceFrom(x + .5, yCoord, z + .5) <= 81}: the
+     * squared distance from the centre of the bloom, whose half block of height counts too.
+     */
+    public static boolean etherealBloomReaches(int dx, int dz) {
+        return dx * dx + .25D + dz * dz <= ETHEREAL_BLOOM_RADIUS_SQUARED;
+    }
 
     /** TileEtherealBloom:41 - the bloom only converts tainted, eerie and magical forest biomes. */
     public static boolean etherealBloomConverts(boolean tainted, boolean eerie, boolean magicalForest) {

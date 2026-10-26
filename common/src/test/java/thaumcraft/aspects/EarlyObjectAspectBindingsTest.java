@@ -109,11 +109,17 @@ class EarlyObjectAspectBindingsTest {
         assertAspects(complex, "thaumcraft:arcane_ear", new AspectList().add(Aspect.SENSES, 4));
         assertEquals(32767, EarlyObjectAspectBindings.metadata(id("thaumcraft:goggles_revealing")));
         assertEquals(0, EarlyObjectAspectBindings.metadata(id("thaumcraft:arcane_ear")));
+        // The rest of the original ConfigAspects (original_object_aspects.json): the copper branch
+        // of Config.foundCopperIngot and the sticky piston complex row are original rows.
+        assertAspects(direct, "minecraft:copper_ingot", new AspectList().add(Aspect.METAL, 3).add(Aspect.EXCHANGE, 1));
+        assertAspects(complex, "minecraft:sticky_piston", new AspectList().add(Aspect.MECHANISM, 2).add(Aspect.MOTION, 4));
+        // Modern members reach an original row only through the aspect families of the inference,
+        // never as a registration.
         for (String name : new String[]{"minecraft:blaze_powder", "minecraft:raw_iron", "minecraft:raw_gold",
-                "minecraft:copper_ingot", "minecraft:netherite_ingot", "minecraft:deepslate_iron_ore",
+                "minecraft:netherite_ingot", "minecraft:deepslate_iron_ore",
                 "minecraft:crimson_planks", "thaumcraft:balance_shard", "thaumcraft:salis_mundus",
                 "thaumcraft:nitor", "thaumcraft:alumentum", "thaumcraft:crystal_air", "unknown:future_item",
-                "minecraft:sticky_piston", "minecraft:spruce_trapdoor", "thaumcraft:hungry_chest"}) {
+                "minecraft:spruce_trapdoor", "thaumcraft:hungry_chest"}) {
             assertFalse(direct.containsKey(id(name)), name);
             assertFalse(complex.containsKey(id(name)), name);
         }
@@ -141,8 +147,10 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(216 + 10, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget, the native copper cluster, the original vanilla/content rows restored from the oracle and the ten cultist armour rows of ConfigAspects:437-446");
-        assertEquals(35, complex.size(), "nine existing complex bindings, the actual native Arcane Ear and the original complex vanilla rows of the oracle");
+        assertEquals(216 + 10 + 126, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget, the native copper cluster, the original vanilla/content rows restored from the oracle, the ten cultist armour rows of ConfigAspects:437-446 and the 126 items of the remaining original direct rows of the jar");
+        assertEquals(35 + 20, complex.size(), "nine existing complex bindings, the actual native Arcane Ear, the original complex vanilla rows of the oracle and the 20 items of the remaining original complex rows of the jar");
+        assertEquals(java.util.Set.of(id("minecraft:enchanted_book"), id("thaumcraft:research_table"), id("thaumcraft:arcane_workbench")),
+                EarlyObjectAspectBindings.expressions(), "the original new AspectList(ItemStack) copies of a resolved base");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
         assertEquals(0, EarlyObjectAspectBindings.metadata(id("thaumcraft:focus_pech")), "original one-argument ItemStack(Item) selects exact metadata0, not wildcard");
@@ -364,11 +372,11 @@ class EarlyObjectAspectBindingsTest {
                 new Row(196, "direct", List.of("minecraft:mossy_cobblestone"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.PLANT, 1).add(Aspect.MAGIC, 1)),
                 new Row(198, "direct", List.of("minecraft:infested_stone"), new AspectList().add(Aspect.EARTH, 2).add(Aspect.BEAST, 1).add(Aspect.TRAP, 1)),
                 new Row(199, "direct", List.of("minecraft:stone_bricks"), new AspectList().add(Aspect.EARTH, 2)),
-                new Row(200, "direct", List.of("minecraft:mossy_stone_bricks"), new AspectList().add(Aspect.PLANT, 1)),
-                new Row(201, "direct", List.of("minecraft:cracked_stone_bricks"), new AspectList().add(Aspect.ENTROPY, 1)),
-                new Row(202, "direct", List.of("minecraft:chiseled_stone_bricks"), new AspectList().add(Aspect.ORDER, 1)),
-                new Row(204, "direct", List.of("minecraft:chiseled_sandstone"), new AspectList().add(Aspect.MAGIC, 1)),
-                new Row(205, "direct", List.of("minecraft:smooth_sandstone"), new AspectList().add(Aspect.ORDER, 1)),
+                new Row(200, "direct", List.of("minecraft:mossy_stone_bricks"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.PLANT, 1)),
+                new Row(201, "direct", List.of("minecraft:cracked_stone_bricks"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.ENTROPY, 1)),
+                new Row(202, "direct", List.of("minecraft:chiseled_stone_bricks"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.ORDER, 1)),
+                new Row(204, "direct", List.of("minecraft:chiseled_sandstone"), new AspectList().add(Aspect.EARTH, 2).add(Aspect.ENTROPY, 3).add(Aspect.MAGIC, 1)),
+                new Row(205, "direct", List.of("minecraft:cut_sandstone"), new AspectList().add(Aspect.EARTH, 2).add(Aspect.ENTROPY, 3).add(Aspect.ORDER, 1)),
                 new Row(211, "direct", List.of("minecraft:wheat_seeds"), new AspectList().add(Aspect.PLANT, 1)),
                 new Row(212, "direct", List.of("minecraft:melon_seeds"), new AspectList().add(Aspect.PLANT, 1)),
                 new Row(213, "direct", List.of("minecraft:pumpkin_seeds"), new AspectList().add(Aspect.PLANT, 1)),

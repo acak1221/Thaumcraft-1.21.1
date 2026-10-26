@@ -46,7 +46,7 @@ Largest 20 tracked files at entry (bytes):
 | 1496174 | `docs/analysis/2026-10-15-inventory-OpenTC4-Architectury.json` |
 | 1496170 | `docs/analysis/2026-10-15-inventory-OpenTC4-Architectury-upstream.json` |
 | 1230655 | `docs/porting/verification.json` |
-| 1217635 | `docs/analysis/2026-10-15-inventory-FOREVA.json` |
+| 1217635 | `docs/analysis/2026-10-15-inventory-legacy-1.12.json` |
 | 905526 | `thaumcraft_src/assets/thaumcraft/textures/misc/nodes.png` |
 | 905526 | `src/main/resources/assets/thaumcraft/textures/misc/nodes.png` |
 | 905526 | `common/src/main/resources/assets/thaumcraft/textures/misc/nodes.png` |

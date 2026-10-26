@@ -17,4 +17,11 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface AbstractContainerScreenAccess {
     @Accessor("hoveredSlot")
     Slot thaumcraft$hoveredSlot();
+
+    /** The left edge of the screen's panel; it moves when the recipe book opens. */
+    @Accessor("leftPos")
+    int thaumcraft$leftPos();
+
+    @Accessor("topPos")
+    int thaumcraft$topPos();
 }

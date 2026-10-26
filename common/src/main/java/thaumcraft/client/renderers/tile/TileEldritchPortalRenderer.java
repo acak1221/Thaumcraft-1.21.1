@@ -1,7 +1,9 @@
 package thaumcraft.client.renderers.tile;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -75,7 +77,9 @@ public final class TileEldritchPortalRenderer implements BlockEntityRenderer<Til
         Vector3f topRight = new Vector3f(left).negate().add(up);
         Vector3f topLeft = new Vector3f(left).add(up);
         Vector3f bottomLeft = new Vector3f(left).sub(up);
-        VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(PORTAL));
+        // Original renderTileEntityAt: glDepthMask(false) with the alpha blend, so the gate never
+        // hides the translucent things behind it.
+        VertexConsumer out = buffers.getBuffer(GateType.TYPE);
         // The original colour of the portal is magenta.
         int red = 255, green = 0, blue = 255;
         pose.pushPose();
@@ -129,6 +133,38 @@ public final class TileEldritchPortalRenderer implements BlockEntityRenderer<Til
         float u = frame / (float) FRAMES;
         float uMax = u + 1.0F / FRAMES;
         return new float[]{u, 1.0F, uMax, 1.0F, uMax, 0.0F, u, 0.0F};
+    }
+
+    /** The entity translucent state of the gate, without depth writes. */
+    private static final class GateType extends RenderType {
+        static final RenderType TYPE = new GateType(new TextureStateShard(PORTAL, false, false));
+
+        private GateType(TextureStateShard texture) {
+            super("thaumcraft_eldritch_portal", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, false, true,
+                    () -> begin(texture), () -> end(texture));
+        }
+
+        private static void begin(TextureStateShard texture) {
+            RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.setupRenderState();
+            texture.setupRenderState();
+            TRANSLUCENT_TRANSPARENCY.setupRenderState();
+            NO_CULL.setupRenderState();
+            LIGHTMAP.setupRenderState();
+            OVERLAY.setupRenderState();
+            LEQUAL_DEPTH_TEST.setupRenderState();
+            COLOR_WRITE.setupRenderState();
+        }
+
+        private static void end(TextureStateShard texture) {
+            COLOR_WRITE.clearRenderState();
+            LEQUAL_DEPTH_TEST.clearRenderState();
+            OVERLAY.clearRenderState();
+            LIGHTMAP.clearRenderState();
+            NO_CULL.clearRenderState();
+            TRANSLUCENT_TRANSPARENCY.clearRenderState();
+            texture.clearRenderState();
+            RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.clearRenderState();
+        }
     }
 
     private static void vertex(VertexConsumer out, PoseStack pose, Vector3f corner, float scale, float scaley,

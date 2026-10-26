@@ -132,6 +132,12 @@ public final class ObjectAspectCatalog {
             var salis = ResourceLocation.fromNamespaceAndPath("thaumcraft", "salis_mundus");
             loaded.remove(salis);
             conflicts.remove(salis);
+            // The original copy expressions are evaluated by the native resolver from the resolved
+            // base item, like salis mundus; a divergent legacy literal must not replace them.
+            EarlyObjectAspectBindings.expressions().forEach(id -> {
+                loaded.remove(id);
+                conflicts.remove(id);
+            });
             bindings = Collections.unmodifiableMap(loaded);
             candidateBindings = bindings;
             blockCandidateIds = Set.copyOf(blocks);
@@ -170,7 +176,8 @@ public final class ObjectAspectCatalog {
 
     /** Native bundled expressions/complex recipes remain on-demand so RecipeManager reloads still take effect. */
     public static boolean hasDerivedRegistration(ResourceLocation id, int metadata) {
-        Integer declared = EarlyObjectAspectBindings.complex().containsKey(id) ? EarlyObjectAspectBindings.metadata(id) : null;
+        Integer declared = EarlyObjectAspectBindings.complex().containsKey(id) || EarlyObjectAspectBindings.expressionOf(id) != null
+                ? EarlyObjectAspectBindings.metadata(id) : null;
         if (id.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "thaumonomicon"))
                 || id.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "thaumonomicon_cheat"))) declared = ObjectAspectRegistry.WILDCARD;
         if (id.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "salis_mundus"))

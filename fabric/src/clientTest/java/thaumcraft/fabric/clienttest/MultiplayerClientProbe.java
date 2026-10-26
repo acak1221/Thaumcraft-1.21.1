@@ -1164,6 +1164,16 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         int zap = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:wisp_zap", new AtomicInteger()).get();
         evidence.put("wire_wisp_zap_packets", zap);
         if (zap == 0) {
+            // The wisps wander to random waypoints up to sixteen blocks away,
+            // so between their rare searches they drift out of the sixteen
+            // block search range (and past thirty-two blocks they despawn).
+            // Bringing them back every second keeps the lead in range without
+            // touching their AI.
+            if (stageTicks % 20 == 0) {
+                BlockPos near = client.player.blockPosition().offset(3, 2, 0);
+                client.getConnection().sendCommand("tp @e[type=thaumcraft:wisp] " + near.getX() + " " + near.getY() + " "
+                        + near.getZ());
+            }
             if (stageTicks < 2400) return false;
             client.getConnection().sendCommand("difficulty peaceful");
             throw new IllegalStateException("The wisp never produced its clientbound zap");
@@ -1257,12 +1267,21 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     private boolean bringPeerNextToLead(Minecraft client) {
         int wanted = client.player.getBlockX() + 2;
         Map<String, String> status = peerStatus();
-        if (String.valueOf(wanted).equals(status.get("x"))) return true;
+        // Entities of the earlier stages (the straw golems) can push the second player a block
+        // after the teleport; an exact match then flipped every tick and the stages behind this
+        // gate never sent their command. A block of tolerance is still next to the lead.
+        if (within(status.get("x"), wanted) && within(status.get("z"), client.player.getBlockZ())) return true;
         if (stageTicks % 20 == 0) {
             client.getConnection().sendCommand("tp " + peerName + " " + wanted + " " + client.player.getBlockY() + " "
                     + client.player.getBlockZ());
         }
         return false;
+    }
+
+    private static boolean within(String reported, int wanted) {
+        if (reported == null) return false;
+        try { return Math.abs(Integer.parseInt(reported) - wanted) <= 1; }
+        catch (NumberFormatException unreadable) { return false; }
     }
 
     /** The accessory snapshot of one player must never reach the other player. */
@@ -1339,11 +1358,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         if (stageData.get("summon") == null) {
-            Map<String, String> status = peerStatus();
-            int px = Integer.parseInt(status.getOrDefault("x", "0"));
-            int py = Integer.parseInt(status.getOrDefault("y", "0"));
-            int pz = Integer.parseInt(status.getOrDefault("z", "0"));
-            BlockPos pos = new BlockPos(px + 1, py, pz);
+            BlockPos pos = openSpotNextToPeer(client, 1);
             client.getConnection().sendCommand("summon thaumcraft:golem " + pos.getX() + " " + pos.getY() + " " + pos.getZ()
                     + " {Owner:\"" + peerName + "\"}");
             stageData.put("summon", true);
@@ -1351,14 +1366,15 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         }
         EntityGolemBase golem = peerOwnedGolem(client);
         if (golem == null) {
+            // What the lead's client does see, for a run where the golem never shows up.
+            List<String> seen = new ArrayList<>();
+            for (var entity : client.level.entitiesForRendering())
+                if (entity instanceof EntityGolemBase other) seen.add(other.getOwnerName() + "@" + other.blockPosition().toShortString());
+            evidence.put("pair_golem_client_view", seen);
             // The golem of the other player is summoned again until it is on
             // the client of the lead.
             if (stageTicks % 100 == 0) {
-                Map<String, String> status = peerStatus();
-                int px = Integer.parseInt(status.getOrDefault("x", "0"));
-                int py = Integer.parseInt(status.getOrDefault("y", "0"));
-                int pz = Integer.parseInt(status.getOrDefault("z", "0"));
-                BlockPos pos = new BlockPos(px + 1, py, pz);
+                BlockPos pos = openSpotNextToPeer(client, 1);
                 client.getConnection().sendCommand("summon thaumcraft:golem " + pos.getX() + " " + pos.getY() + " "
                         + pos.getZ() + " {Owner:\"" + peerName + "\"}");
             }
@@ -1371,8 +1387,10 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         if (stageData.get("used") == null) {
+            evidence.put("pair_golem_interaction_distance", Math.sqrt(golem.distanceToSqr(client.player)));
             client.gameMode.interact(client.player, golem, InteractionHand.MAIN_HAND);
-            stageData.put("used", true);
+            // The refusal gets its own time: the golem may show up late in the stage.
+            stageData.put("used", stageTicks);
             return false;
         }
         String refusal = lastMessageContaining("You are not my Master!");
@@ -1381,7 +1399,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         evidence.put("pair_lead_bell_selected", leadSelected);
         if (leadSelected) throw new IllegalStateException("The lead client took over the second client's golem");
         if (refusal == null) {
-            if (stageTicks < 300) return false;
+            if (stageTicks - (Integer) stageData.get("used") < 200) return false;
             throw new IllegalStateException("The lead client was not refused the second client's golem");
         }
         if (stageData.get("peer_bell") == null) {
@@ -1402,10 +1420,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         if (!bringPeerNextToLead(client)) return false;
         if (stageData.get("summon") == null) {
             Map<String, String> status = peerStatus();
-            int px = Integer.parseInt(status.getOrDefault("x", "0"));
-            int py = Integer.parseInt(status.getOrDefault("y", "0"));
-            int pz = Integer.parseInt(status.getOrDefault("z", "0"));
-            BlockPos pos = new BlockPos(px - 1, py, pz);
+            BlockPos pos = openSpotNextToPeer(client, -1);
             client.getConnection().sendCommand("summon thaumcraft:traveling_trunk " + pos.getX() + " " + pos.getY() + " "
                     + pos.getZ() + " {upgrade:3b,Owner:\"" + peerName + "\",OwnerUUID:" + uuidIntArray(status.get("uuid")) + "}");
             stageData.put("summon", true);
@@ -1676,6 +1691,28 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     }
 
     /** The golem of the second client, as the lead's client sees it. */
+    /**
+     * A spot next to the second player whose feet and head blocks are free. The pair stages run in
+     * the work area of the earlier stages: a golem summoned into the arcane bore placed there
+     * suffocated before it could answer the bell.
+     */
+    private BlockPos openSpotNextToPeer(Minecraft client, int side) {
+        Map<String, String> status = peerStatus();
+        int px = Integer.parseInt(status.getOrDefault("x", "0"));
+        int py = Integer.parseInt(status.getOrDefault("y", "0"));
+        int pz = Integer.parseInt(status.getOrDefault("z", "0"));
+        int[][] offsets = {{side, 0}, {0, side}, {0, -side}, {-side, 0}, {side, side}, {side, -side}, {2 * side, 0}, {0, 2 * side}};
+        for (int[] offset : offsets) {
+            BlockPos pos = new BlockPos(px + offset[0], py, pz + offset[1]);
+            if (client.level.getBlockState(pos).getCollisionShape(client.level, pos).isEmpty()
+                    && client.level.getBlockState(pos.above()).getCollisionShape(client.level, pos.above()).isEmpty()) {
+                evidence.put("pair_spot_" + (side > 0 ? "golem" : "trunk"), List.of(pos.getX(), pos.getY(), pos.getZ()));
+                return pos;
+            }
+        }
+        return new BlockPos(px + side, py, pz);
+    }
+
     private EntityGolemBase peerOwnedGolem(Minecraft client) {
         EntityGolemBase best = null;
         double bestDistance = Double.MAX_VALUE;

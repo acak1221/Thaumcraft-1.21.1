@@ -24,7 +24,8 @@ import java.util.Properties;
  * <p>1.21.1 has no Forge configuration screen, so the port keeps the settings in the properties
  * file {@code config/thaumcraft.properties} and this store is the catalogue that the native
  * screen edits. Every entry names the original category and the original key, so the screen shows
- * the original layout with the settings the port really has.
+ * the original layout with the settings the port really has. The sixth category, {@code Tweaks},
+ * is the port's own: the improvements adopted from TC4Tweaks.
  */
 public final class ThaumcraftConfigStore {
     /** The original category of a setting. */
@@ -33,7 +34,9 @@ public final class ThaumcraftConfigStore {
         MONSTER_SPAWNING("Monster_Spawning"),
         WORLD_GENERATION("World_Generation"),
         WORLD_REGENERATION("World_Regeneration"),
-        RESEARCH("Research");
+        RESEARCH("Research"),
+        /** Not an original category: the improvements adopted from TC4Tweaks ({@link ThaumcraftTweaks}). */
+        TWEAKS("Tweaks");
         private final String id;
         Category(String id) { this.id = id; }
         public String id() { return id; }
@@ -94,7 +97,20 @@ public final class ThaumcraftConfigStore {
             // counterpart in the port: the port does not regenerate chunks at all.
             // Original Research category.
             new Entry(Category.RESEARCH, "research_difficulty", false, false, 0, -1, 1),
-            new Entry(Category.RESEARCH, "aspect_total_cap", false, false, 100, 100, 1000));
+            new Entry(Category.RESEARCH, "aspect_total_cap", false, false, 100, 100, 1000),
+            // Port settings, not original keys: ThaumcraftTweaks.DEFAULTS.
+            // Port setting held by ResearchSettings, so that the client resolves aspects like the server.
+            new Entry(Category.TWEAKS, "aspect_inference", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "more_randomized_loot", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "earth_shock_targets", false, false, 2, 0, 2),
+            new Entry(Category.TWEAKS, "infusion_keeps_item_data", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "filled_container_to_hand", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_search", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_counter", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "notification_clear_button", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_remember_page", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_keyboard", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_bookmarks", true, true, 0, 0, 0));
 
     private ThaumcraftConfigStore() {}
 

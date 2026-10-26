@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:tin_nugget",
+    {
+      "id": "#c:nuggets/tin",
+      "required": false
+    }
+  ]
+}

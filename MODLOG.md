@@ -1,3 +1,18 @@
+## 2026-10-26 — add-on developer documentation
+
+docs/api/README.md (and docs/api/ru/README.md) index eight guides in English (docs/api/guide) and Russian
+(docs/api/ru/guide): getting started, aspects, research, recipes (API and JSON of the native types), wands and
+foci, blocks/essentia/vis, gear and baubles, content and world; plus an API reference generated from the Javadoc
+(docs/api/reference, scripts/porting/ApiReference.java --check). scripts/porting/api_docs.py copies the guides'
+code from the example add-on, which grew a focus, an essentia container block with IWandable, an amulet bauble,
+a knowledge scroll, a rod update hook, complex and entity tags, JSON recipes, a smelting bonus, warp and loot bag
+entries; test_api_docs.py keeps guides, links and reference in step. Five API defects found on the way were
+fixed: warp from worn baubles (as the original WarpEvents.getWarpFromGear), onUnequipped on a plain click,
+TileThaumcraft data with the chunk and after a container empties, tubes and machines now take essentia from an
+add-on IEssentiaTransport and the infusion matrix from an add-on IAspectSource. Verified: 2640 JUnit, 138 Python,
+GameTest Fabric 495/495 and NeoForge 483/483 on fresh worlds, both builds; the example was inspected in a Fabric
+client. Not run: a NeoForge client or multiplayer with an add-on. Gaps and deviations: KNOWN_DEVIATIONS.md §9.
+
 ## 2026-10-26 — add-on API: porting Thaumcraft 4 add-ons from 1.7.10
 
 Every class of the original API already existed, but much of it only registered things the game never

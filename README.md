@@ -128,8 +128,10 @@ NeoForge has had less client and multiplayer testing than Fabric.
 The public API of Thaumcraft 4.2.3.5 (`thaumcraft.api`) is kept under the same names, so a 1.7.10
 add-on is ported rather than rewritten: research, recipes, aspects, object tags, wand rods, caps and
 foci registered through it work in the game, and the 1.7.10 ore dictionary names and `ConfigItems`
-names still resolve. [`docs/api/PORTING.md`](docs/api/PORTING.md) is the porting guide, and
-[`examples/example-addon`](examples/example-addon) a working add-on (`./gradlew :fabric:runExampleClient`).
+names still resolve. [`docs/api`](docs/api/README.md) holds the developer guides (English and Russian), an API
+reference generated from the Javadoc and the [porting guide](docs/api/PORTING.md);
+[`examples/example-addon`](examples/example-addon) is a working add-on the guides quote
+(`./gradlew :fabric:runExampleClient`).
 
 ## Building from source
 

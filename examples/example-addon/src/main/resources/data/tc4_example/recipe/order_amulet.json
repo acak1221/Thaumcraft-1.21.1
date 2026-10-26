@@ -1,0 +1,12 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "EXAMPLE_AMULET",
+  "input": {"item": "thaumcraft:mundane_amulet"},
+  "components": [
+    {"item": "thaumcraft:order_shard"}, {"item": "tc4_example:vis_shard"},
+    {"item": "thaumcraft:order_shard"}, {"item": "tc4_example:vis_shard"}
+  ],
+  "aspects": {"ordo": 16, "praecantatio": 8, "tutamen": 8},
+  "instability": 2,
+  "result": {"id": "tc4_example:order_amulet", "count": 1}
+}

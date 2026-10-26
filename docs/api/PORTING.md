@@ -5,7 +5,8 @@ Thaumcraft 4 Reload keeps the public API of Thaumcraft 4.2.3.5: every class of `
 1.21.1 allows it. A 1.7.10 add-on is ported, not loaded: its code still has to move to 1.21.1 itself
 (items, blocks, rendering, networking). This guide is about the Thaumcraft side of that move: what stays,
 what changed and what to call instead. The working example is
-[`examples/example-addon`](../../examples/example-addon) (run it with `./gradlew :fabric:runExampleClient`).
+[`examples/example-addon`](../../examples/example-addon) (run it with `./gradlew :fabric:runExampleClient`), and the
+[guides](README.md#guides) explain each part of the API with compiled code from it.
 
 Everything stated as working here is exercised by a test of this repository; the names are in each section.
 
@@ -244,9 +245,10 @@ Thaumcraft asks every item, block and block entity for these interfaces, so impl
 
 ## 11. The example add-on
 
-[`examples/example-addon`](../../examples/example-addon) registers items, an aspect of its own, object tags
-(one by a 1.7.10 ore dictionary name), an arcane, a crucible and an infusion recipe, a wand rod and a wand cap,
-and a research tab with five entries (a parent of the original tree, recipe, aspect and smelting pages, a
-data-driven recipe page, a hidden entry revealed by scanning, a warp value, the ROD/CAP entries). It
-imports nothing but `thaumcraft.api` (`ExampleAddonApiOnlyTest` keeps it so) and is compiled by every
-build. `./gradlew :fabric:runExampleClient` starts a development client with it.
+[`examples/example-addon`](../../examples/example-addon) registers items, a block with a block entity, an aspect of its
+own, object, complex and entity tags (one by a 1.7.10 ore dictionary name), arcane, shapeless arcane, crucible and
+infusion recipes through the API and as JSON files of the native types, a wand rod with an update hook and a wand cap,
+a focus, an amulet bauble with a discount, runic charge and warp, an essentia container that feeds tubes and answers a
+wand, an item that grants research points, and a research tab with nine entries. It imports nothing but
+`thaumcraft.api` (`ExampleAddonApiOnlyTest` keeps it so) and is compiled by every build; the guides quote it.
+`./gradlew :fabric:runExampleClient` starts a development client with it.

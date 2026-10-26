@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "EXAMPLE_BOWL",
+  "pattern": ["G G", "GBG"],
+  "key": {
+    "G": {"item": "minecraft:glass"},
+    "B": {"item": "minecraft:bowl"}
+  },
+  "result": {"id": "tc4_example:essentia_bowl", "count": 1},
+  "vis": {"aqua": 5, "ordo": 3}
+}

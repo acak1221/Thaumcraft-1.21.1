@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "EXAMPLE_FOCUS",
+  "pattern": [" F ", "FQF", " F "],
+  "key": {
+    "F": {"item": "thaumcraft:fire_shard"},
+    "Q": {"item": "minecraft:quartz"}
+  },
+  "result": {"id": "tc4_example:spark_focus", "count": 1},
+  "vis": {"ignis": 10, "aer": 5, "perditio": 5}
+}

@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "EXAMPLE_SCROLL",
+  "source_order": 1000,
+  "catalyst": {"item": "minecraft:paper"},
+  "result": {"id": "tc4_example:insight_scroll", "count": 1},
+  "aspects": {"cognitio": 4, "praecantatio": 2}
+}

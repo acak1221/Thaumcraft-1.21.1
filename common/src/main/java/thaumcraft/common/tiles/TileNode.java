@@ -173,7 +173,7 @@ public final class TileNode extends BlockEntity implements INode {
     public int getRechargeWait() { return rechargeWait; }
 
     boolean canTransduce() { return !transducing && !ticking && !notifying && !pearlPlanning && current(); }
-    boolean beginTransduction() {
+    public boolean beginTransduction() {
         if (transducing || ticking || notifying || pearlPlanning) return false;
         transducing = true;
         try { if (current()) return true; }
@@ -182,7 +182,7 @@ public final class TileNode extends BlockEntity implements INode {
         return false;
     }
     boolean transductionCurrent() { return transducing && !ticking && !notifying && !pearlPlanning && current(); }
-    void endTransduction() { transducing = false; }
+    public void endTransduction() { transducing = false; }
     /** Detached native reversion only. Original converter69-72 sets BASE then
      * drains every current key toZERO; UUID is freshly generated, not preserved. */
     void initializeReverted(AspectList base, NodeType type, NodeModifier modifier) {
@@ -235,7 +235,7 @@ public final class TileNode extends BlockEntity implements INode {
     }
 
     /** One whole node vis pays a prepared pedestal credit before notification callbacks run. */
-    boolean drawForPedestal(TileWandPedestal pedestal, Aspect aspect) {
+    public boolean drawForPedestal(TileWandPedestal pedestal, Aspect aspect) {
         AspectList stock = aspects;
         int amount = stock.getAmount(aspect);
         if (transducing || ticking || notifying || pearlPlanning || orbIntent != null

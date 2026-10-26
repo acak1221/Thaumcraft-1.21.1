@@ -1,6 +1,7 @@
 package thaumcraft.neoforge;
 
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.api.distmarker.Dist;
@@ -18,7 +19,7 @@ import thaumcraft.client.ClientSetup;
  */
 @Mod(Thaumcraft.MODID)
 public final class ThaumcraftNeoForge {
-    public ThaumcraftNeoForge(IEventBus bus) {
+    public ThaumcraftNeoForge(IEventBus bus, ModContainer container) {
         // The native creative tab sink must be installed before the shared module
         // publishes its tab stacks.
         NeoForgeCreativeTabs.init(bus);
@@ -37,6 +38,7 @@ public final class ThaumcraftNeoForge {
         NeoForgeBorePlatform.init();
         NeoForgeGolemHarvestPlatform.init();
         NeoForgeGolemUsePlatform.init();
+        NeoForgeWandUseCapture.init();
         // The shared Architectury break event must reach the shared protection for
         // every break attempt, also for the three refusals NeoForge posts its
         // native break event already cancelled for.
@@ -49,6 +51,7 @@ public final class ThaumcraftNeoForge {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(ClientSetup::init));
             thaumcraft.neoforge.client.ThaumcraftNeoForgeClient.register(bus);
+            thaumcraft.neoforge.client.NeoForgeConfigScreen.register(container);
         }
     }
 }

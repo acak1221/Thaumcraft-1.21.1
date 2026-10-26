@@ -1,4 +1,4 @@
-package thaumcraft.common.lib.world;
+package thaumcraft.common.testing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -10,10 +10,14 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkPyramid;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.common.lib.world.StructurePlacementRules;
+import thaumcraft.common.lib.world.WorldGenMound;
+import thaumcraft.common.lib.world.WorldGenMoundTemplate;
+import thaumcraft.common.lib.world.WorldGenWriteArea;
 
 /** Real generated chunks and blocks, with a deliberately restricted feature write envelope.
  * The terrain is a declared fixture; this is not a claim of natural mound discovery. */

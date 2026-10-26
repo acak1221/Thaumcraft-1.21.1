@@ -31,6 +31,8 @@ public final class ThaumcraftGameTestMod {
         // owns the native BlockEvent.BreakEvent and the real removal; the shared
         // side never names a loader class.
         thaumcraft.common.testing.NativeBreakPhases.Holder.install(NeoForgeBreakPhases::install);
+        // NeoForge writes saved data on its IO worker; disk-reload fixtures wait for it.
+        thaumcraft.common.testing.SavedDataFlush.install(net.neoforged.neoforge.common.IOUtilities::waitUntilIOWorkerComplete);
         // The test-only blocks of the shared harness must enter the native registry
         // before it freezes. The Fabric harness registers them in its mod
         // initializer; NeoForge has no such phase, but its RegisterEvent fires
@@ -60,6 +62,8 @@ public final class ThaumcraftGameTestMod {
     private static void onRegister(RegisterEvent event) {
         var key = event.getRegistryKey();
         if (Registries.BLOCK.equals(key)) {
+            // The Fabric harness registers this neighbour probe in its initializer too.
+            thaumcraft.common.testing.ResourceSafetyRuntimeChecks.registerTestProbes();
             NodeTransductionRuntimeChecks.registerTestProbes();
             ExcavationRemovalFailureRuntimeChecks.registerEarlyProbe();
             BiologicalLampRuntimeChecks.registerTestProbes();

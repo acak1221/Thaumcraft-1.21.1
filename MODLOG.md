@@ -1,3 +1,25 @@
+## 2026-10-26 — NeoForge GameTest parity and three NeoForge-only defects
+
+NeoForge built and ran on the current shared code for the first time since the
+content waves. Its GameTest catalogue no longer compiled and covered 307 of 469
+wrappers; it is now regenerated from Fabric by
+`scripts/porting/neoforge_gametests.py`, and a Python test catches drift. The
+17 wrappers on Fabric-only APIs (Transfer API, Fabric loot and protection events)
+are skipped and their NeoForge counterparts stay untested. Harness: three check
+classes moved out of mod packages (JPMS split packages; four mod methods became
+public), disk-reload checks wait for NeoForge's asynchronous SavedData writes,
+sounds.json is read through the mod's class. Shared-code fixes: the Primal
+Crusher no longer charges and breaks the centre block a second time on NeoForge;
+removing an advanced alchemical furnace part at a chunk edge no longer loads the
+unavailable neighbour chunk through NeoForge's comparator notice; wand block
+triggers run outside NeoForge's block snapshot capture, as the original's
+onItemUseFirst did, so the Oculus keeps its dark node when a neighbour undoes
+the gate. NeoForge also registers the config screen. Verified: NeoForge build,
+12 NeoForge JUnit, 452/452 NeoForge GameTests and 467/467 Fabric GameTests on
+fresh worlds, 2571 JUnit, 115 Python tests. Not run: a real NeoForge client,
+EMI on NeoForge (no plugin yet), multiplayer. See
+[the report](docs/analysis/2026-10-26-neoforge-gametest-parity-ru.md).
+
 ## 2026-10-25 — 1.21.1 integrations: EMI, Mod Menu, config screen, tag translations
 
 Optional EMI plugin in the Fabric module: arcane workbench (every rod x cap the

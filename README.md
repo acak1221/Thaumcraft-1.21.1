@@ -48,8 +48,9 @@ Fabric API и Architectury API устанавливаются отдельно �
 ```
 
 Артефакт Fabric: `fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.6.jar`.
-NeoForge сохраняется в проекте; его сборка и игровая проверка пока отложены
-согласно Fabric-first приоритету в `AGENTS.md`.
+NeoForge собирается и проходит тот же набор GameTest, кроме 17 фикстур на API Fabric
+(`./gradlew :neoforge:build`). В настоящем клиенте NeoForge порт пока не проверялся, EMI на
+NeoForge не подключён.
 
 Тесты:
 
@@ -57,6 +58,9 @@ NeoForge сохраняется в проекте; его сборка и игр
 ./gradlew :common:test                 # JUnit
 rm -rf fabric/run-gametest/world
 ./gradlew :fabric:runGameTest          # GameTest, нужен чистый мир
+rm -rf neoforge/run-gametest/world
+./gradlew :neoforge:runGameTest        # тот же набор на NeoForge
+python3 scripts/porting/neoforge_gametests.py --write  # после правки каталога Fabric
 ```
 
 ## Документация

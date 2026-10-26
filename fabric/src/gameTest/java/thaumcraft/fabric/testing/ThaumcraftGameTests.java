@@ -148,17 +148,17 @@ public final class ThaumcraftGameTests implements FabricGameTest {
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal")
     public void reviewPedestalConservesWholeNodeVis(GameTestHelper test) {
-        thaumcraft.common.tiles.WandPedestalRegressionChecks.conservesWholeNodeVis(test);
+        thaumcraft.common.testing.WandPedestalRegressionChecks.conservesWholeNodeVis(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal")
     public void reviewPedestalPartialAndCompoundCharge(GameTestHelper test) {
-        thaumcraft.common.tiles.WandPedestalRegressionChecks.fillsPartialVisAndConvertsOnlyWithFocus(test);
+        thaumcraft.common.testing.WandPedestalRegressionChecks.fillsPartialVisAndConvertsOnlyWithFocus(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_pedestal_sync")
     public void reviewPedestalInventoryUpdatesClients(GameTestHelper test) {
-        thaumcraft.common.tiles.WandPedestalRegressionChecks.inventoryChangesQueueNativeClientUpdates(test);
+        thaumcraft.common.testing.WandPedestalRegressionChecks.inventoryChangesQueueNativeClientUpdates(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "review_regressions")
@@ -317,7 +317,8 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void g21ButcherLeavesBreedingPair(GameTestHelper test) { thaumcraft.common.testing.GolemEndToEndRuntimeChecks.butcherLeavesBreedingPair(test); }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void sound_registry_covers_bundled_events(GameTestHelper helper) {
-        try (var input = ThaumcraftGameTests.class.getResourceAsStream("/assets/thaumcraft/sounds.json")) {
+        // The mod's own class: on NeoForge this harness is a separate JPMS module.
+        try (var input = thaumcraft.common.Thaumcraft.class.getResourceAsStream("/assets/thaumcraft/sounds.json")) {
             if (input == null) throw new IllegalStateException("Bundled sounds.json missing");
             var sounds = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(input,
                     java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
@@ -497,12 +498,12 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "mound_boundary")
     public void moundBoundaryIsCompleteOrRefused(GameTestHelper test) {
-        thaumcraft.common.lib.world.MoundBoundaryRuntimeChecks.run(test);
+        thaumcraft.common.testing.MoundBoundaryRuntimeChecks.run(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "mound_rng_isolation")
     public void moundGenerationRandomIsIsolated(GameTestHelper test) {
-        thaumcraft.common.lib.world.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);
+        thaumcraft.common.testing.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "bore_chunk_envelope_native_prerequisite")

@@ -1,4 +1,4 @@
-package thaumcraft.common.tiles;
+package thaumcraft.common.testing;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,6 +27,8 @@ import thaumcraft.common.items.baubles.ItemAmuletVis;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.foci.FocalUpgradeCosts;
+import thaumcraft.common.tiles.TileNode;
+import thaumcraft.common.tiles.TileWandPedestal;
 
 /** Actual registered block tickers, node stock and native chunk update queue; no copied charge arithmetic. */
 public final class WandPedestalRegressionChecks {

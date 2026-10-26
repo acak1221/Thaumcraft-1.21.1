@@ -227,7 +227,7 @@ public final class SaveCycleRuntimeChecks {
         generator.grid[2][2] = 512; // Explicit nonempty marker input, not a labyrinth generation acceptance.
         maze.storeLabyrinth(generator, 123000, -123000);
         var before = maze.save(new CompoundTag(), level.registryAccess());
-        level.getDataStorage().save();
+        SavedDataFlush.save(level.getDataStorage());
         // A separate EMPTY cache opens the actual world's data directory, not a copy of the live map.
         var directory = level.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).resolve("data").toFile();
         var fresh = new DimensionDataStorage(directory, level.getServer().getFixerUpper(), level.registryAccess());

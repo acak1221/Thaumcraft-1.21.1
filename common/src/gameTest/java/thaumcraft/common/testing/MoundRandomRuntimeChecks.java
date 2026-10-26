@@ -1,10 +1,11 @@
-package thaumcraft.common.lib.world;
+package thaumcraft.common.testing;
 
 import java.lang.reflect.Proxy;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.world.WorldGenMound;
 
 /** Exercise the actual loot-state factory with registered blocks, without a live-level RNG escape. */
 public final class MoundRandomRuntimeChecks {

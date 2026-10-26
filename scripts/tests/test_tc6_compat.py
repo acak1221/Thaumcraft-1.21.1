@@ -15,6 +15,8 @@ TC6 = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(TC6)
 
 
+# The donor JAR is Azanor's release and is not tracked; the ABI check runs where it is present locally.
+@unittest.skipUnless(os.path.isfile(DONOR), "Thaumcraft-1.12.2-6.1.BETA26.jar not present at the repository root")
 class Tc6CompatAbiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

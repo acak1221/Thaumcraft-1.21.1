@@ -147,10 +147,15 @@ class FoundationAssetsTest(unittest.TestCase):
                 patch.object(warp, "PROGRAM_TARGET", Path(tmp) / "program"), \
                 patch.object(warp, "STALE_PROGRAM_DIR", Path(tmp) / "stale"):
             warp.main()
+            # The original JAR is not tracked. Without it the converter reads thaumcraft_src, whose
+            # text files lost some of the JAR's CRLF line endings, so only the text is compared.
+            exact = warp.ORIGINAL_JAR.exists()
             for produced in Path(tmp).rglob("*"):
                 if produced.is_file():
                     native = (program_root if produced.parent.name == "program" else shader_root / "post") / produced.name
-                    self.assertEqual(produced.read_bytes(), native.read_bytes(), f"stale converted shader: {native}")
+                    want, got = native.read_bytes(), produced.read_bytes()
+                    if not exact: want, got = want.replace(b"\r\n", b"\n"), got.replace(b"\r\n", b"\n")
+                    self.assertEqual(got, want, f"stale converted shader: {native}")
         for stage in program_root.glob("*sh"):
             text = stage.read_text()
             self.assertTrue(text.startswith("#version 150"), stage)

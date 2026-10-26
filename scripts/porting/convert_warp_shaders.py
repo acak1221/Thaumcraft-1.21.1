@@ -42,8 +42,9 @@ The program renames keep the original file names visible:
 The two chains that only use vanilla programs keep the vanilla program names
 (``color_convolve``, ``blit``, ``box_blur``).
 
-The source of truth is the original JAR, which is tracked in this repository;
-the retained 1.12 reference tree is used only as a fallback.
+The source of truth is the original JAR, read from the repository root when it is present
+locally (it is not tracked: it is Azanor's release); without it the byte-identical copies in
+``thaumcraft_src`` are read.
 """
 from __future__ import annotations
 
@@ -163,15 +164,17 @@ BLUR_PROGRAM = "thaumcraft_blur"
 
 
 def read_original(relative: str) -> str | None:
-    """Read one original shader asset, the tracked JAR first."""
+    """Read one original shader asset, the local JAR first."""
     if ORIGINAL_JAR.exists():
         with zipfile.ZipFile(ORIGINAL_JAR) as jar:
             try:
                 return jar.read("assets/minecraft/shaders/" + relative).decode("utf-8")
             except KeyError:
                 return None
+    # Bytes, not read_text(): universal newlines would turn the CRLF of the original files into LF
+    # and the fallback would no longer reproduce what the JAR produces.
     path = FALLBACK / relative
-    return path.read_text(encoding="utf-8") if path.exists() else None
+    return path.read_bytes().decode("utf-8") if path.exists() else None
 
 
 def glsl150(text: str, stage: str) -> str:

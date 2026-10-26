@@ -109,3 +109,10 @@ javac.*.args
 .gradle-g22/
 .gradle-g24/
 .gradle-g25/
+
+# Azanor's original releases: the behavioral oracle is kept locally at the repository root and
+# never committed (removed from the whole history on 2026-10-26 before the repository went public).
+/Thaumcraft-1.7.10-4.2.3.5.jar
+/Thaumcraft-1.12.2-6.1.BETA26.jar
+# A stray Gradle distribution download that was once committed.
+.gradle-g21/

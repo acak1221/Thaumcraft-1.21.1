@@ -241,6 +241,9 @@ public final class Thaumcraft {
             thaumcraft.common.lib.research.AddonResearch.refresh();
             // Object tags an add-on registered for an item tag at mod initialization, before tags were bound.
             thaumcraft.api.ThaumcraftApi.applyTagObjectTags();
+            // Original ConfigAspects ran in postInit, after the add-ons registered their aspects: their
+            // Wisp rows belong to the public entity list before anything is scanned.
+            thaumcraft.common.lib.research.EntityAspectBindings.registerLateWispVariants();
             ObjectAspectCatalog.validateAgainstRegistries();
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);

@@ -42,7 +42,8 @@ import thaumcraft.common.tiles.TileManaPod;
  * registered effects. Explicit empty or unrelated component patches remain
  * initialized legacy NBT and are not rerolled. */
 public final class ItemManaBean extends Item implements IEssentiaContainerItem {
-    private static final Aspect[] DISPLAY_ASPECTS=Aspect.aspects.values().toArray(Aspect[]::new);
+    // Original displayAspects: the 48 original aspects in practice, see OriginalDisplayAspects.
+    private static final Aspect[] DISPLAY_ASPECTS=OriginalDisplayAspects.ALL;
     /** Original ItemManaBean:68 - the random potion of a fresh bean lasts 160 ticks plus a random of eighty. */
     public static final int EFFECT_DURATION = 160;
     /** Original ItemManaBean:68 - the random part of the duration of the potion of a fresh bean. */

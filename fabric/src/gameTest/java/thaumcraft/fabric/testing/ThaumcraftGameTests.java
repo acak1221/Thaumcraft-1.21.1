@@ -2443,4 +2443,41 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void wandApiHelperPaysChargesAndMountsAddonFoci(GameTestHelper test) {
         thaumcraft.common.testing.WandApiRuntimeChecks.wandHelperPaysAndMounts(test);
     }
+
+    // An aspect registered by an add-on (registered by these scenarios only, never by the mod) works end to
+    // end. Own batches: the scenarios register and remove a 49th aspect.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_aspect_scan")
+    public void addonAspectObjectTagScanDiscoversIt(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.objectTagScanDiscoversIt(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectEssentiaFillsAJarAndSurvivesReload(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.essentiaFillsAJarAndSurvivesReload(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectCombinesAtTheResearchTable(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.combinesAtTheResearchTable(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectRoundTripsThroughClientCodecs(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.roundTripsThroughClientCodecs(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectMenusSynchroniseIt(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.menusSynchroniseIt(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectWispScansAndCentrifugeSplitsIt(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.wispScansAndCentrifugeSplitsIt(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectCreativeTabListsItsPhial(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.creativeTabListsItsPhial(test);
+    }
 }

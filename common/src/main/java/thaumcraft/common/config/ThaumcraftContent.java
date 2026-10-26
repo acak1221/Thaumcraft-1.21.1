@@ -230,6 +230,14 @@ public final class ThaumcraftContent {
     }
 
     private ThaumcraftContent() {}
+
+    /** One filled phial per aspect registered after the fixed creative slots were declared, in registry order. */
+    static java.util.List<ItemStack> lateAspectPhials(java.util.Set<String> listed) {
+        java.util.List<String> late;
+        synchronized (Aspect.aspects) { late = Aspect.aspects.keySet().stream().filter(tag -> !listed.contains(tag)).toList(); }
+        return late.stream().map(ItemEssence::filled).toList();
+    }
+
     public static Item crystalFor(String tag) {
         RegistrySupplier<Item> shard = SHARDS.get(tag);
         return shard == null ? null : shard.get();
@@ -250,7 +258,15 @@ public final class ThaumcraftContent {
         CreativeTabRegistry.append(TAB, EMPTY_PHIAL);
         CreativeTabRegistry.append(TAB, CRYSTAL_ESSENCE);
         CreativeTabRegistry.append(TAB, IRON_WAND_CAP);
-        for (Aspect aspect : Aspect.aspects.values()) CreativeTabRegistry.appendStack(TAB, () -> ItemEssence.filled(aspect.getTag()));
+        // Original ItemEssence.getSubItems:84-90 listed one phial per aspect of the LIVE registry when the
+        // tab was built, so add-on aspects had their phial. The aspects known now keep their fixed tab
+        // slots; the phial of an add-on aspect registered after this point (another mod's initialiser may
+        // run later on either loader) is published when the tab is built. Published stacks sit where the
+        // loader puts them (Fabric: before the appended stacks), not next to the fixed phials.
+        java.util.Set<String> listedPhials;
+        synchronized (Aspect.aspects) { listedPhials = new java.util.LinkedHashSet<>(Aspect.aspects.keySet()); }
+        for (String tag : listedPhials) CreativeTabRegistry.appendStack(TAB, () -> ItemEssence.filled(tag));
+        ThaumcraftCreativeTabs.publish(TAB, () -> lateAspectPhials(listedPhials));
         CreativeTabRegistry.appendStack(TAB, () -> new ItemStack(JAR.get()), () -> new ItemStack(VOID_JAR.get()), () -> new ItemStack(AURA_NODE.get()));
         for (Map.Entry<String, RegistrySupplier<Item>> material : MATERIALS.entrySet())
             // Original ItemResource:132-137 - the creative listing of the resources skips the

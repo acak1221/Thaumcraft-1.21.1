@@ -17,7 +17,8 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 
 /** Original ItemWispEssence:40-105; subtypes/NBT become native components. */
 public final class ItemWispEssence extends Item implements IEssentiaContainerItem {
-    private static final Aspect[] DISPLAY_ASPECTS = Aspect.aspects.values().toArray(Aspect[]::new);
+    // Original displayAspects: the 48 original aspects in practice, see OriginalDisplayAspects.
+    private static final Aspect[] DISPLAY_ASPECTS = OriginalDisplayAspects.ALL;
     // Native TooltipContext no longer supplies the viewing player. ClientSetup
     // supplies a lazy local-player lookup; no client classes or player cache are
     // loaded on a dedicated server. Without a viewer, never reveal a tag name.

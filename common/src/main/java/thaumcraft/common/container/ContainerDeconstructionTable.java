@@ -20,7 +20,12 @@ import thaumcraft.common.tiles.TileDeconstructionTable;
 
 /** Reward button carries no aspect or quantity chosen by the client. */
 public final class ContainerDeconstructionTable extends AbstractContainerMenu {
-    private static final List<Aspect> PRIMALS = List.of(Aspect.AIR, Aspect.EARTH, Aspect.FIRE, Aspect.WATER, Aspect.ORDER, Aspect.ENTROPY);
+    /**
+     * The reward slot carries a position in {@link Aspect#getPrimalAspects()}, the live registry order: the
+     * six original primals keep positions 0-5 and an add-on primal reward (original TileDeconstructionTable
+     * rewards any primal of the reduced object aspects) is shown instead of being dropped.
+     */
+    private final List<Aspect> primals = Aspect.getPrimalAspects();
     private final TileDeconstructionTable table;
     private final Player viewer;
     private final BlockPos pos;
@@ -34,7 +39,7 @@ public final class ContainerDeconstructionTable extends AbstractContainerMenu {
                 if (index == 0) return table.breakTime();
                 if (index != 1) return 0;
                 Aspect reward = table.reward();
-                return reward == null ? 0 : PRIMALS.indexOf(reward) + 1;
+                return reward == null ? 0 : primals.indexOf(reward) + 1;
             }
             @Override public void set(int index, int value) {}
             @Override public int getCount() { return 2; }
@@ -47,7 +52,7 @@ public final class ContainerDeconstructionTable extends AbstractContainerMenu {
         addDataSlots(data);
     }
     public int breakTime() { return data.get(0); }
-    public Aspect reward() { int id = data.get(1) - 1; return id >= 0 && id < PRIMALS.size() ? PRIMALS.get(id) : null; }
+    public Aspect reward() { int id = data.get(1) - 1; return id >= 0 && id < primals.size() ? primals.get(id) : null; }
     public boolean owns(TileDeconstructionTable expected, ServerPlayer player) {
         return table == expected && player == viewer && player.server.isSameThread() && player.containerMenu == this && stillValid(player);
     }

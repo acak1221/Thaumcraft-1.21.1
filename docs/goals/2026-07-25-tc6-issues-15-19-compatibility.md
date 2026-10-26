@@ -17,35 +17,35 @@ Complete the frozen Required Outcomes using the listed Change Envelope and Prima
 ### Required Outcomes
 
 - R1: Balkon's Expansion compatibility from issue #15.
-  - Source: https://github.com/0FL01/Thaumcraft-4.2-FOREVA/issues/15
+  - Source: issue #15 of the Forge 1.12.2 baseline repository
   - Acceptance: The pinned WeaponMod and Balkon's Expansion modset completes dedicated-server startup without Thaumcraft linkage or lifecycle failures.
   - Primary evidence: `./scripts/dev.sh smoke-modset balkonsexpansion`
   - Status: verified
   - Evidence: `./scripts/dev.sh smoke-modset balkonsexpansion` reached server ready state on 2026-07-25.
 
 - R2: Solar Flux compatibility from issue #16.
-  - Source: https://github.com/0FL01/Thaumcraft-4.2-FOREVA/issues/16
+  - Source: issue #16 of the Forge 1.12.2 baseline repository
   - Acceptance: The pinned Solar Flux modset completes dedicated-server startup, including its Thaumcraft init and post-init integration.
   - Primary evidence: `./scripts/dev.sh smoke-modset solarflux`
   - Status: verified
   - Evidence: `./scripts/dev.sh smoke-modset solarflux` reached server ready state on 2026-07-25; the required integration marker and `Registering TC researches...` confirm init and post-init execution.
 
 - R3: Botania CEu compatibility from issue #17.
-  - Source: https://github.com/0FL01/Thaumcraft-4.2-FOREVA/issues/17
+  - Source: issue #17 of the Forge 1.12.2 baseline repository
   - Acceptance: The pinned Botania modset completes dedicated-server startup and its aspect registry subscriber runs without the null Warp Ward brew failure.
   - Primary evidence: `./scripts/dev.sh smoke-modset botania`
   - Status: verified
   - Evidence: `./scripts/dev.sh smoke-modset botania` reached server ready state after its TC aspect subscriber completed on 2026-07-25.
 
 - R4: Just Enough Magiculture compatibility from issue #18.
-  - Source: https://github.com/0FL01/Thaumcraft-4.2-FOREVA/issues/18
+  - Source: issue #18 of the Forge 1.12.2 baseline repository
   - Acceptance: The pinned JEM dependency set completes client mod loading and JEM post-init without missing Thaumcraft implementation classes or members.
   - Primary evidence: `./scripts/dev.sh smoke-client-modset justenoughmagiculture`
   - Status: verified
   - Evidence: `THAUMCRAFT_SMOKE_TIMEOUT=60s ./scripts/dev.sh smoke-client-modset justenoughmagiculture` reported successful Forge loading after JEM registered its custom JER entries on 2026-07-25.
 
 - R5: JAOPCA/WrapUp compatibility from issue #19.
-  - Source: https://github.com/0FL01/Thaumcraft-4.2-FOREVA/issues/19
+  - Source: issue #19 of the Forge 1.12.2 baseline repository
   - Acceptance: The pinned JAOPCA and WrapUp modset completes dedicated-server startup without the TC6 `ResearchEntry` return-descriptor failure.
   - Primary evidence: `./scripts/dev.sh smoke-modset jaopca`
   - Status: verified

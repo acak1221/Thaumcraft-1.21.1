@@ -152,7 +152,8 @@ Azanor его не одобрял и не поддерживает.
 ## Авторы и лицензия
 
 - **Thaumcraft** создал **Azanor**. Название, текстуры, звуки, модели и игровой дизайн — его работа.
-- Порт: Andrey Bash и участники (см. [`LICENSE`](LICENSE)).
+- Порт: участники Thaumcraft 4 Reload. Он вырос из порта Forge 1.12.2 от Andrey Bash и участников,
+  их уведомление MIT сохранено в [`LICENSE`](LICENSE).
 - Использованные источники, перенесённые алгоритмы и их лицензии перечислены в
   [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), среди них OpenTC4, Minecraft Forge 1.7.10 и
   идеи TC4Tweaks от Glease (код не копировался).

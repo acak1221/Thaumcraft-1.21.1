@@ -157,7 +157,8 @@ later versions.
 
 - **Thaumcraft** was created by **Azanor**. Its name, textures, sounds, models and game design are
   his work.
-- The port: Andrey Bash and contributors (see [`LICENSE`](LICENSE)).
+- The port: Thaumcraft 4 Reload contributors. It grew out of a Forge 1.12.2 port by Andrey Bash and
+  contributors, whose MIT notice is kept in [`LICENSE`](LICENSE).
 - References, adapted algorithms and their licenses are listed in
   [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), among them OpenTC4, Minecraft Forge 1.7.10 and
   the ideas of TC4Tweaks by Glease (no code copied).

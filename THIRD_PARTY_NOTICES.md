@@ -5,7 +5,7 @@ Thaumcraft 4.2.3.5 was created by Azanor. This is an unofficial port and must no
 ## Pinned sources
 
 - Behavioral oracle: `Thaumcraft-1.7.10-4.2.3.5.jar`, Azanor's original release. It is kept locally by the maintainers and is not part of this repository: on 2026-10-26 it and `Thaumcraft-1.12.2-6.1.BETA26.jar` were removed from the whole git history before publication. Its hashes and the baseline commit are recorded in the migration source lock (`docs/porting/source-lock.json`).
-- Audited Forge 1.12.2 baseline: <https://github.com/0FL01/Thaumcraft-4.2-FOREVA>, commit `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
+- Audited Forge 1.12.2 baseline: the Forge 1.12.2 port by Andrey Bash and contributors (MIT; its notice is the root `LICENSE`), commit `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
 - Original-source reference: <https://github.com/IgnoreLicensesCN/OpenTC4>, commit `80aac29c52543ef51766c4b0788fba782abb3b0b`.
 - Platform-pattern reference: <https://github.com/IgnoreLicensesCN/OpenTC4-Architectury>, commit `1509b3192910aaca0af8bba1b55d189a675010bf`, target Minecraft 1.20.1. Its root `LICENSE.txt` claims MIT, while its README explicitly says the author did not obtain permission from Azanor. Its build/license statements are not treated as permission for the original Thaumcraft code or assets.
 - Selective modern-API reference: <https://github.com/EugeneHeisst/thaumcraft-port>, commit `a9b7a613c9c3e5a4418f30e0cf38553ac328b1e6`. No gameplay code/assets from this incomplete reference were copied; its MDK-template notice is not treated as a licence for original Thaumcraft material.

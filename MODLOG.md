@@ -724,7 +724,7 @@ validation is offloaded to GitHub CI for the next commit. Client/NeoForge accept
 
 ## 2026-10-15: начальный системный анализ
 
-- Полный клон `0FL01/Thaumcraft-4.2-FOREVA`, ветка `master`, baseline `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
+- Полный клон исходного порта Forge 1.12.2, ветка `master`, baseline `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
 - Production code и original/donor JAR не изменялись; новый commit не создан.
 - Инвентаризация: 934 main Java + 530 Java test files, 1199 test annotations, 1676 resource paths.
 - Original behavioral oracle: CFR 0.152, 859 Java files вне Git-репозитория; `thaumcraft_src` здесь содержит ресурсы.

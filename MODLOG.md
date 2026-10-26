@@ -1,3 +1,11 @@
+## 2026-10-26 — thaumometer arms no longer copy another player's pose
+
+The scanner arm was drawn from the player renderer's model, which every player shares, without
+resetting its pose, so in multiplayer it followed a running neighbour. It is now posed as the
+original renderFirstPersonArm does (swing reset, no motion) before it is drawn. The new
+ThaumometerArmPoseTest fails 3/3 without the fix. Verified: 2593 JUnit, both builds; on a Fabric
+client the arm froze in a running pose before and stays put after. Two-client multiplayer not run.
+
 ## 2026-10-26 — history without the original JARs, PR to main, alpha.7
 
 At the owner's request the original Thaumcraft 4.2.3.5 and 6.1 beta jars and a stray Gradle

@@ -4,10 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.client.renderers.models.ModelThaumometer;
@@ -218,14 +220,32 @@ public final class ItemThaumometerRenderer {
         ThaumometerReadout.render(pose, buffers, target, scanned, ThaumometerReadout.packedLight(ticks, jitter));
     }
 
-    /** The arm of the player, as the original RenderPlayer.renderFirstPersonArm:318-324 draws it. */
+    /**
+     * The arm of the player, as the original RenderPlayer.renderFirstPersonArm:318-324 draws it: the
+     * swing is reset and the biped is posed with no motion before its right arm is drawn. The model
+     * belongs to the player renderer and is shared by every player it draws, so without the reset the
+     * arm kept the pose of whichever player was drawn last; in multiplayer a running player shook the
+     * scanner arms of everyone watching.
+     */
     private static void arm(PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         var player = Minecraft.getInstance().player;
         if (player == null) return;
         var renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
         if (!(renderer instanceof LivingEntityRenderer<?, ?> living)) return;
         if (!(living.getModel() instanceof HumanoidModel<?> humanoid)) return;
+        firstPersonArmPose(humanoid.rightArm);
         humanoid.rightArm.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(player.getSkin().texture())), light, overlay);
+    }
+
+    /**
+     * ModelBiped.setRotationAngles(0, 0, 0, 0, 0, ...) for the right arm with the swing reset: the
+     * rest pivot and no rotation, then the idle bob of age 0 about Z (cos(0) * 0.05 + 0.05). The
+     * original also tilted the arm by heldItemRight, a field left over from the last player drawn;
+     * like the vanilla first-person hand, the port does not take it.
+     */
+    static void firstPersonArmPose(ModelPart arm) {
+        arm.resetPose();
+        arm.zRot += Mth.cos(0.0F) * 0.05F + 0.05F;
     }
 
     /**

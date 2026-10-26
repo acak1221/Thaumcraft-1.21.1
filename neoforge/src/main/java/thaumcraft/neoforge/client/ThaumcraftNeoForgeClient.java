@@ -101,6 +101,13 @@ public final class ThaumcraftNeoForgeClient {
 
     /** The builtin item renderers of the Fabric BuiltinItemRendererRegistry. */
     private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        // The shared client setup must run before NeoForge collects menu screens, model layers
+        // and entity renderers. ClientHooks.initClientHooks posts those events from the Minecraft
+        // constructor, long before FMLClientSetupEvent, and the Architectury registries apply
+        // these three only inside the events. Run from client setup, every Thaumcraft GUI, gear
+        // model layer and entity renderer was lost, and the first Thaumcraft entity drawn crashed
+        // the client. This event is the first initClientHooks posts; registries are filled by then.
+        thaumcraft.client.ClientSetup.init();
         // The original robe dye in the native armour layer. It is not an item
         // renderer but the NeoForge native colour hook of the robe items.
         NeoForgeRobeDye.register(event);

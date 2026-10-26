@@ -24,7 +24,7 @@
       "thaumcraft.fabric.ThaumcraftFabricClient"
     ],
     "emi": [
-      "thaumcraft.fabric.compat.emi.ThaumcraftEmiPlugin"
+      "thaumcraft.compat.emi.ThaumcraftEmiPlugin"
     ],
     "modmenu": [
       "thaumcraft.fabric.compat.ThaumcraftModMenu"

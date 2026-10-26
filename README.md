@@ -49,8 +49,9 @@ Fabric API и Architectury API устанавливаются отдельно �
 
 Артефакт Fabric: `fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.6.jar`.
 NeoForge собирается и проходит тот же набор GameTest, кроме 17 фикстур на API Fabric
-(`./gradlew :neoforge:build`). В настоящем клиенте NeoForge порт пока не проверялся, EMI на
-NeoForge не подключён.
+(`./gradlew :neoforge:build`). Настоящий клиент NeoForge проверен в одиночной игре (GUI,
+сущности, снаряжение, EMI); мультиплеер на NeoForge не проверялся. Необязательный плагин EMI
+работает на обоих загрузчиках (`-PwithEmi` подключает EMI к `runClient`).
 
 Тесты:
 

@@ -9,8 +9,9 @@ displayName="Thaumcraft 4.2 FOREVA"
 authors="Azanor (original Thaumcraft), FOREVA contributors"
 description='''Unofficial port of Thaumcraft 4.2.3.5 (Minecraft 1.7.10) to Minecraft 1.21.1.'''
 displayURL="https://github.com/acak1221/Thaumcraft-1.21.1"
-# The original Thaumonomicon item texture; pixel art, so the mod list must not blur it.
-logoFile="assets/thaumcraft/textures/items/thaumonomicon.png"
+# The original Thaumonomicon item texture, copied by processResources; pixel art, so the mod
+# list must not blur it.
+logoFile="assets/thaumcraft/icon.png"
 logoBlur=false
 [[dependencies.thaumcraft]]
 modId="neoforge"
@@ -30,6 +31,13 @@ type="required"
 versionRange="[13.0.11,)"
 ordering="AFTER"
 side="BOTH"
+# Optional recipe viewer; the plugin is loaded by EMI only when EMI is installed.
+[[dependencies.thaumcraft]]
+modId="emi"
+type="optional"
+versionRange="*"
+ordering="NONE"
+side="CLIENT"
 [[mixins]]
 config="thaumcraft-common.mixins.json"
 [[mixins]]

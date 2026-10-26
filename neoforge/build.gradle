@@ -15,17 +15,30 @@ dependencies {
  modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
  common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
  shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
+ // Optional EMI integration: compile against the API only, never bundle or require it.
+ // `-PwithEmi` adds EMI to runClient for manual checks; GameTest and default runs stay without it.
+ modCompileOnly "dev.emi:emi-neoforge:$rootProject.emi_version:api"
+ if (providers.gradleProperty('withEmi').isPresent()) modLocalRuntime "dev.emi:emi-neoforge:$rootProject.emi_version"
  // The loader parity test compares the two loader modules source against source.
  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
  testImplementation 'org.junit.platform:junit-platform-launcher'
  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 processResources {
+ // The mod list reads the logo from this mod's own roots. In development the shared resources
+ // are a separate generated mod, so give NeoForge its own copy, as Fabric does for Mod Menu.
+ from(project(':common').file('src/main/resources/assets/thaumcraft/textures/items/thaumonomicon.png')) {
+  into 'assets/thaumcraft'
+  rename { 'icon.png' }
+ }
  inputs.property 'version', project.version
  filesMatching('META-INF/neoforge.mods.toml') { expand version: project.version }
 }
 shadowJar { configurations = [project.configurations.shadowBundle]; archiveClassifier = 'dev-shadow' }
 remapJar { inputFile.set shadowJar.archiveFile }
+
+// The optional EMI plugin, shared with Fabric (compat/emi).
+sourceSets.main.java.srcDir rootProject.file('compat/emi/src/main/java')
 
 sourceSets {
  gameTest {

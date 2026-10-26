@@ -43,6 +43,9 @@ shadowJar {
 }
 remapJar { inputFile.set shadowJar.archiveFile }
 
+// The optional EMI plugin is shared with NeoForge and compiled into each loader module.
+sourceSets.main.java.srcDir rootProject.file('compat/emi/src/main/java')
+
 // Opt-in harnesses. Neither output is included by jar/shadowJar or normal runs.
 sourceSets {
  gameTest {

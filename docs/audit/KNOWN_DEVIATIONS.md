@@ -93,7 +93,10 @@ world**. They must not be reported as verified until someone does:
 
 * The thaumometer screen and readout, the excavation beam, the architect overlay, the essence flow,
   the sparkles, the bone bow glint.
-* Runtime mixin injection on both loaders.
+* Runtime mixin injection on Fabric. On NeoForge it is now checked: a Mixin audit on a real
+  NeoForge client (2026-10-26) applied every pending target without error, after
+  `TaintOverlayChunkLayerMixin` was fixed for NeoForge's delegating `SectionCompiler.compile`
+  (see `docs/analysis/2026-10-26-neoforge-client-ru.md`).
 * The projective mirror shader compiling in the shader driver.
 * Nether wild nodes in a freshly generated Nether.
 * The chunk regeneration queue on a real saved world.

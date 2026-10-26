@@ -509,6 +509,30 @@ class NeoForgeLoaderParityTest {
     }
 
     /**
+     * The shared client setup runs before NeoForge collects menu screens, model layers and
+     * entity renderers.
+     *
+     * <p>NeoForge posts RegisterMenuScreensEvent, RegisterLayerDefinitions and RegisterRenderers
+     * from ClientHooks.initClientHooks in the Minecraft constructor, before FMLClientSetupEvent,
+     * and the Architectury registries apply those three only inside the events. From client
+     * setup they were lost: no Thaumcraft GUI opened, gear layers were missing and the first
+     * Thaumcraft entity drawn crashed the client (seen on a real NeoForge client, 2026-10-26).</p>
+     */
+    @Test void theSharedClientSetupRunsBeforeTheClientHookEvents() {
+        String bootstrap = read("neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java");
+        String client = read("neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java");
+        assertTrue(!bootstrap.contains("import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;")
+                        && !bootstrap.contains("ClientSetup::init"),
+                "the shared client setup is not deferred to FMLClientSetupEvent");
+        int handler = client.indexOf("private static void onRegisterClientExtensions(");
+        assertTrue(handler >= 0, "the NeoForge client handles RegisterClientExtensionsEvent");
+        String body = client.substring(client.indexOf('{', handler) + 1).replaceAll("(?m)^\\s*//.*$", "");
+        String head = body.substring(0, body.indexOf(';') + 1).trim();
+        assertEquals("thaumcraft.client.ClientSetup.init();", head,
+                "the shared client setup is the first thing the first client hook event does");
+    }
+
+    /**
      * The original robe dye of the native armour layer.
      *
      * <p>The Fabric loader redirects the DYEABLE check of the native armour layer, the NeoForge

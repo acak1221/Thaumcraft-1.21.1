@@ -1358,13 +1358,13 @@
       "ResourceLocation.parse(tag.getString(\"Recipe\"))",
       "ResourceLocation.parse(row.getString(\"id\"))"
     ],
-    "fabric/src/main/java/thaumcraft/fabric/compat/emi/AspectEmiStack.java": [
+    "compat/emi/src/main/java/thaumcraft/compat/emi/AspectEmiStack.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",aspect.getTag())"
     ],
-    "fabric/src/main/java/thaumcraft/fabric/compat/emi/EmiAspectCombinationRecipe.java": [
+    "compat/emi/src/main/java/thaumcraft/compat/emi/EmiAspectCombinationRecipe.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+aspect.getTag())"
     ],
-    "fabric/src/main/java/thaumcraft/fabric/compat/emi/ThaumcraftEmiPlugin.java": [
+    "compat/emi/src/main/java/thaumcraft/compat/emi/ThaumcraftEmiPlugin.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/\"+(sceptre?\"sceptre\":\"wand\")+\"/\"+rod.tag()+\"/\"+cap.tag())",
       "ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(),\"/\"+holder.id().getPath()+\"/hardening_\"+hardening)"

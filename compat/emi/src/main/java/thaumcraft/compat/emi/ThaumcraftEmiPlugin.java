@@ -1,5 +1,6 @@
-package thaumcraft.fabric.compat.emi;
+package thaumcraft.compat.emi;
 
+import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiInitRegistry;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
@@ -50,15 +51,17 @@ import thaumcraft.common.lib.runic.RunicArmor;
  * Optional EMI integration: arcane, crucible and infusion recipes and the aspect combinations.
  *
  * <p>TC4 had no recipe viewer of its own; its recipes were only readable in the Thaumonomicon.
- * EMI loads this class through the {@code emi} entrypoint of fabric.mod.json; nothing else
- * references it, so the mod runs unchanged without EMI. Every recipe is read from the recipes
- * the server synchronized, so datapack edits appear as well.
+ * EMI loads this class itself: on Fabric through the {@code emi} entrypoint of fabric.mod.json,
+ * on NeoForge through {@link EmiEntrypoint}. Nothing else references it, so the mod runs
+ * unchanged without EMI. Every recipe is read from the recipes the server synchronized, so
+ * datapack edits appear as well.
  *
- * <p>It lives in the Fabric module, not in common: the Architectury development transformer
- * resolves every type a common class names, and EMI's API jars carry a mod descriptor, so they
- * cannot sit on a development classpath without EMI itself. NeoForge needs its own entry point
- * (EMI's {@code @EmiEntrypoint}) when that loader is resumed.</p>
+ * <p>The plugin source ({@code compat/emi}) is compiled into both loader modules, not into
+ * common: the Architectury development transformer resolves every type a common class names,
+ * and EMI's API jars carry a mod descriptor, so they cannot sit on a development classpath
+ * without EMI itself. Loader modules are not transformed.</p>
  */
+@EmiEntrypoint
 public final class ThaumcraftEmiPlugin implements EmiPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger("Thaumcraft/EMI");
 

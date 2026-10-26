@@ -1,3 +1,19 @@
+## 2026-10-26 — real NeoForge client: two defects that broke every client; EMI on NeoForge
+
+First run of a real NeoForge client. Two shared-code defects broke every
+NeoForge client: `TaintOverlayChunkLayerMixin` selected NeoForge's delegating
+`SectionCompiler.compile` and crashed on joining a world (now `compile*`; a Mixin
+audit then applied every target), and `ClientSetup.init()` ran from
+FMLClientSetupEvent, after the events in which Architectury registers menu
+screens, model layers and entity renderers, so all 17 GUIs, 8 gear layers and
+every entity renderer were lost. The setup now runs from the first client hook
+event, pinned by a loader parity test. The EMI plugin moved to a shared
+`compat/emi` source folder and works on both loaders. The relic GameTest fixture
+now sets its own biome, since a natural taint biome legitimately grows no
+fibres. Verified: 2571 JUnit, 13 NeoForge JUnit, both builds, 467/467 Fabric
+and 452/452 NeoForge GameTests on fresh worlds, 115 Python tests. Not run: NeoForge multiplayer. See
+[the report](docs/analysis/2026-10-26-neoforge-client-ru.md).
+
 ## 2026-10-26 — NeoForge GameTest parity and three NeoForge-only defects
 
 NeoForge built and ran on the current shared code for the first time since the

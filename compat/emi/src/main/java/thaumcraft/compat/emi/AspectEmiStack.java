@@ -1,4 +1,4 @@
-package thaumcraft.fabric.compat.emi;
+package thaumcraft.compat.emi;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.emi.emi.api.render.EmiTooltipComponents;

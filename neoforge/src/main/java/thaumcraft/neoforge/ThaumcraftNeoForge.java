@@ -3,11 +3,9 @@ package thaumcraft.neoforge;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import thaumcraft.common.Thaumcraft;
-import thaumcraft.client.ClientSetup;
 
 /**
  * NeoForge bootstrap of the shared TC4 4.2.3.5 port.
@@ -49,7 +47,8 @@ public final class ThaumcraftNeoForge {
         // Original TileCrucible:373-410 - the water tank of the crucible that other mods may read and fill.
         NeoForgeCrucibleFluidHandler.init(bus);
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(ClientSetup::init));
+            // ClientSetup.init runs from the first client hook event, not FMLClientSetupEvent:
+            // see ThaumcraftNeoForgeClient.onRegisterClientExtensions.
             thaumcraft.neoforge.client.ThaumcraftNeoForgeClient.register(bus);
             thaumcraft.neoforge.client.NeoForgeConfigScreen.register(container);
         }

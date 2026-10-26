@@ -1,4 +1,4 @@
-package thaumcraft.fabric.compat.emi;
+package thaumcraft.compat.emi;
 
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.handler.StandardRecipeHandler;

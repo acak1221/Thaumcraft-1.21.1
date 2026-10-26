@@ -218,6 +218,20 @@ public final class GuiResearchTable extends ThaumcraftContainerScreen<ContainerR
 
     private static int lastPage(List<String> tags) { return Math.max(0, (tags.size() - 20) / 5); }
 
+    /**
+     * The mouse wheel turns the aspect palette like its two arrows, an input adopted from TC4Tweaks
+     * (KNOWN_DEVIATIONS §8). TC4 pages the palette with the arrows only.
+     */
+    @Override public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        if (scrollY != 0 && inside(x, y, 10, 40, 80, 90)) {
+            int before = page;
+            page = Math.clamp(page - (int) Math.signum(scrollY), 0, lastPage(palette()));
+            if (page != before) sound("key", .3F, 1);
+            return true;
+        }
+        return super.mouseScrolled(x, y, scrollX, scrollY);
+    }
+
     private void drawPalette(GuiGraphics graphics) {
         List<String> tags = palette();
         for (int drawn = 0, index = page * 5; drawn < 25 && index < tags.size(); drawn++, index++) {

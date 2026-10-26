@@ -152,6 +152,7 @@ real client (`docs/analysis/2026-10-26-tc4tweaks-wave2-ru.md`).
 | `research_search` (client) | The Thaumonomicon has no search | A search box on the top border finds completed research by name or key, and by the items their readable recipe pages make (not the sample items of enchantment and runic infusions); a result opens the research. Research the player has not completed is never listed |
 | `research_counter` (client) | No counter | The top border shows the completed research of the open category out of all of it, or, while some is still hidden, out of what the player can see, marked with a red question mark |
 | `notification_clear_button` (client) | Notifications in the corner can only expire | Open chat shows a Clear button above the notification stack while it has rows |
+| (always, client) | The research table pages its aspect palette with two arrows | The mouse wheel over the palette pages it as well; a pure input addition with no setting |
 
 Not adopted, because the port already covers them or they do not apply to 1.21.1: the packet
 exploit fixes for research completion and aspect combination (the port validates both on the

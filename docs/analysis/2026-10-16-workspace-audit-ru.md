@@ -10,12 +10,12 @@
 
 | Путь относительно workspace | Назначение и охват |
 |---|---|
-| `Thaumcraft-4.2-FOREVA/common/src/main` | Активные общие gameplay/API/resources 1.21.1 |
-| `Thaumcraft-4.2-FOREVA/fabric`, `neoforge` | Loader bootstrap, platform integrations; A07 отделяет test-only source sets |
-| `Thaumcraft-4.2-FOREVA/src` | Read-only справочник 1.12: 934 main + 530 test Java; не компилируется modern build |
-| `Thaumcraft-4.2-FOREVA/thaumcraft_src` | 1096 assets/metadata файлов, 0 Java; не original Java oracle |
-| `Thaumcraft-4.2-FOREVA/raw` | 3 JPEG, не игровые исходники |
-| `Thaumcraft-4.2-FOREVA/docs`, `scripts`, `gradle`, root build files | Планы, provenance, manifests, конвертеры, тесты, Java21/Gradle8.12.1 сборка |
+| `Thaumcraft-4-Reload/common/src/main` | Активные общие gameplay/API/resources 1.21.1 |
+| `Thaumcraft-4-Reload/fabric`, `neoforge` | Loader bootstrap, platform integrations; A07 отделяет test-only source sets |
+| `Thaumcraft-4-Reload/src` | Read-only справочник 1.12: 934 main + 530 test Java; не компилируется modern build |
+| `Thaumcraft-4-Reload/thaumcraft_src` | 1096 assets/metadata файлов, 0 Java; не original Java oracle |
+| `Thaumcraft-4-Reload/raw` | 3 JPEG, не игровые исходники |
+| `Thaumcraft-4-Reload/docs`, `scripts`, `gradle`, root build files | Планы, provenance, manifests, конвертеры, тесты, Java21/Gradle8.12.1 сборка |
 | `work/thaumcraft-4.2.3.5-oracle` | Приватная original gameplay specification: 859 Java; read-only вне repository |
 | `work/references` | OpenTC4: 2050 tracked файлов; Architectury ref: 6129. Пины в source-lock, оба лишь references |
 | `work/note-generator-oracle` | Приватный generator oracle, 516 Java8 и 516 Java21 vectors; результаты byte-identical в проверенном срезе |

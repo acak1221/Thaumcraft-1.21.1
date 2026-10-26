@@ -1,4 +1,4 @@
-# Thaumcraft 4.2 FOREVA — Minecraft 1.21.1 migration
+# Thaumcraft 4 Reload — Minecraft 1.21.1 migration
 
 The user explicitly authorized migration to Minecraft 1.21.1 on 2026-10-15. Java 21, Architectury, Fabric and NeoForge replace the legacy Java 8/Forge 1.12 build. Old no-upgrade constraints apply only to the retained legacy source. Original instructions/build snapshots are under docs/legacy-build/.
 

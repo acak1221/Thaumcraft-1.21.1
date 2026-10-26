@@ -623,7 +623,7 @@ and native Bore repair; Ward behaviour and Excavation Silk/Dowsing; Growth/Ferti
 Deconstruction table, Brainy/Giant zombies. Local 620 JUnit and 78 Python pass; full server
 validation is offloaded to GitHub CI for the next commit. Client/NeoForge acceptance remains pending.
 
-# MODLOG — анализ Thaumcraft 4.2 FOREVA
+# MODLOG — анализ Thaumcraft 4 Reload
 
 ## 2026-10-20: интеграция исследований, инфузии, устройств и Warp — CI passed
 
@@ -682,7 +682,7 @@ validation is offloaded to GitHub CI for the next commit. Client/NeoForge accept
 ## 2026-10-15: таумономикон, актуальные refs и Git checkpoint
 
 - Продолжен существующий checkpoint `8abb7feb` на ветке `port/minecraft-1.21.1`; полный порт всё ещё не завершён.
-- Три субагента независимо проверили active gameplay, build/packaging и оба reference corpora. Созданы пофайловые inventories pinned FOREVA/OpenTC4/Architectury и свежего Architectury upstream3a836a39, delta45; пины gameplay/reference не заменены.
+- Три субагента независимо проверили active gameplay, build/packaging и оба reference corpora. Созданы пофайловые inventories pinned legacy-1.12/OpenTC4/Architectury и свежего Architectury upstream3a836a39, delta45; пины gameplay/reference не заменены.
 - Добавлены normal Thaumonomicon, bookshelf wand trigger без vis cost, native floating/fire-resistant item entity, server snapshot/open, original single-pass sibling effects, category/research graph visibility и completed/gated text+illustration pages с EN/RU pagination.
 - Исправлены original node rewards max(4,vis/10), block picked-item identity/redstone duplicates и HexUtils original fixed orientation с расходом RNG draw. PowerShell single-task splatting исправлен; оба remapped JAR включают проверенные canonical notices+LICENSE.
 - Реальные проверки final production source: `.tmp/session-book-final-validate.log` exit0;61 JUnit,9 Fabric и9 NeoForge GameTests,0 failures/errors. Python tooling24PASS; extractor/resource checksPASS;492 sprites/59 refs/66 events/111 sounds/missing0.
@@ -695,7 +695,7 @@ validation is offloaded to GitHub CI for the next commit. Client/NeoForge accept
 
 - После user steering про дополнительных субагентов и Git продолжен read-only original audit: записаны research-unlock-spec и research-notes-spec, production исходники не менялись.
 - Установлены original default difficulty0, Secondary-only point purchase, exact cost/prerequisite/clue/warp rules; native purchase обязана атомарно recheck баланс на сервере вместо original authority defect.
-- Сопоставлены note NBT/data kinds, solved vs learned flags, endpoint/RNG/HashMap ordering, paper/tool costs, original copy ink_sac и расхождение legacy FOREVA FEATHER. Эти документы — specification/test plan, не реализованная research note механика.
+- Сопоставлены note NBT/data kinds, solved vs learned flags, endpoint/RNG/HashMap ordering, paper/tool costs, original copy ink_sac и расхождение legacy 1.12 FEATHER. Эти документы — specification/test plan, не реализованная research note механика.
 - Проверенная playable book unit сохранена локально в commit85e22827; следующий docs commit отделяет план будущей unit от реализации. Никакой public push не выполнялся.
 
 ## 2026-10-15: покупка вторичных исследований

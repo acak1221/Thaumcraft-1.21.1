@@ -5,7 +5,7 @@
 Обозначения evidence:
 
 - `O` = `C:/Users/Acak/Documents/Codex/2026-10-15/new-chat/work/thaumcraft-4.2.3.5-oracle` — приватный CFR source оригинального JAR, вне repository.
-- `L` = repository root `src/main/java` — сохранённый FOREVA 1.12 reference, вторичный источник.
+- `L` = repository root `src/main/java` — сохранённый legacy 1.12 reference, вторичный источник.
 - `N` = repository root `common/src/main/java` — активный 1.21.1 port.
 - `R` = `../work/references/OpenTC4` at `80aac29c52543ef51766c4b0788fba782abb3b0b` — вспомогательная readable mapping, не gameplay specification.
 

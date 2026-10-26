@@ -4606,7 +4606,7 @@
       "independently heard audio or full legacy art parity",
       "NeoForge"
     ],
-    "actual_owned_world": "C:\\Users\\Acak\\Documents\\Codex\\2026-10-15\\new-chat\\Thaumcraft-4.2-FOREVA\\fabric\\run-clienttest\\saves\\valve-smoke-39c7d715-ac80-4b86-97a6-7fcafb0c3caa",
+    "actual_owned_world": "C:\\Users\\Acak\\Documents\\Codex\\2026-10-15\\new-chat\\Thaumcraft-4-Reload\\fabric\\run-clienttest\\saves\\valve-smoke-39c7d715-ac80-4b86-97a6-7fcafb0c3caa",
     "old_world_scan": {
       "old_hot_furnace_before_RAW_snbt": "{Aspects:[{amount:8,key:\"ignis\"}],BurnTime:224s,CookTime:0s,CurrentItemBurnTime:1600,Items:[{Slot:1b,count:1,id:\"minecraft:coal\"}],SmeltTime:260,Vis:8s,id:\"thaumcraft:alchemy_furnace\",speedBoost:0b,x:1722,y:216,z:377}",
       "min": "1462, 214, 359",

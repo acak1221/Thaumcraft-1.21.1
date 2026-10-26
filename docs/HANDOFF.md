@@ -6285,7 +6285,7 @@ Guarded export DONE:10,250,855bytes SHA256
 `18169f73b820c81c4c2e67a6082214f7a6d0a19253b1f55c3b59a70b4302f409`,
 in `../Thaumcraft-Fabric-1.21.1/mods/`, README/SHA256SUMS updated; previousvalve
 backedup `backups/valve-fabric-validate4/`, priorvoidjar/Frost retained outside mods.
-Sourceproject/.git stays in Thaumcraft-4.2-FOREVA. Next **M06c buffer only**, then
+Sourceproject/.git stays in Thaumcraft-4-Reload. Next **M06c buffer only**, then
 M06dconstruct/centrifuge; [spec](analysis/2026-10-17-buffer-centrifuge.md), read-only
 `.tmp/buffer-transaction-design.md` and `.tmp/centrifuge-source-audit.md` ready.
 User17.10: checkpoint is NOT reason to stop; begin next Fabric group immediately,
@@ -6340,7 +6340,7 @@ JAR10,235,830bytes SHA256
 inspection `.tmp/valve-fabric-validate4-jar-inspection.json`. Guarded export уже
 обновил `../Thaumcraft-Fabric-1.21.1/mods/`; README/SHA256SUMS обновлены. Старый
 voidjarJAR+README+manifest в `backups/voidjar-fabric-validate2/`, прежнийFrost backup
-сохранён; backups НЕ вmods. Source project/.git остаются в Thaumcraft-4.2-FOREVA.
+сохранён; backups НЕ вmods. Source project/.git остаются в Thaumcraft-4-Reload.
 
 Следующий bounded gate — [filter/restrict/oneway](analysis/2026-10-16-tube-filters.md),
 пока read-only/безвладельцев; buffer исключён. Нельзя выдавать3готовые трубы или
@@ -7628,7 +7628,7 @@ R07 spec сохраняет permissive TABLE topology, shared public table/no ow
 
 ## Команды и расположения
 
-Repo: `C:/Users/Acak/Documents/Codex/2026-10-15/new-chat/Thaumcraft-4.2-FOREVA`.
+Repo: `C:/Users/Acak/Documents/Codex/2026-10-15/new-chat/Thaumcraft-4-Reload`.
 JDK21: `../work/jdk21/jdk-21.0.12.1+1`; Python: `C:/Program Files/Python314/python.exe`.
 Oracle: `../work/thaumcraft-4.2.3.5-oracle`; refs: `../work/references`; old vanilla evidence: `../work/vanilla-1.7.10-reference`. Всё read-only вне Git.
 

@@ -5,8 +5,8 @@ issueTrackerURL="https://github.com/acak1221/Thaumcraft-1.21.1/issues"
 [[mods]]
 modId="thaumcraft"
 version="${version}"
-displayName="Thaumcraft 4.2 FOREVA"
-authors="Azanor (original Thaumcraft), FOREVA contributors"
+displayName="Thaumcraft 4 Reload"
+authors="Azanor (original Thaumcraft), Thaumcraft 4 Reload contributors"
 description='''Unofficial port of Thaumcraft 4.2.3.5 (Minecraft 1.7.10) to Minecraft 1.21.1.'''
 displayURL="https://github.com/acak1221/Thaumcraft-1.21.1"
 # The original Thaumonomicon item texture, copied by processResources; pixel art, so the mod

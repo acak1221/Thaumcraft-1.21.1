@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "id": "thaumcraft",
   "version": "${version}",
-  "name": "Thaumcraft 4.2 FOREVA",
+  "name": "Thaumcraft 4 Reload",
   "description": "Unofficial port of Thaumcraft 4.2.3.5 (Minecraft 1.7.10) to Minecraft 1.21.1.",
   "authors": [
     "Azanor (original Thaumcraft)",
-    "FOREVA contributors"
+    "Thaumcraft 4 Reload contributors"
   ],
   "contact": {
     "homepage": "https://github.com/acak1221/Thaumcraft-1.21.1",

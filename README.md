@@ -1,4 +1,4 @@
-# Thaumcraft 4.2 FOREVA — Minecraft 1.21.1
+# Thaumcraft 4 Reload — Minecraft 1.21.1
 
 Порт **Thaumcraft 4.2.3.5** (Minecraft 1.7.10) на **Java 21 / Architectury / Fabric / NeoForge 1.21.1**.
 

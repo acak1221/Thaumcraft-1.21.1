@@ -663,7 +663,7 @@ Fabric build и изоляция прошли; **542 JUnit / 176 Fabric GameTest
 [Контракт, хэш JAR и непроверенные границы](analysis/2026-10-20-golem-reservoir.md).
 Клиент и NeoForge этим результатом не подтверждены. Остальной перенос остаётся незавершённым.
 
-Контрольная точка:16.10.2026, локальная ветка `port/minecraft-1.21.1`, HEAD R07 implementation `ac1734af`; native R08/R09 и частичные M02–M05 в рабочем дереве. Проверенные записки R01–R05 — `03fe0782`; предыдущие checkpoints: книга `85e22827`, Secondary purchase `d89b669f`, полный план `6406d64d`; первоначальный FOREVA baseline — `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
+Контрольная точка:16.10.2026, локальная ветка `port/minecraft-1.21.1`, HEAD R07 implementation `ac1734af`; native R08/R09 и частичные M02–M05 в рабочем дереве. Проверенные записки R01–R05 — `03fe0782`; предыдущие checkpoints: книга `85e22827`, Secondary purchase `d89b669f`, полный план `6406d64d`; первоначальный legacy-1.12 baseline — `4bc68454b1063cdc1255f833dd537e0fd4fc341d`.
 
 **Это частичный нативный порт TC4 4.2.3.5, не полный Thaumcraft.** Старый `src/` остаётся справочником Forge 1.12 и не входит в современную сборку. Поддерживаются только новые миры Minecraft 1.21.1; импорт миров 1.7/1.12 не реализован.
 
@@ -1842,7 +1842,7 @@ Object-aspect registry validation: 137 accepted, missing item/block IDs 0, confl
 
 Scoped partial mappings охватывают IScribeTools/inkwell/notes/data и ResearchManager generator/solver/learning/completion/issuance/ink; type0/type1 network и GUI basis обновлены. Table/unknown/config и полный mutable addon API остаются pending. Совпадение path или успешный тест участка не закрывают весь legacy class; ни один legacy unit не принят полностью.
 
-Пофайловый committed inventory на начало итерации: FOREVA 5562 файла; OpenTC4 2050; Architectury 6129. Для текущего upstream Architectury создан отдельный inventory и delta. Это полная инвентаризация файлов и адресный семантический аудит, не заявление о построчном чтении всех 13 тысяч файлов. Отчёты:
+Пофайловый committed inventory на начало итерации: legacy-1.12 5562 файла; OpenTC4 2050; Architectury 6129. Для текущего upstream Architectury создан отдельный inventory и delta. Это полная инвентаризация файлов и адресный семантический аудит, не заявление о построчном чтении всех 13 тысяч файлов. Отчёты:
 
 - [Сравнение и пофайловые JSON](analysis/2026-10-15-reference-comparison-ru.md).
 - [Аудит всех 35 active main Java до добавления книги](analysis/2026-10-15-native-gameplay-audit.md).

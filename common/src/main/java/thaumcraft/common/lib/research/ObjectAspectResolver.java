@@ -197,7 +197,6 @@ public final class ObjectAspectResolver {
         final RecipeIndex recipes;
         final Set<Item> history = new LinkedHashSet<>();
         final Map<Item, AspectList> resolved = new HashMap<>();
-        final Map<ResourceLocation, AspectList> complex = EarlyObjectAspectBindings.complex();
 
         Resolution(Level level, RecipeIndex recipes) { this.level = level; this.recipes = recipes; }
 
@@ -231,7 +230,7 @@ public final class ObjectAspectResolver {
             if (result == null) result = new AspectList();
             // Curated original complex registrations add to generated tags only
             // when no explicit direct binding existed (source Api:259-273).
-            AspectList addition = complex.get(id);
+            AspectList addition = EarlyObjectAspectBindings.complexOf(id);
             if (addition != null) result.add(addition);
             result = cap(result);
             resolved.put(item, result.copy());

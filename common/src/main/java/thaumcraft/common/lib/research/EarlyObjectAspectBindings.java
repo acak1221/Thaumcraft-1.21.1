@@ -33,6 +33,12 @@ public final class EarlyObjectAspectBindings {
         return copy(Holder.BINDINGS.complex());
     }
 
+    /** The raw addition of one id, as an independent copy, or null; {@link #complex()} without copying all of them. */
+    public static AspectList complexOf(ResourceLocation id) {
+        AspectList addition = Holder.BINDINGS.complex().get(id);
+        return addition == null ? null : addition.copy();
+    }
+
     /** Old subtype identities are flattened; a declared wildcard remains a wildcard rather than becoming native damage0. */
     public static Integer metadata(ResourceLocation id) { return Holder.BINDINGS.metadata().get(id); }
 

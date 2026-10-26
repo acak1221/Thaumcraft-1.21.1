@@ -91,7 +91,7 @@ finding them.
 These are not differences — they are things **nobody has looked at on a real frame or a real
 world**. They must not be reported as verified until someone does:
 
-* The thaumometer screen and readout, the excavation beam, the architect overlay, the essence flow,
+* The thaumometer screen and readout, the excavation beam in third person, the essence flow,
   the sparkles, the bone bow glint.
 * Runtime mixin injection on Fabric. On NeoForge it is now checked: a Mixin audit on a real
   NeoForge client (2026-10-26) applied every pending target without error, after
@@ -129,6 +129,23 @@ recorded here so the claim is bounded by what was seen, not by a test count:
 * **Shimmerleaf and cinderpearl** — both decorative plants draw their crossed-quad models, the
   shimmerleaf emits its blue wisp and the cinderpearl its flame/smoke while standing on sand.
 
+
+### 7.2 Now seen on a real frame (2026-10-26)
+
+* **Architect overlay** — it was **not drawn at all**: the port drew the area with the depth test of
+  an entity, exactly on the faces of the blocks it marks, so the terrain hid it
+  (`docs/analysis/images/2026-10-26-architect-before.png`). The original bytecode of
+  `REHWandHandler.drawOverlayBlock` switches the depth test, depth writes and culling off, blends
+  `SRC_ALPHA, ONE`, grows the cube to `-0.001..1.001` and sets the texture mode `GL_ADD`; the port
+  now does the same (core shader `thaumcraft:architect_overlay` for `GL_ADD`). A real Fabric frame
+  shows the 7x7 warded-glass shell of an Equal Trade area and the axis arrows
+  (`docs/analysis/images/2026-10-26-architect-after.png`). Not reproduced: the lightmap value
+  `200` of the original tessellator; the area is drawn at full brightness. NeoForge registers the
+  same shader but was not looked at in a client.
+* **Excavation beam, first person** — on a real Fabric frame the beam runs almost along the view,
+  so it reads as a short green streak from the wand tip toward the target, with a green glint at
+  the impact and crack stages on the block. The full ribbon length, third person and another
+  player's view are still unseen.
 
 ---
 

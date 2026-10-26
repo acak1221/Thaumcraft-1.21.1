@@ -37,6 +37,9 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     TileNodeStabilizerRenderer.setBubbleShader(shader);
                     VisNetClientEffects.setShader(shader);
                 }));
+        CoreShaderRegistrationCallback.EVENT.register(context -> context.register(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "architect_overlay"),
+                DefaultVertexFormat.POSITION_TEX_COLOR, thaumcraft.client.ThaumcraftArchitectClient::setShader));
         ClientSetup.init();
         // The original wand, the void robes and the fortress armour use the TC4 models, not the
         // vanilla baked item and armour models.

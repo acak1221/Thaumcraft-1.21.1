@@ -25,12 +25,43 @@ public final class ProgrammaticRecipes {
 
     public static List<Object> registrations() { return ThaumcraftApi.getProgrammaticCraftingRecipes(); }
 
+    // The ordered list is asked for per crucible item, per Thaumatorium work tick and per frame of
+    // its renderer, so it is kept per manager (client and server have one each) until the recipes of
+    // that manager or the registrations change.
+    private record Ordered(Object source, List<Object> registrations, List<RecipeHolder<CrucibleRecipe>> crucibles,
+                           Map<ResourceLocation, CrucibleRecipe> byId) {}
+    private static final Map<RecipeManager, Ordered> ORDERED = new java.util.WeakHashMap<>();
+
     /** Stock recipes retain ConfigRecipes ordering; addon registrations follow in their original order. */
     public static synchronized List<RecipeHolder<CrucibleRecipe>> crucibles(RecipeManager manager) {
+        return ordered(manager).crucibles();
+    }
+
+    private static Ordered ordered(RecipeManager manager) {
+        // Native byName.values changes identity whenever the recipes are replaced (a reload, a sync).
+        Object source = manager.getRecipes();
+        List<Object> registrations = registrations();
+        Ordered cached = ORDERED.get(manager);
+        if (cached != null && cached.source() == source && sameIdentities(registrations, cached.registrations())) return cached;
+        List<RecipeHolder<CrucibleRecipe>> crucibles = build(manager, registrations);
+        Map<ResourceLocation, CrucibleRecipe> byId = new java.util.HashMap<>();
+        for (var holder : crucibles) byId.putIfAbsent(holder.id(), holder.value());
+        Ordered created = new Ordered(source, registrations, crucibles, byId);
+        ORDERED.put(manager, created);
+        return created;
+    }
+
+    private static boolean sameIdentities(List<Object> first, List<Object> second) {
+        if (first.size() != second.size()) return false;
+        for (int i = 0; i < first.size(); i++) if (first.get(i) != second.get(i)) return false;
+        return true;
+    }
+
+    private static List<RecipeHolder<CrucibleRecipe>> build(RecipeManager manager, List<Object> registrations) {
         List<RecipeHolder<CrucibleRecipe>> recipes = new ArrayList<>(manager.getAllRecipesFor(ThaumcraftAlchemy.CRUCIBLE_RECIPE_TYPE.get()).stream()
                 .sorted(Comparator.<RecipeHolder<CrucibleRecipe>>comparingInt(holder -> holder.value().sourceOrder())
                         .thenComparing(holder -> holder.id().toString())).toList());
-        for (Object registration : registrations()) {
+        for (Object registration : registrations) {
             if (!(registration instanceof thaumcraft.api.crafting.CrucibleRecipe recipe)) continue;
             RecipeHolder<CrucibleRecipe> holder = CRUCIBLES.get(recipe);
             if (holder == null) {
@@ -46,12 +77,12 @@ public final class ProgrammaticRecipes {
         return List.copyOf(recipes);
     }
 
-    public static synchronized void forget(Object recipe) { CRUCIBLES.remove(recipe); }
+    public static synchronized void forget(Object recipe) { CRUCIBLES.remove(recipe); ORDERED.clear(); }
 
-    public static CrucibleRecipe crucible(RecipeManager manager, ResourceLocation id) {
+    /** The first recipe of the ordered list with this id, as the linear search of the list. */
+    public static synchronized CrucibleRecipe crucible(RecipeManager manager, ResourceLocation id) {
         if (id == null) return null;
-        for (var holder : crucibles(manager)) if (holder.id().equals(id)) return holder.value();
-        return null;
+        return ordered(manager).byId().get(id);
     }
 
     public record PreparedInfusion(ItemStack output, List<InfusionComponentPredicate> components, AspectList cost,

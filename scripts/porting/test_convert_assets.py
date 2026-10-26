@@ -97,8 +97,10 @@ class FoundationAssetsTest(unittest.TestCase):
         # GLSL150 conversion; none are bulk-copied into Minecraft's namespace.
         # linked_mirror is the projective core shader of the linked mirror: the original used
         # fixed-function glTexGen, which 1.21.1 does not have, so the projection is a core shader
-        # modelled on vanilla rendertype_end_portal.
+        # modelled on vanilla rendertype_end_portal. architect_overlay is the GL_ADD texture mode of
+        # the original Architect area (REHWandHandler.drawOverlayBlock), which no vanilla shader has.
         self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh",
+                          "core/architect_overlay.json", "core/architect_overlay.fsh",
                           "core/monster_lit_particle.json", "core/monster_lit_particle.fsh",
                           "core/linked_mirror.json", "core/linked_mirror.fsh", "core/linked_mirror.vsh",
                           "post/warp_blurred.json", "post/warp_death_gaze.json", "post/warp_hunger.json", "post/warp_sun_scorned.json"},

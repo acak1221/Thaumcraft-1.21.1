@@ -1429,7 +1429,7 @@
     "common/src/main/java/thaumcraft/api/wands/WandCap.java": "dc5963e4e9e5c0c716a8123bf570ee509a525b579418721df7cdf258e73b552b",
     "common/src/main/java/thaumcraft/api/wands/WandRod.java": "21d2fec3787a9fbddefd1040a7338a49879ca61a1b8aaabd5391027d72d8c800",
     "common/src/main/java/thaumcraft/client/BoreClientEffects.java": "99563c98766c47450475e263f412100d61724c624b6b9050b6330b85295c8433",
-    "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "6471c99c018271104ad721ccc61332275023a36b16983acfaee85a34e70f6d68",
+    "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "7475798cb5d8083aca9b7462d81b48e55ce884dd6df0bb0ff3e8bf051687b684",
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
     "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "8a82c324559a31c13e51f1bfe8dabbf9b3cabad505e7bdc3c1749c480bf76bae",
     "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "0f457422d7cf69dfabfa26a0eb9e87b7bed3acd861ad33f3de91218dce21e7c9",

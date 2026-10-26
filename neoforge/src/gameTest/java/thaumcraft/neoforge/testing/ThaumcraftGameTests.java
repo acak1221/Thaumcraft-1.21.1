@@ -1825,6 +1825,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.TravelGearRuntimeChecks.harnessFuelAndPermissions(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m08_hover_mining")
+    public void hoverHarnessMinesAtGroundSpeedWhileAirborne(GameTestHelper test) {
+        thaumcraft.common.testing.TravelGearRuntimeChecks.harnessMining(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m08_hover_menu")
     public void hoverHarnessMenuPreservesActualJarCustody(GameTestHelper test) {
         thaumcraft.common.testing.TravelGearRuntimeChecks.harnessMenu(test);
@@ -2126,6 +2131,11 @@ public final class ThaumcraftGameTests {
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300)
     public void eldritch_altar_takes_eyes_and_switches_its_spawn_type(GameTestHelper test) {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.altarTakesEyesAndSwitchesItsSpawnType(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200)
+    public void eldritch_glyphed_stone_gives_its_experience(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.glyphedStoneGivesItsExperience(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 2400)

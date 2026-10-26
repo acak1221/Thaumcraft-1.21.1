@@ -76,7 +76,7 @@ public final class ThaumcraftNeoForgeClient {
         NeoForge.EVENT_BUS.addListener(ThaumcraftNeoForgeClient::onLoggingOut);
     }
 
-    /** The two core shaders of the Fabric CoreShaderRegistrationCallback. */
+    /** The core shaders of the Fabric CoreShaderRegistrationCallback. */
     private static void onRegisterShaders(RegisterShadersEvent event) {
         try {
             var mirror = new ShaderInstance(event.getResourceProvider(),
@@ -94,6 +94,10 @@ public final class ThaumcraftNeoForgeClient {
                 TileNodeStabilizerRenderer.setBubbleShader(shader);
                 VisNetClientEffects.setShader(shader);
             });
+            var architect = new ShaderInstance(event.getResourceProvider(),
+                    ResourceLocation.fromNamespaceAndPath("thaumcraft", "architect_overlay"),
+                    DefaultVertexFormat.POSITION_TEX_COLOR);
+            event.registerShader(architect, ThaumcraftArchitectClient::setShader);
         } catch (java.io.IOException failure) {
             throw new IllegalStateException("TC4 core shaders could not be created", failure);
         }

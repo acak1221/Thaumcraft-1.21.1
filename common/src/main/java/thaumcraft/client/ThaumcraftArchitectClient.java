@@ -1,17 +1,20 @@
 package thaumcraft.client;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -47,6 +50,13 @@ import thaumcraft.common.lib.world.WardingOverlay;
  * of the warded glass ({@code :399-416}); the native draws the cube of the block, because the 1.7.10
  * block renderer cannot draw one model with the texture of another. The geometry of the faces, the
  * hidden inner faces, the colours and the arrows are the original's.</p>
+ *
+ * <p>The draw state is the original's too ({@code drawOverlayBlock} and {@code drawArchitectAxis}):
+ * no depth test and no depth write, no face culling, the blend {@code SRC_ALPHA, ONE}, the cube
+ * grown by {@code 0.001} on every side, and for the area the texture mode {@code GL_ADD}, which the
+ * core shader {@code thaumcraft:architect_overlay} reproduces. With the depth test of an entity the
+ * area lay inside the very blocks it marks and was never seen. Not reproduced: the lightmap value
+ * {@code 200} the original tessellator carried; the area is drawn at full brightness.</p>
  */
 public final class ThaumcraftArchitectClient {
     /** The arrow sheet of the original ({@code REHWandHandler:80}). */
@@ -58,6 +68,14 @@ public final class ThaumcraftArchitectClient {
     public static final float ARROW_ALPHA = 0.33F;
     /** The size of the arrow quad of the original ({@code REHWandHandler:453}). */
     public static final float ARROW_SIZE = 1.0F;
+    /** The original render bounds of an overlay block are {@code -0.001} to {@code 1.001}. */
+    public static final float GROWTH = 0.001F;
+
+    private static ShaderInstance shader;
+    private static final Map<ResourceLocation, RenderType> AREA_TYPES = new HashMap<>();
+
+    /** The {@code thaumcraft:architect_overlay} core shader, registered by the loader client bootstrap. */
+    public static void setShader(ShaderInstance instance) { shader = instance; }
 
     private ThaumcraftArchitectClient() {}
 
@@ -72,7 +90,7 @@ public final class ThaumcraftArchitectClient {
     public static void render(PoseStack pose, MultiBufferSource buffers, float partialTick, Camera camera) {
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
-        if (player == null || minecraft.level == null || pose == null || buffers == null || camera == null) return;
+        if (player == null || minecraft.level == null || pose == null || buffers == null || camera == null || shader == null) return;
         ItemStack wand = player.getMainHandItem();
         ItemStack focus = FocusData.get(wand);
         if (!(focus.getItem() instanceof IArchitect architect)) return;
@@ -86,6 +104,18 @@ public final class ThaumcraftArchitectClient {
         List<BlockCoordinates> area = architect.getArchitectBlocks(wand, minecraft.level,
                 anchor.getX(), anchor.getY(), anchor.getZ(), side, player);
         if (area == null || area.isEmpty()) return;
+        try {
+            draw(pose, buffers, minecraft, player, wand, architect, anchor, side, area, camera, partialTick);
+        } finally {
+            // Draw the last batch here, in the world matrices, and not at whatever flush of the frame
+            // comes next.
+            if (buffers instanceof MultiBufferSource.BufferSource source) source.endLastBatch();
+        }
+    }
+
+    private static void draw(PoseStack pose, MultiBufferSource buffers, Minecraft minecraft, Player player,
+                             ItemStack wand, IArchitect architect, BlockPos anchor, int side,
+                             List<BlockCoordinates> area, Camera camera, float partialTick) {
         Set<BlockPos> cells = new HashSet<>();
         for (BlockCoordinates cell : area) cells.add(new BlockPos(cell.x, cell.y, cell.z));
         var eye = camera.getPosition();
@@ -130,7 +160,7 @@ public final class ThaumcraftArchitectClient {
             // not drawn.
             if (faceHidden(cells, pos, face)) continue;
             int texture = WardingOverlay.texture(mask(cells, pos, face));
-            VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(
+            VertexConsumer out = buffers.getBuffer(areaType(
                     ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/blocks/warded_glass_" + texture + ".png")));
             quad(pose, out, face, r, g, b, BLOCK_ALPHA);
         }
@@ -182,7 +212,7 @@ public final class ThaumcraftArchitectClient {
         float r = (float) Math.sin(ticks / 4.0F + anchor.getX()) * 0.2F + 0.3F;
         float g = (float) Math.sin(ticks / 3.0F + anchor.getY()) * 0.2F + 0.3F;
         float b = (float) Math.sin(ticks / 2.0F + anchor.getZ()) * 0.2F + 0.8F;
-        VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(ARROWS));
+        VertexConsumer out = buffers.getBuffer(ArchitectRenderType.ARROW_TYPE);
         pose.pushPose();
         try {
             // Original REHWandHandler:450 - the arrows lie in the plane of the screen.
@@ -237,15 +267,59 @@ public final class ThaumcraftArchitectClient {
         };
         float[][] uv = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
         for (int index = 0; index < 4; index++) {
-            vertex(pose, out, corners[index][0], corners[index][1], corners[index][2], uv[index][0], uv[index][1], r, g, b, alpha);
+            vertex(pose, out, grown(corners[index][0]), grown(corners[index][1]), grown(corners[index][2]),
+                    uv[index][0], uv[index][1], r, g, b, alpha);
         }
+    }
+
+    /** A corner of the unit cube on the original render bounds {@code -0.001} to {@code 1.001}. */
+    public static float grown(float corner) {
+        return corner <= 0.0F ? -GROWTH : 1.0F + GROWTH;
     }
 
     private static void vertex(PoseStack pose, VertexConsumer out, float x, float y, float z,
                                float u, float v, float r, float g, float b, float alpha) {
-        out.addVertex(pose.last(), x, y, z)
-                .setColor(r, g, b, alpha)
-                .setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT)
-                .setNormal(pose.last(), 0, 1, 0);
+        out.addVertex(pose.last(), x, y, z).setUv(u, v).setColor(r, g, b, alpha);
+    }
+
+    private static RenderType areaType(ResourceLocation texture) {
+        return AREA_TYPES.computeIfAbsent(texture, ArchitectRenderType::area);
+    }
+
+    /** The original draw state of the area and of the arrows. */
+    private static final class ArchitectRenderType extends RenderType {
+        static final RenderType ARROW_TYPE = new ArchitectRenderType("thaumcraft_architect_arrows",
+                new TextureStateShard(ARROWS, false, false),
+                new ShaderStateShard(net.minecraft.client.renderer.GameRenderer::getPositionTexColorShader));
+
+        private ArchitectRenderType(String name, TextureStateShard texture, ShaderStateShard program) {
+            super(name, DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS, 4096, false, false,
+                    () -> begin(texture, program), () -> end(texture, program));
+        }
+
+        static RenderType area(ResourceLocation texture) {
+            return new ArchitectRenderType("thaumcraft_architect_area", new TextureStateShard(texture, false, false),
+                    new ShaderStateShard(() -> shader));
+        }
+
+        private static void begin(TextureStateShard texture, ShaderStateShard program) {
+            program.setupRenderState();
+            texture.setupRenderState();
+            LIGHTNING_TRANSPARENCY.setupRenderState();
+            NO_CULL.setupRenderState();
+            // Native NO_DEPTH_TEST is a no-op for GL_ALWAYS in 1.21.1; clearing the LEQUAL state
+            // switches the depth test off, as the original glDisable(GL_DEPTH_TEST).
+            LEQUAL_DEPTH_TEST.clearRenderState();
+            COLOR_WRITE.setupRenderState();
+        }
+
+        private static void end(TextureStateShard texture, ShaderStateShard program) {
+            COLOR_WRITE.clearRenderState();
+            LEQUAL_DEPTH_TEST.setupRenderState();
+            NO_CULL.clearRenderState();
+            LIGHTNING_TRANSPARENCY.clearRenderState();
+            texture.clearRenderState();
+            program.clearRenderState();
+        }
     }
 }

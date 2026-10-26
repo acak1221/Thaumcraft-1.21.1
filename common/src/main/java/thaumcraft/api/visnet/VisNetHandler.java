@@ -78,6 +78,8 @@ public final class VisNetHandler {
     public static void setEffectSink(EffectSink sink) { effectSink = Objects.requireNonNull(sink, "sink"); }
     private static final List<Network> NETWORKS = new ArrayList<>();
     private static final AtomicLong LIFETIMES = new AtomicLong();
+    // The recursion fences stay installed (empty) between calls: a relay asks them about ten times
+    // a tick, and dropping the set each time allocated a new identity map on every call.
     private static final ThreadLocal<Set<Level>> VALIDATING = ThreadLocal.withInitial(VisNetHandler::identities);
     private static final ThreadLocal<Set<TileVisNode>> CHECKING_NODES = ThreadLocal.withInitial(VisNetHandler::identities);
     private static final ThreadLocal<Set<TileVisNode>> CHECKING_METADATA = ThreadLocal.withInitial(VisNetHandler::identities);
@@ -148,7 +150,7 @@ public final class VisNetHandler {
             MinecraftServer owner = server.getServer();
             if (owner == null || !owner.isSameThread()) throw new IllegalStateException("VisNet requires the server thread");
             return WorldCoordinates.isCanonicalDimension(server.dimension()) && owner.getLevel(server.dimension()) == server;
-        } finally { checking.remove(level); if (checking.isEmpty()) VALIDATING.remove(); }
+        } finally { checking.remove(level); }
     }
     static void requireThread(Level level) {
         if (level == null || level.isClientSide) return;
@@ -158,7 +160,7 @@ public final class VisNetHandler {
         try {
             MinecraftServer owner = server.getServer();
             if (owner == null || !owner.isSameThread()) throw new IllegalStateException("VisNet requires the server thread");
-        } finally { checking.remove(level); if (checking.isEmpty()) VALIDATING.remove(); }
+        } finally { checking.remove(level); }
     }
     public static boolean isValidAspect(Aspect aspect) {
         if (aspect == null) return false;
@@ -177,7 +179,7 @@ public final class VisNetHandler {
             return world.isInWorldBounds(pos) && world.hasChunkAt(pos) && node.getType().isValid(state)
                     && world.getBlockEntity(pos) == node && world.getBlockState(pos) == state
                     && !node.isRemoved() && node.getLevel() == world && node.getBlockState() == state && node.hasTickIdentity();
-        } finally { checking.remove(node); if (checking.isEmpty()) CHECKING_NODES.remove(); }
+        } finally { checking.remove(node); }
     }
     private static Metadata metadata(TileVisNode node) {
         if (node == null) return null;
@@ -187,7 +189,7 @@ public final class VisNetHandler {
             if (!isCurrent(node) || !node.isNetworkEnabled()) return null;
             int range = node.getRange(); byte attunement = node.getAttunement(); boolean source = node.isSource();
             return range > 0 && attunement >= -1 && attunement <= 5 && isCurrent(node) ? new Metadata(range, attunement, source) : null;
-        } finally { checking.remove(node); if (checking.isEmpty()) CHECKING_METADATA.remove(); }
+        } finally { checking.remove(node); }
     }
     /** Null/cleared/invalid nodes return false; server-backed validation may throw IllegalStateException off-thread or propagate callbacks. */
     public static boolean isNodeValid(WeakReference<TileVisNode> ref) {

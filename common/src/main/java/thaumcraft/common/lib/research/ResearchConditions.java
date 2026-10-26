@@ -17,6 +17,8 @@ public final class ResearchConditions {
         var settings = thaumcraft.common.config.ThaumcraftSettings.server();
         thaumcraft.common.config.ThaumcraftSettings.configureServer(settings.withFeatures(wardsAllowed, mirrorsAllowed));
     }
+    // The book asks this for every research node on every frame; String.matches compiled it each time.
+    private static final java.util.regex.Pattern CONFIG_FACT = java.util.regex.Pattern.compile("Config\\.[A-Za-z][A-Za-z0-9]*");
     public static boolean available(List<String> conditions) { return evaluate(conditions, ResearchConditions::fact); }
     public static boolean evaluate(List<String> conditions, Predicate<String> facts) {
         for (String expression : conditions) {
@@ -24,7 +26,7 @@ public final class ResearchConditions {
             if (!text.startsWith("if (") || !text.endsWith(")")) return false;
             for (String term : text.substring(4, text.length() - 1).split("&&", -1)) {
                 String value = term.strip();
-                if (!value.matches("Config\\.[A-Za-z][A-Za-z0-9]*") || !facts.test(value.substring(7))) return false;
+                if (!CONFIG_FACT.matcher(value).matches() || !facts.test(value.substring(7))) return false;
             }
         }
         return true;

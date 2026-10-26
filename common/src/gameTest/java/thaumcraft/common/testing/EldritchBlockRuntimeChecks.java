@@ -87,6 +87,43 @@ public final class EldritchBlockRuntimeChecks {
         test.succeed();
     }
 
+    /**
+     * BlockEldritch:197-205 - breaking glyphed eldritch stone gives one to four experience. NeoForge
+     * awards block experience only through its getExpDrop hook, never through spawnAfterBreak.
+     */
+    public static void glyphedStoneGivesItsExperience(GameTestHelper test) {
+        var lane = new WaveLane(test, 3, 2, 3);
+        try {
+            ServerLevel level = lane.level;
+            ServerPlayer player = test.makeMockServerPlayerInLevel();
+            player.setGameMode(GameType.SURVIVAL);
+            lane.floor(3);
+            BlockPos pos = lane.origin;
+            var bounds = new net.minecraft.world.phys.AABB(pos).inflate(3);
+            for (int round = 0; round < 4; round++) {
+                lane.put(pos, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.ELDRITCH_CRUST.get().defaultBlockState(),
+                        EldritchBlockRules.ELDRITCH_GLYPHED));
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE));
+                test.assertTrue(player.gameMode.destroyBlock(pos) && level.getBlockState(pos).isAir(),
+                        "survival mining removes the glyphed eldritch stone");
+                int experience = 0;
+                for (var orb : level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, bounds)) {
+                    CompoundTag tag = new CompoundTag();
+                    orb.addAdditionalSaveData(tag);
+                    experience += orb.getValue() * Math.max(1, tag.getInt("Count"));
+                    orb.discard();
+                }
+                test.assertTrue(experience >= 1 && experience <= 4,
+                        "glyphed eldritch stone gives the original one to four experience: " + experience);
+            }
+        } catch (RuntimeException | Error failure) {
+            lane.clean();
+            throw failure;
+        }
+        lane.clean();
+        test.succeed();
+    }
+
     /** The original eldritch obelisk only buffs the eldritch mobs around it. */
     public static void obeliskSlowsOnlyTheEldritchMobs(GameTestHelper test) {
         var lane = new WaveLane(test, 3, 2, 3);

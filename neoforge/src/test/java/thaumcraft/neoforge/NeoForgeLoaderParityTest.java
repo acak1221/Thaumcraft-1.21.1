@@ -406,8 +406,8 @@ class NeoForgeLoaderParityTest {
         String fabric = read("fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java");
         String neoforge = read("neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java");
 
-        // The two core shaders of the Fabric CoreShaderRegistrationCallback.
-        for (String shader : List.of("monster_lit_particle", "node_stabilizer_bubble")) {
+        // The core shaders of the Fabric CoreShaderRegistrationCallback.
+        for (String shader : List.of("linked_mirror", "monster_lit_particle", "node_stabilizer_bubble", "architect_overlay")) {
             assertTrue(fabric.contains(shader), "the Fabric client registers the core shader " + shader);
             assertTrue(neoforge.contains(shader), "the NeoForge client registers the core shader " + shader);
         }

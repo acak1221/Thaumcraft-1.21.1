@@ -1,6 +1,7 @@
 package thaumcraft.neoforge;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -19,6 +20,10 @@ import thaumcraft.common.tiles.TileCrucible;
  *
  * <p>NeoForge counts a bucket as one thousand millibuckets, so the unit of the original and the unit of
  * the loader are the same here and no conversion happens. The rule itself lives in the shared tile.</p>
+ *
+ * <p>Like the Fabric storage, the handler only moves water while its crucible is the live tile at its
+ * position, and here also only on the server thread: NeoForge hands the capability out on the client
+ * too, and a client side fill would change a tank the server never sees.</p>
  */
 final class NeoForgeCrucibleFluidHandler {
     private NeoForgeCrucibleFluidHandler() {}
@@ -41,8 +46,15 @@ final class NeoForgeCrucibleFluidHandler {
 
         @Override public int getTanks() { return 1; }
 
+        /** The crucible is still the tile at its position and the caller is on the server thread. */
+        private boolean live() {
+            var pos = crucible.getBlockPos();
+            return crucible.getLevel() instanceof ServerLevel server && server.getServer().isSameThread()
+                    && !crucible.isRemoved() && server.hasChunkAt(pos) && server.getBlockEntity(pos) == crucible;
+        }
+
         @Override public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int tank) {
-            int amount = crucible.getWaterAmount();
+            int amount = crucible.isRemoved() ? 0 : crucible.getWaterAmount();
             if (amount <= 0) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
             return new net.neoforged.neoforge.fluids.FluidStack(
                     BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER), amount);
@@ -55,21 +67,23 @@ final class NeoForgeCrucibleFluidHandler {
         }
 
         @Override public int fill(net.neoforged.neoforge.fluids.FluidStack resource, FluidAction action) {
-            if (resource == null || resource.isEmpty()) return 0;
+            if (resource == null || resource.isEmpty() || !live()) return 0;
             return crucible.fillWater(resource.getFluid(), resource.getAmount(), action.execute());
         }
 
         @Override public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack resource,
                                                                           FluidAction action) {
-            if (resource == null || resource.isEmpty()) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
+            if (resource == null || resource.isEmpty() || !live()) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
             int drained = crucible.drainWater(resource.getFluid(), resource.getAmount(), action.execute());
             if (drained <= 0) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
             return new net.neoforged.neoforge.fluids.FluidStack(
                     BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER), drained);
         }
 
-        @Override public net.neoforged.neoforge.fluids.FluidStack drain(int tank, FluidAction action) {
-            int drained = crucible.drainWater(Integer.MAX_VALUE, action.execute());
+        /** Oracle TileCrucible:395-397 - at most the requested amount, as {@code FluidTank.drain}. */
+        @Override public net.neoforged.neoforge.fluids.FluidStack drain(int maxDrain, FluidAction action) {
+            if (maxDrain <= 0 || !live()) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
+            int drained = crucible.drainWater(maxDrain, action.execute());
             if (drained <= 0) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
             return new net.neoforged.neoforge.fluids.FluidStack(
                     BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER), drained);

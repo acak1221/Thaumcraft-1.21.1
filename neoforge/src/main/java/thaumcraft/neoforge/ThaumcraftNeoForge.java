@@ -46,6 +46,11 @@ public final class ThaumcraftNeoForge {
         NeoForgeGolemFluidAccess.init();
         // Original TileCrucible:373-410 - the water tank of the crucible that other mods may read and fill.
         NeoForgeCrucibleFluidHandler.init(bus);
+        // Original Hover: a hovering player mines at the ground speed. NeoForge breaks blocks through
+        // Player.getDigSpeed, which posts this event after the airborne fifth, as Forge 1.7.10 did.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                (net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed event) -> event.setNewSpeed(
+                        thaumcraft.common.items.armor.Hover.miningSpeed(event.getEntity(), event.getNewSpeed())));
         if (FMLEnvironment.dist == Dist.CLIENT) {
             // ClientSetup.init runs from the first client hook event, not FMLClientSetupEvent:
             // see ThaumcraftNeoForgeClient.onRegisterClientExtensions.

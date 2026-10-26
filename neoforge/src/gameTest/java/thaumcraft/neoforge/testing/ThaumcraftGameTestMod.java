@@ -26,7 +26,11 @@ public final class ThaumcraftGameTestMod {
     private static final Logger LOG = LoggerFactory.getLogger("ThaumcraftGameTest");
 
     public ThaumcraftGameTestMod(IEventBus bus) {
-        bus.addListener((RegisterGameTestsEvent event) -> event.register(ThaumcraftGameTests.class));
+        bus.addListener((RegisterGameTestsEvent event) -> {
+            event.register(ThaumcraftGameTests.class);
+            // NeoForge-only scenarios, outside the catalogue generated from the Fabric suite.
+            event.register(NeoForgeFluidCapabilityGameTests.class);
+        });
         // The shared harness observes the loader's own block-break phases. NeoForge
         // owns the native BlockEvent.BreakEvent and the real removal; the shared
         // side never names a loader class.

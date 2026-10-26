@@ -1,3 +1,23 @@
+## 2026-10-26 — review agents: NeoForge fluids, hover mining and XP, invisible architect overlay, performance
+
+Read-only Sonnet subagents gathered the leads; every claim was checked against
+code or bytecode and every defect by a test that fails before the fix. NeoForge:
+the pure fluid bucket is now a fluid container, crucible and spa drains honour
+maxDrain, the spa answers a sideless lookup, and the crucible handler only moves
+water for its live tile on the server thread (3 NeoForge-only GameTests). Hover
+Harness mining speed and eldritch block experience never applied on NeoForge;
+fixed through the BreakSpeed event (the mixin is now Fabric only) and getExpDrop.
+The architect focus overlay was never visible: per the original REHWandHandler
+bytecode it now draws without depth test or depth writes, unculled, additive,
+grown by 0.001, with GL_ADD texturing in a new core shader; seen before and after
+in a real Fabric client. Behaviour-neutral performance work: VisNet recursion
+fences no longer allocate per call, aspect resolution no longer copies all 35
+complex bindings, the ordered crucible recipe list is cached per RecipeManager,
+and research conditions use one compiled Pattern. Verified: 2580 JUnit, 13
+NeoForge JUnit, both builds, 473/473 Fabric and 461/461 NeoForge GameTests on
+fresh worlds, 115 Python tests. See
+[the report](docs/analysis/2026-10-26-review-agents-fixes-ru.md).
+
 ## 2026-10-26 — TC4Tweaks wave 2: Thaumonomicon search and counter, notification clear button
 
 Three client improvements from TC4Tweaks, each a setting in the Tweaks tab, on by

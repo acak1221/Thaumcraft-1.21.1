@@ -4,10 +4,13 @@ import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -64,6 +67,8 @@ public final class EntityAspectBindings {
             Map.entry("thaumcraft:primal_orb", "Thaumcraft.PrimalOrb"),
             Map.entry("thaumcraft:eldritch_guardian", "Thaumcraft.EldritchGuardian"), Map.entry("thaumcraft:eldritch_orb", "Thaumcraft.EldritchOrb"));
     private static volatile List<Row> rows;
+    /** Aspects whose Wisp rows were already built, by {@link #originalTags()} or by {@link #registerLateWispVariants()}. */
+    private static final Set<Aspect> WISP_VARIANTS = Collections.newSetFromMap(new IdentityHashMap<>());
     private record Row(String name, Map<String, Integer> aspects, String byteName, int byteValue, boolean wisp) {}
     public record Target(String originalName, String signature, AspectList aspects, ResearchClues.Context clue) {}
     private EntityAspectBindings() {}
@@ -72,6 +77,8 @@ public final class EntityAspectBindings {
         String registryName = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
         String name = entity instanceof Player player ? "player_" + player.getGameProfile().getName()
                 : originalName(registryName);
+        // The client readout of the thaumometer also describes entities; only the server thread appends.
+        if (!entity.level().isClientSide()) registerLateWispVariants();
         var registered = new ArrayList<>(ThaumcraftApi.scanEntities);
         var nbt = new CompoundTag();
         if (registered.stream().anyMatch(row -> matchesName(row.entityName, name, registryName) && row.nbts != null && row.nbts.length > 0))
@@ -110,6 +117,7 @@ public final class EntityAspectBindings {
         var data = new CompoundTag();
         for (var entry : byteValues.entrySet()) data.putByte(entry.getKey(), entry.getValue().byteValue());
         if (wispType != null) data.putString("Type", wispType);
+        registerLateWispVariants();
         return select(new ArrayList<>(ThaumcraftApi.scanEntities), name, name, data);
     }
 
@@ -139,19 +147,49 @@ public final class EntityAspectBindings {
     /** Expanded public API baseline:69 retained declarations include one loop over48 Wisp aspect variants, yielding116 rows. */
     public static List<ThaumcraftApi.EntityTags> originalTags() {
         var result = new ArrayList<ThaumcraftApi.EntityTags>();
+        List<Aspect> registered;
+        synchronized (Aspect.aspects) { registered = new ArrayList<>(Aspect.aspects.values()); }
+        synchronized (WISP_VARIANTS) { WISP_VARIANTS.addAll(registered); }
         for (Row row : rows()) {
-            var variants = row.wisp ? new ArrayList<>(Aspect.aspects.values()) : java.util.Collections.<Aspect>singletonList(null);
-            for (Aspect variant : variants) {
-                var aspects = new AspectList();
-                if (row.wisp) aspects.add(variant, 2);
-                for (var entry : row.aspects.entrySet()) aspects.add(Aspect.getAspect(entry.getKey()), entry.getValue());
-                var conditions = row.wisp ? new ThaumcraftApi.EntityTagsNBT[] { new ThaumcraftApi.EntityTagsNBT("Type", variant.getTag()) }
-                        : row.byteName == null ? new ThaumcraftApi.EntityTagsNBT[0]
-                        : new ThaumcraftApi.EntityTagsNBT[] { new ThaumcraftApi.EntityTagsNBT(row.byteName, (byte) row.byteValue) };
-                result.add(new ThaumcraftApi.EntityTags(row.name, aspects, conditions));
-            }
+            var variants = row.wisp ? registered : java.util.Collections.<Aspect>singletonList(null);
+            for (Aspect variant : variants) result.add(tags(row, variant));
         }
         return result;
+    }
+
+    private static ThaumcraftApi.EntityTags tags(Row row, Aspect variant) {
+        var aspects = new AspectList();
+        if (row.wisp) aspects.add(variant, 2);
+        for (var entry : row.aspects.entrySet()) aspects.add(Aspect.getAspect(entry.getKey()), entry.getValue());
+        var conditions = row.wisp ? new ThaumcraftApi.EntityTagsNBT[] { new ThaumcraftApi.EntityTagsNBT("Type", variant.getTag()) }
+                : row.byteName == null ? new ThaumcraftApi.EntityTagsNBT[0]
+                : new ThaumcraftApi.EntityTagsNBT[] { new ThaumcraftApi.EntityTagsNBT(row.byteName, (byte) row.byteValue) };
+        return new ThaumcraftApi.EntityTags(row.name, aspects, conditions);
+    }
+
+    /**
+     * Original ConfigAspects.registerEntityAspects:98-99 registered one Wisp row per aspect of the live
+     * registry in Thaumcraft's postInit, after every add-on had registered its aspects, so a Wisp of an
+     * add-on aspect (EntityWisp picks any registered compound) was scannable. The native baseline is
+     * built when {@link ThaumcraftApi} loads, which can precede an add-on initialiser; this appends the
+     * missing Wisp rows of aspects registered since, once per aspect, to the live public list. Rows that
+     * an add-on removed from that list are not restored. Call on the server thread or during mod
+     * initialisation only.
+     */
+    public static void registerLateWispVariants() {
+        // Load the public list first: its own initialiser builds the baseline from the current registry.
+        List<ThaumcraftApi.EntityTags> target = ThaumcraftApi.scanEntities;
+        List<Aspect> late = new ArrayList<>();
+        synchronized (Aspect.aspects) {
+            synchronized (WISP_VARIANTS) {
+                for (Aspect aspect : Aspect.aspects.values()) if (WISP_VARIANTS.add(aspect)) late.add(aspect);
+            }
+        }
+        if (late.isEmpty()) return;
+        for (Row row : rows()) {
+            if (!row.wisp) continue;
+            for (Aspect aspect : late) target.add(tags(row, aspect));
+        }
     }
 
     public static AspectList playerAspects(String playerName) {

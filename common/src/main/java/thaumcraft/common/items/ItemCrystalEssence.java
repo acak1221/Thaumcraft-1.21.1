@@ -21,7 +21,8 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
  * No prototype component: absent/EMPTY/unrelated-NBT are different legacy states.
  * Machine output is pretyped and never enters the untyped lazy RNG branch. */
 public final class ItemCrystalEssence extends Item implements IEssentiaContainerItem {
-    private static final Aspect[] DISPLAY_ASPECTS = Aspect.aspects.values().toArray(Aspect[]::new);
+    // Original displayAspects: the 48 original aspects in practice, see OriginalDisplayAspects.
+    private static final Aspect[] DISPLAY_ASPECTS = OriginalDisplayAspects.ALL;
     private static Supplier<? extends Player> tooltipViewer = () -> null;
     private final Random random = new Random(); // ORIGINAL item-local, never world RNG.
 

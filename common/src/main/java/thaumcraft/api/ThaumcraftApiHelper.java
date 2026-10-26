@@ -1,6 +1,9 @@
 package thaumcraft.api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -209,24 +212,38 @@ public class ThaumcraftApiHelper {
         return null;
     }
 
-    /** Returns a caller-owned mutable copy of the cached aspects for this amount. */
-    public static AspectList getAllAspects(int amount) {
-        AspectList cached = ALL_ASPECTS.get(amount);
-        if (cached != null) return cached.copy();
-        AspectList al = new AspectList();
-        for (Aspect aspect : Aspect.aspects.values()) al.add(aspect, amount);
-        ALL_ASPECTS.put(amount, al);
-        return al.copy();
+    /**
+     * Original ThaumcraftApiHelper.getAllAspects: every registered aspect, add-on aspects included, with
+     * this amount, in registry order. Returns a caller-owned mutable copy of the cached list.
+     *
+     * <p>Deliberate deviation: the original cached the first answer for an amount forever, so an aspect
+     * registered after the first call (any add-on whose initialiser runs later) was missing from every
+     * later answer. The cache is rebuilt whenever it no longer holds exactly the registered aspects.</p>
+     */
+    public static synchronized AspectList getAllAspects(int amount) {
+        List<Aspect> registered;
+        synchronized (Aspect.aspects) { registered = new ArrayList<>(Aspect.aspects.values()); }
+        return cached(ALL_ASPECTS, amount, registered);
     }
 
-    /** Returns a caller-owned mutable copy of the cached compound aspects for this amount. */
-    public static AspectList getAllCompoundAspects(int amount) {
-        AspectList cached = ALL_COMPOUND_ASPECTS.get(amount);
-        if (cached != null) return cached.copy();
-        AspectList al = new AspectList();
-        for (Aspect aspect : Aspect.getCompoundAspects()) al.add(aspect, amount);
-        ALL_COMPOUND_ASPECTS.put(amount, al);
-        return al.copy();
+    /**
+     * Original ThaumcraftApiHelper.getAllCompoundAspects: every registered compound, add-on compounds
+     * included, with this amount; a caller-owned copy, rebuilt like {@link #getAllAspects(int)} when the
+     * registry or a component array changed.
+     */
+    public static synchronized AspectList getAllCompoundAspects(int amount) {
+        return cached(ALL_COMPOUND_ASPECTS, amount, Aspect.getCompoundAspects());
+    }
+
+    private static AspectList cached(Map<Integer, AspectList> cache, int amount, List<Aspect> registered) {
+        AspectList cached = cache.get(amount);
+        // Aspect has identity equality: the cache is current only for the very same aspects in order.
+        if (cached == null || !Arrays.asList(cached.getAspects()).equals(registered)) {
+            cached = new AspectList();
+            for (Aspect aspect : registered) cached.add(aspect, amount);
+            cache.put(amount, cached);
+        }
+        return cached.copy();
     }
 
     public static boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting) {

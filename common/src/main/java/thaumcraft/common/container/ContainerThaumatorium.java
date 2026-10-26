@@ -25,7 +25,8 @@ import thaumcraft.api.aspects.Aspect;
 
 /** One genuine catalyst slot and server-authoritative recipe toggles; packets never carry research claims. */
 public final class ContainerThaumatorium extends AbstractContainerMenu {
-    private static final List<Aspect> ASPECTS = Aspect.aspects.values().stream().sorted(Comparator.comparing(Aspect::getTag)).toList();
+    /** The synchronised stock order, taken when the menu opens so add-on aspects registered by any mod initialiser are included. */
+    private final List<Aspect> aspects;
     private final TileThaumatorium tile;
     private final Player viewer;
     private final BlockPos pos;
@@ -42,13 +43,15 @@ public final class ContainerThaumatorium extends AbstractContainerMenu {
     private ContainerThaumatorium(int id, Inventory inventory, Container contents, BlockPos pos, TileThaumatorium tile, List<RecipeHolder<CrucibleRecipe>> openingRecipes) {
         super(ThaumcraftThaumatorium.MENU.get(), id); this.tile = tile; this.pos = pos.immutable(); viewer = inventory.player;
         recipes = openingRecipes == null ? thaumcraft.common.crafting.ProgrammaticRecipes.crucibles(viewer.level().getRecipeManager()) : List.copyOf(openingRecipes);
+        synchronized (Aspect.aspects) { aspects = Aspect.aspects.values().stream().sorted(Comparator.comparing(Aspect::getTag)).toList(); }
+        List<Aspect> stock = aspects;
         int recipeFields = recipes.size() + 1;
-        int size = recipeFields + ASPECTS.size() * 2;
+        int size = recipeFields + stock.size() * 2;
         data = tile == null ? new SimpleContainerData(size) : new ContainerData() {
             @Override public int get(int index) {
                 if (index == 0) return tile.isHeated() ? 1 : 0;
                 if (index >= recipeFields) {
-                    int field = index - recipeFields, amount = tile.containerContains(ASPECTS.get(field / 2));
+                    int field = index - recipeFields, amount = tile.containerContains(stock.get(field / 2));
                     return field % 2 == 0 ? amount & 65535 : amount >>> 16;
                 }
                 var recipe = recipes.get(index - 1);
@@ -65,7 +68,7 @@ public final class ContainerThaumatorium extends AbstractContainerMenu {
     }
     public List<RecipeHolder<CrucibleRecipe>> recipes() { return recipes; }
     public int stored(Aspect aspect) {
-        int index = ASPECTS.indexOf(aspect);
+        int index = aspects.indexOf(aspect);
         if (index < 0) return 0;
         int base = recipes.size() + 1 + index * 2;
         return (data.get(base) & 65535) | ((data.get(base + 1) & 65535) << 16);

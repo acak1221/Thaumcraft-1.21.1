@@ -2379,6 +2379,43 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.arcaneFurnaceIsBuiltByAWandAndPaysTheMeatNuggets(test);
     }
 
+    // An aspect registered by an add-on (registered by these scenarios only, never by the mod) works end to
+    // end. Own batches: the scenarios register and remove a 49th aspect.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "addon_aspect_scan")
+    public void addonAspectObjectTagScanDiscoversIt(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.objectTagScanDiscoversIt(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectEssentiaFillsAJarAndSurvivesReload(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.essentiaFillsAJarAndSurvivesReload(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectCombinesAtTheResearchTable(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.combinesAtTheResearchTable(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectRoundTripsThroughClientCodecs(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.roundTripsThroughClientCodecs(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectMenusSynchroniseIt(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.menusSynchroniseIt(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectWispScansAndCentrifugeSplitsIt(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.wispScansAndCentrifugeSplitsIt(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "addon_aspects")
+    public void addonAspectCreativeTabListsItsPhial(GameTestHelper test) {
+        thaumcraft.common.testing.AspectApiRuntimeChecks.creativeTabListsItsPhial(test);
+    }
+
     private static net.minecraft.server.level.ServerPlayer notePlayer(GameTestHelper test) {
         test.assertTrue(NetworkRegistry.getCodec(ResearchNoteRequestPayload.TYPE.id(),
                         ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,

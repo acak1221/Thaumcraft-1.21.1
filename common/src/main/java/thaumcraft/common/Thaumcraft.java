@@ -237,6 +237,9 @@ public final class Thaumcraft {
         });
         LifecycleEvent.SERVER_STARTED.register(server -> {
             thaumcraft.api.internal.ThaumcraftInternalMethods.serverStarted(server);
+            // Original ConfigAspects ran in postInit, after the add-ons registered their aspects: their
+            // Wisp rows belong to the public entity list before anything is scanned.
+            thaumcraft.common.lib.research.EntityAspectBindings.registerLateWispVariants();
             ObjectAspectCatalog.validateAgainstRegistries();
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);

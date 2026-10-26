@@ -11,6 +11,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
+import thaumcraft.api.aspects.Aspect;
 
 /** TC4 knowledge owned by one player, with no process-wide player-name cache. */
 public final class PlayerKnowledge {
@@ -52,10 +53,21 @@ public final class PlayerKnowledge {
         addDiscoveredPrimalAspects();
     }
 
+    /**
+     * Original ResearchManager.loadPlayerData:796-802: on the first load every registered aspect WITHOUT a
+     * component array (not "isPrimal": a three-parent aspect is not included) is discovered with 15-19
+     * research points, drawn in registry order. With the original registry that is exactly the six
+     * primals in {@link #PRIMAL_TAGS} order; an add-on primal registered with null components is given
+     * the same way.
+     */
     public void initializePrimalAspects(RandomSource random) {
         if (isRejected()) return;
         if (initializedAspects) return;
-        for (String tag : PRIMAL_TAGS) {
+        List<String> starting = new java.util.ArrayList<>();
+        synchronized (Aspect.aspects) {
+            for (Aspect aspect : Aspect.aspects.values()) if (aspect.getComponents() == null) starting.add(aspect.getTag());
+        }
+        for (String tag : starting) {
             discoveredAspects.put(tag, 15 + random.nextInt(5));
         }
         initializedAspects = true;

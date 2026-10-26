@@ -8,8 +8,76 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-/** The 48 TC4 aspects; amounts and centivis are stored by their consumers. */
+/**
+ * The aspect registry of TC4: the 48 original aspects plus every aspect an add-on registers.
+ * Amounts and centivis are stored by their consumers.
+ *
+ * <h2>Add-on aspects</h2>
+ *
+ * <p>An add-on registers an aspect exactly as it did on 1.7.10, by constructing it once:</p>
+ * <pre>{@code
+ * public static final Aspect TEMPUS = new Aspect("tempus", 0xB68CFF, new Aspect[]{Aspect.VOID, Aspect.ORDER},
+ *         ResourceLocation.fromNamespaceAndPath("myaddon", "textures/aspects/tempus.png"), 1);
+ * ThaumcraftApi.registerObjectTag(new ItemStack(Items.CLOCK), new AspectList().add(TEMPUS, 4));
+ * }</pre>
+ * <p>The constructor is the whole registration: the aspect is then known to the thaumometer, the
+ * research table, the research notes, essentia storage and transport, the crucible, the alchemical
+ * furnace, the centrifuge, phials, crystals, wisps, the creative tab and the EMI/JEI/Jade
+ * integrations, exactly like an original aspect. The contract:</p>
+ * <ul>
+ * <li><b>When.</b> During mod initialisation, on both physical sides (common code, never only the
+ * client or only the server): a {@code static final} field of a class your initialiser loads (Fabric
+ * {@code ModInitializer#onInitialize}; NeoForge mod constructor or
+ * {@code FMLCommonSetupEvent#enqueueWork}). The order relative to Thaumcraft's own initialiser does not
+ * matter: the 48 original aspects are registered by the static initialiser of this class, so they always
+ * precede add-on aspects, and every consumer reads this registry when it needs it. Do not register
+ * aspects after a world or server started (data pack recipes, open menus and saved data are validated
+ * against the registry at that point) and never remove one: the registry has no unregistration.</li>
+ * <li><b>Tag.</b> Unique, non-empty, lowercase, made of {@code [a-z0-9_.-]}; a duplicate throws
+ * {@link IllegalArgumentException}. The tag is the identity of the aspect everywhere: saved block
+ * entities, item components, player knowledge, research notes, recipes and every packet store the tag
+ * string, and EMI/JEI use {@code thaumcraft:<tag>} as identifier (a tag that is not a valid resource
+ * path is accepted, as in the original, but logged, because those identifiers then fail). Changing a
+ * tag later orphans existing worlds.</li>
+ * <li><b>Components.</b> A compound has exactly two registered parents; any other array length makes
+ * the aspect primal ({@link #isPrimal()}, original rule). The research table and the hex notes link an
+ * aspect to its two parents; {@link #getCombinationResult} answers the first registered aspect with that
+ * pair, so a pair that an original aspect already uses never yields the add-on aspect. An aspect
+ * without components ({@code null}) is a primal: like the six original primals it is given to a player
+ * on the first join (original ResearchManager.loadPlayerData), but wand, sceptre and amulet vis, vis
+ * relays, shards, crystal clusters and infused ores of this port exist for the six original primals
+ * only.</li>
+ * <li><b>Texture.</b> {@link #getImage()} is bound directly as a texture, not as an atlas sprite: ship
+ * {@code assets/<namespace>/textures/aspects/<name>.png}, a square image (the originals are 32x32
+ * RGBA) drawn white or grey on transparency, because Thaumcraft tints it with {@link #getColor()}
+ * (RGB {@code 0xRRGGBB}, no alpha). Use the five-argument constructor with your own namespace; the
+ * three- and four-argument forms derive {@code thaumcraft:textures/aspects/<lowercase tag>.png},
+ * which only the original aspects ship.</li>
+ * <li><b>Blend.</b> {@code 1} (additive, the default) or {@code 771} (alpha blended, the dark
+ * aspects), used by nodes and aspect orbs; other values render as additive.</li>
+ * <li><b>Chat colour.</b> One legacy formatting code character (for example {@code "5"}), used for
+ * primal vis costs of foci; the compound constructors default it to {@code "f"}.</li>
+ * <li><b>Language keys.</b> {@link #getName()} is the capitalised tag and is not translated, as in the
+ * original. Add {@code tc.aspect.<tag>} (the meaning shown under the name, for example
+ * {@code "tc.aspect.tempus": "Time"}) and {@code tc.aspect.help.<tag>} (a short lowercase noun used
+ * by the thaumometer when the aspect is a missing parent: "To understand this you need to study
+ * %s.") to your own {@code assets/<namespace>/lang/en_us.json}.</li>
+ * <li><b>Networking.</b> Client and server must register the same aspects: a client that lacks one
+ * cannot decode the phials, crystals, wisp essence, jar labels, recipes and research notes that name
+ * it and is disconnected. The essentia tube vent effect and the deconstruction table menu send a
+ * position in the registry order, and the thaumatorium menu a position in the tag-sorted registry, so
+ * register the same aspects in a deterministic order on both sides.</li>
+ * <li><b>Threads.</b> Registration synchronises on {@link #aspects}, so parallel mod construction
+ * (NeoForge) cannot corrupt the map, and {@link #getPrimalAspects()}, {@link #getCompoundAspects()} and
+ * {@link #getCombinationResult} read it under the same lock. Code that iterates {@link #aspects}
+ * itself while other mods may still be constructing must synchronise on it too.</li>
+ * </ul>
+ */
 public class Aspect {
+    /**
+     * The live registry, keyed by tag, in registration order: the 48 original aspects first, then the
+     * add-on aspects. Writes synchronise on this map; see the class documentation.
+     */
     public static final LinkedHashMap<String, Aspect> aspects = new LinkedHashMap<>();
 
     public static final Aspect AIR = new Aspect("aer", 0xffff7e, "e", 1);
@@ -79,8 +147,14 @@ public class Aspect {
         this.components = components == null ? null : components.clone();
         this.image = Objects.requireNonNull(image, "image");
         this.blend = blend;
-        if (aspects.putIfAbsent(tag, this) != null) {
-            throw new IllegalArgumentException("Aspect already registered: " + tag);
+        synchronized (aspects) {
+            if (aspects.putIfAbsent(tag, this) != null) {
+                throw new IllegalArgumentException("Aspect already registered: " + tag);
+            }
+        }
+        if (!ResourceLocation.isValidPath(tag)) {
+            org.slf4j.LoggerFactory.getLogger("Thaumcraft").warn(
+                    "Aspect tag '{}' is not a lowercase resource path; EMI/JEI identifiers of this aspect will fail", tag);
         }
     }
 
@@ -111,8 +185,27 @@ public class Aspect {
     public String getTag() { return this.tag; }
     /** Returns the stored RGB integer without changing state. */
     public int getColor() { return this.color; }
-    /** Returns the tag with its first character capitalized; null/empty tags fail, and this is not a translation lookup. */
-    public String getName() { return this.tag.substring(0, 1).toUpperCase(Locale.ROOT) + this.tag.substring(1); }
+    /**
+     * Original Aspect.getName: {@code WordUtils.capitalizeFully(tag)}, the tag in lower case with the
+     * first letter of each whitespace-separated word in title case; a null or empty tag (after
+     * {@link #setTag}) is returned unchanged. This is not a translation lookup. The lower casing uses
+     * {@link Locale#ROOT}, not the default locale of the original, so a Turkish locale cannot change a
+     * name.
+     */
+    public String getName() {
+        if (this.tag == null || this.tag.isEmpty()) return this.tag;
+        char[] name = this.tag.toLowerCase(Locale.ROOT).toCharArray();
+        boolean wordStart = true;
+        for (int index = 0; index < name.length; index++) {
+            if (Character.isWhitespace(name[index])) {
+                wordStart = true;
+            } else if (wordStart) {
+                name[index] = Character.toTitleCase(name[index]);
+                wordStart = false;
+            }
+        }
+        return new String(name);
+    }
     /** Returns a new component array sharing Aspect objects, or null when no array is stored. */
     public Aspect[] getComponents() { return this.components == null ? null : this.components.clone(); }
     /** Returns the non-null texture identifier without changing state. */
@@ -149,27 +242,43 @@ public class Aspect {
     /** Looks up the live registry by key; unknown/null keys return null unless the public map was manually populated at that key. */
     public static Aspect getAspect(String tag) { return aspects.get(tag); }
 
-    /** Returns a new registry-ordered list of primal aspects; elements remain shared mutable identities. */
+    /**
+     * Returns a new registry-ordered list of primal aspects, read from the live registry (add-on
+     * primals included, after the six original ones); elements remain shared mutable identities.
+     */
     public static ArrayList<Aspect> getPrimalAspects() {
         ArrayList<Aspect> result = new ArrayList<>();
-        for (Aspect aspect : aspects.values()) if (aspect.isPrimal()) result.add(aspect);
+        synchronized (aspects) {
+            for (Aspect aspect : aspects.values()) if (aspect.isPrimal()) result.add(aspect);
+        }
         return result;
     }
 
-    /** Returns a new registry-ordered list of nonprimal aspects; elements remain shared mutable identities. */
+    /**
+     * Returns a new registry-ordered list of nonprimal aspects, read from the live registry (add-on
+     * compounds included); elements remain shared mutable identities.
+     */
     public static ArrayList<Aspect> getCompoundAspects() {
         ArrayList<Aspect> result = new ArrayList<>();
-        for (Aspect aspect : aspects.values()) if (!aspect.isPrimal()) result.add(aspect);
+        synchronized (aspects) {
+            for (Aspect aspect : aspects.values()) if (!aspect.isPrimal()) result.add(aspect);
+        }
         return result;
     }
 
-    /** Returns the first registry aspect matching the two parent identities in either order, or null for null inputs/no match; malformed short component arrays can throw. */
+    /**
+     * Original ResearchManager.getCombinationResult: the first registry aspect whose components are the
+     * two identities in either order, add-on aspects included, or null for null inputs/no match.
+     * Malformed short component arrays can throw.
+     */
     public static Aspect getCombinationResult(Aspect first, Aspect second) {
         if (first == null || second == null) return null;
-        for (Aspect aspect : aspects.values()) {
-            Aspect[] parents = aspect.components;
-            if (parents != null && ((parents[0] == first && parents[1] == second)
-                    || (parents[1] == first && parents[0] == second))) return aspect;
+        synchronized (aspects) {
+            for (Aspect aspect : aspects.values()) {
+                Aspect[] parents = aspect.components;
+                if (parents != null && ((parents[0] == first && parents[1] == second)
+                        || (parents[1] == first && parents[0] == second))) return aspect;
+            }
         }
         return null;
     }

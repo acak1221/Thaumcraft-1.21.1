@@ -2234,6 +2234,27 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.EquipmentItemRuntimeChecks.relicsAndReliquariesKeepTheirOriginalRules(test);
     }
 
+    // The settings adopted from TC4Tweaks, each with the tweak and with the original rule.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc4tweaks_loot")
+    public void tweakLootRerollsBooksAndAmulets(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.loot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc4tweaks_shock")
+    public void tweakEarthShockSparesItemsAndExperience(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.earthShock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void tweakInfusionKeepsCentreItemData(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.infusionData(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc4tweaks_phial")
+    public void tweakFilledPhialStaysInHand(GameTestHelper test) {
+        thaumcraft.common.testing.TweakRuntimeChecks.filledToHand(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
     public void runic_accessories_keep_their_original_charge_and_slot(GameTestHelper test) {
         thaumcraft.common.testing.RunicBaubleRuntimeChecks.runicAccessoriesKeepTheirOriginalChargeAndSlot(test);

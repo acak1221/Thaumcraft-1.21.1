@@ -129,3 +129,28 @@ recorded here so the claim is bounded by what was seen, not by a test count:
 * **Shimmerleaf and cinderpearl** — both decorative plants draw their crossed-quad models, the
   shimmerleaf emits its blue wisp and the cinderpearl its flame/smoke while standing on sand.
 
+
+---
+
+## 8. Improvements adopted from TC4Tweaks (settings, on by default)
+
+The user asked for the quality-of-life improvements of TC4Tweaks, the 1.7.10 companion mod of
+TC4 (<https://github.com/Glease/TC4Tweaks>, AGPL-3.0). Each one is a setting in the `Tweaks`
+tab of the configuration screen (`config/thaumcraft.properties`), on by default like in
+TC4Tweaks; switched off, the original rule applies. No TC4Tweaks code was copied: it patched
+1.7.10 bytecode, and each idea is re-implemented on the port's code
+(`thaumcraft.common.config.ThaumcraftTweaks`). `TweakRuntimeChecks` drives every one of them
+twice, with the setting and with the original rule.
+
+| Setting (key) | Original TC4 4.2.3.5 (oracle bytecode) | With the setting |
+|---|---|---|
+| `more_randomized_loot` | `Utils.generateLoot` enchants the pooled `Items.book` in place, once, so every later book repeats that enchantment until the server restarts; `ThaumcraftLoot` charges the loot vis amulet once per run | Every book from a loot bag, urn or crate is enchanted on its own draw and the pool keeps its plain book; every loot vis amulet gets its own charge with the original spread (0–4 vis per primal) |
+| `earth_shock_targets` (2) | `EntityShockOrb` hurts `getEntitiesWithinAABB(Entity.class, …)`, and the shock field (`BlockAiry.onEntityCollidedWithBlock`) hurts any entity, so dropped items and experience orbs are destroyed | 2: only living entities; 1: everything except items and experience orbs; 0: the original. The field still slows every entity |
+| `infusion_keeps_item_data` | `TileInfusionMatrix` copies `InfusionRecipe.getRecipeOutput(input)`, so an enchanted or named centre item loses its enchantments and name | When the centre and the result are both armour or tools, every component the centre item changes is kept on the result unless the recipe's result sets that component itself; the components that define the kind of item are never copied and carried wear never breaks the result. Applies to data recipes and plain add-on recipes, not to recipe subclasses that compute their own result |
+| `filled_container_to_hand` | `ItemEssence` gives the filled phial with `InventoryPlayer.addItemStackToInventory`, the first free slot when no stack has room | When the last empty phial (or, at the alembic, the last empty jar) in hand is filled and no stack of the filled item has room, the filled one stays in that hand |
+
+Not adopted, because the port already covers them or they do not apply to 1.21.1: the packet
+exploit fixes for research completion and aspect combination (the port validates both on the
+server), golems picking up dead item entities (checked), the decant golem's unbounded fluid search
+(bounded), the mana bean replant fix (matched by full item components), saved player data file
+names, and the 1.7.10 crash workarounds for renderers and world generation.

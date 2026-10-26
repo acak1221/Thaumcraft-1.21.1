@@ -1,3 +1,18 @@
+## 2026-10-26 — TC4Tweaks wave 1: four gameplay improvements as settings
+
+At the user's request, TC4Tweaks (AGPL-3.0; ideas only, no code copied) was
+triaged against the port. Four improvements are adopted, each a setting in the
+new Tweaks tab, on by default like in TC4Tweaks and documented as an accepted
+deviation (KNOWN_DEVIATIONS §8): varied loot (books and vis amulets rolled per
+draw), earth shock that spares items and experience, infusion that keeps the
+centre armour or tool's enchantments, name and other data, and a filled phial
+(or alembic jar) that stays in the emptied hand. The exploit fixes of TC4Tweaks
+are already closed in the port; Thaumonomicon search, completion counter and the
+notification clear button are wave 2. Verified: 2577 JUnit, both builds,
+471/471 Fabric and 456/456 NeoForge GameTests on fresh worlds (every setting
+both ways), 115 Python tests; the tab was inspected in English and Russian. See
+[the report](docs/analysis/2026-10-26-tc4tweaks-wave1-ru.md).
+
 ## 2026-10-26 — real NeoForge client: two defects that broke every client; EMI on NeoForge
 
 First run of a real NeoForge client. Two shared-code defects broke every

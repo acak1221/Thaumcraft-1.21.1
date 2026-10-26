@@ -77,12 +77,16 @@ public final class ThaumcraftSettings {
                         + "# regeneration of the original never touches a chunk until one of them is on.\n"
                         + "regen_key=DEFAULT\naura_nodes=false\nstructures=false\ncinnibar_ore=false\n"
                         + "amber_ore=false\ninfused_stone=false\ntrees=false\n"
-                        + "shaders=true\n",
+                        + "shaders=true\n"
+                        + "# Improvements adopted from TC4Tweaks; false (earth_shock_targets=0) is the original rule.\n"
+                        + "more_randomized_loot=true\nearth_shock_targets=2\ninfusion_keeps_item_data=true\n"
+                        + "filled_container_to_hand=true\n",
                         StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }
             configureServer(ResearchSettings.read(properties));
             ThaumcraftTaintSettings.load(properties);
             ThaumcraftBiomeSettings.configure(properties);
+            ThaumcraftTweaks.load(properties);
             // Original Config.shaders: a local rendering switch, not a server fact.
             shaders = !"false".equalsIgnoreCase(properties.getProperty("shaders", "true").strip());
             Config.shaders = shaders;
@@ -91,6 +95,7 @@ public final class ThaumcraftSettings {
             configureServer(ResearchSettings.DEFAULTS);
             ThaumcraftTaintSettings.configure(ThaumcraftTaintSettings.DEFAULTS);
             ThaumcraftBiomeSettings.defaults();
+            ThaumcraftTweaks.configure(ThaumcraftTweaks.DEFAULTS);
             shaders = true;
             Config.shaders = true;
         }

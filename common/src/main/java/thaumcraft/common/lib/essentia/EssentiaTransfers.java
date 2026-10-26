@@ -959,13 +959,18 @@ public final class EssentiaTransfers {
             // Detachment also defeats creative useOn's passed-stack restoration.
             held.shrink(1);
             int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : 40;
-            player.getInventory().setItem(slot, replaceHand ? delivery : paid.isEmpty() ? ItemStack.EMPTY : paid);
+            // Tweak (TC4Tweaks): the last empty phial or jar in hand becomes the filled one in that
+            // hand, unless a stack of the filled item already has room. The original added it
+            // to the first free slot.
+            boolean intoHand = !replaceHand && paid.isEmpty() && thaumcraft.common.config.ThaumcraftTweaks.filledToHand()
+                    && player.getInventory().getSlotWithRemainingSpace(delivery) < 0;
+            player.getInventory().setItem(slot, replaceHand || intoHand ? delivery : paid.isEmpty() ? ItemStack.EMPTY : paid);
             mutation.raw = false;
             try {
                 // Inventory.add silently discards undeliverable leftovers for
                 // instabuild players. A paid TC4 exchange must instead keep its
                 // output, so do not enter that branch without actual room.
-                if (!replaceHand && (!hasRoomForOne(player, delivery) || !player.getInventory().add(delivery)))
+                if (!replaceHand && !intoHand && (!hasRoomForOne(player, delivery) || !player.getInventory().add(delivery)))
                     DeferredItemDrops.enqueue(level, endpoint.getBlockPos(), List.of(delivery));
                 player.getInventory().setChanged();
                 player.containerMenu.broadcastChanges();

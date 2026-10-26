@@ -153,7 +153,8 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                 recipeInput = central.copy();
                 recipeIngredients.clear();
                 recipeIngredients.addAll(recipe.selectedComponents());
-                recipeOutput = output.copy();
+                // Tweak (TC4Tweaks): armour and tools keep the centre item's data; off, the original stack.
+                recipeOutput = thaumcraft.common.lib.infusion.InfusionItemData.apply(central, output.copy());
                 recipeOutputLabel = "";
                 recipeInstability = recipe.instability();
                 recipeType = 0;
@@ -236,7 +237,10 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
             recipeInput = central.copy();
             recipeIngredients.clear();
             recipeIngredients.addAll(prepared.components());
-            recipeOutput = prepared.output().copy();
+            // Tweak (TC4Tweaks) as above, only for a plain add-on recipe: a subclass may compute its own result.
+            recipeOutput = registration.getClass() == thaumcraft.api.crafting.InfusionRecipe.class
+                    ? thaumcraft.common.lib.infusion.InfusionItemData.apply(central, prepared.output().copy())
+                    : prepared.output().copy();
             recipeOutputLabel = "";
             recipeEnchantment = prepared.enchantment();
             recipeInstability = prepared.instability();

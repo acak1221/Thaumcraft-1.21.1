@@ -36,6 +36,8 @@ import thaumcraft.common.config.ThaumcraftConfigStore;
 public final class ThaumcraftConfigScreen extends Screen {
     private static final int HEADER = 52, FOOTER = 44, ROW_HEIGHT = 24;
     private static final int TEXT = 0xFFFFFF, DIM = 0xA0A0A0;
+    /** Integer settings whose values are modes with names rather than amounts. */
+    private static final java.util.Set<String> NAMED_VALUES = java.util.Set.of("research_difficulty", "earth_shock_targets");
     private final Screen parent;
     private final Properties values;
     private ThaumcraftConfigStore.Category category = ThaumcraftConfigStore.Category.GENERAL;
@@ -48,16 +50,21 @@ public final class ThaumcraftConfigScreen extends Screen {
 
     @Override protected void init() {
         var categories = ThaumcraftConfigStore.Category.values();
-        int tabWidth = Math.min(110, (this.width - 20) / categories.length);
-        int x = (this.width - tabWidth * categories.length) / 2;
-        for (ThaumcraftConfigStore.Category candidate : categories) {
+        // Each tab is as wide as its name; when the names cannot all fit, the tabs share the width.
+        int available = this.width - 20, total = 0;
+        int[] widths = new int[categories.length];
+        for (int i = 0; i < categories.length; i++) total += widths[i] = Math.min(110, this.font.width(categoryName(categories[i])) + 10);
+        if (total > available) java.util.Arrays.fill(widths, total = available / categories.length);
+        int x = (this.width - total) / 2;
+        for (int i = 0; i < categories.length; i++) {
+            ThaumcraftConfigStore.Category candidate = categories[i];
             Button tab = Button.builder(categoryName(candidate), button -> {
                 category = candidate;
                 rebuildWidgets();
-            }).bounds(x + 1, 24, tabWidth - 2, 20).tooltip(Tooltip.create(Component.literal(candidate.id()))).build();
+            }).bounds(x + 1, 24, widths[i] - 2, 20).tooltip(Tooltip.create(Component.literal(candidate.id()))).build();
             tab.active = candidate != category;
             addRenderableWidget(tab);
-            x += tabWidth;
+            x += widths[i];
         }
         SettingsList list = new SettingsList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER);
         for (ThaumcraftConfigStore.Entry entry : ThaumcraftConfigStore.entries(category)) list.add(new Row(entry));
@@ -139,7 +146,7 @@ public final class ThaumcraftConfigScreen extends Screen {
         @Override public List<? extends NarratableEntry> narratables() { return List.of(control); }
     }
 
-    /** An integer setting between its minimum and maximum; research difficulty names its three modes. */
+    /** An integer setting between its minimum and maximum; a setting with modes names them. */
     private final class IntegerSlider extends AbstractSliderButton {
         private final ThaumcraftConfigStore.Entry entry;
 
@@ -158,8 +165,8 @@ public final class ThaumcraftConfigScreen extends Screen {
 
         @Override protected void updateMessage() {
             int current = current();
-            setMessage("research_difficulty".equals(entry.key())
-                    ? Component.translatable("tc.port.config.research_difficulty.value." + current)
+            setMessage(NAMED_VALUES.contains(entry.key())
+                    ? Component.translatable("tc.port.config." + entry.key() + ".value." + current)
                     : Component.literal(Integer.toString(current)));
         }
 

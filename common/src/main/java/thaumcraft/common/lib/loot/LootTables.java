@@ -81,7 +81,11 @@ public final class LootTables {
             if(selected==null) throw new IllegalStateException("Original weighted loot pool has no result");
             result=selected.item;
         }
-        if(result.is(Items.BOOK)) {
+        if(result.is(Items.BOOK)&&thaumcraft.common.config.ThaumcraftTweaks.moreRandomizedLoot()) {
+            // Tweak (TC4Tweaks): every book gets its own enchantment and the pools keep their plain
+            // book. The original below converts the pooled book once and repeats it until restart.
+            result=OriginalLootEnchantments.enchant(level,result.copy(),random,(int)(5F+rarity*.75F*random.nextInt(18)));
+        } else if(result.is(Items.BOOK)) {
             ItemStack original=result;
             result=OriginalLootEnchantments.enchant(level,result,random,(int)(5F+rarity*.75F*random.nextInt(18)));
             // All registrations of the SAME original stack observe its in-place BOOK conversion.
@@ -89,8 +93,21 @@ public final class LootTables {
             if(selected!=null) for(var pool:List.of(WeightedRandomLoot.lootBagCommon,WeightedRandomLoot.lootBagUncommon,WeightedRandomLoot.lootBagRare))
                 for(var entry:pool) if(entry.item==original)entry.item=result;
         }
+        if(thaumcraft.common.config.ThaumcraftTweaks.moreRandomizedLoot()&&result.is(ThaumcraftBaubles.VIS_AMULET_LESSER.get()))
+            result=recharge(result,random);
         rebindEnchantments(level,result);
         return result.copy();
+    }
+    /**
+     * Tweak (TC4Tweaks): a vis amulet from loot gets a charge of its own, drawn like the original
+     * one (ThaumcraftLoot.lootAmulet: zero to four whole vis of every primal), instead of the charge
+     * the original drew once per server run.
+     */
+    private static ItemStack recharge(ItemStack amulet,RandomSource random) {
+        ItemStack charged=amulet.copy();
+        var item=ThaumcraftBaubles.VIS_AMULET_LESSER.get();
+        for(var primal:thaumcraft.api.aspects.Aspect.getPrimalAspects()) item.storeVis(charged,primal,random.nextInt(5)*100);
+        return charged;
     }
     /** Static public templates can outlive a server registry. Rebind their exact keys/levels, with NO RNG. */
     private static void rebindEnchantments(ServerLevel level,ItemStack stack) {

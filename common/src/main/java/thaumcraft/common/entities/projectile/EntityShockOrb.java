@@ -89,6 +89,8 @@ public final class EntityShockOrb extends Projectile {
         // Original EntityUtils range is an inflated POINT AABB, not a sphere or the orb's own inflated box.
         for(Entity victim:server.getEntities(this,new AABB(x,y,z,x,y,z).inflate(area))) {
             if(!visible(server,position(),victim.position())) continue;
+            // Tweak (TC4Tweaks): by default only creatures; the original also destroyed items and XP orbs.
+            if(!thaumcraft.common.config.ThaumcraftTweaks.earthShockHurts(victim)) continue;
             victim.hurt(damageSources().indirectMagic(this,getOwner()),getDamage());
             if(isRemoved()) return;
         }

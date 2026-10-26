@@ -83,8 +83,8 @@ def validate(root: Path, resources: Path, sprites: dict[str, Path], contract: di
     contract = contract if contract is not None else json.loads(CONTRACT.read_text())
     errors = []
     inventory, helpers = {}, {}
-    # compat/emi: the optional EMI plugin, compiled into both loader modules.
-    for module in ('common', 'fabric', 'neoforge', 'compat/emi'):
+    # compat/*: the optional EMI, JEI and Jade plugins, compiled into both loader modules.
+    for module in ('common', 'fabric', 'neoforge', 'compat/emi', 'compat/jade', 'compat/jei'):
         for path in sorted((root / module / 'src/main/java').rglob('*.java')):
             source = path.read_text()
             found = dynamic_calls(source)

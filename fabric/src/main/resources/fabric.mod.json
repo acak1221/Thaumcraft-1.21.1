@@ -26,6 +26,12 @@
     "emi": [
       "thaumcraft.compat.emi.ThaumcraftEmiPlugin"
     ],
+    "jade": [
+      "thaumcraft.compat.jade.ThaumcraftJadePlugin"
+    ],
+    "jei_mod_plugin": [
+      "thaumcraft.compat.jei.ThaumcraftJeiPlugin"
+    ],
     "modmenu": [
       "thaumcraft.fabric.compat.ThaumcraftModMenu"
     ]
@@ -45,6 +51,8 @@
   "license": "See THIRD_PARTY_NOTICES.md",
   "suggests": {
     "emi": "*",
+    "jade": "*",
+    "jei": "*",
     "modmenu": "*"
   }
 }

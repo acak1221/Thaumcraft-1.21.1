@@ -1072,6 +1072,10 @@
     "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": [
       "ResourceLocation.parse(entry.image())"
     ],
+    "common/src/main/java/thaumcraft/client/lib/RecipeViews.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/\"+(sceptre?\"sceptre\":\"wand\")+\"/\"+rod.tag()+\"/\"+cap.tag())",
+      "ResourceLocation.fromNamespaceAndPath(recipeId.getNamespace(),\"/\"+recipeId.getPath()+\"/hardening_\"+hardening)"
+    ],
     "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
     ],
@@ -1387,9 +1391,13 @@
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+aspect.getTag())"
     ],
     "compat/emi/src/main/java/thaumcraft/compat/emi/ThaumcraftEmiPlugin.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/\"+(sceptre?\"sceptre\":\"wand\")+\"/\"+rod.tag()+\"/\"+cap.tag())",
-      "ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(),\"/\"+holder.id().getPath()+\"/hardening_\"+hardening)"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "compat/jei/src/main/java/thaumcraft/compat/jei/AspectIngredient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",stack.aspect().getTag())"
+    ],
+    "compat/jei/src/main/java/thaumcraft/compat/jei/Categories.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+recipe.aspect().getTag())"
     ],
     "fabric/src/main/java/thaumcraft/fabric/world/FabricBiomeSpawns.java": [
       "ResourceLocation.parse(row.entity())"

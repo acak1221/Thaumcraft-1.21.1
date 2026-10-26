@@ -19,6 +19,12 @@ dependencies {
  // `-PwithEmi` adds EMI to runClient for manual checks; GameTest and default runs stay without it.
  modCompileOnly "dev.emi:emi-neoforge:$rootProject.emi_version:api"
  if (providers.gradleProperty('withEmi').isPresent()) modLocalRuntime "dev.emi:emi-neoforge:$rootProject.emi_version"
+ // Optional Jade integration, the same way; `-PwithJade` adds Jade to runClient.
+ modCompileOnly "maven.modrinth:jade:$rootProject.jade_version+neoforge"
+ if (providers.gradleProperty('withJade').isPresent()) modLocalRuntime "maven.modrinth:jade:$rootProject.jade_version+neoforge"
+ // Optional JEI integration, the same way; `-PwithJei` adds JEI to runClient.
+ modCompileOnly "mezz.jei:jei-1.21.1-neoforge-api:$rootProject.jei_version"
+ if (providers.gradleProperty('withJei').isPresent()) modLocalRuntime "mezz.jei:jei-1.21.1-neoforge:$rootProject.jei_version"
  // The loader parity test compares the two loader modules source against source.
  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
  testImplementation 'org.junit.platform:junit-platform-launcher'
@@ -39,6 +45,10 @@ remapJar { inputFile.set shadowJar.archiveFile }
 
 // The optional EMI plugin, shared with Fabric (compat/emi).
 sourceSets.main.java.srcDir rootProject.file('compat/emi/src/main/java')
+// The optional Jade plugin, shared with Fabric (compat/jade).
+sourceSets.main.java.srcDir rootProject.file('compat/jade/src/main/java')
+// The optional JEI plugin, shared with Fabric (compat/jei).
+sourceSets.main.java.srcDir rootProject.file('compat/jei/src/main/java')
 
 sourceSets {
  gameTest {

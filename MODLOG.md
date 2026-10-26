@@ -1,3 +1,12 @@
+## 2026-10-26 — Jade and JEI integrations
+
+Optional integrations for Fabric and NeoForge (`compat/jade`, `compat/jei`). Jade shows container
+essentia behind the goggles of revealing (as TC4 does; a Jade option drops the requirement),
+machine state without them, and a golem's master, core and upgrades. JEI lists the same five
+categories as EMI with aspects as JEI ingredients; the non-grid pages come from the shared
+`RecipeViews`, which EMI now uses too. Verified: 2590 JUnit, NeoForge JUnit, both builds, 120
+Python tests; Jade, JEI and EMI seen on a Fabric client.
+
 ## 2026-10-26 — aspects for every item: the remaining TC4 rows and automatic inference
 
 `scripts/porting/extract_config_aspects.py` accounts for all 326 ConfigAspects registrations from

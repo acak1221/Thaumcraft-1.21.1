@@ -9,43 +9,31 @@ import dev.emi.emi.api.recipe.EmiRecipeSorting;
 import dev.emi.emi.api.stack.Comparison;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.enchantment.Enchantment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import thaumcraft.api.aspects.Aspect;
-import thaumcraft.api.aspects.AspectList;
+import thaumcraft.client.lib.RecipeViews;
 import thaumcraft.common.config.ThaumcraftAlchemy;
 import thaumcraft.common.config.ThaumcraftArcane;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftInfusion;
 import thaumcraft.common.config.ThaumcraftRunic;
 import thaumcraft.common.config.ThaumcraftWandEnchantments;
-import thaumcraft.common.crafting.ArcaneRecipeInput;
 import thaumcraft.common.crafting.ArcaneShapedRecipe;
 import thaumcraft.common.crafting.ArcaneShapelessRecipe;
-import thaumcraft.common.crafting.ArcaneWandRecipe;
 import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.crafting.InfusionRunicAugmentRecipe;
 import thaumcraft.common.crafting.InfusionStackRecipe;
 import thaumcraft.common.crafting.NativeArcaneRecipe;
 import thaumcraft.common.crafting.ProgrammaticRecipes;
 import thaumcraft.common.items.wands.WandData;
-import thaumcraft.common.items.wands.WandMaterials;
-import thaumcraft.common.lib.crafting.ArcaneSceptreRecipe;
-import thaumcraft.common.lib.runic.RunicArmor;
 
 /**
  * Optional EMI integration: arcane, crucible and infusion recipes and the aspect combinations.
@@ -146,106 +134,25 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
         }
         // The wand and sceptre recipes take any registered rod and cap: list every combination
         // the registered recipe itself accepts, with the cost it charges for it.
-        if (recipe instanceof ArcaneWandRecipe || recipe instanceof ArcaneSceptreRecipe) {
-            boolean sceptre = recipe instanceof ArcaneSceptreRecipe;
-            List<EmiArcaneRecipe> variants = new ArrayList<>();
-            for (var rod : WandMaterials.RODS) {
-                for (var cap : WandMaterials.CAPS) {
-                    ArcaneRecipeInput input;
-                    try {
-                        input = sceptre ? ArcaneSceptreRecipe.displayInput(rod.tag(), cap.tag()) : ArcaneWandRecipe.displayInput(rod.tag(), cap.tag());
-                    } catch (IllegalArgumentException unsupported) {
-                        continue;
-                    }
-                    if (!recipe.matches(input, null)) continue;
-                    ItemStack result = recipe.assemble(input, registries);
-                    if (result.isEmpty()) continue;
-                    List<ItemStack> stacks = new ArrayList<>();
-                    for (int slot = 0; slot < 9; slot++) stacks.add(input.getItem(slot));
-                    String research = sceptre ? recipe.research() : !rod.tag().equals("wood") ? rod.research() : cap.research();
-                    ResourceLocation id = ResourceLocation.fromNamespaceAndPath("thaumcraft",
-                            "/" + (sceptre ? "sceptre" : "wand") + "/" + rod.tag() + "/" + cap.tag());
-                    variants.add(new EmiArcaneRecipe(id, research, EmiArcaneRecipe.stackGrid(stacks), result, recipe.vis(input), false));
-                }
-            }
-            return variants;
-        }
-        return List.of();
+        return RecipeViews.constructs(recipe, registries).stream().map(view -> new EmiArcaneRecipe(view.id(), view.research(),
+                EmiArcaneRecipe.stackGrid(view.grid()), view.result(), view.vis(), false)).toList();
     }
 
     private static EmiInfusionRecipe infusion(RecipeHolder<InfusionStackRecipe> holder, HolderLookup.Provider registries) {
-        InfusionStackRecipe recipe = holder.value();
-        EmiIngredient central = damaged(recipe.input(), recipe.inputDamage().orElse(null));
-        var selected = recipe.selectedComponents();
-        List<EmiIngredient> components = new ArrayList<>();
-        for (int i = 0; i < recipe.components().size(); i++) {
-            var predicate = selected.get(i);
-            Integer damage = recipe.componentDamage(i).orElse(null);
-            List<EmiStack> choices = new ArrayList<>();
-            for (ItemStack choice : recipe.components().get(i).getItems()) {
-                ItemStack shown = predicate.displayStack(choice);
-                if (shown.isEmpty()) continue;
-                if (damage != null) shown.setDamageValue(damage);
-                choices.add(EmiStack.of(shown));
-            }
-            components.add(EmiIngredient.of(choices));
-        }
-        return new EmiInfusionRecipe(holder.id(), recipe.research(), central, components, recipe.getResultItem(registries),
-                recipe.aspects(), recipe.instability(), List.of(), false);
+        return page(RecipeViews.infusion(holder.id(), holder.value(), registries), false);
     }
 
     private static List<EmiInfusionRecipe> runic(RecipeHolder<InfusionRunicAugmentRecipe> holder) {
-        InfusionRunicAugmentRecipe recipe = holder.value();
-        List<EmiInfusionRecipe> recipes = new ArrayList<>();
-        // The book page rotates robes already carrying hardening 0..4, each with its own price.
-        for (int hardening = 0; hardening <= 4; hardening++) {
-            ItemStack central = recipe.sample(hardening);
-            if (!recipe.canApply(central)) continue;
-            List<EmiIngredient> components = recipe.components(central).stream().map(EmiIngredient::of).toList();
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(),
-                    "/" + holder.id().getPath() + "/hardening_" + hardening);
-            recipes.add(new EmiInfusionRecipe(id, recipe.research(), EmiStack.of(central), components, RunicArmor.augment(central),
-                    costs(recipe.aspectCost(central)), recipe.instability(central), List.of(), false));
-        }
-        return recipes;
+        return RecipeViews.runic(holder.id(), holder.value()).stream().map(view -> page(view, false)).toList();
     }
 
     private static List<EmiInfusionRecipe> enchantment(RecipeHolder<InfusionEnchantmentRecipe> holder, HolderLookup.Provider registries) {
-        InfusionEnchantmentRecipe recipe = holder.value();
-        var target = recipe.enchantment(registries);
-        List<EmiStack> centrals = new ArrayList<>();
-        ItemStack sample = ItemStack.EMPTY;
-        for (var item : target.value().getSupportedItems()) {
-            ItemStack stack = new ItemStack(item);
-            if (!InfusionEnchantmentRecipe.canApply(stack, target)) continue;
-            if (sample.isEmpty()) sample = stack;
-            centrals.add(EmiStack.of(stack));
-        }
-        if (centrals.isEmpty()) return List.of();
-        List<EmiIngredient> components = recipe.components().stream().map(EmiIngredient::of).toList();
-        List<Component> details = List.of(Enchantment.getFullname(target, 1),
-                Component.translatable("tc.port.book_recipe.xp_levels", recipe.xpLevels(sample, registries)));
-        return List.of(new EmiInfusionRecipe(holder.id(), recipe.research(), EmiIngredient.of(centrals), components,
-                InfusionEnchantmentRecipe.raise(sample, recipe.enchantment(), registries), costs(recipe.aspectCost(sample, registries)),
-                recipe.calculatedInstability(sample), details, true));
+        return RecipeViews.enchantment(holder.id(), holder.value(), registries).map(view -> List.of(page(view, true))).orElse(List.of());
     }
 
-    private static EmiIngredient damaged(Ingredient ingredient, Integer damage) {
-        if (damage == null) return EmiIngredient.of(ingredient);
-        List<EmiStack> stacks = new ArrayList<>();
-        for (ItemStack stack : ingredient.getItems()) {
-            ItemStack shown = stack.copy();
-            shown.setDamageValue(damage);
-            stacks.add(EmiStack.of(shown));
-        }
-        return EmiIngredient.of(stacks);
-    }
-
-    private static Map<String, Integer> costs(AspectList list) {
-        Map<String, Integer> costs = new LinkedHashMap<>();
-        if (list != null) for (Aspect aspect : list.getAspects()) {
-            if (aspect != null && list.getAmount(aspect) > 0) costs.put(aspect.getTag(), list.getAmount(aspect));
-        }
-        return costs;
+    private static EmiInfusionRecipe page(RecipeViews.Infusion view, boolean enchantment) {
+        return new EmiInfusionRecipe(view.id(), view.research(), EmiIngredient.of(view.central()),
+                view.components().stream().map(EmiIngredient::of).toList(), view.result(), view.aspects(), view.instability(),
+                view.details(), enchantment);
     }
 }

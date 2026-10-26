@@ -17,6 +17,10 @@ subprojects {
   maven { url = 'https://maven.neoforged.net/releases/' }
   // Optional recipe viewer API (EMI); compile-only, never bundled.
   maven { url = 'https://maven.terraformersmc.com/releases/'; content { includeGroup 'dev.emi'; includeGroup 'com.terraformersmc' } }
+  // Optional block/entity tooltip API (Jade); compile-only, never bundled.
+  maven { url = 'https://api.modrinth.com/maven'; content { includeGroup 'maven.modrinth' } }
+  // Optional recipe viewer API (JEI); compile-only, never bundled.
+  maven { url = 'https://maven.blamejared.com/'; content { includeGroup 'mezz.jei' } }
  }
  dependencies {
   minecraft "com.mojang:minecraft:$rootProject.minecraft_version"

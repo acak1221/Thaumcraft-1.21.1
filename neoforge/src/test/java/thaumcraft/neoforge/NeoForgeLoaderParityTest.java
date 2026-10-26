@@ -320,8 +320,8 @@ class NeoForgeLoaderParityTest {
     // ------------------------------------------------------------------ the access transformer
 
     /**
-     * NeoForge has no access widener. The three entries of the shared access widener must be the
-     * three entries of the NeoForge access transformer, or the shared module throws an
+     * NeoForge has no access widener. The six entries of the shared access widener must be the
+     * six entries of the NeoForge access transformer, or the shared module throws an
      * {@code IllegalAccessError} on NeoForge.
      */
     @Test void theAccessTransformerIsTheSharedAccessWidener() {

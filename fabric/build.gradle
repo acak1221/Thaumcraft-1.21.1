@@ -17,10 +17,14 @@ dependencies {
  // Optional integrations: compile against the APIs only, never bundle or require them.
  modCompileOnly "dev.emi:emi-fabric:$rootProject.emi_version:api"
  modCompileOnly "com.terraformersmc:modmenu:$rootProject.modmenu_version"
+ modCompileOnly "maven.modrinth:jade:$rootProject.jade_version+fabric"
+ modCompileOnly "mezz.jei:jei-1.21.1-fabric-api:$rootProject.jei_version"
  // `-PwithEmi` / `-PwithModMenu` add the mods to runClient for manual checks; GameTest and
  // the default runs stay without them.
  if (providers.gradleProperty('withEmi').isPresent()) modLocalRuntime "dev.emi:emi-fabric:$rootProject.emi_version"
  if (providers.gradleProperty('withModMenu').isPresent()) modLocalRuntime "com.terraformersmc:modmenu:$rootProject.modmenu_version"
+ if (providers.gradleProperty('withJade').isPresent()) modLocalRuntime "maven.modrinth:jade:$rootProject.jade_version+fabric"
+ if (providers.gradleProperty('withJei').isPresent()) modLocalRuntime "mezz.jei:jei-1.21.1-fabric:$rootProject.jei_version"
 }
 processResources {
   // Loader reads AW from THIS mod's roots during dev startup, not an arbitrary
@@ -45,6 +49,10 @@ remapJar { inputFile.set shadowJar.archiveFile }
 
 // The optional EMI plugin is shared with NeoForge and compiled into each loader module.
 sourceSets.main.java.srcDir rootProject.file('compat/emi/src/main/java')
+// The optional Jade plugin, shared with NeoForge as well.
+sourceSets.main.java.srcDir rootProject.file('compat/jade/src/main/java')
+// The optional JEI plugin, shared with NeoForge as well.
+sourceSets.main.java.srcDir rootProject.file('compat/jei/src/main/java')
 
 // Opt-in harnesses. Neither output is included by jar/shadowJar or normal runs.
 sourceSets {

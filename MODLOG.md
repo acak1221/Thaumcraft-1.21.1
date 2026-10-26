@@ -1,3 +1,20 @@
+## 2026-10-26 — add-on API: porting Thaumcraft 4 add-ons from 1.7.10
+
+Every class of the original API already existed, but much of it only registered things the game never
+read. Research an add-on registers is now research of the game (book, research table, purchase, scan
+clues, completion, saves; pages drawn from its ResearchPage objects; add-on tabs and icons; changes to
+original entries through their public view). Add-on wand rods, staff rods, caps and foci assemble and
+render, and WandHelper replaces ItemWandCasting. Add-on aspects work like the 48 originals. The 1.7.10
+ConfigItems/ConfigBlocks and ore dictionary names resolve (ItemApi, OreDictionaryNames,
+docs/api/LEGACY_IDS.md). IThaumcraftAddon / ThaumcraftApi.whenReady replace after:Thaumcraft and
+postInit. ThaumcraftApiHelper gained research completion, aspect points and warp, ThaumcraftFX the effect
+packets of the original, and API recipes show in EMI and JEI. Guide: docs/api/PORTING.md; example:
+examples/example-addon (`:fabric:runExampleClient`); the sources jars carry the API sources and
+publishToMavenLocal is configured. Three parts were done by agents in separate worktrees. Verified: 2638
+JUnit, 130 Python, GameTest Fabric 492/492 and NeoForge 480/480 on fresh worlds, both builds; the book,
+an add-on wand and EMI were inspected in a Fabric client with the example add-on. Not run: multiplayer
+with an add-on, a NeoForge client with an add-on. Deviations: KNOWN_DEVIATIONS.md §9.
+
 ## 2026-10-26 — thaumometer arms no longer copy another player's pose
 
 The scanner arm was drawn from the player renderer's model, which every player shares, without

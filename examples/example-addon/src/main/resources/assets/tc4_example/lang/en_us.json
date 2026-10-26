@@ -19,5 +19,7 @@
   "tc4_example.research_page.ROD_amethyst.1": "A wand rod registered with new WandRod(...): 80 vis, craft cost 4. Combine it with any cap you know in the arcane workbench.",
   "tc.research_name.CAP_amethyst": "Amethyst Wand Caps",
   "tc.research_text.CAP_amethyst": "An add-on wand cap",
-  "tc4_example.research_page.CAP_amethyst.1": "A wand cap registered with new WandCap(...): 95% vis cost, 85% for order and entropy."
+  "tc4_example.research_page.CAP_amethyst.1": "A wand cap registered with new WandCap(...): 95% vis cost, 85% for order and entropy.",
+  "tc.aspect.tempus": "Time",
+  "tc.aspect.help.tempus": "time"
 }

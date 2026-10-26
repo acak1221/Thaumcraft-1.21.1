@@ -123,6 +123,14 @@ What backs the port up:
 Known gaps are listed in [`docs/audit/KNOWN_DEVIATIONS.md`](docs/audit/KNOWN_DEVIATIONS.md) §7;
 NeoForge has had less client and multiplayer testing than Fabric.
 
+## For add-on developers
+
+The public API of Thaumcraft 4.2.3.5 (`thaumcraft.api`) is kept under the same names, so a 1.7.10
+add-on is ported rather than rewritten: research, recipes, aspects, object tags, wand rods, caps and
+foci registered through it work in the game, and the 1.7.10 ore dictionary names and `ConfigItems`
+names still resolve. [`docs/api/PORTING.md`](docs/api/PORTING.md) is the porting guide, and
+[`examples/example-addon`](examples/example-addon) a working add-on (`./gradlew :fabric:runExampleClient`).
+
 ## Building from source
 
 ```bash
@@ -147,7 +155,8 @@ project and the state of every part of the port.
 4.2.3.5 version and is not endorsed by Azanor.
 
 **Do I need Baubles, Thaumic Tinkerer or other addons?** No. The bauble slots are built in. Old
-1.7.10 addons do not work on 1.21.1.
+1.7.10 addons do not run on 1.21.1, but their authors can port them: see
+[For add-on developers](#for-add-on-developers).
 
 **Why Thaumcraft 4 and not 6?** Thaumcraft 4 is the version many players remember best and the one
 the original addons and packs were built around. This port keeps its rules rather than mixing in

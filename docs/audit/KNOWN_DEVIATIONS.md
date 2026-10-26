@@ -223,3 +223,29 @@ exploit fixes for research completion and aspect combination (the port validates
 server), golems picking up dead item entities (checked), the decant golem's unbounded fluid search
 (bounded), the mana bean replant fix (matched by full item components), saved player data file
 names, and the 1.7.10 crash workarounds for renderers and world generation.
+
+## 9. Add-on API (2026-10-26)
+
+The public API was completed so that 1.7.10 add-ons port quickly ([`docs/api/PORTING.md`](../api/PORTING.md)).
+Where the 1.7.10 behaviour could not or should not be kept, this is what an add-on gets instead:
+
+| Area | Original TC4 4.2.3.5 | Thaumcraft 4 Reload |
+|---|---|---|
+| When to register | `dependencies = "after:Thaumcraft"`, then `init`/`postInit` | `IThaumcraftAddon` (Fabric entrypoint `thaumcraft`, NeoForge `@IThaumcraftAddon.Addon`) or `ThaumcraftApi.whenReady`, run once after every mod registered its items |
+| Ore dictionary names | `OreDictionary` entries, populated before `postInit` | `OreDictionaryNames`: the names TC4 used are its `thaumcraft:original_ore/*` tags, the Forge convention is the `c:` tag. A tag registration of object aspects is kept and applied again when tags are bound (world start, client join), filling only items without a registration of their own |
+| Research of add-ons | One registry read by everything | Add-on entries and changes to original entries through their public view are laid over the bundled corpus (`AddonResearch`); the icon, conditions and item triggers of an original entry are never taken from its view |
+| IMAGE research pages | `GuiResearchRecipe.drawPage` has no IMAGE branch: the page is blank | The image is drawn over the page width with its caption |
+| ASPECTS research pages | Hovering an aspect shows a grid of scanned items holding it | The hover shows the name and the description of the aspect |
+| COMPOUND_CRAFTING pages | The wand construct diagrams | Not drawn for add-ons (the API type differs from the original list shape) |
+| Item triggers of add-on research | `areItemStacksEqual(trigger, scanned, true, true, false)`, ore dictionary shortcut included | Same item and same data, durable damage ignored; no ore dictionary shortcut |
+| Smelting pages | Output from the global furnace registry at construction | Output from the client world's recipe manager when drawn |
+| `ConfigItems`/`ConfigBlocks` names | Static fields | `ItemApi`/`ItemsTC`/`BlocksTC` resolve the original names and metadata through `data/thaumcraft/tc4/legacy_ids.json` ([LEGACY_IDS.md](../api/LEGACY_IDS.md)); `getItem`/`getBlock` return null instead of throwing for a malformed name |
+| Wand parts | A part registered under a native tag replaced it; API capacities in whole vis | Native parts are never replaced and setters on their API views do not change gameplay; capacities are whole vis in the API, add-on capacity 0..143165, assembly cost at most 32767 |
+| `WandHelper` (was `ItemWandCasting`) | Negative amounts drained or refilled; client-side payment debited | Negative amounts do nothing; client-side payment answers without changing the stack; `getFocusItem` is an empty stack instead of null |
+| Add-on foci | Any `ItemFocusBasic` | Any `ItemFocusBasic` (the port's closed list of ten native foci was removed) |
+| Add-on aspects | Single-threaded registry; caches of `getAllAspects` kept forever | Registration synchronised; the caches rebuild when the registry changes; `getName()` lowercases with `Locale.ROOT`; late wisp scan rows and creative-tab phials are added when the aspect appears |
+| Add-on primal aspects | Wands, sceptres, amulets and vis relays used the live primal list | They stay limited to the six original primals (a gap, not a choice: see `docs/analysis/2026-10-26-addon-aspects-ru.md`) |
+| `ThaumcraftApiHelper` knowledge services, `ThaumcraftFX`, `ResearchPage.recipe(ids)` | Not in the API (add-ons used `thaumcraft.common`) | Added; not 1.7.10 members |
+
+Details and evidence: `docs/analysis/2026-10-26-addon-api-ru.md`, `-addon-wand-parts-ru.md`,
+`-addon-aspects-ru.md`, `-addon-legacy-ids-ru.md`.

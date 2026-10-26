@@ -39,6 +39,8 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
     public static final Item VIS_SHARD = new Item(new Item.Properties());
     public static final Item AMETHYST_ROD = new Item(new Item.Properties());
     public static final Item AMETHYST_CAP = new Item(new Item.Properties());
+    /** An aspect of the add-on; created in {@link #onThaumcraftReady()}, on both sides, before anything uses it. */
+    public static Aspect TEMPUS;
 
     @Override
     public void onInitialize() {
@@ -49,6 +51,14 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
 
     @Override
     public void onThaumcraftReady() {
+        // An aspect of its own: a compound of two registered aspects, a white glyph tinted with its colour (this example
+        // borrows an original glyph), and the lang keys tc.aspect.tempus / tc.aspect.help.tempus.
+        TEMPUS = new Aspect("tempus", 0xB68CFF, new Aspect[]{Aspect.VOID, Aspect.ORDER},
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/aspects/ordo.png"), 1);
+        ThaumcraftApi.registerObjectTag(new ItemStack(Items.CLOCK), new AspectList().add(TEMPUS, 4).add(Aspect.MECHANISM, 2));
+        // The 1.7.10 ore dictionary call keeps working: "ingotCopper" is the c:ingots/copper tag.
+        ThaumcraftApi.registerObjectTag("ingotCopper", new AspectList().add(Aspect.METAL, 3).add(Aspect.EXCHANGE, 1));
+
         // 1.7.10: ThaumcraftApi.registerObjectTag(new ItemStack(item, 1, meta), aspects). There is no metadata now.
         ThaumcraftApi.registerObjectTag(new ItemStack(VIS_SHARD), new AspectList().add(Aspect.MAGIC, 2).add(Aspect.CRYSTAL, 2));
 
@@ -76,7 +86,7 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
                         new ResearchPage(crucible),
                         // Not in 1.7.10: a data-driven recipe of the add-on, shown by its id.
                         ResearchPage.recipe(id("vis_shard_from_amethyst")),
-                        new ResearchPage(new AspectList().add(Aspect.CRYSTAL, 3).add(Aspect.MAGIC, 3)))
+                        new ResearchPage(new AspectList().add(Aspect.CRYSTAL, 3).add(Aspect.MAGIC, 3).add(TEMPUS, 2)))
                 .registerResearchItem();
 
         new ResearchItem("EXAMPLE_INFUSION", "EXAMPLE", new AspectList().add(Aspect.SENSES, 4).add(Aspect.MAGIC, 3),

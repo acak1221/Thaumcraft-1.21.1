@@ -127,7 +127,21 @@ names for vanilla and Thaumcraft entities ("Zombie", "Thaumcraft.Firebat") and t
 ("mymod:my_entity"). Tests: `OreDictionaryNamesTest`, GameTests `oreDictionaryNamesReachTheTagsOfTheWorld`,
 `ObjectAspectApiRuntimeChecks`.
 
-<!-- ASPECTS-SECTION -->
+**New aspects** use the original constructor, five-argument form with your own texture:
+
+```java
+Aspect TEMPUS = new Aspect("tempus", 0xB68CFF, new Aspect[]{Aspect.VOID, Aspect.ORDER},
+        ResourceLocation.fromNamespaceAndPath("myaddon", "textures/aspects/tempus.png"), 1);
+```
+
+The tag is unique and lower case; the texture is a square white or grey glyph (the originals are 32×32),
+tinted with the colour; the lang keys are `tc.aspect.<tag>` (the meaning under the name) and
+`tc.aspect.help.<tag>`. Register the same aspects in the same order on both sides: a client that lacks one
+cannot decode the items that name it. An add-on aspect is stored, synced, scanned, combined at the research
+table, carried as essentia in jars, tubes, phials and crystals, and drawn everywhere aspects are drawn. A
+primal of your own (no components) is given to players on their first join, but wand, sceptre and amulet vis,
+vis relays, shards and infused ores exist for the six original primals only. The full contract is the Javadoc
+of `Aspect`. Tests: `AddonAspectTest`, GameTests of `AspectApiRuntimeChecks`.
 
 ## 6. Recipes
 
@@ -168,7 +182,33 @@ its warp, and the knowledge of a player saves and syncs it.
 Tests: GameTest `addonResearchJoinsGameplay`; the book was checked in a client with the example add-on
 ([screenshots](../analysis/2026-10-26-addon-api-ru.md)).
 
-<!-- WANDS-SECTION -->
+## 8. Wand parts, foci and the wand itself
+
+`new WandRod(...)`, `new StaffRod(...)` and `new WandCap(...)` are the original constructors and register the
+part (capacity in whole vis, craft cost, an `IWandRodOnUpdate` for vis regeneration, the texture):
+
+```java
+new WandRod("infernal", 150, new ItemStack(MyItems.INFERNAL_CORE), 12, new MyRodOnUpdate(),
+        ResourceLocation.fromNamespaceAndPath("myaddon", "textures/models/wand_rod_infernal.png"));
+WandCap cap = new WandCap("alchemical", 0.9F, List.of(Aspect.WATER), 0.8F, new ItemStack(MyItems.ALCHEMICAL_CAP), 7);
+cap.setTexture(ResourceLocation.fromNamespaceAndPath("myaddon", "textures/models/wand_cap_alchemical.png"));
+```
+
+The arcane workbench builds wands, staves and sceptres from the part items once `ROD_<tag>` and `CAP_<tag>`
+are researched (register those research entries yourself, as in 1.7.10), the cost is rod cost × cap cost, the
+capacity comes from the rod, the discount from the cap (special aspects included), `onUpdate` runs while the
+wand is carried, and the name uses `item.Wand.<tag>.rod` / `item.Wand.<tag>.cap`. The wand is drawn with your
+textures in the UV layout of the original `ModelWand`, so a 1.7.10 PNG works unchanged. A part registered under
+a native tag never replaces the native part. Any `ItemFocusBasic` subclass is a focus: it mounts on a wand and
+its hooks, colour and ornament are used.
+
+`thaumcraft.api.wands.WandHelper` is the original `ItemWandCasting` surface: `isWand`, `getRod`, `getCap`,
+`getFocus`, `getFocusItem`, `setFocus`, `isStaff`, `isSceptre`, `getVis`/`getAllVis`/`getMaxVis` and
+`addRealVis`/`consumeVis`/`consumeAllVis` in centivis (hundredths of vis, as stored), `addVis` and
+`consumeAllVisCrafting` in whole vis, `getConsumptionModifier` and the focus upgrade getters. Payment goes
+through the native discount and debit rules. Tests: `WandAddonPartsTest`, `WandAddonRenderingTest`,
+GameTests of `WandApiRuntimeChecks`; the drawing was checked in a client
+([screenshots](../analysis/2026-10-26-addon-wand-parts-ru.md)).
 
 ## 9. Interfaces of items, blocks and block entities
 
@@ -190,10 +230,12 @@ Thaumcraft asks every item, block and block entity for these interfaces, so impl
 | `IEldritchMob`, `ITaintedMob` | targeting and taint rules | – |
 | `IBauble` | the built-in amulet, ring and belt slots | `LivingEntity` |
 
-## 10. What is not public API
+## 10. Effects, and what is not public API
 
-- The particle effects of `Thaumcraft.proxy` (sparkles, beams, bolts, wisps) are client internals of
-  `thaumcraft.client.fx`; there is no stable facade yet. Use vanilla particles or your own.
+- `ThaumcraftFX` sends the effect packets 1.7.10 add-ons built themselves (`PacketFXBlockSparkle`,
+  `PacketFXBlockArc`, `PacketFXBlockZap`, `PacketFXBlockBubble`, `PacketFXEssentiaSource`, `PacketFXVisDrain`)
+  from the server. The client-side particles of `Thaumcraft.proxy` (`sparkle`, `beam`, `wispFX`...) are
+  internals of `thaumcraft.client.fx` without a stable facade: use vanilla particles or your own.
 - Golems had no API in 1.7.10 and have none now.
 - The Thaumcraft 6 shaped classes of `thaumcraft.api` (theorycraft, `ResearchEntry`/`ResearchStage`,
   `ScanningManager`, `IWandFocus`) are not wired into Thaumcraft 4 gameplay; use the TC4 classes above.
@@ -202,8 +244,9 @@ Thaumcraft asks every item, block and block entity for these interfaces, so impl
 
 ## 11. The example add-on
 
-[`examples/example-addon`](../../examples/example-addon) registers an item, object tags, an arcane, a crucible
-and an infusion recipe, a research tab with three entries (a parent of the original tree, recipe, aspect
-and smelting pages, a hidden entry revealed by scanning, a warp value) and a data-driven recipe page. It
+[`examples/example-addon`](../../examples/example-addon) registers items, an aspect of its own, object tags
+(one by a 1.7.10 ore dictionary name), an arcane, a crucible and an infusion recipe, a wand rod and a wand cap,
+and a research tab with five entries (a parent of the original tree, recipe, aspect and smelting pages, a
+data-driven recipe page, a hidden entry revealed by scanning, a warp value, the ROD/CAP entries). It
 imports nothing but `thaumcraft.api` (`ExampleAddonApiOnlyTest` keeps it so) and is compiled by every
 build. `./gradlew :fabric:runExampleClient` starts a development client with it.

@@ -99,10 +99,10 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
         }
         guarded("arcane", manager.getAllRecipesFor(ThaumcraftArcane.ARCANE_RECIPE_TYPE.get()), holder -> arcane(holder, registries), registry);
         // Recipes add-ons registered through ThaumcraftApi live outside the recipe manager.
-        guarded("add-on arcane", ProgrammaticRecipes.arcaneViews(), holder -> arcane(holder, registries), registry);
-        guarded("add-on infusion", ProgrammaticRecipes.infusionViews(), holder -> List.of(infusion(holder, registries)), registry);
-        guarded("add-on enchantment infusion", ProgrammaticRecipes.enchantmentViews(), holder -> enchantment(holder, registries), registry);
-        guarded("crucible", ProgrammaticRecipes.crucibles(manager), holder -> List.of(new EmiCrucibleRecipe(holder.id(),
+        guarded("add-on arcane", synthetic(manager, ProgrammaticRecipes.arcaneViews()), holder -> arcane(holder, registries), registry);
+        guarded("add-on infusion", synthetic(manager, ProgrammaticRecipes.infusionViews()), holder -> List.of(infusion(holder, registries)), registry);
+        guarded("add-on enchantment infusion", synthetic(manager, ProgrammaticRecipes.enchantmentViews()), holder -> enchantment(holder, registries), registry);
+        guarded("crucible", synthetic(manager, ProgrammaticRecipes.crucibles(manager)), holder -> List.of(new EmiCrucibleRecipe(holder.id(),
                 holder.value().research(), holder.value().catalyst(), holder.value().getResultItem(registries), holder.value().aspects())), registry);
         guarded("infusion", manager.getAllRecipesFor(ThaumcraftInfusion.INFUSION_RECIPE_TYPE.get()), holder -> List.of(infusion(holder, registries)), registry);
         guarded("runic augmentation", manager.getAllRecipesFor(ThaumcraftRunic.AUGMENT_TYPE.get()), holder -> runic(holder), registry);
@@ -113,6 +113,16 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
     private static List<Object> wandIdentity(EmiStack stack) {
         WandData data = stack.getOrDefault(ThaumcraftContent.WAND_DATA.get(), WandData.EMPTY);
         return List.of(data.rod(), data.cap(), stack.getOrDefault(ThaumcraftWandEnchantments.WAND_SCEPTRE.get(), Boolean.FALSE));
+    }
+
+    /**
+     * EMI's convention for a recipe that is not in the recipe manager (an add-on's ThaumcraftApi registration): its id
+     * path starts with '/', so it never collides with a data pack recipe and EMI's dev mode accepts it.
+     */
+    private static <T extends net.minecraft.world.item.crafting.Recipe<?>> List<RecipeHolder<T>> synthetic(RecipeManager manager, List<RecipeHolder<T>> holders) {
+        return holders.stream().map(holder -> manager.byKey(holder.id()).isPresent() || holder.id().getPath().startsWith("/") ? holder
+                : new RecipeHolder<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(), "/" + holder.id().getPath()),
+                holder.value())).toList();
     }
 
     /** One broken datapack or addon recipe must not hide every other Thaumcraft recipe. */

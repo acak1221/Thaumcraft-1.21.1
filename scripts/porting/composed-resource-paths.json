@@ -953,12 +953,17 @@
   "dynamic_factories": {
     "common/src/main/java/thaumcraft/api/ItemApi.java": [
       "ResourceLocation.tryParse(name)",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)",
+      "ResourceLocation.tryParse(name)",
+      "ResourceLocation.parse(value.getAsString())"
+    ],
+    "common/src/main/java/thaumcraft/api/OreDictionaryNames.java": [
+      "ResourceLocation.tryParse(name)",
+      "ResourceLocation.parse(vanilla)"
     ],
     "common/src/main/java/thaumcraft/api/ThaumcraftApi.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
-      "ResourceLocation.parse(id)",
-      "ResourceLocation.tryParse(nativeItemTag)"
+      "ResourceLocation.parse(id)"
     ],
     "common/src/main/java/thaumcraft/api/ThaumcraftMaterials.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
@@ -970,10 +975,6 @@
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/aspects/\"+requireTag(tag).toLowerCase(Locale.ROOT)+\".png\")"
     ],
     "common/src/main/java/thaumcraft/api/blocks/BlocksTC.java": [
-      "ResourceLocation.tryParse(name)",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
-    ],
-    "common/src/main/java/thaumcraft/api/crafting/ArcaneRecipes.java": [
       "ResourceLocation.tryParse(name)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
     ],
@@ -1067,13 +1068,13 @@
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",nativeId)",
       "ResourceLocation.tryParse(entry.getValue())",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"crucible/balanced_shard_\"+primal)"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"crucible/balanced_shard_\"+primal)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/page/\"+Integer.toHexString(System.identityHashCode(value)))"
     ],
     "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": [
       "ResourceLocation.parse(entry.image())"
     ],
     "common/src/main/java/thaumcraft/client/lib/RecipeViews.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/\"+(sceptre?\"sceptre\":\"wand\")+\"/\"+rod.tag()+\"/\"+cap.tag())",
       "ResourceLocation.fromNamespaceAndPath(recipeId.getNamespace(),\"/\"+recipeId.getPath()+\"/hardening_\"+hardening)"
     ],
     "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": [
@@ -1197,7 +1198,8 @@
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/arcane/\"+index)"
     ],
     "common/src/main/java/thaumcraft/common/crafting/ProgrammaticRecipes.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/crucible/\"+Integer.toUnsignedString(recipe.hash,16)+\"_\"+collision)"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/crucible/\"+Integer.toUnsignedString(recipe.hash,16)+\"_\"+collision)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/\"+kind+\"/\"+index)"
     ],
     "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
@@ -1384,6 +1386,12 @@
       "ResourceLocation.parse(tag.getString(\"Recipe\"))",
       "ResourceLocation.parse(row.getString(\"id\"))"
     ],
+    "fabric/src/main/java/thaumcraft/fabric/world/FabricBiomeSpawns.java": [
+      "ResourceLocation.parse(row.entity())"
+    ],
+    "neoforge/src/main/java/thaumcraft/neoforge/OriginalEntitySpawnsBiomeModifier.java": [
+      "ResourceLocation.parse(row.entity())"
+    ],
     "compat/emi/src/main/java/thaumcraft/compat/emi/AspectEmiStack.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",aspect.getTag())"
     ],
@@ -1391,19 +1399,14 @@
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+aspect.getTag())"
     ],
     "compat/emi/src/main/java/thaumcraft/compat/emi/ThaumcraftEmiPlugin.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
+      "ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(),\"/\"+holder.id().getPath())"
     ],
     "compat/jei/src/main/java/thaumcraft/compat/jei/AspectIngredient.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",stack.aspect().getTag())"
     ],
     "compat/jei/src/main/java/thaumcraft/compat/jei/Categories.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+recipe.aspect().getTag())"
-    ],
-    "fabric/src/main/java/thaumcraft/fabric/world/FabricBiomeSpawns.java": [
-      "ResourceLocation.parse(row.entity())"
-    ],
-    "neoforge/src/main/java/thaumcraft/neoforge/OriginalEntitySpawnsBiomeModifier.java": [
-      "ResourceLocation.parse(row.entity())"
     ]
   },
   "helper_calls": {
@@ -1412,6 +1415,8 @@
     ],
     "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": [
       "ModelWand.rodTexture(rod.baseTag())",
+      "ModelWand.rodTexture(rod.tag())",
+      "ModelWand.capTexture(cap.tag())",
       "ModelWand.capTexture(cap.tag())"
     ],
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": [
@@ -1453,16 +1458,16 @@
     ]
   },
   "source_contracts": {
-    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "84ab076a42a595ce58ebc82e8342d9346cf506d0d6e0704630b5c33f724a1dc7",
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "06ad89e81104dd938eddcbf3f0034051740f759eca13fc5badcd3089f0a98f6b",
     "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": "d30a772140f079ffe0dc439aac08300d6bdb298907c05598b3aab5d24299f2ce",
-    "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "fd1c8be36797ba032ef54273789bd1fdd59e6211da9e06317322d9112c490d91",
-    "common/src/main/java/thaumcraft/api/wands/WandCap.java": "dc5963e4e9e5c0c716a8123bf570ee509a525b579418721df7cdf258e73b552b",
-    "common/src/main/java/thaumcraft/api/wands/WandRod.java": "21d2fec3787a9fbddefd1040a7338a49879ca61a1b8aaabd5391027d72d8c800",
+    "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "dfe13669bea48e0824519c0bc316302da0b1565cf4aba70d64ec8189a39ece9f",
+    "common/src/main/java/thaumcraft/api/wands/WandCap.java": "69e012ede97de067a218a273552b6acc2b4e7c6d698e0ede9390ab4783cc3cf3",
+    "common/src/main/java/thaumcraft/api/wands/WandRod.java": "c1f0ca9c0395fa55d54a6cd9facacd4b8569ad925b9e1f2da5969d05137423c1",
     "common/src/main/java/thaumcraft/client/BoreClientEffects.java": "99563c98766c47450475e263f412100d61724c624b6b9050b6330b85295c8433",
     "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "0129a3a85f941d1ef4b7d7a03abaa56da1489872026c1ed5fc78e465a69324b9",
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
     "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "8a82c324559a31c13e51f1bfe8dabbf9b3cabad505e7bdc3c1749c480bf76bae",
-    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "8701423958ad9d641bbdac3aabd22f4d5bbef8877604ea331ed88cf329c7ea41",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "b69e2cd79835f398d5d4c3b76dc21f725bb16aab58e0d97ff08d90ebadd711a3",
     "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": "7ed2c201abea159fca1baa780c3f7334bb01c6a410fd4b6ce45ecc1c98b500a5",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
     "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "9a482d65fb0eaa1005d9110f130ff3f1ea4e772f8d419256f2e39748ee7c3efe",
@@ -1473,8 +1478,8 @@
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
     "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",
     "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "7b79ce511e397760b8b05c7cd35df2be79d5d695cf6f0f1426513fd25dd8fef6",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "3a1c45e27c9677588130ed1a7465dc2f0fbc3acea70b8b5c1b57374454a2989b",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "c6ea5cb6f2205a947f622cea15ffb463063678ca5adc4dafb6b6ebd813bb5343",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "1300a7e9586ec7603409e3f9429b671bd0e22f92841cf46dcec694228f8f4306",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "93d14fa2b44a81fc91ca9db2e1c87a49f631e1f1512f332dc0e48237f7c70c8e",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "ecfc90fcd0873efb9b6a8a09116b7d76ff457a1bfb6e3e81eb29fcc430c4e480",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "220dafc23bc2d0d320e20a1522f9f01f93b760983213c731e5320b3f5e0f6b10",
     "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "73e8c2b51da90c42dfb5087d21d9e0f4d4943d02d335e09a664df72f0c3a451d",
@@ -1495,7 +1500,7 @@
     "common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java": "ea10e543e92f616e94af656eaec78fb2b0a9a31a3a9a7be7cdab980b65d2bb54",
     "common/src/main/java/thaumcraft/client/renderers/models/gear/HarnessArmorRenderer.java": "226216949728f6d8df4297fa7bd397f45fd883283255ba7c8fc331719b7f5007",
     "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelHoverHarness.java": "bd8224012149acfec22551ecc6591aac37a3f5c5fc0e16462d25a8cd3f95712a",
-    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java": "52e25ffbd3247f2d1e3c5866b3354a88093e1e6503b6e5112730e43412ec7694",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java": "99af897d780c9bb2b4a96990ed29ff470045d073bf62d878bbf1bd6f138c8fda",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileAlchemyFurnaceAdvancedRenderer.java": "93272dbf8a6c8f29dd878f0c07f3f02979a2458209377b40acd6f53f6384bfcc",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileMagicWorkbenchChargerRenderer.java": "a7c1d902af52287c94cd582832389717af096e7527c663949068db80c4ccaab0",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeConverterRenderer.java": "9e485cd5554d5d3d1a69ab4a7abb739aa11b6f5827e8c50d3d2b251c025d7515",
@@ -1508,11 +1513,11 @@
     "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedRenderer.java": "1853d594e99104ef44284a2e2e23ec96be0d9e0c12aab41a722c139733bc3b9c",
     "common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java": "f2cc7513778677ed8ed2206f2957c6451eddeb42f4a4981278fb482adb3c257a",
     "common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java": "39e8a870dd9a0c1d49548d1c13c9a3269b8d5a1a69dd5f0216a26192553708ef",
-    "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java": "2d30c4493247ecbc9131ff60e6bd95cdee7199ccda16f678497dea8aada3b2d7",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java": "b520f52dee8c0acce222b0dde081f683b92a2933ae263a8a625d2983678cc9cb",
     "common/src/main/java/thaumcraft/common/items/armor/VoidRobeLayers.java": "8241dc3e7534ccbc90ef2f79894b1218189681f3880c2ffe5b3733941e6f1a16",
     "common/src/main/java/thaumcraft/common/items/golems/GolemUpgrade.java": "770663031aea503eda84ecaafbee6907835a1fc9a55aa22c308bc60d2c36fd15",
-    "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java": "ced3a62c9861d08d0340e20116a0689a1cdef5d9d28dfb37b484f761e964b0fc",
-    "common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java": "655f22fae0b97543c5958f103e87bb8d5724c9736db06c9e99727ef35593966b",
+    "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java": "f06cc2c0dbf79a70a14d03ea5c7c00657e38417b72d0201939a82e6214daeaf9",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java": "2b904622570ec5abe19aec92f515edca39c1f0843780f8afa1343f4b1b532919",
     "common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java": "653d2e42aeb3842b8c917c7a41671ea8f0fe7dbc5328454fd026f7299b6d48ef",
     "common/src/main/java/thaumcraft/common/lib/world/WardingOverlay.java": "02f4d10b8880c9255b638b507a37dfa1ece81472bce974fae0e35425a62de7cf"
   }

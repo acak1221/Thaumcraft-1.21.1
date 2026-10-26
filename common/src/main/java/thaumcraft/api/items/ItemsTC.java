@@ -6,6 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.api.ItemApi;
 import thaumcraft.common.config.ThaumcraftContent;
 
 /**
@@ -15,13 +16,20 @@ import thaumcraft.common.config.ThaumcraftContent;
  * surface kept them in {@code ItemsTC}; 1.21.1 registers every item in the item registry, so this class
  * resolves the native registry instead of holding a second copy of it. A plain name means
  * {@code thaumcraft:<name>}.</p>
+ *
+ * <p>An original TC4 field name of {@code ConfigItems} or {@code ConfigBlocks} ({@code "itemThaumometer"},
+ * {@code "blockJar"}) is accepted too and means the item of its metadata 0, the original
+ * {@code new ItemStack(ConfigItems.field)}; {@link #get(String, int)} selects another metadata. The names and
+ * metadata resolve through {@link ItemApi#legacyItemId} ({@code docs/api/LEGACY_IDS.md}).</p>
  */
 public final class ItemsTC {
     private ItemsTC() {}
 
-    /** Null/empty names throw IllegalArgumentException; malformed namespaced IDs return null, malformed plain paths throw ResourceLocationException. */
+    /** Null/empty names throw IllegalArgumentException; malformed namespaced IDs return null, malformed plain paths throw ResourceLocationException.
+     * An original field name answers the item of its metadata 0, or null when 1.21.1 has none; it never throws. */
     public static ResourceLocation id(String name) {
         if (name == null || name.isEmpty()) throw new IllegalArgumentException("An item needs a name");
+        if (ItemApi.isLegacyName(name)) return ItemApi.legacyItemId(name, 0);
         return name.contains(":") ? ResourceLocation.tryParse(name) : ResourceLocation.fromNamespaceAndPath("thaumcraft", name);
     }
 
@@ -31,6 +39,21 @@ public final class ItemsTC {
         if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) return null;
         return BuiltInRegistries.ITEM.get(id);
     }
+
+    /**
+     * The item of an original field name and metadata ({@code get("itemResource", 2)} is the thaumium ingot),
+     * or null for an unknown metadata, a variant without a 1.21.1 item or an unregistered item. For any other
+     * name the metadata is ignored: a native id names one item.
+     */
+    public static Item get(String name, int metadata) {
+        if (name == null || name.isEmpty()) throw new IllegalArgumentException("An item needs a name");
+        if (!ItemApi.isLegacyName(name)) return get(name);
+        ResourceLocation id = ItemApi.legacyItemId(name, metadata);
+        return id == null || !BuiltInRegistries.ITEM.containsKey(id) ? null : BuiltInRegistries.ITEM.get(id);
+    }
+
+    /** True when the name is an original TC4 {@code ConfigItems} or {@code ConfigBlocks} field. */
+    public static boolean isLegacyName(String name) { return ItemApi.isLegacyName(name); }
 
     /** Null/empty or missing names throw IllegalArgumentException; malformed plain paths throw ResourceLocationException. */
     public static Item require(String name) {

@@ -1738,6 +1738,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.AccessoriesRuntimeChecks.menuPersistenceAndDeath(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100)
+    public void accessories_right_click_equip(GameTestHelper test) {
+        thaumcraft.common.testing.AccessoriesRuntimeChecks.rightClickEquip(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m09_vis_amulet")
     public void visAmuletsTransferAndPayThroughActualNativeRelay(GameTestHelper test) {
         thaumcraft.common.testing.VisAmuletRuntimeChecks.nativeWornTransferAndRelayPayment(test);

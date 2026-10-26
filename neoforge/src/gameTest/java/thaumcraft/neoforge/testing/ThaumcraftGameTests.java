@@ -1740,6 +1740,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.AccessoriesRuntimeChecks.menuPersistenceAndDeath(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100)
+    public void accessories_right_click_equip(GameTestHelper test) {
+        thaumcraft.common.testing.AccessoriesRuntimeChecks.rightClickEquip(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "m09_vis_amulet")
     public void visAmuletsTransferAndPayThroughActualNativeRelay(GameTestHelper test) {
         thaumcraft.common.testing.VisAmuletRuntimeChecks.nativeWornTransferAndRelayPayment(test);

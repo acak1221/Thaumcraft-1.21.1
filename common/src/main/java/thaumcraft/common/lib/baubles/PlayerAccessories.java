@@ -39,6 +39,34 @@ public final class PlayerAccessories {
         // A dimension transition retains the ServerPlayer but replaces the LocalPlayer.
         // The unchanged server inventory must therefore bypass syncChanged's last-sent cache.
         PlayerEvent.CHANGE_DIMENSION.register((player,oldLevel,newLevel) -> AccessoryNetworking.sync(player));
+        // The port's own convenience: a bauble used from the hand goes into the first free slot of its kind,
+        // as the modern accessory mods do; the menu (key B, or the button by the player in the inventory)
+        // stays the way to take one off or to replace a worn one.
+        dev.architectury.event.events.common.InteractionEvent.RIGHT_CLICK_ITEM.register((player,hand) -> {
+            ItemStack held=player.getItemInHand(hand);
+            int slot=freeSlotFor(player,held);
+            if(slot<0)return dev.architectury.event.CompoundEventResult.pass();
+            if(player instanceof ServerPlayer server) {
+                get(server).setItem(slot,held.copyWithCount(1));
+                held.consume(1,server);
+                server.level().playSound(null,server.getX(),server.getY(),server.getZ(),
+                        net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_GENERIC.value(),server.getSoundSource(),1F,1F);
+                AccessoryNetworking.syncChanged(server);
+            }
+            return dev.architectury.event.CompoundEventResult.interruptTrue(player.getItemInHand(hand));
+        });
+    }
+
+    /**
+     * The first empty slot that takes the stack, or -1. A focus pouch keeps its own use (it opens), and
+     * a rejected attachment takes nothing.
+     */
+    public static int freeSlotFor(Player player,ItemStack stack) {
+        if(stack.isEmpty()||!(stack.getItem() instanceof IBauble)||stack.getItem() instanceof thaumcraft.common.items.wands.ItemFocusPouch
+                ||player.isSpectator())return -1;
+        PlayerAccessoryInventory inventory=get(player);
+        for(int slot=0;slot<4;slot++)if(inventory.getItem(slot).isEmpty()&&inventory.canPlaceItem(slot,stack))return slot;
+        return -1;
     }
     private static CompoundTag empty() { CompoundTag tag=new CompoundTag();tag.put("Items",new net.minecraft.nbt.ListTag());return tag; }
     public static void tick(Player player) {

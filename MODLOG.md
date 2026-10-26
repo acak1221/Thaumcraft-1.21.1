@@ -1,3 +1,13 @@
+## 2026-10-26 — accessories: where to wear the rings
+
+The four accessory slots (amulet, two rings, belt) had a menu that was nearly unreachable: no
+button in the creative inventory, a tiny one in the corner of the survival window, and no key. A
+key (B, as in the Baubles mod TC4 relied on) and a B button beside the player in the survival and
+creative inventories now open it; empty slots show a faded amulet, ring or belt and name their
+kind. Using a bauble from the hand puts it into the first free slot of its kind (the port's own
+convenience, KNOWN_DEVIATIONS §8). Verified: 2590 JUnit, both builds, the new equip GameTest and
+the menu test on Fabric 2/2 and NeoForge 2/2; seen on a Fabric client.
+
 ## 2026-10-26 — Jade and JEI integrations
 
 Optional integrations for Fabric and NeoForge (`compat/jade`, `compat/jei`). Jade shows container

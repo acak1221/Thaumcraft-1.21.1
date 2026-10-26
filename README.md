@@ -1,93 +1,167 @@
-# Thaumcraft 4 Reload — Minecraft 1.21.1
+<div align="center">
 
-Порт **Thaumcraft 4.2.3.5** (Minecraft 1.7.10) на **Java 21 / Architectury / Fabric / NeoForge 1.21.1**.
+<img src="docs/images/readme/hero.jpg" alt="An aura node glowing above an infusion altar in a Magical Forest" width="100%">
 
-Текущая версия — **0.1.0-alpha.6**, Fabric. [Примечания к выпуску](docs/RELEASE_NOTES_0.1.0-alpha.6.md).
-Для запуска нужны Minecraft 1.21.1, Java 21, Fabric Loader 0.16.14 или новее,
-Fabric API (проверено с 0.116.17+1.21.1) и Architectury API 13.0.11 или новее.
-Fabric API и Architectury API устанавливаются отдельно в `mods` вместе с JAR мода.
+# Thaumcraft 4 Reload
 
-Необязательно, но рекомендуется: **[EMI](https://modrinth.com/mod/emi)** (проверено с 1.1.22+1.21.1) —
-показывает рецепты магического верстака (включая все сочетания стержней и колпачков), тигля,
-инфузии, зачарования инфузией и сочетания аспектов; аспекты кликабельны, «+» раскладывает
-предметы в магическом верстаке. **[Mod Menu](https://modrinth.com/mod/modmenu)** открывает
-настройки мода из списка модов.
+**Azanor's Thaumcraft 4.2.3.5, carried from Minecraft 1.7.10 to 1.21.1 — on Fabric and NeoForge.**
 
-## Состояние
+[![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=flat-square)](#installation)
+[![Fabric](https://img.shields.io/badge/Fabric-supported-DBD0B4?style=flat-square)](#installation)
+[![NeoForge](https://img.shields.io/badge/NeoForge-supported-D7742F?style=flat-square)](#installation)
+[![Java 21](https://img.shields.io/badge/Java-21-E76F00?style=flat-square)](#building-from-source)
+[![Status: alpha](https://img.shields.io/badge/status-alpha-8A4BD6?style=flat-square)](#project-status)
+
+**English** · [Русский](README.ru.md)
+
+</div>
+
+---
+
+Thaumcraft 4 Reload is an unofficial, faithful port of the classic magic mod. The original
+4.2.3.5 release is the specification: the research tree and its keys, the 48 aspects and the
+aspect values of items, recipes, vis costs, mob behaviour and world generation follow the 1.7.10
+mod, quirks included. Where 1.21.1 has no equivalent (item metadata, the ore dictionary, Baubles),
+the port maps the original onto the modern game and writes every deviation down in
+[`docs/audit/KNOWN_DEVIATIONS.md`](docs/audit/KNOWN_DEVIATIONS.md).
+
+On top of that it adds what a modern pack expects: recipe viewer pages, Jade tooltips, a
+configuration screen and a set of optional quality-of-life tweaks that you can switch off to get
+the 1.7.10 behaviour back.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/readme/infusion.jpg" alt="An infusion altar drawing essentia from jars"></td>
+    <td width="50%"><img src="docs/images/readme/magical-forest.jpg" alt="A Magical Forest from above"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Runic infusion: pedestals, pillars and jars of essentia</sub></td>
+    <td align="center"><sub>Magical Forest with greatwood and silverwood</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/readme/thaumonomicon-map.jpg" alt="The Thaumonomicon research map"></td>
+    <td><img src="docs/images/readme/thaumonomicon-page.jpg" alt="A Thaumonomicon page with an arcane recipe"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>The Thaumonomicon, with search and a completion counter</sub></td>
+    <td align="center"><sub>Research pages with their arcane, crucible and infusion recipes</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/readme/research-table.jpg" alt="Research notes on the research table"></td>
+    <td><img src="docs/images/readme/thaumometer.jpg" alt="Scanning an aura node with the thaumometer"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Solving research notes on the research table</sub></td>
+    <td align="center"><sub>Scanning an aura node with the thaumometer</sub></td>
+  </tr>
+</table>
+
+## What is in it
 
 | | |
 |---|---|
-| Покрытие оригинала | **1044 из 1044** единиц `parity_verified` |
-| JUnit | **2571** тест, 0 падений |
-| GameTest (Fabric) | **467** сценариев на свежем мире, все проходят (прогон 25.10.2026, после интеграций EMI/Mod Menu) |
-| Python (скрипты портирования) | **112** тестов |
-| Ассеты | 285 составных путей проверены, `missing_references: 0` |
+| **Research** | The Thaumonomicon with all six categories and 199 research entries, the research table and its hex puzzle, the thaumometer, aspect discovery and combination, warp and its events |
+| **Thaumaturgy** | Wands, staves and sceptres from every rod and cap, vis and its discounts, foci and their upgrades, the focal manipulator, the focus pouch |
+| **Alchemy** | The crucible, essentia, jars, tubes, valves and buffers, alembics, the alchemical furnace, the centrifuge, the thaumatorium, crystallizers, the essentia mirror |
+| **Artifice** | The arcane workbench, the infusion altar and its instability, enchantment infusion, runic shielding, goggles, travel gear, hover girdle, thaumium and void gear, the arcane bore, lamps, mirrors and wards |
+| **Golemancy** | Golems of every material, cores, upgrades, the golem bell and its markers |
+| **Eldritch** | The Outer Lands, the eldritch portal and its maze, cultists, guardians, the eldritch golem and warden |
+| **World** | Aura nodes and their ecology, Magical Forest, Eerie and Tainted Land biomes, taint and its creatures, wisps, pech, firebats, cinnabar and amber ores, shimmerleaf, cinderpearl, mana beans |
+| **Baubles** | Built in: an amulet, two rings and a belt. Open them with **B** or the button next to your character; use a bauble in your hand to put it on. No extra mod required |
 
-Счётчик покрытия пересчитан из самого `docs/porting/scope-ledger.json`, а не взят из отчёта.
-Это учёт кода, а не полное игровое прохождение. Результаты исправлений и границы
-проверок: [отчёт от 25.10.2026](docs/analysis/2026-10-25-followup-review-fixes-ru.md).
-Интеграции 1.21.1 (EMI, Mod Menu, новый экран настроек, переводы тегов): [отчёт и кадры](docs/analysis/2026-10-25-emi-modmenu-config-ru.md).
-Улучшения из TC4Tweaks (разнообразная добыча, земляной удар не уничтожает предметы, инфузия
-сохраняет чары, полный флакон остаётся в руке, поиск и счётчик в Таумономиконе, очистка
-уведомлений) включены по умолчанию и выключаются на вкладке «Улучшения» экрана настроек:
-[волна 1](docs/analysis/2026-10-26-tc4tweaks-wave1-ru.md), [волна 2](docs/analysis/2026-10-26-tc4tweaks-wave2-ru.md).
+About 320 items, 160 blocks and 55 entities are ported. Interface languages: English and Russian.
 
-## Что проверено, а что нет
+## Quality of life
 
-**Проверено автоматическими гейтами:** логика блоков, предметов, сущностей, машин,
-исследований, сети, генерации мира, сохранений; данные рецептов и аспектов; целостность
-ассетов и реестров.
+Every tweak is a setting in the configuration screen (Mod Menu on Fabric, the mod list on
+NeoForge) and on by default; switched off, the original rule applies.
 
-**Осмотрено в клиенте:** положение и размер жезла/таумометра, обе руки и хотбар. Общий фикс перенесён в эту ветку; [причина, проверки и кадры](docs/analysis/2026-10-25-item-framing-ru.md). Многочисленные визуальные эффекты, добавленные
-в последних волнах (луч раскопок, зеркало, оверлей архитектора, экран таумометра, граф
-исследований, радиальное меню фокуса), **не сверялись с кадром**. Это записано в
-`docs/audit/KNOWN_DEVIATIONS.md` §7.
+- **Aspects for every item.** The original aspect table and its ore dictionary groups, mapped to
+  1.21.1 items and `c:` tags, plus an inference for items that did not exist in 1.7.10.
+- **Thaumonomicon.** Search, a completion counter, research bookmarks, keyboard navigation, reopening
+  the page you left.
+- **Ideas from [TC4Tweaks](https://github.com/Glease/TC4Tweaks)**, re-implemented: varied loot,
+  earth shock that leaves items alone, infusion that keeps enchantments and names, filled phials
+  that stay in your hand, a button that clears notifications.
+- **Recipe viewers.** Arcane, crucible, infusion and enchantment infusion recipes, and aspect
+  combinations, in [EMI](https://modrinth.com/mod/emi) (including "fill the workbench") and
+  [JEI](https://modrinth.com/mod/jei).
+- **[Jade](https://modrinth.com/mod/jade).** Essentia in jars, tubes and machines behind the goggles
+  of revealing, the state of furnaces, crucibles and infusions, a golem's core and upgrades.
 
-Это альфа: играбельно, но не полировано.
+## Installation
 
-## Сборка
+| | Fabric | NeoForge |
+|---|---|---|
+| Minecraft | 1.21.1 | 1.21.1 |
+| Loader | Fabric Loader 0.16.14 or newer | NeoForge 21.1 (built against 21.1.259) |
+| Required | [Fabric API](https://modrinth.com/mod/fabric-api), [Architectury API](https://modrinth.com/mod/architectury-api) 13.0.11+ | [Architectury API](https://modrinth.com/mod/architectury-api) 13.0.11+ |
+| Optional | EMI, JEI, Jade, Mod Menu | EMI, JEI, Jade |
+| Java | 21 | 21 |
+
+Download the jar for your loader from [Releases](../../releases) and put it in `mods` together with
+the required libraries. Start a **new world**: worlds from Thaumcraft 4 on 1.7.10 cannot be
+converted.
+
+## Project status
+
+This is an **alpha**. All of the original content is in and exercised by automated tests, but the
+port has not yet had long survival playthroughs by many players. Please report what you find.
+
+What backs the port up:
+
+- every original class, recipe, research entry and asset is accounted for in
+  [`docs/porting/scope-ledger.json`](docs/porting/scope-ledger.json) (1044 of 1044 units with a
+  verdict and its evidence);
+- about 2,600 unit tests and about 480 in-game GameTest scenarios, nearly all of them run on both
+  loaders;
+- visual checks against the original in a real client, with screenshots under
+  [`docs/analysis`](docs/analysis).
+
+Known gaps are listed in [`docs/audit/KNOWN_DEVIATIONS.md`](docs/audit/KNOWN_DEVIATIONS.md) §7;
+NeoForge has had less client and multiplayer testing than Fabric.
+
+## Building from source
 
 ```bash
-./gradlew :common:test :fabric:build
+./gradlew :common:test :fabric:build :neoforge:build
 ```
 
-Артефакт Fabric: `fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.6.jar`.
-NeoForge собирается и проходит тот же набор GameTest, кроме 17 фикстур на API Fabric
-(`./gradlew :neoforge:build`). Настоящий клиент NeoForge проверен в одиночной игре (GUI,
-сущности, снаряжение, EMI); мультиплеер на NeoForge не проверялся. Необязательный плагин EMI
-работает на обоих загрузчиках (`-PwithEmi` подключает EMI к `runClient`).
-
-Тесты:
+The jars land in `fabric/build/libs` and `neoforge/build/libs`. The GameTest suites need a fresh
+test world:
 
 ```bash
-./gradlew :common:test                 # JUnit
-rm -rf fabric/run-gametest/world
-./gradlew :fabric:runGameTest          # GameTest, нужен чистый мир
-rm -rf neoforge/run-gametest/world
-./gradlew :neoforge:runGameTest        # тот же набор на NeoForge
-python3 scripts/porting/neoforge_gametests.py --write  # после правки каталога Fabric
+rm -rf fabric/run-gametest/world && ./gradlew :fabric:runGameTest
+rm -rf neoforge/run-gametest/world && ./gradlew :neoforge:runGameTest
 ```
 
-## Документация
+`./gradlew :fabric:runClient -PwithEmi` (or `-PwithJei`, `-PwithJade`) starts a development client
+with an optional integration. [`docs/HANDOFF.md`](docs/HANDOFF.md) describes the layout of the
+project and the state of every part of the port.
 
-| Файл | Что внутри |
-|---|---|
-| `docs/HANDOFF.md` | состояние, что сделано, что осталось |
-| `docs/MIGRATION_STATUS.md` | подробный статус миграции |
-| `docs/porting/scope-ledger.json` | 1044 единицы, вердикт и доказательство по каждой |
-| `docs/audit/REPORT.md` | итоговый аудит кода |
-| `docs/audit/KNOWN_DEVIATIONS.md` | принятые расхождения и непроверенное |
-| `MODLOG.md` | хронология по волнам |
+## FAQ
 
-## Происхождение
+**Is this the official Thaumcraft?** No. Thaumcraft is Azanor's mod; this is a fan port of its
+4.2.3.5 version and is not endorsed by Azanor.
 
-Порт восстановлен из оригинального `Thaumcraft-1.7.10-4.2.3.5.jar` (побайтово, 859 из 859
-файлов совпадают с записанными отпечатками). Официальные `client.jar` и MCP-маппинг
-Mojang 1.7.10 использовались как второй источник. Все сторонние материалы перечислены в
-`THIRD_PARTY_NOTICES.md`; их права принадлежат Mojang/Microsoft и авторам Thaumcraft и не
-перелицензируются.
+**Do I need Baubles, Thaumic Tinkerer or other addons?** No. The bauble slots are built in. Old
+1.7.10 addons do not work on 1.21.1.
 
-## Лицензия
+**Why Thaumcraft 4 and not 6?** Thaumcraft 4 is the version many players remember best and the one
+the original addons and packs were built around. This port keeps its rules rather than mixing in
+later versions.
 
-См. `LICENSE`. Исходный код Thaumcraft принадлежит его авторам; этот репозиторий — порт и
-не претендует на права оригинала.
+## Credits and license
+
+- **Thaumcraft** was created by **Azanor**. Its name, textures, sounds, models and game design are
+  his work.
+- The port: Andrey Bash and contributors (see [`LICENSE`](LICENSE)).
+- References, adapted algorithms and their licenses are listed in
+  [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), among them OpenTC4, Minecraft Forge 1.7.10 and
+  the ideas of TC4Tweaks by Glease (no code copied).
+
+The MIT license in [`LICENSE`](LICENSE) covers the port's own work. It grants no rights to
+Azanor's original material, which is not relicensed. This project is not affiliated with Azanor,
+Mojang Studios or Microsoft.

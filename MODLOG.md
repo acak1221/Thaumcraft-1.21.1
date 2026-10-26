@@ -1,3 +1,12 @@
+## 2026-10-26 — public README
+
+README.md (English) and README.ru.md (Russian) rewritten for a public page: new 1.21.1 screenshots
+taken on a Fabric client in a fresh world (aura node over an infusion altar, a running runic
+infusion, the Magical Forest, the Thaumonomicon map and a research page, research notes on the
+research table, a node through the thaumometer) under `docs/images/readme`, content overview,
+quality-of-life settings, installation for both loaders, status, build, FAQ and credits. The
+1.12.2 screenshots in `raw/` are removed: they showed the earlier Forge 1.12.2 build.
+
 ## 2026-10-26 — TC4 biome patches follow the world seed
 
 Chunk generation fills biomes through the NoiseChunk's own climate sampler, which lacked the world

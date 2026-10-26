@@ -28,7 +28,8 @@ contains everything since alpha.5.
   cleanses taint again; the arcane furnace nozzle works.
 - **Rendering fixes checked against the original**: the architect focus overlay, thaumometer
   amounts, the held bone bow, warded runes, primal arrows, the thaumic slime shell, wand rods,
-  golem bell markers and more.
+  golem bell markers and more. In multiplayer, the thaumometer arms no longer copy the movements
+  of other players.
 
 ### Install
 
@@ -44,7 +45,7 @@ Magical Forest and Tainted Land patches.
 
 ### Checked
 
-2590 JUnit tests, 478/478 GameTest scenarios on Fabric and 466/466 on NeoForge on fresh worlds,
+2593 JUnit tests, 478/478 GameTest scenarios on Fabric and 466/466 on NeoForge on fresh worlds,
 120 Python tests, both builds; the new features were inspected in a real Fabric client. Earlier the same
 day, before the Jade, JEI and baubles changes, a dedicated server with two Fabric clients passed
 37/37 checks. Not yet checked: a long survival playthrough, NeoForge multiplayer. Known gaps: `docs/audit/KNOWN_DEVIATIONS.md` §7.
@@ -68,8 +69,9 @@ day, before the Jade, JEI and baubles changes, a dedicated server with two Fabri
 - **Улучшения по мотивам TC4Tweaks** — каждое выключается в настройках.
 - **Генерация мира**: пятна магического леса и порчи теперь зависят от сида мира; эфирный цветок
   и сопло магической печи снова работают.
-- **Исправления отрисовки**, сверенные с оригиналом.
+- **Исправления отрисовки**, сверенные с оригиналом; в мультиплеере руки с таумометром больше не
+  повторяют движения других игроков.
 
-Нужен свежий мир. Проверено: 2590 JUnit, GameTest 478/478 на Fabric и 466/466 на NeoForge на свежих
+Нужен свежий мир. Проверено: 2593 JUnit, GameTest 478/478 на Fabric и 466/466 на NeoForge на свежих
 мирах, 120 Python-тестов, обе сборки; новое осмотрено в клиенте Fabric. Не проверено: долгое
 выживание, мультиплеер на NeoForge.

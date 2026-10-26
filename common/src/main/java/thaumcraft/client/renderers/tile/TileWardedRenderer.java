@@ -38,7 +38,10 @@ public final class TileWardedRenderer implements BlockEntityRenderer<TileWarded>
         if (!(minecraft.getCameraEntity() instanceof Player viewer)
                 || !(FocusData.get(viewer.getMainHandItem()).getItem() instanceof ItemFocusWarding)) return;
         if (tile.getBlockPos().distToCenterSqr(minecraft.gameRenderer.getMainCamera().getPosition()) > 64D * 64D) return;
-        if (!VisNetRender.flush(buffers)) return;
+        // Original TileWardedRenderer: the runes are drawn with GL_TEXTURE_ENV_MODE GL_ADD, the
+        // colour added to the rune texture, as the Architect area.
+        var add = thaumcraft.client.ThaumcraftArchitectClient.addTextureShader();
+        if (add == null || !VisNetRender.flush(buffers)) return;
         boolean owned = tile.ownedBy(viewer.getUUID());
         float ticks = viewer.tickCount + partialTick;
         var pos = tile.getBlockPos();
@@ -48,7 +51,7 @@ public final class TileWardedRenderer implements BlockEntityRenderer<TileWarded>
         for (Direction face : Direction.values()) {
             if (!WardingOverlay.visible(tile.getLevel(), pos, face)) continue;
             int texture = WardingOverlay.texture(WardingOverlay.mask(tile.getLevel(), pos, face, tile.owner()));
-            VisNetRender.draw(RUNES[texture - 1], GL11.GL_ONE, false,
+            VisNetRender.draw(RUNES[texture - 1], GL11.GL_ONE, false, add,
                     out -> face(out, poses.last(), face, red, green, blue, owned ? .5F : .25F));
         }
     }

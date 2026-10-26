@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11;
 import thaumcraft.client.fx.bolt.WispLightningShape;
@@ -36,7 +35,7 @@ public final class HarnessBoltParticle extends Particle {
         PoseStack pose=new PoseStack();var eye=camera.getPosition();pose.translate(-eye.x,-eye.y,-eye.z);var look=camera.getLookVector();Vec3 view=new Vec3(look.x,look.y,look.z);
         for(int pass=0;pass<2;pass++) {
             float alpha=pass==0?(1-fraction)*.4F:1-fraction*.5F;
-            VisNetRender.draw(pass==0?VisNetRender.BOLT_LARGE:VisNetRender.BOLT_SMALL,GL11.GL_ONE_MINUS_SRC_ALPHA,false,GameRenderer.getPositionTexColorShader(),out->{
+            VisNetRender.draw(pass==0?VisNetRender.BOLT_LARGE:VisNetRender.BOLT_SMALL,GL11.GL_ONE_MINUS_SRC_ALPHA,false,VisNetRender.lowAlphaShader(),out->{
                 for(var segment:bolt.segments) {
                     if(segment.number>reach)continue;
                     // The original divides the ribbon width by the joint sine; a sine the normalised dot product

@@ -31,6 +31,8 @@ public final class VisNetRender {
     private VisNetRender() {}
     public static ResourceLocation texture(String path){return ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/"+path+".png");}
     public static void setShader(ShaderInstance value){shader=Objects.requireNonNull(value,"Root-owned low-alpha POSITION_TEX_COLOR shader");}
+    /** The low-alpha (1/255) POSITION_TEX_COLOR shader: the alpha test of the original particle renderer. */
+    public static ShaderInstance lowAlphaShader(){return Objects.requireNonNull(shader,"Root must pass node_stabilizer_bubble to VisNetClientEffects.setShader before VisNet rendering");}
     public static int cameraTicks(){var camera=Minecraft.getInstance().getCameraEntity();return camera==null?0:camera.tickCount;}
     public static boolean flush(MultiBufferSource buffers){if(buffers instanceof MultiBufferSource.BufferSource nativeBuffers){nativeBuffers.endBatch();return true;}return false;}
     public static RenderType modelType(String name,String texture,boolean translucent){return new ModelType(name,texture,translucent);}

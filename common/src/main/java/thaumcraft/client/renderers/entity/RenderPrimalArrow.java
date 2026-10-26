@@ -86,13 +86,53 @@ public class RenderPrimalArrow<T extends AbstractArrow> extends EntityRenderer<T
             float span = thaumcraft.client.lib.UtilsFX.wispUvSpan(thaumcraft.client.lib.UtilsFX.getTextureSize("textures/misc/wisp.png", 64));
             float u0 = (frame % 4) / 4F, u1 = u0 + span;
             float v0 = (frame / 4) / 4F, v1 = v0 + span;
-            RenderType type2 = type < 5 ? RenderType.entityTranslucent(WISP) : RenderType.entityCutout(WISP);
+            // Original renderArrow: glDepthMask(false); GL_SRC_ALPHA/GL_ONE for the primal
+            // types, GL_SRC_ALPHA/GL_ONE_MINUS_SRC_ALPHA for type 5, whose fade then shows.
+            RenderType type2 = type < 5 ? TrailType.ADDITIVE : TrailType.ALPHA;
             VertexConsumer out = buffers.getBuffer(type2);
             vertex(out, pose, -size, -size, 0, u1, v1, color >> 16 & 255, color >> 8 & 255, color & 255, alpha);
             vertex(out, pose, size, -size, 0, u0, v1, color >> 16 & 255, color >> 8 & 255, color & 255, alpha);
             vertex(out, pose, size, size, 0, u0, v0, color >> 16 & 255, color >> 8 & 255, color & 255, alpha);
             vertex(out, pose, -size, size, 0, u1, v0, color >> 16 & 255, color >> 8 & 255, color & 255, alpha);
         } finally { pose.popPose(); }
+    }
+
+    /** The trail state of the original: no depth write, additive or alpha blended, unculled. */
+    private static final class TrailType extends RenderType {
+        static final RenderType ADDITIVE = new TrailType("thaumcraft_primal_arrow_trail_additive", true);
+        static final RenderType ALPHA = new TrailType("thaumcraft_primal_arrow_trail", false);
+
+        private TrailType(String name, boolean additive) {
+            this(name, additive, new TextureStateShard(WISP, false, false));
+        }
+
+        private TrailType(String name, boolean additive, TextureStateShard texture) {
+            super(name, com.mojang.blaze3d.vertex.DefaultVertexFormat.NEW_ENTITY,
+                    com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, 1536, false, true,
+                    () -> begin(texture, additive), () -> end(texture, additive));
+        }
+
+        private static void begin(TextureStateShard texture, boolean additive) {
+            RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.setupRenderState();
+            texture.setupRenderState();
+            (additive ? LIGHTNING_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY).setupRenderState();
+            NO_CULL.setupRenderState();
+            LIGHTMAP.setupRenderState();
+            OVERLAY.setupRenderState();
+            LEQUAL_DEPTH_TEST.setupRenderState();
+            COLOR_WRITE.setupRenderState();
+        }
+
+        private static void end(TextureStateShard texture, boolean additive) {
+            COLOR_WRITE.clearRenderState();
+            LEQUAL_DEPTH_TEST.clearRenderState();
+            OVERLAY.clearRenderState();
+            LIGHTMAP.clearRenderState();
+            NO_CULL.clearRenderState();
+            (additive ? LIGHTNING_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY).clearRenderState();
+            texture.clearRenderState();
+            RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.clearRenderState();
+        }
     }
 
     private static void vertex(PoseStack.Pose pose, VertexConsumer out, float x, float y, float z, float u, float v,
@@ -103,7 +143,9 @@ public class RenderPrimalArrow<T extends AbstractArrow> extends EntityRenderer<T
 
     private static void vertex(VertexConsumer out, PoseStack pose, float x, float y, float z, float u, float v,
                                int r, int g, int b, float alpha) {
-        out.addVertex(pose.last(), x, y, z).setColor(r, g, b, alpha).setUv(u, v)
+        // Components are 0..255; with a float alpha, setColor(int, int, int, float) would pick the float
+        // overload and wrap 255 * 255 into a wrong byte (the trails came out green and blue).
+        out.addVertex(pose.last(), x, y, z).setColor(r / 255F, g / 255F, b / 255F, alpha).setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY).setLight(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
                 .setNormal(pose.last(), 0, 1, 0);
     }

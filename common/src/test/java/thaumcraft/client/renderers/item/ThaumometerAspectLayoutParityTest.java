@@ -27,6 +27,16 @@ class ThaumometerAspectLayoutParityTest {
                 {-16,40},{0,40},{-8,56}}, positions(15));
     }
 
+    @Test void eachAmountSitsAtTheLowerRightOfItsOwnGlyph() {
+        // Original UtilsFX.drawTag (JAR bytecode, drawTag(double, double, ...) offsets 432-468):
+        // drawString(amount, 32 - width + x * 2, 32 - FONT_HEIGHT + y * 2) at half size.
+        assertArrayEquals(new int[]{-5, 7}, new int[]{ThaumometerReadout.amountX(5, -16), ThaumometerReadout.amountY(9, -8)});
+        assertArrayEquals(new int[]{-37, 7}, new int[]{ThaumometerReadout.amountX(5, -32), ThaumometerReadout.amountY(9, -8)},
+                "a second glyph one column to the left moves its amount with it");
+        assertArrayEquals(new int[]{2, 39}, new int[]{ThaumometerReadout.amountX(14, -8), ThaumometerReadout.amountY(9, 8)},
+                "a wider amount stays right-aligned, a lower row moves down");
+    }
+
     private static int[][] positions(int count) {
         var layout = new ThaumometerReadout.AspectLayout(count);
         var result = new int[count][2];

@@ -54,7 +54,9 @@ public final class FloatyLine {
         CULTIST
     }
 
-    private static final java.util.Map<ResourceLocation, RenderType> TYPES = new java.util.concurrent.ConcurrentHashMap<>();
+    // Keyed by texture AND flavour: the wand pedestal (additive, no depth write) and the cultist
+    // (alpha blend) share textures/misc/wispy.png, and the first one drawn fixed the state of both.
+    private static final java.util.Map<java.util.List<Object>, RenderType> TYPES = new java.util.concurrent.ConcurrentHashMap<>();
 
     private FloatyLine() {}
 
@@ -93,7 +95,7 @@ public final class FloatyLine {
         int red = color >> 16 & 255;
         int green = color >> 8 & 255;
         int blue = color & 255;
-        var out = buffers.getBuffer(TYPES.computeIfAbsent(texture, key -> new FloatyLineType(key, flavour)));
+        var out = buffers.getBuffer(TYPES.computeIfAbsent(java.util.List.of(texture, flavour), key -> new FloatyLineType(texture, flavour)));
         ribbon(out, pose, true, dcX, dcY, dcZ, toX, toY, toZ, worldX, worldY, worldZ,
                 dist, length, distance, time, speed, red, green, blue, width, flavour);
         ribbon(out, pose, false, dcX, dcY, dcZ, toX, toY, toZ, worldX, worldY, worldZ,

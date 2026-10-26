@@ -77,6 +77,12 @@ public final class ThaumcraftArchitectClient {
     /** The {@code thaumcraft:architect_overlay} core shader, registered by the loader client bootstrap. */
     public static void setShader(ShaderInstance instance) { shader = instance; }
 
+    /**
+     * The same shader for other original {@code GL_ADD} draws (the warded block runes); null until
+     * the loader registered it.
+     */
+    public static ShaderInstance addTextureShader() { return shader; }
+
     private ThaumcraftArchitectClient() {}
 
     /**

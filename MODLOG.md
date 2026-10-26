@@ -1,3 +1,21 @@
+## 2026-10-26 — visual checks round 2: eight rendering defects and the wand runes
+
+The invisible architect overlay showed that unseen effects can hide defects, so the
+remaining ones went through real Fabric and NeoForge clients while a Sonnet
+subagent compared renderer GL state with the original bytecode. Fixed, each from
+the bytecode and with before/after frames: thaumometer aspect amounts all drawn at
+one point; the held bone bow 2.5 blocks large and off the arm; every late world
+effect on NeoForge drawn without the camera rotation; warded block runes without
+GL_ADD; primal arrow trails with wrong colours (setColor overload) and depth
+writes; eldritch orb rays writing depth; node items drawn through walls; the
+FloatyLine state cached by texture only; bolt halos cut by a 0.1 alpha test.
+Added the sceptre and primal staff runes. Seen and in order: the thaumometer
+screen, sparkles, the mirror and the infusion essentia streams. The g31 GameTest no
+longer depends on asynchronous entity loading. Verified: 2586 JUnit, both builds,
+473/473 Fabric and 461/461 NeoForge GameTests on fresh worlds, 115 Python tests.
+Open: magical forest decoration depends on thread order. See
+[the report](docs/analysis/2026-10-26-visual-checks-round2-ru.md).
+
 ## 2026-10-26 — review agents: NeoForge fluids, hover mining and XP, invisible architect overlay, performance
 
 Read-only Sonnet subagents gathered the leads; every claim was checked against

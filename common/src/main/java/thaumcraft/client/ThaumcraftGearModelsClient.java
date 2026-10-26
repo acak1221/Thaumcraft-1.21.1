@@ -125,8 +125,8 @@ public final class ThaumcraftGearModelsClient {
     /**
      * The original ModelWand83-243 for the loader's builtin item hook: the rod
      * in its own material sheet, the cap in its own sheet and the focus cube
-     * with the focus colour. The sceptre, the ornament, the focus depth layer
-     * and the runes of the original need items this port does not have.
+     * with the focus colour, then the sceptre and primal staff runes
+     * ({@link thaumcraft.client.renderers.item.WandRunes}).
      *
      * <p>The renderer only runs when the model of the wand resolves to a builtin entity model:
      * the shape models of the 990 combinations of rod, cap and focus name
@@ -202,11 +202,13 @@ public final class ThaumcraftGearModelsClient {
                 }
                 model.renderCapBottom(pose, capBuffer, light, overlay);
             } finally { pose.popPose(); }
+            int tick = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
             var focusStack = FocusData.get(stack);
             if (!focusStack.isEmpty() && focusStack.getItem() instanceof ItemFocusBasic basic) {
-                int tick = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
                 PrimalWandFocusRenderer.renderFocus(model, basic, focusStack, pose, buffers, light, overlay, tick, staff);
             }
+            // Original ModelWand.render after the focus: the sceptre rune ring and the primal staff runes.
+            thaumcraft.client.renderers.item.WandRunes.render(pose, buffers, sceptre, rod.hasRunes(), tick);
         } finally { pose.popPose(); }
     }
 

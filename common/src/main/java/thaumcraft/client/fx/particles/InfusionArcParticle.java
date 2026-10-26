@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -99,7 +98,7 @@ public final class InfusionArcParticle extends Particle {
             final float alpha = pass == 0 ? (1 - fraction) * .4F : 1 - fraction * .5F;
             final int rgb = pass == 0 ? TYPE_ZERO_LARGE : TYPE_ZERO_SMALL;
             VisNetRender.draw(pass == 0 ? VisNetRender.BOLT_LARGE : VisNetRender.BOLT_SMALL, GL11.GL_ONE, false,
-                    GameRenderer.getPositionTexColorShader(), out -> {
+                    VisNetRender.lowAlphaShader(), out -> {
                         for (var segment : bolt.segments) {
                             if (segment.number > reach) continue;
                             // The original divides the ribbon width by the joint sine; a sine the normalised dot

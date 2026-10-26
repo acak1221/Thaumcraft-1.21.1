@@ -91,13 +91,12 @@ finding them.
 These are not differences — they are things **nobody has looked at on a real frame or a real
 world**. They must not be reported as verified until someone does:
 
-* The thaumometer screen and readout, the excavation beam in third person, the essence flow,
-  the sparkles, the bone bow glint.
+* The excavation beam in third person and from another player; the floaty lines of the wand
+  pedestal and the cultist; the fading halo of bolts and arcs.
 * Runtime mixin injection on Fabric. On NeoForge it is now checked: a Mixin audit on a real
   NeoForge client (2026-10-26) applied every pending target without error, after
   `TaintOverlayChunkLayerMixin` was fixed for NeoForge's delegating `SectionCompiler.compile`
   (see `docs/analysis/2026-10-26-neoforge-client-ru.md`).
-* The projective mirror shader compiling in the shader driver.
 * Nether wild nodes in a freshly generated Nether.
 * The chunk regeneration queue on a real saved world.
 * Two physical clients plus a dedicated server (the last accepted run predates waves 4–8).
@@ -146,6 +145,19 @@ recorded here so the claim is bounded by what was seen, not by a test count:
   so it reads as a short green streak from the wand tip toward the target, with a green glint at
   the impact and crack stages on the block. The full ribbon length, third person and another
   player's view are still unseen.
+
+### 7.3 Now seen on a real frame (2026-10-26, round 2)
+
+See `docs/analysis/2026-10-26-visual-checks-round2-ru.md` for every frame. Seen and found wrong,
+then fixed against the original bytecode: the thaumometer amounts (all drawn at one point), the
+held bone bow (2.5 blocks, detached from the arm), every late world effect on NeoForge (drawn
+without the camera rotation), the warded block runes (`GL_ADD`), the primal arrow trails (wrong
+colours, depth writes), the eldritch orb rays (depth writes), node items (drawn through walls).
+Added: the sceptre and primal staff runes. Seen and in order: the thaumometer screen and scan,
+the block sparkles, the projective mirror (no shader error), the infusion essentia streams.
+Still different, not fixed: the deconstruction table ghost item is drawn solid (original additive,
+alpha 0.75); the eldritch portal writes depth; jar and alembic aspect labels are cut out instead of
+alpha blended; golem markers are lines instead of the original textured quads.
 
 ---
 

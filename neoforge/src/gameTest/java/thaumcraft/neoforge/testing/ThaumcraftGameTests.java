@@ -2418,6 +2418,22 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.WandApiRuntimeChecks.wandHelperPaysAndMounts(test);
     }
 
+    // An add-on essentia source (a plain IEssentiaTransport) feeds the mod's tubes and jars through its takeEssentia.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "addon_essentia")
+    public void addonEssentiaSourceFeedsTubesAndJars(GameTestHelper test) {
+        thaumcraft.common.testing.AddonEssentiaRuntimeChecks.addonSourceFeedsTubesAndJars(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "addon_essentia_infusion")
+    public void addonAspectSourcePaysTheInfusionMatrix(GameTestHelper test) {
+        thaumcraft.common.testing.AddonEssentiaRuntimeChecks.addonAspectSourcePaysInfusion(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "wand_api_bauble")
+    public void addonBaubleCountsOnlyWhenWorn(GameTestHelper test) {
+        thaumcraft.common.testing.WandApiRuntimeChecks.addonBaubleCountsWhenWorn(test);
+    }
+
     // An aspect registered by an add-on (registered by these scenarios only, never by the mod) works end to
     // end. Own batches: the scenarios register and remove a 49th aspect.
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "addon_aspect_scan")

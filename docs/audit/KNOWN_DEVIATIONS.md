@@ -246,6 +246,10 @@ Where the 1.7.10 behaviour could not or should not be kept, this is what an add-
 | Add-on aspects | Single-threaded registry; caches of `getAllAspects` kept forever | Registration synchronised; the caches rebuild when the registry changes; `getName()` lowercases with `Locale.ROOT`; late wisp scan rows and creative-tab phials are added when the aspect appears |
 | Add-on primal aspects | Wands, sceptres, amulets and vis relays used the live primal list | They stay limited to the six original primals (a gap, not a choice: see `docs/analysis/2026-10-26-addon-aspects-ru.md`) |
 | `ThaumcraftApiHelper` knowledge services, `ThaumcraftFX`, `ResearchPage.recipe(ids)` | Not in the API (add-ons used `thaumcraft.common`) | Added; not 1.7.10 members |
+| `TileThaumcraft` update data | `getDescriptionPacket` carried the custom NBT, with the chunk and after `markBlockForUpdate` | The same data with the chunk (`getUpdateTag`) and in the update packet, plus the key `thaumcraft:update`: a 1.21.1 client drops an update whose tag is empty, which would leave an emptied add-on container full on screen (2026-10-26) |
+| Add-on essentia sources that pay more than asked | A tube credited one unit whatever the source's `takeEssentia` returned; a surplus was lost | Native receivers still ask for one unit; a surplus goes back to the source through its `addEssentia` (2026-10-26) |
+| `IWandable.onUsingWandTick` / `onWandStoppedUsing` | Called for an object an add-on marked with the internal `ItemWandCasting.setObjectInUse` | Not called: the port has no counterpart of `setObjectInUse` (a gap) |
+| Phials as `IEssentiaContainerItem` | `ItemEssence` implemented it (contents in NBT) | Empty and filled phials are two items with a native component and do not implement it (a gap); jars, crystals, wisp essence and mana beans do |
 
 Details and evidence: `docs/analysis/2026-10-26-addon-api-ru.md`, `-addon-wand-parts-ru.md`,
 `-addon-aspects-ru.md`, `-addon-legacy-ids-ru.md`.

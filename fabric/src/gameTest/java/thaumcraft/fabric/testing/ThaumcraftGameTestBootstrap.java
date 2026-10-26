@@ -13,6 +13,8 @@ public final class ThaumcraftGameTestBootstrap implements ModInitializer {
         thaumcraft.common.testing.ResourceSafetyRuntimeChecks.registerTestProbes();
         NodeTransductionRuntimeChecks.registerTestProbes();
         thaumcraft.common.testing.VisAmuletRuntimeChecks.registerTestProbes();
+        // The test add-on's essentia source (a plain IEssentiaTransport block entity).
+        thaumcraft.common.testing.AddonEssentiaRuntimeChecks.registerTestProbes();
         FluxOverfullRuntimeChecks.registerTestProbes();
         ExcavationRemovalFailureRuntimeChecks.registerEarlyProbe();
         thaumcraft.common.testing.BiologicalLampRuntimeChecks.registerTestProbes();

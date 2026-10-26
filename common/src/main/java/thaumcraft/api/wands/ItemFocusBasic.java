@@ -35,7 +35,7 @@ public class ItemFocusBasic extends Item {
         for (short id : data.applied()) result.append(id);
         return result.toString();
     }
-    /** Returns zero game ticks of cooldown in this base implementation, ignoring nullable stack. */
+    /** The pause between two casts, in milliseconds of real time like the original WandManager cooldown (not game ticks); zero here. */
     public int getActivationCooldown(ItemStack focusstack) { return 0; }
     /** Returns WAVE in this base implementation, ignoring nullable stack without mutation. */
     public WandFocusAnimation getAnimation(ItemStack focusstack) { return WandFocusAnimation.WAVE; }
@@ -78,7 +78,14 @@ public class ItemFocusBasic extends Item {
      */
     public boolean onFocusBlockStartBreak(ItemStack focusstack, int x, int y, int z, Player player) { return false; }
 
-    /** Returns null in this base implementation without acting on any nullable argument; subclasses supply stack/hand-aware use behavior. */
+    /**
+     * The cast, called on both sides when the player uses the wand with this focus (and its activation cooldown is over).
+     *
+     * <p>Return the stack the hand holds afterwards (normally {@code wandstack}) when the focus acted, or {@code null} to let
+     * the click pass. The focus pays for itself, for example with {@code WandHelper.consumeAllVis}. A focus that is held
+     * calls {@code player.startUsingItem(hand)} here and then receives {@link #onUsingFocusTick} every tick. This base
+     * implementation returns null.</p>
+     */
     public ItemStack onFocusRightClick(ItemStack wandstack, Level level, Player player, InteractionHand hand) { return null; }
     /** Does nothing in this base implementation; nullable wand/player are ignored and count is remaining item-use game ticks in native dispatch. */
     public void onUsingFocusTick(ItemStack wandstack, Player player, int count) {}

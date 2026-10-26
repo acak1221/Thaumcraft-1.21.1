@@ -44,8 +44,9 @@ public final class PlayerAccessoryInventory extends SimpleContainer {
     }
     @Override public ItemStack removeItem(int slot, int amount) {
         if (mutating || rejected != null || amount <= 0) return ItemStack.EMPTY;
-        ItemStack before = getItem(slot), removed = super.removeItem(slot, amount);
-        if (!silent && !removed.isEmpty() && before.getItem() instanceof IBauble bauble) bauble.onUnequipped(removed, owner);
+        // The removal splits the slot's own stack, which leaves it empty (and its item air): ask the removed stack.
+        ItemStack removed = super.removeItem(slot, amount);
+        if (!silent && !removed.isEmpty() && removed.getItem() instanceof IBauble bauble) bauble.onUnequipped(removed, owner);
         return removed;
     }
     @Override public ItemStack removeItemNoUpdate(int slot) { return removeItem(slot, 1); }

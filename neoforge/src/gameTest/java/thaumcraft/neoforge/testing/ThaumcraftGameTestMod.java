@@ -73,10 +73,12 @@ public final class ThaumcraftGameTestMod {
             BiologicalLampRuntimeChecks.registerTestProbes();
             FluxOverfullRuntimeChecks.registerTestProbes();
             VisAmuletRuntimeChecks.registerTestProbes();
+            thaumcraft.common.testing.AddonEssentiaRuntimeChecks.registerTestProbes();
         } else if (Registries.BLOCK_ENTITY_TYPE.equals(key)) {
             // The amulet pulse relay owns a block entity type; the block itself is
             // registered by the block pass above, so the type is registered here.
             VisAmuletRuntimeChecks.registerTestProbes();
+            thaumcraft.common.testing.AddonEssentiaRuntimeChecks.registerTestProbes();
         } else if (Registries.ITEM.equals(key)) {
             // The test add-on's wand rod, staff core, cap and focus items, as the Fabric initializer registers them.
             thaumcraft.common.testing.WandApiRuntimeChecks.registerTestItems();

@@ -10,6 +10,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.Item;
@@ -17,8 +18,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.api.IVisDiscountGear;
+import thaumcraft.api.IWarpingGear;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.baubles.BaubleType;
+import thaumcraft.api.baubles.IBauble;
 import thaumcraft.api.wands.FocusUpgradeType;
 import thaumcraft.api.wands.IWandRodOnUpdate;
 import thaumcraft.api.wands.ItemFocusBasic;
@@ -38,8 +43,11 @@ import thaumcraft.common.crafting.ArcaneWandRecipe;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.items.wands.WandMaterials;
+import thaumcraft.common.items.wands.WandVisDiscount;
 import thaumcraft.common.items.wands.foci.FocusData;
 import thaumcraft.common.items.wands.foci.WandFocusActions;
+import thaumcraft.common.lib.WarpGear;
+import thaumcraft.common.lib.baubles.PlayerAccessories;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.crafting.ArcaneSceptreRecipe;
 import thaumcraft.common.tiles.TileArcaneWorkbench;
@@ -58,6 +66,7 @@ public final class WandApiRuntimeChecks {
     static final String ROD = "gt_ember", STAFF = "gt_ember_staff", CAP = "gt_tidal";
     private static Item rodItem, staffItem, capItem;
     private static AddonFocus focusItem;
+    private static AddonRing ringItem;
     private static int onUpdateCalls;
     private static WandRod rod;
     private static StaffRod staff;
@@ -71,6 +80,7 @@ public final class WandApiRuntimeChecks {
         staffItem = Registry.register(BuiltInRegistries.ITEM, id("addon_staff_rod"), new Item(new Item.Properties()));
         capItem = Registry.register(BuiltInRegistries.ITEM, id("addon_wand_cap"), new Item(new Item.Properties()));
         focusItem = Registry.register(BuiltInRegistries.ITEM, id("addon_focus"), new AddonFocus(new Item.Properties()));
+        ringItem = Registry.register(BuiltInRegistries.ITEM, id("addon_ring"), new AddonRing(new Item.Properties()));
     }
 
     private static ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath("thaumcraft_gametest", path); }
@@ -109,6 +119,18 @@ public final class WandApiRuntimeChecks {
             casts++;
             return wand;
         }
+    }
+
+    /** An add-on ring: a bauble that carries warp and a fire discount, and counts its equip, unequip and worn-tick callbacks. */
+    static final class AddonRing extends Item implements IBauble, IWarpingGear, IVisDiscountGear {
+        int equipped, unequipped, wornTicks;
+        AddonRing(Properties properties) { super(properties.stacksTo(1)); }
+        @Override public BaubleType getBaubleType(ItemStack stack) { return BaubleType.RING; }
+        @Override public void onEquipped(ItemStack stack, LivingEntity wearer) { equipped++; }
+        @Override public void onUnequipped(ItemStack stack, LivingEntity wearer) { unequipped++; }
+        @Override public void onWornTick(ItemStack stack, LivingEntity wearer) { wornTicks++; }
+        @Override public int getWarp(ItemStack stack, Player player) { return 2; }
+        @Override public int getVisDiscount(ItemStack stack, Player player, Aspect aspect) { return aspect == Aspect.FIRE ? 3 : 0; }
     }
 
     private static ItemStack wand(String rod, String cap, int each) {
@@ -267,6 +289,39 @@ public final class WandApiRuntimeChecks {
             inventory.tick();
             f.check(WandHelper.getVis(inventory.getItem(3), Aspect.FIRE) == 15000, "the hook stops at the add-on capacity");
             inventory.clearContent();
+        }
+        test.succeed();
+    }
+
+    /**
+     * An add-on bauble counts only while it is worn: its slot type, its equip/unequip/worn-tick callbacks, and its warp
+     * (original WarpEvents.getWarpFromGear reads the four Baubles slots) and vis discount (original WandManager) from an
+     * accessory slot, never from the pack.
+     */
+    public static void addonBaubleCountsWhenWorn(GameTestHelper test) {
+        try (var f = new TubeVariantsRuntimeChecks.Fixture(test)) {
+            f.open();
+            var accessories = PlayerAccessories.get(f.player);
+            for (int slot = 0; slot < 4; slot++) accessories.removeItem(slot, 1);
+            int equipped = ringItem.equipped, unequipped = ringItem.unequipped, worn = ringItem.wornTicks;
+            ItemStack ring = new ItemStack(ringItem);
+            f.player.getInventory().setItem(9, ring.copy());
+            f.check(WarpGear.fromGear(f.player) == 0 && WandVisDiscount.percentagePoints(f.player, Aspect.FIRE) == 0,
+                    "a ring in the pack counts for nothing");
+            f.check(!accessories.canPlaceItem(0, ring) && accessories.canPlaceItem(1, ring) && accessories.canPlaceItem(2, ring)
+                    && !accessories.canPlaceItem(3, ring) && PlayerAccessories.freeSlotFor(f.player, ring) == 1,
+                    "a RING bauble goes into the two ring slots only, and a right click puts it into the first free one");
+            accessories.setItem(1, ring.copy());
+            f.check(ringItem.equipped == equipped + 1, "onEquipped ran once");
+            f.check(WarpGear.fromGear(f.player) == 2, "worn, its warp counts: " + WarpGear.fromGear(f.player));
+            f.check(WandVisDiscount.percentagePoints(f.player, Aspect.FIRE) == 3 && WandVisDiscount.percentagePoints(f.player, Aspect.WATER) == 0,
+                    "worn, its fire discount counts and only for fire");
+            PlayerAccessories.tick(f.player);
+            f.check(ringItem.wornTicks == worn + 1, "onWornTick runs once per accessory tick");
+            accessories.removeItem(1, 1);
+            f.check(ringItem.unequipped == unequipped + 1 && WarpGear.fromGear(f.player) == 0
+                    && WandVisDiscount.percentagePoints(f.player, Aspect.FIRE) == 0, "taken off: onUnequipped ran, warp and discount are gone");
+            f.player.getInventory().clearContent();
         }
         test.succeed();
     }

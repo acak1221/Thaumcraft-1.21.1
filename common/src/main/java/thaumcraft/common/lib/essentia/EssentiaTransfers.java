@@ -645,9 +645,10 @@ public final class EssentiaTransfers {
                 }
             }
             selected = true;
-            // Unsupported transports are never debited via callback take/add,
-            // but an eligible buffer candidate still terminates its scan.
-            if (!EssentiaAtomicEndpoint.validAspect(wanted) || !from.canOutputTo(output) || stockFrom == null || !stockFrom.preflightTake(wanted, output)) return new Attempt(true, 0, null);
+            // An eligible buffer candidate terminates its scan even when nothing moves.
+            if (!EssentiaAtomicEndpoint.validAspect(wanted) || !from.canOutputTo(output)) return new Attempt(true, 0, null);
+            if (stockFrom == null) return foreignSource(mutation, receiver, into, beforeInto, source, from, output, inputFace, wanted, level, profile);
+            if (!stockFrom.preflightTake(wanted, output)) return new Attempt(true, 0, null);
             var debit = stockFrom.prepareExtract(beforeFrom, wanted, 1);
             var credit = into.prepareInsert(beforeInto, wanted, 1);
             if (!prepared(debit, stockFrom, beforeFrom, 1) || !prepared(credit, into, beforeInto, 1)) return new Attempt(true, 0, null);
@@ -662,6 +663,34 @@ public final class EssentiaTransfers {
         } catch (RuntimeException failure) {
             return new Attempt(selected, 0, failure);
         } finally { finishTubeFilterMutation(mutation); }
+    }
+
+    /**
+     * A source that is not one of the mod's own endpoints: an add-on's {@link IEssentiaTransport}.
+     *
+     * <p>Original TileTube.equalizeWithNeighbours, TileJarFillable and the other TC4 receivers asked any neighbouring
+     * transport for one unit through its own {@code takeEssentia} and kept what it reported as taken. The receiver's
+     * credit is prepared before that call and committed after it; the mod's own endpoints stay locked while the add-on
+     * code runs, so the call cannot reach the receiver. A unit that cannot be credited after all, or a surplus beyond the
+     * one requested, goes back to the source through its {@code addEssentia}.</p>
+     */
+    private static Attempt foreignSource(Mutation mutation, BlockEntity receiver, EssentiaAtomicEndpoint into, EssentiaAtomicEndpoint.State beforeInto,
+                                         BlockEntity source, IEssentiaTransport from, Direction output, Direction inputFace, Aspect wanted,
+                                         ServerLevel level, Profile profile) {
+        var credit = into.prepareInsert(beforeInto, wanted, 1);
+        if (!prepared(credit, into, beforeInto, 1)) return new Attempt(true, 0, null);
+        if (!from.isConnectable(output) || profile != Profile.BUFFER && (!into.isConnectable(inputFace) || !into.canInputFrom(inputFace))
+                || !current(receiver, level) || !current(source, level)
+                || level.getBlockEntity(receiver.getBlockPos().relative(inputFace)) != source
+                || !into.matchesAtomicState(beforeInto)) return new Attempt(true, 0, null);
+        int taken = from.takeEssentia(wanted, 1, output);
+        if (taken <= 0) return new Attempt(true, 0, null);
+        if (!current(receiver, level) || !into.matchesAtomicState(beforeInto)) {
+            from.addEssentia(wanted, taken, output);
+            return new Attempt(true, 0, null);
+        }
+        if (taken > 1) from.addEssentia(wanted, taken - 1, output);
+        return new Attempt(true, 1, commitPrepared(mutation, receiver, into, credit, null, null, null));
     }
 
     private static boolean prepared(EssentiaAtomicEndpoint.Change change, EssentiaAtomicEndpoint owner, EssentiaAtomicEndpoint.State before, int units) {
@@ -1120,9 +1149,7 @@ public final class EssentiaTransfers {
         if (wanted == null || source == consumer || !(consumer.getLevel() instanceof ServerLevel level)) return 0;
         if (!level.getServer().isSameThread()) throw new IllegalStateException("Infusion consumption requires the server thread");
         if (MUTATION.get() != null || !(consumer instanceof InfusionDemandEndpoint demand)
-                || !(source instanceof IAspectSource) || !(source instanceof EssentiaStorageEndpoint || source instanceof TileEssentiaReservoir
-                        || source instanceof TileMirrorEssentia)
-                || !current(consumer, level) || !current(source, level)) return 0;
+                || !(source instanceof IAspectSource) || !current(consumer, level) || !current(source, level)) return 0;
         int dx = source.getBlockPos().getX() - consumer.getBlockPos().getX();
         int dy = source.getBlockPos().getY() - consumer.getBlockPos().getY();
         int dz = source.getBlockPos().getZ() - consumer.getBlockPos().getZ();
@@ -1132,7 +1159,7 @@ public final class EssentiaTransfers {
         // The essentia mirror is an aspect source without a stock of its own: it
         // pays with one unit of the network in front of its twin.
         if (source instanceof TileMirrorEssentia mirror) return consumeFromMirror(level, demand, consumer, mirror, wanted);
-        EssentiaStorageEndpoint storage = (EssentiaStorageEndpoint) source;
+        if (!(source instanceof EssentiaStorageEndpoint storage)) return consumeFromForeignSource(level, demand, consumer, (IAspectSource) source, wanted);
         Mutation mutation = new Mutation(consumer, source);
         MUTATION.set(mutation);
         try {
@@ -1201,6 +1228,33 @@ public final class EssentiaTransfers {
         // normal stock that must not be written inside a foreign mutation.
         if (!mirror.takeFromContainer(wanted, 1)) return 0;
         Mutation mutation = new Mutation(consumer, mirror);
+        MUTATION.set(mutation);
+        try {
+            mutation.raw = true;
+            demand.consumeInfusionEssentiaRaw(wanted);
+            mutation.raw = false;
+            demand.notifyInfusionEssentiaChanged();
+            return 1;
+        } finally {
+            mutation.raw = false;
+            MUTATION.remove();
+        }
+    }
+
+    /**
+     * An add-on's {@link IAspectSource}, which is none of the mod's own stocks. Original EssentiaHandler.drainEssentia took
+     * the unit with the source's own {@code takeFromContainer}; as for the mirror above, the source pays first, outside the
+     * raw scope. A unit the matrix no longer wants once it is paid goes back through {@code addToContainer}.
+     */
+    private static int consumeFromForeignSource(ServerLevel level, InfusionDemandEndpoint demand, BlockEntity consumer,
+                                                IAspectSource source, Aspect wanted) {
+        if (!current(consumer, level) || demand.getPendingEssentia(wanted) <= 0) return 0;
+        if (!source.takeFromContainer(wanted, 1)) return 0;
+        if (!current(consumer, level) || demand.getPendingEssentia(wanted) <= 0) {
+            source.addToContainer(wanted, 1);
+            return 0;
+        }
+        Mutation mutation = new Mutation(consumer, (BlockEntity) source);
         MUTATION.set(mutation);
         try {
             mutation.raw = true;

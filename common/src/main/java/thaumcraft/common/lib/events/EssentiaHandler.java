@@ -41,8 +41,8 @@ public final class EssentiaHandler {
             if (!level.hasChunkAt(sourcePos)) break;
             BlockEntity source = level.getBlockEntity(sourcePos);
             if (!(source instanceof IAspectSource) || !current(source, level)) break;
-            // No sided transport/minimum suction/filter calls, nor take/refund.
-            // Unknown addon endpoints are refused by the atomic native boundary.
+            // No sided transport/minimum suction/filter calls. An add-on source pays
+            // through its own takeFromContainer, as in the original.
             if (EssentiaTransfers.consumeForInfusion(matrix, source, aspect) != 1) continue;
             matrix.sendEffect(1, sourcePos, aspect.getColor());
             return true;

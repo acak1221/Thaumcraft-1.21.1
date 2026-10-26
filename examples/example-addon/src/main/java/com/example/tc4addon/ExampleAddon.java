@@ -18,6 +18,8 @@ import thaumcraft.api.items.ItemsTC;
 import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchItem;
 import thaumcraft.api.research.ResearchPage;
+import thaumcraft.api.wands.WandCap;
+import thaumcraft.api.wands.WandRod;
 
 /**
  * A Thaumcraft 4 add-on written only against {@code thaumcraft.api}, the way a 1.7.10 add-on was written.
@@ -35,10 +37,14 @@ import thaumcraft.api.research.ResearchPage;
 public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
     public static final String MOD_ID = "tc4_example";
     public static final Item VIS_SHARD = new Item(new Item.Properties());
+    public static final Item AMETHYST_ROD = new Item(new Item.Properties());
+    public static final Item AMETHYST_CAP = new Item(new Item.Properties());
 
     @Override
     public void onInitialize() {
         Registry.register(BuiltInRegistries.ITEM, id("vis_shard"), VIS_SHARD);
+        Registry.register(BuiltInRegistries.ITEM, id("amethyst_rod"), AMETHYST_ROD);
+        Registry.register(BuiltInRegistries.ITEM, id("amethyst_cap"), AMETHYST_CAP);
     }
 
     @Override
@@ -89,6 +95,20 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
                         new ResearchPage(new ItemStack(Items.RAW_COPPER)))
                 .registerResearchItem();
         ThaumcraftApi.addWarpToResearch("EXAMPLE_SECRET", 1);
+
+        // A wand rod and a wand cap, the 1.7.10 constructors: capacity in whole vis, the craft cost of the part, and an
+        // entity-style texture with the UV layout of the original ModelWand (a 1.7.10 PNG works unchanged). The arcane
+        // workbench builds wands, staves and sceptres from the part items once ROD_<tag> and CAP_<tag> are researched.
+        new WandRod("amethyst", 80, new ItemStack(AMETHYST_ROD), 4,
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_quartz.png"));
+        WandCap cap = new WandCap("amethyst", 0.95F, java.util.List.of(Aspect.ORDER, Aspect.ENTROPY), 0.85F, new ItemStack(AMETHYST_CAP), 3);
+        cap.setTexture(ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_cap_thaumium.png"));
+        new ResearchItem("ROD_amethyst", "EXAMPLE", new AspectList().add(Aspect.CRYSTAL, 3).add(Aspect.TOOL, 2), 0, 2, 1,
+                new ItemStack(AMETHYST_ROD)).setParents("EXAMPLE_SHARDS").setSecondary()
+                .setPages(new ResearchPage("tc4_example.research_page.ROD_amethyst.1")).registerResearchItem();
+        new ResearchItem("CAP_amethyst", "EXAMPLE", new AspectList().add(Aspect.CRYSTAL, 2).add(Aspect.ORDER, 2), 2, 2, 1,
+                new ItemStack(AMETHYST_CAP)).setParents("EXAMPLE_SHARDS").setSecondary()
+                .setPages(new ResearchPage("tc4_example.research_page.CAP_amethyst.1")).registerResearchItem();
     }
 
     static ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath(MOD_ID, path); }

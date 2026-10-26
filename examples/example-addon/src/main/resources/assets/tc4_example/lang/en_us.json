@@ -9,5 +9,15 @@
   "tc4_example.research_page.EXAMPLE_INFUSION.1": "An infusion recipe registered with ThaumcraftApi.addInfusionCraftingRecipe. Its parents are an add-on entry and the original INFUSION entry.",
   "tc.research_name.EXAMPLE_SECRET": "Copper Secrets",
   "tc.research_text.EXAMPLE_SECRET": "Revealed by scanning an echo shard",
-  "tc4_example.research_page.EXAMPLE_SECRET.1": "A hidden entry: scanning its trigger item gives the clue that lets you research it. The next page is an original smelting page."
+  "tc4_example.research_page.EXAMPLE_SECRET.1": "A hidden entry: scanning its trigger item gives the clue that lets you research it. The next page is an original smelting page.",
+  "item.tc4_example.amethyst_rod": "Amethyst Wand Core",
+  "item.tc4_example.amethyst_cap": "Amethyst Wand Cap",
+  "item.Wand.amethyst.rod": "Amethyst",
+  "item.Wand.amethyst.cap": "Amethyst Tipped",
+  "tc.research_name.ROD_amethyst": "Amethyst Wand Core",
+  "tc.research_text.ROD_amethyst": "An add-on wand rod",
+  "tc4_example.research_page.ROD_amethyst.1": "A wand rod registered with new WandRod(...): 80 vis, craft cost 4. Combine it with any cap you know in the arcane workbench.",
+  "tc.research_name.CAP_amethyst": "Amethyst Wand Caps",
+  "tc.research_text.CAP_amethyst": "An add-on wand cap",
+  "tc4_example.research_page.CAP_amethyst.1": "A wand cap registered with new WandCap(...): 95% vis cost, 85% for order and entropy."
 }

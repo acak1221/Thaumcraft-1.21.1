@@ -62,7 +62,8 @@ public final class TileAlembicRenderer implements BlockEntityRenderer<TileAlembi
                 // state only; it does not pretend a label-item attachment API exists.
                 pose.mulPose(Axis.YP.rotationDegrees(90 + angle));
                 quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(LABEL)), .135F, .468F, -.409F, 0xffffff, light, overlay);
-                quad(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(tile.getFilter().getImage())), .104F, .468F, -.41F,
+                // Blended as UtilsFX.drawTag, not cut out (see TileJarRenderer).
+                quad(pose, buffers.getBuffer(RenderType.entityTranslucent(tile.getFilter().getImage())), .104F, .468F, -.41F,
                         tile.getFilter().getColor(), light, overlay);
             }
         } finally {

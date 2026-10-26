@@ -50,7 +50,9 @@ public class RenderPrimalArrow<T extends AbstractArrow> extends EntityRenderer<T
             pose.mulPose(Axis.XP.rotationDegrees(45.0F));
             pose.scale(.05625F, .05625F, .05625F);
             pose.translate(-4.0F, 0.0F, 0.0F);
-            VertexConsumer out = buffers.getBuffer(RenderType.entityCutout(ARROW));
+            // Original renderArrow:27-37 and 223-237: the shaft is drawn with GL_SRC_ALPHA/GL_ONE and the
+            // colour (1, 1, 1, spent life fade), so it glows and fades; depth writes stay on.
+            VertexConsumer out = buffers.getBuffer(ArrowType.SHAFT);
             PoseStack.Pose last = pose.last();
             // The original end cap, seen from both sides.
             vertex(last, out, -7, -2, -2, 0.0F, .15625F, -1, 0, 0, light, alpha);
@@ -88,7 +90,7 @@ public class RenderPrimalArrow<T extends AbstractArrow> extends EntityRenderer<T
             float v0 = (frame / 4) / 4F, v1 = v0 + span;
             // Original renderArrow: glDepthMask(false); GL_SRC_ALPHA/GL_ONE for the primal
             // types, GL_SRC_ALPHA/GL_ONE_MINUS_SRC_ALPHA for type 5, whose fade then shows.
-            RenderType type2 = type < 5 ? TrailType.ADDITIVE : TrailType.ALPHA;
+            RenderType type2 = type < 5 ? ArrowType.ADDITIVE : ArrowType.ALPHA;
             VertexConsumer out = buffers.getBuffer(type2);
             vertex(out, pose, -size, -size, 0, u1, v1, color >> 16 & 255, color >> 8 & 255, color & 255, alpha);
             vertex(out, pose, size, -size, 0, u0, v1, color >> 16 & 255, color >> 8 & 255, color & 255, alpha);
@@ -97,38 +99,42 @@ public class RenderPrimalArrow<T extends AbstractArrow> extends EntityRenderer<T
         } finally { pose.popPose(); }
     }
 
-    /** The trail state of the original: no depth write, additive or alpha blended, unculled. */
-    private static final class TrailType extends RenderType {
-        static final RenderType ADDITIVE = new TrailType("thaumcraft_primal_arrow_trail_additive", true);
-        static final RenderType ALPHA = new TrailType("thaumcraft_primal_arrow_trail", false);
+    /**
+     * The states of the original: the trail without depth writes, additive or alpha blended and
+     * unculled; the shaft additive, culled, with depth writes.
+     */
+    private static final class ArrowType extends RenderType {
+        static final RenderType ADDITIVE = new ArrowType("thaumcraft_primal_arrow_trail_additive", WISP, true, false);
+        static final RenderType ALPHA = new ArrowType("thaumcraft_primal_arrow_trail", WISP, false, false);
+        static final RenderType SHAFT = new ArrowType("thaumcraft_primal_arrow_shaft", ARROW, true, true);
 
-        private TrailType(String name, boolean additive) {
-            this(name, additive, new TextureStateShard(WISP, false, false));
+        private ArrowType(String name, ResourceLocation texture, boolean additive, boolean shaft) {
+            this(name, new TextureStateShard(texture, false, false), additive, shaft);
         }
 
-        private TrailType(String name, boolean additive, TextureStateShard texture) {
+        private ArrowType(String name, TextureStateShard texture, boolean additive, boolean shaft) {
             super(name, com.mojang.blaze3d.vertex.DefaultVertexFormat.NEW_ENTITY,
                     com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, 1536, false, true,
-                    () -> begin(texture, additive), () -> end(texture, additive));
+                    () -> begin(texture, additive, shaft), () -> end(texture, additive, shaft));
         }
 
-        private static void begin(TextureStateShard texture, boolean additive) {
+        private static void begin(TextureStateShard texture, boolean additive, boolean shaft) {
             RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.setupRenderState();
             texture.setupRenderState();
             (additive ? LIGHTNING_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY).setupRenderState();
-            NO_CULL.setupRenderState();
+            if (!shaft) NO_CULL.setupRenderState();
             LIGHTMAP.setupRenderState();
             OVERLAY.setupRenderState();
             LEQUAL_DEPTH_TEST.setupRenderState();
-            COLOR_WRITE.setupRenderState();
+            (shaft ? COLOR_DEPTH_WRITE : COLOR_WRITE).setupRenderState();
         }
 
-        private static void end(TextureStateShard texture, boolean additive) {
-            COLOR_WRITE.clearRenderState();
+        private static void end(TextureStateShard texture, boolean additive, boolean shaft) {
+            (shaft ? COLOR_DEPTH_WRITE : COLOR_WRITE).clearRenderState();
             LEQUAL_DEPTH_TEST.clearRenderState();
             OVERLAY.clearRenderState();
             LIGHTMAP.clearRenderState();
-            NO_CULL.clearRenderState();
+            if (!shaft) NO_CULL.clearRenderState();
             (additive ? LIGHTNING_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY).clearRenderState();
             texture.clearRenderState();
             RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.clearRenderState();

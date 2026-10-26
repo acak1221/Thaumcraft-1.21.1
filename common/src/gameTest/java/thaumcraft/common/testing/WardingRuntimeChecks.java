@@ -245,7 +245,14 @@ public final class WardingRuntimeChecks {
             stranger.setGameMode(GameType.CREATIVE);
             cast(stranger, primary, wand(1000, false));
             test.assertTrue(ward(primary).ownedBy(owner.getUUID()), "a colliding player name never authorizes unwarding");
-            test.assertTrue(!stranger.gameMode.destroyBlock(primary) && !owner.gameMode.destroyBlock(primary), "neither creative stranger nor survival owner mines the wrapper");
+            // One full Fabric run (2026-10-26) saw a true here that no other run reproduced, so the
+            // message names who mined, from which level, and what that level held at the position.
+            for (ServerPlayer miner : List.of(stranger, owner)) {
+                String seen = miner.getGameProfile().getName() + " in " + miner.serverLevel().dimension().location()
+                        + (miner.serverLevel() == level ? "" : " (not the test level)") + " saw "
+                        + miner.serverLevel().getBlockState(primary) + ", removed " + miner.isRemoved();
+                test.assertTrue(!miner.gameMode.destroyBlock(primary), "neither creative stranger nor survival owner mines the wrapper: " + seen);
+            }
         }
         void restore() {
             level.setBlock(primary.west(), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);

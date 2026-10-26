@@ -99,7 +99,9 @@ world**. They must not be reported as verified until someone does:
   (see `docs/analysis/2026-10-26-neoforge-client-ru.md`).
 * Nether wild nodes in a freshly generated Nether.
 * The chunk regeneration queue on a real saved world.
-* Two physical clients plus a dedicated server (the last accepted run predates waves 4–8).
+* Two physical clients plus a dedicated server on NeoForge. (On Fabric the scripted 37-step run
+  passed on a fresh server world and the current code on 2026-10-26, see
+  `docs/analysis/2026-10-26-bloom-blend-multiplayer-ru.md`.)
 
 ### 7.1 Now seen on a real frame (2026-10-23)
 
@@ -156,8 +158,18 @@ colours, depth writes), the eldritch orb rays (depth writes), node items (drawn 
 Added: the sceptre and primal staff runes. Seen and in order: the thaumometer screen and scan,
 the block sparkles, the projective mirror (no shader error), the infusion essentia streams.
 Still different, not fixed: the deconstruction table ghost item is drawn solid (original additive,
-alpha 0.75); the eldritch portal writes depth; jar and alembic aspect labels are cut out instead of
-alpha blended; golem markers are lines instead of the original textured quads.
+alpha 0.75); golem markers are lines instead of the original textured quads. (The eldritch portal
+depth writes and the cut-out jar and alembic labels listed here before are fixed, see 7.4.)
+
+### 7.4 Now seen on a real frame (2026-10-26, round 3)
+
+See `docs/analysis/2026-10-26-bloom-blend-multiplayer-ru.md`. Fixed against the original bytecode
+and seen on a Fabric client: the ethereal bloom (it had no ticker at all, so it neither grew nor
+cleansed taint), the thaumic slime outer shell (missing, an invented 0.7 inner body drawn instead),
+the additive bloom crystal, the see-through ice and quartz wand rods, the additive fading primal
+arrow shaft, blended aspect icons on jars and alembics, the research table inkwell and parchment,
+and the eldritch portal without depth writes. The bloom now restores each quart of a column to the
+biome its generator gives it; 1.7.10 had one biome per column, 1.21.1 has one per quart height.
 
 ---
 

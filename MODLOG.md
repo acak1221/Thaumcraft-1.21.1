@@ -1,3 +1,24 @@
+## 2026-10-26 — ethereal bloom, seven blend mismatches, two-client acceptance
+
+The ethereal bloom never ticked: its block had no ticker, so it neither grew nor
+cleansed taint. It now ticks on both sides and follows the original updateEntity
+from the bytecode: random start phase, nextInt(8) - nextInt(8) offsets, squared
+reach from the tile centre, the roots sound, and taint, eerie or magical forest
+columns restored to the biome the generator gave them (generated taint becomes
+plains). A new GameTest fails without the ticker. A Sonnet subagent found, and
+javap confirmed, textures the port cut out where the original blended. The thaumic
+slime outer shell was missing, with an invented inner body drawn instead. Also
+fixed: the additive bloom crystal, see-through ice and quartz wand rods, the
+additive fading primal arrow shaft, blended aspect icons on jars and alembics, the
+research table inkwell and parchment, and a portal without depth writes. The
+magical forest GameTest pins the shared oak height (the original rule is
+untouched), so it no longer swings between 0 and 9 pods. In the two-client harness
+the wisps stay with the player, the golem is not summoned into the bore and the
+script stops its server. Verified: 2587 JUnit, both builds, 474/474 Fabric and
+462/462 NeoForge GameTests on fresh worlds, 115 Python tests, and a dedicated
+server with two Fabric clients 37/37. See
+[the report](docs/analysis/2026-10-26-bloom-blend-multiplayer-ru.md).
+
 ## 2026-10-26 — visual checks round 2: eight rendering defects and the wand runes
 
 The invisible architect overlay showed that unseen effects can hide defects, so the

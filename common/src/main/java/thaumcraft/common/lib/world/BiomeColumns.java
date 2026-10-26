@@ -65,6 +65,37 @@ public final class BiomeColumns {
         return true;
     }
 
+    /**
+     * Utils.setBiomeAt with the biome WorldChunkManager.getBiomeGenAt(..., true) generated for the column:
+     * every quart Y of the column gets back the biome the generator gives it, and a generated
+     * {@code refused} biome becomes {@code replacement} instead. Never loads a chunk.
+     */
+    public static boolean restoreGenerated(ServerLevel level, int x, int z, ResourceKey<Biome> refused, ResourceKey<Biome> replacement) {
+        requireWorld(level);
+        LevelChunk chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4);
+        if (chunk == null) return false;
+        Holder<Biome> substitute = target(level, new BlockPos(x, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15), z), replacement);
+        if (substitute == null) return false;
+        var source = level.getChunkSource().getGenerator().getBiomeSource();
+        Climate.Sampler sampler = level.getChunkSource().randomState().sampler();
+        int selectedX = QuartPos.fromBlock(x), selectedZ = QuartPos.fromBlock(z);
+        int minY = QuartPos.fromBlock(chunk.getMinBuildHeight());
+        @SuppressWarnings("unchecked")
+        Holder<Biome>[] generated = new Holder[QuartPos.fromBlock(chunk.getMaxBuildHeight() - 1) - minY + 1];
+        boolean changed = false;
+        for (int index = 0; index < generated.length; index++) {
+            Holder<Biome> biome = source.getNoiseBiome(selectedX, minY + index, selectedZ, sampler);
+            generated[index] = biome.is(refused) ? substitute : biome;
+            if (chunk.getNoiseBiome(selectedX, minY + index, selectedZ) != generated[index]) changed = true;
+        }
+        if (!changed) return false;
+        chunk.fillBiomesFromNoise((quartX, quartY, quartZ, ignoredSampler) -> quartX == selectedX && quartZ == selectedZ
+                ? generated[quartY - minY] : chunk.getNoiseBiome(quartX, quartY, quartZ), sampler);
+        chunk.setUnsaved(true);
+        level.getChunkSource().chunkMap.resendBiomesForChunks(List.of(chunk));
+        return true;
+    }
+
     /** Generation-stage variant: mutate only the existing writable region chunk; its eventual full chunk packet carries the biome data. */
     public static boolean set(WorldGenLevel level, int x, int z, ResourceKey<Biome> targetKey) {
         if (level instanceof ServerLevel server) return set(server, x, z, targetKey);

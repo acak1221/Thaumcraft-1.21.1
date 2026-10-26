@@ -170,7 +170,9 @@ public final class ThaumcraftGearModelsClient {
                     pose.translate(0, ModelWand.Geometry.STAFF_ROD_SHIFT, 0);
                     pose.scale(ModelWand.Geometry.STAFF_ROD_XZ, ModelWand.Geometry.STAFF_ROD_Y, ModelWand.Geometry.STAFF_ROD_XZ);
                 }
-                model.renderRod(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(ModelWand.rodTexture(rod.baseTag()))), light, overlay);
+                // Original ItemWandRenderer.renderItem:542-568 draws the whole wand with the blend (770, 771):
+                // the ice rod (alpha 216) and the quartz rod (alpha 246) are see-through, the caps opaque.
+                model.renderRod(pose, buffers.getBuffer(RenderType.entityTranslucent(ModelWand.rodTexture(rod.baseTag()))), light, overlay);
             } finally { pose.popPose(); }
             pose.pushPose();
             try {

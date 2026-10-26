@@ -43,6 +43,7 @@ public final class TileEtherealBloomRenderer implements BlockEntityRenderer<Tile
     public static final int STRIP_ROW = 6;
 
     private static final RenderType STRIP = new StripRenderType();
+    private static final RenderType CAPACITOR_TYPE = new CapacitorRenderType();
 
     private final ModelCube cube = new ModelCube(0);
 
@@ -79,12 +80,12 @@ public final class TileEtherealBloomRenderer implements BlockEntityRenderer<Tile
         } finally {
             pose.popPose();
         }
-        // The crystal capacitor in the middle of the bloom.
+        // The crystal capacitor in the middle of the bloom, still under the additive blend of the strip.
         pose.pushPose();
         try {
             pose.translate(.5F - scaleCore / 8.0F, scalePetals - scaleCore / 6.0F, .5F - scaleCore / 8.0F);
             pose.scale(scaleCore / 4.0F, scaleCore / 3.0F, scaleCore / 4.0F);
-            cube.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(CAPACITOR)), light, overlay, 0xffffffff);
+            cube.render(pose, buffers.getBuffer(CAPACITOR_TYPE), light, overlay, 0xffffffff);
         } finally {
             pose.popPose();
         }
@@ -174,6 +175,40 @@ public final class TileEtherealBloomRenderer implements BlockEntityRenderer<Tile
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setLight(LightTexture.FULL_BRIGHT)
                 .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
+    }
+
+    /**
+     * The crystal capacitor of the original (bytecode 141-159, 237-244, 315-326): the blend
+     * {@code (770, 1)} the strip enabled is still on, culling and depth writes are back on. Every
+     * opaque texel of {@code crystalcapacitor.png} has the alpha 206, so the cube glows through.
+     */
+    private static final class CapacitorRenderType extends RenderType {
+        private static final TextureStateShard TEXTURE = new TextureStateShard(CAPACITOR, false, false);
+
+        private CapacitorRenderType() {
+            super("thaumcraft_bloom_capacitor", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS,
+                    1536, false, true, CapacitorRenderType::begin, CapacitorRenderType::end);
+        }
+
+        private static void begin() {
+            RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.setupRenderState();
+            TEXTURE.setupRenderState();
+            LIGHTNING_TRANSPARENCY.setupRenderState();
+            LIGHTMAP.setupRenderState();
+            OVERLAY.setupRenderState();
+            LEQUAL_DEPTH_TEST.setupRenderState();
+            COLOR_DEPTH_WRITE.setupRenderState();
+        }
+
+        private static void end() {
+            COLOR_DEPTH_WRITE.clearRenderState();
+            LEQUAL_DEPTH_TEST.clearRenderState();
+            OVERLAY.clearRenderState();
+            LIGHTMAP.clearRenderState();
+            LIGHTNING_TRANSPARENCY.clearRenderState();
+            TEXTURE.clearRenderState();
+            RENDERTYPE_ENTITY_TRANSLUCENT_SHADER.clearRenderState();
+        }
     }
 
     /**

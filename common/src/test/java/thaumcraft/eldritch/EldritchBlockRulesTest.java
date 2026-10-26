@@ -313,6 +313,18 @@ class EldritchBlockRulesTest {
         assertEquals(81.0D, EldritchBlockRules.ETHEREAL_BLOOM_RADIUS_SQUARED);
     }
 
+    @Test void etherealBloomReachesTheOriginalSquaredDistanceFromItsCentre() {
+        // The offsets are nextInt(8) - nextInt(8); the distance adds the half block of the height.
+        assertTrue(EldritchBlockRules.etherealBloomReaches(0, 0));
+        assertTrue(EldritchBlockRules.etherealBloomReaches(7, 5));
+        assertTrue(EldritchBlockRules.etherealBloomReaches(-6, -6));
+        assertFalse(EldritchBlockRules.etherealBloomReaches(7, 6));
+        assertFalse(EldritchBlockRules.etherealBloomReaches(-7, -7));
+        assertFalse(EldritchBlockRules.etherealBloomReaches(9, 0), "81.25 is past the reach of 81");
+        assertEquals(8, EldritchBlockRules.ETHEREAL_BLOOM_OFFSET);
+        assertEquals(100, EldritchBlockRules.ETHEREAL_BLOOM_START_PHASE);
+    }
+
     // --------------------------------------------------------------------- jars
     @Test void jarFillSemanticsKeepTheOriginalCapacityAndSuction() {
         assertEquals(64, EldritchBlockRules.JAR_CAPACITY);

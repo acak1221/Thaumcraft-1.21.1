@@ -652,6 +652,10 @@ public final class ThaumcraftEldritchBlocks {
         @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
             return new TileEtherealBloom(pos, state);
         }
+        // The original updateEntity ran on both sides: the server cleanses, both grow the bloom.
+        @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+            return createTickerHelper(type, ETHEREAL_BLOOM_TILE.get(), TileEtherealBloom::tick);
+        }
     }
 
     private static boolean registered;

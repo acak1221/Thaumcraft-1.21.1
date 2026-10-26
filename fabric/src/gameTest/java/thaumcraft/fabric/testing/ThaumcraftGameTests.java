@@ -2164,6 +2164,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.glyphedStoneGivesItsExperience(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void eldritch_ethereal_bloom_cleanses_back_to_the_generated_biome(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.etherealBloomCleansesBackToTheGeneratedBiome(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
     public void eldritch_obelisk_slows_only_the_eldritch_mobs(GameTestHelper test) {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.obeliskSlowsOnlyTheEldritchMobs(test);

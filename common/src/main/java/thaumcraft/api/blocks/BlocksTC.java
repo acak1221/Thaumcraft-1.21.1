@@ -6,6 +6,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.api.ItemApi;
 import thaumcraft.common.config.ThaumcraftContent;
 
 /**
@@ -15,13 +17,21 @@ import thaumcraft.common.config.ThaumcraftContent;
  * surface kept them in {@code BlocksTC}; 1.21.1 registers every block in the block registry, so this class
  * resolves the native registry instead of holding a second copy of it. A plain name means
  * {@code thaumcraft:<name>}.</p>
+ *
+ * <p>An original TC4 field name of {@code ConfigBlocks} ({@code "blockJar"}, {@code "blockCosmeticSolid"}) is
+ * accepted too and means the block of its metadata 0; {@link #get(String, int)} and {@link #state(String, int)}
+ * select another metadata. The names and metadata resolve through {@link ItemApi#legacyBlockId} and
+ * {@link ItemApi#legacyBlockState} ({@code docs/api/LEGACY_IDS.md}).</p>
  */
 public final class BlocksTC {
     private BlocksTC() {}
 
-    /** Null/empty names throw IllegalArgumentException; malformed namespaced IDs return null, malformed plain paths throw ResourceLocationException. */
+    /** Null/empty names throw IllegalArgumentException; malformed namespaced IDs return null, malformed plain paths throw ResourceLocationException.
+     * An original field name answers the block of its metadata 0, or null when 1.21.1 has none (an item field
+     * has no block); it never throws. */
     public static ResourceLocation id(String name) {
         if (name == null || name.isEmpty()) throw new IllegalArgumentException("A block needs a name");
+        if (ItemApi.isLegacyName(name)) return ItemApi.legacyBlockId(name, 0);
         return name.contains(":") ? ResourceLocation.tryParse(name) : ResourceLocation.fromNamespaceAndPath("thaumcraft", name);
     }
 
@@ -31,6 +41,33 @@ public final class BlocksTC {
         if (id == null || !BuiltInRegistries.BLOCK.containsKey(id)) return null;
         return BuiltInRegistries.BLOCK.get(id);
     }
+
+    /**
+     * The block of an original field name and metadata ({@code get("blockCosmeticSolid", 4)} is the thaumium
+     * block), or null for an unknown metadata, a variant without a 1.21.1 block or an unregistered block. For
+     * any other name the metadata is ignored: a native id names one block.
+     */
+    public static Block get(String name, int metadata) {
+        if (name == null || name.isEmpty()) throw new IllegalArgumentException("A block needs a name");
+        if (!ItemApi.isLegacyName(name)) return get(name);
+        ResourceLocation id = ItemApi.legacyBlockId(name, metadata);
+        return id == null || !BuiltInRegistries.BLOCK.containsKey(id) ? null : BuiltInRegistries.BLOCK.get(id);
+    }
+
+    /**
+     * The block state of an original field name and metadata ({@code state("blockCosmeticSolid", 1)} is the
+     * obsidian tile, {@code cosmetic_solid_tough[variant=1]}), or for any other name the default state of the
+     * named block; null when there is no such block.
+     */
+    public static BlockState state(String name, int metadata) {
+        if (name == null || name.isEmpty()) throw new IllegalArgumentException("A block needs a name");
+        if (ItemApi.isLegacyName(name)) return ItemApi.legacyBlockState(name, metadata);
+        Block block = get(name);
+        return block == null ? null : block.defaultBlockState();
+    }
+
+    /** True when the name is an original TC4 {@code ConfigItems} or {@code ConfigBlocks} field. */
+    public static boolean isLegacyName(String name) { return ItemApi.isLegacyName(name); }
 
     /** Null/empty or missing names throw IllegalArgumentException; malformed plain paths throw ResourceLocationException. */
     public static Block require(String name) {

@@ -1,3 +1,17 @@
+## 2026-10-26 — history without the original JARs, PR to main, alpha.7
+
+At the owner's request the original Thaumcraft 4.2.3.5 and 6.1 beta jars and a stray Gradle
+download (`.gradle-g21/`) were removed from every commit with git filter-repo and all branches
+were force-pushed (116.5 → 40.1 MiB; every hash changed, map in
+`docs/porting/history-rewrite-2026-10-26.txt`). The jars stay local and ignored; the tests and
+scripts that read them skip or fall back to `thaumcraft_src` without them (the shader fallback
+no longer loses the original CRLF). AGENTS.md and THIRD_PARTY_NOTICES.md record the decision to
+publish. Version 0.1.0-alpha.7 with release notes. Verified without the jars: 2590 JUnit (5
+skipped), 120 Python tests, both builds; with them: 2590 JUnit, GameTest 478/478 Fabric and
+466/466 NeoForge on fresh worlds. Left to the owner: the six tags (this session's proxy denies tag
+pushes), GitHub's own refs of the closed PRs, the release and the visibility switch. See
+[the report](docs/analysis/2026-10-26-public-release-ru.md).
+
 ## 2026-10-26 — public README
 
 README.md (English) and README.ru.md (Russian) rewritten for a public page: new 1.21.1 screenshots

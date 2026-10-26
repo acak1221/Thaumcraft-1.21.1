@@ -17,6 +17,8 @@ public final class ThaumcraftWandClient {
     public static final ResourceLocation ROD_PROPERTY = ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand_rod");
     public static final ResourceLocation CAP_PROPERTY = ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand_cap");
     public static final ResourceLocation FOCUS_PROPERTY = ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand_focus");
+    /** One for a wand with an add-on rod or cap: selects {@link WandModels#ADDON_MODEL}. */
+    public static final ResourceLocation ADDON_PROPERTY = ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand_addon");
     private static boolean initialized;
 
     private ThaumcraftWandClient() {}
@@ -30,6 +32,11 @@ public final class ThaumcraftWandClient {
                 (stack, level, entity, seed) -> WandModels.rodValue(ItemWandCasting.data(stack).rod()));
         ItemPropertiesRegistry.register(ThaumcraftContent.WAND.get(), CAP_PROPERTY,
                 (stack, level, entity, seed) -> WandModels.capValue(ItemWandCasting.data(stack).cap()));
+        ItemPropertiesRegistry.register(ThaumcraftContent.WAND.get(), ADDON_PROPERTY,
+                (stack, level, entity, seed) -> {
+                    var data = ItemWandCasting.data(stack);
+                    return WandModels.addonValue(data.rod(), data.cap());
+                });
         ItemPropertiesRegistry.register(ThaumcraftContent.WAND.get(), FOCUS_PROPERTY,
                 (stack, level, entity, seed) -> {
                     var focus = FocusData.get(stack);

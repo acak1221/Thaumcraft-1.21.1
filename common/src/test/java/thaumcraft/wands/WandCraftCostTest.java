@@ -32,7 +32,14 @@ class WandCraftCostTest {
                 "the dearest plain wand");
         assertTrue(ThaumcraftWands.craftCostCodec().encodeStart(JsonOps.INSTANCE, 432).result().isPresent(),
                 "the dearest sceptre");
-        assertTrue(ThaumcraftWands.craftCostCodec().encodeStart(JsonOps.INSTANCE, 433).error().isPresent(),
-                "nothing above the dearest sceptre");
+        // Add-on parts (WandRod/WandCap registered by another mod) may cost more than the native catalogue,
+        // so the range is the original one: item metadata, written as a short (ArcaneWandRecipe:59-61).
+        assertTrue(ThaumcraftWands.craftCostCodec().encodeStart(JsonOps.INSTANCE, 433).result().isPresent(),
+                "an add-on wand dearer than the dearest native sceptre");
+        assertTrue(ThaumcraftWands.craftCostCodec().encodeStart(JsonOps.INSTANCE, (int) Short.MAX_VALUE).result().isPresent(),
+                "the largest original metadata");
+        assertTrue(ThaumcraftWands.craftCostCodec().encodeStart(JsonOps.INSTANCE, Short.MAX_VALUE + 1).error().isPresent(),
+                "nothing above the original short metadata");
+        assertTrue(ThaumcraftWands.craftCostCodec().encodeStart(JsonOps.INSTANCE, -1).error().isPresent(), "never negative");
     }
 }

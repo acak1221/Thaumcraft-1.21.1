@@ -2427,4 +2427,20 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void effectsOfTheOriginalPacketsAreSent(GameTestHelper test) {
         thaumcraft.common.testing.AddonApiRuntimeChecks.effectsOfTheOriginalPacketsAreSent(test);
     }
+
+    // Wand parts and a focus registered by an add-on through the public API (test-only add-on of this harness).
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "wand_api_assembly")
+    public void wandApiAddonPartsAssembleInTheArcaneWorkbench(GameTestHelper test) {
+        thaumcraft.common.testing.WandApiRuntimeChecks.addonPartsAssemble(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "wand_api_on_update")
+    public void wandApiAddonRodOnUpdateRefillsTheCarriedWand(GameTestHelper test) {
+        thaumcraft.common.testing.WandApiRuntimeChecks.addonRodOnUpdateRuns(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "wand_api_helper")
+    public void wandApiHelperPaysChargesAndMountsAddonFoci(GameTestHelper test) {
+        thaumcraft.common.testing.WandApiRuntimeChecks.wandHelperPaysAndMounts(test);
+    }
 }

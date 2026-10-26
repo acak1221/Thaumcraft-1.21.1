@@ -24,7 +24,7 @@ import thaumcraft.common.items.wands.foci.ItemFocusWarding;
  */
 public final class FocusRenderingTestRegistry implements LauncherSessionListener {
     private static List<ItemFocusBasic> depthFoci;
-    private static ItemFocusBasic ordinary, addon;
+    private static ItemFocusBasic ordinary, addon, ornamented;
 
     @Override public void launcherSessionOpened(LauncherSession session) {
         if (depthFoci != null) return;
@@ -45,6 +45,12 @@ public final class FocusRenderingTestRegistry implements LauncherSessionListener
                         return ResourceLocation.fromNamespaceAndPath("addon", "textures/focus.png");
                     }
                 });
+                ornamented = register("ornamented", new ItemFocusBasic(new Item.Properties()) {
+                    @Override public int getFocusColor(ItemStack stack) { return 0x33CCAA; }
+                    @Override public ResourceLocation getOrnament(ItemStack stack) {
+                        return ResourceLocation.fromNamespaceAndPath("addon", "textures/items/focus_orn.png");
+                    }
+                });
             } finally {
                 flag.setBoolean(null, previous);
             }
@@ -61,4 +67,5 @@ public final class FocusRenderingTestRegistry implements LauncherSessionListener
     static List<ItemFocusBasic> depthFoci() { return depthFoci; }
     static ItemFocusBasic ordinary() { return ordinary; }
     static ItemFocusBasic addon() { return addon; }
+    static ItemFocusBasic ornamented() { return ornamented; }
 }

@@ -7924,6 +7924,12 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_primal_staff_copper_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_addon": 1.0
+   },
+   "model": "thaumcraft:item/wand_addon"
   }
  ]
 }

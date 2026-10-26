@@ -58,37 +58,55 @@ class WandApiTest {
         assertFalse(WandTriggerRegistry.hasTrigger(Blocks.STONE.defaultBlockState(), "othermod"));
     }
 
+    // The registries are global: every test that registers a part restores them, so other tests see the native views.
+    private java.util.LinkedHashMap<String, WandRod> savedRods;
+    private java.util.LinkedHashMap<String, WandCap> savedCaps;
+
+    @org.junit.jupiter.api.BeforeEach void saveRegistries() {
+        savedRods = new java.util.LinkedHashMap<>(WandRod.rods);
+        savedCaps = new java.util.LinkedHashMap<>(WandCap.caps);
+    }
+
+    @org.junit.jupiter.api.AfterEach void restoreRegistries() {
+        WandRod.rods.clear(); WandRod.rods.putAll(savedRods);
+        WandCap.caps.clear(); WandCap.caps.putAll(savedCaps);
+    }
+
     @Test void aRodKeepsTheOriginalShapeAndResearchKey() {
-        WandRod rod = new WandRod("wood", 2500, new ItemStack(Items.STICK), 1);
-        assertEquals("wood", rod.getTag());
-        assertEquals(2500, rod.getCapacity());
+        // Original constructor shape; the capacity is in whole vis, like new WandRod("wood", 25, ...).
+        WandRod rod = new WandRod("apitest_rod", 25, new ItemStack(Items.STICK), 1);
+        assertEquals("apitest_rod", rod.getTag());
+        assertEquals(25, rod.getCapacity());
         assertEquals(1, rod.getCraftCost());
-        assertEquals("ROD_wood", rod.getResearch());
+        assertEquals("ROD_apitest_rod", rod.getResearch());
         assertNotNull(rod.getTexture());
-        assertSame(rod, WandRod.rods.get("wood"));
+        assertSame(rod, WandRod.rods.get("apitest_rod"));
+        assertEquals(2500, WandMaterials.capacity("apitest_rod"), "the wand stores centivis");
     }
 
     @Test void aStaffRodKeepsTheOriginalStaffTag() {
-        StaffRod staff = new StaffRod("greatwood", 12500, new ItemStack(Items.STICK), 8);
-        assertEquals("greatwood_staff", staff.getTag());
-        assertEquals("ROD_greatwood_staff", staff.getResearch());
+        StaffRod staff = new StaffRod("apitest", 125, new ItemStack(Items.STICK), 8);
+        assertEquals("apitest_staff", staff.getTag());
+        assertEquals("ROD_apitest_staff", staff.getResearch());
         assertFalse(staff.hasRunes());
         staff.setRunes(true);
         assertTrue(staff.hasRunes());
+        assertTrue(WandRod.rods.get("primal_staff") instanceof StaffRod primal && primal.hasRunes(), "the native primal staff view");
     }
 
     @Test void aCapKeepsTheOriginalShapeAndResearchKey() {
-        WandCap cap = new WandCap("iron", 1.1F, new ItemStack(Items.IRON_INGOT), 1);
-        assertEquals("iron", cap.getTag());
+        WandCap cap = new WandCap("apitest_cap", 1.1F, new ItemStack(Items.IRON_INGOT), 1);
+        assertEquals("apitest_cap", cap.getTag());
         assertEquals(1.1F, cap.getBaseCostModifier());
-        assertEquals("CAP_iron", cap.getResearch());
-        assertSame(cap, WandCap.caps.get("iron"));
+        assertEquals("CAP_apitest_cap", cap.getResearch());
+        assertSame(cap, WandCap.caps.get("apitest_cap"));
+        assertSame(WandMaterials.IRON, WandCap.caps.get("iron").nativeCap(), "the native iron cap is registered as a view");
     }
 
     @Test void theNativeCatalogueAndThePublicRodAgree() {
         WandRod nativeRod = new WandRod(WandMaterials.WOOD, new ItemStack(Items.STICK));
         assertEquals(WandMaterials.WOOD.tag(), nativeRod.getTag());
-        assertEquals(WandMaterials.WOOD.capacity(), nativeRod.getCapacity());
+        assertEquals(WandMaterials.WOOD.capacity() / 100, nativeRod.getCapacity(), "the API view answers the original whole vis");
         assertEquals(WandMaterials.WOOD.craftCost(), nativeRod.getCraftCost());
         assertEquals("ROD_wood", nativeRod.getResearch());
         WandCap nativeCap = new WandCap(WandMaterials.IRON, new ItemStack(Items.IRON_INGOT));

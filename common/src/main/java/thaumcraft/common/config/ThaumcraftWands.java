@@ -14,16 +14,16 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.crafting.ArcaneWandRecipe;
 import thaumcraft.common.items.wands.WandMaterials;
-import thaumcraft.common.lib.enchantment.WandEnchantmentRules;
 
 /** Register after ThaumcraftContent/ThaumcraftArcane; the basic iron cap and wooden rod already exist. */
 public final class ThaumcraftWands {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<DataComponentType<?>> COMPONENTS = DeferredRegister.create(Thaumcraft.MODID, Registries.DATA_COMPONENT_TYPE);
     private static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(Thaumcraft.MODID, Registries.RECIPE_SERIALIZER);
-    // cap x rod price: the dearest rod is the primal staff (32), the dearest cap the void one (9).
-    // A sceptre of the same materials costs half as much again (432), and it carries this metadata too.
-    private static final Codec<Integer> CRAFT_COST_CODEC = Codec.intRange(0, WandEnchantmentRules.MAX_CRAFT_COST);
+    // cap x rod price: the dearest native rod is the primal staff (32), the dearest native cap the void one (9).
+    // A sceptre of the same materials costs half as much again (432), and it carries this metadata too. Add-on
+    // parts may cost more, so the range is the original one: the item metadata the original wrote (a short).
+    private static final Codec<Integer> CRAFT_COST_CODEC = Codec.intRange(0, WandMaterials.MAX_ASSEMBLY_COST);
 
     public static final RegistrySupplier<Item> GREATWOOD_WAND_ROD = ITEMS.register("wand_rod_greatwood", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> SILVERWOOD_WAND_ROD = ITEMS.register("wand_rod_silverwood", () -> new Item(new Item.Properties()));

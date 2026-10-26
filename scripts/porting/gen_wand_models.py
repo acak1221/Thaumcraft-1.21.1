@@ -51,8 +51,19 @@ def write_primal_shapes():
         (MODELS / f"{kind}_primal_shape.json").write_text(json.dumps(shape, indent=2) + "\n", encoding="utf-8", newline="")
 
 
+def write_addon_model():
+    # A wand with any add-on rod or cap (thaumcraft:wand_addon = 1, WandModels.addonValue). Its parts are drawn by the
+    # builtin item renderer from the add-on's own textures, so the model only has to reach builtin/entity through the
+    # shape chain; the textures are the fallback particle of the shape. One model serves wands, staves and sceptres:
+    # the shape's elements are never baked for a builtin model, and the renderer picks the staff geometry itself.
+    model = {"parent": "thaumcraft:item/wand_shape",
+             "textures": {"rod": "thaumcraft:models/wand_rod_greatwood", "cap": "thaumcraft:models/wand_cap_iron"}}
+    (MODELS / "wand_addon.json").write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8", newline="")
+
+
 def main():
     write_primal_shapes()
+    write_addon_model()
     overrides = []
     for r, rod in enumerate(ROD_TAGS):
         for c, cap in enumerate(CAP_TAGS):
@@ -68,6 +79,8 @@ def main():
                     path.write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8", newline="")
                 overrides.append({"predicate": {"thaumcraft:wand_rod": value(r, ROD_SCALE), "thaumcraft:wand_cap": value(c, CAP_SCALE),
                                                 "thaumcraft:wand_focus": focus}, "model": f"thaumcraft:item/{name}"})
+    # Last, so it wins whenever the wand has an add-on part; a native wand reads 0 and never meets it.
+    overrides.append({"predicate": {"thaumcraft:wand_addon": 1.0}, "model": "thaumcraft:item/wand_addon"})
     # The fallback model is the SHAPE, not a flat handheld sprite.
     #
     # Every override above parents to wand_shape (builtin/entity) and supplies #rod/#cap, so the

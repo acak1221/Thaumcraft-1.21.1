@@ -36,21 +36,38 @@ import thaumcraft.client.renderers.models.gear.ModelWand;
 public final class PrimalWandFocusRenderer {
     private static final ResourceLocation DEPTH = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/focus_primal_depth.png");
     private static final Map<ResourceLocation, Animation> ANIMATIONS = new HashMap<>();
+    private static final Map<ResourceLocation, Sheet> ORNAMENTS = new HashMap<>();
     private PrimalWandFocusRenderer() {}
 
     /** Resource reloads must drop cached dimensions and animation metadata with the textures. */
-    public static void reset() { ANIMATIONS.clear(); }
+    public static void reset() { ANIMATIONS.clear(); ORNAMENTS.clear(); }
 
     public static void renderFocus(ModelWand model, ItemFocusBasic focus, ItemStack stack, PoseStack pose,
                                    MultiBufferSource buffers, int light, int overlay, int tick, boolean staff) {
         renderFocus(model, focus, stack, pose, buffers, light, overlay, tick, staff,
-                texture -> ANIMATIONS.computeIfAbsent(texture, PrimalWandFocusRenderer::loadAnimation));
+                texture -> ANIMATIONS.computeIfAbsent(texture, PrimalWandFocusRenderer::loadAnimation),
+                texture -> ORNAMENTS.computeIfAbsent(texture, PrimalWandFocusRenderer::loadSheet));
     }
 
     /** The production drawing path; the resolver keeps resource IO separate from vertex recording tests. */
     static void renderFocus(ModelWand model, ItemFocusBasic focus, ItemStack stack, PoseStack pose,
                             MultiBufferSource buffers, int light, int overlay, int tick, boolean staff,
                             Function<ResourceLocation, Animation> animations) {
+        renderFocus(model, focus, stack, pose, buffers, light, overlay, tick, staff, animations,
+                texture -> ORNAMENTS.computeIfAbsent(texture, PrimalWandFocusRenderer::loadSheet));
+    }
+
+    /** The production drawing path with an ornament sheet resolver as well. */
+    static void renderFocus(ModelWand model, ItemFocusBasic focus, ItemStack stack, PoseStack pose,
+                            MultiBufferSource buffers, int light, int overlay, int tick, boolean staff,
+                            Function<ResourceLocation, Animation> animations, Function<ResourceLocation, Sheet> ornaments) {
+        // Original ModelWand.render:414-635 draws the ornament first, then the depth layer, then the shell.
+        ResourceLocation ornament = focus.getOrnament(stack);
+        if (ornament != null) {
+            Sheet sheet = ornaments.apply(ornament);
+            renderOrnament(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(ornament)), light, overlay,
+                    sheet.animation().at(tick), sheet.width(), sheet.height());
+        }
         ResourceLocation texture = focus.getFocusDepthLayerIcon(stack);
         if (texture != null) renderDepthLayer(pose, buffers, light, overlay, staff, texture, animations.apply(texture).at(tick));
         int tint = (int) ((texture == null ? .95F : .6F) * 255) << 24 | focus.getFocusColor(stack) & 0xFFFFFF;
@@ -77,6 +94,80 @@ public final class PrimalWandFocusRenderer {
             // The native texture manager supplies its missing texture; never break the entire wand
             // render because a resource pack supplied a missing or malformed depth sheet/metadata.
             return Animation.STATIC;
+        }
+    }
+
+    /** An ornament sheet: its animation and the pixel size of one frame (the original icon width/height). */
+    record Sheet(Animation animation, int width, int height) {
+        static final Sheet MISSING = new Sheet(Animation.STATIC, 16, 16);
+    }
+
+    private static Sheet loadSheet(ResourceLocation texture) {
+        var resource = Minecraft.getInstance().getResourceManager().getResource(texture);
+        if (resource.isEmpty()) return Sheet.MISSING;
+        try (var input = resource.get().open(); var image = NativeImage.read(input)) {
+            var metadata = resource.get().metadata().getSection(AnimationMetadataSection.SERIALIZER).orElse(null);
+            Animation animation = Animation.from(image.getWidth(), image.getHeight(), metadata);
+            int width = image.getWidth(), height = image.getHeight();
+            if (animation != Animation.STATIC) { width /= animation.columns; height /= animation.rows; }
+            return new Sheet(animation, Math.max(1, width), Math.max(1, height));
+        } catch (IOException | RuntimeException invalidTexture) {
+            return Sheet.MISSING;
+        }
+    }
+
+    /**
+     * Original ModelWand.render:422-632: the ornament of the focus ({@code ItemFocusBasic.getOrnament}), an extruded item
+     * icon drawn twice, the second turned ninety degrees about Y, inside the turn of a hundred and eighty degrees about X.
+     */
+    static void renderOrnament(PoseStack pose, VertexConsumer out, int light, int overlay, UV uv, int width, int height) {
+        pose.pushPose();
+        try {
+            pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(180.0F));
+            for (int pass = 0; pass < 2; pass++) {
+                pose.pushPose();
+                try {
+                    if (pass == 1) pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90.0F));
+                    pose.translate(ModelWand.Geometry.ORNAMENT_SHIFT_X, ModelWand.Geometry.ORNAMENT_SHIFT_Y, ModelWand.Geometry.ORNAMENT_SHIFT_Z);
+                    pose.scale(ModelWand.Geometry.ORNAMENT_SCALE, ModelWand.Geometry.ORNAMENT_SCALE, ModelWand.Geometry.ORNAMENT_SCALE);
+                    renderItemIn2D(pose, out, light, overlay, uv.u1(), uv.v0(), uv.u0(), uv.v1(), width, height, ModelWand.Geometry.ORNAMENT_THICKNESS);
+                } finally { pose.popPose(); }
+            }
+        } finally { pose.popPose(); }
+    }
+
+    /**
+     * 1.7.10 {@code ItemRenderer.renderItemIn2D(tess, maxU, minV, minU, maxV, width, height, thickness)}: the front and back
+     * faces of a unit square and one edge strip per pixel column and row, so an icon has depth.
+     */
+    private static void renderItemIn2D(PoseStack pose, VertexConsumer out, int light, int overlay,
+                                       float u1, float v1, float u0, float v0, int width, int height, float thickness) {
+        float back = -thickness;
+        quad(pose, out, light, overlay, 0, 0, 1, new float[][]{{0, 0, 0, u1, v0}, {1, 0, 0, u0, v0}, {1, 1, 0, u0, v1}, {0, 1, 0, u1, v1}});
+        quad(pose, out, light, overlay, 0, 0, -1, new float[][]{{0, 1, back, u1, v1}, {1, 1, back, u0, v1}, {1, 0, back, u0, v0}, {0, 0, back, u1, v0}});
+        float halfU = .5F * (u1 - u0) / width, halfV = .5F * (v0 - v1) / height;
+        for (int k = 0; k < width; k++) {
+            float x = (float) k / width, u = u1 + (u0 - u1) * x - halfU;
+            quad(pose, out, light, overlay, -1, 0, 0, new float[][]{{x, 0, back, u, v0}, {x, 0, 0, u, v0}, {x, 1, 0, u, v1}, {x, 1, back, u, v1}});
+        }
+        for (int k = 0; k < width; k++) {
+            float x = (float) k / width, u = u1 + (u0 - u1) * x - halfU, next = x + 1.0F / width;
+            quad(pose, out, light, overlay, 1, 0, 0, new float[][]{{next, 1, back, u, v1}, {next, 1, 0, u, v1}, {next, 0, 0, u, v0}, {next, 0, back, u, v0}});
+        }
+        for (int k = 0; k < height; k++) {
+            float y = (float) k / height, v = v0 + (v1 - v0) * y - halfV, next = y + 1.0F / height;
+            quad(pose, out, light, overlay, 0, 1, 0, new float[][]{{0, next, 0, u1, v}, {1, next, 0, u0, v}, {1, next, back, u0, v}, {0, next, back, u1, v}});
+        }
+        for (int k = 0; k < height; k++) {
+            float y = (float) k / height, v = v0 + (v1 - v0) * y - halfV;
+            quad(pose, out, light, overlay, 0, -1, 0, new float[][]{{1, y, 0, u0, v}, {0, y, 0, u1, v}, {0, y, back, u1, v}, {1, y, back, u0, v}});
+        }
+    }
+
+    private static void quad(PoseStack pose, VertexConsumer out, int light, int overlay, float nx, float ny, float nz, float[][] vertices) {
+        for (float[] vertex : vertices) {
+            out.addVertex(pose.last(), vertex[0], vertex[1], vertex[2]).setColor(0xffffffff).setUv(vertex[3], vertex[4])
+                    .setOverlay(overlay).setLight(light).setNormal(pose.last(), nx, ny, nz);
         }
     }
 

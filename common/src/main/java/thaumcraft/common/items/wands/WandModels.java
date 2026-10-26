@@ -29,8 +29,19 @@ public final class WandModels {
 
     /** At most 33 rods (places 0..32) and 5 caps (0..4) fit these scales; the JUnit test fails before a model silently goes wrong. */
     public static final float ROD_SCALE = 32F, CAP_SCALE = 4F;
+    /**
+     * The model of a wand with any add-on part ({@code thaumcraft:wand_addon} is one): the last override of {@code wand.json},
+     * so it wins over every native combination. Like every wand model its root is {@code minecraft:builtin/entity}, so the
+     * loader's builtin item renderer draws it from the parts' own textures.
+     */
+    public static final String ADDON_MODEL = "thaumcraft:item/wand_addon";
 
     private WandModels() {}
+
+    /** One when the rod or the cap is an add-on part, zero for a wand of native parts (whose models stay the native ones). */
+    public static float addonValue(String rod, String cap) {
+        return WandMaterials.nativeRod(rod) == null || WandMaterials.nativeCap(cap) == null ? 1F : 0F;
+    }
 
     public static float rodValue(String tag) {
         for (int index = 0; index < WandMaterials.RODS.size(); index++) {

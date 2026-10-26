@@ -2397,6 +2397,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.AddonApiRuntimeChecks.oreDictionaryNamesReachTheTagsOfTheWorld(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "api_effects")
+    public void effectsOfTheOriginalPacketsAreSent(GameTestHelper test) {
+        thaumcraft.common.testing.AddonApiRuntimeChecks.effectsOfTheOriginalPacketsAreSent(test);
+    }
+
     private static net.minecraft.server.level.ServerPlayer notePlayer(GameTestHelper test) {
         test.assertTrue(NetworkRegistry.getCodec(ResearchNoteRequestPayload.TYPE.id(),
                         ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,

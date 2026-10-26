@@ -2422,4 +2422,9 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void oreDictionaryNamesReachTheTagsOfTheWorld(GameTestHelper test) {
         thaumcraft.common.testing.AddonApiRuntimeChecks.oreDictionaryNamesReachTheTagsOfTheWorld(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "api_effects")
+    public void effectsOfTheOriginalPacketsAreSent(GameTestHelper test) {
+        thaumcraft.common.testing.AddonApiRuntimeChecks.effectsOfTheOriginalPacketsAreSent(test);
+    }
 }

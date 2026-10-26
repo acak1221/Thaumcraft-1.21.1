@@ -21,6 +21,26 @@ public final class AddonApiRuntimeChecks {
         test.succeed();
     }
 
+    /** Every effect of the facade is sent on the server thread without a player in range; no crash, nothing else. */
+    public static void effectsOfTheOriginalPacketsAreSent(GameTestHelper test) {
+        var level = test.getLevel();
+        var pos = test.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
+        var center = net.minecraft.world.phys.Vec3.atCenterOf(pos);
+        thaumcraft.api.ThaumcraftFX.blockSparkle(level, pos, thaumcraft.api.ThaumcraftFX.RANDOM_GREY);
+        thaumcraft.api.ThaumcraftFX.zap(level, center, center.add(2, 1, 0));
+        thaumcraft.api.ThaumcraftFX.bubbles(level, pos, 0x3cd4fc);
+        thaumcraft.api.ThaumcraftFX.essentiaTrail(level, pos, pos.above(2), Aspect.WATER);
+        thaumcraft.api.ThaumcraftFX.visDrain(level, pos, pos.above(3), Aspect.AIR);
+        boolean refused = false;
+        try {
+            java.util.concurrent.CompletableFuture.runAsync(() -> thaumcraft.api.ThaumcraftFX.blockSparkle(level, pos, 0xFFFFFF)).join();
+        } catch (java.util.concurrent.CompletionException expected) {
+            refused = expected.getCause() instanceof IllegalStateException;
+        }
+        test.assertTrue(refused, "another thread is refused, as the facade documents");
+        test.succeed();
+    }
+
     public static void oreDictionaryNamesReachTheTagsOfTheWorld(GameTestHelper test) {
         List<Object> key = List.of(Items.SLIME_BALL, 0);
         AspectList before = ThaumcraftApi.objectTags.get(key);

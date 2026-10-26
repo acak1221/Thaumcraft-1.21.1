@@ -58,6 +58,7 @@
     "Tc4BiomeParameterListMixin",
     "Tc4ClimateSamplerMixin",
     "Tc4RandomStateMixin",
+    "Tc4NoiseChunkSeedMixin",
     "Tc4MultiNoiseBiomeSourceMixin",
     "Tc4OuterLandsFlatGeneratorMixin",
     "BathSaltExpiryMixin",

@@ -1,3 +1,11 @@
+## 2026-10-26 — TC4 biome patches follow the world seed
+
+Chunk generation fills biomes through the NoiseChunk's own climate sampler, which lacked the world
+seed, so the magical forest and taint patches of generated chunks followed seed 0 in every world
+while `/locate` used the real seed. `Tc4NoiseChunkSeedMixin` carries the seed over. The GameTest
+world has seed 0, which hid the defect; the new GameTest uses seed 912873 and fails without the
+fix. Verified: biome tests on Fabric 9/9 and NeoForge 9/9, 2590 JUnit, both builds.
+
 ## 2026-10-26 — accessories: where to wear the rings
 
 The four accessory slots (amulet, two rings, belt) had a menu that was nearly unreachable: no

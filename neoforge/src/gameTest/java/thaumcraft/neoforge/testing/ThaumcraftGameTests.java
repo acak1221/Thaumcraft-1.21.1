@@ -1980,6 +1980,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.BiomeRuntimeChecks.source(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 600)
+    public void generated_chunk_biomes_follow_the_world_seed(GameTestHelper test) {
+        thaumcraft.common.testing.BiomeRuntimeChecks.generatedChunkBiomesFollowSeed(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "r14_biome_trees")
     public void originalBiomeTreesAndDungeonsUseRealWorldgen(GameTestHelper test) {
         thaumcraft.common.testing.BiomeRuntimeChecks.treesAndDungeon(test);

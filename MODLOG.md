@@ -1,3 +1,13 @@
+## 2026-10-26 — quality-of-life batch (in progress): Thaumcraft 4 Reload, Thaumonomicon
+
+The project is renamed to Thaumcraft 4 Reload (metadata, README, AGENTS, Gradle, docs; links to
+the 1.12 baseline repository stay as provenance; ids and saves unchanged). The Thaumonomicon gets
+three client settings, on by default: reopen the last page (the inventory key on a page closes the
+book), keyboard navigation (page keys, Backspace to the map, arrows and Tab on the map) and up to
+nine bookmarks (a ribbon on the page, a column beside the map, config/thaumcraft-bookmarks.txt).
+Seen on a Fabric client. Verified: 2590 JUnit, both builds, 115 Python tests. See
+[the report](docs/analysis/2026-10-26-qol-batch-ru.md).
+
 ## 2026-10-26 — unwired tickers, golem bell marks, entity visibility race
 
 After the ethereal bloom defect the port was swept for code that is written but

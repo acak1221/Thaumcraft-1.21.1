@@ -13,8 +13,8 @@ class ThaumcraftTweaksTest {
     @AfterEach void restore() { ThaumcraftTweaks.configure(ThaumcraftTweaks.DEFAULTS); }
 
     @Test void theDefaultsAreTheTc4TweaksOnesAndTheOriginalIsEverythingOff() {
-        assertEquals(new Values(true, EarthShockTargets.ONLY_LIVING, true, true, true, true, true), ThaumcraftTweaks.DEFAULTS);
-        assertEquals(new Values(false, EarthShockTargets.ALL, false, false, false, false, false), ThaumcraftTweaks.ORIGINAL);
+        assertEquals(new Values(true, EarthShockTargets.ONLY_LIVING, true, true, true, true, true, true, true, true), ThaumcraftTweaks.DEFAULTS);
+        assertEquals(new Values(false, EarthShockTargets.ALL, false, false, false, false, false, false, false, false), ThaumcraftTweaks.ORIGINAL);
         ThaumcraftTweaks.load(new Properties());
         assertEquals(ThaumcraftTweaks.DEFAULTS, ThaumcraftTweaks.values());
     }
@@ -28,6 +28,9 @@ class ThaumcraftTweaksTest {
         file.setProperty("research_search", "false");
         file.setProperty("research_counter", "false");
         file.setProperty("notification_clear_button", "false");
+        file.setProperty("research_remember_page", "false");
+        file.setProperty("research_keyboard", "false");
+        file.setProperty("research_bookmarks", "false");
         ThaumcraftTweaks.load(file);
         assertEquals(ThaumcraftTweaks.ORIGINAL, ThaumcraftTweaks.values());
     }
@@ -73,7 +76,7 @@ class ThaumcraftTweaksTest {
     @Test void theScreenOffersEveryTweakWithItsDefault() {
         Properties missing = new Properties();
         var entries = ThaumcraftConfigStore.entries(ThaumcraftConfigStore.Category.TWEAKS);
-        assertEquals(7, entries.size());
+        assertEquals(10, entries.size());
         for (var entry : entries) missing.setProperty(entry.key(), entry.value(new Properties()));
         ThaumcraftTweaks.load(missing);
         assertEquals(ThaumcraftTweaks.DEFAULTS, ThaumcraftTweaks.values());

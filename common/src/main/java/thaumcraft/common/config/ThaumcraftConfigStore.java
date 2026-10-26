@@ -105,7 +105,10 @@ public final class ThaumcraftConfigStore {
             new Entry(Category.TWEAKS, "filled_container_to_hand", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "research_search", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "research_counter", true, true, 0, 0, 0),
-            new Entry(Category.TWEAKS, "notification_clear_button", true, true, 0, 0, 0));
+            new Entry(Category.TWEAKS, "notification_clear_button", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_remember_page", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_keyboard", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_bookmarks", true, true, 0, 0, 0));
 
     private ThaumcraftConfigStore() {}
 

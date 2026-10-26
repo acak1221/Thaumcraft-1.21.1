@@ -202,6 +202,9 @@ real client (`docs/analysis/2026-10-26-tc4tweaks-wave2-ru.md`).
 | `research_counter` (client) | No counter | The top border shows the completed research of the open category out of all of it, or, while some is still hidden, out of what the player can see, marked with a red question mark |
 | `notification_clear_button` (client) | Notifications in the corner can only expire | Open chat shows a Clear button above the notification stack while it has rows |
 | (always, client) | The research table pages its aspect palette with two arrows | The mouse wheel over the palette pages it as well; a pure input addition with no setting |
+| `research_remember_page` (client, the port's own) | The inventory key on a research page goes back to the map (`GuiResearchRecipe.keyTyped`); the book always reopens on the map | The inventory key on a research page closes the book and the next opening shows that spread again; Escape, Back and Backspace still go back to the map and forget it |
+| `research_keyboard` (client, the port's own) | Only the inventory key and Escape | On a page: the arrow and page keys turn the spreads, Home/End, Backspace to the map. On the map: the arrows move it one cell, Tab and Shift+Tab change the category |
+| `research_bookmarks` (client, the port's own) | No bookmarks | A ribbon on a research page bookmarks it (up to nine); the completed bookmarked research is listed right of the map: click opens it, right-click removes it. Kept in `config/thaumcraft-bookmarks.txt` on this computer |
 
 Not adopted, because the port already covers them or they do not apply to 1.21.1: the packet
 exploit fixes for research completion and aspect combination (the port validates both on the

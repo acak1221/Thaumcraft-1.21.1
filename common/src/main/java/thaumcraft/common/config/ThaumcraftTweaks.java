@@ -38,17 +38,24 @@ public final class ThaumcraftTweaks {
      * @param researchSearch     the Thaumonomicon has a search box over the research the player completed
      * @param researchCounter    the Thaumonomicon counts the completed research of the open category
      * @param clearNotifications open chat offers a button that clears the notification stack
+     * @param rememberPage       closing the Thaumonomicon with the inventory key on a research page reopens
+     *                           that page next time (the port's own; TC4 always reopens the map)
+     * @param bookKeyboard       the arrow and page keys turn the pages and pan the map, Tab changes the
+     *                           category (the port's own)
+     * @param bookmarks          research pages can be bookmarked and are listed beside the map (the port's own)
      */
     public record Values(boolean moreRandomizedLoot, EarthShockTargets earthShock, boolean infusionKeepsData,
                          boolean filledToHand, boolean researchSearch, boolean researchCounter,
-                         boolean clearNotifications) {
+                         boolean clearNotifications, boolean rememberPage, boolean bookKeyboard, boolean bookmarks) {
         public Values { Objects.requireNonNull(earthShock, "earth shock"); }
     }
 
-    /** The TC4Tweaks defaults. */
-    public static final Values DEFAULTS = new Values(true, EarthShockTargets.ONLY_LIVING, true, true, true, true, true);
+    /** The TC4Tweaks defaults, and the port's own book conveniences switched on. */
+    public static final Values DEFAULTS = new Values(true, EarthShockTargets.ONLY_LIVING, true, true, true, true, true,
+            true, true, true);
     /** Every original TC4 4.2.3.5 rule. */
-    public static final Values ORIGINAL = new Values(false, EarthShockTargets.ALL, false, false, false, false, false);
+    public static final Values ORIGINAL = new Values(false, EarthShockTargets.ALL, false, false, false, false, false,
+            false, false, false);
 
     private static volatile Values values = DEFAULTS;
 
@@ -62,6 +69,9 @@ public final class ThaumcraftTweaks {
     public static boolean researchSearch() { return values.researchSearch(); }
     public static boolean researchCounter() { return values.researchCounter(); }
     public static boolean clearNotifications() { return values.clearNotifications(); }
+    public static boolean rememberPage() { return values.rememberPage(); }
+    public static boolean bookKeyboard() { return values.bookKeyboard(); }
+    public static boolean bookmarks() { return values.bookmarks(); }
 
     public static void configure(Values input) { values = Objects.requireNonNull(input); }
 
@@ -74,7 +84,10 @@ public final class ThaumcraftTweaks {
                 flag(properties, "filled_container_to_hand", DEFAULTS.filledToHand()),
                 flag(properties, "research_search", DEFAULTS.researchSearch()),
                 flag(properties, "research_counter", DEFAULTS.researchCounter()),
-                flag(properties, "notification_clear_button", DEFAULTS.clearNotifications())));
+                flag(properties, "notification_clear_button", DEFAULTS.clearNotifications()),
+                flag(properties, "research_remember_page", DEFAULTS.rememberPage()),
+                flag(properties, "research_keyboard", DEFAULTS.bookKeyboard()),
+                flag(properties, "research_bookmarks", DEFAULTS.bookmarks())));
     }
 
     /** Whether earth shock hurts an entity of this kind under the given setting. */

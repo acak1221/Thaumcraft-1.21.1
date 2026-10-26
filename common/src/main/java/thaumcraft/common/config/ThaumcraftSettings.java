@@ -81,7 +81,9 @@ public final class ThaumcraftSettings {
                         + "# Improvements adopted from TC4Tweaks; false (earth_shock_targets=0) is the original rule.\n"
                         + "more_randomized_loot=true\nearth_shock_targets=2\ninfusion_keeps_item_data=true\n"
                         + "filled_container_to_hand=true\nresearch_search=true\nresearch_counter=true\n"
-                        + "notification_clear_button=true\n",
+                        + "notification_clear_button=true\n"
+                        + "# The port's own Thaumonomicon conveniences; false is the original book.\n"
+                        + "research_remember_page=true\nresearch_keyboard=true\nresearch_bookmarks=true\n",
                         StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }
             configureServer(ResearchSettings.read(properties));

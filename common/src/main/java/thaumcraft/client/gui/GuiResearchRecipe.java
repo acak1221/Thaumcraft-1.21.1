@@ -29,8 +29,11 @@ public final class GuiResearchRecipe extends Screen {
     private record Draw(FormattedCharSequence text, ResearchText.Image image, int y, int width, int height) {}
     private record BookPage(List<Draw> text, ThaumcraftRecipeDisplay recipe) {}
 
-    public GuiResearchRecipe(Screen parent, ResearchDefinition research) {
+    public GuiResearchRecipe(Screen parent, ResearchDefinition research) { this(parent, research, 0); }
+    /** Opens the research on the spread that holds {@code startPage}; the reopened page of the book. */
+    public GuiResearchRecipe(Screen parent, ResearchDefinition research, int startPage) {
         super(Component.translatable(research.nameKey())); this.parent = parent; this.research = research;
+        page = Math.max(0, startPage) / 2 * 2;
     }
     @Override protected void init() {
         // Oracle GuiResearchRecipe:83-84,216-227: fixed 256x181 sheet at scale 1.3.
@@ -48,7 +51,69 @@ public final class GuiResearchRecipe extends Screen {
         // Native parent-screen Back retains its existing action using the original history arrow.
         addRenderableWidget(new BookNavigation(sw + 118, sh + 189, 20, 12,
                 Component.translatable("gui.back"), b -> onClose(), 38, 202, 20, 12, 0, 0));
+        // The port's own bookmark ribbon on the top right corner of the book (ThaumcraftTweaks.bookmarks).
+        if (thaumcraft.common.config.ThaumcraftTweaks.bookmarks()) addRenderableWidget(new BookmarkRibbon(left + bookWidth - 34, top - 4));
         updateButtons();
+    }
+
+    /**
+     * The port's own keys (ThaumcraftTweaks.bookKeyboard): the arrow and page keys turn the spreads,
+     * Home and End go to the first and the last one, Backspace goes back to the map. The inventory key
+     * goes back to the map as in TC4 (oracle GuiResearchRecipe.keyTyped), or with the reopen setting
+     * closes the book on this page.
+     */
+    @Override public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (thaumcraft.common.config.ThaumcraftTweaks.bookKeyboard()) {
+            int last = Math.max(0, (pages.size() - 1) / 2 * 2);
+            switch (key) {
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT, org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_UP -> { turnTo(page - 2, last); return true; }
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT, org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_DOWN -> { turnTo(page + 2, last); return true; }
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_HOME -> { turnTo(0, last); return true; }
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_END -> { turnTo(last, last); return true; }
+                case org.lwjgl.glfw.GLFW.GLFW_KEY_BACKSPACE -> { onClose(); return true; }
+                default -> { }
+            }
+        }
+        if (minecraft.options.keyInventory.matches(key, scanCode)) {
+            if (thaumcraft.common.config.ThaumcraftTweaks.rememberPage()) {
+                thaumcraft.client.lib.ResearchBookState.rememberPage(research.key(), page);
+                minecraft.setScreen(null);
+            } else onClose();
+            return true;
+        }
+        return super.keyPressed(key, scanCode, modifiers);
+    }
+
+    private void turnTo(int target, int last) {
+        if (target < 0 || target > last || target == page) return;
+        page = target;
+        updateButtons();
+    }
+
+    /** A ribbon in the corner of the book: red while the research is bookmarked, a faded outline otherwise. */
+    private final class BookmarkRibbon extends Button {
+        private BookmarkRibbon(int x, int y) {
+            super(x, y, 9, 16, Component.translatable("tc.port.bookmark.add"), button -> {
+                thaumcraft.client.lib.ResearchBookState.bookmarks().toggle(research.key());
+            }, DEFAULT_NARRATION);
+        }
+        @Override protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+            var bookmarks = thaumcraft.client.lib.ResearchBookState.bookmarks();
+            boolean marked = bookmarks.contains(research.key());
+            int body = marked ? 0xFFA0201C : isHovered() ? 0xC06A4A2A : 0x806A4A2A;
+            int x = getX(), y = getY();
+            graphics.fill(x, y, x + 9, y + 11, body);
+            // The forked end of a ribbon.
+            for (int row = 0; row < 5; row++) {
+                graphics.fill(x, y + 11 + row, x + 4 - row, y + 12 + row, body);
+                graphics.fill(x + 5 + row, y + 11 + row, x + 9, y + 12 + row, body);
+            }
+            if (isHovered()) {
+                Component tip = Component.translatable(marked ? "tc.port.bookmark.remove" : "tc.port.bookmark.add");
+                if (!marked && bookmarks.full()) tip = tip.copy().append(" (" + thaumcraft.client.lib.ResearchBookState.MAX_BOOKMARKS + ")");
+                graphics.renderTooltip(font, tip, mouseX, mouseY);
+            }
+        }
     }
     private void updateButtons() { previous.active = page > 0; next.active = page + 2 < pages.size(); }
     private void refreshPages(boolean force) {
@@ -195,6 +260,10 @@ public final class GuiResearchRecipe extends Screen {
     // Screen.render draws widgets after calling this. Do not blur the pages a
     // second time: their explicit background pass is at the start of render.
     @Override public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {}
-    @Override public void onClose() { minecraft.setScreen(parent); }
+    @Override public void onClose() {
+        // Back to the map: the next opening shows the map, not this page.
+        thaumcraft.client.lib.ResearchBookState.forgetPage();
+        minecraft.setScreen(parent);
+    }
     @Override public boolean isPauseScreen() { return false; }
 }

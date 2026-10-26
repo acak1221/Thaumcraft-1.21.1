@@ -65,6 +65,23 @@ public final class GuiResearchBrowser extends Screen {
             panY -= thaumcraft.client.lib.ResearchNotifications.lastRow() * 24;
         }
     }
+    /**
+     * Opens the Thaumonomicon: on the research page it was closed on when the reopen setting is on and
+     * that research is still completed (ResearchBookState), on the map otherwise.
+     */
+    public static Screen open() {
+        var minecraft = net.minecraft.client.Minecraft.getInstance();
+        String remembered = thaumcraft.client.lib.ResearchBookState.rememberedResearch();
+        if (remembered != null && thaumcraft.common.config.ThaumcraftTweaks.rememberPage() && minecraft.player != null) {
+            var research = thaumcraft.common.lib.research.ResearchCatalog.get(remembered);
+            if (research != null && KnowledgeAccess.get(minecraft.player).isResearchComplete(remembered)) {
+                return new GuiResearchRecipe(new GuiResearchBrowser(), research, thaumcraft.client.lib.ResearchBookState.rememberedPage());
+            }
+        }
+        thaumcraft.client.lib.ResearchBookState.forgetPage();
+        return new GuiResearchBrowser();
+    }
+
     private Set<String> completed() {
         return minecraft.player == null ? Set.of() : KnowledgeAccess.get(minecraft.player).getResearchComplete();
     }
@@ -208,18 +225,7 @@ public final class GuiResearchBrowser extends Screen {
                 graphics.blit(FRAME, node.x - 2, node.y - 2, 26, 230, 26, 26, 256, 256);
             }
             if (thaumcraft.client.lib.ResearchNotifications.highlighted(node.research.key())) highlight(graphics, node.x - 5, node.y - 5);
-            if (!ResearchIconDisplay.render(graphics, font, node.research.iconExpression(), node.x + 3, node.y + 3)) {
-                // Original GuiResearchBrowser:404-412 draws the icon of the research only
-                // when its expression is a texture of the mod. An expression that names
-                // nothing draws NOTHING, it never falls back to another icon.
-                var expression = TEXTURE.matcher(node.research.iconExpression() == null ? "" : node.research.iconExpression());
-                if (expression.matches()) {
-                    ResourceLocation icon = texture(expression.group(1).toLowerCase(java.util.Locale.ROOT));
-                    if (thaumcraft.client.lib.MissingResourceDiagnostics.isPresent(minecraft.getResourceManager(), icon)) {
-                        graphics.blit(icon, node.x + 3, node.y + 3, 16, 16, 0, 0, 256, 256, 256, 256);
-                    }
-                }
-            }
+            drawIcon(graphics, node.research, node.x + 3, node.y + 3);
             if (!available && !unlocked) graphics.fill(node.x, node.y, node.x + 22, node.y + 22, 0x99000000);
         }
         graphics.disableScissor();
@@ -231,6 +237,7 @@ public final class GuiResearchBrowser extends Screen {
         if (search != null) graphics.fill(search.getX() - 3, search.getY() - 2, search.getX() + search.getWidth() + 1,
                 search.getY() + search.getHeight(), 0x90000000);
         renderResults(graphics, mouseX, mouseY);
+        renderBookmarks(graphics, mouseX, mouseY);
         super.render(graphics, mouseX, mouseY, delta);
         renderCounter(graphics, completed, entries.size(), mouseX, mouseY);
         Node hover = nodeAt(mouseX, mouseY);
@@ -501,6 +508,92 @@ public final class GuiResearchBrowser extends Screen {
         return Component.translatable("tc.port.note.failure." + failure.name().toLowerCase(java.util.Locale.ROOT));
     }
 
+    private void drawIcon(GuiGraphics graphics, ResearchDefinition research, int x, int y) {
+        if (ResearchIconDisplay.render(graphics, font, research.iconExpression(), x, y)) return;
+        // Original GuiResearchBrowser:404-412 draws the icon of the research only
+        // when its expression is a texture of the mod. An expression that names
+        // nothing draws NOTHING, it never falls back to another icon.
+        var expression = TEXTURE.matcher(research.iconExpression() == null ? "" : research.iconExpression());
+        if (expression.matches()) {
+            ResourceLocation icon = texture(expression.group(1).toLowerCase(java.util.Locale.ROOT));
+            if (thaumcraft.client.lib.MissingResourceDiagnostics.isPresent(minecraft.getResourceManager(), icon)) {
+                graphics.blit(icon, x, y, 16, 16, 0, 0, 256, 256, 256, 256);
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ the port's own bookmarks
+
+    private record Bookmark(ResearchDefinition research, int x, int y) {}
+
+    /** The bookmarked research the player has completed, one column right of the book. */
+    private List<Bookmark> bookmarks() {
+        if (!thaumcraft.common.config.ThaumcraftTweaks.bookmarks() || minecraft.player == null) return List.of();
+        var completed = completed();
+        // Right of the book, beyond the second column of category tabs when there is one.
+        int x = left + 256 + (tabs.size() > 9 ? 28 : 4), y = top + 4;
+        List<Bookmark> shown = new ArrayList<>();
+        for (String key : thaumcraft.client.lib.ResearchBookState.bookmarks().keys()) {
+            var research = thaumcraft.common.lib.research.ResearchCatalog.get(key);
+            if (research == null || !completed.contains(key)) continue;
+            shown.add(new Bookmark(research, x, y + shown.size() * 24));
+        }
+        return shown;
+    }
+
+    private Bookmark bookmarkAt(double x, double y) {
+        for (Bookmark bookmark : bookmarks())
+            if (x >= bookmark.x && x < bookmark.x + 22 && y >= bookmark.y && y < bookmark.y + 22) return bookmark;
+        return null;
+    }
+
+    private void renderBookmarks(GuiGraphics graphics, int mouseX, int mouseY) {
+        Bookmark hovered = null;
+        for (Bookmark bookmark : bookmarks()) {
+            blend();
+            graphics.blit(FRAME, bookmark.x - 2, bookmark.y - 2, badgeFrame(bookmark.research, false), 230, 26, 26, 256, 256);
+            drawIcon(graphics, bookmark.research, bookmark.x + 3, bookmark.y + 3);
+            if (mouseX >= bookmark.x && mouseX < bookmark.x + 22 && mouseY >= bookmark.y && mouseY < bookmark.y + 22) hovered = bookmark;
+        }
+        if (hovered != null) graphics.renderComponentTooltip(font, List.of(Component.translatable(hovered.research.nameKey()),
+                Component.translatable("tc.port.bookmark.open").withStyle(ChatFormatting.DARK_GRAY)), mouseX, mouseY);
+    }
+
+    /** The port's own map keys: the arrows move the map by one cell, Tab changes the category. */
+    private boolean mapKey(int key, int modifiers) {
+        int step = 24;
+        switch (key) {
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT -> pan(step, 0);
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT -> pan(-step, 0);
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_UP -> pan(0, step);
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN -> pan(0, -step);
+            case org.lwjgl.glfw.GLFW.GLFW_KEY_TAB -> {
+                if (tabs.isEmpty()) return true;
+                int current = 0;
+                for (int index = 0; index < tabs.size(); index++) if (tabs.get(index).key().equals(category)) current = index;
+                int next = Math.floorMod(current + ((modifiers & org.lwjgl.glfw.GLFW.GLFW_MOD_SHIFT) != 0 ? -1 : 1), tabs.size());
+                selectCategory(tabs.get(next).key());
+            }
+            default -> { return false; }
+        }
+        return true;
+    }
+
+    private void pan(double dx, double dy) {
+        int[] bounds = mapBounds();
+        panX = -Math.clamp(-panX - graphWidth / 2 - dx, bounds[0], bounds[2] - 1) - graphWidth / 2;
+        panY = -Math.clamp(-panY - graphHeight / 2 - dy, bounds[1], bounds[3] - 1) - graphHeight / 2;
+    }
+
+    private void selectCategory(String key) {
+        category = key;
+        thaumcraft.client.lib.ResearchNotifications.selectCategory(category);
+        rebuildWidgets();
+        // After a key press 1.21.1 focuses the first widget, the search box, which would take the arrows.
+        if (search != null) search.setFocused(false);
+        setFocused(null);
+    }
+
     // 1.21.1 Screen.render invokes this again before drawing its widgets. The
     // background was already drawn above; a second blur would blur the map.
     @Override public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {}
@@ -534,9 +627,13 @@ public final class GuiResearchBrowser extends Screen {
         }
         Tab tab = tabAt(x, y);
         if (button == 0 && tab != null) {
-            category = tab.key();
-            thaumcraft.client.lib.ResearchNotifications.selectCategory(category);
-            rebuildWidgets();
+            selectCategory(tab.key());
+            return true;
+        }
+        Bookmark bookmark = bookmarkAt(x, y);
+        if (bookmark != null) {
+            if (button == 1) thaumcraft.client.lib.ResearchBookState.bookmarks().remove(bookmark.research.key());
+            else if (button == 0) minecraft.setScreen(new GuiResearchRecipe(this, bookmark.research));
             return true;
         }
         Node node = nodeAt(x, y);
@@ -569,9 +666,7 @@ public final class GuiResearchBrowser extends Screen {
     }
     @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
         if (button == 0 && inGraph(x, y) && !inResults(x, y)) {
-            int[] bounds = mapBounds();
-            panX = -Math.clamp(-panX - graphWidth / 2 - dx, bounds[0], bounds[2] - 1) - graphWidth / 2;
-            panY = -Math.clamp(-panY - graphHeight / 2 - dy, bounds[1], bounds[3] - 1) - graphHeight / 2;
+            pan(dx, dy);
             return true;
         }
         return super.mouseDragged(x, y, button, dx, dy);
@@ -596,6 +691,7 @@ public final class GuiResearchBrowser extends Screen {
             return search.keyPressed(key, scanCode, modifiers) || search.canConsumeInput() || super.keyPressed(key, scanCode, modifiers);
         }
         if (minecraft.options.keyInventory.matches(key,scanCode)) { onClose(); return true; }
+        if (thaumcraft.common.config.ThaumcraftTweaks.bookKeyboard() && mapKey(key, modifiers)) return true;
         return super.keyPressed(key,scanCode,modifiers);
     }
     @Override public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {

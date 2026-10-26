@@ -86,6 +86,16 @@ finding them.
 
 ---
 
+## 6a. Original object aspects whose recipe base 1.21.1 no longer has
+
+`ConfigAspects` registers the enchanted golden apple (`golden_apple` metadata 1) as a complex row:
+the original adds `praecantatio4 sano8` to the tags generated from its 1.7.10 recipe (eight gold
+blocks and an apple). 1.21.1 has no recipe for it, so the generated base is empty and the item has
+the additions alone. Every other original row keeps its base (`scripts/porting/extract_config_aspects.py`
+accounts for all 326 registrations of the jar).
+
+---
+
 ## 7. Unverified, not deviated
 
 These are not differences — they are things **nobody has looked at on a real frame or a real
@@ -205,6 +215,7 @@ real client (`docs/analysis/2026-10-26-tc4tweaks-wave2-ru.md`).
 | `research_remember_page` (client, the port's own) | The inventory key on a research page goes back to the map (`GuiResearchRecipe.keyTyped`); the book always reopens on the map | The inventory key on a research page closes the book and the next opening shows that spread again; Escape, Back and Backspace still go back to the map and forget it |
 | `research_keyboard` (client, the port's own) | Only the inventory key and Escape | On a page: the arrow and page keys turn the spreads, Home/End, Backspace to the map. On the map: the arrows move it one cell, Tab and Shift+Tab change the category |
 | `research_bookmarks` (client, the port's own) | No bookmarks | A ribbon on a research page bookmarks it (up to nine); the completed bookmarked research is listed right of the map: click opens it, right-click removes it. Kept in `config/thaumcraft-bookmarks.txt` on this computer |
+| `aspect_inference` (server, synced to the client, the port's own) | An item has aspects only from a `ConfigAspects` registration (the ore dictionary rows reach every member of a name), an API registration or crafting, crucible, arcane and infusion recipes (`ThaumcraftCraftingManager.generateTags`); an item made by none of them has none | An item without a registration takes the original row of the last aspect family whose tag holds it, before its recipes, as the original ore dictionary registrations did (the ore dictionary names and wildcard families as `thaumcraft:aspect_family/*` tags with the 1.21.1 members and optional `c:` convention tags; a complex family row adds to the recipe base). An item that the TC4 rules still leave with nothing takes, in order: the port's own table (`data/thaumcraft/port/aspect_inference.json`: a form of another item, or a raw material's list), the plain block of a waxed or weathered copper block, stonecutting, smithing and cooking recipes, three quarters of what a raw material cooks into, one point of the largest aspect of its richest recipe, and for a spawn egg the aspects of its creature. Off: exactly the TC4 rules |
 
 Not adopted, because the port already covers them or they do not apply to 1.21.1: the packet
 exploit fixes for research completion and aspect combination (the port validates both on the

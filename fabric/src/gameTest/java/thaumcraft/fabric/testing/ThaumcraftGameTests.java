@@ -1413,6 +1413,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void original_object_aspects_and_aspect_inference(GameTestHelper test) {
+        thaumcraft.common.testing.AspectCoverageRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void arcane_furnace_nozzle_feeds_the_furnace_fire_essentia(GameTestHelper test) {
         thaumcraft.common.testing.ArcaneFurnaceNozzleRuntimeChecks.nozzleFeedsTheFurnaceFireEssentia(test);
     }

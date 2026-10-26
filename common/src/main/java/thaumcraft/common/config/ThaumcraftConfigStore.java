@@ -99,6 +99,8 @@ public final class ThaumcraftConfigStore {
             new Entry(Category.RESEARCH, "research_difficulty", false, false, 0, -1, 1),
             new Entry(Category.RESEARCH, "aspect_total_cap", false, false, 100, 100, 1000),
             // Port settings, not original keys: ThaumcraftTweaks.DEFAULTS.
+            // Port setting held by ResearchSettings, so that the client resolves aspects like the server.
+            new Entry(Category.TWEAKS, "aspect_inference", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "more_randomized_loot", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "earth_shock_targets", false, false, 2, 0, 2),
             new Entry(Category.TWEAKS, "infusion_keeps_item_data", true, true, 0, 0, 0),

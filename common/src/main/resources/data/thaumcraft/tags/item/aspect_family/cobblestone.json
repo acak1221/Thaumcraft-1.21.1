@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cobblestone",
+    "minecraft:cobbled_deepslate",
+    {
+      "id": "#c:cobblestones",
+      "required": false
+    }
+  ]
+}

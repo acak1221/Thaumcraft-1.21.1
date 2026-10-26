@@ -7,3 +7,7 @@ accessible method net/minecraft/world/entity/projectile/Projectile <init> (Lnet/
 accessible field net/minecraft/world/entity/item/ItemEntity pickupDelay I
 # The golem visor marks its victim as recently struck (original EntityUtils.setRecentlyHit(victim, 100)).
 accessible field net/minecraft/world/entity/LivingEntity lastHurtByPlayerTime I
+# The port's aspect inference derives an upgraded item from its smithing inputs (ObjectAspectResolver).
+accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe template Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe base Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe addition Lnet/minecraft/world/item/crafting/Ingredient;

@@ -1,0 +1,1830 @@
+{
+  "schema_version": 1,
+  "source": "Thaumcraft-1.7.10-4.2.3.5.jar thaumcraft/common/config/ConfigAspects.registerItemAspects, read with javap -c -l and evaluated by scripts/porting/extract_config_aspects.py; 1.7.10 SRG names resolved with MCP stable 12-1.7.10",
+  "policy": {
+    "rows": "Original registrations that early_object_aspects.json does not hold, mapped to the 1.21.1 items of their 1.7.10 members. They apply after the early rows and never replace one: no id of a row here has an early row. base_item is the original new AspectList(ItemStack) copy that the native resolver evaluates at run time.",
+    "families": "The port's own aspect inference (server setting aspect_inference, on by default): an item with no registration takes the row of the LAST family tag that holds it, in the original registration order, before any recipe derivation, as the original ore dictionary registrations did for the members of a name.",
+    "accounting": "326 original object registrations; every one is an early row, a row here, an excluded registration or an ore name without a 1.21.1 member.",
+    "excluded": {
+      "Blocks.lit_redstone_ore@0": "the lit ore is a separate legacy block; the item is the unlit ore of oreRedstone",
+      "Blocks.fire@32767": "1.21.1 has no fire item",
+      "Blocks.water@32767": "1.21.1 has no water block item",
+      "Blocks.lava@32767": "1.21.1 has no lava block item",
+      "Blocks.portal@32767": "1.21.1 has no nether portal item",
+      "Blocks.end_portal@32767": "1.21.1 has no end portal item",
+      "Blocks.lit_furnace@32767": "the lit furnace is a separate legacy block; the item is the furnace row",
+      "Items.potionitem@0": "the native resolver computes the potion tags from the potion contents",
+      "Items.potionitem@loop": "the native resolver computes the potion tags from the potion contents",
+      "ConfigBlocks.blockCosmeticSolid@0": "grouped flattening: cosmetic_solid_tough also hosts metadata 1 and 8",
+      "ConfigBlocks.blockCosmeticSolid@11": "grouped flattening: cosmetic_solid hosts ten metadata variants",
+      "ConfigBlocks.blockCosmeticSolid@12": "grouped flattening: cosmetic_solid hosts ten metadata variants",
+      "ConfigBlocks.blockEldritch@32767": "grouped flattening: six native eldritch items host the eleven variants",
+      "ConfigBlocks.blockEldritch@3": "grouped flattening: eldritch_doorway also hosts the lock",
+      "ConfigBlocks.blockEldritch@4": "grouped flattening: eldritch_crust also hosts the glyphed stone",
+      "ConfigBlocks.blockEldritch@5": "grouped flattening: eldritch_crust also hosts the glowing crust",
+      "ConfigBlocks.blockEldritch@6": "grouped flattening: eldritch_spawner also hosts the runed trap",
+      "ConfigBlocks.blockEldritchPortal@0": "the eldritch portal has no item",
+      "ConfigBlocks.blockAiry@2": "the airy blocks have no item",
+      "ConfigBlocks.blockAiry@3": "the airy blocks have no item",
+      "ConfigBlocks.blockWoodenDevice@8": "the banner variant of wooden_device is a grouped flattening",
+      "ConfigItems.itemResource@14": "salis mundus: the native resolver evaluates the original expression",
+      "ConfigBlocks.blockMetalDevice@0": "crucible: the native resolver evaluates the original expression",
+      "ConfigItems.itemThaumonomicon@32767": "the native resolver evaluates the original bookshelf expression",
+      "ConfigItems.itemCrystalEssence@0": "ObjectAspectCatalog keeps the explicit empty crystal essence base"
+    }
+  },
+  "rows": [
+    {
+      "original_jar_line": 122,
+      "bytecode_offset": 104,
+      "registration": "direct",
+      "original_target": "slabWood",
+      "modern_ids": [
+        "minecraft:oak_slab",
+        "minecraft:spruce_slab",
+        "minecraft:birch_slab",
+        "minecraft:jungle_slab",
+        "minecraft:acacia_slab",
+        "minecraft:dark_oak_slab"
+      ],
+      "aspects": {
+        "arbor": 1
+      },
+      "evidence": "Forge 1.7.10 registers wooden_slab wildcard (metadata 0-5) as slabWood"
+    },
+    {
+      "original_jar_line": 123,
+      "bytecode_offset": 124,
+      "registration": "direct",
+      "original_target": "stairWood",
+      "modern_ids": [
+        "minecraft:oak_stairs",
+        "minecraft:spruce_stairs",
+        "minecraft:birch_stairs",
+        "minecraft:jungle_stairs",
+        "minecraft:acacia_stairs",
+        "minecraft:dark_oak_stairs"
+      ],
+      "aspects": {
+        "arbor": 1
+      },
+      "evidence": "Forge 1.7.10 registers the six wooden stairs as stairWood"
+    },
+    {
+      "original_jar_line": 125,
+      "bytecode_offset": 171,
+      "registration": "direct",
+      "original_target": "treeSapling",
+      "modern_ids": [
+        "minecraft:oak_sapling",
+        "minecraft:spruce_sapling",
+        "minecraft:birch_sapling",
+        "minecraft:jungle_sapling",
+        "minecraft:acacia_sapling",
+        "minecraft:dark_oak_sapling"
+      ],
+      "aspects": {
+        "arbor": 1,
+        "herba": 2
+      },
+      "evidence": "Forge 1.7.10 registers sapling wildcard (metadata 0-5) as treeSapling"
+    },
+    {
+      "original_jar_line": 126,
+      "bytecode_offset": 191,
+      "registration": "direct",
+      "original_target": "treeLeaves",
+      "modern_ids": [
+        "minecraft:oak_leaves",
+        "minecraft:spruce_leaves",
+        "minecraft:birch_leaves",
+        "minecraft:jungle_leaves",
+        "minecraft:acacia_leaves",
+        "minecraft:dark_oak_leaves"
+      ],
+      "aspects": {
+        "herba": 1
+      },
+      "evidence": "Forge 1.7.10 registers leaves and leaves2 wildcard as treeLeaves"
+    },
+    {
+      "original_jar_line": 130,
+      "bytecode_offset": 221,
+      "registration": "direct",
+      "original_target": "dyes",
+      "modern_ids": [
+        "minecraft:ink_sac",
+        "minecraft:red_dye",
+        "minecraft:green_dye",
+        "minecraft:cocoa_beans",
+        "minecraft:purple_dye",
+        "minecraft:cyan_dye",
+        "minecraft:light_gray_dye",
+        "minecraft:gray_dye",
+        "minecraft:pink_dye",
+        "minecraft:lime_dye",
+        "minecraft:yellow_dye",
+        "minecraft:light_blue_dye",
+        "minecraft:magenta_dye",
+        "minecraft:orange_dye",
+        "minecraft:bone_meal"
+      ],
+      "aspects": {
+        "sensus": 1
+      },
+      "evidence": "ConfigAspects.dyes loop; Forge 1.7.10 dyeBlack..dyeWhite are dye metadata 0-15, flattened by 1.13; dyeBlue (lapis) is already an early row"
+    },
+    {
+      "original_jar_line": 159,
+      "bytecode_offset": 956,
+      "registration": "direct",
+      "original_target": "ingotCopper",
+      "modern_ids": [
+        "minecraft:copper_ingot"
+      ],
+      "aspects": {
+        "metallum": 3,
+        "permutatio": 1
+      },
+      "evidence": "Config.foundCopperIngot branch; copper is vanilla in 1.21.1"
+    },
+    {
+      "original_jar_line": 161,
+      "bytecode_offset": 1024,
+      "registration": "direct",
+      "original_target": "oreCopper",
+      "modern_ids": [
+        "minecraft:copper_ore"
+      ],
+      "aspects": {
+        "metallum": 2,
+        "permutatio": 1,
+        "terra": 1
+      },
+      "evidence": "Config.foundCopperIngot branch; copper is vanilla in 1.21.1"
+    },
+    {
+      "original_jar_line": 165,
+      "bytecode_offset": 1101,
+      "registration": "direct",
+      "original_target": "nuggetTin",
+      "modern_ids": [
+        "thaumcraft:tin_nugget"
+      ],
+      "aspects": {
+        "metallum": 1
+      },
+      "evidence": "Config.foundTinIngot branch; the native nugget exists"
+    },
+    {
+      "original_jar_line": 169,
+      "bytecode_offset": 1247,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget@18",
+      "modern_ids": [
+        "thaumcraft:cluster_tin"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "ordo": 1,
+        "terra": 1,
+        "vitreus": 2
+      },
+      "evidence": "Config.foundTinIngot branch; native cluster"
+    },
+    {
+      "original_jar_line": 172,
+      "bytecode_offset": 1273,
+      "registration": "direct",
+      "original_target": "nuggetSilver",
+      "modern_ids": [
+        "thaumcraft:silver_nugget"
+      ],
+      "aspects": {
+        "metallum": 1
+      },
+      "evidence": "Config.foundSilverIngot branch; the native nugget exists"
+    },
+    {
+      "original_jar_line": 176,
+      "bytecode_offset": 1419,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget@19",
+      "modern_ids": [
+        "thaumcraft:cluster_silver"
+      ],
+      "aspects": {
+        "lucrum": 2,
+        "metallum": 5,
+        "ordo": 1,
+        "terra": 1
+      },
+      "evidence": "Config.foundSilverIngot branch; native cluster"
+    },
+    {
+      "original_jar_line": 179,
+      "bytecode_offset": 1445,
+      "registration": "direct",
+      "original_target": "nuggetLead",
+      "modern_ids": [
+        "thaumcraft:lead_nugget"
+      ],
+      "aspects": {
+        "metallum": 1
+      },
+      "evidence": "Config.foundLeadIngot branch; the native nugget exists"
+    },
+    {
+      "original_jar_line": 183,
+      "bytecode_offset": 1591,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget@20",
+      "modern_ids": [
+        "thaumcraft:cluster_lead"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "ordo": 3,
+        "terra": 1
+      },
+      "evidence": "Config.foundLeadIngot branch; native cluster"
+    },
+    {
+      "original_jar_line": 188,
+      "bytecode_offset": 1674,
+      "registration": "direct",
+      "original_target": "Blocks.dirt@32767",
+      "modern_ids": [
+        "minecraft:dirt",
+        "minecraft:coarse_dirt",
+        "minecraft:podzol"
+      ],
+      "aspects": {
+        "terra": 2
+      },
+      "evidence": "dirt metadata 0-2"
+    },
+    {
+      "original_jar_line": 189,
+      "bytecode_offset": 1710,
+      "registration": "direct",
+      "original_target": "Blocks.dirt@2",
+      "modern_ids": [
+        "minecraft:podzol"
+      ],
+      "aspects": {
+        "herba": 1,
+        "terra": 1
+      },
+      "evidence": "dirt metadata 2 is podzol"
+    },
+    {
+      "original_jar_line": 192,
+      "bytecode_offset": 1820,
+      "registration": "direct",
+      "original_target": "Blocks.grass@0",
+      "modern_ids": [
+        "minecraft:grass_block"
+      ],
+      "aspects": {
+        "herba": 1,
+        "terra": 1
+      },
+      "evidence": "grass is grass_block"
+    },
+    {
+      "original_jar_line": 196,
+      "bytecode_offset": 1960,
+      "registration": "direct",
+      "original_target": "Blocks.mycelium@0",
+      "modern_ids": [
+        "minecraft:mycelium"
+      ],
+      "aspects": {
+        "herba": 1,
+        "terra": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 197,
+      "bytecode_offset": 1998,
+      "registration": "direct",
+      "original_target": "Blocks.clay@32767",
+      "modern_ids": [
+        "minecraft:clay"
+      ],
+      "aspects": {
+        "aqua": 3,
+        "terra": 3
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 206,
+      "bytecode_offset": 2336,
+      "registration": "direct",
+      "original_target": "Blocks.stained_glass@32767",
+      "modern_ids": [
+        "minecraft:white_stained_glass",
+        "minecraft:orange_stained_glass",
+        "minecraft:magenta_stained_glass",
+        "minecraft:light_blue_stained_glass",
+        "minecraft:yellow_stained_glass",
+        "minecraft:lime_stained_glass",
+        "minecraft:pink_stained_glass",
+        "minecraft:gray_stained_glass",
+        "minecraft:light_gray_stained_glass",
+        "minecraft:cyan_stained_glass",
+        "minecraft:purple_stained_glass",
+        "minecraft:blue_stained_glass",
+        "minecraft:brown_stained_glass",
+        "minecraft:green_stained_glass",
+        "minecraft:red_stained_glass",
+        "minecraft:black_stained_glass"
+      ],
+      "aspects": {
+        "vitreus": 1
+      },
+      "evidence": "stained_glass metadata 0-15"
+    },
+    {
+      "original_jar_line": 208,
+      "bytecode_offset": 2426,
+      "registration": "direct",
+      "original_target": "Blocks.obsidian@32767",
+      "modern_ids": [
+        "minecraft:obsidian"
+      ],
+      "aspects": {
+        "ignis": 2,
+        "tenebrae": 1,
+        "terra": 2
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 209,
+      "bytecode_offset": 2471,
+      "registration": "direct",
+      "original_target": "Blocks.monster_egg@32767",
+      "modern_ids": [
+        "minecraft:infested_cobblestone",
+        "minecraft:infested_stone_bricks",
+        "minecraft:infested_mossy_stone_bricks",
+        "minecraft:infested_cracked_stone_bricks",
+        "minecraft:infested_chiseled_stone_bricks"
+      ],
+      "aspects": {
+        "bestia": 1,
+        "terra": 2,
+        "vinculum": 1
+      },
+      "evidence": "monster_egg metadata 1-5; the early row holds metadata 0 (infested_stone) only"
+    },
+    {
+      "original_jar_line": 214,
+      "bytecode_offset": 2678,
+      "registration": "complex",
+      "original_target": "Blocks.sandstone@32767",
+      "modern_ids": [
+        "minecraft:sandstone"
+      ],
+      "aspects": {},
+      "evidence": "sandstone metadata 0; the later early rows hold metadata 1 and 2"
+    },
+    {
+      "original_jar_line": 219,
+      "bytecode_offset": 2808,
+      "registration": "direct",
+      "original_target": "Blocks.tallgrass@32767",
+      "modern_ids": [
+        "minecraft:short_grass",
+        "minecraft:fern"
+      ],
+      "aspects": {
+        "aer": 1,
+        "herba": 1
+      },
+      "evidence": "tallgrass metadata 1-2; metadata 0 became dead_bush, which the later deadbush row replaces"
+    },
+    {
+      "original_jar_line": 220,
+      "bytecode_offset": 2846,
+      "registration": "direct",
+      "original_target": "Blocks.double_plant@32767",
+      "modern_ids": [
+        "minecraft:sunflower",
+        "minecraft:lilac",
+        "minecraft:tall_grass",
+        "minecraft:large_fern",
+        "minecraft:rose_bush",
+        "minecraft:peony"
+      ],
+      "aspects": {
+        "aer": 1,
+        "herba": 1
+      },
+      "evidence": "double_plant metadata 0-5"
+    },
+    {
+      "original_jar_line": 221,
+      "bytecode_offset": 2884,
+      "registration": "direct",
+      "original_target": "Blocks.waterlily@32767",
+      "modern_ids": [
+        "minecraft:lily_pad"
+      ],
+      "aspects": {
+        "aqua": 1,
+        "herba": 2
+      },
+      "evidence": "waterlily is lily_pad"
+    },
+    {
+      "original_jar_line": 222,
+      "bytecode_offset": 2922,
+      "registration": "direct",
+      "original_target": "Blocks.deadbush@32767",
+      "modern_ids": [
+        "minecraft:dead_bush"
+      ],
+      "aspects": {
+        "herba": 1,
+        "perditio": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 223,
+      "bytecode_offset": 2953,
+      "registration": "direct",
+      "original_target": "Blocks.vine@32767",
+      "modern_ids": [
+        "minecraft:vine"
+      ],
+      "aspects": {
+        "herba": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 227,
+      "bytecode_offset": 3077,
+      "registration": "direct",
+      "original_target": "Items.melon@32767",
+      "modern_ids": [
+        "minecraft:melon_slice"
+      ],
+      "aspects": {
+        "fames": 1
+      },
+      "evidence": "the 1.7.10 item melon is the slice; the block is melon_block"
+    },
+    {
+      "original_jar_line": 230,
+      "bytecode_offset": 3156,
+      "registration": "direct",
+      "original_target": "Blocks.red_flower@32767",
+      "modern_ids": [
+        "minecraft:poppy",
+        "minecraft:blue_orchid",
+        "minecraft:allium",
+        "minecraft:azure_bluet",
+        "minecraft:red_tulip",
+        "minecraft:orange_tulip",
+        "minecraft:white_tulip",
+        "minecraft:pink_tulip",
+        "minecraft:oxeye_daisy"
+      ],
+      "aspects": {
+        "herba": 1,
+        "sensus": 1,
+        "victus": 1
+      },
+      "evidence": "red_flower metadata 0-8"
+    },
+    {
+      "original_jar_line": 231,
+      "bytecode_offset": 3201,
+      "registration": "direct",
+      "original_target": "Blocks.yellow_flower@32767",
+      "modern_ids": [
+        "minecraft:dandelion"
+      ],
+      "aspects": {
+        "herba": 1,
+        "sensus": 1,
+        "victus": 1
+      },
+      "evidence": "yellow_flower is dandelion"
+    },
+    {
+      "original_jar_line": 232,
+      "bytecode_offset": 3242,
+      "registration": "direct",
+      "original_target": "Blocks.cactus@0",
+      "modern_ids": [
+        "minecraft:cactus"
+      ],
+      "aspects": {
+        "aqua": 1,
+        "herba": 3,
+        "perditio": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 233,
+      "bytecode_offset": 3283,
+      "registration": "direct",
+      "original_target": "Blocks.brown_mushroom@0",
+      "modern_ids": [
+        "minecraft:brown_mushroom"
+      ],
+      "aspects": {
+        "herba": 1,
+        "tenebrae": 1,
+        "terra": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 234,
+      "bytecode_offset": 3324,
+      "registration": "direct",
+      "original_target": "Blocks.red_mushroom@0",
+      "modern_ids": [
+        "minecraft:red_mushroom"
+      ],
+      "aspects": {
+        "herba": 1,
+        "ignis": 1,
+        "tenebrae": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 235,
+      "bytecode_offset": 3369,
+      "registration": "direct",
+      "original_target": "Blocks.brown_mushroom_block@32767",
+      "modern_ids": [
+        "minecraft:brown_mushroom_block"
+      ],
+      "aspects": {
+        "herba": 2,
+        "tenebrae": 1,
+        "terra": 1
+      },
+      "evidence": "the stem metadata became mushroom_stem, shared with the red block"
+    },
+    {
+      "original_jar_line": 236,
+      "bytecode_offset": 3414,
+      "registration": "direct",
+      "original_target": "Blocks.red_mushroom_block@32767",
+      "modern_ids": [
+        "minecraft:red_mushroom_block"
+      ],
+      "aspects": {
+        "herba": 2,
+        "ignis": 1,
+        "tenebrae": 1
+      },
+      "evidence": "the stem metadata became mushroom_stem, shared with the brown block"
+    },
+    {
+      "original_jar_line": 243,
+      "bytecode_offset": 3523,
+      "registration": "direct",
+      "original_target": "Items.apple@0",
+      "modern_ids": [
+        "minecraft:apple"
+      ],
+      "aspects": {
+        "fames": 1,
+        "messis": 2
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 248,
+      "bytecode_offset": 3704,
+      "registration": "direct",
+      "original_target": "Blocks.pumpkin@32767",
+      "modern_ids": [
+        "minecraft:pumpkin",
+        "minecraft:carved_pumpkin"
+      ],
+      "aspects": {
+        "messis": 2
+      },
+      "evidence": "the 1.7.10 pumpkin has a face; 1.13 split it into pumpkin and carved_pumpkin"
+    },
+    {
+      "original_jar_line": 249,
+      "bytecode_offset": 3742,
+      "registration": "complex",
+      "original_target": "Blocks.melon_block@32767",
+      "modern_ids": [
+        "minecraft:melon"
+      ],
+      "aspects": {
+        "messis": 2
+      },
+      "evidence": "melon_block is the melon block"
+    },
+    {
+      "original_jar_line": 260,
+      "bytecode_offset": 4026,
+      "registration": "direct",
+      "original_target": "Blocks.ice@32767",
+      "modern_ids": [
+        "minecraft:ice"
+      ],
+      "aspects": {
+        "gelum": 4
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 278,
+      "bytecode_offset": 4702,
+      "registration": "direct",
+      "original_target": "Items.fish@32767",
+      "modern_ids": [
+        "minecraft:salmon",
+        "minecraft:tropical_fish",
+        "minecraft:pufferfish"
+      ],
+      "aspects": {
+        "aqua": 1,
+        "corpus": 3,
+        "victus": 1
+      },
+      "evidence": "fish metadata 1-3; the early row holds metadata 0 (cod) only"
+    },
+    {
+      "original_jar_line": 279,
+      "bytecode_offset": 4747,
+      "registration": "direct",
+      "original_target": "Items.cooked_fish@32767",
+      "modern_ids": [
+        "minecraft:cooked_cod",
+        "minecraft:cooked_salmon"
+      ],
+      "aspects": {
+        "corpus": 4,
+        "fabrico": 1,
+        "fames": 3
+      },
+      "evidence": "cooked_fish metadata 0-1"
+    },
+    {
+      "original_jar_line": 281,
+      "bytecode_offset": 4837,
+      "registration": "direct",
+      "original_target": "Items.cooked_chicken@32767",
+      "modern_ids": [
+        "minecraft:cooked_chicken"
+      ],
+      "aspects": {
+        "corpus": 4,
+        "fabrico": 1,
+        "fames": 3
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 283,
+      "bytecode_offset": 4927,
+      "registration": "direct",
+      "original_target": "Items.cooked_porkchop@32767",
+      "modern_ids": [
+        "minecraft:cooked_porkchop"
+      ],
+      "aspects": {
+        "corpus": 3,
+        "fabrico": 1,
+        "fames": 3
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 285,
+      "bytecode_offset": 5017,
+      "registration": "direct",
+      "original_target": "Items.cooked_beef@32767",
+      "modern_ids": [
+        "minecraft:cooked_beef"
+      ],
+      "aspects": {
+        "corpus": 4,
+        "fabrico": 1,
+        "fames": 4
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 300,
+      "bytecode_offset": 5652,
+      "registration": "direct",
+      "original_target": "Items.record_far@0",
+      "modern_ids": [
+        "minecraft:music_disc_far"
+      ],
+      "aspects": {
+        "aer": 4,
+        "alienis": 4,
+        "lucrum": 4,
+        "sensus": 4
+      },
+      "evidence": "record_far is music_disc_far"
+    },
+    {
+      "original_jar_line": 309,
+      "bytecode_offset": 6040,
+      "registration": "direct",
+      "original_target": "Items.nether_star@0",
+      "modern_ids": [
+        "minecraft:nether_star"
+      ],
+      "aspects": {
+        "alienis": 8,
+        "lux": 8,
+        "ordo": 8,
+        "praecantatio": 8
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 318,
+      "bytecode_offset": 6252,
+      "registration": "complex",
+      "original_target": "Items.enchanted_book@0",
+      "modern_ids": [
+        "minecraft:enchanted_book"
+      ],
+      "aspects": {},
+      "evidence": "the additions are new AspectList(new ItemStack(Items.book)): the book's tags",
+      "base_item": "minecraft:book"
+    },
+    {
+      "original_jar_line": 320,
+      "bytecode_offset": 6324,
+      "registration": "direct",
+      "original_target": "Blocks.dragon_egg@0",
+      "modern_ids": [
+        "minecraft:dragon_egg"
+      ],
+      "aspects": {
+        "alienis": 8,
+        "bestia": 8,
+        "praecantatio": 8
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 323,
+      "bytecode_offset": 6445,
+      "registration": "direct",
+      "original_target": "Blocks.end_portal_frame@32767",
+      "modern_ids": [
+        "minecraft:end_portal_frame"
+      ],
+      "aspects": {
+        "alienis": 4,
+        "iter": 4,
+        "machina": 4
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 334,
+      "bytecode_offset": 6609,
+      "registration": "complex",
+      "original_target": "Blocks.chest@32767",
+      "modern_ids": [
+        "minecraft:chest"
+      ],
+      "aspects": {
+        "vacuos": 4
+      },
+      "evidence": "the 1.7.10 trapped chest is a separate block without a row"
+    },
+    {
+      "original_jar_line": 335,
+      "bytecode_offset": 6645,
+      "registration": "complex",
+      "original_target": "Items.golden_apple@0",
+      "modern_ids": [
+        "minecraft:golden_apple"
+      ],
+      "aspects": {
+        "praecantatio": 2,
+        "sano": 4
+      },
+      "evidence": "golden_apple metadata 0"
+    },
+    {
+      "original_jar_line": 336,
+      "bytecode_offset": 6682,
+      "registration": "complex",
+      "original_target": "Items.golden_apple@1",
+      "modern_ids": [
+        "minecraft:enchanted_golden_apple"
+      ],
+      "aspects": {
+        "praecantatio": 4,
+        "sano": 8
+      },
+      "evidence": "golden_apple metadata 1; 1.21.1 has no recipe, so the generated base is empty"
+    },
+    {
+      "original_jar_line": 339,
+      "bytecode_offset": 6770,
+      "registration": "complex",
+      "original_target": "Items.minecart@0",
+      "modern_ids": [
+        "minecraft:minecart"
+      ],
+      "aspects": {
+        "iter": 4,
+        "machina": 2
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 342,
+      "bytecode_offset": 6872,
+      "registration": "complex",
+      "original_target": "Items.boat@0",
+      "modern_ids": [
+        "minecraft:oak_boat"
+      ],
+      "aspects": {
+        "aqua": 4,
+        "iter": 4
+      },
+      "evidence": "the 1.7.10 boat is the oak boat"
+    },
+    {
+      "original_jar_line": 346,
+      "bytecode_offset": 6976,
+      "registration": "direct",
+      "original_target": "Items.bucket@0",
+      "modern_ids": [
+        "minecraft:bucket"
+      ],
+      "aspects": {
+        "metallum": 8,
+        "vacuos": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 347,
+      "bytecode_offset": 7013,
+      "registration": "direct",
+      "original_target": "Items.water_bucket@0",
+      "modern_ids": [
+        "minecraft:water_bucket"
+      ],
+      "aspects": {
+        "aqua": 4,
+        "metallum": 8,
+        "vacuos": 1
+      },
+      "evidence": "the bucket row before it is literal"
+    },
+    {
+      "original_jar_line": 348,
+      "bytecode_offset": 7057,
+      "registration": "direct",
+      "original_target": "Items.lava_bucket@0",
+      "modern_ids": [
+        "minecraft:lava_bucket"
+      ],
+      "aspects": {
+        "ignis": 4,
+        "metallum": 8,
+        "terra": 1,
+        "vacuos": 1
+      },
+      "evidence": "the bucket row before it is literal"
+    },
+    {
+      "original_jar_line": 351,
+      "bytecode_offset": 7152,
+      "registration": "direct",
+      "original_target": "Items.cake@0",
+      "modern_ids": [
+        "minecraft:cake"
+      ],
+      "aspects": {
+        "aqua": 4,
+        "fames": 4,
+        "victus": 4
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 355,
+      "bytecode_offset": 7251,
+      "registration": "complex",
+      "original_target": "Blocks.rail@32767",
+      "modern_ids": [
+        "minecraft:rail"
+      ],
+      "aspects": {
+        "iter": 1,
+        "metallum": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 365,
+      "bytecode_offset": 7610,
+      "registration": "complex",
+      "original_target": "Blocks.redstone_torch@32767",
+      "modern_ids": [
+        "minecraft:redstone_torch"
+      ],
+      "aspects": {
+        "machina": 2
+      },
+      "evidence": "the lit torch is the item"
+    },
+    {
+      "original_jar_line": 367,
+      "bytecode_offset": 7686,
+      "registration": "complex",
+      "original_target": "Blocks.sticky_piston@32767",
+      "modern_ids": [
+        "minecraft:sticky_piston"
+      ],
+      "aspects": {
+        "machina": 2,
+        "motus": 4
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 373,
+      "bytecode_offset": 7896,
+      "registration": "complex",
+      "original_target": "Blocks.enchanting_table@0",
+      "modern_ids": [
+        "minecraft:enchanting_table"
+      ],
+      "aspects": {
+        "fabrico": 4,
+        "praecantatio": 8
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 375,
+      "bytecode_offset": 7950,
+      "registration": "complex",
+      "original_target": "Items.clock@0",
+      "modern_ids": [
+        "minecraft:clock"
+      ],
+      "aspects": {
+        "machina": 2
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 377,
+      "bytecode_offset": 8007,
+      "registration": "direct",
+      "original_target": "Blocks.anvil@0,1,2",
+      "modern_ids": [
+        "minecraft:anvil",
+        "minecraft:chipped_anvil",
+        "minecraft:damaged_anvil"
+      ],
+      "aspects": {
+        "fabrico": 2,
+        "instrumentum": 2,
+        "metallum": 64
+      },
+      "evidence": "registerObjectTag(ItemStack, int[] {0, 1, 2}): anvil damage metadata 0-2"
+    },
+    {
+      "original_jar_line": 380,
+      "bytecode_offset": 8048,
+      "registration": "complex",
+      "original_target": "Blocks.beacon@0",
+      "modern_ids": [
+        "minecraft:beacon"
+      ],
+      "aspects": {
+        "auram": 2,
+        "permutatio": 2,
+        "praecantatio": 2
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 385,
+      "bytecode_offset": 8171,
+      "registration": "complex",
+      "original_target": "Items.golden_carrot@0",
+      "modern_ids": [
+        "minecraft:golden_carrot"
+      ],
+      "aspects": {
+        "sensus": 2
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 386,
+      "bytecode_offset": 8216,
+      "registration": "complex",
+      "original_target": "Blocks.ender_chest@32767",
+      "modern_ids": [
+        "minecraft:ender_chest"
+      ],
+      "aspects": {
+        "iter": 2,
+        "permutatio": 2,
+        "vacuos": 4
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 391,
+      "bytecode_offset": 8261,
+      "registration": "complex",
+      "original_target": "Blocks.hopper@32767",
+      "modern_ids": [
+        "minecraft:hopper"
+      ],
+      "aspects": {
+        "machina": 1,
+        "permutatio": 1,
+        "vacuos": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 392,
+      "bytecode_offset": 8306,
+      "registration": "complex",
+      "original_target": "Blocks.dropper@32767",
+      "modern_ids": [
+        "minecraft:dropper"
+      ],
+      "aspects": {
+        "machina": 1,
+        "permutatio": 1,
+        "vacuos": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 393,
+      "bytecode_offset": 8351,
+      "registration": "complex",
+      "original_target": "Blocks.dispenser@32767",
+      "modern_ids": [
+        "minecraft:dispenser"
+      ],
+      "aspects": {
+        "machina": 1,
+        "permutatio": 1,
+        "vacuos": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 394,
+      "bytecode_offset": 8396,
+      "registration": "direct",
+      "original_target": "Blocks.tripwire_hook@32767",
+      "modern_ids": [
+        "minecraft:tripwire_hook"
+      ],
+      "aspects": {
+        "machina": 1,
+        "sensus": 1,
+        "vinculum": 1
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 396,
+      "bytecode_offset": 8441,
+      "registration": "complex",
+      "original_target": "Blocks.daylight_detector@32767",
+      "modern_ids": [
+        "minecraft:daylight_detector"
+      ],
+      "aspects": {
+        "lux": 3,
+        "machina": 3,
+        "sensus": 2
+      },
+      "evidence": "plain identifier"
+    },
+    {
+      "original_jar_line": 417,
+      "bytecode_offset": 8591,
+      "registration": "complex",
+      "original_target": "ConfigBlocks.blockTable@0",
+      "modern_ids": [
+        "thaumcraft:table"
+      ],
+      "aspects": {
+        "instrumentum": 1
+      },
+      "evidence": "the plain table, metadata 0"
+    },
+    {
+      "original_jar_line": 418,
+      "bytecode_offset": 8631,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTable@15",
+      "modern_ids": [
+        "thaumcraft:arcane_workbench"
+      ],
+      "aspects": {
+        "fabrico": 4
+      },
+      "evidence": "new AspectList(table metadata 0) plus fabrico4",
+      "base_item": "thaumcraft:table"
+    },
+    {
+      "original_jar_line": 419,
+      "bytecode_offset": 8670,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTable@2",
+      "modern_ids": [
+        "thaumcraft:research_table"
+      ],
+      "aspects": {
+        "cognitio": 4
+      },
+      "evidence": "new AspectList(table metadata 0) plus cognitio4",
+      "base_item": "thaumcraft:table"
+    }
+  ],
+  "families": [
+    {
+      "original_jar_line": 118,
+      "bytecode_offset": 17,
+      "registration": "direct",
+      "original_target": "stone",
+      "tag": "thaumcraft:aspect_family/stone",
+      "aspects": {
+        "terra": 2
+      }
+    },
+    {
+      "original_jar_line": 119,
+      "bytecode_offset": 44,
+      "registration": "direct",
+      "original_target": "cobblestone",
+      "tag": "thaumcraft:aspect_family/cobblestone",
+      "aspects": {
+        "perditio": 1,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 120,
+      "bytecode_offset": 64,
+      "registration": "direct",
+      "original_target": "logWood",
+      "tag": "thaumcraft:aspect_family/log_wood",
+      "aspects": {
+        "arbor": 4
+      }
+    },
+    {
+      "original_jar_line": 121,
+      "bytecode_offset": 84,
+      "registration": "direct",
+      "original_target": "plankWood",
+      "tag": "thaumcraft:aspect_family/plank_wood",
+      "aspects": {
+        "arbor": 1
+      }
+    },
+    {
+      "original_jar_line": 122,
+      "bytecode_offset": 104,
+      "registration": "direct",
+      "original_target": "slabWood",
+      "tag": "thaumcraft:aspect_family/slab_wood",
+      "aspects": {
+        "arbor": 1
+      }
+    },
+    {
+      "original_jar_line": 123,
+      "bytecode_offset": 124,
+      "registration": "direct",
+      "original_target": "stairWood",
+      "tag": "thaumcraft:aspect_family/stair_wood",
+      "aspects": {
+        "arbor": 1
+      }
+    },
+    {
+      "original_jar_line": 124,
+      "bytecode_offset": 144,
+      "registration": "direct",
+      "original_target": "stickWood",
+      "tag": "thaumcraft:aspect_family/stick_wood",
+      "aspects": {
+        "arbor": 1
+      }
+    },
+    {
+      "original_jar_line": 125,
+      "bytecode_offset": 171,
+      "registration": "direct",
+      "original_target": "treeSapling",
+      "tag": "thaumcraft:aspect_family/tree_sapling",
+      "aspects": {
+        "arbor": 1,
+        "herba": 2
+      }
+    },
+    {
+      "original_jar_line": 126,
+      "bytecode_offset": 191,
+      "registration": "direct",
+      "original_target": "treeLeaves",
+      "tag": "thaumcraft:aspect_family/tree_leaves",
+      "aspects": {
+        "herba": 1
+      }
+    },
+    {
+      "original_jar_line": 130,
+      "bytecode_offset": 221,
+      "registration": "direct",
+      "original_target": "dyes",
+      "tag": "thaumcraft:aspect_family/dye",
+      "aspects": {
+        "sensus": 1
+      }
+    },
+    {
+      "original_jar_line": 134,
+      "bytecode_offset": 254,
+      "registration": "direct",
+      "original_target": "oreLapis",
+      "tag": "thaumcraft:aspect_family/ore_lapis",
+      "aspects": {
+        "sensus": 3,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 135,
+      "bytecode_offset": 288,
+      "registration": "direct",
+      "original_target": "oreDiamond",
+      "tag": "thaumcraft:aspect_family/ore_diamond",
+      "aspects": {
+        "lucrum": 3,
+        "terra": 1,
+        "vitreus": 3
+      }
+    },
+    {
+      "original_jar_line": 136,
+      "bytecode_offset": 315,
+      "registration": "direct",
+      "original_target": "gemDiamond",
+      "tag": "thaumcraft:aspect_family/gem_diamond",
+      "aspects": {
+        "lucrum": 4,
+        "vitreus": 4
+      }
+    },
+    {
+      "original_jar_line": 137,
+      "bytecode_offset": 349,
+      "registration": "direct",
+      "original_target": "oreRedstone",
+      "tag": "thaumcraft:aspect_family/ore_redstone",
+      "aspects": {
+        "machina": 2,
+        "potentia": 2,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 139,
+      "bytecode_offset": 424,
+      "registration": "direct",
+      "original_target": "oreEmerald",
+      "tag": "thaumcraft:aspect_family/ore_emerald",
+      "aspects": {
+        "lucrum": 4,
+        "terra": 1,
+        "vitreus": 3
+      }
+    },
+    {
+      "original_jar_line": 140,
+      "bytecode_offset": 451,
+      "registration": "direct",
+      "original_target": "gemEmerald",
+      "tag": "thaumcraft:aspect_family/gem_emerald",
+      "aspects": {
+        "lucrum": 5,
+        "vitreus": 4
+      }
+    },
+    {
+      "original_jar_line": 141,
+      "bytecode_offset": 478,
+      "registration": "direct",
+      "original_target": "oreQuartz",
+      "tag": "thaumcraft:aspect_family/ore_quartz",
+      "aspects": {
+        "terra": 1,
+        "vitreus": 3
+      }
+    },
+    {
+      "original_jar_line": 144,
+      "bytecode_offset": 559,
+      "registration": "direct",
+      "original_target": "nuggetIron",
+      "tag": "thaumcraft:aspect_family/nugget_iron",
+      "aspects": {
+        "metallum": 1
+      }
+    },
+    {
+      "original_jar_line": 145,
+      "bytecode_offset": 586,
+      "registration": "direct",
+      "original_target": "oreIron",
+      "tag": "thaumcraft:aspect_family/ore_iron",
+      "aspects": {
+        "metallum": 3,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 146,
+      "bytecode_offset": 613,
+      "registration": "direct",
+      "original_target": "dustIron",
+      "tag": "thaumcraft:aspect_family/dust_iron",
+      "aspects": {
+        "metallum": 3,
+        "perditio": 1
+      }
+    },
+    {
+      "original_jar_line": 148,
+      "bytecode_offset": 674,
+      "registration": "direct",
+      "original_target": "oreGold",
+      "tag": "thaumcraft:aspect_family/ore_gold",
+      "aspects": {
+        "lucrum": 1,
+        "metallum": 2,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 149,
+      "bytecode_offset": 708,
+      "registration": "direct",
+      "original_target": "dustGold",
+      "tag": "thaumcraft:aspect_family/dust_gold",
+      "aspects": {
+        "lucrum": 1,
+        "metallum": 2,
+        "perditio": 1
+      }
+    },
+    {
+      "original_jar_line": 151,
+      "bytecode_offset": 783,
+      "registration": "direct",
+      "original_target": "Blocks.coal_ore@0",
+      "tag": "thaumcraft:aspect_family/ore_coal",
+      "aspects": {
+        "ignis": 1,
+        "potentia": 2,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 153,
+      "bytecode_offset": 848,
+      "registration": "direct",
+      "original_target": "dustRedstone",
+      "tag": "thaumcraft:aspect_family/dust_redstone",
+      "aspects": {
+        "machina": 1,
+        "potentia": 2
+      }
+    },
+    {
+      "original_jar_line": 154,
+      "bytecode_offset": 875,
+      "registration": "direct",
+      "original_target": "dustGlowstone",
+      "tag": "thaumcraft:aspect_family/dust_glowstone",
+      "aspects": {
+        "lux": 2,
+        "sensus": 1
+      }
+    },
+    {
+      "original_jar_line": 155,
+      "bytecode_offset": 903,
+      "registration": "direct",
+      "original_target": "glowstone",
+      "tag": "thaumcraft:aspect_family/glowstone",
+      "aspects": {
+        "lux": 10,
+        "sensus": 3
+      }
+    },
+    {
+      "original_jar_line": 158,
+      "bytecode_offset": 929,
+      "registration": "direct",
+      "original_target": "nuggetCopper",
+      "tag": "thaumcraft:aspect_family/nugget_copper",
+      "aspects": {
+        "metallum": 1
+      }
+    },
+    {
+      "original_jar_line": 159,
+      "bytecode_offset": 956,
+      "registration": "direct",
+      "original_target": "ingotCopper",
+      "tag": "thaumcraft:aspect_family/ingot_copper",
+      "aspects": {
+        "metallum": 3,
+        "permutatio": 1
+      }
+    },
+    {
+      "original_jar_line": 160,
+      "bytecode_offset": 990,
+      "registration": "direct",
+      "original_target": "dustCopper",
+      "tag": "thaumcraft:aspect_family/dust_copper",
+      "aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "permutatio": 1
+      }
+    },
+    {
+      "original_jar_line": 161,
+      "bytecode_offset": 1024,
+      "registration": "direct",
+      "original_target": "oreCopper",
+      "tag": "thaumcraft:aspect_family/ore_copper",
+      "aspects": {
+        "metallum": 2,
+        "permutatio": 1,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 165,
+      "bytecode_offset": 1101,
+      "registration": "direct",
+      "original_target": "nuggetTin",
+      "tag": "thaumcraft:aspect_family/nugget_tin",
+      "aspects": {
+        "metallum": 1
+      }
+    },
+    {
+      "original_jar_line": 166,
+      "bytecode_offset": 1128,
+      "registration": "direct",
+      "original_target": "ingotTin",
+      "tag": "thaumcraft:aspect_family/ingot_tin",
+      "aspects": {
+        "metallum": 3,
+        "vitreus": 1
+      }
+    },
+    {
+      "original_jar_line": 167,
+      "bytecode_offset": 1162,
+      "registration": "direct",
+      "original_target": "dustTin",
+      "tag": "thaumcraft:aspect_family/dust_tin",
+      "aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "vitreus": 1
+      }
+    },
+    {
+      "original_jar_line": 168,
+      "bytecode_offset": 1196,
+      "registration": "direct",
+      "original_target": "oreTin",
+      "tag": "thaumcraft:aspect_family/ore_tin",
+      "aspects": {
+        "metallum": 3,
+        "perditio": 1,
+        "vitreus": 1
+      }
+    },
+    {
+      "original_jar_line": 172,
+      "bytecode_offset": 1273,
+      "registration": "direct",
+      "original_target": "nuggetSilver",
+      "tag": "thaumcraft:aspect_family/nugget_silver",
+      "aspects": {
+        "metallum": 1
+      }
+    },
+    {
+      "original_jar_line": 173,
+      "bytecode_offset": 1300,
+      "registration": "direct",
+      "original_target": "ingotSilver",
+      "tag": "thaumcraft:aspect_family/ingot_silver",
+      "aspects": {
+        "lucrum": 1,
+        "metallum": 3
+      }
+    },
+    {
+      "original_jar_line": 174,
+      "bytecode_offset": 1334,
+      "registration": "direct",
+      "original_target": "dustSilver",
+      "tag": "thaumcraft:aspect_family/dust_silver",
+      "aspects": {
+        "lucrum": 1,
+        "metallum": 2,
+        "perditio": 1
+      }
+    },
+    {
+      "original_jar_line": 175,
+      "bytecode_offset": 1368,
+      "registration": "direct",
+      "original_target": "oreSilver",
+      "tag": "thaumcraft:aspect_family/ore_silver",
+      "aspects": {
+        "lucrum": 1,
+        "metallum": 3,
+        "perditio": 1
+      }
+    },
+    {
+      "original_jar_line": 179,
+      "bytecode_offset": 1445,
+      "registration": "direct",
+      "original_target": "nuggetLead",
+      "tag": "thaumcraft:aspect_family/nugget_lead",
+      "aspects": {
+        "metallum": 1
+      }
+    },
+    {
+      "original_jar_line": 180,
+      "bytecode_offset": 1472,
+      "registration": "direct",
+      "original_target": "ingotLead",
+      "tag": "thaumcraft:aspect_family/ingot_lead",
+      "aspects": {
+        "metallum": 3,
+        "ordo": 1
+      }
+    },
+    {
+      "original_jar_line": 181,
+      "bytecode_offset": 1506,
+      "registration": "direct",
+      "original_target": "dustLead",
+      "tag": "thaumcraft:aspect_family/dust_lead",
+      "aspects": {
+        "metallum": 2,
+        "ordo": 1,
+        "perditio": 1
+      }
+    },
+    {
+      "original_jar_line": 182,
+      "bytecode_offset": 1540,
+      "registration": "direct",
+      "original_target": "oreLead",
+      "tag": "thaumcraft:aspect_family/ore_lead",
+      "aspects": {
+        "metallum": 3,
+        "ordo": 1,
+        "perditio": 1
+      }
+    },
+    {
+      "original_jar_line": 205,
+      "bytecode_offset": 2305,
+      "registration": "direct",
+      "original_target": "Blocks.glass@32767",
+      "tag": "thaumcraft:aspect_family/glass",
+      "aspects": {
+        "vitreus": 1
+      }
+    },
+    {
+      "original_jar_line": 206,
+      "bytecode_offset": 2336,
+      "registration": "direct",
+      "original_target": "Blocks.stained_glass@32767",
+      "tag": "thaumcraft:aspect_family/stained_glass",
+      "aspects": {
+        "vitreus": 1
+      }
+    },
+    {
+      "original_jar_line": 209,
+      "bytecode_offset": 2471,
+      "registration": "direct",
+      "original_target": "Blocks.monster_egg@32767",
+      "tag": "thaumcraft:aspect_family/infested_block",
+      "aspects": {
+        "bestia": 1,
+        "terra": 2,
+        "vinculum": 1
+      }
+    },
+    {
+      "original_jar_line": 220,
+      "bytecode_offset": 2846,
+      "registration": "direct",
+      "original_target": "Blocks.double_plant@32767",
+      "tag": "thaumcraft:aspect_family/tall_flower",
+      "aspects": {
+        "aer": 1,
+        "herba": 1
+      }
+    },
+    {
+      "original_jar_line": 230,
+      "bytecode_offset": 3156,
+      "registration": "direct",
+      "original_target": "Blocks.red_flower@32767",
+      "tag": "thaumcraft:aspect_family/small_flower",
+      "aspects": {
+        "herba": 1,
+        "sensus": 1,
+        "victus": 1
+      }
+    },
+    {
+      "original_jar_line": 235,
+      "bytecode_offset": 3369,
+      "registration": "direct",
+      "original_target": "Blocks.brown_mushroom_block@32767",
+      "tag": "thaumcraft:aspect_family/mushroom_block",
+      "aspects": {
+        "herba": 2,
+        "tenebrae": 1,
+        "terra": 1
+      }
+    },
+    {
+      "original_jar_line": 278,
+      "bytecode_offset": 4702,
+      "registration": "direct",
+      "original_target": "Items.fish@32767",
+      "tag": "thaumcraft:aspect_family/raw_fish",
+      "aspects": {
+        "aqua": 1,
+        "corpus": 3,
+        "victus": 1
+      }
+    },
+    {
+      "original_jar_line": 279,
+      "bytecode_offset": 4747,
+      "registration": "direct",
+      "original_target": "Items.cooked_fish@32767",
+      "tag": "thaumcraft:aspect_family/cooked_fish",
+      "aspects": {
+        "corpus": 4,
+        "fabrico": 1,
+        "fames": 3
+      }
+    },
+    {
+      "original_jar_line": 296,
+      "bytecode_offset": 5460,
+      "registration": "direct",
+      "original_target": "Items.record_11@0",
+      "tag": "thaumcraft:aspect_family/music_disc",
+      "aspects": {
+        "aer": 4,
+        "lucrum": 4,
+        "sensus": 4
+      }
+    },
+    {
+      "original_jar_line": 334,
+      "bytecode_offset": 6609,
+      "registration": "complex",
+      "original_target": "Blocks.chest@32767",
+      "tag": "thaumcraft:aspect_family/chest",
+      "aspects": {
+        "vacuos": 4
+      }
+    },
+    {
+      "original_jar_line": 341,
+      "bytecode_offset": 6838,
+      "registration": "complex",
+      "original_target": "Items.wooden_door@0",
+      "tag": "thaumcraft:aspect_family/wooden_door",
+      "aspects": {
+        "machina": 1,
+        "motus": 1
+      }
+    },
+    {
+      "original_jar_line": 342,
+      "bytecode_offset": 6872,
+      "registration": "complex",
+      "original_target": "Items.boat@0",
+      "tag": "thaumcraft:aspect_family/boat",
+      "aspects": {
+        "aqua": 4,
+        "iter": 4
+      }
+    },
+    {
+      "original_jar_line": 355,
+      "bytecode_offset": 7251,
+      "registration": "complex",
+      "original_target": "Blocks.rail@32767",
+      "tag": "thaumcraft:aspect_family/rail",
+      "aspects": {
+        "iter": 1,
+        "metallum": 1
+      }
+    },
+    {
+      "original_jar_line": 359,
+      "bytecode_offset": 7396,
+      "registration": "complex",
+      "original_target": "Blocks.fence_gate@32767",
+      "tag": "thaumcraft:aspect_family/fence_gate",
+      "aspects": {
+        "iter": 1,
+        "machina": 1
+      }
+    },
+    {
+      "original_jar_line": 360,
+      "bytecode_offset": 7434,
+      "registration": "complex",
+      "original_target": "Blocks.wooden_pressure_plate@32767",
+      "tag": "thaumcraft:aspect_family/wooden_pressure_plate",
+      "aspects": {
+        "machina": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_jar_line": 370,
+      "bytecode_offset": 7799,
+      "registration": "complex",
+      "original_target": "Blocks.trapdoor@32767",
+      "tag": "thaumcraft:aspect_family/wooden_trapdoor",
+      "aspects": {
+        "motus": 1
+      }
+    },
+    {
+      "original_jar_line": 381,
+      "bytecode_offset": 8079,
+      "registration": "complex",
+      "original_target": "Blocks.wooden_button@32767",
+      "tag": "thaumcraft:aspect_family/wooden_button",
+      "aspects": {
+        "machina": 1
+      }
+    }
+  ]
+}

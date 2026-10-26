@@ -2647,6 +2647,8 @@
   "tc.port.notifications.clear": "Очистить",
   "tc.port.config.aspect_total_cap": "Предел запаса аспектов",
   "tc.port.config.aspect_total_cap.tooltip": "Сколько каждого аспекта игрок может хранить для исследований.",
+  "tc.port.config.aspect_inference": "Автоматические аспекты",
+  "tc.port.config.aspect_inference.tooltip": "Предметы, которым TC4 не даёт аспектов, получают их по семейству тегов (рудный словарь TC4: глубинные руды, новые породы дерева, красители, металлы модов), по рецептам камнереза, кузнечного стола и печи, а яйца призыва — от своего существа. Выкл.: строго правила TC4. Собственная настройка порта; нужен перезапуск.",
   "tag.item.thaumcraft.original_ore.cluster_cinnabar": "Киноварные кластеры",
   "tag.item.thaumcraft.original_ore.cluster_copper": "Меднорудные кластеры",
   "tag.item.thaumcraft.original_ore.cluster_gold": "Золоторудные кластеры",

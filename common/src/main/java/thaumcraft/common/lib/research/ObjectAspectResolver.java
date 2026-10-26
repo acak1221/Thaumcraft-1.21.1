@@ -33,8 +33,16 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.HoneycombItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import thaumcraft.api.aspects.Aspect;
@@ -52,6 +60,7 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandMaterials;
 import thaumcraft.common.config.ThaumcraftEquipment;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.config.ThaumcraftSettings;
 
 /**
  * Native crafting/arcane/crucible/STACK infusion tags and item bonuses shared by scans and
@@ -178,25 +187,43 @@ public final class ObjectAspectResolver {
         // Level/RegistryAccess references survive a lookup or a server lifetime.
         if (existing != null && existing.source == recipes) return existing;
         Map<Item, List<RecipeHolder<?>>> outputs = new HashMap<>();
+        Map<Item, List<RecipeHolder<?>>> modernOutputs = new HashMap<>();
+        Map<Item, List<RecipeHolder<?>>> cookedFrom = new HashMap<>();
         recipes.stream().sorted(Comparator.comparing(holder -> holder.id().toString())).forEach(holder -> {
             var recipe = holder.value();
+            ItemStack result = recipe.getResultItem(level.registryAccess());
+            if (recipe instanceof StonecutterRecipe || recipe instanceof SmithingTransformRecipe || recipe instanceof AbstractCookingRecipe) {
+                // The port's aspect inference only: recipe types that 1.7.10 did not have or did not derive from.
+                if (!result.isEmpty()) modernOutputs.computeIfAbsent(result.getItem(), ignored -> new ArrayList<>()).add(holder);
+                if (recipe instanceof AbstractCookingRecipe cooking && !cooking.getIngredients().isEmpty()) {
+                    for (ItemStack input : cooking.getIngredients().getFirst().getItems()) {
+                        cookedFrom.computeIfAbsent(input.getItem(), ignored -> new ArrayList<>()).add(holder);
+                    }
+                }
+                return;
+            }
             if (!(recipe instanceof CrucibleRecipe || recipe instanceof ArcaneShapedRecipe || recipe instanceof ArcaneShapelessRecipe || recipe instanceof InfusionStackRecipe
                     || recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe)) return;
-            ItemStack result = recipe.getResultItem(level.registryAccess());
             if (!result.isEmpty()) outputs.computeIfAbsent(result.getItem(), ignored -> new ArrayList<>()).add(holder);
         });
-        var created = new RecipeIndex(recipes, outputs);
+        var created = new RecipeIndex(recipes, outputs, modernOutputs, cookedFrom);
         INDEXES.put(manager, created);
         return created;
     }
 
-    private record RecipeIndex(Collection<RecipeHolder<?>> source, Map<Item, List<RecipeHolder<?>>> outputs) {}
+    private record RecipeIndex(Collection<RecipeHolder<?>> source, Map<Item, List<RecipeHolder<?>>> outputs,
+                               Map<Item, List<RecipeHolder<?>>> modernOutputs, Map<Item, List<RecipeHolder<?>>> cookedFrom) {}
+
+    /** The port's own aspect inference (server setting {@code aspect_inference}); off is the TC4 resolver. */
+    public static boolean inference() { return ThaumcraftSettings.current().aspectInference(); }
 
     private static final class Resolution {
         final Level level;
         final RecipeIndex recipes;
         final Set<Item> history = new LinkedHashSet<>();
         final Map<Item, AspectList> resolved = new HashMap<>();
+
+        final boolean infer = inference();
 
         Resolution(Level level, RecipeIndex recipes) { this.level = level; this.recipes = recipes; }
 
@@ -213,6 +240,11 @@ public final class ObjectAspectResolver {
             // is not a crafting recipe, so ordinary RecipeManager lookup alone
             // would otherwise make this real machine unknown/valueless.
             AspectList result;
+            var expression = EarlyObjectAspectBindings.expressionOf(id);
+            // The inference never answers for an item of the bundled catalogue: when an add-on
+            // removes such a tag, the catalogue baseline must not come back through a family.
+            boolean inferable = infer && !ObjectAspectCatalog.registeredIds().contains(id);
+            var family = inferable && expression == null && EarlyObjectAspectBindings.complexOf(id) == null ? family(item) : null;
             if (item == ThaumcraftContent.MATERIALS.get("salis_mundus").get()) {
                 // ConfigAspects421/AspectList25–37/InternalMethodHandler53–55:
                 // getObjectTags, NOT getBonusTags/cull6 or smelting derivation.
@@ -223,6 +255,14 @@ public final class ObjectAspectResolver {
                 result = base(Items.BOOKSHELF).add(Aspect.MAGIC, 2).merge(Aspect.MIND, 2);
             } else if (id.getNamespace().equals("thaumcraft") && id.getPath().equals("crucible")) {
                 result = base(Items.CAULDRON).add(Aspect.CRAFT, 4).add(Aspect.MAGIC, 4);
+            } else if (expression != null && !expression.complex()) {
+                // Original new AspectList(new ItemStack(base)).add(...): the research table and the
+                // arcane workbench copy the resolved table.
+                result = base(BuiltInRegistries.ITEM.get(expression.base())).add(expression.additions());
+            } else if (family != null && !family.complex()) {
+                // Aspect inference: the original ore dictionary registration of a name reached every
+                // member; a 1.21.1 tag stands for the name.
+                result = family.aspects();
             } else result = fromCrucible(candidates);
             if (result == null) result = fromArcane(candidates);
             if (result == null) result = fromInfusion(candidates);
@@ -231,10 +271,120 @@ public final class ObjectAspectResolver {
             // Curated original complex registrations add to generated tags only
             // when no explicit direct binding existed (source Api:259-273).
             AspectList addition = EarlyObjectAspectBindings.complexOf(id);
+            if (addition == null && expression != null && expression.complex()) {
+                // Original enchanted book: the additions are new AspectList(new ItemStack(Items.book)).
+                addition = base(BuiltInRegistries.ITEM.get(expression.base())).add(expression.additions());
+            }
+            if (addition == null && family != null && family.complex()) addition = family.aspects();
             if (addition != null) result.add(addition);
+            // The inference only fills an item that the TC4 rules leave with nothing at all.
+            if (result.size() == 0 && inferable) {
+                AspectList inferred = inferred(item, candidates);
+                if (inferred != null) result = inferred;
+                else if (item instanceof SpawnEggItem egg) {
+                    AspectList entity = EntityAspectBindings.forType(egg.getType(new ItemStack(item)));
+                    if (entity != null) result = entity;
+                }
+            }
             result = cap(result);
             resolved.put(item, result.copy());
             return result;
+        }
+
+        /** The last aspect family, in the original registration order, whose tag holds the item. */
+        private EarlyObjectAspectBindings.Family family(Item item) {
+            EarlyObjectAspectBindings.Family found = null;
+            var holder = item.builtInRegistryHolder();
+            for (var family : EarlyObjectAspectBindings.families()) if (holder.is(family.tag())) found = family;
+            return found;
+        }
+
+        /**
+         * The port's aspect inference for an item that the TC4 resolver leaves without aspects.
+         *
+         * <p>In order: the port's table ({@link AspectInferenceTable}: a form of another item, or a raw
+         * material's literal list); a waxed or weathered copper block takes the plain one; the 1.21.1
+         * recipe types the original did not derive from (stonecutting and cooking keep the whole share,
+         * smithing the original 0.75 crafting share); a raw material takes three quarters of what it
+         * cooks into; and last an item crafted from items with aspects keeps one point of the largest
+         * one instead of rounding every share down to nothing.</p>
+         */
+        private AspectList inferred(Item item, List<RecipeHolder<?>> candidates) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            ResourceLocation like = AspectInferenceTable.likeOf(id);
+            if (like != null && BuiltInRegistries.ITEM.containsKey(like)) {
+                AspectList tags = base(BuiltInRegistries.ITEM.get(like));
+                if (tags.size() > 0) return tags;
+            }
+            AspectList literal = AspectInferenceTable.aspectsOf(id);
+            if (literal != null) return literal;
+            if (item instanceof BlockItem block) {
+                // A waxed or weathered copper block is a form of the plain one (the vanilla relations).
+                Block unwaxed = HoneycombItem.WAX_OFF_BY_BLOCK.get().get(block.getBlock());
+                Block previous = unwaxed != null ? unwaxed : WeatheringCopper.getPrevious(block.getBlock()).orElse(null);
+                if (previous != null && previous.asItem() != item) {
+                    AspectList tags = base(previous.asItem());
+                    if (tags.size() > 0) return tags;
+                }
+            }
+            AspectList best = null;
+            for (var holder : recipes.modernOutputs.getOrDefault(item, List.of())) {
+                var recipe = holder.value();
+                List<Ingredient> input;
+                if (recipe instanceof SmithingTransformRecipe smithing) input = List.of(smithing.template, smithing.base, smithing.addition);
+                else input = recipe.getIngredients();
+                int outputCount = recipe.getResultItem(level.registryAccess()).getCount();
+                // A stonecutter or a furnace changes the form of one input; keep its whole share.
+                float share = recipe instanceof SmithingTransformRecipe ? .75F : 1F;
+                AspectList tags = scaled(input, share, outputCount);
+                if (tags.visSize() > 0 && (best == null || tags.visSize() < best.visSize())) best = tags;
+            }
+            if (best != null) return best;
+            for (var holder : recipes.cookedFrom.getOrDefault(item, List.of())) {
+                ItemStack output = holder.value().getResultItem(level.registryAccess());
+                if (output.isEmpty() || output.getItem() == item) continue;
+                AspectList tags = base(output.getItem());
+                AspectList result = new AspectList();
+                for (Aspect aspect : tags.getAspects()) result.add(aspect, (int) (tags.getAmount(aspect) * .75F * output.getCount()));
+                if (positive(result).visSize() > 0 && (best == null || result.visSize() < best.visSize())) best = result;
+            }
+            if (best != null) return best;
+            // The recipe that puts the most into the item decides the one point it keeps.
+            AspectList richest = null;
+            List<RecipeHolder<?>> all = new ArrayList<>(candidates);
+            all.addAll(recipes.modernOutputs.getOrDefault(item, List.of()));
+            for (var holder : all) {
+                var recipe = holder.value();
+                List<Ingredient> input;
+                if (recipe instanceof SmithingTransformRecipe smithing) input = List.of(smithing.template, smithing.base, smithing.addition);
+                else if (recipe instanceof InfusionStackRecipe infusion) {
+                    input = new ArrayList<>(infusion.components());
+                    input.add(infusion.input());
+                } else if (recipe instanceof CrucibleRecipe crucible) input = List.of(crucible.catalyst());
+                else input = recipe.getIngredients();
+                AspectList sum = scaled(input, 1F, 1);
+                if (sum.visSize() > 0 && (richest == null || sum.visSize() > richest.visSize())) richest = sum;
+            }
+            if (richest == null) return null;
+            Aspect largest = richest.getAspectsSortedAmount()[0];
+            return new AspectList().add(largest, 1);
+        }
+
+        /** One of every input, like the original crafting walk, times {@code share}, divided by the output count. */
+        private AspectList scaled(List<Ingredient> input, float share, int outputCount) {
+            AspectList sum = new AspectList();
+            for (Ingredient ingredient : input) {
+                if (ingredient == null || ingredient.isEmpty()) continue;
+                for (ItemStack alternative : ingredient.getItems()) {
+                    AspectList tags = base(alternative.getItem());
+                    if (tags.size() == 0) continue;
+                    sum.add(tags);
+                    break;
+                }
+            }
+            AspectList result = new AspectList();
+            for (Aspect aspect : sum.getAspects()) result.add(aspect, (int) (sum.getAmount(aspect) * share / Math.max(1, outputCount)));
+            return positive(result);
         }
 
         private AspectList fromCrucible(List<RecipeHolder<?>> candidates) {

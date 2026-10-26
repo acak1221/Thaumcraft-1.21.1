@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:lead_nugget",
+    {
+      "id": "#c:nuggets/lead",
+      "required": false
+    }
+  ]
+}

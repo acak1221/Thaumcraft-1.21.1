@@ -1294,8 +1294,16 @@
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"eldritch_lands\")",
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"node_biome_types/\"+name)"
     ],
+    "common/src/main/java/thaumcraft/common/lib/research/AspectInferenceTable.java": [
+      "ResourceLocation.parse(entry.getKey())",
+      "ResourceLocation.parse(entry.getValue().getAsString())",
+      "ResourceLocation.parse(entry.getKey())"
+    ],
     "common/src/main/java/thaumcraft/common/lib/research/EarlyObjectAspectBindings.java": [
-      "ResourceLocation.parse(identifier.getAsString())"
+      "ResourceLocation.parse(identifier.getAsString())",
+      "ResourceLocation.parse(row.get(\"base_item\").getAsString())",
+      "ResourceLocation.parse(identifier.getAsString())",
+      "ResourceLocation.parse(row.get(\"tag\").getAsString())"
     ],
     "common/src/main/java/thaumcraft/common/lib/research/ObjectAspectCatalog.java": [
       "ResourceLocation.parse(id.getAsString())",

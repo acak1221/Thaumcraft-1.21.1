@@ -113,6 +113,12 @@ public final class EntityAspectBindings {
         return select(new ArrayList<>(ThaumcraftApi.scanEntities), name, name, data);
     }
 
+    /** The plain row of an entity type, without any data predicate: the port's aspect inference gives it to a spawn egg. */
+    public static AspectList forType(net.minecraft.world.entity.EntityType<?> type) {
+        String registryName = BuiltInRegistries.ENTITY_TYPE.getKey(type).toString();
+        return select(new ArrayList<>(ThaumcraftApi.scanEntities), originalName(registryName), registryName, new CompoundTag());
+    }
+
     public static AspectList forNames(String originalName, String nativeName, CompoundTag data) {
         return select(new ArrayList<>(ThaumcraftApi.scanEntities), originalName, nativeName, data);
     }

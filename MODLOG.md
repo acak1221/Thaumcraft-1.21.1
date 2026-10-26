@@ -1,3 +1,14 @@
+## 2026-10-26 — aspects for every item: the remaining TC4 rows and automatic inference
+
+`scripts/porting/extract_config_aspects.py` accounts for all 326 ConfigAspects registrations from
+the jar bytecode; the 217 ported rows matched except five copy rows (stone bricks, sandstone), now
+fixed. The 75 missing original rows are added and replace the divergent 1.12 legacy values. A new
+server setting `aspect_inference` (on by default, synced to the client) adds ore dictionary aspect
+families as tags with 1.21.1 and `c:` members, a port table for post-1.7 raw materials, copper
+weathering, stonecutting/smithing/cooking recipes, a one-point residue and spawn eggs. Items
+without aspects: 808 of 1737 before, 117 after. Verified: 2590 JUnit, NeoForge JUnit, both builds,
+GameTest Fabric 476/476 and NeoForge 464/464 on fresh worlds, 120 Python tests.
+
 ## 2026-10-26 — quality-of-life batch (in progress): Thaumcraft 4 Reload, Thaumonomicon
 
 The project is renamed to Thaumcraft 4 Reload (metadata, README, AGENTS, Gradle, docs; links to

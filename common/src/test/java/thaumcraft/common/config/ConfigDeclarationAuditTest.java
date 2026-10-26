@@ -35,6 +35,7 @@ class ConfigDeclarationAuditTest {
             Map.entry("runic_cost", "50"), Map.entry("notification_delay", "5000"),
             Map.entry("notification_max", "15"),
             // The port's own Tweaks category (ThaumcraftTweaks.DEFAULTS), not oracle keys.
+            Map.entry("aspect_inference", "true"),
             Map.entry("more_randomized_loot", "true"), Map.entry("earth_shock_targets", "2"),
             Map.entry("infusion_keeps_item_data", "true"), Map.entry("filled_container_to_hand", "true"),
             Map.entry("research_search", "true"), Map.entry("research_counter", "true"),
@@ -60,8 +61,8 @@ class ConfigDeclarationAuditTest {
             assertTrue(keys.add(entry.key()), "duplicate key " + entry.key());
             assertTrue(parsers.toString().contains("\"" + entry.key() + "\""), "no runtime reader: " + entry.key());
         }
-        assertEquals(35, keys.size());
-        assertEquals(49, DEFAULTS.size());
+        assertEquals(36, keys.size());
+        assertEquals(50, DEFAULTS.size());
     }
 
     @Test void editorDefaultsMatchTheOracleAndDoNotSilentlyDisableGlowingTaint(@TempDir Path directory) {
@@ -78,7 +79,7 @@ class ConfigDeclarationAuditTest {
 
     @Test void allRuntimeParserDefaultsMatchTheOracle() {
         Properties empty = new Properties();
-        assertEquals(new ResearchSettings(false, true, true, true, false, 0, 100), ResearchSettings.read(empty));
+        assertEquals(new ResearchSettings(false, true, true, true, false, 0, 100, true), ResearchSettings.read(empty));
         assertEquals(new BiomeSettings(5, 2, true, true, false), BiomeSettings.read(empty));
         assertEquals(new OriginalSpawnSettings(true, true, true, true, true, true), OriginalSpawnSettings.read(empty));
         assertEquals(new OriginalWorldgenSettings(true, true, true, true, true), OriginalWorldgenSettings.read(empty));
@@ -87,7 +88,7 @@ class ConfigDeclarationAuditTest {
         assertEquals(new thaumcraft.common.lib.runic.RunicSettings(2000, 80, 50),
                 thaumcraft.common.lib.runic.RunicSettings.DEFAULTS);
         assertEquals(ThaumcraftTweaks.DEFAULTS, readTweaks(empty));
-        assertEquals(49, DEFAULTS.size());
+        assertEquals(50, DEFAULTS.size());
     }
 
     private static ThaumcraftTweaks.Values readTweaks(Properties properties) {

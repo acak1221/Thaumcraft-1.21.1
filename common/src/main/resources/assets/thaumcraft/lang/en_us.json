@@ -2647,6 +2647,8 @@
   "tc.port.notifications.clear": "Clear",
   "tc.port.config.aspect_total_cap": "Aspect pool limit",
   "tc.port.config.aspect_total_cap.tooltip": "The most of each aspect a player can hold in their research pool.",
+  "tc.port.config.aspect_inference": "Automatic aspects",
+  "tc.port.config.aspect_inference.tooltip": "Items that TC4 gives no aspects get them from their tag family (the TC4 ore dictionary: deepslate ores, new woods, dyes, mod metals), from stonecutting, smithing and cooking recipes, and spawn eggs from their creature. Off: exactly the TC4 rules. The port's own setting; restart required.",
   "tag.item.thaumcraft.original_ore.cluster_cinnabar": "Native Cinnabar Clusters",
   "tag.item.thaumcraft.original_ore.cluster_copper": "Native Copper Clusters",
   "tag.item.thaumcraft.original_ore.cluster_gold": "Native Gold Clusters",

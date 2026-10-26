@@ -327,7 +327,7 @@ class NeoForgeLoaderParityTest {
     @Test void theAccessTransformerIsTheSharedAccessWidener() {
         List<String> widener = accessWidener();
         List<String> transformer = accessTransformer();
-        assertEquals(3, widener.size(), "the shared access widener owns three entries");
+        assertEquals(6, widener.size(), "the shared access widener owns six entries");
         assertEquals(widener, transformer,
                 "the NeoForge access transformer is the shared access widener, entry by entry");
     }
@@ -343,7 +343,7 @@ class NeoForgeLoaderParityTest {
                 found.add(method.group(1).replace('/', '.') + "#" + method.group(2) + "(" + method.group(3) + ")V");
                 continue;
             }
-            Matcher field = Pattern.compile("^accessible\\s+field\\s+(\\S+)\\s+(\\S+)\\s+I$").matcher(text);
+            Matcher field = Pattern.compile("^accessible\\s+field\\s+(\\S+)\\s+(\\S+)\\s+(?:I|L[^;\\s]+;)$").matcher(text);
             if (field.matches()) {
                 found.add(field.group(1).replace('/', '.') + "#" + field.group(2));
                 continue;

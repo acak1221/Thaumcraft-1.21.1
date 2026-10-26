@@ -51,8 +51,9 @@ public final class RecipeViews {
         if (!(recipe instanceof ArcaneWandRecipe || recipe instanceof ArcaneSceptreRecipe)) return List.of();
         boolean sceptre = recipe instanceof ArcaneSceptreRecipe;
         List<Arcane> variants = new ArrayList<>();
-        for (var rod : WandMaterials.RODS) {
-            for (var cap : WandMaterials.CAPS) {
+        // Native parts first, then the parts add-ons registered through WandRod.rods / WandCap.caps.
+        for (var rod : WandMaterials.allRods()) {
+            for (var cap : WandMaterials.allCaps()) {
                 ArcaneRecipeInput input;
                 try {
                     input = sceptre ? ArcaneSceptreRecipe.displayInput(rod.tag(), cap.tag()) : ArcaneWandRecipe.displayInput(rod.tag(), cap.tag());
@@ -65,8 +66,9 @@ public final class RecipeViews {
                 List<ItemStack> stacks = new ArrayList<>();
                 for (int slot = 0; slot < 9; slot++) stacks.add(input.getItem(slot));
                 String research = sceptre ? recipe.research() : !rod.tag().equals("wood") ? rod.research() : cap.research();
-                ResourceLocation id = ResourceLocation.fromNamespaceAndPath("thaumcraft",
+                ResourceLocation id = ResourceLocation.tryBuild("thaumcraft",
                         "/" + (sceptre ? "sceptre" : "wand") + "/" + rod.tag() + "/" + cap.tag());
+                if (id == null) continue; // an add-on tag that is not a valid resource path
                 variants.add(new Arcane(id, research, List.copyOf(stacks), result, recipe.vis(input)));
             }
         }

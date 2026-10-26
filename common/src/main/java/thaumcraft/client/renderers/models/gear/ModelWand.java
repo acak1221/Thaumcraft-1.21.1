@@ -91,6 +91,16 @@ public final class ModelWand {
         /** Original render175-181: the focus depth layer scale. */
         public static final float STAFF_DEPTH_XZ = .165F, STAFF_DEPTH_Y = .1765F, STAFF_DEPTH_SHIFT = -.15F;
         public static final float WAND_DEPTH = .16F, WAND_DEPTH_SHIFT = -.09F;
+        /** Original render180-199: the ornament of a focus is drawn twice, the second turned 90 degrees, both shifted and halved. */
+        public static final float ORNAMENT_SHIFT_X = -.25F, ORNAMENT_SHIFT_Y = -.1F, ORNAMENT_SHIFT_Z = .0275F, ORNAMENT_SCALE = .5F,
+                ORNAMENT_THICKNESS = .1F;
         private Geometry() {}
+
+        /**
+         * Original render87-101: a glowing rod ({@code WandRod.isGlowing}) is drawn with the raw lightmap value
+         * {@code (int) (200 + sin(ticks) * 5 + 5)} of the client player's ticks, block light only; 1.7.10's raw value is the
+         * modern packed light (block light in the low sixteen bits).
+         */
+        public static int glowLight(int ticks) { return (int) (200.0F + net.minecraft.util.Mth.sin(ticks) * 5.0F + 5.0F); }
     }
 }

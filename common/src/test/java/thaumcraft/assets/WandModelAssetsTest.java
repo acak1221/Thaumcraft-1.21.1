@@ -34,19 +34,42 @@ class WandModelAssetsTest {
     private boolean exists(String path) { return getClass().getClassLoader().getResource(path) != null; }
 
     private static String resolve(JsonArray overrides, float rod, float cap, float focus) {
+        return resolve(overrides, rod, cap, focus, 0F);
+    }
+
+    /** Vanilla ItemOverrides: the last entry whose every predicate value is at most the property value wins (absent = 0). */
+    private static String resolve(JsonArray overrides, float rod, float cap, float focus, float addon) {
         for (int index = overrides.size() - 1; index >= 0; index--) {
             JsonObject override = overrides.get(index).getAsJsonObject();
             JsonObject predicate = override.getAsJsonObject("predicate");
-            boolean met = predicate.get("thaumcraft:wand_rod").getAsFloat() <= rod && predicate.get("thaumcraft:wand_cap").getAsFloat() <= cap
-                    && predicate.get("thaumcraft:wand_focus").getAsFloat() <= focus;
+            boolean met = value(predicate, "thaumcraft:wand_rod") <= rod && value(predicate, "thaumcraft:wand_cap") <= cap
+                    && value(predicate, "thaumcraft:wand_focus") <= focus && value(predicate, "thaumcraft:wand_addon") <= addon;
             if (met) return override.get("model").getAsString();
         }
         return null;
     }
 
+    private static float value(JsonObject predicate, String property) {
+        return predicate.has(property) ? predicate.get(property).getAsFloat() : Float.NEGATIVE_INFINITY;
+    }
+
+    @Test void aWandWithAnAddonPartSelectsTheBuiltinAddonModel() throws Exception {
+        JsonArray overrides = json("assets/thaumcraft/models/item/wand.json").getAsJsonArray("overrides");
+        JsonObject last = overrides.get(overrides.size() - 1).getAsJsonObject();
+        assertEquals(WandModels.ADDON_MODEL, last.get("model").getAsString(), "the add-on entry is last, so it wins");
+        assertEquals(1, last.getAsJsonObject("predicate").size(), "it only reads thaumcraft:wand_addon");
+        // An unknown part reads 0 for rod/cap: whatever the focus, the add-on flag picks the add-on model.
+        for (var focus : WandModels.FOCI) assertEquals(WandModels.ADDON_MODEL, resolve(overrides, 0F, 0F, focus.value(), 1F), focus.suffix());
+        JsonObject model = json("assets/thaumcraft/models/item/wand_addon.json");
+        assertEquals("thaumcraft:item/wand_shape", model.get("parent").getAsString(),
+                "the shape chain reaches minecraft:builtin/entity, so the builtin item renderer draws the add-on parts");
+        assertFalse(model.has("display"), "the renderer owns the hand/GUI/ground transforms, exactly as for a native wand");
+    }
+
     @Test void everyCombinationOfRodCapAndFocusSelectsItsOwnModel() throws Exception {
         JsonArray overrides = json("assets/thaumcraft/models/item/wand.json").getAsJsonArray("overrides");
-        assertEquals(WandMaterials.RODS.size() * WandMaterials.CAPS.size() * WandModels.FOCI.size(), overrides.size(), "one entry per combination");
+        assertEquals(WandMaterials.RODS.size() * WandMaterials.CAPS.size() * WandModels.FOCI.size() + 1, overrides.size(),
+                "one entry per native combination, and the add-on entry");
         List<String> wrong = new ArrayList<>();
         for (var rod : WandMaterials.RODS) for (var cap : WandMaterials.CAPS) for (var focus : WandModels.FOCI) {
             String chosen = resolve(overrides, WandModels.rodValue(rod.tag()), WandModels.capValue(cap.tag()), focus.value());

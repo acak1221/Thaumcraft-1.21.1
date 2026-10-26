@@ -73,11 +73,8 @@ public record FocusUpgradeData(List<Short> ranks) {
     public static boolean supportedForFocus(ItemStack focus) {
         if (focus == null || focus.isEmpty() || focus.getCount() != 1
                 || focus.has(ThaumcraftFoci.WAND_FOCUS.get()) || focus.has(ThaumcraftContent.WAND_DATA.get())
-                || !(focus.getItem() instanceof ItemFocusFire || focus.getItem() instanceof ItemFocusFrost
-                    || focus.getItem() instanceof ItemFocusShock || focus.getItem() instanceof ItemFocusExcavation
-                    || focus.getItem() instanceof ItemFocusPortableHole || focus.getItem() instanceof ItemFocusWarding
-                    || focus.getItem() instanceof ItemFocusTrade || focus.getItem() instanceof ItemFocusHellbat
-                    || focus.getItem() instanceof ItemFocusPech || focus.getItem() instanceof ItemFocusPrimal)) return false;
+                // A native focus, or an add-on ItemFocusBasic whose applied ranks its own getPossibleUpgradesByRank allows.
+                || !(FocusData.isNativeFocus(focus.getItem()) || FocusData.isAddonFocus(focus.getItem()))) return false;
         if (focus.getItem() instanceof ItemFocusWarding && read(focus).level(FocusUpgradeType.enlarge) > 0
                 && read(focus).level(FocusUpgradeType.architect) == 0) return false;
         if (focus.getItem() instanceof ItemFocusShock && read(focus).level(FocusUpgradeType.enlarge) > 0

@@ -172,13 +172,16 @@ public final class ThaumcraftGearModelsClient {
                 }
                 // Original ItemWandRenderer.renderItem:542-568 draws the whole wand with the blend (770, 771):
                 // the ice rod (alpha 216) and the quartz rod (alpha 246) are see-through, the caps opaque.
-                model.renderRod(pose, buffers.getBuffer(RenderType.entityTranslucent(ModelWand.rodTexture(rod.baseTag()))), light, overlay);
+                // Original ModelWand.render:46-60 binds getRod(stack).getTexture(): an add-on rod's own sheet.
+                model.renderRod(pose, buffers.getBuffer(RenderType.entityTranslucent(rodTexture(rod))),
+                        rod.glowing() ? ModelWand.Geometry.glowLight(glowTick()) : light, overlay);
             } finally { pose.popPose(); }
             pose.pushPose();
             try {
                 if (staff) pose.scale(ModelWand.Geometry.STAFF_CAP_XZ, ModelWand.Geometry.STAFF_CAP_Y, ModelWand.Geometry.STAFF_CAP_XZ);
                 else pose.scale(ModelWand.Geometry.WAND_CAP_XZ, ModelWand.Geometry.WAND_CAP_Y, ModelWand.Geometry.WAND_CAP_XZ);
-                var capBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(ModelWand.capTexture(cap.tag())));
+                // Original ModelWand.render:233-244 binds getCap(stack).getTexture().
+                var capBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(capTexture(cap)));
                 if (sceptre) {
                     // Original ModelWand:126-134 - a sceptre draws the cap, and a second flat cap above it.
                     pose.pushPose();
@@ -212,6 +215,29 @@ public final class ThaumcraftGearModelsClient {
             // Original ModelWand.render after the focus: the sceptre rune ring and the primal staff runes.
             thaumcraft.client.renderers.item.WandRunes.render(pose, buffers, sceptre, rod.hasRunes(), tick);
         } finally { pose.popPose(); }
+    }
+
+    /**
+     * The model sheet of a rod: the native {@code wand_rod_<baseTag>.png}, or the add-on rod's own texture (null falls back to
+     * {@code thaumcraft:textures/models/wand_rod_<tag>.png}, the original constructors' derived name).
+     */
+    public static ResourceLocation rodTexture(WandMaterials.Rod rod) {
+        if (!rod.isAddon()) return ModelWand.rodTexture(rod.baseTag());
+        ResourceLocation texture = rod.texture();
+        return texture != null ? texture : ModelWand.rodTexture(rod.tag());
+    }
+
+    /** The model sheet of a cap: the native {@code wand_cap_<tag>.png}, or the add-on cap's own texture (null: the derived name). */
+    public static ResourceLocation capTexture(WandMaterials.Cap cap) {
+        if (!cap.isAddon()) return ModelWand.capTexture(cap.tag());
+        ResourceLocation texture = cap.texture();
+        return texture != null ? texture : ModelWand.capTexture(cap.tag());
+    }
+
+    /** Original ModelWand:93-101 reads the ticks of the client's own player for the glow. */
+    private static int glowTick() {
+        var player = Minecraft.getInstance().player;
+        return player == null ? 0 : player.tickCount;
     }
 
     /**

@@ -11,9 +11,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Immutable, persistent/synchronized item component. Amounts are TC4 centivis; the largest capacity is a staff's 250 whole vis. */
+/**
+ * Immutable, persistent/synchronized item component. Amounts are TC4 centivis; the largest native capacity is a staff's 250 whole vis.
+ *
+ * <p>The rod and cap are tags of {@link WandMaterials}: a native part, or a part an add-on registered through the public
+ * {@code WandRod}/{@code WandCap} registries (resolved when the component is decoded or built, so the add-on must be present
+ * on both sides).</p>
+ */
 public record WandData(String rod, String cap, Map<String, Integer> vis) {
-    /** The most one aspect can hold: the silverwood and primal staves as a sceptre, 375 whole vis (original rod capacity x 150). */
+    /**
+     * The most one aspect of a NATIVE wand can hold: the silverwood and primal staves as a sceptre, 375 whole vis (original rod
+     * capacity x 150). An add-on rod may hold more; the decoder checks every amount against the sceptre capacity of the rod.
+     */
     public static final int MAX_CENTIVIS = WandMaterials.MAX_CAPACITY;
     public static final List<String> PRIMALS = List.of("aer", "terra", "ignis", "aqua", "ordo", "perditio");
     public static final WandData EMPTY = new WandData("wood", "iron", Map.of());
@@ -32,7 +41,9 @@ public record WandData(String rod, String cap, Map<String, Integer> vis) {
     private static final Codec<Encoded> ENCODED_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ROD_CODEC.optionalFieldOf("rod", "wood").forGetter(Encoded::rod),
             CAP_CODEC.optionalFieldOf("cap", "iron").forGetter(Encoded::cap),
-            Codec.unboundedMap(ASPECT_CODEC, Codec.intRange(0, MAX_CENTIVIS)).optionalFieldOf("vis", Map.of()).forGetter(Encoded::vis)
+            // Non-negative here; the flatXmap below bounds every amount by the sceptre capacity of the actual rod, which for a
+            // native rod is at most MAX_CENTIVIS (so native acceptance is unchanged) and for an add-on rod its own capacity.
+            Codec.unboundedMap(ASPECT_CODEC, Codec.intRange(0, Integer.MAX_VALUE)).optionalFieldOf("vis", Map.of()).forGetter(Encoded::vis)
     ).apply(instance, Encoded::new));
     public static final Codec<WandData> CODEC = ENCODED_CODEC.flatXmap(encoded -> {
         int capacity = maxCapacity(encoded.rod());

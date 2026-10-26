@@ -2379,6 +2379,22 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.arcaneFurnaceIsBuiltByAWandAndPaysTheMeatNuggets(test);
     }
 
+    // Wand parts and a focus registered by an add-on through the public API (test-only add-on of this harness).
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "wand_api_assembly")
+    public void wandApiAddonPartsAssembleInTheArcaneWorkbench(GameTestHelper test) {
+        thaumcraft.common.testing.WandApiRuntimeChecks.addonPartsAssemble(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "wand_api_on_update")
+    public void wandApiAddonRodOnUpdateRefillsTheCarriedWand(GameTestHelper test) {
+        thaumcraft.common.testing.WandApiRuntimeChecks.addonRodOnUpdateRuns(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "wand_api_helper")
+    public void wandApiHelperPaysChargesAndMountsAddonFoci(GameTestHelper test) {
+        thaumcraft.common.testing.WandApiRuntimeChecks.wandHelperPaysAndMounts(test);
+    }
+
     private static net.minecraft.server.level.ServerPlayer notePlayer(GameTestHelper test) {
         test.assertTrue(NetworkRegistry.getCodec(ResearchNoteRequestPayload.TYPE.id(),
                         ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,

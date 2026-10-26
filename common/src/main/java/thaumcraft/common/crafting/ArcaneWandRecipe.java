@@ -2,6 +2,7 @@ package thaumcraft.common.crafting;
 
 import com.mojang.serialization.MapCodec;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -19,9 +20,14 @@ import thaumcraft.common.config.ThaumcraftWands;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.items.wands.WandMaterials;
+import thaumcraft.common.items.wands.WandPartItems;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 
-/** Original ArcaneWandRecipe:31-153, restricted to the registered playable rods/caps. Inert caps never count as materials. */
+/**
+ * Original ArcaneWandRecipe:31-153 over every registered rod and cap: the native catalogue first, then the parts add-ons
+ * registered through {@code WandRod.rods} / {@code WandCap.caps} (resolved at every match, never frozen). Inert caps never
+ * count as materials.
+ */
 public final class ArcaneWandRecipe implements NativeArcaneRecipe {
     private static final ArcaneWandRecipe INSTANCE = new ArcaneWandRecipe();
     public static final MapCodec<ArcaneWandRecipe> CODEC = MapCodec.unit(INSTANCE);
@@ -29,8 +35,12 @@ public final class ArcaneWandRecipe implements NativeArcaneRecipe {
     // x + y*3. Thus cap1=(0,2) is slot6, and cap2=(2,0) is slot2.
     private static final int CAP1 = 6, CAP2 = 2, ROD = 4;
 
-    private record Materials(WandMaterials.Rod rod, WandMaterials.Cap cap) {
-        int cost() { return rod.craftCost() * cap.craftCost(); }
+    /**
+     * The part of every cell that the output uses (the first registered part of that item, original :43-57) and every part of
+     * that item, for the research check (original checkMatch:141-161 accepts the cell when ANY part of that item is researched).
+     */
+    private record Materials(WandMaterials.Rod rod, WandMaterials.Cap cap, List<WandMaterials.Rod> rods, List<WandMaterials.Cap> caps) {
+        int cost() { return WandMaterials.assemblyCost(rod, cap); }
     }
 
     private static Materials materials(ArcaneRecipeInput input) {
@@ -39,15 +49,9 @@ public final class ArcaneWandRecipe implements NativeArcaneRecipe {
         }
         ItemStack cap1 = input.getItem(CAP1), cap2 = input.getItem(CAP2), rodItem = input.getItem(ROD);
         if (cap1.isEmpty() || cap2.isEmpty() || rodItem.isEmpty() || !checkItemEquals(cap1, cap2)) return null;
-        WandMaterials.Cap cap = null;
-        WandMaterials.Rod rod = null;
-        for (var candidate : WandMaterials.CAPS) {
-            if (checkItemEquals(cap1, ThaumcraftWands.capItem(candidate.tag()))) { cap = candidate; break; }
-        }
-        for (var candidate : WandMaterials.RODS) {
-            if (checkItemEquals(rodItem, ThaumcraftWands.rodItem(candidate.tag()))) { rod = candidate; break; }
-        }
-        return cap == null || rod == null ? null : new Materials(rod, cap);
+        var caps = WandPartItems.caps(cap1, ArcaneWandRecipe::checkItemEquals);
+        var rods = WandPartItems.rods(rodItem, ArcaneWandRecipe::checkItemEquals);
+        return caps.isEmpty() || rods.isEmpty() ? null : new Materials(rods.getFirst(), caps.getFirst(), rods, caps);
     }
 
     /**
@@ -70,8 +74,8 @@ public final class ArcaneWandRecipe implements NativeArcaneRecipe {
         if (materials == null || actor == null) return false;
         var knowledge = KnowledgeAccess.get(actor);
         // Includes CAP_iron / ROD_wood, whose original research entries auto-unlock.
-        return knowledge.isResearchComplete(materials.cap().research())
-                && knowledge.isResearchComplete(materials.rod().research());
+        return materials.caps().stream().anyMatch(cap -> knowledge.isResearchComplete(cap.research()))
+                && materials.rods().stream().anyMatch(rod -> knowledge.isResearchComplete(rod.research()));
     }
 
     @Override public ItemStack assemble(ArcaneRecipeInput input, HolderLookup.Provider registries) {
@@ -103,12 +107,17 @@ public final class ArcaneWandRecipe implements NativeArcaneRecipe {
     @Override public RecipeSerializer<?> getSerializer() { return ThaumcraftWands.ARCANE_WAND_SERIALIZER.get(); }
     @Override public RecipeType<?> getType() { return ThaumcraftArcane.ARCANE_RECIPE_TYPE.get(); }
 
-    /** Book-only input fixture; derive its output/cost through THIS registered recipe, never a global fake result. */
+    /**
+     * Book-only input fixture; derive its output/cost through THIS registered recipe, never a global fake result.
+     * The parts may be native or add-on tags; an unknown tag, or an add-on part without an item, throws.
+     */
     public static ArcaneRecipeInput displayInput(String rod, String cap) {
+        ItemStack capItem = WandPartItems.capItem(WandMaterials.cap(cap)), rodItem = WandPartItems.rodItem(WandMaterials.rod(rod));
+        if (capItem.isEmpty() || rodItem.isEmpty()) throw new IllegalArgumentException("Wand part without an item: " + rod + "/" + cap);
         NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
-        items.set(CAP1, ThaumcraftWands.capItem(cap));
-        items.set(CAP2, ThaumcraftWands.capItem(cap));
-        items.set(ROD, ThaumcraftWands.rodItem(rod));
+        items.set(CAP1, capItem.copyWithCount(1));
+        items.set(CAP2, capItem.copyWithCount(1));
+        items.set(ROD, rodItem.copyWithCount(1));
         return new ArcaneRecipeInput(items);
     }
 

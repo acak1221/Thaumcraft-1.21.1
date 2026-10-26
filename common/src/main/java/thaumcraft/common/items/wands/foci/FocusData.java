@@ -5,7 +5,9 @@ import com.mojang.serialization.DataResult;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftFoci;
 import thaumcraft.common.items.wands.ItemWandCasting;
@@ -36,16 +38,31 @@ public record FocusData(ItemStack focus) {
 
     public static boolean isSupportedFocus(ItemStack stack) {
         return stack != null && !stack.isEmpty() && stack.getCount() == 1
-                // An unknown ItemFocusBasic is NOT an implemented focus and
-                // must never decode, select, or silently dispatch as Fire.
-                && (stack.getItem() instanceof ItemFocusFire || stack.getItem() instanceof ItemFocusExcavation
-                    || stack.getItem() instanceof ItemFocusFrost || stack.getItem() instanceof ItemFocusShock
-                    || stack.getItem() instanceof ItemFocusPortableHole || stack.getItem() instanceof ItemFocusWarding
-                    || stack.getItem() instanceof ItemFocusTrade || stack.getItem() instanceof ItemFocusHellbat
-                    || stack.getItem() instanceof ItemFocusPech || stack.getItem() instanceof ItemFocusPrimal)
+                // A native focus, or a focus of another mod (original ItemWandCasting.setFocus and
+                // WandManager.changeFocus took every ItemFocusBasic). An add-on focus is dispatched through
+                // its OWN ItemFocusBasic hooks, never as Fire or any other native focus.
+                && (isNativeFocus(stack.getItem()) || isAddonFocus(stack.getItem()))
                 && !stack.has(ThaumcraftFoci.WAND_FOCUS.get())
                 && !stack.has(ThaumcraftContent.WAND_DATA.get())
                 && FocusUpgradeData.supportedForFocus(stack);
+    }
+
+    /** One of the ten native focus items. */
+    public static boolean isNativeFocus(Item item) {
+        return item instanceof ItemFocusFire || item instanceof ItemFocusExcavation
+                || item instanceof ItemFocusFrost || item instanceof ItemFocusShock
+                || item instanceof ItemFocusPortableHole || item instanceof ItemFocusWarding
+                || item instanceof ItemFocusTrade || item instanceof ItemFocusHellbat
+                || item instanceof ItemFocusPech || item instanceof ItemFocusPrimal;
+    }
+
+    /**
+     * A focus item of another mod: an {@link ItemFocusBasic} that is not a native focus. It mounts on a wand, is selected and
+     * casts through its own hooks ({@code onFocusRightClick}, {@code onUsingFocusTick}, ...), and is drawn with its colour,
+     * ornament and depth layer.
+     */
+    public static boolean isAddonFocus(Item item) {
+        return item instanceof ItemFocusBasic && !isNativeFocus(item);
     }
 
     /** Missing components do not rewrite old wand materials, capacity or stored vis. */

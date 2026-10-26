@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.api.wands.IWandRodOnUpdate;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.lib.baubles.RunicBaubleRules;
 
@@ -14,8 +15,12 @@ import thaumcraft.common.lib.baubles.RunicBaubleRules;
  * no fixed aspect: on every fiftieth tick it adds one whole vis to ONE primal picked at random among the primals that are below a
  * tenth of the capacity. The native wand applies the same rule on the carrier's tick through {@link WandRodPassive}; this class
  * is the original's own rod passive, with the decision in {@link RunicBaubleRules}.
+ *
+ * <p>Like the original it is an {@link IWandRodOnUpdate}: the native views in {@code WandRod.rods} return it from
+ * {@code getOnUpdate()}. The native wand never calls it through those views (its tick uses {@link WandRodPassive}), so an
+ * elemental rod refills once per tick, not twice.</p>
  */
-public final class WandRodPrimalOnUpdate {
+public final class WandRodPrimalOnUpdate implements IWandRodOnUpdate {
     /** The passive of a rod tag, or null when the rod has none. */
     private final String aspect;
 
@@ -41,7 +46,7 @@ public final class WandRodPrimalOnUpdate {
     public boolean anyPrimal() { return aspect == null; }
 
     /** The original onUpdate: the carrier's tick refills the wand this rod sits in. */
-    public void onUpdate(ItemStack stack, Player player) {
+    @Override public void onUpdate(ItemStack stack, Player player) {
         if (stack == null || stack.isEmpty() || player == null) return;
         WandData before = ItemWandCasting.data(stack);
         // Original WandRodPrimalOnUpdate:34 and :40 measure against getMaxVis of the stack itself,

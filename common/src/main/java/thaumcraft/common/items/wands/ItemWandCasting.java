@@ -133,6 +133,13 @@ public final class ItemWandCasting extends Item {
         if (level.isClientSide || !(entity instanceof Player player)) return;
         normalizeModifiers(stack);
         WandData before = data(stack);
+        WandMaterials.Rod rod = WandMaterials.rod(before.rod());
+        if (rod.isAddon()) {
+            // Original ItemWandCasting.onUpdate:350-355: getRod(stack).getOnUpdate().onUpdate(stack, player), server only.
+            thaumcraft.api.wands.IWandRodOnUpdate hook = rod.onUpdate();
+            if (hook != null) hook.onUpdate(stack, player);
+            return;
+        }
         // The passive rod refills up to a tenth of the capacity of the wand it sits in (original
         // WandRodPrimalOnUpdate:34); a sceptre holds one and a half times the capacity of its rod.
         WandData after = WandRodPassive.tick(before, getMaxVis(stack), player.tickCount, player.getRandom()::nextInt);
@@ -375,7 +382,8 @@ public final class ItemWandCasting extends Item {
         WandData state = data(stack);
         var rod = WandMaterials.rod(state.rod());
         // Original getItemStackDisplayName: a staff is named after the plain rod ("greatwood_staff" -> Greatwood) with the staff noun.
-        // A sceptre is named with the sceptre noun (ItemWandCasting:160).
+        // A sceptre is named with the sceptre noun (ItemWandCasting:160). An add-on part uses the same keys
+        // (item.Wand.<cap>.cap, item.Wand.<rod>.rod), which the add-on ships in its own language file.
         String noun = rod.staff() ? "staff" : isSceptre(stack) ? "sceptre" : "wand";
         return Component.translatable("tc.port.wand.name", Component.translatable("item.Wand." + state.cap() + ".cap"),
                 Component.translatable("item.Wand." + rod.baseTag() + ".rod"), Component.translatable("item.Wand." + noun + ".obj"));

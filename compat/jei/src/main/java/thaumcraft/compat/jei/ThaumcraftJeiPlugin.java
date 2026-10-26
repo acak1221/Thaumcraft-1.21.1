@@ -77,18 +77,23 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
         }
         RecipeManager manager = level.getRecipeManager();
         HolderLookup.Provider registries = level.registryAccess();
-        registration.addRecipes(Categories.ARCANE, guarded("arcane", manager.getAllRecipesFor(ThaumcraftArcane.ARCANE_RECIPE_TYPE.get()),
-                holder -> arcane(holder, registries)));
+        // Recipes add-ons registered through ThaumcraftApi live outside the recipe manager.
+        var arcane = new ArrayList<>(manager.getAllRecipesFor(ThaumcraftArcane.ARCANE_RECIPE_TYPE.get()));
+        arcane.addAll(ProgrammaticRecipes.arcaneViews());
+        registration.addRecipes(Categories.ARCANE, guarded("arcane", arcane, holder -> arcane(holder, registries)));
         registration.addRecipes(Categories.CRUCIBLE, guarded("crucible", ProgrammaticRecipes.crucibles(manager), holder -> List.of(
                 new Pages.Crucible(holder.id(), holder.value().research(), holder.value().catalyst(), holder.value().getResultItem(registries),
                         holder.value().aspects()))));
-        List<RecipeViews.Infusion> infusions = new ArrayList<>(guarded("infusion", manager.getAllRecipesFor(ThaumcraftInfusion.INFUSION_RECIPE_TYPE.get()),
+        var infusionHolders = new ArrayList<>(manager.getAllRecipesFor(ThaumcraftInfusion.INFUSION_RECIPE_TYPE.get()));
+        infusionHolders.addAll(ProgrammaticRecipes.infusionViews());
+        List<RecipeViews.Infusion> infusions = new ArrayList<>(guarded("infusion", infusionHolders,
                 holder -> List.of(RecipeViews.infusion(holder.id(), holder.value(), registries))));
         infusions.addAll(guarded("runic augmentation", manager.getAllRecipesFor(ThaumcraftRunic.AUGMENT_TYPE.get()),
                 holder -> RecipeViews.runic(holder.id(), holder.value())));
         registration.addRecipes(Categories.INFUSION, infusions);
-        registration.addRecipes(Categories.INFUSION_ENCHANTMENT, guarded("enchantment infusion",
-                manager.getAllRecipesFor(ThaumcraftInfusion.ENCHANTMENT_RECIPE_TYPE.get()),
+        var enchantments = new ArrayList<>(manager.getAllRecipesFor(ThaumcraftInfusion.ENCHANTMENT_RECIPE_TYPE.get()));
+        enchantments.addAll(ProgrammaticRecipes.enchantmentViews());
+        registration.addRecipes(Categories.INFUSION_ENCHANTMENT, guarded("enchantment infusion", enchantments,
                 holder -> RecipeViews.enchantment(holder.id(), holder.value(), registries).map(List::of).orElse(List.of())));
     }
 

@@ -98,6 +98,10 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
             return;
         }
         guarded("arcane", manager.getAllRecipesFor(ThaumcraftArcane.ARCANE_RECIPE_TYPE.get()), holder -> arcane(holder, registries), registry);
+        // Recipes add-ons registered through ThaumcraftApi live outside the recipe manager.
+        guarded("add-on arcane", ProgrammaticRecipes.arcaneViews(), holder -> arcane(holder, registries), registry);
+        guarded("add-on infusion", ProgrammaticRecipes.infusionViews(), holder -> List.of(infusion(holder, registries)), registry);
+        guarded("add-on enchantment infusion", ProgrammaticRecipes.enchantmentViews(), holder -> enchantment(holder, registries), registry);
         guarded("crucible", ProgrammaticRecipes.crucibles(manager), holder -> List.of(new EmiCrucibleRecipe(holder.id(),
                 holder.value().research(), holder.value().catalyst(), holder.value().getResultItem(registries), holder.value().aspects())), registry);
         guarded("infusion", manager.getAllRecipesFor(ThaumcraftInfusion.INFUSION_RECIPE_TYPE.get()), holder -> List.of(infusion(holder, registries)), registry);

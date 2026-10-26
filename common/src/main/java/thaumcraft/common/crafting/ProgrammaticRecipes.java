@@ -77,7 +77,61 @@ public final class ProgrammaticRecipes {
         return List.copyOf(recipes);
     }
 
-    public static synchronized void forget(Object recipe) { CRUCIBLES.remove(recipe); ORDERED.clear(); }
+    public static synchronized void forget(Object recipe) { CRUCIBLES.remove(recipe); VIEWS.remove(recipe); ORDERED.clear(); }
+
+    /** One stable display holder per API registration, so a recipe viewer sees the same id on every reload. */
+    private static final Map<Object, RecipeHolder<?>> VIEWS = new IdentityHashMap<>();
+
+    /**
+     * The native views of the arcane registrations of the public API, as recipe holders for recipe viewers. The id is
+     * {@code thaumcraft:api/arcane/<registration index>}, the id the arcane workbench gives the same match. A custom
+     * {@code IArcaneRecipe} without a native view has none.
+     */
+    @SuppressWarnings("unchecked")
+    public static synchronized List<RecipeHolder<NativeArcaneRecipe>> arcaneViews() {
+        List<RecipeHolder<NativeArcaneRecipe>> views = new ArrayList<>();
+        List<Object> registrations = registrations();
+        for (int index = 0; index < registrations.size(); index++) {
+            Object registration = registrations.get(index);
+            NativeArcaneRecipe view = registration instanceof thaumcraft.api.crafting.ShapedArcaneRecipe shaped ? shaped.nativeRecipe()
+                    : registration instanceof thaumcraft.api.crafting.ShapelessArcaneRecipe shapeless ? shapeless.nativeRecipe() : null;
+            if (view != null) views.add((RecipeHolder<NativeArcaneRecipe>) view(registration, "arcane", index, view));
+        }
+        return views;
+    }
+
+    /** The native views of the infusion registrations of the public API; a patched result has none. */
+    @SuppressWarnings("unchecked")
+    public static synchronized List<RecipeHolder<InfusionStackRecipe>> infusionViews() {
+        List<RecipeHolder<InfusionStackRecipe>> views = new ArrayList<>();
+        List<Object> registrations = registrations();
+        for (int index = 0; index < registrations.size(); index++) {
+            if (registrations.get(index) instanceof thaumcraft.api.crafting.InfusionRecipe infusion && infusion.nativeRecipe() != null)
+                views.add((RecipeHolder<InfusionStackRecipe>) view(infusion, "infusion", index, infusion.nativeRecipe()));
+        }
+        return views;
+    }
+
+    /** The native views of the enchantment infusion registrations of the public API. */
+    @SuppressWarnings("unchecked")
+    public static synchronized List<RecipeHolder<InfusionEnchantmentRecipe>> enchantmentViews() {
+        List<RecipeHolder<InfusionEnchantmentRecipe>> views = new ArrayList<>();
+        List<Object> registrations = registrations();
+        for (int index = 0; index < registrations.size(); index++) {
+            if (registrations.get(index) instanceof thaumcraft.api.crafting.InfusionEnchantmentRecipe infusion && infusion.nativeRecipe() != null)
+                views.add((RecipeHolder<InfusionEnchantmentRecipe>) view(infusion, "enchantment", index, infusion.nativeRecipe()));
+        }
+        return views;
+    }
+
+    private static RecipeHolder<?> view(Object registration, String kind, int index, net.minecraft.world.item.crafting.Recipe<?> recipe) {
+        RecipeHolder<?> holder = VIEWS.get(registration);
+        if (holder == null || holder.value() != recipe) {
+            holder = new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath("thaumcraft", "api/" + kind + "/" + index), recipe);
+            VIEWS.put(registration, holder);
+        }
+        return holder;
+    }
 
     /** The first recipe of the ordered list with this id, as the linear search of the list. */
     public static synchronized CrucibleRecipe crucible(RecipeManager manager, ResourceLocation id) {

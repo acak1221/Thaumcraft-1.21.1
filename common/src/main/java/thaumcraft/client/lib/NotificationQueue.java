@@ -31,4 +31,5 @@ public final class NotificationQueue {
         return List.copyOf(retained);
     }
     public void clear() { notifications.clear(); }
+    public int size() { return notifications.size(); }
 }

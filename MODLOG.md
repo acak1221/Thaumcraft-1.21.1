@@ -1,3 +1,15 @@
+## 2026-10-26 — TC4Tweaks wave 2: Thaumonomicon search and counter, notification clear button
+
+Three client improvements from TC4Tweaks, each a setting in the Tweaks tab, on by
+default (KNOWN_DEVIATIONS §8): a Thaumonomicon search box that only lists
+completed research, by name or by the items its recipe pages make; a completed
+research counter that never reveals hidden research; and a Clear button above
+the notification stack while chat is open. A real client run found and fixed
+research icons drawing over the result list and infusion-enchantment sample items
+polluting item results. Verified: 2580 JUnit, both builds, 471/471 Fabric and
+456/456 NeoForge GameTests on fresh worlds, 115 Python tests; inspected in a real
+Fabric client. See [the report](docs/analysis/2026-10-26-tc4tweaks-wave2-ru.md).
+
 ## 2026-10-26 — TC4Tweaks wave 1: four gameplay improvements as settings
 
 At the user's request, TC4Tweaks (AGPL-3.0; ideas only, no code copied) was

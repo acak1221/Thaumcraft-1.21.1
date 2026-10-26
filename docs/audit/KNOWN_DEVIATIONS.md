@@ -140,7 +140,8 @@ tab of the configuration screen (`config/thaumcraft.properties`), on by default 
 TC4Tweaks; switched off, the original rule applies. No TC4Tweaks code was copied: it patched
 1.7.10 bytecode, and each idea is re-implemented on the port's code
 (`thaumcraft.common.config.ThaumcraftTweaks`). `TweakRuntimeChecks` drives every one of them
-twice, with the setting and with the original rule.
+twice, with the setting and with the original rule; the three client settings were checked in a
+real client (`docs/analysis/2026-10-26-tc4tweaks-wave2-ru.md`).
 
 | Setting (key) | Original TC4 4.2.3.5 (oracle bytecode) | With the setting |
 |---|---|---|
@@ -148,6 +149,9 @@ twice, with the setting and with the original rule.
 | `earth_shock_targets` (2) | `EntityShockOrb` hurts `getEntitiesWithinAABB(Entity.class, …)`, and the shock field (`BlockAiry.onEntityCollidedWithBlock`) hurts any entity, so dropped items and experience orbs are destroyed | 2: only living entities; 1: everything except items and experience orbs; 0: the original. The field still slows every entity |
 | `infusion_keeps_item_data` | `TileInfusionMatrix` copies `InfusionRecipe.getRecipeOutput(input)`, so an enchanted or named centre item loses its enchantments and name | When the centre and the result are both armour or tools, every component the centre item changes is kept on the result unless the recipe's result sets that component itself; the components that define the kind of item are never copied and carried wear never breaks the result. Applies to data recipes and plain add-on recipes, not to recipe subclasses that compute their own result |
 | `filled_container_to_hand` | `ItemEssence` gives the filled phial with `InventoryPlayer.addItemStackToInventory`, the first free slot when no stack has room | When the last empty phial (or, at the alembic, the last empty jar) in hand is filled and no stack of the filled item has room, the filled one stays in that hand |
+| `research_search` (client) | The Thaumonomicon has no search | A search box on the top border finds completed research by name or key, and by the items their readable recipe pages make (not the sample items of enchantment and runic infusions); a result opens the research. Research the player has not completed is never listed |
+| `research_counter` (client) | No counter | The top border shows the completed research of the open category out of all of it, or, while some is still hidden, out of what the player can see, marked with a red question mark |
+| `notification_clear_button` (client) | Notifications in the corner can only expire | Open chat shows a Clear button above the notification stack while it has rows |
 
 Not adopted, because the port already covers them or they do not apply to 1.21.1: the packet
 exploit fixes for research completion and aspect combination (the port validates both on the

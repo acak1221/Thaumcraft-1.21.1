@@ -102,7 +102,10 @@ public final class ThaumcraftConfigStore {
             new Entry(Category.TWEAKS, "more_randomized_loot", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "earth_shock_targets", false, false, 2, 0, 2),
             new Entry(Category.TWEAKS, "infusion_keeps_item_data", true, true, 0, 0, 0),
-            new Entry(Category.TWEAKS, "filled_container_to_hand", true, true, 0, 0, 0));
+            new Entry(Category.TWEAKS, "filled_container_to_hand", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_search", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "research_counter", true, true, 0, 0, 0),
+            new Entry(Category.TWEAKS, "notification_clear_button", true, true, 0, 0, 0));
 
     private ThaumcraftConfigStore() {}
 

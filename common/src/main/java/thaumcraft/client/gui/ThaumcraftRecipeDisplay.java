@@ -299,6 +299,25 @@ public final class ThaumcraftRecipeDisplay {
     /** The synthetic inputs of such a page, in the order of the original recipe. */
     private final List<ItemStack> syntheticInputs;
 
+    /**
+     * The items this page makes: its synthetic result, the result of every alternative, or the
+     * result of its recipe. Used by the Thaumonomicon search; nothing is evaluated or synthesised.
+     */
+    public List<ItemStack> results(Level level) {
+        if (syntheticResult != null && !syntheticResult.isEmpty()) return List.of(syntheticResult);
+        if (!alternatives.isEmpty()) {
+            List<ItemStack> all = new ArrayList<>();
+            for (ThaumcraftRecipeDisplay alternative : alternatives) all.addAll(alternative.results(level));
+            return all;
+        }
+        if (recipe == null) return List.of();
+        // An enchantment or runic infusion shows a sample tool or armour; it makes no item of its own.
+        if (recipe.value() instanceof InfusionEnchantmentRecipe
+                || recipe.value() instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe) return List.of();
+        ItemStack result = recipe.value().getResultItem(level.registryAccess());
+        return result.isEmpty() ? List.of() : List.of(result);
+    }
+
     private ThaumcraftRecipeDisplay(RecipeHolder<?> recipe, List<Ingredient> ingredients, int gridWidth, boolean shapeless) {
         this.recipe = recipe;
         this.ingredients = List.copyOf(ingredients);

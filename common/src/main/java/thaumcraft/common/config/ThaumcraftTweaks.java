@@ -35,16 +35,20 @@ public final class ThaumcraftTweaks {
      *                           the centre item on the result, unless the recipe sets them itself
      * @param filledToHand       filling a phial or a jar with the last empty one in hand puts the filled
      *                           one into that hand, unless a stack of it already has room
+     * @param researchSearch     the Thaumonomicon has a search box over the research the player completed
+     * @param researchCounter    the Thaumonomicon counts the completed research of the open category
+     * @param clearNotifications open chat offers a button that clears the notification stack
      */
     public record Values(boolean moreRandomizedLoot, EarthShockTargets earthShock, boolean infusionKeepsData,
-                         boolean filledToHand) {
+                         boolean filledToHand, boolean researchSearch, boolean researchCounter,
+                         boolean clearNotifications) {
         public Values { Objects.requireNonNull(earthShock, "earth shock"); }
     }
 
     /** The TC4Tweaks defaults. */
-    public static final Values DEFAULTS = new Values(true, EarthShockTargets.ONLY_LIVING, true, true);
+    public static final Values DEFAULTS = new Values(true, EarthShockTargets.ONLY_LIVING, true, true, true, true, true);
     /** Every original TC4 4.2.3.5 rule. */
-    public static final Values ORIGINAL = new Values(false, EarthShockTargets.ALL, false, false);
+    public static final Values ORIGINAL = new Values(false, EarthShockTargets.ALL, false, false, false, false, false);
 
     private static volatile Values values = DEFAULTS;
 
@@ -55,6 +59,9 @@ public final class ThaumcraftTweaks {
     public static EarthShockTargets earthShock() { return values.earthShock(); }
     public static boolean infusionKeepsData() { return values.infusionKeepsData(); }
     public static boolean filledToHand() { return values.filledToHand(); }
+    public static boolean researchSearch() { return values.researchSearch(); }
+    public static boolean researchCounter() { return values.researchCounter(); }
+    public static boolean clearNotifications() { return values.clearNotifications(); }
 
     public static void configure(Values input) { values = Objects.requireNonNull(input); }
 
@@ -64,7 +71,10 @@ public final class ThaumcraftTweaks {
                 flag(properties, "more_randomized_loot", DEFAULTS.moreRandomizedLoot()),
                 EarthShockTargets.byId(number(properties, "earth_shock_targets", DEFAULTS.earthShock().ordinal())),
                 flag(properties, "infusion_keeps_item_data", DEFAULTS.infusionKeepsData()),
-                flag(properties, "filled_container_to_hand", DEFAULTS.filledToHand())));
+                flag(properties, "filled_container_to_hand", DEFAULTS.filledToHand()),
+                flag(properties, "research_search", DEFAULTS.researchSearch()),
+                flag(properties, "research_counter", DEFAULTS.researchCounter()),
+                flag(properties, "notification_clear_button", DEFAULTS.clearNotifications())));
     }
 
     /** Whether earth shock hurts an entity of this kind under the given setting. */

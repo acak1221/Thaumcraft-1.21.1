@@ -1,4 +1,4 @@
-## 2026-10-27 — CI on main: the advanced Guard range scenario
+## 2026-10-27 — CI on main: two intermittent GameTests (Guard range, tube phase)
 
 The GameTest advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag failed now and then on main: its row of spiders
 reaches two chunks from the Guard's home, and a chunk loaded only by level.getChunk makes its entities visible a
@@ -8,6 +8,14 @@ tick entities (GameTestChunkAwait.entityTicking), then released; GameTestIsolati
 with the row in unloaded chunks: the old code refused every spider, the fix passes. Verified by a local replay of
 every CI step: 2641 JUnit, 140 Python (7 skipped), :fabric:build, GameTest Fabric 495/495 on a fresh world; the
 scenario alone on NeoForge 1/1. Not run: the full NeoForge suite.
+
+The next CI run failed on another intermittent scenario, addonAspectEssentiaFillsAJarAndSurvivesReload: it ticks
+the tube and jar exactly 160 times for 32 units, but a new tube starts its phase at nextInt(10) of the world
+random (as the original TileTube), and phase 4 reaches its first pull count before its first suction count, so
+the 32 units need 165 ticks (about one run in ten). The scenario now ticks 165 times, the worst case of the ten
+phases, and still checks conservation on every tick. Reproduced with the phase set to 4: 160 ticks gives the CI
+message, 165 passes. Verified by a second local replay of every CI step: 2641 JUnit, 140 Python (7 skipped), :fabric:build,
+GameTest Fabric 495/495 on a fresh world; the scenario alone on NeoForge 1/1.
 
 ## 2026-10-26 — add-on developer documentation
 

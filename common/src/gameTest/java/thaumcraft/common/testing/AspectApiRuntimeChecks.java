@@ -224,7 +224,9 @@ public final class AspectApiRuntimeChecks {
 
             source.setFilter(tempus);
             test.assertTrue(source.addToContainer(tempus, 32) == 0, "the alembic holds exactly thirty-two add-on units");
-            ticks(test, level, jarPos, tubePos, sourcePos, tempus, 160, 32);
+            // A new tube starts its phase at nextInt(10) of the world random (original TileTube). Phase 4 reaches its first pull
+            // count, 5, before its first suction count, so it loses that pull and the 32 units take 165 ticks instead of 160.
+            ticks(test, level, jarPos, tubePos, sourcePos, tempus, 165, 32);
             test.assertTrue(jar.getAmount() == 32 && jar.getAspect() == tempus && source.getAmount() == 0,
                     "the real tube and jar tickers move every add-on unit into the labelled jar");
 

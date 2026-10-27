@@ -108,6 +108,37 @@ class CheckpointEvidenceTest(unittest.TestCase):
             with self.subTest(tag=tag), self.assertRaisesRegex(ValueError, "Failed or skipped"):
                 self.report(f'<testsuite><testcase name="test"><{tag}/></testcase></testsuite>')
 
+    def test_only_a_suite_whose_original_jar_is_absent_may_skip(self) -> None:
+        suite = "thaumcraft.eldritch.OrphanMobOracleContractTest"
+        allowed = frozenset({suite})
+        skipped = (f'<testsuite tests="2" skipped="2"><testcase classname="{suite}" name="a"><skipped/></testcase>'
+                   f'<testcase classname="{suite}" name="b"><skipped/></testcase></testsuite>')
+        self.assertEqual(self.report(skipped, allowed_skips=allowed)["skipped"], 2)
+        with self.assertRaisesRegex(ValueError, "Unsuccessful"):
+            self.report(skipped)
+        with self.assertRaisesRegex(ValueError, "Unsuccessful"):
+            self.report('<testsuite skipped="1"><testcase classname="demo.Other" name="a"><skipped/></testcase></testsuite>',
+                        allowed_skips=allowed)
+        with self.assertRaisesRegex(ValueError, "Failed or skipped"):
+            self.report('<testsuite><testcase classname="demo.Other" name="a"><skipped/></testcase></testsuite>',
+                        allowed_skips=allowed)
+        with self.assertRaisesRegex(ValueError, "Unsuccessful"):
+            self.report(f'<testsuite skipped="2"><testcase classname="{suite}" name="a"><skipped/></testcase></testsuite>',
+                        allowed_skips=allowed)
+
+    def test_skips_are_allowed_only_while_the_original_jar_is_absent(self) -> None:
+        self.assertEqual(evidence.absent_original_skips(self.root), frozenset(evidence.ORIGINAL_JAR_SUITES))
+        for jar in set(evidence.ORIGINAL_JAR_SUITES.values()):
+            self.write(jar, "jar")
+        self.assertEqual(evidence.absent_original_skips(self.root), frozenset())
+
+    def test_every_listed_suite_skips_only_on_its_missing_jar(self) -> None:
+        tests = Path(__file__).resolve().parents[2] / "common/src/test/java"
+        for suite, jar in evidence.ORIGINAL_JAR_SUITES.items():
+            source = (tests / (suite.replace(".", "/") + ".java")).read_text(encoding="utf-8")
+            self.assertIn(jar, source, suite)
+            self.assertIn("assumeTrue(Files.isRegularFile(path)", source, suite)
+
     def test_empty_unnamed_and_duplicate_cases_are_rejected(self) -> None:
         for xml in ('<testsuite/>', '<testsuite><testcase/></testsuite>',
                     '<testsuite><testcase name="one"/><testcase name="one"/></testsuite>'):

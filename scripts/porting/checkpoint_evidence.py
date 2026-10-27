@@ -99,8 +99,18 @@ def junit_reports(root: Path) -> list[Path]:
     return [actual[name] for name in sorted(actual)]
 
 
+# JUnit suites that read an original JAR the repository does not track (the owner had them removed from the history on
+# 2026-10-26). Each skips through an assumption when its JAR is absent from the repository root; nothing else may skip.
+ORIGINAL_JAR_SUITES = {"thaumcraft.eldritch.OrphanMobOracleContractTest": "Thaumcraft-1.7.10-4.2.3.5.jar"}
+
+
+def absent_original_skips(root: Path) -> frozenset[str]:
+    """The suites whose skipped cases are accepted: only those whose original JAR is really absent."""
+    return frozenset(suite for suite, jar in ORIGINAL_JAR_SUITES.items() if not (root / jar).is_file())
+
+
 def validate_test_report(path: Path, *, required: list[str] | None = None,
-                         fabric_prefix: bool = False) -> dict:
+                         fabric_prefix: bool = False, allowed_skips: frozenset[str] = frozenset()) -> dict:
     root = ET.parse(path).getroot()
     cases = list(root.iter("testcase"))
     summary = {"tests": len(cases),
@@ -109,14 +119,18 @@ def validate_test_report(path: Path, *, required: list[str] | None = None,
                "cases": [case.attrib.get("name", "") for case in cases]}
     if not cases or any(not name for name in summary["cases"]):
         raise ValueError(f"Empty or unnamed test cases: {path}")
+
+    def allowed_skipped(node) -> int:
+        return sum(1 for case in node.iter("testcase")
+                   if case.attrib.get("classname") in allowed_skips and case.find("skipped") is not None)
     for node in root.iter():
         if node.tag in ("testsuite", "testsuites"):
             if "tests" in node.attrib and int(node.attrib["tests"]) != sum(1 for _ in node.iter("testcase")):
                 raise ValueError(f"Test count does not match actual cases: {path}")
             for key in ("failures", "errors", "skipped", "disabled"):
-                if int(node.attrib.get(key, "0")):
+                if int(node.attrib.get(key, "0")) != (allowed_skipped(node) if key == "skipped" else 0):
                     raise ValueError(f"Unsuccessful test report ({key}): {path}")
-    if any(summary[key] for key in ("failures", "errors", "skipped")):
+    if summary["failures"] or summary["errors"] or summary["skipped"] != allowed_skipped(root):
         raise ValueError(f"Failed or skipped tests: {path}")
     # JUnit parameterized cases may repeat display names in different classes.
     identities = [(case.attrib.get("classname", ""), case.attrib["name"]) for case in cases]

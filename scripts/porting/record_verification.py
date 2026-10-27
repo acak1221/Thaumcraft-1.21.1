@@ -151,13 +151,15 @@ def main() -> None:
         raise SystemExit("Build log does not contain native registry validation")
     accepted, missing_items, missing_blocks, conflicts = map(int, registry_checks[-1])
     suites = []
+    absent_original = checkpoint_evidence.absent_original_skips(ROOT)
     for path in checkpoint_evidence.junit_reports(ROOT):
         checked_output(path)
-        suites.append(checkpoint_evidence.validate_test_report(path))
+        suites.append(checkpoint_evidence.validate_test_report(path, allowed_skips=absent_original))
     if not suites:
         raise SystemExit("JUnit results are absent")
     junit = {key: sum(s[key] for s in suites)
              for key in ("tests", "failures", "errors", "skipped")}
+    junit["skipped_suites_without_original_jar"] = sorted(absent_original)
     if junit["failures"] or junit["errors"]:
         raise SystemExit("JUnit reports failing tests")
     gametests, artifacts = {}, []

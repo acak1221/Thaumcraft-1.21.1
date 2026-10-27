@@ -42,6 +42,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -106,6 +107,7 @@ public final class GolemAdvancedRuntimeChecks {
         private final Map<BlockPos, BlockState> original = new LinkedHashMap<>();
         private final Set<UUID> existing = new HashSet<>();
         private final List<Entity> spawned = new ArrayList<>(), attackers = new ArrayList<>();
+        private final List<ChunkPos> forced = new ArrayList<>();
         private boolean touched;
 
         private Check(GameTestHelper test) {
@@ -354,10 +356,17 @@ public final class GolemAdvancedRuntimeChecks {
             var guard = golem(TALLOW, GolemData.GUARD, List.of(), true);
             guard.setHome(base, Direction.UP);
             int[] distances = {18, 19, 20, 23, 24};
+            // The row reaches up to two chunks from the home, wherever the random GameTest origin puts the borders. A chunk loaded
+            // only by level.getChunk shows its entities a task later, and a spider the level cannot find yet is rightly refused by
+            // the Guard, so the row's chunks are forced and awaited until they tick entities.
+            for (int distance : distances) {
+                var chunk = new ChunkPos(base.offset(distance, 0, 0));
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
+            }
+            for (int distance : distances) GameTestChunkAwait.entityTicking(test, base.offset(distance, 0, 0));
             List<Mob> targets = new ArrayList<>();
             for (int distance : distances) {
                 BlockPos pos = base.offset(distance, 0, 0);
-                level.getChunk(pos);
                 var spider = EntityType.SPIDER.create(level);
                 spider.moveTo(pos.getX() + .5, pos.getY(), pos.getZ() + .5, 0, 0);
                 spider.setNoAi(true);
@@ -471,6 +480,7 @@ public final class GolemAdvancedRuntimeChecks {
                 if (touched) original.forEach((pos, state) -> level.setBlock(pos, state, QUIET));
             } finally {
                 try {
+                    for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
                     if (level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player);
                 } finally { player.discard(); channel.finishAndReleaseAll(); }
             }

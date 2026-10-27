@@ -79,6 +79,23 @@ class GameTestIsolationTest {
         }
     }
 
+    /**
+     * The Guard range row of the advanced golems reaches two chunks from its home. A spider added to a chunk that only
+     * {@code level.getChunk} loaded is not a level entity until a later main-thread task makes the chunk's entities visible,
+     * so the Guard refused it whenever the random GameTest origin put a chunk border inside the row (CI on main, 27.10.2026).
+     */
+    @Test void theAdvancedGuardRowWaitsUntilItsChunksTickEntities() throws IOException {
+        String advanced = source("GolemAdvancedRuntimeChecks.java");
+        assertTrue(advanced.contains("level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk);")
+                        && advanced.contains("GameTestChunkAwait.entityTicking(test, base.offset(distance, 0, 0))")
+                        && advanced.contains("for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);"),
+                "the row's chunks are forced, awaited until they tick entities, and released");
+        assertFalse(advanced.contains("level.getChunk(pos);"), "a bare getChunk does not make the row's spiders level entities");
+        String wait = source("GameTestChunkAwait.java");
+        assertTrue(wait.contains("level.isPositionEntityTicking(pos)") && wait.contains("source.pollTask()"),
+                "the wait services the native load until the chunk ticks entities");
+    }
+
     @Test void everyFabricScenarioHasAnOwnershipAndGlobalStateVerdict() throws IOException {
         Path fabric = Path.of("../fabric/src/gameTest");
         String mixins = Files.readString(fabric.resolve("resources/thaumcraft-gametest-selection.mixins.json"));

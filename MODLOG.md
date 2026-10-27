@@ -1,3 +1,14 @@
+## 2026-10-27 — CI on main: the advanced Guard range scenario
+
+The GameTest advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag failed now and then on main: its row of spiders
+reaches two chunks from the Guard's home, and a chunk loaded only by level.getChunk makes its entities visible a
+main-thread task later, so the level could not find a spider yet and the Guard refused it. It failed whenever the
+random GameTest origin put a chunk border inside the row. The row's chunks are now forced and awaited until they
+tick entities (GameTestChunkAwait.entityTicking), then released; GameTestIsolationTest pins the rule. Reproduced
+with the row in unloaded chunks: the old code refused every spider, the fix passes. Verified by a local replay of
+every CI step: 2641 JUnit, 140 Python (7 skipped), :fabric:build, GameTest Fabric 495/495 on a fresh world; the
+scenario alone on NeoForge 1/1. Not run: the full NeoForge suite.
+
 ## 2026-10-26 — add-on developer documentation
 
 docs/api/README.md (and docs/api/ru/README.md) index eight guides in English (docs/api/guide) and Russian

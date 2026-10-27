@@ -2,6 +2,7 @@ package thaumcraft.common.testing;
 
 import java.time.Duration;
 import java.util.concurrent.locks.LockSupport;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -29,5 +30,22 @@ public final class GameTestChunkAwait {
                 + LOAD_DEADLINE + "; state=" + source.getChunkDebugData(pos)
                 + "; pendingTasks=" + source.getPendingTasksCount());
         return chunk;
+    }
+
+    /** Await entity ticking at a position whose chunk the caller ALREADY forced. A chunk reaches FULL before its entity
+     * section is visible: the visibility change is a later main-thread task, and until it runs an entity added there is
+     * not found by {@code ServerLevel.getEntity}. Same real-time budget, no extra ticket.
+     */
+    public static void entityTicking(GameTestHelper test, BlockPos pos) {
+        var level = test.getLevel();
+        var source = level.getChunkSource();
+        long deadline = System.nanoTime() + LOAD_DEADLINE.toNanos();
+        while (!level.isPositionEntityTicking(pos) && System.nanoTime() < deadline) {
+            if (!source.pollTask()) LockSupport.parkNanos(1_000_000);
+        }
+        var chunk = new ChunkPos(pos);
+        test.assertTrue(level.isPositionEntityTicking(pos), "forced chunk " + chunk + " did not tick entities within "
+                + LOAD_DEADLINE + "; state=" + source.getChunkDebugData(chunk)
+                + "; pendingTasks=" + source.getPendingTasksCount());
     }
 }

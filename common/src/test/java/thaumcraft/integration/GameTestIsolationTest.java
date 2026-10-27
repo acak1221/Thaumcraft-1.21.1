@@ -96,6 +96,20 @@ class GameTestIsolationTest {
                 "the wait services the native load until the chunk ticks entities");
     }
 
+    /**
+     * The research table scenarios that count drops: the same visibility lag hid every drop of a table broken in a chunk
+     * that the fixture's own setBlock had just loaded (CI on main, 27.10.2026: "breaking either half delivers one raw
+     * table and each physical stack exactly once: true").
+     */
+    @Test void theTableDropScenariosWaitUntilTheirChunksTickEntities() throws IOException {
+        String table = source("ResearchTableRuntimeChecks.java");
+        assertTrue(table.contains("try { fixture.holdEntityChunks(); }") && table.contains("            fixture.holdEntityChunks();\n"),
+                "both drop-counting scenarios hold their chunks before they act");
+        assertTrue(table.contains("GameTestChunkAwait.entityTicking(test, chunk.getMiddleBlockPosition(center.getY()))")
+                        && table.contains("for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);"),
+                "the fixture waits until its chunks tick entities and releases only the chunks it forced");
+    }
+
     @Test void everyFabricScenarioHasAnOwnershipAndGlobalStateVerdict() throws IOException {
         Path fabric = Path.of("../fabric/src/gameTest");
         String mixins = Files.readString(fabric.resolve("resources/thaumcraft-gametest-selection.mixins.json"));

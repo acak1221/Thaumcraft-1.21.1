@@ -1,4 +1,4 @@
-## 2026-10-27 — CI on main: two intermittent GameTests (Guard range, tube phase)
+## 2026-10-27 — CI on main: three intermittent GameTests, JUnit skips without the original JARs
 
 The GameTest advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag failed now and then on main: its row of spiders
 reaches two chunks from the Guard's home, and a chunk loaded only by level.getChunk makes its entities visible a
@@ -16,6 +16,26 @@ the 32 units need 165 ticks (about one run in ten). The scenario now ticks 165 t
 phases, and still checks conservation on every tick. Reproduced with the phase set to 4: 160 ticks gives the CI
 message, 165 passes. Verified by a second local replay of every CI step: 2641 JUnit, 140 Python (7 skipped), :fabric:build,
 GameTest Fabric 495/495 on a fresh world; the scenario alone on NeoForge 1/1.
+
+The run after that passed the build, JUnit and all 495 GameTests and failed in the verification record:
+validate_test_report accepted no skipped test, and OrphanMobOracleContractTest skips its five cases without the
+original 4.2.3.5 JAR, as on CI since the JARs left the history (the record never reached the JUnit check before,
+the Python log check stopped it first; a local run keeps the JAR at the root and did not see it). A skip is now
+accepted only for a suite in ORIGINAL_JAR_SUITES and only while its JAR is really absent; any other skip, and any
+skip with the JAR present, is still an error; the record keeps the skipped count and the suites. Three new
+test_checkpoint_evidence cases. Reproduced with the suite's report written without the JAR.
+
+The local replay without the JARs then reached the second full suite of step 11 and showed a third intermittent
+scenario, tableBreakEvacuatesEachHalfOnce, with the spiders' mechanism: a new GameTest grid cell may have its chunk
+loaded only by the fixture's own setBlock, and the dropped items stay invisible to the level until a main-thread task
+makes the chunk's entities visible. Reproduced with the fixture in an unloaded chunk (same message, no item entity
+found at all); measured and ruled out: a crowded deferred-drop queue (empty before the table, at most 13 entries
+in the whole suite). Fixture.holdEntityChunks() now forces the fixture's chunks, waits until they tick entities and
+releases them; both drop-counting table scenarios call it, and GameTestIsolationTest pins it. Not swept: other
+scenarios that may add entities to a freshly loaded chunk and look them up at once. Verified by a local replay of every CI step with both original JARs moved out, as on CI: 2642 JUnit (5 skipped,
+only OrphanMobOracleContractTest), 134 Python (9 skipped), :fabric:build, GameTest Fabric 495/495 twice (steps 8
+and 11) and the four isolated scenarios of step 11; both table scenarios alone on NeoForge 2/2. Not run: the full
+NeoForge suite.
 
 ## 2026-10-26 — add-on developer documentation
 

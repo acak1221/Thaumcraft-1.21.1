@@ -266,6 +266,7 @@ public final class ResearchTableRuntimeChecks {
             closed[0] = true;
             fixture.close();
         };
+        try { fixture.holdEntityChunks(); } catch (RuntimeException | Error error) { cleanup.run(); throw error; }
         // Native queue output has no fixture pickup protection. Keep the actual
         // player away until assertions run after the safe server-level-post.
         player.setPos(fixture.center.getX() + 0.5, fixture.center.getY() + 6, fixture.center.getZ() + 0.5);
@@ -425,6 +426,7 @@ public final class ResearchTableRuntimeChecks {
             fixture.close();
         };
         try {
+            fixture.holdEntityChunks();
             var mainPos = fixture.center;
             var otherMain = mainPos.east(2);
             var secondaryPos = otherMain.north();
@@ -500,6 +502,9 @@ public final class ResearchTableRuntimeChecks {
         final Map<BlockPos, SavedBlock> blocks = new LinkedHashMap<>();
         final Set<UUID> originalDrops = new HashSet<>();
         final List<PlayerState> players = new ArrayList<>();
+        final List<ChunkPos> forced = new ArrayList<>();
+        /** The blocks of the widest drop-counting fixture (two pairs, two blocks apart) plus the two-block drop search. */
+        static final int DROP_AREA = 6;
         Fixture(GameTestHelper test, ServerPlayer... players) {
             this.test = test; level = test.getLevel(); center = test.absolutePos(new BlockPos(3, 2, 3));
             for (ServerPlayer player : players) {
@@ -537,6 +542,17 @@ public final class ResearchTableRuntimeChecks {
             return new ArrayList<>(result.values());
         }
         void discardNewDrops() { for (ItemEntity entity : newDrops()) entity.discard(); }
+        /** A fixture that counts drops holds the chunks of its area: its own setBlock may load a chunk only now, and the
+         * entities added there are not found by the level until a later main-thread task makes the chunk's entities visible. */
+        void holdEntityChunks() {
+            List<ChunkPos> area = new ArrayList<>();
+            for (int x = (center.getX() - DROP_AREA) >> 4; x <= (center.getX() + DROP_AREA) >> 4; x++)
+                for (int z = (center.getZ() - DROP_AREA) >> 4; z <= (center.getZ() + DROP_AREA) >> 4; z++) area.add(new ChunkPos(x, z));
+            for (ChunkPos chunk : area) {
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
+            }
+            for (ChunkPos chunk : area) GameTestChunkAwait.entityTicking(test, chunk.getMiddleBlockPosition(center.getY()));
+        }
         void assertKnowledgeUnchanged() { for (PlayerState player : players) test.assertValueEqual(KnowledgeAccess.get(player.player).save(), player.knowledge.save(), "table lifecycle/menu does not change knowledge, pools, clues, scans or warp"); }
         @Override public void close() {
             for (PlayerState player : players) player.player.closeContainer();
@@ -548,6 +564,7 @@ public final class ResearchTableRuntimeChecks {
             }
             discardNewDrops();
             for (PlayerState player : players) player.restore();
+            for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
         }
     }
     private record SavedBlock(BlockState state, CompoundTag tag) {}

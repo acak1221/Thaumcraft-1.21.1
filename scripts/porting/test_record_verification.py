@@ -100,6 +100,19 @@ class PackagedIsolationTest(unittest.TestCase):
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, "Test mod metadata"):
                 self.check_archive([(name, content)])
 
+class UnittestSummaryTest(unittest.TestCase):
+    """The CI Python run skips the tests that need the original JARs, which are not in the repository."""
+
+    def test_a_plain_and_a_skipping_success_are_accepted(self) -> None:
+        self.assertEqual(recorder.unittest_summary("....\nRan 4 tests in 0.1s\n\nOK\n"), (4, 0))
+        self.assertEqual(recorder.unittest_summary("..s.\nRan 138 tests in 36.3s\n\nOK (skipped=7)\n"), (138, 7))
+
+    def test_failures_and_missing_summaries_are_rejected(self) -> None:
+        for log in ("Ran 4 tests in 0.1s\n\nFAILED (failures=1)\n", "Ran 4 tests in 0.1s\n",
+                    "OK\n", "Ran 4 tests in 0.1s\n\nOK (failures=1)\n"):
+            with self.subTest(log=log), self.assertRaises(SystemExit):
+                recorder.unittest_summary(log)
+
 
 if __name__ == "__main__":
     unittest.main()

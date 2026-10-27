@@ -80,6 +80,20 @@ def client_evidence(relative: str) -> dict:
             "scan_feedback_seen_in_log": "[CHAT] To understand this" in text}
 
 
+
+def unittest_summary(log: str) -> tuple[int, int]:
+    """(tests run, tests skipped) of a successful unittest log.
+
+    Tests that need the original JARs, which are not in the repository, skip themselves, so a successful log
+    ends in "OK" or "OK (skipped=N)". Anything else is not a successful run.
+    """
+    ran = re.search(r"Ran (\d+) tests? in", log)
+    result = re.search(r"^OK(?: \(skipped=(\d+)\))?\s*$", log, re.MULTILINE)
+    if not ran or not result or "FAILED" in log:
+        raise SystemExit("Asset test log does not show a successful unittest run")
+    return int(ran.group(1)), int(result.group(1) or 0)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--loaders", nargs="+", choices=("fabric", "neoforge"), default=["fabric"],
@@ -128,10 +142,7 @@ def main() -> None:
     exit_record = json.loads(args.build_exit_json.read_text(encoding="utf-8"))
     if exit_record["code"] != 0:
         raise SystemExit("The supplied build did not succeed")
-    asset_log = args.asset_test_log.read_text(encoding="utf-8", errors="replace")
-    asset_count = re.search(r"Ran (\d+) tests? in", asset_log)
-    if not asset_count or not re.search(r"^OK\s*$", asset_log, re.MULTILINE) or "FAILED" in asset_log:
-        raise SystemExit("Asset test log does not show a successful unittest run")
+    asset_ran, asset_skipped = unittest_summary(args.asset_test_log.read_text(encoding="utf-8", errors="replace"))
     build_log = (ROOT / args.build_log).read_text(encoding="utf-8", errors="replace")
     if "BUILD SUCCESSFUL" not in build_log or "BUILD FAILED" in build_log:
         raise SystemExit("Build log does not show successful Gradle validation")
@@ -193,7 +204,8 @@ def main() -> None:
                         "source_fingerprints_sha256": snapshot["source_fingerprints_sha256"],
                         "outputs": output_evidence},
               "junit": junit, "gametests": gametests, "artifacts": artifacts,
-              "assets": {"python_tests_passed": int(asset_count.group(1)), "test_log": args.asset_test_log.as_posix(),
+              "assets": {"python_tests_passed": asset_ran - asset_skipped, "python_tests_skipped": asset_skipped,
+                         "test_log": args.asset_test_log.as_posix(),
                          "references": convert_assets.validate_resources(), "source_revision": convert_assets.source_revision()},
               "native_registry_bindings": {"accepted": accepted, "missing_items": missing_items,
                                            "missing_blocks": missing_blocks, "conflicts": conflicts},

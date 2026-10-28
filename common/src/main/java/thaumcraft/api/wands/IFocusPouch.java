@@ -32,8 +32,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public interface IFocusPouch {
     /**
-     * The number of cells of one pouch the focus selector reads and writes: cells from this index on are neither listed
-     * nor given a returned focus. Thaumic Tinkerer's pouch has 117 cells, which fit.
+     * The most cells of one pouch the focus selector reads and writes: the cells whose index is this number or more are
+     * neither listed nor given a returned focus. Thaumic Tinkerer's pouch has 117 cells, which fit.
      */
     int MAX_SELECTABLE_CELLS = 128;
 

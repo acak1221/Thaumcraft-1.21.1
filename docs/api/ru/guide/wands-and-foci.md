@@ -129,6 +129,93 @@ public class SparkFocus extends ItemFocusBasic {
 
 `FocusUpgradeType` хранит исходные улучшения (`potency`, `frugal`, `treasure`, `enlarge`, `extend`...) и их id.
 
+## Мешочки для фокусов: `IFocusPouch`
+
+Выбор фокуса жезла (клавиша смены фокуса, по умолчанию F) перечисляет фокусы, которые несёт игрок, и фокусы в каждом
+найденном мешочке для фокусов. Мешочек — это любой предмет, реализующий `IFocusPouch`: собственный мешочек Thaumcraft
+реализует его, и ваш тоже может. Интерфейс — это пара методов 1.7.10 `getInventory` и `setInventory`, которые были у
+Bottomless Pouch из Thaumic Tinkerer через наследование от внутреннего `ItemFocusPouch`; теперь внутренний класс не нужен.
+
+<!-- snippet:focus-pouch -->
+```java
+public class FocusBelt extends Item implements IBauble, IFocusPouch {
+    public static final int CELLS = 6;
+
+    public FocusBelt(Properties properties) { super(properties.stacksTo(1)); }
+
+    @Override public BaubleType getBaubleType(ItemStack stack) { return BaubleType.BELT; }
+
+    /** Every cell, in order, with ItemStack.EMPTY where there is nothing; independent copies the selector may change. */
+    @Override public ItemStack[] getInventory(ItemStack pouch) {
+        List<ItemStack> stored = pouch.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).stream().toList();
+        // A payload this belt cannot read: the selector then ignores the belt and does not touch it.
+        if (stored.size() > CELLS) throw new IllegalArgumentException("a belt has " + CELLS + " cells");
+        ItemStack[] cells = new ItemStack[CELLS];
+        Arrays.fill(cells, ItemStack.EMPTY);
+        for (int cell = 0; cell < stored.size(); cell++) cells[cell] = stored.get(cell); // stream() hands out copies
+        return cells;
+    }
+
+    /** Stores all cells into the stack it is given and nothing else; the selector also calls it on a scratch copy. */
+    @Override public void setInventory(ItemStack pouch, ItemStack[] contents) {
+        if (contents.length != CELLS) throw new IllegalArgumentException("a belt has " + CELLS + " cells");
+        pouch.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(Arrays.asList(contents))); // copies the stacks
+    }
+
+    /**
+     * The belt's own use. A pouch is never put on by a click, so unlike the talisman it needs no equipsOnUse: the Baubles
+     * menu puts it on, and the selector lists its foci either way.
+     */
+    @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack belt = player.getItemInHand(hand);
+        ItemStack other = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+        if (level.isClientSide) return InteractionResultHolder.success(belt);
+        ItemStack[] cells = getInventory(belt);
+        if (player.isShiftKeyDown()) {
+            for (int cell = CELLS - 1; cell >= 0; cell--) {
+                if (cells[cell].isEmpty()) continue;
+                player.getInventory().placeItemBackInInventory(cells[cell]);
+                cells[cell] = ItemStack.EMPTY;
+                break;
+            }
+        } else if (other.getItem() instanceof ItemFocusBasic) {
+            for (int cell = 0; cell < CELLS; cell++) {
+                if (!cells[cell].isEmpty()) continue;
+                cells[cell] = other.split(1);
+                break;
+            }
+        }
+        setInventory(belt, cells);
+        return InteractionResultHolder.success(belt);
+    }
+}
+```
+<!-- /snippet -->
+
+| Метод | Контракт |
+|---|---|
+| `getInventory(pouch)` | все ячейки по порядку, `ItemStack.EMPTY` для пустой, никогда не `null`; длина — число ячеек и для одного стака не меняется; независимые копии; вызывается на обеих сторонах. Для содержимого, которое вы не можете прочитать, бросьте `IllegalArgumentException`: выбор тогда игнорирует этот мешочек и не трогает его |
+| `setInventory(pouch, contents)` | заменяет все ячейки переданного стака (длина та же, что у `getInventory`); копируйте то, что оставляете, и больше ничего не меняйте. Поток сервера. Выбор вызывает его на живом стаке, который остаётся в своём слоте, и на черновых копиях, пока строит план |
+
+Что выбор делает с мешочком:
+
+- Он смотрит 36 основных слотов инвентаря и четыре слота безделушек, так что мешочек, который ещё и поясная `IBauble`,
+  учитывается, пока надет; вторая рука, броня и другие контейнеры не смотрятся. Считается только стак ровно из одного
+  мешочка.
+- Он предлагает каждую ячейку, в которой лежит фокус (`ItemFocusBasic`). Остальные предметы в ячейках игнорируются и не
+  трогаются.
+- **Размер.** Выбор — кольцо с одной кнопкой на фокус, а не сетка, поэтому мешочек любого размера перечисляется. Первые
+  `IFocusPouch.MAX_SELECTABLE_CELLS` (128) ячеек могут предлагаться и могут принять фокус обратно; у исходного мешочка 18,
+  у Bottomless Pouch 117. Ячейки с номера 128 не предлагаются и фокус в них не возвращается, поэтому важные ячейки держите
+  в начале.
+- Выбор фокуса вынимает его из ячейки (она становится `ItemStack.EMPTY`) и ставит на жезл. Фокус, который был на жезле,
+  уходит в первую пустую ячейку первого мешочка, где она есть (сначала надетые, каждый с первой ячейки), затем в свободный
+  слот инвентаря. Выбор проходит целиком или не проходит вовсе.
+- Правый клик никогда не надевает мешочек, что бы ни отвечал `IBauble.equipsOnUse`: клик идёт в собственный `use`
+  мешочка. Поясной мешочек надевается через меню безделушек.
+
+Экран мешочка, правило о том, что в него можно класть, и место хранения ячеек — дело самого аддона.
+
 ## Блоки, отвечающие жезлу: `IWandable`
 
 Блок или его блок-сущность с `IWandable` отвечает на клик жезлом раньше собственного поведения жезла, как в 1.7.10:

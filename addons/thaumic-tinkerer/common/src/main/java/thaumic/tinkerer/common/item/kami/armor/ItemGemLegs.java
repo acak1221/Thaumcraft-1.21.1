@@ -34,7 +34,6 @@ import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 import thaumic.tinkerer.common.item.kami.ItemKamiResource;
-import thaumic.tinkerer.common.item.kami.KamiHooks;
 import thaumic.tinkerer.common.item.kami.KamiResearch;
 import thaumic.tinkerer.common.lib.LibBlockNames;
 import thaumic.tinkerer.common.lib.LibItemNames;
@@ -90,8 +89,10 @@ public class ItemGemLegs extends ItemIchorclothArmorAdv {
 
     /**
      * 1.7.10 {@code ItemBrightNitor.setBlock}: gaseous nitor into air or into nitor. The "bright" variant is metadata 1 of
-     * the nitor gas block; the SimpleBlocks group represents it by a state property called {@code bright} (boolean) or
-     * {@code meta}/{@code variant} (integer); without such a property the plain gas is placed.
+     * the nitor gas block, which the SimpleBlocks group keeps in the integer state property {@code level} (1 is the
+     * strong light of these leggings); the property is found by name so that the groups need not share a class
+     * ({@code level}, {@code meta} or {@code variant} as an integer, {@code bright} as a boolean); without such a property
+     * the plain gas is placed.
      */
     private static void setNitor(Level level, BlockPos pos, boolean bright) {
         if (level.isClientSide || !(level instanceof ServerLevel)) return;
@@ -105,7 +106,8 @@ public class ItemGemLegs extends ItemIchorclothArmorAdv {
                 if (property instanceof BooleanProperty flag && flag.getName().equals("bright")) {
                     state = state.setValue(flag, true);
                 } else if (property instanceof IntegerProperty number
-                        && (number.getName().equals("meta") || number.getName().equals("variant"))
+                        && (number.getName().equals("level") || number.getName().equals("meta")
+                                || number.getName().equals("variant"))
                         && number.getPossibleValues().contains(1)) {
                     state = state.setValue(number, 1);
                 }

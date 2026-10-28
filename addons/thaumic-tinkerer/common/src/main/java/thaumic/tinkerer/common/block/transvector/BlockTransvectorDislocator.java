@@ -44,7 +44,7 @@ public class BlockTransvectorDislocator extends PulseDeviceBlock implements ITTi
     public static final MapCodec<BlockTransvectorDislocator> CODEC = simpleCodec(BlockTransvectorDislocator::new);
 
     public BlockTransvectorDislocator() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 10F).noOcclusion());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 10F).requiresCorrectToolForDrops().noOcclusion());
     }
 
     protected BlockTransvectorDislocator(Properties properties) {

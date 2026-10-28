@@ -119,7 +119,7 @@ class SimpleBlocksLogicTest {
         AspectList list = new AspectList().add(Aspect.AIR, 3).add(Aspect.ORDER, 5).add(Aspect.WATER, 1);
         Map<String, Integer> map = InfusedSeedComponents.toMap(list);
         assertEquals(List.of("aer", "ordo", "aqua"), List.copyOf(map.keySet()), "the order is kept");
-        assertEquals(3, map.get("aer"));
+        assertEquals(3, (int) map.get("aer"));
         AspectList back = InfusedSeedComponents.toList(map);
         assertEquals(3, back.getAmount(Aspect.AIR));
         assertEquals(5, back.getAmount(Aspect.ORDER));
@@ -231,9 +231,9 @@ class SimpleBlocksLogicTest {
     @Test
     void theLevelAndTheAgeOfTheOldBlockAreNeverCarriedOver() {
         BlockState oldWater = Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 3);
-        assertEquals(0, FireRules.carryOver(oldWater, Blocks.LAVA.defaultBlockState()).getValue(LiquidBlock.LEVEL));
+        assertEquals(0, (int) FireRules.carryOver(oldWater, Blocks.LAVA.defaultBlockState()).getValue(LiquidBlock.LEVEL));
         BlockState oldWheat = Blocks.WHEAT.defaultBlockState().setValue(net.minecraft.world.level.block.CropBlock.AGE, 6);
-        assertEquals(0, FireRules.carryOver(oldWheat, Blocks.CARROTS.defaultBlockState()).getValue(net.minecraft.world.level.block.CropBlock.AGE));
+        assertEquals(0, (int) FireRules.carryOver(oldWheat, Blocks.CARROTS.defaultBlockState()).getValue(net.minecraft.world.level.block.CropBlock.AGE));
     }
 
     @Test
@@ -254,8 +254,8 @@ class SimpleBlocksLogicTest {
 
     @Test
     void aGasHasSixteenLevelsAndAirCountsAsGasCountsAsAir() {
-        assertEquals(0, BlockGas.LEVEL.getPossibleValues().stream().min(Integer::compare).orElseThrow());
-        assertEquals(15, BlockGas.LEVEL.getPossibleValues().stream().max(Integer::compare).orElseThrow());
+        assertEquals(0, (int) BlockGas.LEVEL.getPossibleValues().stream().min(Integer::compare).orElseThrow());
+        assertEquals(15, (int) BlockGas.LEVEL.getPossibleValues().stream().max(Integer::compare).orElseThrow());
         assertEquals(4, BlockGas.RELEASE_LEVEL);
         assertTrue(BlockGas.isAirLike(Blocks.AIR.defaultBlockState()));
         assertTrue(BlockGas.isAirLike(Blocks.CAVE_AIR.defaultBlockState()));

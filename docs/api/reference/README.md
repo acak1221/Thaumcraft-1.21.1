@@ -56,6 +56,7 @@ The public Thaumcraft API of the 1.21.1 port.
 | Type | Summary |
 |---|---|
 | [`BaubleType`](thaumcraft.api.baubles.md#baubletype) | Original Baubles 1.7.10 categories; native slot order is amulet, ring, ring, belt. |
+| [`BaublesApi`](thaumcraft.api.baubles.md#baublesapi) | Read access to what an entity wears in the four accessory slots (amulet, two rings, belt). |
 | [`IBauble`](thaumcraft.api.baubles.md#ibauble) | Native type adaptation of Azanor's original four-slot Baubles item contract. |
 
 ## [thaumcraft.api.blocks](thaumcraft.api.blocks.md)
@@ -176,6 +177,7 @@ The public Thaumcraft API of the 1.21.1 port.
 | Type | Summary |
 |---|---|
 | [`FocusUpgradeType`](thaumcraft.api.wands.md#focusupgradetype) | Bounded native catalogue. |
+| [`IFocusPouch`](thaumcraft.api.wands.md#ifocuspouch) | An item that stores focuses for the wand's focus selector: the native focus pouch, and a pouch of an add-on. |
 | [`IWandFocus`](thaumcraft.api.wands.md#iwandfocus) | **Deprecated.** The original TC4 wand focus contract. |
 | [`IWandRodOnUpdate`](thaumcraft.api.wands.md#iwandrodonupdate) | The original TC4 wand rod update hook. |
 | [`IWandTriggerManager`](thaumcraft.api.wands.md#iwandtriggermanager) | The original TC4 wand trigger contract. |

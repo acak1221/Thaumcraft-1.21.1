@@ -2460,6 +2460,33 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.WandApiRuntimeChecks.addonBaubleCountsWhenWorn(test);
     }
 
+    // The bauble API through an add-on item: IBauble.equipsOnUse (the hand equip and its opt-out) and BaublesApi.getWorn.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "baubles_api_equips_on_use")
+    public void baubleEquipsOnUseOptOutKeepsTheItemsOwnUse(GameTestHelper test) {
+        thaumcraft.common.testing.BaublesApiRuntimeChecks.equipsOnUseOptOut(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "baubles_api_worn")
+    public void baublesApiGetWornIsAReadOnlySnapshot(GameTestHelper test) {
+        thaumcraft.common.testing.BaublesApiRuntimeChecks.getWornIsAReadOnlySnapshot(test);
+    }
+
+    // A focus pouch of an add-on (IFocusPouch, 40 and 130 cells, its own storage): offered by the wand's selector like the native one.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_pouch_select")
+    public void addonFocusPouchIsOfferedAndSelectedLikeTheNativeOne(GameTestHelper test) {
+        thaumcraft.common.testing.AddonPouchRuntimeChecks.offeredAndSelectedLikeTheNativeOne(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_pouch_cap")
+    public void addonFocusPouchBeyondTheCellCapAndUnreadablePayloadsStayUntouched(GameTestHelper test) {
+        thaumcraft.common.testing.AddonPouchRuntimeChecks.beyondTheCapAndUnreadablePouches(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_pouch_use")
+    public void addonFocusPouchKeepsItsOwnUseAndIsWornFromTheMenu(GameTestHelper test) {
+        thaumcraft.common.testing.AddonPouchRuntimeChecks.addonPouchKeepsItsOwnUse(test);
+    }
+
     // An aspect registered by an add-on (registered by these scenarios only, never by the mod) works end to
     // end. Own batches: the scenarios register and remove a 49th aspect.
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_aspect_scan")
@@ -2495,5 +2522,47 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "addon_aspects")
     public void addonAspectCreativeTabListsItsPhial(GameTestHelper test) {
         thaumcraft.common.testing.AspectApiRuntimeChecks.creativeTabListsItsPhial(test);
+    }
+
+    // Knowledge, bonus-tag and tree-felling helpers of ThaumcraftApiHelper (hasScannedItem, discoverAspect, getScans/addScans,
+    // getBonusObjectTags, isWoodLog, breakFurthestBlock) against real players and blocks.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_knowledge")
+    public void knowledgeApiScansAndDiscovery(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.scansAndDiscovery(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_knowledge")
+    public void knowledgeApiBonusObjectTags(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.bonusObjectTags(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiWoodLogRule(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.woodLogRule(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockFellsATrunk(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockFellsATrunkOneLogPerCall(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockFirstLocalMaximum(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockIsTheFirstLocalMaximum(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockCrossesGapsAndDiagonals(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockCrossesGapsAndDiagonals(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockStaysInsideTheBox(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockStaysInsideTheOriginalBox(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockStartAndPlayerRules(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockStartAndPlayerRules(test);
     }
 }

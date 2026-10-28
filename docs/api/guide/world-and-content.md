@@ -55,6 +55,40 @@ The original potions are registered mob effects: `PotionFluxTaint.instance()` / 
 `ThaumcraftApi.addLootBagItem(stack, weight, bagTypes...)` adds an entry to Thaumcraft's loot bags; bag types are 0
 common, 1 uncommon, 2 rare (the example adds its shard to the first two; see [recipes](recipes.md#crafting-extras)).
 
+## Felling trees
+
+`ThaumcraftApiHelper.isWoodLog(level, pos)` and `breakFurthestBlock(level, pos, block, player)` are the two helpers the
+Axe of the Stream used (`Utils.isWoodLog`, `BlockUtils.breakFurthestBlock`). The example add-on fells a tree when a log is
+broken with its amethyst core in the hand:
+
+<!-- snippet:felling -->
+```java
+// Breaking a log with the amethyst core in the hand fells the whole tree, the way the Axe of the Stream did. One call
+// of breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop, its limit and the
+// permission check are the caller's. The last call of the loop breaks the clicked log itself, so the break is cancelled.
+PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
+    if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || !player.getMainHandItem().is(AMETHYST_ROD)
+            || !ThaumcraftApiHelper.isWoodLog(server, pos) || !server.mayInteract(player, pos)) return true;
+    for (int logs = 0; logs < 64 && ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player); logs++) { }
+    return false;
+});
+```
+<!-- /snippet -->
+
+- `isWoodLog` is the rule of the walk, not a tree detector: a block of the `#minecraft:logs` tag counts, so do leaf blocks,
+  the plain oak log does not (see `docs/audit/KNOWN_DEVIATIONS.md`, section 9). An unloaded position is no log.
+- `breakFurthestBlock` breaks **one** block per call: the end of a greedy walk, not the farthest log of the tree. The walk
+  starts at `pos` and repeatedly steps to the first cell within two blocks, scanned x from -2 to +2, y from +2 down to -2,
+  z from -2 to +2, that holds exactly `block`, is a log and is farther from `pos` than where it stands. It crosses gaps of
+  a block and diagonals, can follow a neighbouring tree of the same wood, and never leaves 24 blocks sideways or 48 up and
+  down. If no cell qualifies it breaks `pos` itself, **whatever block that is**: test `isWoodLog` first.
+- The block drops its normal loot (rolled with the player's main-hand item; none for a creative or a null player) where it
+  stood. The tool is **not** worn, no break event fires and nothing asks for permission, spawn protection or claims for the
+  broken cell: that is the caller's job, as in the example.
+- It answers true when it handed a breakable, non-air block to the harvester and false for a client level, an unloaded
+  start, an air start or an unbreakable end, so `while (breakFurthestBlock(...))` ends when the start cell is air; put a
+  limit on it anyway. Server thread only (`IllegalStateException` elsewhere): the walk keeps static state, as in the original.
+
 ## Not public API
 
 - Golems had no API in 1.7.10 and have none now.

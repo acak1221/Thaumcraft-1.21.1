@@ -13,11 +13,6 @@ package thaumic.tinkerer.common.item.kami.tool;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.utils.value.IntValue;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -38,6 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import thaumcraft.api.ThaumcraftApiHelper;
 import thaumic.tinkerer.common.item.kami.KamiComponents;
 import thaumic.tinkerer.common.item.kami.KamiHooks;
 
@@ -124,13 +120,25 @@ public final class ToolHandler {
         if (BREAKING.get() || !(level instanceof ServerLevel server)) return EventResult.pass();
         ItemStack held = player.getMainHandItem();
         if (!(held.getItem() instanceof IAdvancedTool tool)) return EventResult.pass();
+        guarded(() -> tool.onBlockStartBreak(held, server, pos, state, player));
+        return EventResult.pass();
+    }
+
+    /**
+     * Runs the action with the guard set that keeps the breaks inside it from starting the mode again (a break the action
+     * makes fires {@code BlockEvent.BREAK} like any other).
+     */
+    public static void guarded(Runnable action) {
+        if (BREAKING.get()) {
+            action.run();
+            return;
+        }
         BREAKING.set(Boolean.TRUE);
         try {
-            tool.onBlockStartBreak(held, server, pos, state, player);
+            action.run();
         } finally {
             BREAKING.set(Boolean.FALSE);
         }
-        return EventResult.pass();
     }
 
     /** True while an extra block is being broken by this class. */
@@ -186,56 +194,30 @@ public final class ToolHandler {
 
     // ---- tree felling (Axe, tree mode) ----------------------------------------------------------------------
 
-    private static final int TREE_LIMIT = 512;
-    private static final int TREE_RADIUS = 24;
+    /** Upper bound of the felling loop; see {@link #fellTree}. */
+    private static final int TREE_LIMIT = 1024;
 
     /**
-     * 1.7.10 {@code Utils.isWoodLog} and {@code BlockUtils.breakFurthestBlock} in a loop: every log of the same kind that is
-     * connected to the broken one (diagonals included) is broken, the furthest first, and the items are gathered at the
-     * foot of the tree. Thaumcraft's own helpers are internal (API request A6); this is a port of their behaviour with
-     * limits (at most {@value #TREE_LIMIT} logs, {@value #TREE_RADIUS} blocks sideways) so that one click cannot stall
-     * the server.
+     * 1.7.10 tree mode of the awakened axe: when the clicked block is a log by Thaumcraft's rule
+     * ({@link ThaumcraftApiHelper#isWoodLog}), the furthest block of the walk that starts there is broken over and over
+     * ({@link ThaumcraftApiHelper#breakFurthestBlock}) until the clicked cell is air, which fells the connected logs and
+     * ends with the clicked one; then the items around the foot of the tree are gathered at the clicked cell.
+     *
+     * <p>The original looped while the clicked cell was not air. A break that something vetoes would leave it standing and
+     * the loop endless, so the loop stops after {@value #TREE_LIMIT} blocks or when the helper breaks nothing.</p>
      */
     public static void fellTree(ServerLevel level, BlockPos origin, ServerPlayer player) {
-        BlockState originState = level.getBlockState(origin);
-        if (!originState.is(BlockTags.LOGS)) return;
-        Block log = originState.getBlock();
-
-        List<BlockPos> logs = connected(level, origin, log);
-        logs.sort((a, b) -> Double.compare(b.distSqr(origin), a.distSqr(origin)));
-        for (BlockPos pos : logs) {
-            if (!pos.equals(origin) && level.getBlockState(pos).getBlock() == log) player.gameMode.destroyBlock(pos);
+        if (!ThaumcraftApiHelper.isWoodLog(level, origin)) return;
+        for (int i = 0; i < TREE_LIMIT; i++) {
+            BlockState state = level.getBlockState(origin);
+            if (state.isAir()) break;
+            if (!ThaumcraftApiHelper.breakFurthestBlock(level, origin, state.getBlock(), player)) break;
         }
 
         AABB box = new AABB(origin.getX() - 5, origin.getY() - 1, origin.getZ() - 5, origin.getX() + 5,
                 origin.getY() + 64, origin.getZ() + 5);
         for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, box)) {
             item.setPos(origin.getX() + 0.5, origin.getY() + 0.5, origin.getZ() + 0.5);
-            item.setNoPickUpDelay();
         }
-    }
-
-    private static List<BlockPos> connected(ServerLevel level, BlockPos origin, Block log) {
-        List<BlockPos> found = new ArrayList<>();
-        Set<BlockPos> seen = new HashSet<>();
-        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
-        queue.add(origin);
-        seen.add(origin);
-        while (!queue.isEmpty() && found.size() < TREE_LIMIT) {
-            BlockPos at = queue.poll();
-            found.add(at);
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        if (dx == 0 && dy == 0 && dz == 0) continue;
-                        BlockPos next = at.offset(dx, dy, dz);
-                        if (Math.abs(next.getX() - origin.getX()) > TREE_RADIUS
-                                || Math.abs(next.getZ() - origin.getZ()) > TREE_RADIUS || !seen.add(next)) continue;
-                        if (level.getBlockState(next).getBlock() == log) queue.add(next);
-                    }
-                }
-            }
-        }
-        return found;
     }
 }

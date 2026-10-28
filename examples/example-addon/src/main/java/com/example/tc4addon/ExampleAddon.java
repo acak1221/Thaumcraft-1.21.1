@@ -2,9 +2,12 @@ package com.example.tc4addon;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import thaumcraft.api.IThaumcraftAddon;
 import thaumcraft.api.ThaumcraftApi;
+import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.CrucibleRecipe;
@@ -50,9 +54,20 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
     public static final Item VIS_SHARD = new Item(new Item.Properties());
     public static final Item AMETHYST_ROD = new Item(new Item.Properties());
     public static final Item AMETHYST_CAP = new Item(new Item.Properties());
+    // [doc:aspect-component-type]
+    /** The data component of items that carry aspects: saved with the stack, synced to the client, equal by content. */
+    public static final DataComponentType<StoredAspects> STORED_ASPECTS = DataComponentType.<StoredAspects>builder()
+            .persistent(StoredAspects.CODEC).networkSynchronized(StoredAspects.STREAM_CODEC).build();
+    // [/doc]
     public static final SparkFocus SPARK_FOCUS = new SparkFocus(new Item.Properties());
     public static final OrderAmulet ORDER_AMULET = new OrderAmulet(new Item.Properties());
-    public static final InsightScroll INSIGHT_SCROLL = new InsightScroll(new Item.Properties());
+    // A scroll teaches the aspects its component holds: two research points of each primal unless a recipe says otherwise.
+    public static final InsightScroll INSIGHT_SCROLL = new InsightScroll(new Item.Properties().component(STORED_ASPECTS,
+            new StoredAspects(new AspectList().add(Aspect.AIR, 2).add(Aspect.EARTH, 2).add(Aspect.FIRE, 2)
+                    .add(Aspect.WATER, 2).add(Aspect.ORDER, 2).add(Aspect.ENTROPY, 2))));
+    public static final ShareTome SHARE_TOME = new ShareTome(new Item.Properties());
+    public static final OrderTalisman ORDER_TALISMAN = new OrderTalisman(new Item.Properties());
+    public static final FocusBelt FOCUS_BELT = new FocusBelt(new Item.Properties());
     public static final EssentiaBowlBlock ESSENTIA_BOWL = new EssentiaBowlBlock(BlockBehaviour.Properties.of()
             .strength(0.5F).sound(SoundType.STONE).noOcclusion());
     public static BlockEntityType<EssentiaBowlBlockEntity> ESSENTIA_BOWL_TYPE;
@@ -69,12 +84,27 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
         Registry.register(BuiltInRegistries.ITEM, id("amethyst_cap"), AMETHYST_CAP);
         Registry.register(BuiltInRegistries.ITEM, id("spark_focus"), SPARK_FOCUS);
         Registry.register(BuiltInRegistries.ITEM, id("order_amulet"), ORDER_AMULET);
+        Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, id("stored_aspects"), STORED_ASPECTS);
         Registry.register(BuiltInRegistries.ITEM, id("insight_scroll"), INSIGHT_SCROLL);
+        Registry.register(BuiltInRegistries.ITEM, id("share_tome"), SHARE_TOME);
+        Registry.register(BuiltInRegistries.ITEM, id("order_talisman"), ORDER_TALISMAN);
+        Registry.register(BuiltInRegistries.ITEM, id("focus_belt"), FOCUS_BELT);
         // [doc:block-entity-registration]
         Registry.register(BuiltInRegistries.BLOCK, id("essentia_bowl"), ESSENTIA_BOWL);
         Registry.register(BuiltInRegistries.ITEM, id("essentia_bowl"), new BlockItem(ESSENTIA_BOWL, new Item.Properties()));
         ESSENTIA_BOWL_TYPE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id("essentia_bowl"),
                 BlockEntityType.Builder.of(EssentiaBowlBlockEntity::new, ESSENTIA_BOWL).build(null));
+        // [/doc]
+        // [doc:felling]
+        // Breaking a log with the amethyst core in the hand fells the whole tree, the way the Axe of the Stream did. One call
+        // of breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop, its limit and the
+        // permission check are the caller's. The last call of the loop breaks the clicked log itself, so the break is cancelled.
+        PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
+            if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || !player.getMainHandItem().is(AMETHYST_ROD)
+                    || !ThaumcraftApiHelper.isWoodLog(server, pos) || !server.mayInteract(player, pos)) return true;
+            for (int logs = 0; logs < 64 && ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player); logs++) { }
+            return false;
+        });
         // [/doc]
     // [doc:lifecycle]
     }

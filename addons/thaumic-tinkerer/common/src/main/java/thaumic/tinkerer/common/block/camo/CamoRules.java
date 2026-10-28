@@ -13,7 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,8 +24,9 @@ import thaumic.tinkerer.common.lib.LibMisc;
  * check was "the render type of the block is 0, 31 or 39, it is no camouflageable block and not air").
  *
  * <p>1.21.1 has no render types. The equivalent is a block that the chunk renderer draws from its model
- * ({@link RenderShape#MODEL}) and that has no block entity; fluids, invisible blocks and blocks with a special renderer
- * are therefore refused, as the original refused every render type but the plain cube, the log and the pillar.</p>
+ * ({@link RenderShape#MODEL}); fluids, invisible blocks and blocks drawn by a special renderer (chests, beds, skulls) are
+ * therefore refused, as the original refused every render type but the plain cube, the log and the pillar. A furnace or a
+ * dispenser, whose 1.7.10 render type was the plain cube, is accepted: its model is drawn, without its block entity.</p>
  */
 public final class CamoRules {
     private CamoRules() {}
@@ -50,7 +50,6 @@ public final class CamoRules {
     public static boolean isValidCamo(BlockState state) {
         if (state == null || state.isAir()) return false;
         if (state.getBlock() instanceof CamoDeviceBlock) return false;
-        if (state.getBlock() instanceof EntityBlock) return false;
         if (BuiltInRegistries.BLOCK.getKey(state.getBlock()).equals(LibMisc.id(LibBlockNames.CAMO))) return false;
         return state.getRenderShape() == RenderShape.MODEL;
     }

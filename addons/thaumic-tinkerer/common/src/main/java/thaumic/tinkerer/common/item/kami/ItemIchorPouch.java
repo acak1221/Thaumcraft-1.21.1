@@ -31,6 +31,7 @@ import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.baubles.BaubleType;
 import thaumcraft.api.baubles.IBauble;
 import thaumcraft.api.research.ResearchPage;
+import thaumcraft.api.wands.IFocusPouch;
 import thaumic.tinkerer.common.block.tile.container.kami.ContainerIchorPouch;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 import thaumic.tinkerer.common.lib.LibItemNames;
@@ -44,12 +45,10 @@ import thaumic.tinkerer.common.research.TTResearchItem;
 /**
  * The Bottomless Pouch: a belt with 13 x 9 slots that opens on right click. 1.7.10 made it a focus pouch with a bigger
  * inventory ({@code ItemFocusPouch}, stack tag {@code Inventory}), so that the foci in it could be chosen by a wand.
- * Here the slots are the {@link KamiComponents#POUCH_CONTENTS} component. The wand's focus selection only knows
- * Thaumcraft's own pouch, so the foci in this pouch are not offered to the wand yet (API request A2,
- * {@code docs/api-requests/KamiGear.md}); {@link #getInventory} and {@link #setInventory} have the names of the
- * 1.7.10 pouch methods for the interface the request proposes.
+ * Here it is an {@link IFocusPouch}, the API form of that class (the wand's focus selector reads the foci of any pouch
+ * that implements it, 128 cells at most), and the slots are the {@link KamiComponents#POUCH_CONTENTS} component.
  */
-public class ItemIchorPouch extends KamiItemBase implements IBauble {
+public class ItemIchorPouch extends KamiItemBase implements IBauble, IFocusPouch {
     public static final int COLUMNS = 13;
     public static final int ROWS = 9;
     public static final int SIZE = COLUMNS * ROWS;
@@ -63,8 +62,8 @@ public class ItemIchorPouch extends KamiItemBase implements IBauble {
 
     // ---- contents -------------------------------------------------------------------------------------------
 
-    /** The 117 slots of the pouch, empty stacks where there is nothing (1.7.10 {@code getInventory}). */
-    public static ItemStack[] getInventory(ItemStack pouch) {
+    /** The 117 slots of the pouch, empty stacks where there is nothing; every stack is a copy. */
+    public static ItemStack[] readContents(ItemStack pouch) {
         ItemStack[] contents = new ItemStack[SIZE];
         Arrays.fill(contents, ItemStack.EMPTY);
         ItemContainerContents stored = pouch.get(KamiComponents.POUCH_CONTENTS.get());
@@ -78,9 +77,25 @@ public class ItemIchorPouch extends KamiItemBase implements IBauble {
         return contents;
     }
 
-    /** Stores the 117 slots (1.7.10 {@code setInventory}). */
-    public static void setInventory(ItemStack pouch, ItemStack[] contents) {
+    /** Stores the 117 slots (copies of the given stacks). */
+    public static void writeContents(ItemStack pouch, ItemStack[] contents) {
         pouch.set(KamiComponents.POUCH_CONTENTS.get(), ItemContainerContents.fromItems(Arrays.asList(contents)));
+    }
+
+    /** 1.7.10 {@code getInventory}, as {@link IFocusPouch} asks for it. */
+    @Override
+    public ItemStack[] getInventory(ItemStack pouch) {
+        return readContents(pouch);
+    }
+
+    /** 1.7.10 {@code setInventory}, as {@link IFocusPouch} asks for it. */
+    @Override
+    public void setInventory(ItemStack pouch, ItemStack[] contents) {
+        if (contents == null || contents.length != SIZE) {
+            throw new IllegalArgumentException("the Bottomless Pouch has " + SIZE + " cells, not "
+                    + (contents == null ? "none" : String.valueOf(contents.length)));
+        }
+        writeContents(pouch, contents);
     }
 
     /** 1.7.10 {@code GuiHandler.isDimensionAllowed}: the pouch does not open in the dimensions of {@code ConfigHandler.forbiddenDimensions}. */
@@ -114,10 +129,8 @@ public class ItemIchorPouch extends KamiItemBase implements IBauble {
         return BaubleType.BELT;
     }
 
-    /**
-     * API request A1 ({@code docs/api-requests/KamiGear.md}): the right click of this pouch opens it instead of putting
-     * it on. The method has no {@code @Override} until {@code IBauble} declares it.
-     */
+    /** The right click of this pouch opens it instead of putting it on ({@code IBauble.equipsOnUse}, API request A1). */
+    @Override
     public boolean equipsOnUse(ItemStack stack, Player player) {
         return false;
     }

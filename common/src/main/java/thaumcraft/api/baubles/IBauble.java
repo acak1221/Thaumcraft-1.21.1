@@ -19,13 +19,14 @@ public interface IBauble {
     default boolean canUnequip(ItemStack stack, LivingEntity wearer) { return true; }
     /**
      * Whether a right click with this item in a hand puts it into the first free accessory slot of its kind. True in this
-     * default, so an existing bauble is unchanged.
+     * default, whatever the arguments, so an existing bauble is unchanged.
      *
      * <p>The hand equip is the port's own convenience: neither TC4 nor the Baubles mod had it (a bauble went into its slot by
      * the Baubles menu). It runs where the click would otherwise call {@code Item.use}, so a click that the targeted block or
      * {@code Item.useOn} has already consumed never reaches it. Return {@code false} for an item whose right click does something
      * of its own (a talisman that toggles, a belt that opens a screen): the click then goes on to {@code Item.use}, and the
-     * player puts the item on in the Baubles menu.</p>
+     * player puts the item on in the Baubles menu. The click goes on to {@code Item.use} as well when no slot of the item's
+     * kind is free, whatever this method answers.</p>
      *
      * <p>This method controls the hand equip and nothing else: the Baubles menu (key B, the button beside the player), a
      * shift-click into the menu, {@link #getBaubleType} and {@link #canEquip} are all unchanged. A

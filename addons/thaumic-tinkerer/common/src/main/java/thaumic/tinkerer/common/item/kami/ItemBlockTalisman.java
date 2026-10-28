@@ -220,10 +220,8 @@ public class ItemBlockTalisman extends KamiItemBase implements IBauble {
         return BaubleType.RING;
     }
 
-    /**
-     * API request A1 ({@code docs/api-requests/KamiGear.md}): a ring that is sneak-clicked to toggle must not be put on
-     * by the click. The method has no {@code @Override} until {@code IBauble} declares it.
-     */
+    /** A ring that is sneak-clicked to toggle is not put on by the click ({@code IBauble.equipsOnUse}, API request A1). */
+    @Override
     public boolean equipsOnUse(ItemStack stack, Player player) {
         return false;
     }

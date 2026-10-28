@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.block.camo.CamoDeviceBlock;
 import thaumic.tinkerer.common.block.tile.TileGolemConnector;
@@ -71,8 +72,21 @@ public class BlockGolemConnector extends CamoDeviceBlock implements ITTinkererRe
                 : createTickerHelper(type, TileBlocks.golemConnectorType(), TileGolemConnector::serverTick);
     }
 
+    /**
+     * The parent of the Golem Connector in the book. 1.7.10 registered this documentation entry in {@code ResearchHelper}
+     * only when ComputerCraft was loaded (which was also the only case in which the connector existed); the connector is
+     * registered here without a computer mod, so the entry has to exist for it. The Machines group registers the same
+     * entry for the Aspectalyzer, and a second registration of the key is ignored by Thaumcraft.
+     */
+    private static void ensurePeripheralsEntry() {
+        if (ResearchCategories.getResearch(LibResearch.KEY_PERIPHERALS) != null) return;
+        new TTResearchItem(LibResearch.KEY_PERIPHERALS, new AspectList(), -1, 0, 0, new ItemStack(Items.REDSTONE))
+                .setAutoUnlock().setRound().setPages(new ResearchPage("0")).registerResearchItem();
+    }
+
     @Override
     public IRegisterableResearch getResearchItem() {
+        ensurePeripheralsEntry();
         return (IRegisterableResearch) new TTResearchItem(
                 LibResearch.KEY_GOLEMCONNECTOR,
                 new AspectList().add(Aspect.ORDER, 1).add(Aspect.TRAVEL, 2).add(Aspect.TOOL, 1),

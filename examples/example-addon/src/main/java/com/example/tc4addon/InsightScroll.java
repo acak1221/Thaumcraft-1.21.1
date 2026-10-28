@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
 
 /** Scroll of Insight: research points and a hidden research entry for whoever has learned to read it. */
 // [doc:scroll]
@@ -23,7 +24,9 @@ public class InsightScroll extends Item {
             player.displayClientMessage(Component.translatable("tc4_example.insight_scroll.unreadable"), true);
             return InteractionResultHolder.fail(stack);
         }
-        for (Aspect primal : Aspect.getPrimalAspects()) ThaumcraftApiHelper.addAspectPool(player, primal, 2);
+        // What the scroll teaches is the data component of the stack, saved with it and synced to the client.
+        AspectList taught = stack.getOrDefault(ExampleAddon.STORED_ASPECTS, StoredAspects.NONE).aspects();
+        for (Aspect aspect : taught.getAspects()) ThaumcraftApiHelper.addAspectPool(player, aspect, taught.getAmount(aspect));
         ThaumcraftApiHelper.addAspectPool(player, ExampleAddon.TEMPUS, 1);
         // Completes the entry with its parents and pays its warp, as an original ResearchManager.completeResearch.
         if (!ThaumcraftApiHelper.isResearchComplete(player, "EXAMPLE_SECRET")) ThaumcraftApiHelper.completeResearch(player, "EXAMPLE_SECRET");

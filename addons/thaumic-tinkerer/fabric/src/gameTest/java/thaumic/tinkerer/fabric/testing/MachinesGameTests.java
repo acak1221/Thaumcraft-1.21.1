@@ -128,8 +128,8 @@ public final class MachinesGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-    public void infusedSoulAspectsSummonOnlyEveryTwentyMinutesAndAreKept(GameTestHelper test) {
-        MachinesRuntimeChecks.infusedSoulAspectsSummonOnlyEveryTwentyMinutesAndAreKept(test);
+    public void infusedSoulAspectsSummonOnlyEveryTwentyMinutesAreKeptAndBindToTheLastTablet(GameTestHelper test) {
+        MachinesRuntimeChecks.infusedSoulAspectsSummonOnlyEveryTwentyMinutesAreKeptAndBindToTheLastTablet(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -162,7 +162,7 @@ public final class MachinesGameTests implements FabricGameTest {
         MachinesRuntimeChecks.aBladeHurtsWhoStrikesWithIt(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void aBlockingWielderTakesThreeMagicDamageInsteadOfTheBlow(GameTestHelper test) {
         MachinesRuntimeChecks.aBlockingWielderTakesThreeMagicDamageInsteadOfTheBlow(test);
     }

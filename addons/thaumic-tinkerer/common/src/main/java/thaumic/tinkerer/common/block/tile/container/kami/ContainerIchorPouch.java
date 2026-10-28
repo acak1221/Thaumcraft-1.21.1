@@ -82,7 +82,7 @@ public class ContainerIchorPouch extends AbstractContainerMenu {
         // The server holds the truth; the client's copy is overwritten by the slot synchronisation.
         ItemStack pouch = player.getItemInHand(hand);
         if (pouch.getItem() instanceof ItemIchorPouch) {
-            ItemStack[] contents = ItemIchorPouch.getInventory(pouch);
+            ItemStack[] contents = ItemIchorPouch.readContents(pouch);
             for (int i = 0; i < SLOTS; i++) pouchInventory.items().set(i, contents[i]);
         }
         pouchInventory.ready = true;
@@ -98,7 +98,7 @@ public class ContainerIchorPouch extends AbstractContainerMenu {
         if (!(pouch.getItem() instanceof ItemIchorPouch)) return;
         ItemStack[] contents = new ItemStack[SLOTS];
         for (int i = 0; i < SLOTS; i++) contents[i] = pouchInventory.getItem(i);
-        ItemIchorPouch.setInventory(pouch, contents);
+        ItemIchorPouch.writeContents(pouch, contents);
     }
 
     @Override

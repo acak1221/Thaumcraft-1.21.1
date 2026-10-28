@@ -11,28 +11,23 @@
  */
 package thaumic.tinkerer.common.block.tile.container.slot.kami;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import thaumic.tinkerer.common.item.kami.ItemIchorPouch;
+import thaumcraft.api.wands.IFocusPouch;
 
 /**
- * A slot that refuses focus pouches ({@code !(item instanceof ItemFocusPouch)}): Thaumcraft's own pouch, recognised by its
- * id because the class is not API (request A2), and the Bottomless Pouch.
+ * A slot that refuses focus pouches ({@code !(item instanceof ItemFocusPouch)}): {@link IFocusPouch} is the API form of
+ * that class, which Thaumcraft's own pouch and the Bottomless Pouch both implement.
  */
 public class SlotNoPouches extends Slot {
-    private static final ResourceLocation FOCUS_POUCH = ResourceLocation.fromNamespaceAndPath("thaumcraft", "focus_pouch");
-
     public SlotNoPouches(Container container, int slot, int x, int y) {
         super(container, slot, x, y);
     }
 
-    /** True for a focus pouch of Thaumcraft or the Bottomless Pouch. */
+    /** True for a focus pouch of Thaumcraft or the Bottomless Pouch (or any other pouch of an add-on). */
     public static boolean isPouch(ItemStack stack) {
-        return stack.getItem() instanceof ItemIchorPouch
-                || FOCUS_POUCH.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        return stack.getItem() instanceof IFocusPouch;
     }
 
     @Override

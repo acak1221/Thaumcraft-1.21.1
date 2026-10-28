@@ -235,6 +235,34 @@ default int[] getWarp(Player player)
 
 The permanent, sticky and temporary warp of a player, in that order, as a new three-element array; zeros by default.
 
+<a id="iinternalmethodhandler-hasscanneditem"></a>
+```java
+default boolean hasScannedItem(Player player, ItemStack stack)
+```
+
+Whether the player scanned the item of the stack, the way the thaumometer records it; false by default, for a null player and for an empty stack. The installed handler answers from the player's own knowledge, on either side.
+
+<a id="iinternalmethodhandler-discoveraspect"></a>
+```java
+default boolean discoverAspect(Player player, Aspect aspect)
+```
+
+Marks the aspect as discovered for the player and syncs; true only when this call discovered it. Server side only; false by default, on a client, for a null argument and for an aspect already discovered.
+
+<a id="iinternalmethodhandler-getscans"></a>
+```java
+default ThaumcraftApiHelper.Scans getScans(Player player)
+```
+
+The scan markers of the player as an immutable snapshot; `ThaumcraftApiHelper.Scans.EMPTY` by default and for a null player.
+
+<a id="iinternalmethodhandler-addscans"></a>
+```java
+default int addScans(Player player, ThaumcraftApiHelper.Scans scans)
+```
+
+Adds scan markers to the player's knowledge and syncs; the number of markers that were new. Server side only; zero by default, on a client and for null arguments.
+
 <a id="iinternalmethodhandler-addwarptoplayer"></a>
 ```java
 default void addWarpToPlayer(Player player, int amount, boolean temporary)
@@ -371,6 +399,19 @@ public java.util.Set<String> getCompletedResearch(Player player)
 public void addAspectPool(Player player, Aspect aspect, int amount)
 public int getAspectPool(Player player, Aspect aspect)
 public int[] getWarp(Player player)
+```
+
+<a id="thaumcraftinternalmethods-hasscanneditem"></a>
+```java
+public boolean hasScannedItem(Player player, ItemStack stack)
+```
+
+Original `ItemThaumometer` / `ScanManager.hasBeenScanned`: the item is looked up under the marker the thaumometer writes for it, `"@" + registry id`; either that marker or the advanced marker `"#" + id` counts.
+
+```java
+public boolean discoverAspect(Player player, Aspect aspect)
+public ThaumcraftApiHelper.Scans getScans(Player player)
+public int addScans(Player player, ThaumcraftApiHelper.Scans scans)
 ```
 
 ## WeightedRandomLoot

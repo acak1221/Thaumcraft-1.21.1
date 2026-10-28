@@ -1,0 +1,237 @@
+package thaumic.tinkerer.kamigear;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import thaumic.tinkerer.common.lib.LibItemNames;
+
+/**
+ * Test-only code of the port (no 1.7.10 counterpart), CC BY-NC-SA 3.0 like the add-on.
+ *
+ * <p>The data of the KamiGear group: every item has a model, every model's texture and every override target exists, the
+ * armour layers are PNG files in the places the armour materials name, the nugget recipe and the tag files parse and point
+ * at registered paths, and the pouch's language key exists after the language merge.</p>
+ */
+class KamiGearResourcesTest {
+    private static final String NS = "thaumictinkerer";
+
+    /** Every item of the group, in the registration order of {@code KamiGear.register()}. */
+    private static final List<String> ITEMS = items();
+
+    private static List<String> items() {
+        List<String> all = new ArrayList<>(List.of(LibItemNames.KAMI_RESOURCE_NAMES));
+        all.addAll(List.of(LibItemNames.ICHOR_HELM, LibItemNames.ICHOR_CHEST, LibItemNames.ICHOR_LEGS,
+                LibItemNames.ICHOR_BOOTS, LibItemNames.ICHOR_HELM_GEM, LibItemNames.ICHOR_CHEST_GEM,
+                LibItemNames.ICHOR_LEGS_GEM, LibItemNames.ICHOR_BOOTS_GEM, LibItemNames.CAT_AMULET,
+                LibItemNames.ICHOR_PICK, LibItemNames.ICHOR_SHOVEL, LibItemNames.ICHOR_AXE, LibItemNames.ICHOR_SWORD,
+                LibItemNames.ICHOR_PICK_GEM, LibItemNames.ICHOR_SHOVEL_GEM, LibItemNames.ICHOR_AXE_GEM,
+                LibItemNames.ICHOR_SWORD_GEM, LibItemNames.ICHOR_POUCH, LibItemNames.BLOCK_TALISMAN,
+                LibItemNames.PLACEMENT_MIRROR, LibItemNames.PROTOCLAY, LibItemNames.SKY_PEARL,
+                LibItemNames.FOCUS_SHADOWBEAM, LibItemNames.FOCUS_XP_DRAIN, LibItemNames.FOCUS_RECALL));
+        return all;
+    }
+
+    private static JsonObject json(String path) {
+        try (InputStream in = KamiGearResourcesTest.class.getResourceAsStream(path)) {
+            assertNotNull(in, "missing resource " + path);
+            return JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+        } catch (IOException e) {
+            throw new AssertionError(path, e);
+        }
+    }
+
+    private static boolean exists(String path) {
+        return KamiGearResourcesTest.class.getResource(path) != null;
+    }
+
+    private static String own(String id) {
+        return id.startsWith(NS + ":") ? id.substring(NS.length() + 1) : null;
+    }
+
+    // ---- item models ---------------------------------------------------------------------------------------------
+
+    @Test
+    void theGroupListsThirtyThreeItems() {
+        assertEquals(33, ITEMS.size());
+        assertEquals(33, ITEMS.stream().distinct().count(), "no path twice");
+    }
+
+    @Test
+    void everyItemHasAModelWithAnExistingTexture() {
+        for (String item : ITEMS) {
+            JsonObject model = json("/assets/" + NS + "/models/item/" + item + ".json");
+            assertTrue(model.has("parent"), item + " has a parent");
+            JsonObject textures = model.getAsJsonObject("textures");
+            assertNotNull(textures, item + " has textures");
+            for (Map.Entry<String, JsonElement> texture : textures.entrySet()) {
+                String path = own(texture.getValue().getAsString());
+                assertNotNull(path, item + " uses a texture of the add-on: " + texture.getValue());
+                assertTrue(exists("/assets/" + NS + "/textures/" + path + ".png"),
+                        item + ": texture " + path + " exists");
+            }
+        }
+    }
+
+    @Test
+    void everyOverrideOfAModelPointsAtAnExistingModelWithTheClientPredicates() {
+        int overrides = 0;
+        for (String item : ITEMS) {
+            JsonObject model = json("/assets/" + NS + "/models/item/" + item + ".json");
+            if (!model.has("overrides")) continue;
+            JsonArray array = model.getAsJsonArray("overrides");
+            for (JsonElement element : array) {
+                JsonObject override = element.getAsJsonObject();
+                for (String predicate : override.getAsJsonObject("predicate").keySet()) {
+                    // thaumic.tinkerer.client.KamiGearClient.PREDICATE_MODE / PREDICATE_ACTIVE
+                    assertTrue(predicate.equals(NS + ":kami_mode") || predicate.equals(NS + ":kami_active"),
+                            item + ": predicate " + predicate + " is registered by KamiGearClient");
+                }
+                String target = own(override.get("model").getAsString());
+                assertNotNull(target, item);
+                JsonObject targetModel = json("/assets/" + NS + "/models/" + target + ".json");
+                for (Map.Entry<String, JsonElement> texture : targetModel.getAsJsonObject("textures").entrySet()) {
+                    assertTrue(exists("/assets/" + NS + "/textures/" + own(texture.getValue().getAsString()) + ".png"),
+                            target + " texture");
+                }
+                overrides++;
+            }
+        }
+        // 4 awakened tools with modes 1 and 2, and the ring when active.
+        assertEquals(9, overrides);
+    }
+
+    @Test
+    void theAwakenedToolsEncodeTheModeAsAHalfStep() {
+        // The predicate value is the mode / 2 (predicates are clamped to 0..1): mode 1 is 0.5, mode 2 is 1.0.
+        for (String tool : List.of("ichor_pick_gem", "ichor_shovel_gem", "ichor_axe_gem", "ichor_sword_gem")) {
+            JsonArray overrides = json("/assets/" + NS + "/models/item/" + tool + ".json").getAsJsonArray("overrides");
+            assertEquals(2, overrides.size(), tool);
+            assertEquals(0.5, overrides.get(0).getAsJsonObject().getAsJsonObject("predicate")
+                    .get(NS + ":kami_mode").getAsDouble(), 0, tool);
+            assertEquals(1.0, overrides.get(1).getAsJsonObject().getAsJsonObject("predicate")
+                    .get(NS + ":kami_mode").getAsDouble(), 0, tool);
+        }
+    }
+
+    // ---- armour, wand parts ----------------------------------------------------------------------------------------
+
+    @Test
+    void theArmourLayersAndWandPartTexturesArePngFiles() throws IOException {
+        List<String> paths = List.of("textures/models/armor/ichor_layer_1.png", "textures/models/armor/ichor_layer_2.png",
+                "textures/models/armor/ichor_gem_layer_1.png", "textures/models/armor/ichor_gem_layer_2.png",
+                "textures/models/cap_ichor.png", "textures/models/rod_ichorcloth.png", "textures/models/wings.png",
+                "textures/gui/ichor_pouch.png");
+        for (String path : paths) {
+            try (InputStream in = KamiGearResourcesTest.class.getResourceAsStream("/assets/" + NS + "/" + path)) {
+                assertNotNull(in, path);
+                byte[] signature = in.readNBytes(8);
+                assertEquals((byte) 0x89, signature[0], path);
+                assertEquals('P', signature[1], path);
+                assertEquals('N', signature[2], path);
+                assertEquals('G', signature[3], path);
+            }
+        }
+    }
+
+    @Test
+    void theArmourLayersAreCopiesOfTheConvertedOriginalTextures() throws IOException {
+        // docs/deviations/KamiGear.md: the two layer files of a material are copies of ichor_1/2 and ichor_gem_1/2.
+        String[][] pairs = { { "ichor_layer_1", "ichor_1" }, { "ichor_layer_2", "ichor_2" },
+                { "ichor_gem_layer_1", "ichor_gem_1" }, { "ichor_gem_layer_2", "ichor_gem_2" } };
+        for (String[] pair : pairs) {
+            byte[] layer = read("/assets/" + NS + "/textures/models/armor/" + pair[0] + ".png");
+            byte[] converted = read("/assets/" + NS + "/textures/models/" + pair[1] + ".png");
+            assertTrue(java.util.Arrays.equals(layer, converted), pair[0] + " is a copy of " + pair[1]);
+        }
+    }
+
+    private static byte[] read(String path) throws IOException {
+        try (InputStream in = KamiGearResourcesTest.class.getResourceAsStream(path)) {
+            assertNotNull(in, path);
+            return in.readAllBytes();
+        }
+    }
+
+    // ---- recipe, tags, language ----------------------------------------------------------------------------------
+
+    @Test
+    void theNuggetRecipeTurnsOneIchoriumIntoNineNuggets() {
+        JsonObject recipe = json("/data/" + NS + "/recipe/ichor_nuggets.json");
+        assertEquals("minecraft:crafting_shapeless", recipe.get("type").getAsString());
+        JsonArray ingredients = recipe.getAsJsonArray("ingredients");
+        assertEquals(1, ingredients.size());
+        assertEquals(NS + ":" + LibItemNames.KAMI_RESOURCE_NAMES[2],
+                ingredients.get(0).getAsJsonObject().get("item").getAsString());
+        JsonObject result = recipe.getAsJsonObject("result");
+        assertEquals(NS + ":" + LibItemNames.KAMI_RESOURCE_NAMES[3], result.get("id").getAsString());
+        assertEquals(9, result.get("count").getAsInt());
+    }
+
+    @Test
+    void theToolAndArmourTagsNameOnlyItemsOfTheGroupAndAreOptional() {
+        String[][] tags = { { "head_armor", LibItemNames.ICHOR_HELM, LibItemNames.ICHOR_HELM_GEM },
+                { "chest_armor", LibItemNames.ICHOR_CHEST, LibItemNames.ICHOR_CHEST_GEM },
+                { "leg_armor", LibItemNames.ICHOR_LEGS, LibItemNames.ICHOR_LEGS_GEM },
+                { "foot_armor", LibItemNames.ICHOR_BOOTS, LibItemNames.ICHOR_BOOTS_GEM },
+                { "pickaxes", LibItemNames.ICHOR_PICK, LibItemNames.ICHOR_PICK_GEM },
+                { "shovels", LibItemNames.ICHOR_SHOVEL, LibItemNames.ICHOR_SHOVEL_GEM },
+                { "axes", LibItemNames.ICHOR_AXE, LibItemNames.ICHOR_AXE_GEM },
+                { "swords", LibItemNames.ICHOR_SWORD, LibItemNames.ICHOR_SWORD_GEM } };
+        for (String[] tag : tags) {
+            List<String> listed = new ArrayList<>();
+            // The add-on's own copy of the vanilla tag; the loader merges it into the vanilla one.
+            JsonObject definition = json("/data/minecraft/tags/item/" + tag[0] + ".json");
+            assertTrue(!definition.has("replace") || !definition.get("replace").getAsBoolean(),
+                    tag[0] + " adds to the vanilla tag, it does not replace it");
+            for (JsonElement value : definition.getAsJsonArray("values")) {
+                // With the Kami option off the items do not exist: the entries are optional, so the tag still loads.
+                if (value.isJsonObject()) {
+                    assertEquals(false, value.getAsJsonObject().get("required").getAsBoolean(), tag[0]);
+                    listed.add(value.getAsJsonObject().get("id").getAsString());
+                }
+            }
+            assertTrue(listed.contains(NS + ":" + tag[1]), tag[0] + " lists " + tag[1]);
+            assertTrue(listed.contains(NS + ":" + tag[2]), tag[0] + " lists " + tag[2]);
+        }
+    }
+
+    @Test
+    void thePouchTitleKeyIsInTheMergedLanguageFiles() {
+        for (String lang : List.of("en_us", "ru_ru")) {
+            JsonObject strings = json("/assets/" + NS + "/lang/" + lang + ".json");
+            assertTrue(strings.has("container.thaumictinkerer.ichor_pouch"), lang);
+            assertTrue(strings.has("item.thaumictinkerer.ichor_pouch"), lang);
+        }
+    }
+
+    @Test
+    void everyItemHasAnEnglishAndARussianName() {
+        for (String lang : List.of("en_us", "ru_ru")) {
+            JsonObject strings = json("/assets/" + NS + "/lang/" + lang + ".json");
+            for (String item : ITEMS) {
+                assertTrue(strings.has("item." + NS + "." + item), lang + " name of " + item);
+            }
+        }
+    }
+
+    @Test
+    void theWandPartsHaveNames() {
+        // WandCap/WandRod naming: item.Wand.<TAG>.cap and item.Wand.<TAG>.rod with the 1.7.10 tags.
+        JsonObject strings = json("/assets/" + NS + "/lang/en_us.json");
+        assertEquals("Ichorium Adorned", strings.get("item.Wand.ICHOR.cap").getAsString());
+        assertEquals("Ichor Woven Silverwood", strings.get("item.Wand.ICHORCLOTH.rod").getAsString());
+    }
+}

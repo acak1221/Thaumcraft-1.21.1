@@ -87,8 +87,14 @@ public final class ScanManager {
      * scanned target stays missing, exactly as in the original.</p>
      */
     public static boolean alreadyScanned(ServerPlayer player, String signature, ScanKind kind) {
-        if (player == null || signature == null || signature.isEmpty() || kind == null) return false;
-        return wasScanned(KnowledgeAccess.get(player), signature, kind);
+        if (player == null) return false;
+        return alreadyScanned(KnowledgeAccess.get(player), signature, kind);
+    }
+
+    /** The same predicate over a knowledge snapshot: an {@code @} marker counts as scanned when the {@code #} marker is held. */
+    public static boolean alreadyScanned(PlayerKnowledge knowledge, String signature, ScanKind kind) {
+        if (knowledge == null || signature == null || signature.isEmpty() || kind == null) return false;
+        return wasScanned(knowledge, signature, kind);
     }
 
     /**

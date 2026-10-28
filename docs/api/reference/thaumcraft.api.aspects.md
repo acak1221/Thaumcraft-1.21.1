@@ -90,6 +90,30 @@ public static final Aspect MECHANISM
 public static final Aspect TRAP
 ```
 
+<a id="aspect-codec"></a>
+```java
+public static final Codec<Aspect> CODEC
+```
+
+Codec of an aspect by its tag, for data components, JSON data, saved data and any other `Codec` user. Not a 1.7.10 member: an add-on of the original kept the tag string in an NBT tag itself.
+
+**Written form.** The tag as a string, for example `"ignis"`; the same string `getTag()` answers and `getAspect(String)` looks up.
+
+**Registry driven.** Decoding reads the live registry `aspects`, so an aspect an add-on registered decodes exactly like an original one. The add-on must have constructed it before the data is decoded (mod initialisation, see the class documentation); data that names an aspect nobody registered fails to decode.
+
+**Errors.** An unknown or empty tag is a decode error with the message `Unknown aspect tag 'x' ...`, never a null result. Encoding fails with an error for a null aspect and for an aspect that is not registered under its own tag (one retagged with `setTag`), because the written tag could not be read back as that aspect.
+
+**Side and thread.** Pure; either side, any thread that may read the registry. Decoding returns the one registered instance, so `==` comparison and `AspectList` keys keep working.
+
+<a id="aspect-stream_codec"></a>
+```java
+public static final StreamCodec<ByteBuf, Aspect> STREAM_CODEC
+```
+
+Network codec of an aspect by its tag (a UTF-8 string, at most 32767 characters), usable with any `ByteBuf`, so also as the `networkSynchronized` codec of a data component type (`RegistryFriendlyByteBuf` is a `ByteBuf`).
+
+Client and server must register the same aspects (see the class documentation): reading a tag that the receiving side does not know throws `DecoderException` with the message `Unknown aspect tag 'x' ...`, which disconnects the receiving connection like any undecodable packet. Writing a null aspect or one that is not registered under its own tag throws `EncoderException`.
+
 <a id="aspect-aspect"></a>
 ```java
 public Aspect(String tag, int color, Aspect[] components, ResourceLocation image, int blend)
@@ -311,6 +335,32 @@ TC4's ordered aspect amounts. add sums; merge takes the maximum.
 ```java
 public final LinkedHashMap<Aspect, Integer> aspects
 ```
+
+<a id="aspectlist-codec"></a>
+```java
+public static final Codec<AspectList> CODEC
+```
+
+Codec of an aspect list, so that a data component, a JSON file or saved data can hold aspects. Not a 1.7.10 member: an add-on of the original wrote `writeToNBT(CompoundTag)` into an NBT tag itself.
+
+**Written form.** A list of entries in the order of the list: `[{"tag": "ignis", "amount": 4}, {"tag": "tempus", "amount": 2}]` (the tag of `Aspect.CODEC`, a positive int). The empty list is `[]` and is a valid, empty `AspectList`. Decoding keeps the written order, which is the insertion order of the result.
+
+**Strict decoding.** An unknown tag (an add-on aspect that is not registered, see `Aspect.CODEC`), an amount below one and a tag that appears twice are errors of the whole list: the data is never trimmed or summed into a different list. The result is a new mutable list on every decode.
+
+**Encoding.** An entry with an amount of zero or less is not written: such an entry holds no aspect, and `reduce` leaves exactly one behind when it empties an aspect, so a list that was reduced still saves. `getAmount` of a decoded list therefore equals that of the encoded one for every aspect with a positive amount, and is zero for the others. Encoding an aspect that is not registered under its own tag is an error (`Aspect.CODEC`).
+
+**Equality.** `AspectList` compares by identity, as in the original. Two stacks whose data component holds equal but distinct lists are therefore different stacks (they do not merge). A component that must compare by value holds a small immutable value type of its own that wraps the list, copies it on the way in and out and compares `getAspects()` and `getAmount` (the guide shows one).
+
+**Side and thread.** Pure; either side, any thread that may read the aspect registry.
+
+<a id="aspectlist-stream_codec"></a>
+```java
+public static final StreamCodec<ByteBuf, AspectList> STREAM_CODEC
+```
+
+Network codec of an aspect list, usable with any `ByteBuf` (so as the `networkSynchronized` codec of a data component type): a var-int count, then per entry the tag (`Aspect.STREAM_CODEC`) and the amount as a var-int. Same rules as `CODEC`: entries of zero or less are not written, order is kept.
+
+Decoding throws `DecoderException` for a count above the number of registered aspects (distinct aspects cannot outnumber the registry, which bounds the allocation), an unknown tag, an amount below one and a repeated tag. Client and server must register the same aspects, see `Aspect`.
 
 <a id="aspectlist-aspectlist"></a>
 ```java

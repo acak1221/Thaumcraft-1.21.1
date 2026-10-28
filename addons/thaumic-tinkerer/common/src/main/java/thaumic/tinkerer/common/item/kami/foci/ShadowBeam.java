@@ -20,13 +20,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import thaumic.tinkerer.common.item.kami.KamiHooks;
-import thaumic.tinkerer.common.lib.LibBlockNames;
 
 /**
  * The beam of the Focus of Shadowbeam, run on the server in one go.
@@ -34,8 +32,8 @@ import thaumic.tinkerer.common.lib.LibBlockNames;
  * <p>1.7.10 created a {@code Beam} (an {@code EntityThrowable} that was never added to the world) and called its
  * {@code onUpdate} 300 times in a loop. Every step moved it by 0.15 blocks along the look direction (plus a constant
  * 0.0075 bias per component of the direction), damaged the first entity within 0.3 blocks of its way (everything but the
- * caster, and no player without PvP) and mirrored it off the face of a block it hit. This class is that loop without an
- * entity.</p>
+ * caster, and no player without PvP) and mirrored it off the face of a block it hit, except a Nether portal, which an
+ * {@code EntityThrowable} goes through (it only "enters" it). This class is that loop without an entity.</p>
  */
 public final class ShadowBeam {
     /** 1.7.10 {@code initialOffset + length}. */
@@ -80,7 +78,6 @@ public final class ShadowBeam {
         Vec3 pos = launch[0];
         Vec3 movement = launch[1];
         int damage = damage(baseDamage, potency);
-        Block portal = KamiHooks.optionalBlock(LibBlockNames.PORTAL);
 
         List<Vec3> path = new ArrayList<>();
         EntityCache entities = new EntityCache(level, player);
@@ -94,7 +91,7 @@ public final class ShadowBeam {
             if (target != null) {
                 hurt(player, target, damage);
             } else if (block.getType() == HitResult.Type.BLOCK
-                    && !(portal != null && level.getBlockState(block.getBlockPos()).is(portal))) {
+                    && !level.getBlockState(block.getBlockPos()).is(Blocks.NETHER_PORTAL)) {
                 if (tick >= FIRST_VISIBLE_STEP - 1) path.add(pos);
                 movement = reflect(movement, block.getDirection());
             }

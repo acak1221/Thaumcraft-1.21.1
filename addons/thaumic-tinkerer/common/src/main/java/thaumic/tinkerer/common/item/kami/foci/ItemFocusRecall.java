@@ -114,7 +114,7 @@ public class ItemFocusRecall extends ItemModKamiFocus {
                 KamiResearch.tc("itemFocusPortableHole", 0));
     }
 
-    /** The research entry; 1.7.10 skipped it when Thaumcraft's {@code allowMirrors} was off (no API for that yet, A5). */
+    /** The research entry; the registrar skips it while Thaumcraft's mirrors are off ({@code ThaumcraftApi.isMirrorsAllowed()}), as 1.7.10 did. */
     public static TTResearchItem research() {
         return KamiResearch.entry(LibResearch.KEY_FOCUS_RECALL,
                 new AspectList().add(Aspect.TRAVEL, 2).add(Aspect.ELDRITCH, 1).add(Aspect.FLIGHT, 1)

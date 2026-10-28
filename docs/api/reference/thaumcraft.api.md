@@ -831,6 +831,28 @@ public static void clearRecipeKeyCache()
 
 Forgets the answers of `getCraftingRecipeKey`; the runtime calls it when research is added or changed.
 
+<a id="thaumcraftapi-ismirrorsallowed"></a>
+```java
+public static boolean isMirrorsAllowed()
+```
+
+The original `Config.allowMirrors`: may the player build and use the mirrors? Not a 1.7.10 method: an add-on of the original read the public field `thaumcraft.common.config.Config.allowMirrors` (and, on a client, its synced copy `CallowMirrors`).
+
+**What it means.** Thaumcraft's own switch (config key `allow_mirrors`, default `true`). While it is off, the research of the Magic Mirror, the Essentia Mirror and the Hand Mirror (keys `MIRROR`, `MIRRORESSENTIA`, `MIRRORHAND`) is disabled, so nobody can learn it. An add-on feature that is built on a mirror (a focus that needs one as an ingredient, say) should follow the same switch. The mod does not enforce the switch when a mirror is placed or used, and it removes no mirror that exists.
+
+**Side and thread.** Either side. On the client thread it is the value the connected server sent when the player joined (the local configuration when not connected); on every other thread it is this installation's own server value, read from the configuration file at startup. It cannot change while a world runs (restart scoped). Cheap and allocation free; safe to call every tick.
+
+<a id="thaumcraftapi-iswardedstoneallowed"></a>
+```java
+public static boolean isWardedStoneAllowed()
+```
+
+The original `Config.wardedStone`: do warded stone, warded glass, arcane doors and arcane pressure plates belong to their owner? Not a 1.7.10 method: an add-on of the original read the public field `thaumcraft.common.config.Config.wardedStone` (client copy `CwardedStone`).
+
+**What it means.** Thaumcraft's own switch (config key `allow_warded_stone`, default `true`). While it is on, warded doors, warded glass and warded pressure plates are unbreakable by mining (for everybody) and only the owner can take a warded block back with a wand; while it is off they have an ordinary hardness and anybody can remove them with a wand. It also gates the research of the warding focus and of the warded arcana (`FOCUSWARDING`, `WARDEDARCANA`), so an add-on block that builds on warded stone (a ward slab, a warding fence) should be offered only while it is on.
+
+**Side and thread.** Same as `isMirrorsAllowed()`.
+
 <a id="thaumcraftapi-addwarptoitem"></a>
 ```java
 public static void addWarpToItem(ItemStack craftresult, int amount)
@@ -1111,6 +1133,19 @@ public static AspectList getBonusObjectTags(ItemStack is, AspectList ot)
 
 Delegates to the installed handler, normalizing null results to an empty list. The 1.7.10 bonus-enrichment signature now only copies ot in the installed handler (null becomes empty), ignoring is. Use getObjectAspects(ItemStack, Level) for 1.21.1 scan-complete aspect units; no equivalent level-aware bonus facade exists here.
 
+<a id="thaumcraftapihelper-getbonusobjecttags-2"></a>
+```java
+public static AspectList getBonusObjectTags(ItemStack is, AspectList bonus, Level level)
+```
+
+The complete aspects of one item as a scan sees them, plus `bonus` on top: the world-scoped form of the original `getBonusObjectTags(ItemStack, AspectList)`. Not a 1.7.10 signature.
+
+**This is not the 1.7.10 contract.** The original took the BASE aspects of the item in its second argument and returned them enriched with the bonuses. Here the base is already part of the result, so do not pass `getObjectAspects(stack, level)` as `bonus`: every amount would be counted twice. Pass `null` for the aspects of the stack alone, or only the extra aspects you want added.
+
+**The result** is a new list, per single item (the count of the stack is not applied), made of: the registered, recipe-derived or inferred aspects of the item (`Level)`), the contents of an essentia container (a filled jar, a phial, a crystal, wisp essence, a bound jar label), and the bonuses of worn equipment and of enchantments, culled to the six most valuable aspects (`cullTags`) without capping amounts; then `bonus` is added on top by summing, *after* the culling, so the result can hold more than six aspects. `bonus` is never modified.
+
+An empty or null stack or a null level contributes nothing: the result is then a copy of `bonus` (an empty list for null). A replaced handler that answers null gives an empty list. Either side; the recipe-derived aspects are read from the recipes of `level`.
+
 <a id="thaumcraftapihelper-generatetags"></a>
 ```java
 public static AspectList generateTags(Item item, int meta)
@@ -1247,6 +1282,94 @@ public static int getWarpTotal(Player player)
 
 Total warp of the player: permanent, sticky and temporary (original PlayerKnowledge.getWarpTotal).
 
+<a id="thaumcraftapihelper-hasscanneditem"></a>
+```java
+public static boolean hasScannedItem(Player player, ItemStack stack)
+```
+
+Whether the player has scanned the item of the stack with a thaumometer: the answer the thaumometer readout uses to show the aspects of a target that was already scanned. Not a 1.7.10 member (the original compared a hash of the item and its metadata in `Thaumcraft.proxy.getScannedObjects`).
+
+**Identity.** The item is looked up by its registry id (the marker `"@" + id`, as `ItemThaumometer` writes it for the item it picked from a block or an item entity); the count, the damage and the data components of the stack do not matter, and there is no metadata in 1.21.1. The marker of an advanced scan (`"#" + id`) counts as scanned too. Scanning a dropped item counts for that item and scanning a block for the item a pick-block of it gives (a redstone wire is `minecraft:redstone`); scanning a mob counts for no item.
+
+False for a null player, a null or empty stack, and an item nobody scanned. Works on both sides for the client's own player (its knowledge is synced); the knowledge of another player is only known to the server.
+
+<a id="thaumcraftapihelper-discoveraspect"></a>
+```java
+public static boolean discoverAspect(ServerPlayer player, Aspect aspect)
+```
+
+Marks the aspect as discovered for the player, so the research table and the thaumometer treat it as known, and syncs the player's knowledge to the client. The native counterpart of the original `PlayerKnowledge.addDiscoveredAspect`. Not a 1.7.10 helper member.
+
+The aspect starts with an empty research pool; an aspect the player already knows keeps its pool. It does *not* check that the parents of a compound aspect are known (a scan does), shows no discovery notice and gives no research points: it is the quiet "learn this aspect" of the original, for an item that copies knowledge. (A positive `addAspectPool` discovers the aspect too, because in the player's knowledge an aspect is discovered exactly when it has a pool entry.) Only a registered aspect can be discovered.
+
+Server side only, on the server thread (another thread throws `IllegalStateException`).
+
+**Returns:** true when this call discovered the aspect; false when the player already knew it, on a client, for a null player or aspect, and for an aspect that is not registered under its tag
+
+<a id="thaumcraftapihelper-getscans"></a>
+```java
+public static Scans getScans(Player player)
+```
+
+The scan markers of the player: everything the thaumometer recorded for items (and the blocks they were picked from), entities and phenomena (aura nodes). An immutable snapshot, so a Tome of Sharing can copy what one player scanned to another with `addScans`.
+
+**The markers are the mod's own keys** and are meant to travel unchanged, not to be built or parsed: a basic scan is `"@"` followed by the registry id of the item or the name of the entity or phenomenon, an advanced scan `"#"` followed by the same (it replaces the `"@"` marker). A marker is never empty and at most `Scans.MAX_KEY_LENGTH` characters long.
+
+**Not included:** the research clues a scan revealed (`"@KEY"` entries among the completed research; `getCompletedResearch` leaves them out and `completeResearch` refuses them), the discovered aspects (`getDiscoveredAspects(Player)`) and the research points (`getAspectPool`).
+
+Both sides for the client's own player; the knowledge of another player is only known to the server. An empty snapshot for a null player.
+
+<a id="thaumcraftapihelper-addscans"></a>
+```java
+public static int addScans(ServerPlayer player, Scans scans)
+```
+
+Adds scan markers to the player's knowledge and syncs it to the client: the native counterpart of the original `ResearchManager.completeScannedObject/Entity/Phenomena`. Not a 1.7.10 helper member. The markers are those of `getScans`; they give no research points, aspects or clues, only the fact "scanned".
+
+A marker the player already has is not added again, in either of its two forms: a basic marker (`"@x"`) is skipped when the player holds `"@x"` or `"#x"`; an advanced marker (`"#x"`) is added and replaces a basic one. Adding is idempotent, and the order of the markers does not matter.
+
+Server side only, on the server thread (another thread throws `IllegalStateException`).
+
+**Returns:** the number of markers that were new; the player is synced only when it is above zero. Zero on a client and for null arguments
+
+<a id="thaumcraftapihelper-iswoodlog"></a>
+```java
+public static boolean isWoodLog(Level level, BlockPos pos)
+```
+
+Whether the block at the position is a log by the rule of the Axe of the Stream: the 1.21.1 form of the original `Utils.isWoodLog(world, x, y, z)`. It answers "may the furthest-log walk of `breakFurthestBlock` step on this cell", and nothing else: it says nothing about whether the block belongs to a tree.
+
+**The rule.** True for a block in the block tag `#minecraft:logs` (so every log, wood and stem of the tag, stripped ones and the Greatwood and Silverwood logs of Thaumcraft included) and for any leaf block; false for everything else, air included, and false for the plain oak log (`minecraft:oak_log`). This is the rule of the port's `Utils.isWoodLog`. The original asked the block whether it can sustain leaves (a log does) or whether a configured list of "woodLog" ore entries names it; how the port's rule differs for oak and for leaves is listed in `docs/audit/KNOWN_DEVIATIONS.md` section 9.
+
+Only the block state is read (no block entity, no hardness, no ownership). A position in a chunk that is not loaded, or outside the build height, is not a log; the call never loads a chunk. Either side; read-only; cheap. False for null arguments.
+
+<a id="thaumcraftapihelper-breakfurthestblock"></a>
+```java
+public static boolean breakFurthestBlock(Level level, BlockPos pos, Block block, Player player)
+```
+
+Breaks the log at the far end of a tree, as the original Axe of the Stream did when it felled a tree from the clicked log: the 1.21.1 form of the original `BlockUtils.breakFurthestBlock(world, x, y, z, block, player)`. One call breaks ONE block; felling a whole tree is a loop of the caller.
+
+**What "furthest" means.** A greedy walk, not a search of the whole tree. It starts at `pos` with a distance of zero. At each step it scans the cells within two blocks of the cell it stands on, in the order x from -2 to +2, y from +2 down to -2, z from -2 to +2, and moves to the FIRST cell that (1) holds exactly `block` (the same block, not the same tag; the log axis and other state properties are not compared), (2) satisfies `isWoodLog`, (3) can be broken (a destroy speed of zero or more) and (4) is strictly further from `pos` than the cell the walk reached before (squared distance, so an equal distance does not count). Then it repeats from there and stops when no cell qualifies. Consequences: gaps of up to two blocks and diagonals are crossed; a branch that is scanned first and ends early hides a longer branch (the walk is the first local maximum, not the farthest log of the tree); a neighbouring tree of the same wood is followed too. The walk never leaves the box |dx| &lt;= 24, |dy| &lt;= 48, |dz| &lt;= 24 around `pos`; the first scanned cell outside the box ends the whole walk (an original quirk: the remaining cells of that scan are not looked at).
+
+**What is broken.** Only the cell the walk ended on; the logs on the way stay. When no cell qualifies that cell is `pos` itself, *whatever block it holds*: the original never checked the start, because the axe called `isWoodLog` first. Do the same, and pass the block that is at `pos`, or a stone will be mined by a call meant for a tree.
+
+**Drops.** The block is removed and drops its normal loot, rolled with the main-hand item of `player` (Fortune and Silk Touch count), as items at the broken cell; they do not follow the player. A creative player and a null player get no drops. The game rule for block drops applies.
+
+**Tool wear: none.** The held item takes no damage, the player gets no statistics or exhaustion, and no loader break event is fired; the player's own Axe of the Stream does not use this helper in the port (it breaks through the normal break path and wears the axe). **No protection check:** spawn protection, the world border, claims and permission mods are not asked for any cell, and the broken cell can be up to 24 blocks sideways and 48 up or down from `pos`. An add-on that cares must check `level.mayInteract(player, pos)` or walk the tree itself.
+
+**Afterwards** every cell within three blocks of the broken one gets a scheduled block tick 150 to 299 ticks later (the original's delayed neighbourhood update, which the leaves around a felled log answer) and clients see the block update.
+
+**Return value.** True when the walk ended on a cell that is not air and can be broken: that cell was handed to the harvester (like the original, true does not prove the block was removed: another mod can veto the removal and the call still answers true). False, with nothing changed, for a client level, a null argument, a start in a chunk that is not loaded, an air start (the helper behind this method answers true for air and plays a break effect), and an unbreakable block such as bedrock at the end of the walk. So `while (breakFurthestBlock(...))` ends once the start cell is air.
+
+**Side and thread.** Server side, on the server thread; on another thread it throws `IllegalStateException`, because the walk keeps its state in static fields (as the original did) and is not reentrant. Cells inside the box that lie in unloaded chunks are read, and so loaded, like any block read.
+
+**Parameters:**
+- `level` — the level; a client level returns false
+- `pos` — the clicked log, where the walk starts
+- `block` — the block the walk follows, normally `level.getBlockState(pos).getBlock()`
+- `player` — the player who breaks it; decides the drops; may be null
+
 <a id="thaumcraftapihelper-raytraceignoringsource"></a>
 ```java
 public static BlockHitResult rayTraceIgnoringSource(Level world, Vec3 v1, Vec3 v2, boolean includeFluid, boolean requireCollision, boolean reportMiss)
@@ -1257,6 +1380,54 @@ Original TC4 voxel ray that ignores the cell the ray starts in.
 Forced 1.21.1 change: the result is a native `BlockHitResult`; the traversal itself is the native one, so the original per-face step quirks are replaced by the native block outline.
 
 Endpoints are world coordinates in blocks; null world/endpoints or NaN components return null. The 1.7.10 includeFluid/reportMiss switches do not restore their old semantics: traversal tests block shapes only, never fluid shapes, and an unobstructed ray returns null even when reportMiss is true. Use Level.clip with a suitable ClipContext for 1.21.1 fluid/miss semantics. This method reads the world without explicitly mutating it.
+
+### Scans
+
+```java
+public record Scans(Set<String> items, Set<String> entities, Set<String> phenomena)
+```
+
+An immutable snapshot of the scan markers of a player, as `getScans` returns it and `addScans` takes it. Not a 1.7.10 type. The three sets keep the order of the player's knowledge; each marker is a non-empty string of at most `#MAX_KEY_LENGTH` characters (the keys of the mod are far shorter; the bound keeps the knowledge sync packet well inside the limit of an NBT string).
+
+**Parameters:**
+- `items` — markers of scanned items, for example `"@minecraft:diamond"`
+- `entities` — markers of scanned entities
+- `phenomena` — markers of scanned phenomena (aura nodes)
+
+<a id="scans-max_key_length"></a>
+```java
+public static final int MAX_KEY_LENGTH
+```
+
+The longest marker a snapshot accepts; the markers the mod writes are a registry id or a node id, well below it.
+
+<a id="scans-empty"></a>
+```java
+public static final Scans EMPTY
+```
+
+No scan at all.
+
+<a id="scans-scans"></a>
+```java
+public Scans(Set<String> items, Set<String> entities, Set<String> phenomena)
+```
+
+Copies the sets (insertion order kept) into unmodifiable ones; null sets, null or empty markers and markers longer than `MAX_KEY_LENGTH` are rejected with a `NullPointerException` or an `IllegalArgumentException`.
+
+<a id="scans-isempty"></a>
+```java
+public boolean isEmpty()
+```
+
+True when no marker of any kind is held.
+
+<a id="scans-size"></a>
+```java
+public int size()
+```
+
+The number of markers of all three kinds.
 
 ## ThaumcraftFX
 

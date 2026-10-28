@@ -4,7 +4,7 @@
 
 [All packages](README.md)
 
-Types: [`FocusUpgradeType`](#focusupgradetype), [`IWandFocus`](#iwandfocus), [`IWandRodOnUpdate`](#iwandrodonupdate), [`IWandTriggerManager`](#iwandtriggermanager), [`IWandable`](#iwandable), [`ItemFocusBasic`](#itemfocusbasic), [`StaffRod`](#staffrod), [`WandCap`](#wandcap), [`WandHelper`](#wandhelper), [`WandRod`](#wandrod), [`WandTriggerRegistry`](#wandtriggerregistry)
+Types: [`FocusUpgradeType`](#focusupgradetype), [`IFocusPouch`](#ifocuspouch), [`IWandFocus`](#iwandfocus), [`IWandRodOnUpdate`](#iwandrodonupdate), [`IWandTriggerManager`](#iwandtriggermanager), [`IWandable`](#iwandable), [`ItemFocusBasic`](#itemfocusbasic), [`StaffRod`](#staffrod), [`WandCap`](#wandcap), [`WandHelper`](#wandhelper), [`WandRod`](#wandrod), [`WandTriggerRegistry`](#wandtriggerregistry)
 
 ## FocusUpgradeType
 
@@ -85,6 +85,64 @@ Returns the catalogue identity, or null for an unsupported/out-of-short-range ID
 public boolean equals(Object other)
 public int hashCode()
 ```
+
+## IFocusPouch
+
+```java
+public interface IFocusPouch
+```
+
+An item that stores focuses for the wand's focus selector: the native focus pouch, and a pouch of an add-on.
+
+TC4 did not have this interface. Its selector (the change focus key) found a pouch by the class `ItemFocusPouch` and read the foci in it with `getInventory(ItemStack)`; Thaumic Tinkerer's Bottomless Pouch extended that class with 117 cells. `getInventory` and `setInventory(ItemStack, ItemStack[])` keep the original names and become this interface, so an add-on pouch is offered by the selector exactly like the native one without extending an internal class.
+
+What the selector does with a pouch (an item of the stack implements this interface):
+- It looks at the 36 main inventory slots (hotbar included) and at the four accessory slots, so a pouch that is also a belt `thaumcraft.api.baubles.IBauble` is listed while worn. The off-hand, the armour slots and the contents of other containers are not looked at. Only a stack of exactly one pouch counts.
+- It lists every cell that holds a focus (an `ItemFocusBasic` that can be mounted). Other items in a cell are ignored and never touched. The selector UI is a ring with one button per focus, not a grid, so a pouch of any size is listed; only the first `MAX_SELECTABLE_CELLS` cells are listed (the native pouch has 18).
+- When the player picks a focus, it leaves its cell (the cell becomes `ItemStack.EMPTY`) and is mounted on the wand; the focus the wand had goes into the first empty cell among the first `MAX_SELECTABLE_CELLS` cells of the first pouch that has one (worn pouches first, then the main inventory, each from its first cell), before any free inventory slot. The selection is all or nothing.
+- A right click never puts a pouch into an accessory slot, whatever `thaumcraft.api.baubles.IBauble.equipsOnUse` answers: the click goes to the pouch's own `use`, which normally opens its screen. It is put on in the Baubles menu.
+
+The pouch does its own storage, typically in a data component, and its own screen. Opening a screen, the rules for what may be put in, the number of cells and their layout are all the add-on's.
+
+<a id="ifocuspouch-max_selectable_cells"></a>
+```java
+int MAX_SELECTABLE_CELLS
+```
+
+The most cells of one pouch the focus selector reads and writes: the cells whose index is this number or more are neither listed nor given a returned focus. Thaumic Tinkerer's pouch has 117 cells, which fit.
+
+<a id="ifocuspouch-getinventory"></a>
+```java
+ItemStack[] getInventory(ItemStack pouch)
+```
+
+All cells of the pouch, in order, with `ItemStack.EMPTY` for an empty cell (never `null`).
+
+The length is the pouch's number of cells and must be the same on every call for the same pouch stack. Every stack of the result is an independent copy: the caller changes the array and its stacks freely, and a change reaches the pouch only through `setInventory`. Called on both logical sides: on the client to list the focuses, on the server to select one.
+
+A stack that carries a payload this pouch cannot read (for example saved by another version) throws `IllegalArgumentException`; the selector then ignores that pouch and leaves its payload untouched.
+
+**Returns:** the cells, a new array
+
+**Throws:** `IllegalArgumentException` — if the stack holds contents this pouch cannot read
+
+**Parameters:**
+- `pouch` — one pouch of this item; its stack count is one
+
+<a id="ifocuspouch-setinventory"></a>
+```java
+void setInventory(ItemStack pouch, ItemStack[] contents)
+```
+
+Replaces all cells of the pouch.
+
+`contents` has the length `getInventory` returned for this stack; an entry is `ItemStack.EMPTY` for an empty cell. Copy what is kept: the caller may still hold the array. Change nothing but the given stack. Called on the server thread only; the selector calls it on the live stack of the player's inventory or accessory slot (the same stack object stays in its slot) and also on a scratch copy of a stack while it plans a selection, so it must not have any effect outside the stack it is given. It may not refuse an array `getInventory` could have returned with one cell changed.
+
+**Throws:** `IllegalArgumentException` — if `contents` has the wrong length
+
+**Parameters:**
+- `pouch` — one pouch of this item; its stack count is one
+- `contents` — the new cells, one entry per cell, none `null`
 
 ## IWandFocus
 

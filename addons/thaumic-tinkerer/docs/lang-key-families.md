@@ -13,7 +13,7 @@ No text was translated or edited. A value changed only where a literal `%` becam
 | `de_DE.lang` | `de_de.json` | 437 | 578 | 101 | 1 | 1 | 1 | 1 |
 | `fr_Fr.lang` | `fr_fr.json` | 464 | 619 | 102 | 1 | 1 | 1 | 1 |
 | `ko_KR.lang` | `ko_kr.json` | 421 | 562 | 91 | 1 | 1 | 1 | 1 |
-| `ru_RU.lang` | `ru_ru.json` | 467 | 633 | 105 | 1 | 1 | 4 | 12 |
+| `ru_RU.lang` | `ru_ru.json` | 467 | 639 | 105 | 1 | 1 | 4 | 18 |
 | `zh_CN.lang` | `zh_cn.json` | 469 | 624 | 107 | 1 | 1 | 1 | 1 |
 
 ## Key families
@@ -110,7 +110,7 @@ New 1.21.1-only keys live in `addons/thaumic-tinkerer/lang-extra/<group>.<lang>.
 | `ko_kr` | `addons/thaumic-tinkerer/lang-extra/machines.ko_kr.json` | 1 | none |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/kami_gear.ru_ru.json` | 1 | none |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/machines.ru_ru.json` | 1 | none |
-| `ru_ru` | `addons/thaumic-tinkerer/lang-extra/simple_blocks.ru_ru.json` | 4 | none |
+| `ru_ru` | `addons/thaumic-tinkerer/lang-extra/simple_blocks.ru_ru.json` | 10 | none |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.ru_ru.json` | 6 | none |
 | `zh_cn` | `addons/thaumic-tinkerer/lang-extra/machines.zh_cn.json` | 1 | none |
 

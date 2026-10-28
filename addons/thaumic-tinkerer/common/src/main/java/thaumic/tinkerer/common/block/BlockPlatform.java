@@ -14,7 +14,7 @@
 package thaumic.tinkerer.common.block;
 
 import com.mojang.serialization.MapCodec;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;

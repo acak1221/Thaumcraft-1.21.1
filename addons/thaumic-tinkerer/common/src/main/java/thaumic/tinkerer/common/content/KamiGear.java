@@ -17,8 +17,10 @@ import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.wands.WandCap;
 import thaumcraft.api.wands.WandHelper;
@@ -36,6 +38,7 @@ import thaumic.tinkerer.common.item.kami.ItemPlacementMirror;
 import thaumic.tinkerer.common.item.kami.ItemProtoclay;
 import thaumic.tinkerer.common.item.kami.ItemSkyPearl;
 import thaumic.tinkerer.common.item.kami.KamiComponents;
+import thaumic.tinkerer.common.item.kami.KamiResearch;
 import thaumic.tinkerer.common.item.kami.armor.ItemGemBoots;
 import thaumic.tinkerer.common.item.kami.armor.ItemGemChest;
 import thaumic.tinkerer.common.item.kami.armor.ItemGemHelm;
@@ -45,6 +48,7 @@ import thaumic.tinkerer.common.item.kami.armor.KamiArmorMaterials;
 import thaumic.tinkerer.common.item.kami.foci.ItemFocusRecall;
 import thaumic.tinkerer.common.item.kami.foci.ItemFocusShadowbeam;
 import thaumic.tinkerer.common.item.kami.foci.ItemFocusXPDrain;
+import thaumic.tinkerer.common.item.kami.tool.IchorTier;
 import thaumic.tinkerer.common.item.kami.tool.ItemIchorAxe;
 import thaumic.tinkerer.common.item.kami.tool.ItemIchorAxeAdv;
 import thaumic.tinkerer.common.item.kami.tool.ItemIchorPick;
@@ -53,11 +57,11 @@ import thaumic.tinkerer.common.item.kami.tool.ItemIchorShovel;
 import thaumic.tinkerer.common.item.kami.tool.ItemIchorShovelAdv;
 import thaumic.tinkerer.common.item.kami.tool.ItemIchorSword;
 import thaumic.tinkerer.common.item.kami.tool.ItemIchorSwordAdv;
-import thaumic.tinkerer.common.item.kami.tool.IchorTier;
 import thaumic.tinkerer.common.item.kami.tool.ToolHandler;
 import thaumic.tinkerer.common.item.kami.wand.CapIchor;
 import thaumic.tinkerer.common.item.kami.wand.RodIchorcloth;
 import thaumic.tinkerer.common.lib.LibItemNames;
+import thaumic.tinkerer.common.lib.LibResearch;
 import thaumic.tinkerer.common.network.packet.kami.PacketArmorStatus;
 import thaumic.tinkerer.common.network.packet.kami.PacketShadowBeam;
 import thaumic.tinkerer.common.network.packet.kami.PacketToggleArmor;
@@ -103,13 +107,13 @@ public final class KamiGear implements ContentGroup {
 
         // Armour.
         TTRegistry.item(LibItemNames.ICHOR_HELM, () -> new ItemIchorclothArmor(KamiArmorMaterials.ICHOR,
-                net.minecraft.world.item.ArmorItem.Type.HELMET, new Item.Properties()));
+                ArmorItem.Type.HELMET, new Item.Properties()));
         TTRegistry.item(LibItemNames.ICHOR_CHEST, () -> new ItemIchorclothArmor(KamiArmorMaterials.ICHOR,
-                net.minecraft.world.item.ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+                ArmorItem.Type.CHESTPLATE, new Item.Properties()));
         TTRegistry.item(LibItemNames.ICHOR_LEGS, () -> new ItemIchorclothArmor(KamiArmorMaterials.ICHOR,
-                net.minecraft.world.item.ArmorItem.Type.LEGGINGS, new Item.Properties()));
+                ArmorItem.Type.LEGGINGS, new Item.Properties()));
         TTRegistry.item(LibItemNames.ICHOR_BOOTS, () -> new ItemIchorclothArmor(KamiArmorMaterials.ICHOR,
-                net.minecraft.world.item.ArmorItem.Type.BOOTS, new Item.Properties()));
+                ArmorItem.Type.BOOTS, new Item.Properties()));
         TTRegistry.item(LibItemNames.ICHOR_HELM_GEM, () -> new ItemGemHelm(new Item.Properties()));
         TTRegistry.item(LibItemNames.ICHOR_CHEST_GEM, () -> new ItemGemChest(new Item.Properties()));
         TTRegistry.item(LibItemNames.ICHOR_LEGS_GEM, () -> new ItemGemLegs(new Item.Properties()));
@@ -177,7 +181,7 @@ public final class KamiGear implements ContentGroup {
 
         // Research: queued here, registered by ResearchHelper.flush() after every other entry (see KamiResearchItem).
         for (TTResearchItem research : ItemKamiResource.research()) {
-            if (research.key.equals(thaumic.tinkerer.common.lib.LibResearch.KEY_ICHOR)) ichorResearch = research;
+            if (research.key.equals(LibResearch.KEY_ICHOR)) ichorResearch = research;
             ResearchHelper.queue(research);
         }
         ResearchHelper.queue(ItemIchorPick.toolsResearch());
@@ -197,7 +201,8 @@ public final class KamiGear implements ContentGroup {
         ResearchHelper.queue(ItemProtoclay.research());
         ResearchHelper.queue(ItemFocusShadowbeam.research());
         ResearchHelper.queue(ItemFocusXPDrain.research());
-        ResearchHelper.queue(ItemFocusRecall.research());
+        // 1.7.10: ItemFocusRecall.getResearchItem() answered null while Thaumcraft's allowMirrors was off (the recipe stayed).
+        if (ThaumcraftApi.isMirrorsAllowed()) ResearchHelper.queue(ItemFocusRecall.research());
     }
 
     @Override
@@ -209,7 +214,7 @@ public final class KamiGear implements ContentGroup {
     /** The creative-tab wand with the Ichor rod and cap and every primal full (1.7.10: 100000 centivis of each). */
     private static ItemStack ichorWand() {
         try {
-            ItemStack wand = thaumic.tinkerer.common.item.kami.KamiResearch.tc("itemWandCasting", 0);
+            ItemStack wand = KamiResearch.tc("itemWandCasting", 0);
             WandHelper.setRod(wand, WandRod.byTag(RodIchorcloth.TAG));
             WandHelper.setCap(wand, WandCap.byTag(CapIchor.TAG));
             for (Aspect primal : Aspect.getPrimalAspects()) WandHelper.addRealVis(wand, primal, 100000, true);

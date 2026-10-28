@@ -87,6 +87,12 @@ public final class MachinesRuntimeChecks {
         return player;
     }
 
+    /** Removes a mock player (it would stay in the world and pick up what later checks drop) and ends the check. */
+    private static void finish(GameTestHelper test, ServerPlayer player) {
+        player.discard();
+        test.succeed();
+    }
+
     private static double distance(ItemEntity item, Vec3 point) {
         return item.position().distanceTo(point);
     }
@@ -120,7 +126,7 @@ public final class MachinesRuntimeChecks {
         test.assertTrue(Machines.TILE_SUMMON.isPresent() && Machines.TILE_FUNNEL.isPresent(), "block entities");
 
         for (String key : List.of(LibResearch.KEY_ASPECT_ANALYZER, LibResearch.KEY_REPAIRER, LibResearch.KEY_FUNNEL,
-                LibResearch.KEY_MAGNETS, LibResearch.KEY_SUMMON, LibResearch.KEY_BLOOD_SWORD, LibResearch.KEY_PERIPHERALS)) {
+                LibResearch.KEY_MAGNETS, LibResearch.KEY_SUMMON, LibResearch.KEY_BLOOD_SWORD)) {
             test.assertTrue(ResearchCategories.getResearch(key) != null, "research " + key);
         }
         for (String recipe : List.of(LibResearch.KEY_ASPECT_ANALYZER, LibResearch.KEY_REPAIRER, LibResearch.KEY_FUNNEL,
@@ -158,9 +164,10 @@ public final class MachinesRuntimeChecks {
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         test.useBlock(pos, player);
         test.assertTrue(repairer.getItem(0).isEmpty(), "an empty hand takes the tool back");
-        test.assertTrue(player.getInventory().contains(new ItemStack(Items.DIAMOND_PICKAXE)), "into the inventory");
+        test.assertTrue(player.getInventory().contains(stack -> stack.is(Items.DIAMOND_PICKAXE) && stack.getDamageValue() == 500),
+                "into the inventory, still damaged");
         test.assertTrue(!repairer.isPowering(), "no power without a tool");
-        test.succeed();
+        finish(test, player);
     }
 
     public static void repairerAutomationTakesDamagedToolsAndGivesMendedOnes(GameTestHelper test) {
@@ -369,7 +376,7 @@ public final class MachinesRuntimeChecks {
         test.useBlock(pos, player);
         test.assertBlockProperty(pos, BlockMagnet.PULLING, true);
         test.assertTrue(tile(test, pos, TileMagnet.class) != null, "the block entity survives the changes");
-        test.succeed();
+        finish(test, player);
     }
 
     public static void aCorporealAttractorChoosesByMouldAndAge(GameTestHelper test) {
@@ -407,7 +414,7 @@ public final class MachinesRuntimeChecks {
         magnet.setItem(0, blank);
         magnet.adult = true;
         test.assertTrue(!magnet.isSelected(adultCow) && !magnet.isSelected(pig), "an empty mould: nothing");
-        test.succeed();
+        finish(test, player);
     }
 
     public static void aCorporealAttractorMovesTheMobsItSelects(GameTestHelper test) {
@@ -442,7 +449,7 @@ public final class MachinesRuntimeChecks {
         test.assertTrue(!menu.getSlot(0).mayPlace(new ItemStack(Items.STICK)), "not a stick");
         test.assertTrue(menu.getSlot(0).getMaxStackSize() == 1, "one mould");
         test.assertTrue(menu.stillValid(player), "near");
-        test.succeed();
+        finish(test, player);
     }
 
     public static void theMobMagnetSavesItsMouldAndItsFlag(GameTestHelper test) {
@@ -462,7 +469,7 @@ public final class MachinesRuntimeChecks {
         loaded.loadWithComponents(saved, test.getLevel().registryAccess());
         test.assertTrue(!loaded.adult, "the flag");
         test.assertTrue("minecraft:pig".equals(ItemSoulMould.getPatternName(loaded.getItem(0))), "the pattern of the mould");
-        test.succeed();
+        finish(test, player);
     }
 
     public static void aSoulMouldLearnsAndForgets(GameTestHelper test) {
@@ -477,16 +484,16 @@ public final class MachinesRuntimeChecks {
         mould.getItem().interactLivingEntity(mould, player, test.spawn(EntityType.COW, new BlockPos(2, 1, 1)), InteractionHand.MAIN_HAND);
         test.assertTrue("minecraft:cow".equals(ItemSoulMould.getPatternName(mould)), "a cow: the newer pattern wins");
         // a player cannot be moulded
-        mould.getItem().interactLivingEntity(mould, player, test.makeMockServerPlayerInLevel(), InteractionHand.MAIN_HAND);
+        mould.getItem().interactLivingEntity(mould, player, player, InteractionHand.MAIN_HAND);
         test.assertTrue("minecraft:cow".equals(ItemSoulMould.getPatternName(mould)), "players are skipped");
-        // sneaking right click clears it
-        player.setShiftKeyDown(true);
-        mould.getItem().use(test.getLevel(), player, InteractionHand.MAIN_HAND);
-        test.assertTrue(true, "");
+        // a right click without sneaking keeps the pattern, a sneaking one clears it
         player.setItemInHand(InteractionHand.MAIN_HAND, mould);
         mould.getItem().use(test.getLevel(), player, InteractionHand.MAIN_HAND);
-        test.assertTrue(ItemSoulMould.getPatternName(mould).isEmpty(), "forgotten");
-        test.succeed();
+        test.assertTrue("minecraft:cow".equals(ItemSoulMould.getPatternName(mould)), "kept by a plain click");
+        player.setShiftKeyDown(true);
+        mould.getItem().use(test.getLevel(), player, InteractionHand.MAIN_HAND);
+        test.assertTrue(ItemSoulMould.getPatternName(mould).isEmpty(), "forgotten by a sneaking click");
+        finish(test, player);
     }
 
     // ---- Aspectalyzer ----------------------------------------------------------------------------------------------
@@ -525,8 +532,8 @@ public final class MachinesRuntimeChecks {
         menu.quickMoveStack(player, 1 + 27); // the first hot bar slot
         test.assertTrue(analyzer.getItem(0).is(Items.IRON_INGOT) && analyzer.getItem(0).getCount() == 5, "into the analyzer");
         menu.quickMoveStack(player, 0);
-        test.assertTrue(analyzer.getItem(0).isEmpty() && player.getInventory().contains(new ItemStack(Items.IRON_INGOT)), "and back");
-        test.succeed();
+        test.assertTrue(analyzer.getItem(0).isEmpty() && player.getInventory().contains(stack -> stack.is(Items.IRON_INGOT)), "and back");
+        finish(test, player);
     }
 
     // ---- Tablet of Necromancy ---------------------------------------------------------------------------------------
@@ -572,18 +579,38 @@ public final class MachinesRuntimeChecks {
         test.succeed();
     }
 
-    public static void infusedSoulAspectsSummonOnlyEveryTwentyMinutesAndAreKept(GameTestHelper test) {
+    public static void infusedSoulAspectsSummonOnlyEveryTwentyMinutesAreKeptAndBindToTheLastTablet(GameTestHelper test) {
         ItemStack b = soul(Aspect.BEAST, ItemMobAspect.Form.INFUSED);
         TileSummon tablet = tabletWith(test, b.copy(), b.copy(), b.copy());
-        test.assertTrue(!tablet.summon(test.getLevel(), 300), "300 is not a multiple of 1200");
+        BlockPos tabletPos = test.absolutePos(new BlockPos(3, 1, 3));
+        test.assertTrue(!tablet.summon(test.getLevel(), 300), "300 is not a multiple of 1200: nothing happens");
         test.assertEntityNotPresent(EntityType.WOLF);
-        test.assertTrue(tablet.summon(test.getLevel(), 1200), "1200 is");
-        test.assertEntityPresent(EntityType.WOLF);
+
+        // a set that was never used matches every tablet, so the first cycle at a multiple of 1200 summons
+        test.assertTrue(tablet.summon(test.getLevel(), 1200), "1200: summoned");
+        test.assertTrue(wolves(test) == 1, "one wolf, found " + wolves(test));
         ItemStack kept = pedestal(test, new BlockPos(1, 1, 3)).getItem(0);
         test.assertTrue(ItemMobAspect.isInfused(kept), "the infused soul aspect is kept");
-        test.assertTrue(ItemMobAspect.lastUsedTabletMatches(kept, test.absolutePos(new BlockPos(3, 1, 3))), "and remembers the tablet");
+        test.assertTrue(ItemMobAspect.lastUsedTabletMatches(kept, tabletPos), "and remembers the tablet");
         test.assertTrue(!ItemMobAspect.lastUsedTabletMatches(kept, test.absolutePos(new BlockPos(0, 1, 0))), "not another one");
+
+        test.assertTrue(tablet.summon(test.getLevel(), 2400), "2400: the same tablet summons again");
+        test.assertTrue(wolves(test) == 2, "two wolves, found " + wolves(test));
+        test.assertTrue(ItemMobAspect.isInfused(pedestal(test, new BlockPos(5, 1, 3)).getItem(0)), "and the set is still there");
+
+        // 1.7.10 quirk: a second tablet in reach of the same pedestals summons nothing, but takes the mark
+        BlockPos otherPos = new BlockPos(3, 1, 6);
+        test.setBlock(otherPos, Machines.SUMMON.get().defaultBlockState());
+        TileSummon other = tile(test, otherPos, TileSummon.class);
+        test.assertTrue(other.summon(test.getLevel(), 3600), "3600: the set is recognised by the other tablet");
+        test.assertTrue(wolves(test) == 2, "but nothing is summoned: " + wolves(test));
+        test.assertTrue(ItemMobAspect.lastUsedTabletMatches(pedestal(test, new BlockPos(1, 1, 3)).getItem(0),
+                test.absolutePos(otherPos)), "the other tablet took the mark");
         test.succeed();
+    }
+
+    private static int wolves(GameTestHelper test) {
+        return test.getLevel().getEntitiesOfClass(net.minecraft.world.entity.animal.Wolf.class, test.getBounds()).size();
     }
 
     public static void aMixedSetIsUsedUpEvenWhenOneIsInfused(GameTestHelper test) {
@@ -608,19 +635,23 @@ public final class MachinesRuntimeChecks {
                 soul(Aspect.FIRE, ItemMobAspect.Form.BASIC));
         test.assertTrue(tablet.summon(test.getLevel(), 300), "a wither skeleton is summoned");
         test.assertEntityPresent(EntityType.WITHER_SKELETON);
+        List<net.minecraft.world.entity.monster.WitherSkeleton> found = test.getLevel()
+                .getEntitiesOfClass(net.minecraft.world.entity.monster.WitherSkeleton.class, test.getBounds());
+        test.assertTrue(found.size() == 1 && found.get(0).getMainHandItem().is(Items.STONE_SWORD),
+                "it carries the stone sword that onSpawnWithEgg gives it: " + found);
         test.succeed();
     }
 
     // ---- Cursed Spirit's Blade ---------------------------------------------------------------------------------------
 
-    private static ItemStack activeBlade() {
+    private static ItemStack freshBlade() {
         ItemStack blade = TTRegistry.stack(LibItemNames.BLOOD_SWORD);
         return blade;
     }
 
     public static void theBladeSwitchesTheHarvestWithAShiftRightClick(GameTestHelper test) {
         ServerPlayer player = mockPlayer(test);
-        ItemStack blade = activeBlade();
+        ItemStack blade = freshBlade();
         player.setItemInHand(InteractionHand.MAIN_HAND, blade);
         test.assertTrue(!ItemBloodSword.isActivated(blade), "off at first");
         player.setShiftKeyDown(true);
@@ -631,11 +662,11 @@ public final class MachinesRuntimeChecks {
         blade.getItem().use(test.getLevel(), player, InteractionHand.MAIN_HAND);
         test.assertTrue(!ItemBloodSword.isActivated(blade), "off again");
         test.assertTrue(blade.get(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA) == null, "the plain icon");
-        test.succeed();
+        finish(test, player);
     }
 
     public static void theBladeHasTheOriginalNumbers(GameTestHelper test) {
-        ItemStack blade = activeBlade();
+        ItemStack blade = freshBlade();
         test.assertTrue(blade.getMaxDamage() == 950, "950 uses");
         test.assertTrue(blade.getMaxStackSize() == 1, "one item");
         double[] damage = { 0 };
@@ -652,7 +683,7 @@ public final class MachinesRuntimeChecks {
     public static void aBladeHurtsWhoStrikesWithIt(GameTestHelper test) {
         floor(test);
         Villager wielder = test.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(2, 1, 2));
-        wielder.setItemSlot(EquipmentSlot.MAINHAND, activeBlade());
+        wielder.setItemSlot(EquipmentSlot.MAINHAND, freshBlade());
         Pig target = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 2));
         float before = wielder.getHealth();
         EventResult result = ItemBloodSword.onDamageTaken(target, test.getLevel().damageSources().mobAttack(wielder), 4F);
@@ -664,21 +695,31 @@ public final class MachinesRuntimeChecks {
     public static void aBlockingWielderTakesThreeMagicDamageInsteadOfTheBlow(GameTestHelper test) {
         floor(test);
         ServerPlayer player = mockPlayer(test);
-        player.setItemInHand(InteractionHand.MAIN_HAND, activeBlade());
+        // the test world is creative, and a new player is untouchable for 60 ticks
+        player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, freshBlade());
         player.startUsingItem(InteractionHand.MAIN_HAND);
         test.assertTrue(player.isUsingItem(), "raised");
-        float before = player.getHealth();
         Villager attacker = test.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(2, 1, 2));
-        EventResult result = ItemBloodSword.onDamageTaken(player, test.getLevel().damageSources().mobAttack(attacker), 8F);
-        test.assertTrue(result.isFalse(), "the blow is cancelled");
-        test.assertTrue(player.getHealth() == before - 3F, "and 3 magic damage taken instead: " + before + " -> " + player.getHealth());
-        test.succeed();
+        test.runAfterDelay(70, () -> {
+            test.assertTrue(player.isUsingItem(), "still raised");
+            float before = player.getHealth();
+            EventResult result = ItemBloodSword.onDamageTaken(player, test.getLevel().damageSources().mobAttack(attacker), 8F);
+            test.assertTrue(result.isFalse(), "the blow is cancelled");
+            test.assertTrue(player.getHealth() == before - 3F, "and 3 magic damage taken instead: " + before + " -> " + player.getHealth());
+
+            // lowered, the blade does not protect
+            player.stopUsingItem();
+            EventResult lowered = ItemBloodSword.onDamageTaken(player, test.getLevel().damageSources().mobAttack(attacker), 8F);
+            test.assertTrue(lowered.isEmpty(), "a lowered blade leaves the blow alone");
+            finish(test, player);
+        });
     }
 
     public static void anActivatedBladeReapsTheSoulAspectsOfTheMobItKills(GameTestHelper test) {
         floor(test);
         ServerPlayer player = mockPlayer(test);
-        ItemStack blade = activeBlade();
+        ItemStack blade = freshBlade();
         player.setShiftKeyDown(true);
         player.setItemInHand(InteractionHand.MAIN_HAND, blade);
         blade.getItem().use(test.getLevel(), player, InteractionHand.MAIN_HAND);
@@ -699,14 +740,14 @@ public final class MachinesRuntimeChecks {
             test.assertItemEntityPresent(TTRegistry.item(ItemMobAspect.path(Aspect.BEAST, ItemMobAspect.Form.BASIC)));
             test.assertItemEntityPresent(TTRegistry.item(ItemMobAspect.path(Aspect.EARTH, ItemMobAspect.Form.BASIC)));
             test.assertItemEntityPresent(TTRegistry.item(ItemMobAspect.path(Aspect.TRAVEL, ItemMobAspect.Form.BASIC)));
-            test.succeed();
+            finish(test, player);
         });
     }
 
     public static void aBladeThatIsNotActivatedLeavesTheLootAlone(GameTestHelper test) {
         floor(test);
         ServerPlayer player = mockPlayer(test);
-        player.setItemInHand(InteractionHand.MAIN_HAND, activeBlade());
+        player.setItemInHand(InteractionHand.MAIN_HAND, freshBlade());
         Pig pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
         ServerLevel level = test.getLevel();
         pig.hurt(level.damageSources().playerAttack(player), 100F);
@@ -714,7 +755,7 @@ public final class MachinesRuntimeChecks {
             for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, test.getBounds().inflate(6))) {
                 test.assertTrue(!(entity.getItem().getItem() instanceof ItemMobAspect), "no soul aspects");
             }
-            test.succeed();
+            finish(test, player);
         });
     }
 

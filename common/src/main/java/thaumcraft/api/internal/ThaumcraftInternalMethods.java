@@ -11,14 +11,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.crafting.ArcaneVis;
 import thaumcraft.common.items.wands.WandManager;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
+import thaumcraft.common.lib.network.KnowledgeEvents;
 import thaumcraft.common.lib.research.ObjectAspectCatalog;
 import thaumcraft.common.lib.research.ObjectAspectRegistry;
 import thaumcraft.common.lib.research.PlayerKnowledge;
+import thaumcraft.common.lib.research.ScanManager;
 
 /**
  * The native handler bound to the 1.21.1 gameplay internals.
@@ -210,6 +213,69 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     @Override public int[] getWarp(Player player) {
         PlayerKnowledge knowledge = knowledge(player);
         return knowledge == null ? new int[3] : new int[] {knowledge.getWarpPerm(), knowledge.getWarpSticky(), knowledge.getWarpTemp()};
+    }
+
+    /**
+     * Original {@code ItemThaumometer} / {@code ScanManager.hasBeenScanned}: the item is looked up under the marker the
+     * thaumometer writes for it, {@code "@" + registry id}; either that marker or the advanced marker {@code "#" + id}
+     * counts.
+     */
+    @Override public boolean hasScannedItem(Player player, ItemStack stack) {
+        return scannedItem(knowledge(player), stack);
+    }
+
+    static boolean scannedItem(PlayerKnowledge knowledge, ItemStack stack) {
+        if (knowledge == null || stack == null || stack.isEmpty()) return false;
+        return ScanManager.hasBeenScanned(knowledge, "@" + BuiltInRegistries.ITEM.getKey(stack.getItem()), ScanManager.ScanKind.ITEM);
+    }
+
+    @Override public boolean discoverAspect(Player player, Aspect aspect) {
+        if (!(player instanceof ServerPlayer server) || aspect == null || Aspect.getAspect(aspect.getTag()) != aspect) return false;
+        PlayerKnowledge knowledge = knowledge(server);
+        if (knowledge == null) return false;
+        requireServerThread(server);
+        if (!knowledge.addDiscoveredAspect(aspect.getTag())) return false;
+        KnowledgeEvents.sync(server);
+        return true;
+    }
+
+    @Override public ThaumcraftApiHelper.Scans getScans(Player player) {
+        PlayerKnowledge knowledge = knowledge(player);
+        if (knowledge == null) return ThaumcraftApiHelper.Scans.EMPTY;
+        return new ThaumcraftApiHelper.Scans(knowledge.getScannedItems(), knowledge.getScannedEntities(), knowledge.getScannedPhenomena());
+    }
+
+    @Override public int addScans(Player player, ThaumcraftApiHelper.Scans scans) {
+        if (!(player instanceof ServerPlayer server) || scans == null) return 0;
+        PlayerKnowledge knowledge = knowledge(server);
+        if (knowledge == null) return 0;
+        requireServerThread(server);
+        int added = mergeScans(knowledge, scans);
+        if (added > 0) KnowledgeEvents.sync(server);
+        return added;
+    }
+
+    /**
+     * Adds the markers the knowledge does not have yet and returns how many were new. A marker the player already has, in
+     * either of its two forms, is not added again ({@code "@x"} is skipped when {@code "@x"} or {@code "#x"} is held),
+     * and a {@code "#x"} marker is added and replaces {@code "@x"}, which {@link PlayerKnowledge} does.
+     */
+    static int mergeScans(PlayerKnowledge knowledge, ThaumcraftApiHelper.Scans scans) {
+        int added = 0;
+        for (String key : scans.items()) {
+            if (!ScanManager.alreadyScanned(knowledge, key, ScanManager.ScanKind.ITEM) && knowledge.scanItem(key)) added++;
+        }
+        for (String key : scans.entities()) {
+            if (!ScanManager.alreadyScanned(knowledge, key, ScanManager.ScanKind.ENTITY) && knowledge.scanEntity(key)) added++;
+        }
+        for (String key : scans.phenomena()) {
+            if (!ScanManager.alreadyScanned(knowledge, key, ScanManager.ScanKind.PHENOMENA) && knowledge.scanPhenomena(key)) added++;
+        }
+        return added;
+    }
+
+    private static void requireServerThread(ServerPlayer player) {
+        if (!player.server.isSameThread()) throw new IllegalStateException("Player knowledge may only be changed on the server thread");
     }
 
     private static boolean consume(ItemStack wand, AspectList cost, boolean doit) {

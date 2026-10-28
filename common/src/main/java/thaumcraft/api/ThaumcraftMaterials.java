@@ -1,6 +1,9 @@
 package thaumcraft.api;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
@@ -56,6 +59,44 @@ public final class ThaumcraftMaterials {
     public static ArmorMaterial armorMatVoid() { return ThaumcraftEquipment.VOID_ARMOR_MATERIAL.get(); }
     /** The registered native void robe armour material. */
     public static ArmorMaterial armorMatVoidRobe() { return ThaumcraftEquipment.VOID_ROBE_ARMOR_MATERIAL.get(); }
+
+    /** Registry key of {@link #armorMatThaumium()}: {@code thaumcraft:thaumium}. */
+    public static final ResourceKey<ArmorMaterial> ARMORMAT_THAUMIUM_KEY = armorKey("thaumium");
+    /** Registry key of {@link #armorMatThaumiumFortress()}: {@code thaumcraft:fortress}. */
+    public static final ResourceKey<ArmorMaterial> ARMORMAT_THAUMIUM_FORTRESS_KEY = armorKey("fortress");
+    /** Registry key of {@link #armorMatVoid()}: {@code thaumcraft:void}. */
+    public static final ResourceKey<ArmorMaterial> ARMORMAT_VOID_KEY = armorKey("void");
+    /** Registry key of {@link #armorMatVoidRobe()}: {@code thaumcraft:void_robe}. */
+    public static final ResourceKey<ArmorMaterial> ARMORMAT_VOID_ROBE_KEY = armorKey("void_robe");
+
+    private static ResourceKey<ArmorMaterial> armorKey(String path) {
+        return ResourceKey.create(Registries.ARMOR_MATERIAL, ResourceLocation.fromNamespaceAndPath("thaumcraft", path));
+    }
+
+    /**
+     * {@link #armorMatThaumium()} as the registry holder 1.21.1 armour items take ({@code ArmorItem} wants a
+     * {@code Holder<ArmorMaterial>}); the 1.7.10 field {@code ThaumcraftApi.armorMatThaumium} was passed to
+     * {@code ItemArmor} directly. The holder is the registry reference of {@link #ARMORMAT_THAUMIUM_KEY}, not a direct
+     * wrapper of the object.
+     *
+     * @throws IllegalStateException while Thaumcraft's registration has not run
+     */
+    public static Holder<ArmorMaterial> armorMatThaumiumHolder() {
+        return BuiltInRegistries.ARMOR_MATERIAL.getHolderOrThrow(ARMORMAT_THAUMIUM_KEY);
+    }
+    /** {@link #armorMatThaumiumFortress()} as its registry holder, see {@link #armorMatThaumiumHolder()}. */
+    public static Holder<ArmorMaterial> armorMatThaumiumFortressHolder() {
+        return BuiltInRegistries.ARMOR_MATERIAL.getHolderOrThrow(ARMORMAT_THAUMIUM_FORTRESS_KEY);
+    }
+    /** {@link #armorMatVoid()} as its registry holder, see {@link #armorMatThaumiumHolder()}. */
+    public static Holder<ArmorMaterial> armorMatVoidHolder() {
+        return BuiltInRegistries.ARMOR_MATERIAL.getHolderOrThrow(ARMORMAT_VOID_KEY);
+    }
+    /** {@link #armorMatVoidRobe()} as its registry holder, see {@link #armorMatThaumiumHolder()}. */
+    public static Holder<ArmorMaterial> armorMatVoidRobeHolder() {
+        return BuiltInRegistries.ARMOR_MATERIAL.getHolderOrThrow(ARMORMAT_VOID_ROBE_KEY);
+    }
+
     /** The worn layer of a material; the native layers are the registered resource locations. */
     public static ArmorMaterial.Layer layer(String path) {
         return new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath("thaumcraft", path));

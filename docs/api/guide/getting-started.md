@@ -155,6 +155,9 @@ Thaumcraft builds its names from translation keys, as in 1.7.10 (now in `assets/
 | an essentia container, transport and wand-clickable block | `EssentiaBowlBlock.java`, `EssentiaBowlBlockEntity.java` | [essentia and vis](essentia-and-vis.md) |
 | an amulet with discount, runic charge and warp | `OrderAmulet.java` | [gear and baubles](gear-and-baubles.md) |
 | research points and research completion from an item | `InsightScroll.java` | [research](research.md) |
+| a data component that holds aspects (codecs) | `StoredAspects.java`, `ExampleAddon` | [aspects](aspects.md#aspects-in-data-components-data-files-and-packets) |
+| copying scans and discovered aspects between players | `ShareTome.java` | [research](research.md#scans-discovered-aspects-and-the-tome-of-sharing) |
+| felling a tree with the Axe of the Stream's helpers | `ExampleAddon.onInitialize()` | [world and content](world-and-content.md#felling-trees) |
 | warp on crafting, smelting bonus, loot bags | `ExampleAddon.moreContent()` | [world and content](world-and-content.md) |
 
 Run it in a development client:

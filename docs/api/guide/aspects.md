@@ -94,6 +94,15 @@ container); the form without a level cannot resolve the aspects that come from r
 their contents through `IEssentiaContainerItem.getAspects(stack)`: jars, crystallised essentia, wisp essence and mana
 beans implement it. Phials do not in this port; their aspect is part of their scanned aspects.
 
+`ThaumcraftApiHelper.getBonusObjectTags(stack, bonus, level)` gives the same aspects with `bonus` added on top. It is the
+1.7.10 name for code that called `getBonusObjectTags(stack, getObjectAspects(stack))` to add the contents of containers and
+the bonuses of equipment and enchantments to the base aspects. Here the base is already part of the answer, so pass `null`
+(or only the extra aspects you want added): passing the base list counts every aspect twice.
+
+```java
+AspectList shown = ThaumcraftApiHelper.getBonusObjectTags(stack, null, level); // what a scan of one such item shows
+```
+
 ## Entity tags
 
 <!-- snippet:entity-tag -->
@@ -128,3 +137,63 @@ ThaumcraftApi.registerScanEventhandler((stack, level, player) ->
 Scanning gives the player research points of the aspects scanned. An add-on can add or read them directly:
 `ThaumcraftApiHelper.addAspectPool(player, aspect, amount)` and `getAspectPool(player, aspect)` (see
 [research](research.md#player-knowledge)).
+
+## Aspects in data components, data files and packets
+
+`Aspect` and `AspectList` carry codecs, so a data component, a JSON file or a packet can hold aspects. They are not 1.7.10
+members: an add-on of the original wrote the tag strings into NBT itself.
+
+| Codec | Form |
+|---|---|
+| `Aspect.CODEC` | the tag string, `"ignis"` |
+| `Aspect.STREAM_CODEC` | the tag as a UTF-8 string, on any `ByteBuf` (so as the `networkSynchronized` codec of a component) |
+| `AspectList.CODEC` | `[{"tag": "ignis", "amount": 4}, {"tag": "tempus", "amount": 2}]`, in list order |
+| `AspectList.STREAM_CODEC` | a var-int count, then a tag and a var-int amount per entry |
+
+- They read the live registry, so an add-on aspect works like an original one, provided it was registered before the data
+  is decoded (see [a new aspect](#a-new-aspect)). An unknown tag is an error that names it (`Unknown aspect tag 'x'`), never
+  a null or a silently dropped entry; on the network it is a `DecoderException`, which disconnects the receiver.
+- Decoding is strict: an amount below one and a repeated tag fail the whole list. Encoding writes only the entries with a
+  positive amount, so a list in which `reduce` left a zero key still saves.
+- `AspectList` is mutable and compares by identity, so two stacks whose components hold equal lists would not stack. The
+  example add-on wraps the list in a record that copies it and compares by content, and declares the component type:
+
+<!-- snippet:aspect-component-type -->
+```java
+/** The data component of items that carry aspects: saved with the stack, synced to the client, equal by content. */
+public static final DataComponentType<StoredAspects> STORED_ASPECTS = DataComponentType.<StoredAspects>builder()
+        .persistent(StoredAspects.CODEC).networkSynchronized(StoredAspects.STREAM_CODEC).build();
+```
+<!-- /snippet -->
+
+<!-- snippet:aspect-component -->
+```java
+public record StoredAspects(AspectList aspects) {
+    public static final StoredAspects NONE = new StoredAspects(new AspectList());
+    // The codecs of the API do the saving and the syncing; the wrapper only converts.
+    public static final Codec<StoredAspects> CODEC = AspectList.CODEC.xmap(StoredAspects::new, StoredAspects::aspects);
+    public static final StreamCodec<? super RegistryFriendlyByteBuf, StoredAspects> STREAM_CODEC =
+            AspectList.STREAM_CODEC.map(StoredAspects::new, StoredAspects::aspects);
+
+    public StoredAspects {
+        // What the codecs would not write (an amount of zero, which AspectList.reduce leaves behind) is not part of the value.
+        AspectList positive = new AspectList();
+        for (Aspect aspect : aspects.getAspects()) {
+            if (aspects.getAmount(aspect) > 0) positive.add(aspect, aspects.getAmount(aspect));
+        }
+        aspects = positive;
+    }
+
+    @Override public AspectList aspects() { return aspects.copy(); }
+
+    @Override public boolean equals(Object other) {
+        return other instanceof StoredAspects stored && aspects.aspects.equals(stored.aspects.aspects);
+    }
+
+    @Override public int hashCode() { return aspects.aspects.hashCode(); }
+}
+```
+<!-- /snippet -->
+
+The type is registered in the add-on's initialiser with `Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ...)`. The
+Scroll of Insight carries it as the default component of its item and teaches the aspects the stack holds.

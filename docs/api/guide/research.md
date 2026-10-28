@@ -123,6 +123,9 @@ What 1.7.10 add-ons reached through `ResearchManager` and `Thaumcraft.proxy.getP
 | everything the player completed | `getCompletedResearch(player)` |
 | research points | `addAspectPool(player, aspect, amount)`, `getAspectPool(player, aspect)` |
 | discovered aspects | `hasDiscoveredAspect(player, aspect)`, `getDiscoveredAspects(player)` |
+| learn an aspect without a scan | `discoverAspect(serverPlayer, aspect)` (server; no notice, no points) |
+| has the player scanned an item? | `hasScannedItem(player, stack)` (both sides for the client's own player) |
+| copy what a player scanned | `getScans(player)` and `addScans(serverPlayer, scans)` (server; `Scans` is an immutable snapshot) |
 | warp | `getWarpPermanent/Sticky/Temporary/Total(player)`, `addWarpToPlayer(player, amount, temporary)`, `addStickyWarpToPlayer(player, amount)` |
 
 The example add-on's scroll uses them:
@@ -140,7 +143,9 @@ public class InsightScroll extends Item {
             player.displayClientMessage(Component.translatable("tc4_example.insight_scroll.unreadable"), true);
             return InteractionResultHolder.fail(stack);
         }
-        for (Aspect primal : Aspect.getPrimalAspects()) ThaumcraftApiHelper.addAspectPool(player, primal, 2);
+        // What the scroll teaches is the data component of the stack, saved with it and synced to the client.
+        AspectList taught = stack.getOrDefault(ExampleAddon.STORED_ASPECTS, StoredAspects.NONE).aspects();
+        for (Aspect aspect : taught.getAspects()) ThaumcraftApiHelper.addAspectPool(player, aspect, taught.getAmount(aspect));
         ThaumcraftApiHelper.addAspectPool(player, ExampleAddon.TEMPUS, 1);
         // Completes the entry with its parents and pays its warp, as an original ResearchManager.completeResearch.
         if (!ThaumcraftApiHelper.isResearchComplete(player, "EXAMPLE_SECRET")) ThaumcraftApiHelper.completeResearch(player, "EXAMPLE_SECRET");
@@ -151,3 +156,61 @@ public class InsightScroll extends Item {
 }
 ```
 <!-- /snippet -->
+
+### Scans, discovered aspects and the Tome of Sharing
+
+The thaumometer records what a player scanned as markers of the mod's own: items, entities and phenomena (aura nodes).
+`getScans` returns them as an immutable `ThaumcraftApiHelper.Scans`, three sets in the order they were scanned, and
+`addScans` adds such a snapshot to another player. The example add-on's Tome of Sharing copies the scans and the discovered
+aspects of the player who uses it to the player it is used on:
+
+<!-- snippet:share-tome -->
+```java
+public class ShareTome extends Item {
+    public ShareTome(Properties properties) { super(properties.stacksTo(1)); }
+
+    @Override public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
+        // The helpers that change knowledge are for the server's player; a client answers PASS and the server decides.
+        if (!(player instanceof ServerPlayer teacher) || !(target instanceof ServerPlayer student)) return InteractionResult.PASS;
+        // A book is read by someone who has seen one: the thaumometer's record of scanned items.
+        if (!ThaumcraftApiHelper.hasScannedItem(teacher, new ItemStack(Items.BOOK))) {
+            teacher.displayClientMessage(Component.translatable("tc4_example.share_tome.unread"), true);
+            return InteractionResult.FAIL;
+        }
+        // The scans travel as an immutable snapshot of the mod's own markers; the number is how many were new to the student.
+        int scans = ThaumcraftApiHelper.addScans(student, ThaumcraftApiHelper.getScans(teacher));
+        // Aspects are learned quietly (no discovery notice, no research points: the pools stay where they are).
+        int aspects = 0;
+        for (Aspect aspect : ThaumcraftApiHelper.getDiscoveredAspects(teacher).getAspects()) {
+            if (ThaumcraftApiHelper.discoverAspect(student, aspect)) aspects++;
+        }
+        teacher.displayClientMessage(Component.translatable("tc4_example.share_tome.shared", scans, aspects, student.getDisplayName()), true);
+        return InteractionResult.SUCCESS;
+    }
+}
+```
+<!-- /snippet -->
+
+- The markers are opaque keys, made to travel unchanged: `"@"` plus the registry id for a basic scan, `"#"` plus the same
+  for an advanced one. Adding is idempotent; a basic marker never replaces an advanced one, an advanced one replaces a
+  basic one. `addScans` returns how many markers were new and syncs the player once, only when it is above zero.
+- A scan also gives research points and may reveal a research clue. The snapshot carries neither: points are
+  `addAspectPool`, and the clues (`"@KEY"` entries among the completed research) are left out of `getCompletedResearch` and
+  refused by `completeResearch`, so no call copies them.
+- `discoverAspect` is the quiet discovery: it syncs, but shows no notice, gives no points and does not check that the parents
+  of a compound aspect are known (a scan does). `addAspectPool` with a positive amount discovers the aspect as well.
+- `discoverAspect` and `addScans` change the player's knowledge and so belong to the server thread; on another thread they
+  throw `IllegalStateException`. A client only knows its own player's knowledge.
+
+### Server switches
+
+Two settings of the original `Config` can be read: `ThaumcraftApi.isMirrorsAllowed()` (`allow_mirrors`; when it is off the
+research of the mirrors, `MIRROR`, `MIRRORESSENTIA` and `MIRRORHAND`, is hidden) and `ThaumcraftApi.isWardedStoneAllowed()`
+(`allow_warded_stone`; when it is on, warded doors, glass and plates are unbreakable and owned, and `FOCUSWARDING` and
+`WARDEDARCANA` exist). On a client they answer the value the connected server sent. Ask them when a player acts, not
+when you register: register the same research and recipes on both sides whatever the switches say.
+
+```java
+// A focus built on a mirror: it does nothing when the server switched mirrors off.
+if (!ThaumcraftApi.isMirrorsAllowed()) return InteractionResultHolder.fail(stack);
+```

@@ -81,6 +81,9 @@ public final class WandApiRuntimeChecks {
         capItem = Registry.register(BuiltInRegistries.ITEM, id("addon_wand_cap"), new Item(new Item.Properties()));
         focusItem = Registry.register(BuiltInRegistries.ITEM, id("addon_focus"), new AddonFocus(new Item.Properties()));
         ringItem = Registry.register(BuiltInRegistries.ITEM, id("addon_ring"), new AddonRing(new Item.Properties()));
+        // The add-on bauble and focus pouch items of the baubles API scenarios (equipsOnUse, IFocusPouch).
+        BaublesApiRuntimeChecks.registerTestItems();
+        AddonPouchRuntimeChecks.registerTestItems();
     }
 
     private static ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath("thaumcraft_gametest", path); }

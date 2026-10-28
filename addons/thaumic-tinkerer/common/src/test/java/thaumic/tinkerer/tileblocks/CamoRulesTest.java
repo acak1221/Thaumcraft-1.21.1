@@ -56,8 +56,8 @@ class CamoRulesTest {
         assertTrue(CamoRules.isValidCamo(Blocks.OAK_LOG.defaultBlockState()));
         assertFalse(CamoRules.isValidCamo(Blocks.AIR.defaultBlockState()), "air");
         assertFalse(CamoRules.isValidCamo(Blocks.WATER.defaultBlockState()), "a fluid has no model");
-        assertFalse(CamoRules.isValidCamo(Blocks.CHEST.defaultBlockState()), "a block with a block entity has a special renderer");
-        assertFalse(CamoRules.isValidCamo(Blocks.FURNACE.defaultBlockState()), "a block with a block entity");
+        assertFalse(CamoRules.isValidCamo(Blocks.CHEST.defaultBlockState()), "a chest is drawn by a special renderer");
+        assertTrue(CamoRules.isValidCamo(Blocks.FURNACE.defaultBlockState()), "a furnace was a plain cube in 1.7.10 and is drawn from its model");
         assertFalse(CamoRules.isValidCamo(Blocks.BARRIER.defaultBlockState()), "an invisible block");
     }
 

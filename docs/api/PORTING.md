@@ -86,6 +86,8 @@ Do not register from parallel NeoForge mod constructors: the registries of the A
 | `ConfigItems.itemResource` + meta, `ConfigBlocks.*` | `ItemsTC` / `BlocksTC` / `ItemApi`, see section 4 |
 | `Thaumcraft.proxy.getResearchManager()`, `PlayerKnowledge` | `ThaumcraftApiHelper`, see section 4 |
 | `ItemWandCasting` methods | `thaumcraft.api.wands.WandHelper`, see section 8 |
+| `Config.allowMirrors`, `Config.wardedStone` (client copies `CallowMirrors`, `CwardedStone`) | `ThaumcraftApi.isMirrorsAllowed()`, `isWardedStoneAllowed()`, see section 4 |
+| `Utils.isWoodLog`, `BlockUtils.breakFurthestBlock` | `ThaumcraftApiHelper.isWoodLog(level, pos)`, `breakFurthestBlock(level, pos, block, player)`, see section 4 |
 
 ## 4. Reaching Thaumcraft content and player knowledge
 
@@ -107,8 +109,25 @@ What add-ons reached through `ResearchManager` or `Thaumcraft.proxy.getPlayerKno
 | `getWarpPerm/Sticky/Temp/Total(name)` | `getWarpPermanent/Sticky/Temporary/Total(player)` |
 | `Thaumcraft.addWarpToPlayer`, `addStickyWarpToPlayer` | `addWarpToPlayer(player, amount, temporary)`, `addStickyWarpToPlayer` |
 | `consumeVisFromWand`, `consumeVisFromInventory` | same names |
+| `Thaumcraft.proxy.getScannedObjects/Entities/Phenomena`, the hash check of the thaumometer readout | `hasScannedItem(player, stack)`, `getScans(player)` (an immutable `Scans` of the mod's own markers) |
+| `ResearchManager.completeScannedObject/Entity/Phenomena` | `addScans(serverPlayer, scans)` (server; returns how many markers were new, syncs once) |
+| `PlayerKnowledge.addDiscoveredAspect` | `discoverAspect(serverPlayer, aspect)` (server; quiet: no notice, no points) |
+| `Config.allowMirrors`, `Config.wardedStone` | `ThaumcraftApi.isMirrorsAllowed()`, `ThaumcraftApi.isWardedStoneAllowed()` (the value the connected server sent, on a client) |
 
-Tests: GameTest `addonResearchJoinsGameplay` (completion, warp, completed set).
+Scan markers are not research: the clue markers (`"@KEY"` among the completed research) are neither returned by
+`getCompletedResearch` nor accepted by `completeResearch`, and `Scans` does not carry them. Read the switches when a
+player acts, not when you register research, so that both sides register the same content.
+
+The tree helpers of the Axe of the Stream are `ThaumcraftApiHelper.isWoodLog(level, pos)` and
+`breakFurthestBlock(level, pos, block, player)`. Same walk as 1.7.10 (a greedy walk of the first qualifying cell within two
+blocks, boxed to 24/48/24 blocks around the start; it breaks one block per call, drops its loot, wears no tool and checks
+no permission), but server thread only, `false` for a client level, an unloaded start and an air start, and no chunk is
+loaded by `isWoodLog`. Whether leaves and the plain oak log count as logs is a difference to review
+(`docs/audit/KNOWN_DEVIATIONS.md` section 9). See [the guide](guide/world-and-content.md#felling-trees).
+
+Tests: GameTests `addonResearchJoinsGameplay` (completion, warp, completed set), `knowledgeApiScansAndDiscovery`,
+`knowledgeApiWoodLogRule`, `knowledgeApiFurthestBlock*`; `ScansApiTest`, `ScanServicesTest`, `ServerSwitchesApiTest`,
+`TreeFellingApiTest`.
 
 ## 5. Aspects and object tags
 
@@ -143,6 +162,16 @@ table, carried as essentia in jars, tubes, phials and crystals, and drawn everyw
 primal of your own (no components) is given to players on their first join, but wand, sceptre and amulet vis,
 vis relays, shards and infused ores exist for the six original primals only. The full contract is the Javadoc
 of `Aspect`. Tests: `AddonAspectTest`, GameTests of `AspectApiRuntimeChecks`.
+
+**Aspects in data.** `Aspect.CODEC` / `Aspect.STREAM_CODEC` (the tag, registry driven, so add-on aspects work; an unknown tag
+is an error naming it) and `AspectList.CODEC` / `AspectList.STREAM_CODEC` (`[{"tag": "ignis", "amount": 4}]` in list order,
+amounts of at least one) let a data component, a data file or a packet hold aspects. `AspectList` still compares by
+identity, so wrap it in a value type for a component ([guide](guide/aspects.md#aspects-in-data-components-data-files-and-packets)).
+Tests: `AspectCodecsTest`.
+
+**`getBonusObjectTags`.** The 1.7.10 `getBonusObjectTags(stack, base)` took the base aspects and returned them enriched.
+`getBonusObjectTags(stack, bonus, level)` returns the complete aspects of the stack with `bonus` added on top, so the base
+must not be passed again: pass `null`. Test: GameTest `knowledgeApiBonusObjectTags`.
 
 ## 6. Recipes
 
@@ -229,7 +258,16 @@ Thaumcraft asks every item, block and block entity for these interfaces, so impl
 | `IEssentiaTransport`, `IAspectContainer`, `IAspectSource` | tubes, golems, infusion, jars | `Direction` |
 | `IEssentiaContainerItem` | phials, crystals, jars as items | – |
 | `IEldritchMob`, `ITaintedMob` | targeting and taint rules | – |
-| `IBauble` | the built-in amulet, ring and belt slots | `LivingEntity` |
+| `IBauble` | the built-in amulet, ring and belt slots | `LivingEntity`; new `equipsOnUse(stack, player)` (default `true`) keeps an item's right click for itself instead of the hand equip |
+| `IFocusPouch` | the wand's focus selector: the foci of every pouch in the inventory and the accessory slots | new; the 1.7.10 `getInventory`/`setInventory` of `ItemFocusPouch`, which was not API, as an interface (up to 128 cells) |
+
+`BaublesApi.getWorn(entity)` is the read-only "is X worn" view of the accessory slots (copies, slot order, no empty
+slots); the Baubles mod's `BaublesApi.getBaubles(player)` answered the live inventory, which this port does not
+expose. An item that was a bauble **and** a focus pouch in 1.7.10 (Thaumic Tinkerer's Bottomless Pouch extended
+`ItemFocusPouch`) implements `IBauble` and `IFocusPouch`; a right click never puts a pouch on, it runs the
+pouch's own `use`. Guides: [gear and baubles](guide/gear-and-baubles.md#a-bauble-that-keeps-its-right-click),
+[focus pouches](guide/wands-and-foci.md#focus-pouches-ifocuspouch). Tests: `BaublesAndPouchApiTest`,
+`FocusSelectionExtendedCellsTest`, GameTests of `BaublesApiRuntimeChecks` and `AddonPouchRuntimeChecks`.
 
 ## 10. Effects, and what is not public API
 
@@ -249,6 +287,8 @@ Thaumcraft asks every item, block and block entity for these interfaces, so impl
 own, object, complex and entity tags (one by a 1.7.10 ore dictionary name), arcane, shapeless arcane, crucible and
 infusion recipes through the API and as JSON files of the native types, a wand rod with an update hook and a wand cap,
 a focus, an amulet bauble with a discount, runic charge and warp, an essentia container that feeds tubes and answers a
-wand, an item that grants research points, and a research tab with nine entries. It imports nothing but
+wand, an item that grants research points from a data component that holds aspects (the codecs of `AspectList`), a Tome
+of Sharing that copies scans and discovered aspects between players, a hook that fells a tree with `isWoodLog` and
+`breakFurthestBlock`, and a research tab with nine entries. It imports nothing but
 `thaumcraft.api` (`ExampleAddonApiOnlyTest` keeps it so) and is compiled by every build; the guides quote it.
 `./gradlew :fabric:runExampleClient` starts a development client with it.

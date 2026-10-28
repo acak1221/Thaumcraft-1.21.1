@@ -13,7 +13,7 @@ package thaumic.tinkerer.common.block.fire;
 
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;

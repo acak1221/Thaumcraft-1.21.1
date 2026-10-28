@@ -13,7 +13,7 @@ package thaumic.tinkerer.common.block;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;

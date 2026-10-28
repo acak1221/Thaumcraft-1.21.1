@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "thaumcraft:mundane_belt" },
+    { "item": "minecraft:leather" }
+  ],
+  "result": { "id": "tc4_example:focus_belt", "count": 1 }
+}

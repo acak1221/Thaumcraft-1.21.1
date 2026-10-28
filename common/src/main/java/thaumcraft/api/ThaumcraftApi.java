@@ -85,6 +85,12 @@ public final class ThaumcraftApi {
     public static ArmorMaterial armorMatThaumiumFortress() { return ThaumcraftEquipment.FORTRESS_ARMOR_MATERIAL.get(); }
     /** Resolves the registered void armor material; call after material registration, with no mutation. */
     public static ArmorMaterial armorMatVoid() { return ThaumcraftEquipment.VOID_ARMOR_MATERIAL.get(); }
+    /** {@link #armorMatThaumium()} as the registry holder an {@code ArmorItem} takes, see {@link ThaumcraftMaterials#armorMatThaumiumHolder()}. */
+    public static net.minecraft.core.Holder<ArmorMaterial> armorMatThaumiumHolder() { return ThaumcraftMaterials.armorMatThaumiumHolder(); }
+    /** {@link #armorMatThaumiumFortress()} as its registry holder, see {@link ThaumcraftMaterials#armorMatThaumiumHolder()}. */
+    public static net.minecraft.core.Holder<ArmorMaterial> armorMatThaumiumFortressHolder() { return ThaumcraftMaterials.armorMatThaumiumFortressHolder(); }
+    /** {@link #armorMatVoid()} as its registry holder, see {@link ThaumcraftMaterials#armorMatThaumiumHolder()}. */
+    public static net.minecraft.core.Holder<ArmorMaterial> armorMatVoidHolder() { return ThaumcraftMaterials.armorMatVoidHolder(); }
     /**
      * Original {@code armorMatSpecial} (oracle {@code thaumcraft/api/ThaumcraftApi.java:52}):
      * durability 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a
@@ -448,11 +454,11 @@ public final class ThaumcraftApi {
      * add-on of the original read the public field {@code thaumcraft.common.config.Config.allowMirrors} (and, on a
      * client, its synced copy {@code CallowMirrors}).
      *
-     * <p><b>What it means.</b> Thaumcraft's own switch (config key {@code allow_mirrors}, default {@code true}) hides the
-     * research of the Magic Mirror, the Essentia Mirror and the Hand Mirror (keys {@code MIRROR}, {@code MIRRORESSENTIA},
-     * {@code MIRRORHAND}) and with it their recipes. An add-on feature that is built on a mirror (a focus that needs
-     * one as an ingredient, say) should follow the same switch. The switch does not remove mirror blocks that exist,
-     * and the mod does not enforce it when a mirror is placed.</p>
+     * <p><b>What it means.</b> Thaumcraft's own switch (config key {@code allow_mirrors}, default {@code true}). While it
+     * is off, the research of the Magic Mirror, the Essentia Mirror and the Hand Mirror (keys {@code MIRROR},
+     * {@code MIRRORESSENTIA}, {@code MIRRORHAND}) is disabled, so nobody can learn it. An add-on feature that is built
+     * on a mirror (a focus that needs one as an ingredient, say) should follow the same switch. The mod does not
+     * enforce the switch when a mirror is placed or used, and it removes no mirror that exists.</p>
      *
      * <p><b>Side and thread.</b> Either side. On the client thread it is the value the connected server sent when the
      * player joined (the local configuration when not connected); on every other thread it is this installation's own

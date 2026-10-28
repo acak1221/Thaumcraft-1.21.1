@@ -4,7 +4,7 @@
 
 [All packages](README.md)
 
-Types: [`BaubleType`](#baubletype), [`IBauble`](#ibauble)
+Types: [`BaubleType`](#baubletype), [`BaublesApi`](#baublesapi), [`IBauble`](#ibauble)
 
 ## BaubleType
 
@@ -19,6 +19,32 @@ public static final BaubleType AMULET
 public static final BaubleType RING
 public static final BaubleType BELT
 ```
+
+## BaublesApi
+
+```java
+public final class BaublesApi
+```
+
+Read access to what an entity wears in the four accessory slots (amulet, two rings, belt).
+
+The Baubles mod that TC4 relied on had a `BaublesApi.getBaubles(player)` that answered the live four-slot inventory. This port keeps the slots as its own, and this class answers the read-only half of that: what is worn, for the "is X worn" checks of an add-on. Putting an item into a slot or taking it out is done by the player in the Baubles menu, and `IBauble.onEquipped` / `IBauble.onUnequipped` tell the item when that happens.
+
+<a id="baublesapi-getworn"></a>
+```java
+public static List<ItemStack> getWorn(LivingEntity entity)
+```
+
+The accessories the entity wears, in slot order (amulet, ring, ring, belt), without the empty slots.
+
+The list cannot be modified and holds independent copies: changing a stack in it changes nothing the entity wears. The stack an `IBauble` callback (`IBauble.onWornTick`) receives is the live one; use that one to change a worn item. The answer is a snapshot, so ask again after the slots may have changed.
+
+Only a player has accessory slots: any other entity, and `null`, answers an empty list, and so does a player whose saved slots could not be read. On a client the slots of the local player are known; those of other players are not sent to it and read as empty. Cheap enough to ask every tick, and safe on either side.
+
+**Returns:** the worn stacks, never `null`
+
+**Parameters:**
+- `entity` — the entity to ask, or `null`
 
 ## IBauble
 
@@ -66,3 +92,22 @@ default boolean canUnequip(ItemStack stack, LivingEntity wearer)
 ```
 
 Returns true in this default, including null arguments, without changing equipment; implementations may impose restrictions.
+
+<a id="ibauble-equipsonuse"></a>
+```java
+default boolean equipsOnUse(ItemStack stack, Player player)
+```
+
+Whether a right click with this item in a hand puts it into the first free accessory slot of its kind. True in this default, whatever the arguments, so an existing bauble is unchanged.
+
+The hand equip is the port's own convenience: neither TC4 nor the Baubles mod had it (a bauble went into its slot by the Baubles menu). It runs where the click would otherwise call `Item.use`, so a click that the targeted block or `Item.useOn` has already consumed never reaches it. Return `false` for an item whose right click does something of its own (a talisman that toggles, a belt that opens a screen): the click then goes on to `Item.use`, and the player puts the item on in the Baubles menu. The click goes on to `Item.use` as well when no slot of the item's kind is free, whatever this method answers.
+
+This method controls the hand equip and nothing else: the Baubles menu (key B, the button beside the player), a shift-click into the menu, `getBaubleType` and `canEquip` are all unchanged. A `focus pouch` is never put on by a click, whatever this method answers.
+
+Called on the client and on the server for the same click, with the stack in the hand (it may hold more than one item); the two answers must agree, so decide from the stack and from state the client also has (for example `player.isShiftKeyDown()`), and change nothing.
+
+**Returns:** true to let the click equip the item, false to leave the click to `Item.use`
+
+**Parameters:**
+- `stack` — the stack in the hand, never empty
+- `player` — the player using it; a spectator never equips

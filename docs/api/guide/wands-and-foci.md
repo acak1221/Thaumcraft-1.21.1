@@ -127,6 +127,90 @@ public class SparkFocus extends ItemFocusBasic {
 
 `FocusUpgradeType` keeps the original upgrades (`potency`, `frugal`, `treasure`, `enlarge`, `extend`...) and their ids.
 
+## Focus pouches: `IFocusPouch`
+
+The focus selector of a wand (the change focus key, F by default) lists the foci the player carries and the foci in every
+focus pouch it finds. A pouch is any item that implements `IFocusPouch`: Thaumcraft's own pouch does, and so can yours. The
+interface is the 1.7.10 pair of methods `getInventory` and `setInventory`, which Thaumic Tinkerer's Bottomless Pouch had by
+extending the internal `ItemFocusPouch`; no internal class is needed now.
+
+<!-- snippet:focus-pouch -->
+```java
+public class FocusBelt extends Item implements IBauble, IFocusPouch {
+    public static final int CELLS = 6;
+
+    public FocusBelt(Properties properties) { super(properties.stacksTo(1)); }
+
+    @Override public BaubleType getBaubleType(ItemStack stack) { return BaubleType.BELT; }
+
+    /** Every cell, in order, with ItemStack.EMPTY where there is nothing; independent copies the selector may change. */
+    @Override public ItemStack[] getInventory(ItemStack pouch) {
+        List<ItemStack> stored = pouch.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).stream().toList();
+        // A payload this belt cannot read: the selector then ignores the belt and does not touch it.
+        if (stored.size() > CELLS) throw new IllegalArgumentException("a belt has " + CELLS + " cells");
+        ItemStack[] cells = new ItemStack[CELLS];
+        Arrays.fill(cells, ItemStack.EMPTY);
+        for (int cell = 0; cell < stored.size(); cell++) cells[cell] = stored.get(cell); // stream() hands out copies
+        return cells;
+    }
+
+    /** Stores all cells into the stack it is given and nothing else; the selector also calls it on a scratch copy. */
+    @Override public void setInventory(ItemStack pouch, ItemStack[] contents) {
+        if (contents.length != CELLS) throw new IllegalArgumentException("a belt has " + CELLS + " cells");
+        pouch.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(Arrays.asList(contents))); // copies the stacks
+    }
+
+    /**
+     * The belt's own use. A pouch is never put on by a click, so unlike the talisman it needs no equipsOnUse: the Baubles
+     * menu puts it on, and the selector lists its foci either way.
+     */
+    @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack belt = player.getItemInHand(hand);
+        ItemStack other = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+        if (level.isClientSide) return InteractionResultHolder.success(belt);
+        ItemStack[] cells = getInventory(belt);
+        if (player.isShiftKeyDown()) {
+            for (int cell = CELLS - 1; cell >= 0; cell--) {
+                if (cells[cell].isEmpty()) continue;
+                player.getInventory().placeItemBackInInventory(cells[cell]);
+                cells[cell] = ItemStack.EMPTY;
+                break;
+            }
+        } else if (other.getItem() instanceof ItemFocusBasic) {
+            for (int cell = 0; cell < CELLS; cell++) {
+                if (!cells[cell].isEmpty()) continue;
+                cells[cell] = other.split(1);
+                break;
+            }
+        }
+        setInventory(belt, cells);
+        return InteractionResultHolder.success(belt);
+    }
+}
+```
+<!-- /snippet -->
+
+| Method | Contract |
+|---|---|
+| `getInventory(pouch)` | every cell in order, `ItemStack.EMPTY` for an empty one, never `null`; the length is the number of cells and does not change for a stack; independent copies; called on both sides. Throw `IllegalArgumentException` for a payload you cannot read: the selector then ignores that pouch and does not touch it |
+| `setInventory(pouch, contents)` | replaces all cells of the stack it is given (same length as `getInventory`); copy what you keep and change nothing else. Server thread. The selector calls it on the live stack, which stays in its slot, and on scratch copies while it plans |
+
+What the selector does with a pouch:
+
+- It looks at the 36 main inventory slots and the four accessory slots, so a pouch that is also a belt `IBauble` counts while
+  worn; not at the off-hand, the armour or other containers. Only a stack of exactly one pouch counts.
+- It offers every cell that holds a focus (an `ItemFocusBasic`). Other items in a cell are ignored and left alone.
+- **Size.** The selector is a ring with one button per focus, not a grid, so a pouch of any size is listed. The first
+  `IFocusPouch.MAX_SELECTABLE_CELLS` (128) cells can be offered and can take a focus back; the native pouch has 18 and the
+  Bottomless Pouch 117. Cells from 128 on are neither offered nor given a focus, so keep the cells that matter first.
+- Picking a focus takes it out of its cell (the cell becomes `ItemStack.EMPTY`) and mounts it. The focus the wand had goes
+  into the first empty cell of the first pouch that has one (worn pouches first, each from its first cell), then into a free
+  inventory slot. The selection is all or nothing.
+- A right click never puts a pouch on, whatever `IBauble.equipsOnUse` says: the click goes to the pouch's own `use`. The
+  Baubles menu puts a belt pouch on.
+
+The pouch's screen, what may be put in and where the cells are stored are the add-on's own.
+
 ## Blocks that answer a wand: `IWandable`
 
 A block, or its block entity, that implements `IWandable` answers a wand click before the wand's own behaviour, as in

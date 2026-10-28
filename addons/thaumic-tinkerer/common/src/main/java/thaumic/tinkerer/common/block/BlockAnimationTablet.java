@@ -78,7 +78,7 @@ public class BlockAnimationTablet extends BaseEntityBlock implements ITTinkererR
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 2, 16);
 
     public BlockAnimationTablet() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 50F).sound(SoundType.METAL).noOcclusion());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 50F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
     }
 
     protected BlockAnimationTablet(Properties properties) {

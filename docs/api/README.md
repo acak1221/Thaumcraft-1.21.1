@@ -11,18 +11,18 @@ compiles; `python3 scripts/porting/api_docs.py --check` fails when a guide and t
 1. **[Getting started](guide/getting-started.md)** — project setup, where the Thaumcraft registrations go, units, lang
    keys, running the example.
 2. **[Aspects, object tags and scanning](guide/aspects.md)** — new aspects, the aspects of items and entities, ore
-   dictionary names, scan handlers.
-3. **[Research](guide/research.md)** — categories, entries and their flags, pages, player knowledge.
+   dictionary names, scan handlers, codecs for data components.
+3. **[Research](guide/research.md)** — categories, entries and their flags, pages, player knowledge (scans, discovered aspects), server switches.
 4. **[Recipes](guide/recipes.md)** — arcane, crucible and infusion recipes through the API and as JSON data; warp,
    smelting bonuses, loot bags.
-5. **[Wands and foci](guide/wands-and-foci.md)** — rods, staff cores, caps, `WandHelper`, foci, `IWandable`, wand
-   triggers.
+5. **[Wands and foci](guide/wands-and-foci.md)** — rods, staff cores, caps, `WandHelper`, foci, focus pouches
+   (`IFocusPouch`), `IWandable`, wand triggers.
 6. **[Blocks, essentia and vis](guide/essentia-and-vis.md)** — `TileThaumcraft`, essentia containers and transport,
    the vis network, effects.
-7. **[Gear and baubles](guide/gear-and-baubles.md)** — bauble slots, vis discounts, runic shielding, warping gear,
-   goggles.
+7. **[Gear and baubles](guide/gear-and-baubles.md)** — bauble slots (the hand equip and its opt-out, `BaublesApi.getWorn`),
+   vis discounts, runic shielding, warping gear, goggles.
 8. **[Thaumcraft content, entities and the world](guide/world-and-content.md)** — item and block lookups, entity
-   interfaces, damage, effects, world generation.
+   interfaces, damage, effects, world generation, felling trees.
 
 ## Reference
 

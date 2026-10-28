@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 
@@ -85,6 +86,22 @@ public interface IInternalMethodHandler {
 
     /** The permanent, sticky and temporary warp of a player, in that order, as a new three-element array; zeros by default. */
     default int[] getWarp(Player player) { return new int[3]; }
+
+    /** Whether the player scanned the item of the stack, the way the thaumometer records it; false by default, for a
+     * null player and for an empty stack. The installed handler answers from the player's own knowledge, on either side. */
+    default boolean hasScannedItem(Player player, ItemStack stack) { return false; }
+
+    /** Marks the aspect as discovered for the player and syncs; true only when this call discovered it. Server side only;
+     * false by default, on a client, for a null argument and for an aspect already discovered. */
+    default boolean discoverAspect(Player player, Aspect aspect) { return false; }
+
+    /** The scan markers of the player as an immutable snapshot; {@link ThaumcraftApiHelper.Scans#EMPTY} by default and
+     * for a null player. */
+    default ThaumcraftApiHelper.Scans getScans(Player player) { return ThaumcraftApiHelper.Scans.EMPTY; }
+
+    /** Adds scan markers to the player's knowledge and syncs; the number of markers that were new. Server side only;
+     * zero by default, on a client and for null arguments. */
+    default int addScans(Player player, ThaumcraftApiHelper.Scans scans) { return 0; }
 
     /** Default no-op, ignoring nullable player, signed warp-point amount and temporary flag; sends no packet. */
     default void addWarpToPlayer(Player player, int amount, boolean temporary) {}

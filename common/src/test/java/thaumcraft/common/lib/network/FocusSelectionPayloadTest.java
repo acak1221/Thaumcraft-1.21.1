@@ -32,6 +32,27 @@ class FocusSelectionPayloadTest {
         assertArrayEquals(new int[] {0, 127, 0x08, 0x17}, PayloadWire.unsigned(wire(new FocusSelectionPayload(MAIN, 2071))));
     }
 
+    @Test void anAddressInTheBandsOfTheExtraCellsOfALargerPouchTakesTheSameFourBytes() {
+        // Cells 18.. of an add-on pouch (IFocusPouch): main slot 0 cell 18, main slot 35 cell 127, worn slot 0 cell 18, worn slot 3 cell 127.
+        assertArrayEquals(new int[] {0, 127, 0x0B, 0xB8}, PayloadWire.unsigned(wire(new FocusSelectionPayload(MAIN, 3000))));
+        assertArrayEquals(new int[] {1, 127, 0x1B, 0x2F}, PayloadWire.unsigned(wire(new FocusSelectionPayload(OFF, 6959))));
+        assertArrayEquals(new int[] {0, 127, 0x1B, 0x30}, PayloadWire.unsigned(wire(new FocusSelectionPayload(MAIN, 6960))));
+        assertArrayEquals(new int[] {1, 127, 0x1C, 0xE7}, PayloadWire.unsigned(wire(new FocusSelectionPayload(OFF, 7399))));
+        for (int address : new int[] {3000, 3109, 3110, 6959, 6960, 7399}) {
+            for (InteractionHand hand : InteractionHand.values()) {
+                FocusSelectionPayload payload = new FocusSelectionPayload(hand, address);
+                assertEquals(payload, read(PayloadWire.unsigned(wire(payload))), hand + " " + address);
+            }
+        }
+    }
+
+    @Test void theAddressesAroundTheExtraBandsAreRefusedOnTheWireAndInTheConstructor() {
+        for (int[] gap : new int[][] {{0x0B, 0xB7}, {0x1C, 0xE8}, {0xFF, 0xFF}}) {
+            assertThrows(DecoderException.class, () -> read(0, 127, gap[0], gap[1]), gap[0] + ":" + gap[1]);
+        }
+        for (int slot : new int[] {2999, 7400, 65535}) assertThrows(IllegalArgumentException.class, () -> new FocusSelectionPayload(MAIN, slot), "slot " + slot);
+    }
+
     @Test void everyValidAddressRoundTripsWithBothHands() {
         for (int slot = -1; slot < 2100; slot++) {
             if (!FocusSelectionSources.valid(slot)) continue;

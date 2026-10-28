@@ -1,0 +1,239 @@
+package thaumic.tinkerer.kamigear;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.mojang.serialization.JsonOps;
+import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.Bootstrap;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import thaumic.tinkerer.common.item.kami.ItemKamiResource;
+import thaumic.tinkerer.common.item.kami.ItemPlacementMirror;
+import thaumic.tinkerer.common.item.kami.KamiComponents.PearlTarget;
+import thaumic.tinkerer.common.item.kami.KamiComponents.TalismanStore;
+import thaumic.tinkerer.common.item.kami.foci.ItemFocusXPDrain;
+import thaumic.tinkerer.common.item.kami.foci.ShadowBeam;
+import thaumic.tinkerer.common.item.kami.tool.ToolHandler;
+import thaumic.tinkerer.common.lib.LibItemNames;
+import thaumic.tinkerer.common.network.packet.kami.PacketShadowBeam;
+
+/**
+ * Test-only code of the port (no 1.7.10 counterpart), CC BY-NC-SA 3.0 like the add-on.
+ *
+ * <p>The plain rules of the Kami gear: the tool mode cycle, the shape of the Placement Mirror's square, the Shadowbeam's
+ * damage and reflection, the experience curve of the Experience Drain focus, the order of the resource family and the
+ * codecs of the data components and of the beam packet. Nothing here needs a world.</p>
+ */
+class KamiGearLogicTest {
+    @BeforeAll
+    static void bootstrap() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+    }
+
+    // ---- tool modes ----------------------------------------------------------------------------------------------
+
+    @Test
+    void theToolModeCyclesThroughThreeModes() {
+        assertEquals(1, ToolHandler.getNextMode(0));
+        assertEquals(2, ToolHandler.getNextMode(1));
+        assertEquals(0, ToolHandler.getNextMode(2));
+        int mode = 0;
+        for (int i = 0; i < 9; i++) mode = ToolHandler.getNextMode(mode);
+        assertEquals(0, mode, "nine clicks are three full turns");
+    }
+
+    // ---- the resource family -------------------------------------------------------------------------------------
+
+    @Test
+    void theResourceIndicesFollowTheOriginalMetadataOrder() {
+        assertEquals("ichor", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.ICHOR]);
+        assertEquals("ichor_cloth", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.ICHOR_CLOTH]);
+        assertEquals("ichorium", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.ICHORIUM]);
+        assertEquals("ichor_nugget", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.ICHOR_NUGGET]);
+        assertEquals("ichor_cap", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.ICHOR_CAP]);
+        assertEquals("ichorcloth_rod", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.ICHORCLOTH_ROD]);
+        assertEquals("nether_shard", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.NETHER_SHARD]);
+        assertEquals("ender_shard", LibItemNames.KAMI_RESOURCE_NAMES[ItemKamiResource.ENDER_SHARD]);
+        assertEquals(8, LibItemNames.KAMI_RESOURCE_NAMES.length);
+    }
+
+    // ---- the Placement Mirror's square -----------------------------------------------------------------------------
+
+    @Test
+    void theSquareIsAlwaysSizeTimesSizeBlocksOnEveryFaceAndLook() {
+        for (int size : new int[] { 3, 5, 7, 9, 11 }) {
+            for (Direction side : Direction.values()) {
+                for (float pitch : new float[] { -80, 0, 74, 76, 90 }) {
+                    for (int rotation = 0; rotation < 4; rotation++) {
+                        List<int[]> offsets = ItemPlacementMirror.squareOffsets(side, pitch, rotation, size);
+                        assertEquals(size * size, offsets.size(),
+                                "size " + size + " side " + side + " pitch " + pitch + " rotation " + rotation);
+                        Set<String> distinct = new HashSet<>();
+                        for (int[] offset : offsets) distinct.add(offset[0] + "," + offset[1] + "," + offset[2]);
+                        assertEquals(offsets.size(), distinct.size(), "no position twice");
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void anEvenSizeIsTreatedLikeTheOddSizeAboveIt() {
+        // 1.7.10 stored the size as size | 1; squareOffsets itself takes (size ^ 1) / 2 as the half width.
+        assertEquals(25, ItemPlacementMirror.squareOffsets(Direction.NORTH, 0, 0, 4).size());
+        assertEquals(49, ItemPlacementMirror.squareOffsets(Direction.NORTH, 0, 0, 6).size());
+    }
+
+    @Test
+    void aWallSquareStandsInFrontOfTheFaceAndRisesFromTheAimedBlock() {
+        // Aiming at the north face of a block: the square is one block north of it, x centred, y from the block upward.
+        List<int[]> offsets = ItemPlacementMirror.squareOffsets(Direction.NORTH, 0, 0, 3);
+        int minX = 99, maxX = -99, minY = 99, maxY = -99;
+        for (int[] offset : offsets) {
+            assertEquals(-1, offset[2], "one block in front of the north face");
+            minX = Math.min(minX, offset[0]);
+            maxX = Math.max(maxX, offset[0]);
+            minY = Math.min(minY, offset[1]);
+            maxY = Math.max(maxY, offset[1]);
+        }
+        assertEquals(-1, minX);
+        assertEquals(1, maxX);
+        assertEquals(0, minY);
+        assertEquals(2, maxY);
+    }
+
+    @Test
+    void aFloorSquareLiesOnTheTopFaceWhenLookingStraightDown() {
+        List<int[]> offsets = ItemPlacementMirror.squareOffsets(Direction.UP, 80, 0, 5);
+        for (int[] offset : offsets) {
+            assertEquals(1, offset[1], "one block above the aimed block");
+            assertTrue(Math.abs(offset[0]) <= 2 && Math.abs(offset[2]) <= 2);
+        }
+    }
+
+    @Test
+    void aSideFaceSquareFollowsTheFacingOfTheTopFaceWhenLookingSlantedDown() {
+        // Looking down at 60 degrees the top-face square stands up instead: rotation decides its orientation.
+        List<int[]> alongX = ItemPlacementMirror.squareOffsets(Direction.UP, 60, 0, 3);
+        List<int[]> alongZ = ItemPlacementMirror.squareOffsets(Direction.UP, 60, 1, 3);
+        assertTrue(alongX.stream().allMatch(offset -> offset[2] == 0), "even rotation: a wall in the x direction");
+        assertTrue(alongZ.stream().allMatch(offset -> offset[0] == 0), "odd rotation: a wall in the z direction");
+    }
+
+    // ---- the Shadowbeam -------------------------------------------------------------------------------------------
+
+    @Test
+    void theShadowbeamDamageGrowsByTwentyPercentOfTheBasePerPotencyLevel() {
+        assertEquals(10, ShadowBeam.damage(10, 0));
+        assertEquals(12, ShadowBeam.damage(10, 1));
+        assertEquals(14, ShadowBeam.damage(10, 2));
+        assertEquals(16, ShadowBeam.damage(10, 3));
+        assertEquals(11, ShadowBeam.damage(7, 3), "truncated, as the int cast of 1.7.10");
+    }
+
+    @Test
+    void aBeamBouncesOffAWallLikeALightRay() {
+        Vec3 reflected = ShadowBeam.reflect(new Vec3(1, 0, 0), Direction.WEST);
+        assertEquals(-1, reflected.x, 1.0E-9);
+        assertEquals(0, reflected.y, 1.0E-9);
+        assertEquals(0, reflected.z, 1.0E-9);
+
+        Vec3 slanted = ShadowBeam.reflect(new Vec3(0.5, -0.25, 0.1), Direction.UP);
+        assertEquals(0.5, slanted.x, 1.0E-9);
+        assertEquals(0.25, slanted.y, 1.0E-9, "only the component along the normal flips");
+        assertEquals(0.1, slanted.z, 1.0E-9);
+    }
+
+    @Test
+    void theBeamStartsBesideTheEyeAndStepsAlongTheLookWithTheOriginalBias() {
+        Vec3[] launch = ShadowBeam.launch(new Vec3(10, 20, 30), 0, new Vec3(0, 0, 1));
+        // yaw 0: cos = 1, sin = 0
+        assertEquals(10 - 0.16, launch[0].x, 1.0E-9);
+        assertEquals(20 - 0.1, launch[0].y, 1.0E-9);
+        assertEquals(30, launch[0].z, 1.0E-9);
+        assertEquals(0.0075 * 0.15, launch[1].x, 1.0E-9);
+        assertEquals((1 + 0.0075) * 0.15, launch[1].z, 1.0E-9);
+    }
+
+    // ---- the experience curve -------------------------------------------------------------------------------------
+
+    @Test
+    void theExperienceOfALevelFollowsTheVanillaCurve() {
+        assertEquals(0, ItemFocusXPDrain.getExperienceForLevel(0));
+        assertEquals(7, ItemFocusXPDrain.getExperienceForLevel(1));
+        assertEquals(352, ItemFocusXPDrain.getExperienceForLevel(16));
+        assertEquals(394, ItemFocusXPDrain.getExperienceForLevel(17));
+        assertEquals(1395, ItemFocusXPDrain.getExperienceForLevel(30));
+        assertEquals(1507, ItemFocusXPDrain.getExperienceForLevel(31));
+        assertEquals(1628, ItemFocusXPDrain.getExperienceForLevel(32));
+        assertEquals(0, ItemFocusXPDrain.getExperienceForLevel(-4));
+    }
+
+    @Test
+    void theLevelOfAnAmountOfExperienceInvertsTheCurve() {
+        for (int level = 0; level <= 80; level++) {
+            int experience = ItemFocusXPDrain.getExperienceForLevel(level);
+            assertEquals(level, ItemFocusXPDrain.getLevelForExperience(experience), "exactly level " + level);
+            if (level > 0) {
+                assertEquals(level - 1, ItemFocusXPDrain.getLevelForExperience(experience - 1), "one point short");
+            }
+        }
+    }
+
+    // ---- data components and packets -----------------------------------------------------------------------------
+
+    @Test
+    void theTalismanStoreSurvivesItsCodecs() {
+        TalismanStore store = new TalismanStore(ResourceLocation.withDefaultNamespace("cobblestone"), 123456);
+        var json = TalismanStore.CODEC.encodeStart(JsonOps.INSTANCE, store).getOrThrow();
+        assertEquals(store, TalismanStore.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(7, store.withCount(7).count());
+        assertEquals(store.block(), store.withCount(7).block());
+
+        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+        TalismanStore.STREAM_CODEC.encode(buf, store);
+        assertEquals(store, TalismanStore.STREAM_CODEC.decode(buf));
+    }
+
+    @Test
+    void thePearlTargetSurvivesItsCodecs() {
+        PearlTarget target = new PearlTarget(Level.NETHER, new BlockPos(-12, 64, 3000));
+        var json = PearlTarget.CODEC.encodeStart(JsonOps.INSTANCE, target).getOrThrow();
+        assertEquals(target, PearlTarget.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+
+        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+        PearlTarget.STREAM_CODEC.encode(buf, target);
+        assertEquals(target, PearlTarget.STREAM_CODEC.decode(buf));
+    }
+
+    @Test
+    void theBeamPacketCarriesItsPointsAndCapsTheirNumber() {
+        List<Vec3> points = List.of(new Vec3(1.5, 2.5, 3.5), new Vec3(-4, 5, 6.25));
+        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+        PacketShadowBeam.CODEC.encode(buf, new PacketShadowBeam(points));
+        assertEquals(points, PacketShadowBeam.CODEC.decode(buf).points());
+
+        List<Vec3> many = new ArrayList<>();
+        for (int i = 0; i < PacketShadowBeam.MAX_POINTS + 50; i++) many.add(new Vec3(i, 0, 0));
+        RegistryFriendlyByteBuf big = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+        PacketShadowBeam.CODEC.encode(big, new PacketShadowBeam(many));
+        List<Vec3> read = PacketShadowBeam.CODEC.decode(big).points();
+        assertEquals(PacketShadowBeam.MAX_POINTS, read.size());
+        assertFalse(big.isReadable(), "nothing but the capped points was written");
+    }
+}

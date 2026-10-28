@@ -47,7 +47,7 @@ public class BlockMobilizer extends BaseEntityBlock implements ITTinkererRegiste
     public static final MapCodec<BlockMobilizer> CODEC = simpleCodec(BlockMobilizer::new);
 
     public BlockMobilizer() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).instabreak());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).instabreak().requiresCorrectToolForDrops());
     }
 
     protected BlockMobilizer(Properties properties) {

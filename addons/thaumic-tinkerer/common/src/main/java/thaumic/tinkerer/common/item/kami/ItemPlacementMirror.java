@@ -81,9 +81,11 @@ public class ItemPlacementMirror extends KamiItemBase {
 
     // ---- what is in the inventory ---------------------------------------------------------------------------
 
-    /** 1.7.10 {@code hasBlocks}: creative players always have them; otherwise the inventory and the Black Hole Rings in it must hold {@code requiredAmount}. */
+    /**
+     * 1.7.10 {@code hasBlocks}: the inventory and the Black Hole Rings in it must hold {@code requiredAmount} of the block. A
+     * creative player needs them as well (only the consumption skips creative players).
+     */
     public static boolean hasBlocks(Player player, Block requiredBlock, int requiredAmount) {
-        if (player.getAbilities().instabuild) return true;
         Item requiredItem = requiredBlock.asItem();
         if (requiredItem == Items.AIR) return false;
         Item talismanItem = TTRegistry.item(LibItemNames.BLOCK_TALISMAN);
@@ -140,7 +142,9 @@ public class ItemPlacementMirror extends KamiItemBase {
     /** The empty or replaceable positions of the square the player aims at; empty when the player aims at nothing. */
     public static List<BlockPos> getBlocksToPlace(ItemStack stack, Player player) {
         List<BlockPos> coords = new ArrayList<>();
-        BlockHitResult hit = ToolHandler.raytrace(player, REACH);
+        // 1.7.10 asked the reach of the player's game mode on the server and 5 blocks on the client.
+        BlockHitResult hit = ToolHandler.raytrace(player,
+                player.level().isClientSide ? REACH : player.blockInteractionRange());
         if (hit == null) return coords;
         Level level = player.level();
         BlockPos target = hit.getBlockPos();

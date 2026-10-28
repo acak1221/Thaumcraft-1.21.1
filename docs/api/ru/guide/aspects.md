@@ -93,6 +93,16 @@ ServerLifecycleEvents.SERVER_STARTED.register(server -> ThaumcraftApi.registerCo
 `IEssentiaContainerItem.getAspects(stack)`: так делают банки, кристаллизованная эссенция, эссенция блуждающего огонька и
 бобы маны. Фиалы в этом порте этот интерфейс не реализуют; их аспект входит в их сканируемые аспекты.
 
+`ThaumcraftApiHelper.getBonusObjectTags(stack, bonus, level)` даёт те же аспекты, к которым сверху добавлен `bonus`. Это
+имя из 1.7.10 для кода, который вызывал `getBonusObjectTags(stack, getObjectAspects(stack))`, чтобы добавить к базовым
+аспектам содержимое контейнеров и бонусы снаряжения и зачарований. Здесь база уже входит в ответ, поэтому передавайте
+`null` (или только те дополнительные аспекты, которые хотите добавить): если передать базовый список, каждый аспект
+посчитается дважды.
+
+```java
+AspectList shown = ThaumcraftApiHelper.getBonusObjectTags(stack, null, level); // что показывает скан одного такого предмета
+```
+
 ## Теги существ
 
 <!-- snippet:entity-tag -->
@@ -127,3 +137,64 @@ ThaumcraftApi.registerScanEventhandler((stack, level, player) ->
 Сканирование даёт игроку очки исследований по отсканированным аспектам. Аддон может добавлять и читать их напрямую:
 `ThaumcraftApiHelper.addAspectPool(player, aspect, amount)` и `getAspectPool(player, aspect)` (см.
 [исследования](research.md#знания-игрока)).
+
+## Аспекты в компонентах данных, файлах данных и пакетах
+
+У `Aspect` и `AspectList` есть кодеки, поэтому компонент данных, файл JSON или пакет могут хранить аспекты. Это не члены
+1.7.10: аддон оригинала сам писал строки тегов в NBT.
+
+| Кодек | Вид |
+|---|---|
+| `Aspect.CODEC` | строка тега, `"ignis"` |
+| `Aspect.STREAM_CODEC` | тег как строка UTF-8 в любом `ByteBuf` (поэтому годится как `networkSynchronized`-кодек компонента) |
+| `AspectList.CODEC` | `[{"tag": "ignis", "amount": 4}, {"tag": "tempus", "amount": 2}]`, в порядке списка |
+| `AspectList.STREAM_CODEC` | счётчик var-int, затем тег и количество var-int на каждую запись |
+
+- Они читают живой реестр, поэтому аспект аддона работает как исходный, если его зарегистрировали до того, как данные
+  декодируются (см. [новый аспект](#новый-аспект)). Неизвестный тег — ошибка с его именем (`Unknown aspect tag 'x'`), а не
+  null и не молча пропущенная запись; в сети это `DecoderException`, который отключает получателя.
+- Декодирование строгое: количество меньше единицы и повторный тег проваливают весь список. При записи попадают только
+  записи с положительным количеством, поэтому список, в котором `reduce` оставил нулевой ключ, всё равно сохраняется.
+- `AspectList` изменяем и сравнивается по ссылке, поэтому два стека, чьи компоненты хранят равные списки, не склеятся.
+  Аддон из примера оборачивает список в запись, которая копирует его и сравнивает по содержимому, и объявляет тип
+  компонента:
+
+<!-- snippet:aspect-component-type -->
+```java
+/** The data component of items that carry aspects: saved with the stack, synced to the client, equal by content. */
+public static final DataComponentType<StoredAspects> STORED_ASPECTS = DataComponentType.<StoredAspects>builder()
+        .persistent(StoredAspects.CODEC).networkSynchronized(StoredAspects.STREAM_CODEC).build();
+```
+<!-- /snippet -->
+
+<!-- snippet:aspect-component -->
+```java
+public record StoredAspects(AspectList aspects) {
+    public static final StoredAspects NONE = new StoredAspects(new AspectList());
+    // The codecs of the API do the saving and the syncing; the wrapper only converts.
+    public static final Codec<StoredAspects> CODEC = AspectList.CODEC.xmap(StoredAspects::new, StoredAspects::aspects);
+    public static final StreamCodec<? super RegistryFriendlyByteBuf, StoredAspects> STREAM_CODEC =
+            AspectList.STREAM_CODEC.map(StoredAspects::new, StoredAspects::aspects);
+
+    public StoredAspects {
+        // What the codecs would not write (an amount of zero, which AspectList.reduce leaves behind) is not part of the value.
+        AspectList positive = new AspectList();
+        for (Aspect aspect : aspects.getAspects()) {
+            if (aspects.getAmount(aspect) > 0) positive.add(aspect, aspects.getAmount(aspect));
+        }
+        aspects = positive;
+    }
+
+    @Override public AspectList aspects() { return aspects.copy(); }
+
+    @Override public boolean equals(Object other) {
+        return other instanceof StoredAspects stored && aspects.aspects.equals(stored.aspects.aspects);
+    }
+
+    @Override public int hashCode() { return aspects.aspects.hashCode(); }
+}
+```
+<!-- /snippet -->
+
+Тип регистрируется в инициализаторе аддона через `Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ...)`. Свиток
+прозрения несёт его как компонент предмета по умолчанию и обучает аспектам, которые хранит стек.

@@ -24,6 +24,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import thaumcraft.api.ItemApi;
+import thaumcraft.api.ThaumcraftApi;
 import thaumic.tinkerer.client.TileBlocksClient;
 import thaumic.tinkerer.common.block.BlockAnimationTablet;
 import thaumic.tinkerer.common.block.BlockGolemConnector;
@@ -229,12 +230,11 @@ public final class TileBlocks implements ContentGroup {
     }
 
     /**
-     * Thaumcraft's {@code Config.allowMirrors}: without mirrors the Transvector Dislocator has neither research nor recipe.
-     * The API does not expose the setting (API request M1 in docs/api-requests/TileBlocks.md), so mirrors are allowed,
-     * which is the setting's default.
+     * Thaumcraft's {@code Config.allowMirrors}: without mirrors the Transvector Dislocator has neither research nor recipe
+     * (request A5 of docs/API_GAPS.md, answered by {@link ThaumcraftApi#isMirrorsAllowed()}).
      */
     public static boolean mirrorsAllowed() {
-        return true;
+        return ThaumcraftApi.isMirrorsAllowed();
     }
 
     /** The block the registry path names, for the models' sake: kept here so tests can list the group's blocks. */

@@ -88,6 +88,9 @@ public class ItemIchorPickAdv extends ItemIchorPick implements IAdvancedTool {
         if (hit == null) return;
         Direction direction = hit.getDirection();
 
+        // 1.7.10 turned bedrock into the portal or air here, before the modes ran.
+        if (player.isShiftKeyDown() && state.is(Blocks.BEDROCK)) convertBedrock(player, level, pos);
+
         switch (ToolHandler.getMode(stack)) {
             case 1 -> {
                 boolean doX = direction.getStepX() == 0;
@@ -113,9 +116,8 @@ public class ItemIchorPickAdv extends ItemIchorPick implements IAdvancedTool {
     }
 
     /**
-     * Bedrock to portal or air (the sneaking branch of 1.7.10's {@code onBlockStartBreak}). Bedrock cannot be mined in
-     * survival (hardness -1), so the conversion runs when the block is clicked and the click is then cancelled; the
-     * original ran it in the break and let the break go on, which in survival never started.
+     * Bedrock to portal or air (the sneaking branch of 1.7.10's {@code onBlockStartBreak}): the portal in the Overworld's
+     * lowest five layers and in the top two layers of the Bedrock dimension, air in the rest of the Bedrock dimension.
      *
      * @return true when the bedrock was converted
      */
@@ -137,11 +139,29 @@ public class ItemIchorPickAdv extends ItemIchorPick implements IAdvancedTool {
         return false;
     }
 
-    /** Architectury {@code InteractionEvent.LEFT_CLICK_BLOCK}: sneak-clicking bedrock with this pickaxe. */
+    /**
+     * Architectury {@code InteractionEvent.LEFT_CLICK_BLOCK}: 1.7.10's {@code KamiDimensionHandler.onInteract}, which called
+     * {@code onBlockStartBreak} for a left click on bedrock because survival never reaches that method for a block that
+     * cannot be broken. A sneaking click turns the bedrock into the portal or air; a click without sneaking in square or
+     * line mode breaks the blocks around, and the bedrock itself where the rules allow it (the Bedrock dimension below its
+     * top two layers). The click is then cancelled; the bedrock has nothing left to break.
+     */
     public static EventResult onLeftClickBlock(Player player, InteractionHand hand, BlockPos pos, Direction face) {
         if (hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer server)) return EventResult.pass();
-        if (!(server.getMainHandItem().getItem() instanceof ItemIchorPickAdv)) return EventResult.pass();
-        return convertBedrock(server, server.serverLevel(), pos) ? EventResult.interruptFalse() : EventResult.pass();
+        ItemStack held = server.getMainHandItem();
+        if (!(held.getItem() instanceof ItemIchorPickAdv pick)) return EventResult.pass();
+        ServerLevel level = server.serverLevel();
+        BlockState state = level.getBlockState(pos);
+        if (!state.is(Blocks.BEDROCK)) return EventResult.pass();
+
+        ToolHandler.guarded(() -> {
+            pick.onBlockStartBreak(held, level, pos, state, server);
+            // The loops of the modes skip the block being broken; bedrock is not being broken by anything else.
+            if (!server.isShiftKeyDown() && ToolHandler.getMode(held) != 0) {
+                ToolHandler.breakExtraBlock(level, pos, server, ToolHandler.MATERIALS_PICK);
+            }
+        });
+        return EventResult.interruptFalse();
     }
 
     @Override

@@ -44,7 +44,7 @@ public class BlockTransvectorInterface extends CamoDeviceBlock implements ITTink
     public static final MapCodec<BlockTransvectorInterface> CODEC = simpleCodec(BlockTransvectorInterface::new);
 
     public BlockTransvectorInterface() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 10F).noOcclusion());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 10F).requiresCorrectToolForDrops().noOcclusion());
     }
 
     protected BlockTransvectorInterface(Properties properties) {

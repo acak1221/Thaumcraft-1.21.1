@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.items.wands.FocusSelectionSources;
 
-/** The physical focus addresses: held focus, the 36 inventory slots, then 18 cells in each inventory pouch and each of 4 worn pouches. */
+/**
+ * The physical focus addresses: held focus, the 36 inventory slots, then 18 cells in each inventory pouch and each of 4 worn pouches.
+ * A pouch of an add-on may have more cells (up to 128): those have their own bands, see {@link FocusSelectionExtendedCellsTest}.
+ */
 class FocusSelectionSourcesTest {
     @Test void theThreeRangesStartAndEndWhereTheNativeSelectorExpectsThem() {
         assertEquals(1000, FocusSelectionSources.inventoryPouch(0, 0));
@@ -60,10 +63,11 @@ class FocusSelectionSourcesTest {
     }
 
     @Test void aPouchSlotOrCellOutsideTheirRangeIsRefused() {
-        for (int[] bad : new int[][] {{-1, 0}, {36, 0}, {0, -1}, {0, 18}}) {
+        // Cell 18 used to be refused: it is the first extra cell of an IFocusPouch larger than the native pouch. 128 is past the cap.
+        for (int[] bad : new int[][] {{-1, 0}, {36, 0}, {0, -1}, {0, 128}}) {
             assertThrows(IllegalArgumentException.class, () -> FocusSelectionSources.inventoryPouch(bad[0], bad[1]), bad[0] + "," + bad[1]);
         }
-        for (int[] bad : new int[][] {{-1, 0}, {4, 0}, {0, -1}, {0, 18}}) {
+        for (int[] bad : new int[][] {{-1, 0}, {4, 0}, {0, -1}, {0, 128}}) {
             assertThrows(IllegalArgumentException.class, () -> FocusSelectionSources.wornPouch(bad[0], bad[1]), bad[0] + "," + bad[1]);
         }
     }

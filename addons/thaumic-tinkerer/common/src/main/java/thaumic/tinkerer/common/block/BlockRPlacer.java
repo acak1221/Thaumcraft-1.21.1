@@ -55,7 +55,7 @@ public class BlockRPlacer extends PulseDeviceBlock implements IWandable, ITTinke
     public static final MapCodec<BlockRPlacer> CODEC = simpleCodec(BlockRPlacer::new);
 
     public BlockRPlacer() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instabreak().noOcclusion());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instabreak().requiresCorrectToolForDrops().noOcclusion());
     }
 
     protected BlockRPlacer(Properties properties) {

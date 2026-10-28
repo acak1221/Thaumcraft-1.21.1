@@ -43,7 +43,7 @@ public class BlockMobilizerRelay extends BaseEntityBlock implements ITTinkererRe
     public static final MapCodec<BlockMobilizerRelay> CODEC = simpleCodec(BlockMobilizerRelay::new);
 
     public BlockMobilizerRelay() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).instabreak());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).instabreak().requiresCorrectToolForDrops());
     }
 
     protected BlockMobilizerRelay(Properties properties) {

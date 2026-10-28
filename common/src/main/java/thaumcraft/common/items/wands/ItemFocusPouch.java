@@ -14,16 +14,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
+import thaumcraft.api.wands.IFocusPouch;
 import thaumcraft.common.container.ContainerFocusPouch;
 
-/** Original18-slot API. ConfigItems registered its Bauble subclass as ONE item. */
-public class ItemFocusPouch extends Item {
+/** Original18-slot API. ConfigItems registered its Bauble subclass as ONE item. Its two methods are the public {@link IFocusPouch}. */
+public class ItemFocusPouch extends Item implements IFocusPouch {
     public static final int SIZE=18;
     public ItemFocusPouch(Properties properties) { super(properties.stacksTo(1).rarity(Rarity.RARE)); }
     @Override public boolean isFoil(ItemStack stack) { return false; }
     /** Every result is independent. Oversized native container payloads are
      * refused without rewriting/truncating their retained original component. */
-    public ItemStack[] getInventory(ItemStack pouch) {
+    @Override public ItemStack[] getInventory(ItemStack pouch) {
         requirePouch(pouch);
         var stored=pouch.getOrDefault(DataComponents.CONTAINER,ItemContainerContents.EMPTY).stream().toList();
         if(stored.size()>SIZE)throw new IllegalArgumentException("Focus pouch payload exceeds eighteen slots");
@@ -33,7 +34,7 @@ public class ItemFocusPouch extends Item {
     }
     /** Server API retains complete physical entries, including externally saved
      * foreign items; native GUI insertion separately requires ItemFocusBasic. */
-    public void setInventory(ItemStack pouch,ItemStack[] contents) {
+    @Override public void setInventory(ItemStack pouch,ItemStack[] contents) {
         requirePouch(pouch);
         if(contents==null||contents.length!=SIZE)throw new IllegalArgumentException("Focus pouch needs eighteen slots");
         ItemStack[] copied=new ItemStack[SIZE];

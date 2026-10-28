@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "thaumictinkerer:ichor_sword",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichor_sword_gem",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "thaumictinkerer:ichorcloth_legs",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichorcloth_legs_gem",
+      "required": false
+    }
+  ]
+}

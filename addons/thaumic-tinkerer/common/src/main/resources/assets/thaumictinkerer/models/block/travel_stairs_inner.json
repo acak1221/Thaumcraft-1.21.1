@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "thaumcraft:blocks/paving_stone_travel",
+    "side": "thaumcraft:blocks/paving_stone_travel",
+    "top": "thaumcraft:blocks/paving_stone_travel"
+  }
+}

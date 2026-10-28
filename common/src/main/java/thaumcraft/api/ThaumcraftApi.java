@@ -441,6 +441,42 @@ public final class ThaumcraftApi {
     /** Forgets the answers of {@link #getCraftingRecipeKey}; the runtime calls it when research is added or changed. */
     public static void clearRecipeKeyCache() { keyCache.clear(); }
 
+    // ------------------------------------------------------------------ server switches of the original Config
+
+    /**
+     * The original {@code Config.allowMirrors}: may the player build and use the mirrors? Not a 1.7.10 method: an
+     * add-on of the original read the public field {@code thaumcraft.common.config.Config.allowMirrors} (and, on a
+     * client, its synced copy {@code CallowMirrors}).
+     *
+     * <p><b>What it means.</b> Thaumcraft's own switch (config key {@code allow_mirrors}, default {@code true}) hides the
+     * research of the Magic Mirror, the Essentia Mirror and the Hand Mirror (keys {@code MIRROR}, {@code MIRRORESSENTIA},
+     * {@code MIRRORHAND}) and with it their recipes. An add-on feature that is built on a mirror (a focus that needs
+     * one as an ingredient, say) should follow the same switch. The switch does not remove mirror blocks that exist,
+     * and the mod does not enforce it when a mirror is placed.</p>
+     *
+     * <p><b>Side and thread.</b> Either side. On the client thread it is the value the connected server sent when the
+     * player joined (the local configuration when not connected); on every other thread it is this installation's own
+     * server value, read from the configuration file at startup. It cannot change while a world runs (restart scoped).
+     * Cheap and allocation free; safe to call every tick.</p>
+     */
+    public static boolean isMirrorsAllowed() { return thaumcraft.common.config.ThaumcraftSettings.current().mirrors(); }
+
+    /**
+     * The original {@code Config.wardedStone}: do warded stone, warded glass, arcane doors and arcane pressure plates
+     * belong to their owner? Not a 1.7.10 method: an add-on of the original read the public field
+     * {@code thaumcraft.common.config.Config.wardedStone} (client copy {@code CwardedStone}).
+     *
+     * <p><b>What it means.</b> Thaumcraft's own switch (config key {@code allow_warded_stone}, default {@code true}).
+     * While it is on, warded doors, warded glass and warded pressure plates are unbreakable by mining (for everybody)
+     * and only the owner can take a warded block back with a wand; while it is off they have an ordinary hardness and
+     * anybody can remove them with a wand. It also gates the research of the warding focus and of the warded arcana
+     * ({@code FOCUSWARDING}, {@code WARDEDARCANA}), so an add-on block that builds on warded stone (a ward slab, a
+     * warding fence) should be offered only while it is on.</p>
+     *
+     * <p><b>Side and thread.</b> Same as {@link #isMirrorsAllowed()}.</p>
+     */
+    public static boolean isWardedStoneAllowed() { return thaumcraft.common.config.ThaumcraftSettings.current().wardedStone(); }
+
     /** The original recipe keys a research page shows: its own recipe, or the array of the original page. */
     private static List<String> pageRecipeKeys(ResearchDefinition definition, ResearchDefinition.Page page) {
         if (page.recipeKey() != null) return List.of(page.recipeKey());

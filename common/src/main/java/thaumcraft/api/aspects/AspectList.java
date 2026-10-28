@@ -1,19 +1,125 @@
 package thaumcraft.api.aspects;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.api.ThaumcraftApiHelper;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /** TC4's ordered aspect amounts. add sums; merge takes the maximum. */
 public class AspectList implements Serializable {
     public final LinkedHashMap<Aspect, Integer> aspects = new LinkedHashMap<>();
+
+    /** One written entry of the codecs: the tag of an aspect and its amount. */
+    private record Row(Aspect aspect, int amount) {
+        static final Codec<Row> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Aspect.CODEC.fieldOf("tag").forGetter(Row::aspect),
+                ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(Row::amount)
+        ).apply(instance, Row::new));
+    }
+
+    /**
+     * Codec of an aspect list, so that a data component, a JSON file or saved data can hold aspects. Not a 1.7.10
+     * member: an add-on of the original wrote {@link #writeToNBT(CompoundTag)} into an NBT tag itself.
+     *
+     * <p><b>Written form.</b> A list of entries in the order of the list: {@code [{"tag": "ignis", "amount": 4},
+     * {"tag": "tempus", "amount": 2}]} (the tag of {@link Aspect#CODEC}, a positive int). The empty list is
+     * {@code []} and is a valid, empty {@code AspectList}. Decoding keeps the written order, which is the insertion
+     * order of the result.</p>
+     *
+     * <p><b>Strict decoding.</b> An unknown tag (an add-on aspect that is not registered, see {@link Aspect#CODEC}), an
+     * amount below one and a tag that appears twice are errors of the whole list: the data is never trimmed or summed
+     * into a different list. The result is a new mutable list on every decode.</p>
+     *
+     * <p><b>Encoding.</b> An entry with an amount of zero or less is not written: such an entry holds no aspect, and
+     * {@link #reduce} leaves exactly one behind when it empties an aspect, so a list that was reduced still saves.
+     * {@link #getAmount} of a decoded list therefore equals that of the encoded one for every aspect with a positive
+     * amount, and is zero for the others. Encoding an aspect that is not registered under its own tag is an error
+     * ({@link Aspect#CODEC}).</p>
+     *
+     * <p><b>Equality.</b> {@code AspectList} compares by identity, as in the original. Two stacks whose data component
+     * holds equal but distinct lists are therefore different stacks (they do not merge). A component that must compare
+     * by value holds a small immutable value type of its own that wraps the list, copies it on the way in and out and
+     * compares {@link #getAspects()} and {@link #getAmount} (the guide shows one).</p>
+     *
+     * <p><b>Side and thread.</b> Pure; either side, any thread that may read the aspect registry.</p>
+     */
+    public static final Codec<AspectList> CODEC = Row.CODEC.listOf().flatXmap(AspectList::fromRows, AspectList::toRows);
+
+    /**
+     * Network codec of an aspect list, usable with any {@link ByteBuf} (so as the {@code networkSynchronized} codec
+     * of a data component type): a var-int count, then per entry the tag ({@link Aspect#STREAM_CODEC}) and the amount
+     * as a var-int. Same rules as {@link #CODEC}: entries of zero or less are not written, order is kept.
+     *
+     * <p>Decoding throws {@link DecoderException} for a count above the number of registered aspects (distinct aspects
+     * cannot outnumber the registry, which bounds the allocation), an unknown tag, an amount below one and a repeated
+     * tag. Client and server must register the same aspects, see {@link Aspect}.</p>
+     */
+    public static final StreamCodec<ByteBuf, AspectList> STREAM_CODEC = new StreamCodec<>() {
+        @Override public AspectList decode(ByteBuf buffer) {
+            int size = ByteBufCodecs.VAR_INT.decode(buffer);
+            if (size < 0 || size > Aspect.aspects.size()) {
+                throw new DecoderException("Invalid aspect list size " + size + " (" + Aspect.aspects.size() + " aspects are registered)");
+            }
+            AspectList list = new AspectList();
+            for (int index = 0; index < size; index++) {
+                Aspect aspect = Aspect.STREAM_CODEC.decode(buffer);
+                int amount = ByteBufCodecs.VAR_INT.decode(buffer);
+                if (amount < 1) throw new DecoderException("Invalid amount " + amount + " of aspect '" + aspect.getTag() + "'");
+                if (list.aspects.put(aspect, amount) != null) throw new DecoderException("Duplicate aspect '" + aspect.getTag() + "' in an aspect list");
+            }
+            return list;
+        }
+
+        @Override public void encode(ByteBuf buffer, AspectList list) {
+            List<Row> rows = rows(list);
+            ByteBufCodecs.VAR_INT.encode(buffer, rows.size());
+            for (Row row : rows) {
+                Aspect.STREAM_CODEC.encode(buffer, row.aspect());
+                ByteBufCodecs.VAR_INT.encode(buffer, row.amount());
+            }
+        }
+    };
+
+    private static DataResult<AspectList> fromRows(List<Row> rows) {
+        AspectList list = new AspectList();
+        for (Row row : rows) {
+            if (list.aspects.put(row.aspect(), row.amount()) != null) {
+                return DataResult.error(() -> "Duplicate aspect '" + row.aspect().getTag() + "' in an aspect list");
+            }
+        }
+        return DataResult.success(list);
+    }
+
+    private static DataResult<List<Row>> toRows(AspectList list) {
+        return list == null ? DataResult.error(() -> "Cannot write a null aspect list") : DataResult.success(rows(list));
+    }
+
+    /** The entries that carry an aspect: positive amounts only, in the order of the list. */
+    private static List<Row> rows(AspectList list) {
+        List<Row> rows = new ArrayList<>(list.aspects.size());
+        for (Map.Entry<Aspect, Integer> entry : list.aspects.entrySet()) {
+            Integer amount = entry.getValue();
+            if (entry.getKey() != null && amount != null && amount > 0) rows.add(new Row(entry.getKey(), amount));
+        }
+        return rows;
+    }
 
     /**
      * Original AspectList:25-36 - the object aspects of an item stack.

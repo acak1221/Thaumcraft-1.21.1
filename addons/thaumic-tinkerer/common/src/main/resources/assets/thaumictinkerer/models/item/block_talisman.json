@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "thaumictinkerer:item/block_talisman_0"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "thaumictinkerer:kami_active": 1.0
+      },
+      "model": "thaumictinkerer:item/block_talisman_1"
+    }
+  ]
+}

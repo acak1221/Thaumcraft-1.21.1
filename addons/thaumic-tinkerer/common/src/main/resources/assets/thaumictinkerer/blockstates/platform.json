@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "camouflaged=false": {
+      "model": "thaumictinkerer:block/platform"
+    },
+    "camouflaged=true": {
+      "model": "thaumictinkerer:block/platform"
+    }
+  }
+}

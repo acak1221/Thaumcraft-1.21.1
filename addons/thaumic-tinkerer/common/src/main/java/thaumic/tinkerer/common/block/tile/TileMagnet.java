@@ -95,7 +95,7 @@ public class TileMagnet extends BlockEntity {
     }
 
     /** The entities the magnet moves: dropped items. */
-    protected boolean isSelected(Entity entity) {
+    public boolean isSelected(Entity entity) {
         return entity instanceof ItemEntity;
     }
 

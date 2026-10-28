@@ -1,0 +1,50 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "thaumictinkerer:item/seed_generic"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "thaumictinkerer:aspect_texture": 0.0
+      },
+      "model": "thaumictinkerer:item/infused_seeds_aer"
+    },
+    {
+      "predicate": {
+        "thaumictinkerer:aspect_texture": 1.0
+      },
+      "model": "thaumictinkerer:item/infused_seeds_ignis"
+    },
+    {
+      "predicate": {
+        "thaumictinkerer:aspect_texture": 2.0
+      },
+      "model": "thaumictinkerer:item/infused_seeds_aqua"
+    },
+    {
+      "predicate": {
+        "thaumictinkerer:aspect_texture": 3.0
+      },
+      "model": "thaumictinkerer:item/infused_seeds_terra"
+    },
+    {
+      "predicate": {
+        "thaumictinkerer:aspect_texture": 4.0
+      },
+      "model": "thaumictinkerer:item/infused_seeds_ordo"
+    },
+    {
+      "predicate": {
+        "thaumictinkerer:aspect_texture": 5.0
+      },
+      "model": "thaumictinkerer:item/infused_seeds_perditio"
+    },
+    {
+      "predicate": {
+        "thaumictinkerer:aspect_texture": 6.0
+      },
+      "model": "thaumictinkerer:item/infused_seeds_generic"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "  Q",
+    " QQ",
+    "QQQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "thaumcraft:paving_stone_travel"
+    }
+  },
+  "result": {
+    "id": "thaumictinkerer:travel_stairs",
+    "count": 4
+  }
+}

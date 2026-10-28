@@ -1,6 +1,9 @@
 package thaumcraft.common.lib.baubles;
 
 import dev.architectury.event.events.common.PlayerEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -11,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.baubles.IBauble;
+import thaumcraft.api.wands.IFocusPouch;
 import thaumcraft.common.items.baubles.ItemAmuletVis;
 import thaumcraft.common.lib.network.AccessoryNetworking;
 import thaumcraft.common.tiles.TileVisRelay;
@@ -41,7 +45,8 @@ public final class PlayerAccessories {
         PlayerEvent.CHANGE_DIMENSION.register((player,oldLevel,newLevel) -> AccessoryNetworking.sync(player));
         // The port's own convenience: a bauble used from the hand goes into the first free slot of its kind,
         // as the modern accessory mods do; the menu (key B, or the button by the player in the inventory)
-        // stays the way to take one off or to replace a worn one.
+        // stays the way to take one off or to replace a worn one. An item opts out with IBauble.equipsOnUse, and a focus pouch
+        // (any IFocusPouch) always keeps its own use.
         dev.architectury.event.events.common.InteractionEvent.RIGHT_CLICK_ITEM.register((player,hand) -> {
             ItemStack held=player.getItemInHand(hand);
             int slot=freeSlotFor(player,held);
@@ -58,15 +63,29 @@ public final class PlayerAccessories {
     }
 
     /**
-     * The first empty slot that takes the stack, or -1. A focus pouch keeps its own use (it opens), and
-     * a rejected attachment takes nothing.
+     * The first empty slot that takes the stack, or -1. A focus pouch (any {@link IFocusPouch}) keeps its own use (it
+     * opens), a bauble that answers false to {@link IBauble#equipsOnUse} keeps its own use, and a rejected attachment takes
+     * nothing. This decides the hand equip only; the menu does not ask it.
      */
     public static int freeSlotFor(Player player,ItemStack stack) {
-        if(stack.isEmpty()||!(stack.getItem() instanceof IBauble)||stack.getItem() instanceof thaumcraft.common.items.wands.ItemFocusPouch
-                ||player.isSpectator())return -1;
+        if(stack.isEmpty()||!(stack.getItem() instanceof IBauble bauble)||stack.getItem() instanceof IFocusPouch
+                ||player.isSpectator()||!bauble.equipsOnUse(stack,player))return -1;
         PlayerAccessoryInventory inventory=get(player);
         for(int slot=0;slot<4;slot++)if(inventory.getItem(slot).isEmpty()&&inventory.canPlaceItem(slot,stack))return slot;
         return -1;
+    }
+    /**
+     * The worn stacks of an accessory inventory in slot order (amulet, ring, ring, belt), empty slots left out, as independent
+     * copies in an unmodifiable list. A rejected (unreadable) attachment holds nothing, so it answers an empty list.
+     */
+    public static List<ItemStack> worn(PlayerAccessoryInventory inventory) {
+        if(inventory.isRejected())return List.of();
+        List<ItemStack> stacks=new ArrayList<>(4);
+        for(int slot=0;slot<4;slot++) {
+            ItemStack stack=inventory.getItem(slot);
+            if(!stack.isEmpty())stacks.add(stack.copy());
+        }
+        return Collections.unmodifiableList(stacks);
     }
     private static CompoundTag empty() { CompoundTag tag=new CompoundTag();tag.put("Items",new net.minecraft.nbt.ListTag());return tag; }
     public static void tick(Player player) {

@@ -80,7 +80,7 @@ public class TileMobMagnet extends TileMagnet implements Container {
 
     /** The entity types the magnet moves: living beings that are no players, matching the adult flag and the mould. */
     @Override
-    protected boolean isSelected(Entity entity) {
+    public boolean isSelected(Entity entity) {
         if (!(entity instanceof LivingEntity) || entity instanceof Player) return false;
 
         boolean can;

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "Q",
+    "Q"
+  ],
+  "key": {
+    "Q": {
+      "tag": "thaumictinkerer:dark_quartz_blocks"
+    }
+  },
+  "result": {
+    "id": "thaumictinkerer:dark_quartz_pillar",
+    "count": 2
+  }
+}

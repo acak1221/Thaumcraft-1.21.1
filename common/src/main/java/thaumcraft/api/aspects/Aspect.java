@@ -1,6 +1,13 @@
 package thaumcraft.api.aspects;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.EncoderException;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -129,6 +136,39 @@ public class Aspect {
     public static final Aspect MECHANISM = new Aspect("machina", 0x8080a0, new Aspect[]{MOTION, TOOL});
     public static final Aspect TRAP = new Aspect("vinculum", 0x9a8080, new Aspect[]{MOTION, ENTROPY});
 
+    /**
+     * Codec of an aspect by its tag, for data components, JSON data, saved data and any other {@link Codec} user.
+     * Not a 1.7.10 member: an add-on of the original kept the tag string in an NBT tag itself.
+     *
+     * <p><b>Written form.</b> The tag as a string, for example {@code "ignis"}; the same string
+     * {@link #getTag()} answers and {@link #getAspect(String)} looks up.</p>
+     *
+     * <p><b>Registry driven.</b> Decoding reads the live registry {@link #aspects}, so an aspect an add-on registered
+     * decodes exactly like an original one. The add-on must have constructed it before the data is decoded (mod
+     * initialisation, see the class documentation); data that names an aspect nobody registered fails to decode.</p>
+     *
+     * <p><b>Errors.</b> An unknown or empty tag is a decode error with the message
+     * {@code Unknown aspect tag 'x' ...}, never a null result. Encoding fails with an error for a null aspect and
+     * for an aspect that is not registered under its own tag (one retagged with {@link #setTag}), because the written
+     * tag could not be read back as that aspect.</p>
+     *
+     * <p><b>Side and thread.</b> Pure; either side, any thread that may read the registry. Decoding returns the one
+     * registered instance, so {@code ==} comparison and {@link AspectList} keys keep working.</p>
+     */
+    public static final Codec<Aspect> CODEC = Codec.STRING.flatXmap(Aspect::decodeTag, Aspect::encodeTag);
+
+    /**
+     * Network codec of an aspect by its tag (a UTF-8 string, at most 32767 characters), usable with any
+     * {@link ByteBuf}, so also as the {@code networkSynchronized} codec of a data component type
+     * ({@code RegistryFriendlyByteBuf} is a {@code ByteBuf}).
+     *
+     * <p>Client and server must register the same aspects (see the class documentation): reading a tag that the
+     * receiving side does not know throws {@link DecoderException} with the message
+     * {@code Unknown aspect tag 'x' ...}, which disconnects the receiving connection like any undecodable packet.
+     * Writing a null aspect or one that is not registered under its own tag throws {@link EncoderException}.</p>
+     */
+    public static final StreamCodec<ByteBuf, Aspect> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(Aspect::readTag, Aspect::writeTag);
+
     private String tag;
     private final int color;
     private Aspect[] components;
@@ -241,6 +281,36 @@ public class Aspect {
 
     /** Looks up the live registry by key; unknown/null keys return null unless the public map was manually populated at that key. */
     public static Aspect getAspect(String tag) { return aspects.get(tag); }
+
+    private static String unknownTag(String tag) {
+        return "Unknown aspect tag '" + tag + "' (no registered aspect has this tag; is the add-on that adds it missing or not loaded yet?)";
+    }
+
+    private static String unregistered(Aspect aspect) {
+        return aspect == null ? "Cannot write a null aspect"
+                : "Cannot write aspect '" + aspect.tag + "': it is not registered under its own tag";
+    }
+
+    private static DataResult<Aspect> decodeTag(String tag) {
+        Aspect aspect = aspects.get(tag);
+        return aspect == null ? DataResult.error(() -> unknownTag(tag)) : DataResult.success(aspect);
+    }
+
+    private static DataResult<String> encodeTag(Aspect aspect) {
+        return aspect != null && aspect.tag != null && aspects.get(aspect.tag) == aspect
+                ? DataResult.success(aspect.tag) : DataResult.error(() -> unregistered(aspect));
+    }
+
+    private static Aspect readTag(String tag) {
+        Aspect aspect = aspects.get(tag);
+        if (aspect == null) throw new DecoderException(unknownTag(tag));
+        return aspect;
+    }
+
+    private static String writeTag(Aspect aspect) {
+        if (aspect == null || aspect.tag == null || aspects.get(aspect.tag) != aspect) throw new EncoderException(unregistered(aspect));
+        return aspect.tag;
+    }
 
     /**
      * Returns a new registry-ordered list of primal aspects, read from the live registry (add-on

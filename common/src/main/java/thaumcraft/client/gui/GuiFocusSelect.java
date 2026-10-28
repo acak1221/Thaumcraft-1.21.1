@@ -78,12 +78,14 @@ public final class GuiFocusSelect extends Screen {
         return new ArrayList<>(result.values());
     }
 
+    /** Worn pouches by slot and cell, then the main slots, each slot's own focus before the cells of the pouch in it. */
     private static int sourceOrder(int address) {
+        int cells = FocusSelectionSources.MAX_CELLS;
         if (FocusSelectionSources.isWornPouch(address))
-            return FocusSelectionSources.outerSlot(address) * 18 + FocusSelectionSources.pouchSlot(address);
+            return FocusSelectionSources.outerSlot(address) * cells + FocusSelectionSources.pouchSlot(address);
         if (FocusSelectionSources.isInventoryPouch(address))
-            return 72 + FocusSelectionSources.outerSlot(address) * 19 + 1 + FocusSelectionSources.pouchSlot(address);
-        return 72 + address * 19;
+            return 4 * cells + FocusSelectionSources.outerSlot(address) * (cells + 1) + 1 + FocusSelectionSources.pouchSlot(address);
+        return 4 * cells + address * (cells + 1);
     }
 
     private static ResourceLocation texture(String path) {

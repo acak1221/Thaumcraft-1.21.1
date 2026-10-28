@@ -232,17 +232,24 @@ public class TileRepairer extends BlockEntity implements WorldlyContainer, IAspe
         BlockEntity te = ThaumcraftApiHelper.getConnectableTile(level, worldPosition.getX(), worldPosition.getY(),
                 worldPosition.getZ(), orientation);
         if (te != null) {
-            IEssentiaTransport ic = (IEssentiaTransport) te;
-            Direction opposite = orientation.getOpposite();
-            if (!ic.canOutputTo(opposite)) return 0;
+            return drawEssentia((IEssentiaTransport) te, orientation.getOpposite(), getSuctionAmount(orientation));
+        }
+        return 0;
+    }
 
-            for (Map.Entry<Aspect, Integer> repair : repairValues.entrySet()) {
-                Aspect aspect = repair.getKey();
-                if (ic.getSuctionType(opposite) == aspect
-                        && ic.getSuctionAmount(opposite) < getSuctionAmount(orientation)
-                        && ic.takeEssentia(aspect, 1, opposite) == 1) {
-                    return repair.getValue();
-                }
+    /**
+     * Takes one essentia from a neighbouring transport and returns the durability points it mends, or 0. The
+     * neighbour must be willing to output on its face {@code side}, suck one of the three mending aspects (instrumentum
+     * 8, fabrico 5, ordo 3) and suck less than the repairer does ({@code ownSuction}).
+     */
+    public static int drawEssentia(IEssentiaTransport source, Direction side, int ownSuction) {
+        if (!source.canOutputTo(side)) return 0;
+
+        for (Map.Entry<Aspect, Integer> repair : repairValues.entrySet()) {
+            Aspect aspect = repair.getKey();
+            if (source.getSuctionType(side) == aspect && source.getSuctionAmount(side) < ownSuction
+                    && source.takeEssentia(aspect, 1, side) == 1) {
+                return repair.getValue();
             }
         }
         return 0;

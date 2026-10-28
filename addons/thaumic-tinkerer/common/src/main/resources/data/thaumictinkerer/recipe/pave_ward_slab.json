@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "QQQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "thaumcraft:paving_stone_warding"
+    }
+  },
+  "result": {
+    "id": "thaumictinkerer:ward_slab",
+    "count": 6
+  }
+}

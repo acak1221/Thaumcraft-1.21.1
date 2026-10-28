@@ -203,7 +203,7 @@ public class ItemBloodSword extends SwordItem implements IRepairable, ITTinkerer
      * blow, and whoever strikes with the blade takes 2 magic damage. The 1.7.10 handler guarded against its own damage
      * by skipping the next three events of the whole world; the guard here covers exactly the nested damage.
      */
-    static EventResult onDamageTaken(LivingEntity entity, DamageSource source, float amount) {
+    public static EventResult onDamageTaken(LivingEntity entity, DamageSource source, float amount) {
         if (entity.level().isClientSide || handling) return EventResult.pass();
 
         EventResult result = EventResult.pass();

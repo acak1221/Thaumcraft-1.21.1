@@ -6,17 +6,17 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.api.wands.IFocusPouch;
 import thaumcraft.common.config.ThaumcraftFoci;
 import thaumcraft.common.crafting.ArcaneVis;
 import thaumcraft.common.items.wands.foci.FocusData;
 import thaumcraft.common.items.wands.FocusSelectionSources;
-import thaumcraft.common.items.wands.ItemFocusPouch;
 import thaumcraft.common.lib.baubles.PlayerAccessories;
 
 /** Original worn-pouch/main-inventory lookup and pouch-first focus return, with
- * a callback-free material plan and complete physical source validation. */
+ * a callback-free material plan and complete physical source validation.
+ * A pouch is any {@link IFocusPouch}; its cells are read and written only through that interface. */
 public final class FocusSelectionNetworking {
     private static final SoundEvent CAMERA_TICKS = SoundEvent.createVariableRangeEvent(
             ResourceLocation.fromNamespaceAndPath("thaumcraft", "cameraticks"));
@@ -81,9 +81,10 @@ public final class FocusSelectionNetworking {
             int outer=FocusSelectionSources.outerSlot(source),cell=FocusSelectionSources.pouchSlot(source);
             ItemStack container=FocusSelectionSources.isWornPouch(source)?wornAfter[outer]:after[outer];
             ItemStack[] contents=FocusSelectionSources.contents(container);
-            if(contents==null||!FocusData.isSupportedFocus(contents[cell]))return false;
+            // The address names a cell; a pouch smaller than the address (a crafted intent, or a pouch that changed) has none.
+            if(contents==null||cell>=FocusSelectionSources.addressable(contents)||!FocusData.isSupportedFocus(contents[cell]))return false;
             next=contents[cell].copy();contents[cell]=ItemStack.EMPTY;
-            ((ItemFocusPouch)container.getItem()).setInventory(container,contents);
+            ((IFocusPouch)container.getItem()).setInventory(container,contents);
         } else if (source >= 0) {
             if (!FocusData.isSupportedFocus(before[source])) return false;
             next = before[source].copy();
@@ -108,6 +109,13 @@ public final class FocusSelectionNetworking {
             if(!returned)after[destination] = previous.copy();
         }
         FocusData replacement = next.isEmpty() ? null : new FocusData(next);
+        // The final cells of every changed pouch, read back from the planned copy through the pouch's own interface: a pouch
+        // that keeps its cells in any component is written the same way. A plan that cannot be read back refuses the selection.
+        ItemStack[][] cells=new ItemStack[36][],wornCells=new ItemStack[4][];
+        for(int slot=0;slot<36;slot++)
+            if(!ItemStack.matches(before[slot],after[slot])&&before[slot].getItem() instanceof IFocusPouch&&(cells[slot]=FocusSelectionSources.contents(after[slot]))==null)return false;
+        for(int slot=0;slot<4;slot++)
+            if(!ItemStack.matches(wornBefore[slot],wornAfter[slot])&&(wornCells[slot]=FocusSelectionSources.contents(wornAfter[slot]))==null)return false;
 
         // Re-resolve actor, real hand, stack identity, all native components and
         // the COMPLETE inventory before the callback-free material commit.
@@ -119,14 +127,14 @@ public final class FocusSelectionNetworking {
         for(int slot=0;slot<4;slot++)if(worn.getItem(slot)!=wornIdentities[slot]||!ItemStack.matches(worn.getItem(slot),wornBefore[slot]))return false;
         for (int slot = 0; slot < 36; slot++) {
             if (!ItemStack.matches(before[slot], after[slot])) {
-                if(before[slot].getItem() instanceof ItemFocusPouch)identities[slot].set(DataComponents.CONTAINER,after[slot].get(DataComponents.CONTAINER));
+                if(cells[slot]!=null)((IFocusPouch)identities[slot].getItem()).setInventory(identities[slot],cells[slot]);
                 else inventory.setItem(slot, after[slot]);
             }
         }
-        // Updating the existing worn physical pouch's component avoids false
+        // Updating the existing worn physical pouch's contents in place avoids false
         // unequip/equip callbacks in the middle of a material transaction.
-        for(int slot=0;slot<4;slot++)if(!ItemStack.matches(wornBefore[slot],wornAfter[slot]))
-            wornIdentities[slot].set(DataComponents.CONTAINER,wornAfter[slot].get(DataComponents.CONTAINER));
+        for(int slot=0;slot<4;slot++)if(wornCells[slot]!=null)
+            ((IFocusPouch)wornIdentities[slot].getItem()).setInventory(wornIdentities[slot],wornCells[slot]);
         if (replacement == null) wand.remove(ThaumcraftFoci.WAND_FOCUS.get());
         else wand.set(ThaumcraftFoci.WAND_FOCUS.get(), replacement);
         inventory.setChanged();
@@ -136,8 +144,8 @@ public final class FocusSelectionNetworking {
     private static boolean returnToPouch(ItemStack[] outer,int size,ItemStack focus) {
         for(int slot=0;slot<size;slot++) {
             ItemStack[] contents=FocusSelectionSources.contents(outer[slot]);if(contents==null)continue;
-            for(int cell=0;cell<contents.length;cell++)if(contents[cell].isEmpty()) {
-                contents[cell]=focus.copy();((ItemFocusPouch)outer[slot].getItem()).setInventory(outer[slot],contents);return true;
+            for(int cell=0,cells=FocusSelectionSources.addressable(contents);cell<cells;cell++)if(contents[cell].isEmpty()) {
+                contents[cell]=focus.copy();((IFocusPouch)outer[slot].getItem()).setInventory(outer[slot],contents);return true;
             }
         }
         return false;

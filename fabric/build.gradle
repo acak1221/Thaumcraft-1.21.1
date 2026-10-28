@@ -655,3 +655,6 @@ publishing {
  }
 }
 
+
+// Thaumic Tinkerer, the add-on ported from 1.7.10 (addons/thaumic-tinkerer): its source sets, runs and jar.
+apply from: rootProject.file('addons/thaumic-tinkerer/fabric.gradle')

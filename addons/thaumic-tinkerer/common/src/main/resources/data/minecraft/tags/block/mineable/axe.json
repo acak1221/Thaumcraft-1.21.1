@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#thaumictinkerer:mineable/simple_blocks/axe",
+    "#thaumictinkerer:mineable/tile_blocks/axe",
+    "#thaumictinkerer:mineable/machines/axe",
+    "#thaumictinkerer:mineable/kami/axe"
+  ]
+}

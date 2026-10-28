@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "thaumictinkerer_gametest",
+  "version": "1.0.0",
+  "name": "Thaumic Tinkerer GameTest harness",
+  "environment": "server",
+  "entrypoints": {
+    "fabric-gametest": [
+      "thaumic.tinkerer.fabric.testing.CoreGameTests",
+      "thaumic.tinkerer.fabric.testing.SimpleBlocksGameTests",
+      "thaumic.tinkerer.fabric.testing.TileBlocksGameTests",
+      "thaumic.tinkerer.fabric.testing.BasicItemsGameTests",
+      "thaumic.tinkerer.fabric.testing.FociGameTests",
+      "thaumic.tinkerer.fabric.testing.EnchantmentsGameTests",
+      "thaumic.tinkerer.fabric.testing.MachinesGameTests",
+      "thaumic.tinkerer.fabric.testing.KamiGearGameTests",
+      "thaumic.tinkerer.fabric.testing.KamiWorldGameTests"
+    ]
+  },
+  "depends": {
+    "thaumictinkerer": "*",
+    "thaumcraft": "*",
+    "fabricloader": ">=0.16.14",
+    "fabric-api": "*",
+    "minecraft": "1.21.1",
+    "java": ">=21"
+  }
+}

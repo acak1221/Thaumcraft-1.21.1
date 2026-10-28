@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "thaumictinkerer",
+  "version": "${version}",
+  "name": "Thaumic Tinkerer",
+  "description": "An add-on for Thaumcraft 4 Reload: new devices, foci, enchantments and the Kami tier. Research from this mod is prefixed [TT]. Port of Thaumic Tinkerer 1.7.10 by Vazkii, pixlepix, nekosune and the GTNH contributors.",
+  "authors": [
+    "Vazkii",
+    "pixlepix",
+    "nekosune",
+    "GTNewHorizons contributors",
+    "Thaumcraft 4 Reload contributors (1.21.1 port)"
+  ],
+  "contributors": [
+    "Azanor (Thaumcraft 4)"
+  ],
+  "contact": {
+    "homepage": "https://github.com/acak1221/Thaumcraft-1.21.1",
+    "sources": "https://github.com/acak1221/Thaumcraft-1.21.1",
+    "issues": "https://github.com/acak1221/Thaumcraft-1.21.1/issues"
+  },
+  "license": "CC-BY-NC-SA-3.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "thaumic.tinkerer.fabric.ThaumicTinkererFabric"
+    ],
+    "client": [
+      "thaumic.tinkerer.fabric.ThaumicTinkererFabricClient"
+    ],
+    "thaumcraft": [
+      "thaumic.tinkerer.fabric.ThaumicTinkererFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "architectury": ">=13.0.11",
+    "fabric-api": "*",
+    "thaumcraft": "*"
+  }
+}

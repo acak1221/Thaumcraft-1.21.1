@@ -119,3 +119,4 @@ javac.*.args
 
 # Local agent worktrees
 /.claude/worktrees/
+addons/thaumic-tinkerer/.tmp/

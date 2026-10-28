@@ -1,0 +1,121 @@
+// Thaumic Tinkerer for Fabric: a separate mod (id thaumictinkerer) that is built next to Thaumcraft 4 Reload and
+// depends on it through thaumcraft.api only. Applied from fabric/build.gradle, so it runs in the :fabric project and
+// sees its Loom setup, exactly like the exampleAddon source set of that file.
+//
+// The sources of the add-on are the loader-neutral tree addons/thaumic-tinkerer/common and the Fabric entrypoints in
+// addons/thaumic-tinkerer/fabric. NeoForge compiles the same common tree (neoforge.gradle).
+//
+// This build script is part of the build of Thaumcraft 4 Reload (MIT); the add-on sources it compiles are under
+// CC BY-NC-SA 3.0 (addons/thaumic-tinkerer/LICENSE).
+
+def ttDir = rootProject.file('addons/thaumic-tinkerer')
+
+sourceSets {
+ thaumicTinkerer {
+  java.srcDirs = [new File(ttDir, 'common/src/main/java'), new File(ttDir, 'fabric/src/main/java')]
+  resources.srcDirs = [new File(ttDir, 'common/src/main/resources'), new File(ttDir, 'fabric/src/main/resources')]
+  compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+  runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+ }
+ // Runtime assertions of the add-on, run by the tinkererGameTest server (see below).
+ thaumicTinkererGameTest {
+  java.srcDirs = [new File(ttDir, 'common/src/gameTest/java'), new File(ttDir, 'fabric/src/gameTest/java')]
+  resources.srcDirs = [new File(ttDir, 'fabric/src/gameTest/resources')]
+  compileClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.compileClasspath
+  runtimeClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.runtimeClasspath
+ }
+ // JUnit tests of the add-on's plain logic.
+ thaumicTinkererTest {
+  java.srcDirs = [new File(ttDir, 'common/src/test/java')]
+  resources.srcDirs = [new File(ttDir, 'common/src/test/resources')]
+  compileClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.compileClasspath
+  runtimeClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.runtimeClasspath
+ }
+}
+
+dependencies {
+ thaumicTinkererTestImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+ thaumicTinkererTestImplementation 'org.junit.platform:junit-platform-launcher'
+ thaumicTinkererTestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('processThaumicTinkererResources') {
+ inputs.property 'version', project.version
+ filesMatching('fabric.mod.json') { expand version: project.version }
+ // The licence travels with every artifact of the add-on.
+ from(ttDir) { include 'LICENSE'; into 'META-INF' }
+}
+tasks.named('check') { dependsOn 'compileThaumicTinkererJava', 'compileThaumicTinkererGameTestJava' }
+
+def tinkererModRoots = files(sourceSets.thaumicTinkerer.output)
+// Fabric Loader reads one mod per classpath group: groups are separated by a doubled path separator.
+def tinkererGameTestGroups = tinkererModRoots.asPath + File.pathSeparator + File.pathSeparator + files(sourceSets.thaumicTinkererGameTest.output).asPath
+def tinkererGameTestFilter = providers.gradleProperty('tinkererGameTestFilter').getOrElse('')
+
+loom.runs {
+ // The development client with Thaumic Tinkerer loaded next to Thaumcraft.
+ tinkererClient {
+  client()
+  source sourceSets.thaumicTinkerer
+  name 'Thaumic Tinkerer client'
+  runDir 'run-tinkerer'
+  vmArg "-Dfabric.classPathGroups=${tinkererModRoots.asPath}"
+ }
+ // Server-side runtime assertions of the add-on. The Thaumcraft suites are not loaded.
+ tinkererGameTest {
+  server()
+  vmArg '-Xmx3G'
+  source sourceSets.thaumicTinkererGameTest
+  name 'Thaumic Tinkerer GameTests'
+  vmArg "-Dfabric.classPathGroups=${tinkererGameTestGroups}"
+  vmArg '-Dfabric-api.gametest'
+  if (!tinkererGameTestFilter.isBlank()) vmArg "-Dthaumictinkerer.gameTestFilter=${tinkererGameTestFilter}"
+  vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file('tinkerer-gametest-results.xml').get().asFile.absolutePath}"
+  runDir 'run-tinkerer-gametest'
+ }
+}
+tasks.named('runTinkererGameTest') { dependsOn tasks.named('thaumicTinkererGameTestClasses') }
+
+tasks.register('tinkererTest', Test) {
+ group = 'verification'
+ description = 'JUnit tests of the Thaumic Tinkerer add-on.'
+ testClassesDirs = sourceSets.thaumicTinkererTest.output.classesDirs
+ classpath = sourceSets.thaumicTinkererTest.runtimeClasspath
+ useJUnitPlatform()
+ workingDir = ttDir
+}
+
+// The release jar: the add-on's own classes and resources, remapped like the Thaumcraft jar. Thaumcraft itself is
+// a separate download that the add-on depends on.
+def thaumicTinkererJar = tasks.register('thaumicTinkererJar', Jar) {
+ archiveBaseName = 'ThaumicTinkerer-fabric'
+ archiveClassifier = 'dev'
+ from sourceSets.thaumicTinkerer.output
+}
+tasks.register('remapThaumicTinkererJar', net.fabricmc.loom.task.RemapJarTask) {
+ group = 'build'
+ description = 'The remapped Thaumic Tinkerer jar for Fabric.'
+ dependsOn thaumicTinkererJar
+ inputFile.set thaumicTinkererJar.flatMap { it.archiveFile }
+ archiveBaseName = 'ThaumicTinkerer-fabric'
+ archiveClassifier = ''
+ addNestedDependencies = false
+}
+
+// The compile classpath of the add-on, for tools/compile.sh: javac straight on the sources is much faster than
+// Gradle for a tight edit-compile loop and lets several people (or agents) compile at the same time without
+// sharing a Gradle lock. Re-run this task after a dependency change.
+tasks.register('exportTinkererClasspath') {
+ group = 'help'
+ description = 'Writes the compile classpaths of the add-on (main and GameTest) to addons/thaumic-tinkerer/.tmp.'
+ def mainCp = sourceSets.thaumicTinkerer.compileClasspath
+ def testCp = sourceSets.thaumicTinkererGameTest.compileClasspath
+ def outDir = new File(ttDir, '.tmp')
+ inputs.files(mainCp, testCp)
+ outputs.files(new File(outDir, 'classpath.txt'), new File(outDir, 'classpath-gametest.txt'))
+ doLast {
+  outDir.mkdirs()
+  new File(outDir, 'classpath.txt').text = mainCp.files.findAll { it.exists() }.join(File.pathSeparator)
+  new File(outDir, 'classpath-gametest.txt').text = testCp.files.findAll { it.exists() }.join(File.pathSeparator)
+ }
+}

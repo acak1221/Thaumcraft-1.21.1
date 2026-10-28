@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#thaumictinkerer:needs/simple_blocks/diamond_tool",
+    "#thaumictinkerer:needs/tile_blocks/diamond_tool",
+    "#thaumictinkerer:needs/machines/diamond_tool",
+    "#thaumictinkerer:needs/kami/diamond_tool"
+  ]
+}

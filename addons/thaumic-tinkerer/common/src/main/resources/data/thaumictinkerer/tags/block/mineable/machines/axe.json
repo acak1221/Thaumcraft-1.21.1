@@ -1,4 +1,6 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    "thaumictinkerer:aspect_analyzer"
+  ]
 }

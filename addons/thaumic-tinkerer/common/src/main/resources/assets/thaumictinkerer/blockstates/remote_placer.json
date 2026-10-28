@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "thaumictinkerer:block/remote_placer"
+    },
+    "facing=east": {
+      "model": "thaumictinkerer:block/remote_placer",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "thaumictinkerer:block/remote_placer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "thaumictinkerer:block/remote_placer",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "thaumictinkerer:block/remote_placer",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "thaumictinkerer:block/remote_placer",
+      "x": 90
+    }
+  }
+}

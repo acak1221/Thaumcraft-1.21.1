@@ -55,6 +55,8 @@ public class TileRepairer extends BlockEntity implements WorldlyContainer, IAspe
 
     public int ticksExisted = 0;
     public boolean tookLastTick = true;
+    /** Whether the block gave redstone power when the neighbours were last told. */
+    private boolean powering = false;
     private NonNullList<ItemStack> inventorySlots = NonNullList.withSize(1, ItemStack.EMPTY);
 
     public TileRepairer(BlockPos pos, BlockState state) {
@@ -88,8 +90,6 @@ public class TileRepairer extends BlockEntity implements WorldlyContainer, IAspe
                 stack.setDamageValue(newDmg);
                 tookLastTick = newDmg != dmg;
                 markDirtyAndSync();
-                // The repairer is a redstone source while it holds a damaged tool; tell the neighbours when that flips.
-                if ((dmg > 0) != (newDmg > 0)) level.updateNeighborsAt(pos, state.getBlock());
             }
             if (tookLastTick != oldTookLastTick) level.sendBlockUpdated(pos, state, state, 3);
         }
@@ -127,7 +127,20 @@ public class TileRepairer extends BlockEntity implements WorldlyContainer, IAspe
         setChanged();
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            // The repairer is a redstone source while it holds a damaged tool. 1.7.10 never told the neighbours when
+            // that changed, so the signal showed up only with the next block update; here they are told.
+            boolean nowPowering = isPowering();
+            if (nowPowering != powering) {
+                powering = nowPowering;
+                level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
+            }
         }
+    }
+
+    /** True while the slot holds a tool with damage: the repairer then gives a strong redstone signal of 15. */
+    public boolean isPowering() {
+        ItemStack stack = inventorySlots.get(0);
+        return !stack.isEmpty() && stack.getDamageValue() != 0;
     }
 
     // ---- inventory ------------------------------------------------------------------------------------------

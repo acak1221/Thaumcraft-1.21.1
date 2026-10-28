@@ -1,7 +1,19 @@
+/**
+ * This class was created by <Vazkii>. It's distributed as part of the ThaumicTinkerer Mod.
+ *
+ * ThaumicTinkerer is Open Source and distributed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0
+ * License (http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB)
+ *
+ * ThaumicTinkerer is a Derivative Work on Thaumcraft 4. Thaumcraft 4 (c) Azanor 2012
+ * (http://www.minecraftforum.net/topic/1585216-)
+ *
+ * File Created @ [Nov 24, 2013, 6:48:04 PM (GMT)]
+ * Ported to Minecraft 1.21.1 for Thaumcraft 4 Reload (see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.common.block.tile.transvector;
 
 import java.util.List;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -182,7 +194,7 @@ public class TileTransvectorDislocator extends TileTransvector implements Redsto
         }
 
         void notifyNeighbor(BlockPos at) {
-            state.neighborChanged(world, at, TileTransvectorDislocator.this.getBlockState().getBlock(), worldPosition, false);
+            state.handleNeighborChanged(world, at, TileTransvectorDislocator.this.getBlockState().getBlock(), worldPosition, false);
         }
     }
 }

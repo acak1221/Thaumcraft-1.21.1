@@ -1,0 +1,8 @@
+{
+  "ttresearch.name.REMOTE_PLACER": "Remote Placer",
+  "ttresearch.lore.REMOTE_PLACER": "Reach out and build",
+  "tc.research_name.REMOTE_PLACER": "Remote Placer",
+  "tc.research_text.REMOTE_PLACER": "[TT]Reach out and build",
+  "ttresearch.page.REMOTE_PLACER.0": "You found a way to make a dispenser reach further than its own face. The remote placer holds a block, and when it gets a redstone pulse it puts that block down in the empty space in front of it, from one to four blocks away. A phantom builder does the placing, so a block does whatever it would do when you placed it yourself.<BR><BR>Place it looking at the direction you want it to work in: the marked face of the block shows where it aims.",
+  "ttresearch.page.REMOTE_PLACER.1": "Sneak and right click the remote placer with a wand to open its interface, where you put the block in and choose the distance with the four buttons. A plain right click with a wand turns the marked face towards the side you clicked.<BR><BR>It can be camouflaged, too: right click it with any block to make it look like that block, and with an empty hand to take the cover off."
+}

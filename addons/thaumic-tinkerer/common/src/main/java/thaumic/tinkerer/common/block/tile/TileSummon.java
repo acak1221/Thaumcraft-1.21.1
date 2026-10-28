@@ -56,6 +56,17 @@ public class TileSummon extends BlockEntity {
             return;
         }
 
+        summon(level, level.getGameTime());
+    }
+
+    /**
+     * One work cycle of the tablet, as it runs every 300 ticks: looks for three pedestals whose soul aspects are the
+     * aspects of a mob and summons it. {@code gameTime} is the time of the world; infused soul aspects work only when
+     * it is a multiple of 1200.
+     *
+     * @return true when a mob was summoned (or an infused set was recognised and remembered)
+     */
+    public boolean summon(ServerLevel level, long gameTime) {
         for (int radius = 1; radius < 6; radius++) {
             List<BlockPos> pedestals = new ArrayList<>();
             for (int x = worldPosition.getX() - radius; x <= worldPosition.getX() + radius; x++) {
@@ -94,7 +105,7 @@ public class TileSummon extends BlockEntity {
                                     && ItemMobAspect.isInfused(ped2.getItem(0))
                                     && ItemMobAspect.isInfused(ped3.getItem(0));
 
-                            if (isInfused && level.getGameTime() % 1200 != 0) return;
+                            if (isInfused && gameTime % 1200 != 0) return false;
 
                             if (!isInfused) {
                                 clear(level, pos1, ped1);
@@ -118,12 +129,13 @@ public class TileSummon extends BlockEntity {
                                 mark(level, pos3, ped3);
                             }
 
-                            return;
+                            return true;
                         }
                     }
                 }
             }
         }
+        return false;
     }
 
     /** The mob appears on top of the tablet, as {@code spawn.setLocationAndAngles(x + .5, y + 1, z + .5, 0, 0)}. */

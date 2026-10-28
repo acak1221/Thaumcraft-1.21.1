@@ -1,0 +1,24 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "thaumictinkerer:models/repairer"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumictinkerer:models/magnet_n"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumictinkerer:models/magnet_s"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumictinkerer:models/mob_magnet_n"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumictinkerer:models/mob_magnet_s"
+    }
+  ]
+}

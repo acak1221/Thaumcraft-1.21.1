@@ -69,7 +69,7 @@ public class BlockInfusedGrain extends CropBlock implements EntityBlock {
 
     public BlockInfusedGrain(BlockBehaviour.Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(ASPECT_TEXTURE, 6));
+        registerDefaultState(defaultBlockState().setValue(ASPECT_TEXTURE, 0));
     }
 
     public static BlockBehaviour.Properties defaultProperties() {

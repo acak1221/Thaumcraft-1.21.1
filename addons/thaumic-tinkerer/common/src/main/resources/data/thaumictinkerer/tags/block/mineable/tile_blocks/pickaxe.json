@@ -1,4 +1,11 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    "thaumictinkerer:animation_tablet",
+    "thaumictinkerer:levitational_locomotive",
+    "thaumictinkerer:levitational_locomotive_relay",
+    "thaumictinkerer:interface",
+    "thaumictinkerer:dislocator",
+    "thaumictinkerer:remote_placer"
+  ]
 }

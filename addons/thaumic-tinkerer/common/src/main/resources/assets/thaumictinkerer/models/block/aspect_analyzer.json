@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "thaumictinkerer:block/aspect_analyzer_0",
+    "down": "thaumictinkerer:block/aspect_analyzer_0",
+    "up": "thaumictinkerer:block/aspect_analyzer_0",
+    "north": "thaumictinkerer:block/aspect_analyzer_1",
+    "south": "thaumictinkerer:block/aspect_analyzer_2",
+    "west": "thaumictinkerer:block/aspect_analyzer_3",
+    "east": "thaumictinkerer:block/aspect_analyzer_4"
+  }
+}

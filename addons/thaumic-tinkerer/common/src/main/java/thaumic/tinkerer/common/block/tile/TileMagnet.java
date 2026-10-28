@@ -68,7 +68,7 @@ public class TileMagnet extends BlockEntity {
 
             boolean blue = isPulling(state);
             int speedMod = blue ? 1 : -1;
-            double range = redstone / 2; // integer division, as in 1.7.10
+            double range = rangeFor(redstone);
 
             AABB boundingBox = new AABB(x1 - range, pos.getY(), z1 - range, x1 + range, y1 + range, z1 + range);
             List<Entity> entities = level.getEntitiesOfClass(Entity.class, boundingBox, this::isSelected);
@@ -117,16 +117,26 @@ public class TileMagnet extends BlockEntity {
         }
     }
 
+    /** The half width of the box the magnet searches at a redstone level: an integer division, as in 1.7.10. */
+    public static int rangeFor(int redstone) {
+        return redstone / 2;
+    }
+
     /**
      * {@code MiscHelper.setEntityMotionFromVector} of 1.7.10: the motion is the vector from the centre of the entity
      * to the point, normalised when longer than one block, times the modifier.
      */
     static void setEntityMotionFromVector(Entity entity, Vec3 point, float modifier) {
         Vec3 entityCenter = new Vec3(entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ());
+        entity.setDeltaMovement(motionTowards(entityCenter, point, modifier));
+    }
+
+    /** The motion of an entity with the given centre that a magnet at {@code point} causes. */
+    public static Vec3 motionTowards(Vec3 entityCenter, Vec3 point, float modifier) {
         Vec3 finalVector = point.subtract(entityCenter);
 
         if (finalVector.length() > 1) finalVector = finalVector.normalize();
 
-        entity.setDeltaMovement(finalVector.x * modifier, finalVector.y * modifier, finalVector.z * modifier);
+        return new Vec3(finalVector.x * modifier, finalVector.y * modifier, finalVector.z * modifier);
     }
 }

@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "thaumictinkerer:block/dislocator"
+    },
+    "facing=east": {
+      "model": "thaumictinkerer:block/dislocator",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "thaumictinkerer:block/dislocator",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "thaumictinkerer:block/dislocator",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "thaumictinkerer:block/dislocator",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "thaumictinkerer:block/dislocator",
+      "x": 90
+    }
+  }
+}

@@ -634,7 +634,7 @@ tasks.named('runMultiplayerPeerClient') {
   logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest', tinkererGameTest: 'thaumicTinkererGameTest'])
 
 // Add-on authors compile against the mod jar; its sources jar carries the shared code too, the public
 // thaumcraft.api among it, so an IDE shows the documented API rather than decompiled classes.

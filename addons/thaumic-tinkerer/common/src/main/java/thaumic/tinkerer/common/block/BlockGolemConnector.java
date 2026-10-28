@@ -1,0 +1,111 @@
+/**
+ * This class was created by <Vazkii>. It's distributed as part of the ThaumicTinkerer Mod.
+ *
+ * ThaumicTinkerer is Open Source and distributed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0
+ * License (http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB)
+ *
+ * ThaumicTinkerer is a Derivative Work on Thaumcraft 4. Thaumcraft 4 (c) Azanor 2012
+ * (http://www.minecraftforum.net/topic/1585216-)
+ *
+ * Ported to Minecraft 1.21.1 for Thaumcraft 4 Reload (see addons/thaumic-tinkerer/NOTICE.md).
+ */
+package thaumic.tinkerer.common.block;
+
+import com.mojang.serialization.MapCodec;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
+import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.research.ResearchPage;
+import thaumic.tinkerer.common.block.camo.CamoDeviceBlock;
+import thaumic.tinkerer.common.block.tile.TileGolemConnector;
+import thaumic.tinkerer.common.content.TileBlocks;
+import thaumic.tinkerer.common.lib.LibResearch;
+import thaumic.tinkerer.common.registry.ITTinkererRegisterable;
+import thaumic.tinkerer.common.registry.ThaumicTinkererArcaneRecipe;
+import thaumic.tinkerer.common.registry.ThaumicTinkererRecipe;
+import thaumic.tinkerer.common.research.IRegisterableResearch;
+import thaumic.tinkerer.common.research.ResearchHelper;
+import thaumic.tinkerer.common.research.TTResearchItem;
+
+/**
+ * The Golem Connector: a wooden cube (opaque, unlike the other camouflageable devices) that is bound to a golem. See
+ * {@link TileGolemConnector} for what of the 1.7.10 block works here.
+ */
+public class BlockGolemConnector extends CamoDeviceBlock implements ITTinkererRegisterable {
+    public static final MapCodec<BlockGolemConnector> CODEC = simpleCodec(BlockGolemConnector::new);
+
+    public BlockGolemConnector() {
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).instabreak());
+    }
+
+    protected BlockGolemConnector(Properties properties) {
+        super(properties);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileGolemConnector(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide ? null
+                : createTickerHelper(type, TileBlocks.golemConnectorType(), TileGolemConnector::serverTick);
+    }
+
+    @Override
+    public IRegisterableResearch getResearchItem() {
+        return (IRegisterableResearch) new TTResearchItem(
+                LibResearch.KEY_GOLEMCONNECTOR,
+                new AspectList().add(Aspect.ORDER, 1).add(Aspect.TRAVEL, 2).add(Aspect.TOOL, 1),
+                1,
+                0,
+                0,
+                new ItemStack(this)).setParents(LibResearch.KEY_PERIPHERALS).setParentsHidden("GOLEMBELL")
+                        .setConcealed().setRound().setPages(
+                                new ResearchPage("0"),
+                                ResearchHelper.arcaneRecipePage(LibResearch.KEY_GOLEMCONNECTOR),
+                                new ResearchPage("1"),
+                                ResearchHelper.arcaneRecipePage(LibResearch.KEY_INTERFACE + "1"),
+                                new ResearchPage("2"),
+                                new ResearchPage("3"));
+    }
+
+    @Override
+    public ThaumicTinkererRecipe getRecipeItem() {
+        return new ThaumicTinkererArcaneRecipe(
+                LibResearch.KEY_GOLEMCONNECTOR,
+                LibResearch.KEY_GOLEMCONNECTOR,
+                new ItemStack(this),
+                new AspectList().add(Aspect.AIR, 20).add(Aspect.ORDER, 5).add(Aspect.ENTROPY, 15),
+                "WFW",
+                "sIs",
+                "WFW",
+                'I',
+                TileBlocks.legacyItem("itemGolemBell", 0),
+                's',
+                new ItemStack(Items.ENDER_PEARL),
+                'W',
+                TileBlocks.legacyBlock("blockMagicalLog", 0),
+                'F',
+                new ItemStack(Blocks.REDSTONE_BLOCK));
+    }
+}

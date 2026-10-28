@@ -8,13 +8,13 @@ No text was translated or edited. A value changed only where a literal `%` becam
 
 | Source | Target | Keys in .lang | Keys in .json | Renamed keys | Duplicates | Escaped `%` | Fragment files | Fragment keys |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `en_US.lang` | `en_us.json` | 478 | 632 | 114 | 1 | 1 | 0 | 0 |
+| `en_US.lang` | `en_us.json` | 478 | 638 | 114 | 1 | 1 | 1 | 6 |
 | `en_GB.lang` | `en_gb.json` | 14 | 14 | 1 | 0 | 0 | 0 | 0 |
-| `de_DE.lang` | `de_de.json` | 437 | 577 | 101 | 1 | 1 | 0 | 0 |
-| `fr_Fr.lang` | `fr_fr.json` | 464 | 618 | 102 | 1 | 1 | 0 | 0 |
-| `ko_KR.lang` | `ko_kr.json` | 421 | 561 | 91 | 1 | 1 | 0 | 0 |
-| `ru_RU.lang` | `ru_ru.json` | 467 | 621 | 105 | 1 | 1 | 0 | 0 |
-| `zh_CN.lang` | `zh_cn.json` | 469 | 623 | 107 | 1 | 1 | 0 | 0 |
+| `de_DE.lang` | `de_de.json` | 437 | 578 | 101 | 1 | 1 | 1 | 1 |
+| `fr_Fr.lang` | `fr_fr.json` | 464 | 619 | 102 | 1 | 1 | 1 | 1 |
+| `ko_KR.lang` | `ko_kr.json` | 421 | 562 | 91 | 1 | 1 | 1 | 1 |
+| `ru_RU.lang` | `ru_ru.json` | 467 | 628 | 105 | 1 | 1 | 2 | 7 |
+| `zh_CN.lang` | `zh_cn.json` | 469 | 624 | 107 | 1 | 1 | 1 | 1 |
 
 ## Key families
 
@@ -38,8 +38,8 @@ No text was translated or edited. A value changed only where a literal `%` becam
 | `ttresearch.webpage.*` | verbatim | kept | 1 | 0 | 1 | 1 | 1 | 1 | 1 | 1 |
 | `ttresearch.prefix*` | verbatim | kept; prepended to the lore | 2 | 0 | 2 | 2 | 2 | 2 | 2 | 2 |
 | `tc.research_category.*` | verbatim | kept | 2 | 0 | 2 | 2 | 2 | 2 | 2 | 2 |
-| `tc.research_name.<KEY>` | derived | value of ttresearch.name.<KEY> | 77 | 0 | 70 | 77 | 70 | 77 | 77 | 77 |
-| `tc.research_text.<KEY>` | derived | prefix + value of ttresearch.lore.<KEY> | 77 | 0 | 70 | 77 | 70 | 77 | 77 | 77 |
+| `tc.research_name.<KEY>` | derived | value of ttresearch.name.<KEY> | 77 | 0 | 70 | 77 | 70 | 77 | 77 | 78 |
+| `tc.research_text.<KEY>` | derived | prefix + value of ttresearch.lore.<KEY> | 77 | 0 | 70 | 77 | 70 | 77 | 77 | 78 |
 
 Verbatim-kept key families: **13**.
 
@@ -102,7 +102,13 @@ New 1.21.1-only keys live in `addons/thaumic-tinkerer/lang-extra/<group>.<lang>.
 
 | Locale | Fragment | Keys | Replaced keys |
 | --- | --- | --- | --- |
-| (no fragments yet) |  |  |  |
+| `en_us` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.en_us.json` | 6 | none |
+| `de_de` | `addons/thaumic-tinkerer/lang-extra/machines.de_de.json` | 1 | none |
+| `fr_fr` | `addons/thaumic-tinkerer/lang-extra/machines.fr_fr.json` | 1 | none |
+| `ko_kr` | `addons/thaumic-tinkerer/lang-extra/machines.ko_kr.json` | 1 | none |
+| `ru_ru` | `addons/thaumic-tinkerer/lang-extra/machines.ru_ru.json` | 1 | none |
+| `ru_ru` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.ru_ru.json` | 6 | none |
+| `zh_cn` | `addons/thaumic-tinkerer/lang-extra/machines.zh_cn.json` | 1 | none |
 
 ## Verbatim-kept `tile.` / `item.` keys (decide by hand)
 

@@ -155,11 +155,7 @@ public class BlockRepairer extends BaseEntityBlock implements ITTinkererRegister
     /** {@code isProvidingStrongPower}: 15 while the tool in the slot is damaged. */
     @Override
     protected int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        if (level.getBlockEntity(pos) instanceof TileRepairer repairer) {
-            ItemStack stack = repairer.getItem(0);
-            if (!stack.isEmpty() && stack.getDamageValue() != 0) return 15;
-        }
-        return 0;
+        return level.getBlockEntity(pos) instanceof TileRepairer repairer && repairer.isPowering() ? 15 : 0;
     }
 
     @Override

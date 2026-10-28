@@ -79,9 +79,17 @@ public class TileRPlacer extends CamoDeviceBlockEntity implements Container, Ext
 
     /** The block the placer works on. */
     public BlockPos getTargetPos() {
-        Direction orientation = getOrientation();
-        if (orientation == Direction.EAST && EAST_AIMS_WEST_AS_IN_1_7_10) orientation = Direction.WEST;
-        return worldPosition.relative(orientation, blocks);
+        return targetFor(worldPosition, getOrientation(), blocks, EAST_AIMS_WEST_AS_IN_1_7_10);
+    }
+
+    /**
+     * {@code receiveRedstonePulse}'s target: {@code blocks} blocks from {@code pos} in the direction of the orientation
+     * (down, up, north, south and west as one would expect; east is west when {@code eastAimsWest}, the original's copy
+     * and paste).
+     */
+    public static BlockPos targetFor(BlockPos pos, Direction orientation, int blocks, boolean eastAimsWest) {
+        if (orientation == Direction.EAST && eastAimsWest) orientation = Direction.WEST;
+        return pos.relative(orientation, blocks);
     }
 
     public void setBlocks(int blocks) {

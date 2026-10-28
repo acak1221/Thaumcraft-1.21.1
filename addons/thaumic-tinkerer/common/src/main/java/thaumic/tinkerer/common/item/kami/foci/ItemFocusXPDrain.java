@@ -100,7 +100,12 @@ public class ItemFocusXPDrain extends ItemModKamiFocus {
     }
 
     int getXpUse(ItemStack focusstack) {
-        return 15 - getUpgradeLevel(focusstack, FocusUpgradeType.frugal);
+        try {
+            return 15 - getUpgradeLevel(focusstack, FocusUpgradeType.frugal);
+        } catch (RuntimeException notAFocusStack) {
+            // getUpgradeLevel refuses a stack that is not a supported focus (docs/API_GAPS.md 3b); show the base cost.
+            return 15;
+        }
     }
 
     @Override

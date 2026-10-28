@@ -73,12 +73,17 @@ public abstract class PulseDeviceBlock extends CamoDeviceBlock {
      * looks east, ...).
      */
     public static Direction determineOrientation(BlockPos pos, LivingEntity entity) {
-        if (Mth.abs((float) entity.getX() - (float) pos.getX()) < 2.0F && Mth.abs((float) entity.getZ() - (float) pos.getZ()) < 2.0F) {
-            double eyeHeight = entity.getY() + 1.82D;
+        return determineOrientation(pos, entity.getX(), entity.getY(), entity.getZ(), entity.getYRot());
+    }
+
+    /** {@link #determineOrientation(BlockPos, LivingEntity)} for an entity at the given feet position and yaw. */
+    public static Direction determineOrientation(BlockPos pos, double entityX, double entityY, double entityZ, float yaw) {
+        if (Mth.abs((float) entityX - (float) pos.getX()) < 2.0F && Mth.abs((float) entityZ - (float) pos.getZ()) < 2.0F) {
+            double eyeHeight = entityY + 1.82D;
             if (eyeHeight - pos.getY() > 2.0D) return Direction.UP;
             if (pos.getY() - eyeHeight > 0.0D) return Direction.DOWN;
         }
-        int l = Mth.floor((double) (entity.getYRot() * 4.0F / 360.0F) + 0.5D) & 3;
+        int l = Mth.floor((double) (yaw * 4.0F / 360.0F) + 0.5D) & 3;
         return l == 0 ? Direction.NORTH : l == 1 ? Direction.EAST : l == 2 ? Direction.SOUTH : Direction.WEST;
     }
 

@@ -14,6 +14,7 @@ package thaumic.tinkerer.common.item.kami.armor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -74,7 +75,7 @@ public class ItemGemBoots extends ItemIchorclothArmorAdv {
         boolean active = isActive(player, boots);
 
         if (!level.isClientSide && active) {
-            MobEffectsHelper.haste(player);
+            haste(player);
             if (ConfigHandler.shouldKamiBootsDoGrass) {
                 BlockPos below = new BlockPos(Mth.floor(player.getX()), Mth.floor(player.getY()) - 1, Mth.floor(player.getZ()));
                 if (level.getBlockState(below).is(Blocks.DIRT)) {
@@ -134,12 +135,10 @@ public class ItemGemBoots extends ItemIchorclothArmorAdv {
     }
 
     /** Haste II for two ticks, refreshed every tick. */
-    private static final class MobEffectsHelper {
-        static void haste(Player player) {
-            var current = player.getEffect(MobEffects.DIG_SPEED);
-            if (current == null || current.getDuration() < 2 || current.getAmplifier() < 1) {
-                player.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.DIG_SPEED, 2, 1, true, true));
-            }
+    private static void haste(Player player) {
+        MobEffectInstance current = player.getEffect(MobEffects.DIG_SPEED);
+        if (current == null || current.getDuration() < 2 || current.getAmplifier() < 1) {
+            player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 2, 1, true, true));
         }
     }
 

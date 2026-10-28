@@ -37,7 +37,7 @@ public class BlockTravelStairs extends StairBlock implements ITTinkererRegistera
         super(base, properties);
     }
 
-    public static BlockBehaviour.Properties properties() {
+    public static BlockBehaviour.Properties defaultProperties() {
         return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE)
                 .requiresCorrectToolForDrops();
     }

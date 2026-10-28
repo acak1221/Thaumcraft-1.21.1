@@ -44,7 +44,7 @@ public class BlockNitorGas extends BlockGas {
         super(properties);
     }
 
-    public static BlockBehaviour.Properties properties() {
+    public static BlockBehaviour.Properties defaultProperties() {
         return gasProperties().lightLevel(state -> state.getValue(LEVEL) == 1 ? 15 : 12);
     }
 

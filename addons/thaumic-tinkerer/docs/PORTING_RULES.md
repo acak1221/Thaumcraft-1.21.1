@@ -24,7 +24,8 @@ cannot do, or a reproducible crash/exploit, and is written down in `docs/deviati
    if you need one), new files under your own packages, resources listed in section 4. Shared files (`TTRegistry`,
    `ThaumicTinkerer`, `ResearchHelper`, `ConfigHandler`, the build files) are the lead's; ask for a change in your report.
 5. **No Gradle, no git.** Compile with `addons/thaumic-tinkerer/tools/compile.sh` (javac, section 5). Do not commit.
-6. **Do not weaken tests** and do not delete content because it is hard; list it as missing in your report.
+6. **Annotations.** `@Nullable` is `org.jetbrains.annotations.Nullable` (the one the mod uses); `javax.annotation` is not on the classpath.
+7. **Do not weaken tests** and do not delete content because it is hard; list it as missing in your report.
 
 ## 2. Architecture
 
@@ -83,7 +84,7 @@ Language keys: the converted base already carries the 1.7.10 texts. New 1.21.1-o
 - JUnit (plain logic, no Minecraft world): `common/src/test/java/thaumic/tinkerer/<group>/...Test.java`.
 - GameTest (a running server): checks in `common/src/gameTest/java/thaumic/tinkerer/testing/<Group>RuntimeChecks.java`
   as `public static void name(GameTestHelper test)`; the Fabric wrappers go in
-  `fabric/src/gameTest/java/thaumic/tinkerer/fabric/testing/<Group>GameTests.java` (a stub per group exists):
+  `fabric/src/gameTest/java/thaumic/tinkerer/fabric/testing/<Group>GameTests.java` (a stub per group exists: Core, SimpleBlocks, TileBlocks, Machines, BasicItems, Foci, Enchantments, KamiGear, KamiWorld):
   `@GameTest(template = FabricGameTest.EMPTY_STRUCTURE) public void name(GameTestHelper h) { Checks.name(h); }`.
   Test real behaviour (state transitions, drops, costs, persistence through `saveWithFullMetadata`/`loadWithComponents`),
   never "the class exists".

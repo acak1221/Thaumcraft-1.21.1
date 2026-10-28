@@ -31,7 +31,7 @@ public class BlockGaseousShadow extends BlockGas {
         super(properties);
     }
 
-    public static BlockBehaviour.Properties properties() {
+    public static BlockBehaviour.Properties defaultProperties() {
         return gasProperties();
     }
 

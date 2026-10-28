@@ -29,7 +29,7 @@ public class BlockGaseousLight extends BlockGas {
         super(properties);
     }
 
-    public static BlockBehaviour.Properties properties() {
+    public static BlockBehaviour.Properties defaultProperties() {
         return gasProperties().lightLevel(state -> LIGHT);
     }
 

@@ -35,7 +35,7 @@ public class BlockDarkQuartz extends Block implements ITTinkererRegisterable {
     }
 
     /** Hardness 0.8, resistance 10 in the 1.7.10 setter (6 in the units of today), stone, needs a pickaxe. */
-    public static BlockBehaviour.Properties properties() {
+    public static BlockBehaviour.Properties defaultProperties() {
         return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(0.8F, 6.0F).sound(SoundType.STONE)
                 .requiresCorrectToolForDrops();
     }

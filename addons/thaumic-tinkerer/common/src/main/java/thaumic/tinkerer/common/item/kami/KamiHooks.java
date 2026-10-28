@@ -6,6 +6,7 @@
 package thaumic.tinkerer.common.item.kami;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -59,6 +60,7 @@ public final class KamiHooks {
     public static volatile WarpGateTeleporter warpGateTeleporter = KamiHooks::teleportToWarpGate;
 
     private static volatile Consumer<Component> tooltipSink = text -> {};
+    private static volatile Supplier<Player> localPlayer = () -> null;
     private KamiHooks() {}
 
     @FunctionalInterface
@@ -69,6 +71,16 @@ public final class KamiHooks {
     /** Client entry point: where the tool-mode and armour messages are drawn (see {@code ToolModeHUDHandler}). */
     public static void setTooltipSink(Consumer<Component> sink) {
         tooltipSink = sink == null ? text -> {} : sink;
+    }
+
+    /** Client entry point: the player of this client, for the tooltips that depend on where the player stands. */
+    public static void setLocalPlayerSupplier(Supplier<Player> supplier) {
+        localPlayer = supplier == null ? () -> null : supplier;
+    }
+
+    /** The player of this client, or null on a server (and before a world is joined). */
+    public static Player localPlayer() {
+        return localPlayer.get();
     }
 
     /** Shows a message above the hotbar; does nothing on the server side of a level. */

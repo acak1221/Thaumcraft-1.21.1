@@ -12,6 +12,7 @@
 package thaumic.tinkerer.common.registry;
 
 import com.google.common.base.Suppliers;
+import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public final class TTRegistry {
 
     /** The creative tab of the add-on: every item and block registered through the helpers, then extra stacks. */
     public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_TABS.register("main",
-            () -> CreativeModeTab.builder()
+            () -> CreativeTabRegistry.create(builder -> builder
                     .title(Component.translatable(LibMisc.CREATIVE_TAB_KEY))
                     .icon(TTRegistry::tabIcon)
                     .displayItems((parameters, output) -> {
@@ -85,7 +86,7 @@ public final class TTRegistry {
                             ItemStack value = stack.get();
                             if (value != null && !value.isEmpty()) output.accept(value);
                         }
-                    }).build());
+                    })));
 
     private record TabEntry(Supplier<? extends ItemLike> itemSupplier, Supplier<Object> owner) {
         ItemLike item() {

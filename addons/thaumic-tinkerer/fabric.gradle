@@ -109,15 +109,17 @@ tasks.register('remapThaumicTinkererJar', remapJarType) {
 // sharing a Gradle lock. Re-run this task after a dependency change.
 tasks.register('exportTinkererClasspath') {
  group = 'help'
- description = 'Writes the compile classpaths of the add-on (main and GameTest) to addons/thaumic-tinkerer/.tmp.'
- def mainCp = sourceSets.thaumicTinkerer.compileClasspath
- def testCp = sourceSets.thaumicTinkererGameTest.compileClasspath
+ description = 'Writes the compile classpath of the add-on to addons/thaumic-tinkerer/.tmp (it never compiles the add-on).'
+ // Thaumcraft's classes, Minecraft, Architectury and Fabric. The add-on's own output is deliberately not on it: tools/compile.sh
+ // compiles the add-on sources together.
+ def mainCp = sourceSets.main.output.classesDirs + sourceSets.main.compileClasspath
  def outDir = new File(ttDir, '.tmp')
- inputs.files(mainCp, testCp)
+ inputs.files(mainCp)
  outputs.files(new File(outDir, 'classpath.txt'), new File(outDir, 'classpath-gametest.txt'))
  doLast {
   outDir.mkdirs()
-  new File(outDir, 'classpath.txt').text = mainCp.files.findAll { it.exists() }.join(File.pathSeparator)
-  new File(outDir, 'classpath-gametest.txt').text = testCp.files.findAll { it.exists() }.join(File.pathSeparator)
+  def text = mainCp.files.findAll { it.exists() }.join(File.pathSeparator)
+  new File(outDir, 'classpath.txt').text = text
+  new File(outDir, 'classpath-gametest.txt').text = text
  }
 }

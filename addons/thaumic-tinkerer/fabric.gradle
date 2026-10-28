@@ -92,7 +92,9 @@ def thaumicTinkererJar = tasks.register('thaumicTinkererJar', Jar) {
  archiveClassifier = 'dev'
  from sourceSets.thaumicTinkerer.output
 }
-tasks.register('remapThaumicTinkererJar', net.fabricmc.loom.task.RemapJarTask) {
+// The applied script does not see the Loom classes by name; the type of the existing remapJar task is the same class.
+def remapJarType = tasks.named('remapJar').get().getClass().superclass
+tasks.register('remapThaumicTinkererJar', remapJarType) {
  group = 'build'
  description = 'The remapped Thaumic Tinkerer jar for Fabric.'
  dependsOn thaumicTinkererJar

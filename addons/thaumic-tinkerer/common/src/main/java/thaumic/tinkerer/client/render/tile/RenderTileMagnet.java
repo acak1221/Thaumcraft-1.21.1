@@ -32,7 +32,7 @@ import thaumic.tinkerer.common.block.tile.TileMagnet;
  * signal, drifting up and down. The magnet itself is the block model ({@code models/block/magnet*.json}), which
  * replaces the 1.7.10 {@code ModelMagnet} drawn by the same renderer.
  */
-public class RenderTileMagnet implements BlockEntityRenderer<TileMagnet> {
+public class RenderTileMagnet<T extends TileMagnet> implements BlockEntityRenderer<T> {
 
     /** The lightning ring of Thaumcraft's hover harness ({@code ItemHoverHarness.iconLightningRing}); in the block atlas. */
     private static final ResourceLocation RING = ResourceLocation.fromNamespaceAndPath("thaumcraft", "items/lightningring");
@@ -40,7 +40,7 @@ public class RenderTileMagnet implements BlockEntityRenderer<TileMagnet> {
     public RenderTileMagnet(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(TileMagnet magnet, float partialTick, PoseStack pose, MultiBufferSource buffers, int light,
+    public void render(T magnet, float partialTick, PoseStack pose, MultiBufferSource buffers, int light,
             int overlay) {
         int redstone = magnet.getRedstone();
         if (redstone == 0) return; // the scale of the rings is zero without a signal

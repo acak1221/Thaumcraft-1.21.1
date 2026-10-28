@@ -36,8 +36,8 @@ public final class MachinesClient {
 
         BlockEntityRendererRegistry.register(Machines.TILE_REPAIRER.get(), RenderTileRepairer::new);
         BlockEntityRendererRegistry.register(Machines.TILE_FUNNEL.get(), RenderTileFunnel::new);
-        BlockEntityRendererRegistry.<TileMagnet>register(Machines.TILE_MAGNET.get(), RenderTileMagnet::new);
-        BlockEntityRendererRegistry.<TileMobMagnet>register(Machines.TILE_MOB_MAGNET.get(), RenderTileMagnet::new);
+        BlockEntityRendererRegistry.<TileMagnet>register(Machines.TILE_MAGNET.get(), RenderTileMagnet<TileMagnet>::new);
+        BlockEntityRendererRegistry.<TileMobMagnet>register(Machines.TILE_MOB_MAGNET.get(), RenderTileMagnet<TileMobMagnet>::new);
 
         // The glass of the Thaumic Restorer is translucent; the planes of the magnets have transparent pixels.
         RenderTypeRegistry.register(RenderType.translucent(), Machines.REPAIRER.get());

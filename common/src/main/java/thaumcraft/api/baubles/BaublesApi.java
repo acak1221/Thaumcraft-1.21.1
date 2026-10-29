@@ -11,8 +11,9 @@ import thaumcraft.common.lib.baubles.PlayerAccessories;
  *
  * <p>The Baubles mod that TC4 relied on had a {@code BaublesApi.getBaubles(player)} that answered the live four-slot
  * inventory. This port keeps the slots as its own, and this class answers the read-only half of that: what is worn, for
- * the "is X worn" checks of an add-on. Putting an item into a slot or taking it out is done by the player in the Baubles
- * menu, and {@link IBauble#onEquipped} / {@link IBauble#onUnequipped} tell the item when that happens.</p>
+ * the "is X worn" checks of an add-on. Items go into a slot through the Baubles menu, a shift-click into it, or the
+ * right-click hand equip (which an item can keep for itself, {@link IBauble#equipsOnUse}); they come out through the menu.
+ * {@link IBauble#onEquipped} / {@link IBauble#onUnequipped} tell the item when that happens.</p>
  */
 public final class BaublesApi {
     private BaublesApi() {}

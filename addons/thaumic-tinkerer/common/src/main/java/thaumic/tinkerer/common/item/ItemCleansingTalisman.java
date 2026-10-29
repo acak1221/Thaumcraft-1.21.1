@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -39,10 +40,12 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import thaumcraft.api.ItemApi;
+import thaumcraft.api.ThaumcraftSoundIds;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.baubles.BaubleType;
 import thaumcraft.api.baubles.IBauble;
+import thaumcraft.api.potions.WarpEffects;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.lib.LibItemNames;
 import thaumic.tinkerer.common.lib.LibResearch;
@@ -66,17 +69,28 @@ import thaumic.tinkerer.common.research.TTResearchItem;
 public class ItemCleansingTalisman extends Item implements IBauble, ITTinkererRegisterable {
     /** {@code LibFeatures.CLEANSING_TALISMAN_USES}: the durability of the talisman. */
     public static final int USES = 100;
-    /** The effects of warp that wear the talisman ten times as much (1.7.10 {@code Config.potionBlurredID} and the four others). */
-    public static final Set<String> WARP_EFFECTS = Set.of("thaumcraft:blurred_vision", "thaumcraft:death_gaze",
-            "thaumcraft:infectious_vis_exhaust", "thaumcraft:sun_scorned", "thaumcraft:unnatural_hunger");
-    /** The warp ward is registered as a harmful effect, and the original never removed it (1.7.10 {@code PotionWarpWard}). */
-    private static final String WARP_WARD = "thaumcraft:warp_ward";
+    /**
+     * The effects of warp that wear the talisman ten times as much (1.7.10 {@code Config.potionBlurredID},
+     * {@code potionDeathGazeID}, {@code potionInfVisExhaustID}, {@code potionSunScornedID} and {@code potionUnHungerID}),
+     * by the registry id of the effect.
+     */
+    public static final Set<String> WARP_EFFECTS = Set.of(id(WarpEffects.BLURRED_VISION), id(WarpEffects.DEATH_GAZE),
+            id(WarpEffects.INFECTIOUS_VIS_EXHAUST), id(WarpEffects.SUN_SCORNED), id(WarpEffects.UNNATURAL_HUNGER));
+    /**
+     * The warp ward: 1.7.10 registered it as a bad effect and the talisman skipped it by class ({@code PotionWarpWard}); the
+     * port registers it as beneficial, so this is only a guard that keeps the skip if that ever changes.
+     */
+    private static final String WARP_WARD = id(WarpEffects.WARP_WARD);
 
     /** What the talisman remembers of each wearer (server side only). */
     private static final Map<UUID, CleansingLogic.State> STATES = new HashMap<>();
 
     public ItemCleansingTalisman(Item.Properties properties) {
         super(properties.durability(USES).stacksTo(1).rarity(Rarity.UNCOMMON));
+    }
+
+    private static String id(ResourceKey<MobEffect> key) {
+        return key.location().toString();
     }
 
     public static boolean isEnabled(ItemStack stack) {
@@ -213,7 +227,7 @@ public class ItemCleansingTalisman extends Item implements IBauble, ITTinkererRe
         }
 
         if (!plan.removed().isEmpty() || plan.permanentRemoved()) {
-            BasicItemSupport.playThaumcraftSound(level, player, "wand", 0.3F, 0.1F);
+            BasicItemSupport.playThaumcraftSound(level, player, ThaumcraftSoundIds.WAND, 0.3F, 0.1F);
         }
     }
 }

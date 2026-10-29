@@ -240,9 +240,27 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     }
 
     @Override public ThaumcraftApiHelper.Scans getScans(Player player) {
-        PlayerKnowledge knowledge = knowledge(player);
+        return snapshot(knowledge(player));
+    }
+
+    /**
+     * The scan markers of the knowledge as an immutable snapshot. A marker that a {@code Scans} cannot hold (longer than
+     * {@link ThaumcraftApiHelper.Scans#MAX_KEY_LENGTH}, or empty) is left out: nothing bounds the keys at the source (a
+     * hand-edited save, or an add-on's scan handler, can put one in), and a snapshot must never throw for the content of
+     * the knowledge.
+     */
+    static ThaumcraftApiHelper.Scans snapshot(PlayerKnowledge knowledge) {
         if (knowledge == null) return ThaumcraftApiHelper.Scans.EMPTY;
-        return new ThaumcraftApiHelper.Scans(knowledge.getScannedItems(), knowledge.getScannedEntities(), knowledge.getScannedPhenomena());
+        return new ThaumcraftApiHelper.Scans(storable(knowledge.getScannedItems()), storable(knowledge.getScannedEntities()),
+                storable(knowledge.getScannedPhenomena()));
+    }
+
+    private static java.util.Set<String> storable(java.util.Set<String> keys) {
+        java.util.Set<String> result = new java.util.LinkedHashSet<>(Math.max(16, keys.size() * 2));
+        for (String key : keys) {
+            if (key != null && !key.isEmpty() && key.length() <= ThaumcraftApiHelper.Scans.MAX_KEY_LENGTH) result.add(key);
+        }
+        return result;
     }
 
     @Override public int addScans(Player player, ThaumcraftApiHelper.Scans scans) {
@@ -258,18 +276,27 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     /**
      * Adds the markers the knowledge does not have yet and returns how many were new. A marker the player already has, in
      * either of its two forms, is not added again ({@code "@x"} is skipped when {@code "@x"} or {@code "#x"} is held),
-     * and a {@code "#x"} marker is added and replaces {@code "@x"}, which {@link PlayerKnowledge} does.
+     * and a {@code "#x"} marker is added and replaces {@code "@x"}, which {@link PlayerKnowledge} does. A snapshot that
+     * holds both {@code "@x"} and {@code "#x"} counts as the one marker {@code "#x"}, whatever their order: the basic
+     * marker is skipped because the advanced one of the same snapshot supersedes it.
      */
     static int mergeScans(PlayerKnowledge knowledge, ThaumcraftApiHelper.Scans scans) {
+        return mergeKind(knowledge, scans.items(), ScanManager.ScanKind.ITEM)
+                + mergeKind(knowledge, scans.entities(), ScanManager.ScanKind.ENTITY)
+                + mergeKind(knowledge, scans.phenomena(), ScanManager.ScanKind.PHENOMENA);
+    }
+
+    private static int mergeKind(PlayerKnowledge knowledge, java.util.Set<String> keys, ScanManager.ScanKind kind) {
         int added = 0;
-        for (String key : scans.items()) {
-            if (!ScanManager.alreadyScanned(knowledge, key, ScanManager.ScanKind.ITEM) && knowledge.scanItem(key)) added++;
-        }
-        for (String key : scans.entities()) {
-            if (!ScanManager.alreadyScanned(knowledge, key, ScanManager.ScanKind.ENTITY) && knowledge.scanEntity(key)) added++;
-        }
-        for (String key : scans.phenomena()) {
-            if (!ScanManager.alreadyScanned(knowledge, key, ScanManager.ScanKind.PHENOMENA) && knowledge.scanPhenomena(key)) added++;
+        for (String key : keys) {
+            if (key.startsWith("@") && keys.contains("#" + key.substring(1))) continue;
+            if (ScanManager.alreadyScanned(knowledge, key, kind)) continue;
+            boolean changed = switch (kind) {
+                case ITEM -> knowledge.scanItem(key);
+                case ENTITY -> knowledge.scanEntity(key);
+                case PHENOMENA -> knowledge.scanPhenomena(key);
+            };
+            if (changed) added++;
         }
         return added;
     }

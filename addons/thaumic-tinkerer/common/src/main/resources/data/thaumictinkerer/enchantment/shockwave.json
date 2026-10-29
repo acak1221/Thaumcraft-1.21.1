@@ -1,0 +1,25 @@
+{
+  "description": {
+    "translate": "enchantment.thaumictinkerer.shockwave"
+  },
+  "exclusive_set": [
+    "minecraft:feather_falling",
+    "thaumictinkerer:slow_fall"
+  ],
+  "supported_items": "#thaumictinkerer:enchantable/shockwave",
+  "weight": 1,
+  "max_level": 5,
+  "min_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "feet"
+  ],
+  "effects": {}
+}

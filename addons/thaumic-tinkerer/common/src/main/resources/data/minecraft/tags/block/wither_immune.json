@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "thaumictinkerer:bedrock_portal",
+      "required": false
+    }
+  ]
+}

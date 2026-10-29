@@ -5,7 +5,6 @@
  */
 package thaumic.tinkerer.common.item;
 
-import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -16,20 +15,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-/** Sounds of Thaumcraft by name, and the bottle search of the Experience Talisman. */
+/** Sounds of Thaumcraft by id, and the bottle search of the Experience Talisman. */
 public final class BasicItemSupport {
     private BasicItemSupport() {}
 
-    /** The sound event {@code thaumcraft:<path>} of the Thaumcraft mod, when it is registered. */
-    public static Optional<SoundEvent> thaumcraftSound(String path) {
-        return BuiltInRegistries.SOUND_EVENT.getOptional(ResourceLocation.fromNamespaceAndPath("thaumcraft", path));
-    }
-
-    /** Plays {@code thaumcraft:<path>} at the entity for everybody near (server side; nothing when the sound is missing). */
-    public static void playThaumcraftSound(Level level, Entity at, String path, float volume, float pitch) {
+    /**
+     * Plays the Thaumcraft sound (one of the constants of {@code ThaumcraftSoundIds}) at the entity for everybody near
+     * (server side). 1.7.10 played them by name in {@code playSoundAtEntity}; a sound that is not registered is skipped
+     * silently, so the item still works when a resource pack or a stripped build lacks it.
+     */
+    public static void playThaumcraftSound(Level level, Entity at, ResourceLocation id, float volume, float pitch) {
         if (level.isClientSide) return;
-        thaumcraftSound(path).ifPresent(sound -> level.playSound(null, at.getX(), at.getY(), at.getZ(), sound,
-                SoundSource.PLAYERS, volume, pitch));
+        BuiltInRegistries.SOUND_EVENT.getOptional(id).ifPresent(sound -> level.playSound(null, at.getX(), at.getY(),
+                at.getZ(), sound, SoundSource.PLAYERS, volume, pitch));
     }
 
     /** Plays a sound at the entity for everybody near (server side). */

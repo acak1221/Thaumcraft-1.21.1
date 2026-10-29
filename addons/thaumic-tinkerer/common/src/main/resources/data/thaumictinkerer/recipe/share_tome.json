@@ -1,0 +1,24 @@
+{
+  "type": "thaumictinkerer:share_tome",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "PTP",
+    " P "
+  ],
+  "key": {
+    "S": {
+      "item": "thaumcraft:inkwell"
+    },
+    "T": {
+      "item": "thaumcraft:thaumonomicon"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    }
+  },
+  "result": {
+    "id": "thaumictinkerer:share_book",
+    "count": 1
+  }
+}

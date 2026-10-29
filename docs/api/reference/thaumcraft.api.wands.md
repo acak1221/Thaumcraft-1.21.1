@@ -120,7 +120,7 @@ All cells of the pouch, in order, with `ItemStack.EMPTY` for an empty cell (neve
 
 The length is the pouch's number of cells and must be the same on every call for the same pouch stack. Every stack of the result is an independent copy: the caller changes the array and its stacks freely, and a change reaches the pouch only through `setInventory`. Called on both logical sides: on the client to list the focuses, on the server to select one.
 
-A stack that carries a payload this pouch cannot read (for example saved by another version) throws `IllegalArgumentException`; the selector then ignores that pouch and leaves its payload untouched.
+A stack that carries a payload this pouch cannot read (for example saved by another version) throws `IllegalArgumentException`; the selector then ignores that pouch and leaves its payload untouched. Any other `RuntimeException` is treated the same way (and written to the log once per pouch class), because the selector also asks on the client's render thread, where an add-on's bug would otherwise close the game; do not rely on that, an exception is the way to say "unreadable", not to report an error.
 
 **Returns:** the cells, a new array
 
@@ -137,6 +137,8 @@ void setInventory(ItemStack pouch, ItemStack[] contents)
 Replaces all cells of the pouch.
 
 `contents` has the length `getInventory` returned for this stack; an entry is `ItemStack.EMPTY` for an empty cell. Copy what is kept: the caller may still hold the array. Change nothing but the given stack. Called on the server thread only; the selector calls it on the live stack of the player's inventory or accessory slot (the same stack object stays in its slot) and also on a scratch copy of a stack while it plans a selection, so it must not have any effect outside the stack it is given. It may not refuse an array `getInventory` could have returned with one cell changed.
+
+If it throws anyway (a `RuntimeException`, written to the log once per pouch class), the selection stays all or nothing: while the selector plans on a scratch copy, the pouch gives no focus and takes none; if it throws on the live stack, the selection is refused and every stack it had already written is put back as it was, so the wand keeps its focus and no focus is lost or duplicated. A pouch that wrote part of its payload before throwing is therefore restored by the selector, not by the pouch.
 
 **Throws:** `IllegalArgumentException` — if `contents` has the wrong length
 
@@ -535,7 +537,9 @@ The original TC4 wand cap.
 
 An add-on registers a cap exactly like it did on 1.7.10, by constructing it; the constructor puts it into `caps` under its tag:
 
-```java `WandCap alchemical = new WandCap("alchemical", 0.9F, List.of(Aspect.WATER), 0.8F, new ItemStack(MyItems.ALCHEMICAL_CAP), 7); alchemical.setTexture(ResourceLocation.fromNamespaceAndPath("myaddon", "textures/models/wand_cap_alchemical.png"));`
+```java
+WandCap alchemical = new WandCap("alchemical", 0.9F, List.of(Aspect.WATER), 0.8F, new ItemStack(MyItems.ALCHEMICAL_CAP), 7);
+alchemical.setTexture(ResourceLocation.fromNamespaceAndPath("myaddon", "textures/models/wand_cap_alchemical.png"));
 ```
 - **Discount** is the vis cost multiplier of the wand (1 is unchanged, 0.9 is a tenth cheaper); an aspect of the special list uses the special multiplier instead (original ItemWandCasting.getConsumptionModifier:243-248). The equipment discount, the frugal upgrade and the sceptre are subtracted from it as usual, never below a tenth.
 - **Craft cost** is the dimensionless assembly factor, multiplied with the rod's (see `WandRod`).
@@ -919,7 +923,9 @@ The original TC4 wand rod.
 
 An add-on registers a rod exactly like it did on 1.7.10, by constructing it; the constructor puts it into `rods` under its tag:
 
-```java `WandRod infernal = new WandRod("infernal", 150, new ItemStack(MyItems.INFERNAL_ROD), 12, new MyRodOnUpdate(), ResourceLocation.fromNamespaceAndPath("myaddon", "textures/models/wand_rod_infernal.png"));`
+```java
+WandRod infernal = new WandRod("infernal", 150, new ItemStack(MyItems.INFERNAL_ROD), 12, new MyRodOnUpdate(),
+        ResourceLocation.fromNamespaceAndPath("myaddon", "textures/models/wand_rod_infernal.png"));
 ```
 - **Capacity** is in **whole vis**, the unit of the original constructors (`new WandRod("silverwood", 100, ...)`). The wand stores centivis: a wand holds `capacity * 100` centivis of every primal, a sceptre `capacity * 150` (original ItemWandCasting.getMaxVis:91). `getCapacity()` answers whole vis for every rod, native ones included (`WandRod.rods.get("greatwood").getCapacity() == 50`).
 - **Craft cost** is the dimensionless assembly factor: the arcane workbench asks `rodCost * capCost` vis of each primal for a wand, and `(int) (rodCost * capCost * 1.5F)` for a sceptre (original ArcaneWandRecipe:59, ArcaneSceptreRecipe:64); the paying wand's cap and the player's gear discount that price as usual.
@@ -1140,7 +1146,7 @@ public static void registerWandBlockTrigger(IWandTriggerManager manager, int eve
 
 Retained metadata form; `meta` is ignored and every state of the block is registered.
 
-**Deprecated:** Use `int, Block, String)` for all states, or `int, BlockState, String)` for one exact state. Metadata cannot select a state in 1.21.1.
+**Deprecated:** Use `registerWandBlockTrigger(IWandTriggerManager, int, Block, String)` for all states, or `registerWandBlockTrigger(IWandTriggerManager, int, BlockState, String)` for one exact state. Metadata cannot select a state in 1.21.1.
 
 <a id="wandtriggerregistry-registerwandblocktrigger-3"></a>
 ```java
@@ -1158,7 +1164,7 @@ public static void registerWandBlockTrigger(IWandTriggerManager manager, int eve
 
 Retained metadata form using the default mod id; `meta` is ignored.
 
-**Deprecated:** Use `int, Block)` for all states, or the `BlockState` overload with an explicit mod id for one state.
+**Deprecated:** Use `registerWandBlockTrigger(IWandTriggerManager, int, Block)` for all states, or the `BlockState` overload with an explicit mod id for one state.
 
 <a id="wandtriggerregistry-registerwandblocktrigger-5"></a>
 ```java
@@ -1198,7 +1204,7 @@ The original per-mod form.
 
 Original `WandTriggerRegistry:47-53`: the answer is the exact registration of the block or the wildcard registration of the whole block. Forced 1.21.1 change: the metadata no longer exists, so the wildcard registration is the one of the whole block.
 
-**Deprecated:** Use `String)` for whole-block registrations or `String)` to include exact-state registrations. Metadata is ignored.
+**Deprecated:** Use `hasTrigger(Block, String)` for whole-block registrations or `hasTrigger(BlockState, String)` to include exact-state registrations. Metadata is ignored.
 
 <a id="wandtriggerregistry-hastrigger-4"></a>
 ```java
@@ -1241,7 +1247,7 @@ The original block and metadata form of the dispatch.
 
 Forced 1.21.1 change: 1.21.1 has no block metadata, so the metadata argument is ignored and the exact state of the block is its default state. The wildcard registration of the whole block is still the fallback, exactly as in the original.
 
-**Deprecated:** Use `ItemStack, Player, int, int, int, int, BlockState)` with the actual clicked state. This overload ignores metadata and uses the block's default state.
+**Deprecated:** Use `performTrigger(Level, ItemStack, Player, int, int, int, int, BlockState)` with the actual clicked state. This overload ignores metadata and uses the block's default state.
 
 <a id="wandtriggerregistry-performtrigger-3"></a>
 ```java
@@ -1252,7 +1258,7 @@ public static boolean performTrigger(Level level, ItemStack wand, Player player,
 
 Retained per-mod dispatch; metadata is ignored and a null block returns false.
 
-**Deprecated:** Use `ItemStack, Player, int, int, int, int, BlockState, String)` with the actual clicked state, not a legacy metadata value.
+**Deprecated:** Use `performTrigger(Level, ItemStack, Player, int, int, int, int, BlockState, String)` with the actual clicked state, not a legacy metadata value.
 
 <a id="wandtriggerregistry-performtrigger-4"></a>
 ```java

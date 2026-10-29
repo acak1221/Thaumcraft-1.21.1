@@ -1,0 +1,10 @@
+{
+  "type": "thaumictinkerer:bedrock",
+  "generator": {
+    "type": "thaumictinkerer:bedrock",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "thaumictinkerer:bedrock"
+    }
+  }
+}

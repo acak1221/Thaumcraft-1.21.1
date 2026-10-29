@@ -28,7 +28,7 @@ public final class BaublesApi
 
 Read access to what an entity wears in the four accessory slots (amulet, two rings, belt).
 
-The Baubles mod that TC4 relied on had a `BaublesApi.getBaubles(player)` that answered the live four-slot inventory. This port keeps the slots as its own, and this class answers the read-only half of that: what is worn, for the "is X worn" checks of an add-on. Putting an item into a slot or taking it out is done by the player in the Baubles menu, and `IBauble.onEquipped` / `IBauble.onUnequipped` tell the item when that happens.
+The Baubles mod that TC4 relied on had a `BaublesApi.getBaubles(player)` that answered the live four-slot inventory. This port keeps the slots as its own, and this class answers the read-only half of that: what is worn, for the "is X worn" checks of an add-on. Items go into a slot through the Baubles menu, a shift-click into it, or the right-click hand equip (which an item can keep for itself, `IBauble.equipsOnUse`); they come out through the menu. `IBauble.onEquipped` / `IBauble.onUnequipped` tell the item when that happens.
 
 <a id="baublesapi-getworn"></a>
 ```java

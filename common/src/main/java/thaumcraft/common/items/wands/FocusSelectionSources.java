@@ -3,6 +3,9 @@ package thaumcraft.common.items.wands;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.api.wands.IFocusPouch;
@@ -56,14 +59,30 @@ public final class FocusSelectionSources {
     }
     /** The distance of the address from the start of a band of slots*perSlot addresses, or -1 outside it. */
     private static int offset(int address,int base,int slots,int perSlot) { int d=address-base;return d>=0&&d<slots*perSlot?d:-1; }
+    /** The add-on pouches that already had a failure written to the log: one line per pouch class and method, not one per frame. */
+    private static final Set<String> REPORTED=ConcurrentHashMap.newKeySet();
+    /**
+     * Writes the failure of an add-on pouch's own method to the log once per pouch class and method. The selector runs on the
+     * render thread every frame while it is open, so a pouch that always fails must not flood the log.
+     */
+    public static void reportBrokenPouch(IFocusPouch pouch,String method,RuntimeException failure) {
+        if(REPORTED.add(pouch.getClass().getName()+"#"+method))
+            LogUtils.getLogger().error("Focus pouch {} threw from {}; the focus selector treats the pouch as unusable and leaves it untouched",
+                    pouch.getClass().getName(),method,failure);
+    }
     /**
      * The cells of a one-pouch stack as independent stacks (a null entry of an add-on pouch reads as empty), or null for
-     * anything else. A pouch whose payload it cannot read (it throws {@link IllegalArgumentException}) stays intact and inactive.
+     * anything else. A pouch whose payload it cannot read stays intact and inactive: the documented way is an
+     * {@link IllegalArgumentException} from {@link IFocusPouch#getInventory}, and any other {@link RuntimeException} is
+     * treated the same (and logged once), because this runs on the client's render thread as well and an add-on's bug must
+     * not take the game down.
      */
     public static ItemStack[] contents(ItemStack stack) {
         if(stack.getCount()!=1||!(stack.getItem() instanceof IFocusPouch pouch))return null;
         ItemStack[] read;
-        try { read=pouch.getInventory(stack); }catch(IllegalArgumentException malformed){return null;}
+        try { read=pouch.getInventory(stack); }
+        catch(IllegalArgumentException malformed){return null;}
+        catch(RuntimeException broken){reportBrokenPouch(pouch,"getInventory",broken);return null;}
         if(read==null)return null;
         ItemStack[] cells=new ItemStack[read.length];
         for(int cell=0;cell<cells.length;cell++)cells[cell]=read[cell]==null?ItemStack.EMPTY:read[cell].copy();

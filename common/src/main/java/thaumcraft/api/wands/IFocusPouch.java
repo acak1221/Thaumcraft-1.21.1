@@ -46,7 +46,10 @@ public interface IFocusPouch {
      * select one.</p>
      *
      * <p>A stack that carries a payload this pouch cannot read (for example saved by another version) throws
-     * {@link IllegalArgumentException}; the selector then ignores that pouch and leaves its payload untouched.</p>
+     * {@link IllegalArgumentException}; the selector then ignores that pouch and leaves its payload untouched. Any other
+     * {@link RuntimeException} is treated the same way (and written to the log once per pouch class), because the selector
+     * also asks on the client's render thread, where an add-on's bug would otherwise close the game; do not rely on that, an
+     * exception is the way to say "unreadable", not to report an error.</p>
      *
      * @param pouch one pouch of this item; its stack count is one
      * @return the cells, a new array
@@ -63,6 +66,12 @@ public interface IFocusPouch {
      * same stack object stays in its slot) and also on a scratch copy of a stack while it plans a selection, so it must not
      * have any effect outside the stack it is given. It may not refuse an array {@link #getInventory} could have returned
      * with one cell changed.</p>
+     *
+     * <p>If it throws anyway (a {@link RuntimeException}, written to the log once per pouch class), the selection stays all or
+     * nothing: while the selector plans on a scratch copy, the pouch gives no focus and takes none; if it throws on the live
+     * stack, the selection is refused and every stack it had already written is put back as it was, so the wand keeps its focus
+     * and no focus is lost or duplicated. A pouch that wrote part of its payload before throwing is therefore restored by the
+     * selector, not by the pouch.</p>
      *
      * @param pouch    one pouch of this item; its stack count is one
      * @param contents the new cells, one entry per cell, none {@code null}

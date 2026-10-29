@@ -785,7 +785,7 @@ Retains a crucible recipe and its live output reference; null recipe throws NPE,
 public ResearchPage(ItemStack input)
 ```
 
-The original smelting page: the furnace input and its result. In 1.7.10 the global furnace registry resolved the output here; 1.21.1 keeps smelting recipes per world, so recipeOutput stays null and the book resolves the result in the recipe manager of the client world when the page is drawn. Use `Level)` when the output is needed on the server.
+The original smelting page: the furnace input and its result. In 1.7.10 the global furnace registry resolved the output here; 1.21.1 keeps smelting recipes per world, so recipeOutput stays null and the book resolves the result in the recipe manager of the client world when the page is drawn. Use `ResearchPage(ItemStack, Level)` when the output is needed on the server.
 
 <a id="researchpage-researchpage-12"></a>
 ```java

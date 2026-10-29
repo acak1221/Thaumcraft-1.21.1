@@ -224,7 +224,9 @@ See [wands and foci](wands-and-foci.md#blocks-that-answer-a-wand-iwandable) for 
 
 ## Effects
 
-`ThaumcraftFX` sends, from the server, the effect packets 1.7.10 add-ons built themselves:
+`ThaumcraftFX` sends effects from the server. Most of its methods are the effect packets 1.7.10 add-ons built themselves;
+`sparkle`, `burst`, `blockRunes` and `smokeSpiral` have no original packet (they are the server twins of client-only proxy
+calls, last row):
 
 | Call | Original packet |
 |---|---|
@@ -234,6 +236,8 @@ See [wands and foci](wands-and-foci.md#blocks-that-answer-a-wand-iwandable) for 
 | `bubbles(level, pos, rgb)` | `PacketFXBlockBubble` |
 | `essentiaTrail(level, consumer, source, aspect)` | `PacketFXEssentiaSource` |
 | `visDrain(level, consumer, node, aspect)` | `PacketFXVisDrain` |
+| `sparkle(level, x, y, z, size, type, gravity)`, `burst(level, x, y, z, size)`, `blockRunes(level, x, y, z, r, g, b, duration, gravity)`, `smokeSpiral(level, x, y, z, radius, start, minY, rgb)` | none: the server twins of `Thaumcraft.proxy.sparkle`, `burst`, `blockRunes` and `smokeSpiral`, which were client calls |
 
-The client-side particles of `Thaumcraft.proxy` (`sparkle`, `beam`, `wispFX`...) are internals of `thaumcraft.client.fx`
-without a stable facade: use vanilla particles or your own.
+The client-side particles of `Thaumcraft.proxy` (`sparkle`, `burst`, `wispFX`, `blockRunes`, `beamCont`, `smokeSpiral`,
+`essentiaTrailFx`) are `thaumcraft.api.client.ThaumcraftClientFX`; the four server twins above ask every player within 32
+blocks to draw the same effect. See [client effects](world-and-content.md#client-effects-particles).

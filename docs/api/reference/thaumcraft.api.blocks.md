@@ -16,7 +16,7 @@ The public block registry of the native port.
 
 Forced 1.21.1 change: the original TC4 kept its blocks in `ConfigBlocks` and the original add-on surface kept them in `BlocksTC`; 1.21.1 registers every block in the block registry, so this class resolves the native registry instead of holding a second copy of it. A plain name means `thaumcraft:<name>`.
 
-An original TC4 field name of `ConfigBlocks` (`"blockJar"`, `"blockCosmeticSolid"`) is accepted too and means the block of its metadata 0; `int)` and `int)` select another metadata. The names and metadata resolve through `ItemApi.legacyBlockId` and `ItemApi.legacyBlockState` (`docs/api/LEGACY_IDS.md`).
+An original TC4 field name of `ConfigBlocks` (`"blockJar"`, `"blockCosmeticSolid"`) is accepted too and means the block of its metadata 0; `get(String, int)` and `state(String, int)` select another metadata. The names and metadata resolve through `ItemApi.legacyBlockId` and `ItemApi.legacyBlockState` (`docs/api/LEGACY_IDS.md`).
 
 <a id="blockstc-id"></a>
 ```java

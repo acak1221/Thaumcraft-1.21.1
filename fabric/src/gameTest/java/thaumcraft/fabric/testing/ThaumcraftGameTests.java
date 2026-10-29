@@ -2428,6 +2428,18 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.AddonApiRuntimeChecks.effectsOfTheOriginalPacketsAreSent(test);
     }
 
+    // The stable keys of the add-on API (effects, entities, armour materials, sounds) resolve to the registered objects.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "api_stable_keys")
+    public void stableKeysResolveToTheRegisteredObjects(GameTestHelper test) {
+        thaumcraft.common.testing.StableKeysRuntimeChecks.stableKeysResolveToTheRegisteredObjects(test);
+    }
+
+    // The server twins of the client effect facade check their arguments and the thread, and skip a player out of range.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_client_fx")
+    public void clientFxServerTwinsCheckAndSendOnTheServerThread(GameTestHelper test) {
+        thaumcraft.common.testing.ClientFxApiRuntimeChecks.serverTwinsCheckAndSendOnTheServerThread(test);
+    }
+
     // Wand parts and a focus registered by an add-on through the public API (test-only add-on of this harness).
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "wand_api_assembly")
     public void wandApiAddonPartsAssembleInTheArcaneWorkbench(GameTestHelper test) {
@@ -2480,6 +2492,17 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_pouch_cap")
     public void addonFocusPouchBeyondTheCellCapAndUnreadablePayloadsStayUntouched(GameTestHelper test) {
         thaumcraft.common.testing.AddonPouchRuntimeChecks.beyondTheCapAndUnreadablePouches(test);
+    }
+
+    // Add-on pouches with bugs (getInventory throws something else, setInventory throws, a write that cannot be read back): contained, nothing lost.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_pouch_misbehaving")
+    public void addonFocusPouchBugsAreContainedAndRefuseTheSelectionWholly(GameTestHelper test) {
+        thaumcraft.common.testing.AddonPouchRuntimeChecks.misbehavingPouchesAreContained(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_pouch_commit")
+    public void addonFocusPouchThatFailsAtCommitLeavesEverythingAsItWas(GameTestHelper test) {
+        thaumcraft.common.testing.AddonPouchRuntimeChecks.aPouchThatFailsAtCommitLeavesEverythingAsItWas(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "addon_pouch_use")

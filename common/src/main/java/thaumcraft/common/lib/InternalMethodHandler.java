@@ -78,7 +78,8 @@ public final class InternalMethodHandler implements IInternalMethodHandler {
     }
 
     @Override public AspectList getBonusObjectTags(Level level, ItemStack stack, AspectList bonus) {
-        AspectList tags = ObjectAspectResolver.get(stack, level);
+        // The same lookup as getObjectAspects(stack, level) and a thaumometer scan (grouped damage values included).
+        AspectList tags = ObjectAspectResolver.scanTags(stack, level);
         if (bonus != null) tags.add(bonus);
         return tags;
     }

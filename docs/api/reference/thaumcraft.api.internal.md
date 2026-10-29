@@ -142,7 +142,7 @@ Player-scoped service. Old addon handlers retain their username override through
 default boolean hasDiscoveredAspect(Player player, Aspect aspect)
 ```
 
-Player-scoped form of `Aspect)`; false by default and for null arguments. The installed handler reads the player's own knowledge, on either side.
+Player-scoped form of `hasDiscoveredAspect(String, Aspect)`; false by default and for null arguments. The installed handler reads the player's own knowledge, on either side.
 
 <a id="iinternalmethodhandler-getdiscoveredaspects"></a>
 ```java
@@ -286,7 +286,7 @@ default void generateVisEffect(int dim, int x, int y, int z, int x2, int y2, int
 
 Retained numeric-dimension compatibility signature; the installed 1.21.1 handler emits no effect. Legacy Forge dimension numbers cannot identify a native `ServerLevel`.
 
-**Deprecated:** Inert in this port. Use `BlockPos, BlockPos, Aspect)` with the actual server level, endpoint positions and aspect instead.
+**Deprecated:** Inert in this port. Use `thaumcraft.api.visnet.VisNetHandler.generateVisEffect(ServerLevel, BlockPos, BlockPos, Aspect)` with the actual server level, endpoint positions and aspect instead.
 
 <a id="iinternalmethodhandler-isresearchcomplete-2"></a>
 ```java
@@ -360,7 +360,7 @@ public void generateVisEffect(int dim, int x, int y, int z, int x2, int y2, int 
 
 > **Deprecated.**
 
-**Deprecated:** Inert: numeric Forge dimensions cannot select a native server level. Use `net.minecraft.core.BlockPos, net.minecraft.core.BlockPos, Aspect)` instead.
+**Deprecated:** Inert: numeric Forge dimensions cannot select a native server level. Use `thaumcraft.api.visnet.VisNetHandler.generateVisEffect(net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos, Aspect)` instead.
 
 ```java
 public void generateVisEffect(net.minecraft.server.level.ServerLevel level, int x, int y, int z, int x2, int y2, int z2, int color)

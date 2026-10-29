@@ -45,12 +45,22 @@ public final class ThaumcraftExcavationClient {
     public static final float BEAM_OPACITY = 0.4F;
     /** The half width of a plane of the original ({@code FXBeamWand:235-238}). */
     public static final float PLANE_HALF_WIDTH = 0.15F;
-    private static final RenderType BEAM = new BeamRenderType("beam2");
+    /** The four beam textures of the original beam (type 0 to 3: beam, beam1, beam2, beam3); the excavation focus draws type 2. */
+    private static final RenderType[] BEAM_TYPES = {new BeamRenderType("beam"), new BeamRenderType("beam1"),
+            new BeamRenderType("beam2"), new BeamRenderType("beam3")};
+    /** The texture type of the excavation beam. */
+    private static final int EXCAVATION_TYPE = 2;
     /** The particle atlas of the original, the sheet of the impact of the beam. */
     private static final RenderType GLINT = new BeamRenderType("particles");
     /** The alpha of the impact of the original ({@code FXBeamWand:275,288}). */
     public static final float IMPACT_ALPHA = 0.66F;
     private static final Map<Integer, Beam> BEAMS = new LinkedHashMap<>();
+    /**
+     * The beams add-ons ask for through the client effect facade, by the id of the entity that owns them. They are drawn by the
+     * same pass as the excavation beams, are never listed by {@link #beams()} (that is the state the server sent) and are dropped
+     * by the same rules.
+     */
+    private static final Map<Integer, Beam> FACADE_BEAMS = new LinkedHashMap<>();
     private static boolean initialized;
     private ThaumcraftExcavationClient() {}
 
@@ -62,7 +72,37 @@ public final class ThaumcraftExcavationClient {
         ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level -> clear());
         ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> clear());
     }
-    public static void clear() { BEAMS.clear(); }
+    /** The ticks a beam lasts from its first appearance (original FXBeamWand:84, the age of the particle). */
+    public static final int BEAM_LIFETIME = 8;
+    /** The fewest ticks a beam has left after it was refreshed (original FXBeamWand:95-101). */
+    public static final int BEAM_REFRESH = 4;
+    /** The ticks a beam has left after a refresh: the larger of what is left and {@link #BEAM_REFRESH}. */
+    public static int refreshedLifetime(int remaining) { return Math.max(remaining, BEAM_REFRESH); }
+    public static void clear() { BEAMS.clear(); FACADE_BEAMS.clear(); }
+    /** The number of beams drawn for the client effect facade, for the diagnostics of the client. */
+    public static int facadeBeamCount() { return FACADE_BEAMS.size(); }
+
+    /**
+     * The continuous beam of the client effect facade ({@code ThaumcraftClientFX.beam}), the counterpart of the original
+     * {@code Thaumcraft.proxy.beamCont}: a beam that lives eight ticks and is kept alive, for at least four more, by every call
+     * for the same owner, the way the original updated the beam it had returned. The caller has validated the arguments.
+     *
+     * @param owner    the entity the beam belongs to; the beam ends when it is removed or farther than 64 blocks from the player
+     * @param texture  0 to 3, the original beam type
+     * @param reverse  whether the texture slides the other way
+     * @param endSize  the scale of the far end of the beam, as the original {@code endmod}
+     * @param impact   the ticks the glint at the far end still shows, as the original {@code impact}
+     */
+    public static void addFacadeBeam(net.minecraft.world.entity.Entity owner, Vec3 from, Vec3 to, int rgb, int texture,
+                                     boolean reverse, float endSize, int impact) {
+        var client = Minecraft.getInstance();
+        if (client.level == null || client.player == null || owner.level() != client.level) return;
+        Beam beam = FACADE_BEAMS.get(owner.getId());
+        if (beam == null) {
+            if (FACADE_BEAMS.size() == MAX_BEAMS) FACADE_BEAMS.remove(FACADE_BEAMS.keySet().iterator().next());
+            FACADE_BEAMS.put(owner.getId(), new Beam(client.level.dimension().location(), from, to, rgb, texture, reverse, endSize, impact));
+        } else beam.refresh(from, to, rgb, texture, reverse, endSize, impact);
+    }
     public static int activeBeamCount() { return BEAMS.size(); }
     /** Read-only actual S2C visual state, not an injection/test-control API. */
     public static List<BeamView> beams() {
@@ -93,31 +133,49 @@ public final class ThaumcraftExcavationClient {
 
     private static void tick(Minecraft client) {
         if (client.level == null || client.player == null) { clear(); return; }
-        BEAMS.entrySet().removeIf(entry -> {
-            Beam beam = entry.getValue();
-            beam.previousSize = Math.min(beam.age / 4.0F, 1.0F);
-            ++beam.age;
-            if (beam.impact > 0) --beam.impact;
-            var caster = client.level.getEntity(entry.getKey());
-            return --beam.remaining <= 0 || !client.level.dimension().location().equals(beam.dimension)
-                    || caster == null || caster.isRemoved() || client.player.distanceToSqr(beam.origin) > 64 * 64;
-        });
+        BEAMS.entrySet().removeIf(entry -> step(client, entry));
+        FACADE_BEAMS.entrySet().removeIf(entry -> step(client, entry));
+    }
+
+    /** One client tick of a beam; true when the beam is over. */
+    private static boolean step(Minecraft client, Map.Entry<Integer, Beam> entry) {
+        Beam beam = entry.getValue();
+        beam.previousSize = Math.min(beam.age / 4.0F, 1.0F);
+        ++beam.age;
+        if (beam.impact > 0) --beam.impact;
+        var caster = client.level.getEntity(entry.getKey());
+        return --beam.remaining <= 0 || !client.level.dimension().location().equals(beam.dimension)
+                || caster == null || caster.isRemoved() || client.player.distanceToSqr(beam.origin) > 64 * 64;
     }
 
     private static final class Beam {
         private final ResourceLocation dimension;
         private Vec3 previousOrigin, origin, previousTarget, target;
-        private int age, remaining = 8, impact, crackStage;
+        private int age, remaining = BEAM_LIFETIME, impact, crackStage;
         private float endSize;
         private float previousSize;
         private boolean completed, success;
+        /** The colour of the beam (the excavation green 0x00FF66 unless the facade asked for another), its texture and direction. */
+        private float red = 0.0F, green = 1.0F, blue = 0.4F;
+        private int texture = EXCAVATION_TYPE;
+        private boolean reverse;
         private Beam(ExcavationFxPayload payload) {
             dimension = payload.dimension(); origin = payload.origin(); target = payload.target();
-            refresh(payload); remaining = 8;
+            refresh(payload); remaining = BEAM_LIFETIME;
+        }
+        private Beam(ResourceLocation dimension, Vec3 from, Vec3 to, int rgb, int texture, boolean reverse, float endSize, int impact) {
+            this.dimension = dimension; origin = from; target = to;
+            refresh(from, to, rgb, texture, reverse, endSize, impact); remaining = BEAM_LIFETIME;
+        }
+        private void refresh(Vec3 from, Vec3 to, int rgb, int texture, boolean reverse, float endSize, int impact) {
+            previousOrigin = origin; previousTarget = target; origin = from; target = to;
+            remaining = refreshedLifetime(remaining); this.impact = impact; this.endSize = endSize;
+            red = (rgb >> 16 & 255) / 255.0F; green = (rgb >> 8 & 255) / 255.0F; blue = (rgb & 255) / 255.0F;
+            this.texture = texture; this.reverse = reverse;
         }
         private void refresh(ExcavationFxPayload payload) {
             previousOrigin = origin; previousTarget = target; origin = payload.origin(); target = payload.target();
-            remaining = Math.max(remaining, 4); impact = payload.impact() ? 5 : 0; endSize = payload.impact() ? 2 : 0;
+            remaining = refreshedLifetime(remaining); impact = payload.impact() ? 5 : 0; endSize = payload.impact() ? 2 : 0;
             crackStage = payload.crackStage(); completed = payload.completed(); success = payload.success();
         }
         /**
@@ -151,37 +209,47 @@ public final class ThaumcraftExcavationClient {
      * Camera subtraction happens ONCE here, never in the loader hook. */
     public static void render(PoseStack pose, MultiBufferSource.BufferSource buffers, float partialTick, Camera camera) {
         var client = Minecraft.getInstance();
-        if (pose == null || client.level == null || client.player == null || BEAMS.isEmpty()) return;
+        if (pose == null || client.level == null || client.player == null || BEAMS.isEmpty() && FACADE_BEAMS.isEmpty()) return;
         float partial = Mth.clamp(partialTick, 0, 1);
         long gameTime = client.level.getGameTime();
         int slide = client.player.tickCount;
+        boolean[] used = new boolean[BEAM_TYPES.length];
+        for (Beam beam : BEAMS.values()) used[beam.texture] = true;
+        for (Beam beam : FACADE_BEAMS.values()) used[beam.texture] = true;
         for (int pass = 0; pass < 2; pass++) {
-            RenderType type = pass == 0 ? BEAM : GLINT;
-            VertexConsumer vertices = buffers.getBuffer(type);
-            for (Beam beam : BEAMS.values()) {
-                if (!client.level.dimension().location().equals(beam.dimension)) continue;
-                Vec3 origin = beam.previousOrigin.lerp(beam.origin, partial), target = beam.previousTarget.lerp(beam.target, partial);
-                Vec3 end = target.subtract(origin), eye = camera.getPosition().subtract(origin);
-                // Original FXBeamWand:173-176 - the width of the beam pulses over four ticks.
-                float size = beam.size(partial);
-                // Original FXBeamWand:177-180 - the opacity of the beam and its fade in the last
-                // four ticks of its life.
-                float opacity = beam.opacity();
-                pose.pushPose();
-                try {
-                    pose.translate(-eye.x, -eye.y, -eye.z);
-                    if (pass == 0) {
-                        // Original FXBeamWand:229-255 - the beam is a fan of three planes that
-                        // turns around its own axis.
-                        drawBeam(pose, vertices, end, length(end), size, opacity, beam.endSize,
-                                gameTime, partial, slide);
-                    } else if (beam.impact > 0) {
-                        // Original FXBeamWand:261-263 and :269-297 - the impact of the beam.
-                        impact(pose, vertices, camera, end, beam);
+            // Pass 0 draws the beams, one render type per texture in use; pass 1 draws the glints at their far ends.
+            for (int texture = 0; texture < (pass == 0 ? BEAM_TYPES.length : 1); texture++) {
+                if (pass == 0 && !used[texture]) continue;
+                RenderType type = pass == 0 ? BEAM_TYPES[texture] : GLINT;
+                VertexConsumer vertices = buffers.getBuffer(type);
+                for (Map<Integer, Beam> beams : List.of(BEAMS, FACADE_BEAMS)) {
+                    for (Beam beam : beams.values()) {
+                        if (pass == 0 && beam.texture != texture) continue;
+                        if (!client.level.dimension().location().equals(beam.dimension)) continue;
+                        Vec3 origin = beam.previousOrigin.lerp(beam.origin, partial), target = beam.previousTarget.lerp(beam.target, partial);
+                        Vec3 end = target.subtract(origin), eye = camera.getPosition().subtract(origin);
+                        // Original FXBeamWand:173-176 - the width of the beam pulses over four ticks.
+                        float size = beam.size(partial);
+                        // Original FXBeamWand:177-180 - the opacity of the beam and its fade in the last
+                        // four ticks of its life.
+                        float opacity = beam.opacity();
+                        pose.pushPose();
+                        try {
+                            pose.translate(-eye.x, -eye.y, -eye.z);
+                            if (pass == 0) {
+                                // Original FXBeamWand:229-255 - the beam is a fan of three planes that
+                                // turns around its own axis.
+                                drawBeam(pose, vertices, end, length(end), size, opacity, beam.endSize,
+                                        gameTime, partial, slide, beam);
+                            } else if (beam.impact > 0) {
+                                // Original FXBeamWand:261-263 and :269-297 - the impact of the beam.
+                                impact(pose, vertices, camera, end, beam);
+                            }
+                        } finally { pose.popPose(); }
                     }
-                } finally { pose.popPose(); }
+                }
+                buffers.endBatch(type);
             }
-            buffers.endBatch(type);
         }
     }
 
@@ -194,7 +262,7 @@ public final class ThaumcraftExcavationClient {
      * the end size of the beam.</p>
      */
     private static void drawBeam(PoseStack pose, VertexConsumer vertices, Vec3 end, float length,
-                                 float size, float opacity, float endSize, long gameTime, float partial, int slide) {
+                                 float size, float opacity, float endSize, long gameTime, float partial, int slide, Beam beam) {
         if (length < 1.0E-4F) return;
         Vec3 direction = end.normalize();
         pose.pushPose();
@@ -211,23 +279,23 @@ public final class ThaumcraftExcavationClient {
                 // Original FXBeamWand:246 - every plane is turned by another sixty degrees.
                 pose.mulPose(Axis.YP.rotationDegrees(PLANE_STEP));
                 // Original FXBeamWand:201-206 and :235-238 - the texture of the beam slides.
-                float base = -1.0F + scroll(slide, partial) + plane / 3.0F;
+                float base = -1.0F + scroll(slide, partial, beam.reverse) + plane / 3.0F;
                 float top = length * size + base;
-                plane(pose, vertices, length, size, endSize, base, top, opacity);
+                plane(pose, vertices, length, size, endSize, base, top, opacity, beam);
             }
         } finally { pose.popPose(); }
     }
 
     /** One plane of the fan of the original ({@code FXBeamWand:247-254}). */
     private static void plane(PoseStack pose, VertexConsumer vertices, float length, float size, float endSize,
-                              float v0, float v1, float alpha) {
+                              float v0, float v1, float alpha, Beam beam) {
         float half = PLANE_HALF_WIDTH * size;
         float halfEnd = PLANE_HALF_WIDTH * size * endSize;
         float far = length * size;
-        vertex(pose, vertices, -halfEnd, far, 0.0F, 1.0F, v1, alpha);
-        vertex(pose, vertices, -half, 0.0F, 0.0F, 1.0F, v0, alpha);
-        vertex(pose, vertices, half, 0.0F, 0.0F, 0.0F, v0, alpha);
-        vertex(pose, vertices, halfEnd, far, 0.0F, 0.0F, v1, alpha);
+        vertex(pose, vertices, -halfEnd, far, 0.0F, 1.0F, v1, alpha, beam);
+        vertex(pose, vertices, -half, 0.0F, 0.0F, 1.0F, v0, alpha, beam);
+        vertex(pose, vertices, half, 0.0F, 0.0F, 0.0F, v0, alpha, beam);
+        vertex(pose, vertices, halfEnd, far, 0.0F, 0.0F, v1, alpha, beam);
     }
 
     /** The yaw of the direction of the beam, in degrees. */
@@ -259,7 +327,15 @@ public final class ThaumcraftExcavationClient {
      * @return the slide of the texture
      */
     public static float scroll(int slide, float partial) {
-        float value = slide + partial;
+        return scroll(slide, partial, false);
+    }
+
+    /**
+     * The slide of the texture, optionally running the other way (the original {@code reverse} flag of the beam: the age the
+     * texture is slid by changes its sign).
+     */
+    public static float scroll(int slide, float partial, boolean reverse) {
+        float value = reverse ? -(slide + partial) : slide + partial;
         return -value * 0.2F - Mth.floor(-value * 0.1F);
     }
 
@@ -283,18 +359,18 @@ public final class ThaumcraftExcavationClient {
         float u = part / 16.0F, u1 = u + 0.0624375F;
         float v = 0.3125F, v1 = v + 0.0624375F;
         // Original FXBeamWand:275 and :288 - the colour of the beam with the alpha of two thirds.
-        vertex(pose, vertices, end.subtract(right.scale(size)).subtract(up.scale(size)), u1, v1, IMPACT_ALPHA);
-        vertex(pose, vertices, end.add(right.scale(-size)).add(up.scale(size)), u1, v, IMPACT_ALPHA);
-        vertex(pose, vertices, end.add(right.scale(size)).add(up.scale(size)), u, v, IMPACT_ALPHA);
-        vertex(pose, vertices, end.add(right.scale(size)).subtract(up.scale(size)), u, v1, IMPACT_ALPHA);
+        vertex(pose, vertices, end.subtract(right.scale(size)).subtract(up.scale(size)), u1, v1, IMPACT_ALPHA, beam);
+        vertex(pose, vertices, end.add(right.scale(-size)).add(up.scale(size)), u1, v, IMPACT_ALPHA, beam);
+        vertex(pose, vertices, end.add(right.scale(size)).add(up.scale(size)), u, v, IMPACT_ALPHA, beam);
+        vertex(pose, vertices, end.add(right.scale(size)).subtract(up.scale(size)), u, v1, IMPACT_ALPHA, beam);
     }
-    private static void vertex(PoseStack pose, VertexConsumer vertices, Vec3 point, float u, float v, float alpha) {
-        vertices.addVertex(pose.last(), (float) point.x, (float) point.y, (float) point.z).setColor(0F, 1F, .4F, alpha)
+    private static void vertex(PoseStack pose, VertexConsumer vertices, Vec3 point, float u, float v, float alpha, Beam beam) {
+        vertices.addVertex(pose.last(), (float) point.x, (float) point.y, (float) point.z).setColor(beam.red, beam.green, beam.blue, alpha)
                 .setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(pose.last(), 0, 1, 0);
     }
     private static void vertex(PoseStack pose, VertexConsumer vertices, float x, float y, float z,
-                               float u, float v, float alpha) {
-        vertices.addVertex(pose.last(), x, y, z).setColor(0F, 1F, .4F, alpha)
+                               float u, float v, float alpha, Beam beam) {
+        vertices.addVertex(pose.last(), x, y, z).setColor(beam.red, beam.green, beam.blue, alpha)
                 .setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(pose.last(), 0, 1, 0);
     }
     private static final class BeamRenderType extends RenderType {

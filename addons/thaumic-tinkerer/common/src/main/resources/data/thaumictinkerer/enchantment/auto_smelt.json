@@ -1,0 +1,30 @@
+{
+  "description": {
+    "translate": "enchantment.thaumictinkerer.auto_smelt"
+  },
+  "exclusive_set": [
+    "minecraft:efficiency",
+    "minecraft:silk_touch",
+    "minecraft:fortune",
+    "minecraft:mending",
+    "thaumictinkerer:shatter",
+    "thaumictinkerer:tunnel",
+    "thaumictinkerer:desintegrate"
+  ],
+  "supported_items": "#thaumictinkerer:enchantable/auto_smelt",
+  "weight": 1,
+  "max_level": 1,
+  "min_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {}
+}

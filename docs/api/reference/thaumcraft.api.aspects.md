@@ -18,7 +18,10 @@ The aspect registry of TC4: the 48 original aspects plus every aspect an add-on 
 
 An add-on registers an aspect exactly as it did on 1.7.10, by constructing it once:
 
-```java `public static final Aspect TEMPUS = new Aspect("tempus", 0xB68CFF, new Aspect[]{Aspect.VOID, Aspect.ORDER}, ResourceLocation.fromNamespaceAndPath("myaddon", "textures/aspects/tempus.png"), 1); ThaumcraftApi.registerObjectTag(new ItemStack(Items.CLOCK), new AspectList().add(TEMPUS, 4));`
+```java
+public static final Aspect TEMPUS = new Aspect("tempus", 0xB68CFF, new Aspect[]{Aspect.VOID, Aspect.ORDER},
+        ResourceLocation.fromNamespaceAndPath("myaddon", "textures/aspects/tempus.png"), 1);
+ThaumcraftApi.registerObjectTag(new ItemStack(Items.CLOCK), new AspectList().add(TEMPUS, 4));
 ```
 
 The constructor is the whole registration: the aspect is then known to the thaumometer, the research table, the research notes, essentia storage and transport, the crucible, the alchemical furnace, the centrifuge, phials, crystals, wisps, the creative tab and the EMI/JEI/Jade integrations, exactly like an original aspect. The contract:
@@ -133,7 +136,7 @@ Registers a new aspect with a derived texture; RGB color/blend are raw render va
 public Aspect(String tag, int color, Aspect[] components)
 ```
 
-Registers an aspect as `int, Aspect[], int)` with blend 1; component entries are not validated.
+Registers an aspect as `Aspect(String, int, Aspect[], int)` with blend 1; component entries are not validated.
 
 <a id="aspect-aspect-4"></a>
 ```java

@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:leather_boots",
+    "minecraft:chainmail_boots",
+    "minecraft:iron_boots",
+    "minecraft:golden_boots",
+    "minecraft:diamond_boots",
+    "minecraft:netherite_boots",
+    {
+      "id": "thaumcraft:thaumium_boots",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:robe_boots",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:void_boots",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:boots_traveller",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichorcloth_boots",
+      "required": false
+    }
+  ]
+}

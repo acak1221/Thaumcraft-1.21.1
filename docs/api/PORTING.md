@@ -81,7 +81,12 @@ Do not register from parallel NeoForge mod constructors: the registries of the A
 | integer dimension id | `ResourceKey<Level>` (`ThaumcraftApi.addDimBlacklist(ResourceKey, int)`) |
 | `Potion` field (`PotionFluxTaint.instance`) | registered `MobEffect`: `PotionFluxTaint.instance()` / `holder()` |
 | `DamageSourceThaumcraft.taint` field | `DamageSourceThaumcraft.taint(level)`, `causeTentacleDamage(entity)`... (damage types are data) |
-| `ThaumcraftApi.armorMatThaumium` field | `ThaumcraftApi.armorMatThaumium()` |
+| `ThaumcraftApi.armorMatThaumium` field | `ThaumcraftApi.armorMatThaumium()`; as the argument of an `ArmorItem`, the registry holder `ThaumcraftMaterials.armorMatThaumiumHolder()` (also fortress, void, void robe), see [stable keys](guide/world-and-content.md#stable-keys) |
+| `Config.potionWarpWardID` and the six other warp potion ids, `new PotionEffect(id, ...)` | `WarpEffects.WARP_WARD`, `SUN_SCORNED`, `DEATH_GAZE`, `BLURRED_VISION`, `UNNATURAL_HUNGER`, `INFECTIOUS_VIS_EXHAUST`, `THAUMARHIA`; `new MobEffectInstance(WarpEffects.holder(key), duration, amplifier)` |
+| `entity instanceof EntityWisp` (`EntityFireBat`, `EntityBrainyZombie`, `EntityGolemBase`, `EntityFrostShard`...) | `ThaumcraftEntities.is(entity, ThaumcraftEntities.WISP)`; `type(key)`, `holder(key)` |
+| `"thaumcraft:wand"`, `"thaumcraft:zap"`... sound names in strings | `ThaumcraftSoundIds.WAND`, `ZAP`...; `ThaumcraftSoundIds.event(id)` for `Level.playSound` |
+| `Thaumcraft.proxy.sparkle`, `burst`, `wispFX`/`wispFX2`/`wispFX3`, `blockRunes`, `beamCont`, `smokeSpiral`, `essentiaTrailFx`, `particleCount` | `thaumcraft.api.client.ThaumcraftClientFX` (client; the `Level` comes first), see [client effects](guide/world-and-content.md#client-effects-particles) |
+| `UtilsFX.drawTag(x, y, aspect, amount, bonus, ...)` | `thaumcraft.api.client.AspectRenderer.draw(graphics, aspect, x, y, amount, bonus)`, see [aspect tags](guide/world-and-content.md#aspect-tags-in-a-screen) |
 | numeric enchantment ids | `ResourceKey<Enchantment>` constants beside the old fields |
 | `ConfigItems.itemResource` + meta, `ConfigBlocks.*` | `ItemsTC` / `BlocksTC` / `ItemApi`, see section 4 |
 | `Thaumcraft.proxy.getResearchManager()`, `PlayerKnowledge` | `ThaumcraftApiHelper`, see section 4 |
@@ -273,8 +278,17 @@ pouch's own `use`. Guides: [gear and baubles](guide/gear-and-baubles.md#a-bauble
 
 - `ThaumcraftFX` sends the effect packets 1.7.10 add-ons built themselves (`PacketFXBlockSparkle`,
   `PacketFXBlockArc`, `PacketFXBlockZap`, `PacketFXBlockBubble`, `PacketFXEssentiaSource`, `PacketFXVisDrain`)
-  from the server. The client-side particles of `Thaumcraft.proxy` (`sparkle`, `beam`, `wispFX`...) are
-  internals of `thaumcraft.client.fx` without a stable facade: use vanilla particles or your own.
+  from the server, and since 2026-10-28 four more for the client facade (`sparkle`, `burst`, `blockRunes`, `smokeSpiral`).
+- The client-side particles of `Thaumcraft.proxy` are `thaumcraft.api.client.ThaumcraftClientFX`: `sparkle`, `burst`, three
+  `wisp` forms, `blockRunes`, the continuous `beam`, `smokeSpiral`, `essentiaTrail` and `particleCount`. It draws only on a
+  client level (a server level is a no-op, so shared code may call it), checks its arguments on every side, and does not
+  provide the homing wisp, `beamPulseFX`, `bolt`, `arcLightning`, `crucibleBubble` or the returned beam object. `AspectRenderer`
+  is the client-only `UtilsFX.drawTag` (the amount is an `int`). Both are unit tested and unverified on a frame: [client effects](guide/world-and-content.md#client-effects-particles),
+  [aspect tags](guide/world-and-content.md#aspect-tags-in-a-screen). Tests: `ClientFxApiTest`, `ClientFxPayloadTest`,
+  `ClientFxParticleRulesTest`, `AspectRendererTest`, `AspectTagLayoutTest`, GameTest `clientFxServerTwinsCheckAndSendOnTheServerThread`.
+- Stable keys ([guide](guide/world-and-content.md#stable-keys)): `WarpEffects`, `ThaumcraftEntities`, the armour material
+  holders of `ThaumcraftMaterials`/`ThaumcraftApi` and `ThaumcraftSoundIds` replace the numeric potion ids, `instanceof` on
+  internal entity classes and sound names in strings. Tests: `StableKeysApiTest`, GameTest `stableKeysResolveToTheRegisteredObjects`.
 - Golems had no API in 1.7.10 and have none now.
 - The Thaumcraft 6 shaped classes of `thaumcraft.api` (theorycraft, `ResearchEntry`/`ResearchStage`,
   `ScanningManager`, `IWandFocus`) are not wired into Thaumcraft 4 gameplay; use the TC4 classes above.
@@ -286,9 +300,12 @@ pouch's own `use`. Guides: [gear and baubles](guide/gear-and-baubles.md#a-bauble
 [`examples/example-addon`](../../examples/example-addon) registers items, a block with a block entity, an aspect of its
 own, object, complex and entity tags (one by a 1.7.10 ore dictionary name), arcane, shapeless arcane, crucible and
 infusion recipes through the API and as JSON files of the native types, a wand rod with an update hook and a wand cap,
-a focus, an amulet bauble with a discount, runic charge and warp, an essentia container that feeds tubes and answers a
-wand, an item that grants research points from a data component that holds aspects (the codecs of `AspectList`), a Tome
-of Sharing that copies scans and discovered aspects between players, a hook that fells a tree with `isWoodLog` and
-`breakFurthestBlock`, and a research tab with nine entries. It imports nothing but
+a focus, an amulet bauble with a discount, runic charge and warp, a talisman bauble that keeps its sneaking right click
+(`IBauble.equipsOnUse`) and reads `BaublesApi.getWorn`, a belt that is also a focus pouch (`IFocusPouch`), an essentia
+container that feeds tubes and answers a wand, an item that grants research points from a data component that holds
+aspects (the codecs of `AspectList`), a Tome of Sharing that copies scans and discovered aspects between players, a hook
+that fells a tree with `isWoodLog` and `breakFurthestBlock`, a kill hook that uses the stable keys of a wisp, the warp ward and the wand sound, a client entrypoint
+that draws sparkles, runes and a beam while the amethyst core is held and the aspect tags of the held item on the HUD, and a
+research tab with nine entries. It imports nothing but
 `thaumcraft.api` (`ExampleAddonApiOnlyTest` keeps it so) and is compiled by every build; the guides quote it.
 `./gradlew :fabric:runExampleClient` starts a development client with it.

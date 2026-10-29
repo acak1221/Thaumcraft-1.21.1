@@ -292,7 +292,8 @@ public final class ApiReference {
     private static final Pattern INLINE = Pattern.compile("\\{@(code|literal|link|linkplain|value)\\s*");
 
     static String markdown(String javadoc, boolean blockTags) {
-        String text = javadoc.replace("\r", "");
+        List<String> fences = new ArrayList<>();
+        String text = fences(javadoc.replace("\r", ""), fences);
         // Split the main description from the block tags.
         List<String> tags = new ArrayList<>();
         Matcher tag = Pattern.compile("(?m)^\\s*@(param|return|returns|throws|exception|deprecated|see|since|apiNote|implNote)\\b").matcher(text);
@@ -325,7 +326,55 @@ public final class ApiReference {
             }
             if (!params.isEmpty()) out.append("\n\n**Parameters:**\n").append(String.join("\n", params));
         }
-        return out.toString().replaceAll("[ \\t]+\n", "\n").replaceAll("\n{3,}", "\n\n").strip();
+        String result = out.toString().replaceAll("[ \\t]+\n", "\n").replaceAll("\n{3,}", "\n\n").strip();
+        for (int index = 0; index < fences.size(); index++) {
+            result = result.replace(fenceMark(index), "```java\n" + fences.get(index) + "\n```");
+        }
+        return result;
+    }
+
+    private static final Pattern PRE_CODE = Pattern.compile("<pre>\\s*\\{@code\\b", Pattern.CASE_INSENSITIVE);
+
+    private static String fenceMark(int index) { return "\uE000" + index + "\uE001"; }
+
+    /**
+     * {@code <pre>{@code ...}</pre>} as a fenced block that keeps its line breaks and its indentation (the code is not Javadoc:
+     * no tag and no entity inside it is interpreted). Each block is replaced by a mark that {@link #markdown} puts back last, so
+     * the line joining of {@link #html} cannot reach it.
+     */
+    private static String fences(String text, List<String> blocks) {
+        StringBuilder out = new StringBuilder();
+        int from = 0;
+        Matcher matcher = PRE_CODE.matcher(text);
+        while (matcher.find(from)) {
+            int depth = 1, end = matcher.end();
+            while (end < text.length() && depth > 0) {
+                char c = text.charAt(end);
+                if (c == '{') depth++;
+                else if (c == '}') depth--;
+                end++;
+            }
+            Matcher close = Pattern.compile("\\s*</pre>", Pattern.CASE_INSENSITIVE).matcher(text);
+            if (depth != 0 || !close.region(end, text.length()).lookingAt()) {
+                out.append(text, from, matcher.end());
+                from = matcher.end();
+                continue;
+            }
+            out.append(text, from, matcher.start());
+            blocks.add(dedent(text.substring(matcher.end(), end - 1)));
+            out.append("\n\n").append(fenceMark(blocks.size() - 1)).append("\n\n");
+            from = close.end();
+        }
+        return out.append(text.substring(from)).toString();
+    }
+
+    /** The lines of a code sample without the blank lines around it and without the indentation they all share. */
+    private static String dedent(String code) {
+        List<String> lines = new ArrayList<>(List.of(code.split("\n", -1)));
+        while (!lines.isEmpty() && lines.get(0).isBlank()) lines.remove(0);
+        while (!lines.isEmpty() && lines.get(lines.size() - 1).isBlank()) lines.remove(lines.size() - 1);
+        int cut = lines.stream().filter(line -> !line.isBlank()).mapToInt(line -> line.length() - line.stripLeading().length()).min().orElse(0);
+        return lines.stream().map(line -> line.isBlank() ? "" : line.substring(cut).stripTrailing()).collect(Collectors.joining("\n"));
     }
 
     /** {@code x} and {@link x} as code spans; the content is kept verbatim. */
@@ -345,9 +394,10 @@ public final class ApiReference {
             String content = text.substring(matcher.end(), Math.max(matcher.end(), end - 1)).replaceAll("\\s+", " ").strip();
             String kind = matcher.group(1);
             if (kind.equals("link") || kind.equals("linkplain")) {
-                String[] pieces = content.split(" ", 2);
-                String target = pieces[0].startsWith("#") ? pieces[0].substring(1) : pieces[0].replace('#', '.');
-                content = pieces.length > 1 ? pieces[1] : target;
+                int split = linkTargetEnd(content);
+                String reference = content.substring(0, split);
+                String target = reference.startsWith("#") ? reference.substring(1) : reference.replace('#', '.');
+                content = split < content.length() ? content.substring(split).strip() : target;
                 if (kind.equals("linkplain")) { out.append(content); from = end; continue; }
             }
             out.append(kind.equals("literal") ? content : code(content));
@@ -355,6 +405,18 @@ public final class ApiReference {
         }
         out.append(text.substring(from));
         return out.toString();
+    }
+
+    /** Where the target of a {@code {@link}} ends: at the first space outside a parameter list, so {@code m(int, int) label} is split after the ")". */
+    private static int linkTargetEnd(String content) {
+        int depth = 0;
+        for (int index = 0; index < content.length(); index++) {
+            char c = content.charAt(index);
+            if (c == '(') depth++;
+            else if (c == ')' && depth > 0) depth--;
+            else if (c == ' ' && depth == 0) return index;
+        }
+        return content.length();
     }
 
     private static String code(String content) {

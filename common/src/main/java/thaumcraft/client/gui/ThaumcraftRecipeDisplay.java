@@ -21,6 +21,7 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.client.AspectRenderer;
 import thaumcraft.common.config.ThaumcraftArcane;
 import thaumcraft.common.config.ThaumcraftAlchemy;
 import thaumcraft.common.config.ThaumcraftInfusion;
@@ -1313,12 +1314,45 @@ public final class ThaumcraftRecipeDisplay {
         return hover;
     }
 
+    /** The research-book particle sheet, the 256 by 256 texture the bonus sparkle of {@link #drawAspectTag} is cut from. */
+    private static final ResourceLocation PARTICLE_SHEET = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
+
+    /** The row of the particle sheet the bonus sparkle is cut from, in pixels. */
+    static final int BONUS_SHEET_V = 80;
+
+    /** The left edge, in pixels of the particle sheet, of the bonus frame shown on the given tick of the local player. */
+    static int bonusSheetU(int playerTick) {
+        return Math.floorMod(playerTick, AspectRenderer.BONUS_FRAMES) * AspectRenderer.BONUS_SIZE;
+    }
+
     /** Original UtilsFX.drawTag: the tinted aspect glyph of sixteen pixels and, above zero, its amount. */
     private static void drawAspectTag(GuiGraphics graphics, Font font, Aspect aspect, int amount, int x, int y, float scale) {
+        drawAspectTag(graphics, font, aspect, amount, 0, x, y, scale);
+    }
+
+    /**
+     * Original UtilsFX.drawTag with its bonus. In the space of the tag, which starts at ({@code x}, {@code y}) and is
+     * {@code scale} times as large as its sixteen pixels:
+     * <ul>
+     * <li>the glyph of the aspect, tinted with its colour, covers (0, 0) to (16, 16);</li>
+     * <li>an {@code amount} above zero is drawn at half size in white with a shadow, its right edge on the right edge of the
+     * glyph and its top at 11, in front of the glyph (depth +200);</li>
+     * <li>a {@code bonus} above zero puts the sparkle of the research table, a sixteen pixel frame of the particle sheet that
+     * changes every tick of the player, on (-4, -4) to (12, 12), and a {@code bonus} above one adds the number at half size
+     * centred on x = 4 with its top at y = 3, in front of both.</li>
+     * </ul>
+     * Client render thread only; leaves blending enabled, as the original did for the book.
+     */
+    public static void drawAspectTag(GuiGraphics graphics, Font font, Aspect aspect, int amount, int bonus, int x, int y, float scale) {
+        drawAspectTag(graphics, font, aspect, AspectTagLayout.of(x, y, amount, bonus, scale));
+    }
+
+    /** {@link #drawAspectTag(GuiGraphics, Font, Aspect, int, int, int, int, float)} for a layout that was worked out (and tested) as plain numbers. */
+    public static void drawAspectTag(GuiGraphics graphics, Font font, Aspect aspect, AspectTagLayout tag) {
         graphics.pose().pushPose();
         try {
-            graphics.pose().translate(x, y, 0);
-            graphics.pose().scale(scale, scale, 1);
+            graphics.pose().translate(tag.x(), tag.y(), 0);
+            graphics.pose().scale(tag.scale(), tag.scale(), 1);
             graphics.flush();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -1326,13 +1360,27 @@ public final class ThaumcraftRecipeDisplay {
             graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
             graphics.blit(aspect.getImage(), 0, 0, 0, 0, 16, 16, 16, 16);
             graphics.setColor(1, 1, 1, 1);
-            if (amount > 0) {
+            if (tag.showsAmount()) {
                 graphics.pose().pushPose();
-                graphics.pose().translate(16, 11, 200);
+                graphics.pose().translate(AspectRenderer.AMOUNT_RIGHT, AspectRenderer.AMOUNT_TOP, 200);
                 graphics.pose().scale(.5F, .5F, 1);
-                String text = Integer.toString(amount);
+                String text = tag.amountText();
                 graphics.drawString(font, text, -font.width(text), 0, 0xFFFFFFFF, true);
                 graphics.pose().popPose();
+            }
+            if (tag.showsBonus()) {
+                var player = net.minecraft.client.Minecraft.getInstance().player;
+                graphics.flush();
+                graphics.blit(PARTICLE_SHEET, AspectRenderer.BONUS_OFFSET, AspectRenderer.BONUS_OFFSET,
+                        bonusSheetU(player == null ? 0 : player.tickCount), BONUS_SHEET_V, AspectRenderer.BONUS_SIZE, AspectRenderer.BONUS_SIZE, 256, 256);
+                if (tag.showsBonusNumber()) {
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(AspectRenderer.BONUS_NUMBER_CENTER_X, AspectRenderer.BONUS_NUMBER_TOP, 200);
+                    graphics.pose().scale(.5F, .5F, 1);
+                    String text = tag.bonusText();
+                    graphics.drawString(font, text, -font.width(text) / 2, 0, 0xFFFFFFFF, true);
+                    graphics.pose().popPose();
+                }
             }
         } finally {
             graphics.pose().popPose();

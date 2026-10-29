@@ -1,4 +1,9 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    {
+      "id": "thaumictinkerer:warp_gate",
+      "required": false
+    }
+  ]
 }

@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "thaumictinkerer:item/cleansing_talisman_0"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "thaumictinkerer:enabled": 1.0
+      },
+      "model": "thaumictinkerer:item/cleansing_talisman_1"
+    }
+  ]
+}

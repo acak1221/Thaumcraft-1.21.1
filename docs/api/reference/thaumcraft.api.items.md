@@ -51,7 +51,7 @@ The public item registry of the native port.
 
 Forced 1.21.1 change: the original TC4 kept its items in `ConfigItems` and the original add-on surface kept them in `ItemsTC`; 1.21.1 registers every item in the item registry, so this class resolves the native registry instead of holding a second copy of it. A plain name means `thaumcraft:<name>`.
 
-An original TC4 field name of `ConfigItems` or `ConfigBlocks` (`"itemThaumometer"`, `"blockJar"`) is accepted too and means the item of its metadata 0, the original `new ItemStack(ConfigItems.field)`; `int)` selects another metadata. The names and metadata resolve through `ItemApi.legacyItemId` (`docs/api/LEGACY_IDS.md`).
+An original TC4 field name of `ConfigItems` or `ConfigBlocks` (`"itemThaumometer"`, `"blockJar"`) is accepted too and means the item of its metadata 0, the original `new ItemStack(ConfigItems.field)`; `get(String, int)` selects another metadata. The names and metadata resolve through `ItemApi.legacyItemId` (`docs/api/LEGACY_IDS.md`).
 
 <a id="itemstc-id"></a>
 ```java

@@ -1,0 +1,25 @@
+{
+  "description": {
+    "translate": "enchantment.thaumictinkerer.tunnel"
+  },
+  "exclusive_set": [
+    "thaumictinkerer:shatter",
+    "minecraft:efficiency"
+  ],
+  "supported_items": "#thaumictinkerer:enchantable/tunnel",
+  "weight": 1,
+  "max_level": 5,
+  "min_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {}
+}

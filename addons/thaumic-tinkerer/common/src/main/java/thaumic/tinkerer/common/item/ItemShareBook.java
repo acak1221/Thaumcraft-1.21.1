@@ -43,7 +43,7 @@ import thaumic.tinkerer.common.research.TTResearchItem;
  * <p>The binding and the snapshot are the component {@link BasicItemComponents#SHARE_TOME} (1.7.10: the tags {@code player},
  * {@code research} and {@code aspects}; an unassigned tome is a stack without the component, 1.7.10 wrote {@code [none]}).
  * Scan clues ({@code @KEY} entries of the completed research) are not handed over: the API does not let an add-on set them
- * (see {@code docs/api-requests/BasicItems.md}).</p>
+ * (see {@code docs/api-requests/BasicItems.md}, request R1).</p>
  */
 public class ItemShareBook extends Item implements ITTinkererRegisterable {
     /** The research page of the recipe, and the file {@code data/thaumictinkerer/recipe/share_tome.json}. */
@@ -104,9 +104,10 @@ public class ItemShareBook extends Item implements ITTinkererRegisterable {
     public static int load(ShareData data, ServerPlayer player) {
         int completed = 0;
         for (String research : data.research()) {
-            boolean had = ThaumcraftApiHelper.isResearchComplete(player, research);
+            // Completing what is already complete changes nothing but sends the whole knowledge to the client again.
+            if (ThaumcraftApiHelper.isResearchComplete(player, research)) continue;
             ThaumcraftApiHelper.completeResearch(player, research);
-            if (!had && ThaumcraftApiHelper.isResearchComplete(player, research)) completed++;
+            if (ThaumcraftApiHelper.isResearchComplete(player, research)) completed++;
         }
         for (String tag : data.aspects()) {
             Aspect aspect = Aspect.getAspect(tag);

@@ -159,29 +159,35 @@ public class ThaumcraftApiHelper {
         return ObjectAspectResolver.scanTags(is, level);
     }
 
-    /** Delegates to the installed handler, normalizing null results to an empty list.
-     * The 1.7.10 bonus-enrichment signature now only copies ot in the installed handler (null becomes empty), ignoring is.
-     * Use getObjectAspects(ItemStack, Level) for 1.21.1 scan-complete aspect units; no equivalent level-aware bonus facade exists here. */
+    /**
+     * The 1.7.10 signature, which cannot be answered without a world: the installed handler only returns a copy of
+     * {@code ot} (null becomes an empty list) and ignores {@code is}. The 1.7.10 enrichment of the base aspects with the
+     * contents of a container and the bonuses of equipment and enchantments is <em>not</em> done here: use
+     * {@link #getBonusObjectTags(ItemStack, AspectList, Level)} (or {@link #getObjectAspects(ItemStack, Level)}, which
+     * already holds all of it). Its contract differs, so do not just add the level to an old call.
+     */
     public static AspectList getBonusObjectTags(ItemStack is, AspectList ot) {
         AspectList result = ThaumcraftApi.internalMethods.getBonusObjectTags(is, ot);
         return result == null ? new AspectList() : result;
     }
 
     /**
-     * The complete aspects of one item as a scan sees them, plus {@code bonus} on top: the world-scoped form of the
-     * original {@code getBonusObjectTags(ItemStack, AspectList)}. Not a 1.7.10 signature.
+     * The aspects of one item as {@link #getObjectAspects(ItemStack, Level)} gives them, plus {@code bonus} on top: the
+     * world-scoped form of the original {@code getBonusObjectTags(ItemStack, AspectList)}. Not a 1.7.10 signature.
      *
      * <p><b>This is not the 1.7.10 contract.</b> The original took the BASE aspects of the item in its second argument
      * and returned them enriched with the bonuses. Here the base is already part of the result, so do not pass
      * {@code getObjectAspects(stack, level)} as {@code bonus}: every amount would be counted twice. Pass {@code null}
      * for the aspects of the stack alone, or only the extra aspects you want added.</p>
      *
-     * <p><b>The result</b> is a new list, per single item (the count of the stack is not applied), made of: the
-     * registered, recipe-derived or inferred aspects of the item ({@link #getObjectAspects(ItemStack, Level)}), the
-     * contents of an essentia container (a filled jar, a phial, a crystal, wisp essence, a bound jar label), and the
-     * bonuses of worn equipment and of enchantments, culled to the six most valuable aspects ({@link #cullTags})
-     * without capping amounts; then {@code bonus} is added on top by summing, <em>after</em> the culling, so the result
-     * can hold more than six aspects. {@code bonus} is never modified.</p>
+     * <p><b>The result</b> is a new list, per single item (the count of the stack is not applied). Its base part is
+     * <em>exactly</em> {@code getObjectAspects(stack, level)}, which is already the complete answer of a scan: the
+     * registered, recipe-derived or inferred aspects of the item (a group of damage values registered together is
+     * resolved as a scan resolves it), the contents of an essentia container (a filled jar, a phial, a crystal, wisp
+     * essence, a bound jar label), and the bonuses of worn equipment and of enchantments, culled to the six most valuable
+     * aspects ({@link #cullTags}) without capping amounts. This method adds only {@code bonus}, by summing,
+     * <em>after</em> the culling, so the result can hold more than six aspects. {@code bonus} is never modified. When you
+     * have no bonus to add, {@code getObjectAspects(stack, level)} is the plain way to ask.</p>
      *
      * <p>An empty or null stack or a null level contributes nothing: the result is then a copy of {@code bonus} (an
      * empty list for null). A replaced handler that answers null gives an empty list. Either side; the recipe-derived
@@ -387,7 +393,8 @@ public class ThaumcraftApiHelper {
      * <p>Server side only, on the server thread (another thread throws {@link IllegalStateException}).</p>
      *
      * @return true when this call discovered the aspect; false when the player already knew it, on a client, for a
-     *         null player or aspect, and for an aspect that is not registered under its tag
+     *         null player or aspect, for an aspect that is not registered under its tag, and when the player's
+     *         knowledge could not be read (it is kept untouched then, as everywhere else)
      */
     public static boolean discoverAspect(ServerPlayer player, Aspect aspect) {
         return ThaumcraftApi.internalMethods.discoverAspect(player, aspect);
@@ -401,14 +408,15 @@ public class ThaumcraftApiHelper {
      * <p><b>The markers are the mod's own keys</b> and are meant to travel unchanged, not to be built or parsed: a basic
      * scan is {@code "@"} followed by the registry id of the item or the name of the entity or phenomenon, an advanced
      * scan {@code "#"} followed by the same (it replaces the {@code "@"} marker). A marker is never empty and at most
-     * {@link Scans#MAX_KEY_LENGTH} characters long.</p>
+     * 1024 characters long ({@link Scans#MAX_KEY_LENGTH}): a longer one in the knowledge (the mod never writes one; a
+     * hand-edited save or an add-on's own scan handler could) is left out of the snapshot instead of failing the call.</p>
      *
      * <p><b>Not included:</b> the research clues a scan revealed ({@code "@KEY"} entries among the completed research;
      * {@link #getCompletedResearch} leaves them out and {@link #completeResearch} refuses them), the discovered aspects
      * ({@link #getDiscoveredAspects(Player)}) and the research points ({@link #getAspectPool}).</p>
      *
      * <p>Both sides for the client's own player; the knowledge of another player is only known to the server. An empty
-     * snapshot for a null player.</p>
+     * snapshot for a null player and for knowledge that could not be read. Never throws for the content of the knowledge.</p>
      */
     public static Scans getScans(Player player) {
         Scans scans = ThaumcraftApi.internalMethods.getScans(player);
@@ -422,12 +430,14 @@ public class ThaumcraftApiHelper {
      *
      * <p>A marker the player already has is not added again, in either of its two forms: a basic marker ({@code "@x"})
      * is skipped when the player holds {@code "@x"} or {@code "#x"}; an advanced marker ({@code "#x"}) is added and
-     * replaces a basic one. Adding is idempotent, and the order of the markers does not matter.</p>
+     * replaces a basic one. Adding is idempotent. The resulting knowledge and the returned count do not depend on the
+     * order of the markers: a snapshot that holds both {@code "@x"} and {@code "#x"} (an add-on can build one by hand)
+     * counts as the one marker {@code "#x"}.</p>
      *
      * <p>Server side only, on the server thread (another thread throws {@link IllegalStateException}).</p>
      *
      * @return the number of markers that were new; the player is synced only when it is above zero. Zero on a
-     *         client and for null arguments
+     *         client, for null arguments and when the player's knowledge could not be read (nothing is changed then)
      */
     public static int addScans(ServerPlayer player, Scans scans) {
         return ThaumcraftApi.internalMethods.addScans(player, scans);
@@ -436,15 +446,17 @@ public class ThaumcraftApiHelper {
     /**
      * An immutable snapshot of the scan markers of a player, as {@link #getScans} returns it and {@link #addScans}
      * takes it. Not a 1.7.10 type. The three sets keep the order of the player's knowledge; each marker is a non-empty
-     * string of at most {@value #MAX_KEY_LENGTH} characters (the keys of the mod are far shorter; the bound keeps the knowledge
-     * sync packet well inside the limit of an NBT string).
+     * string of at most 1024 characters, {@link #MAX_KEY_LENGTH} (the keys of the mod are far shorter; the bound keeps the
+     * knowledge sync packet well inside the limit of an NBT string). The constructor throws
+     * {@link IllegalArgumentException} for a marker that is null, empty or longer, and {@link NullPointerException} for a
+     * null set.
      *
      * @param items      markers of scanned items, for example {@code "@minecraft:diamond"}
      * @param entities   markers of scanned entities
      * @param phenomena  markers of scanned phenomena (aura nodes)
      */
     public record Scans(Set<String> items, Set<String> entities, Set<String> phenomena) {
-        /** The longest marker a snapshot accepts; the markers the mod writes are a registry id or a node id, well below it. */
+        /** The longest marker a snapshot accepts, 1024 characters; the markers the mod writes are a registry id or a node id, well below it. */
         public static final int MAX_KEY_LENGTH = 1024;
         /** No scan at all. */
         public static final Scans EMPTY = new Scans(Set.of(), Set.of(), Set.of());
@@ -482,24 +494,53 @@ public class ThaumcraftApiHelper {
     // BlockUtils.breakFurthestBlock, the two helpers of the Axe of the Stream.
 
     /**
-     * Whether the block at the position is a log by the rule of the Axe of the Stream: the 1.21.1 form of the original
-     * {@code Utils.isWoodLog(world, x, y, z)}. It answers "may the furthest-log walk of {@link #breakFurthestBlock} step
-     * on this cell", and nothing else: it says nothing about whether the block belongs to a tree.
+     * Whether the block at the position is a log: the 1.21.1 form of the original {@code Utils.isWoodLog(world, x, y, z)}.
+     * It answers "may the furthest-log walk of {@link #breakFurthestBlock} step on this cell", and nothing else: it says
+     * nothing about whether the block belongs to a tree.
      *
-     * <p><b>The rule.</b> True for a block in the block tag {@code #minecraft:logs} (so every log, wood and stem of the
-     * tag, stripped ones and the Greatwood and Silverwood logs of Thaumcraft included) and for any leaf block; false for
-     * everything else, air included, and false for the plain oak log ({@code minecraft:oak_log}). This is the rule of the
-     * port's {@code Utils.isWoodLog}. The original asked the block whether it can sustain leaves (a log does) or whether
-     * a configured list of "woodLog" ore entries names it; how the port's rule differs for oak and for leaves is listed
-     * in {@code docs/audit/KNOWN_DEVIATIONS.md} section 9.</p>
+     * <p><b>The rule.</b> True for a block in the block tag {@code #minecraft:logs}: every log, wood, stripped log and
+     * stem of the tag, the plain oak log among them, and the Greatwood and Silverwood logs of Thaumcraft. False for
+     * everything else: leaf blocks, planks, air, and a log of another mod that is not in the tag. The original accepted
+     * every non-air block that can sustain leaves (a log does, a leaf block does not) and every entry of its list of
+     * ore dictionary logs; in 1.21.1 the tag is both (original {@code Utils.java:202-211}, read in
+     * {@code docs/analysis/2026-10-19-golem-lumber.md}). It is the broad original rule, not the set of the port's own Axe
+     * of the Stream, which deliberately fells a narrower one (the unstripped logs of the six old trees and the Greatwood
+     * and Silverwood logs).</p>
      *
      * <p>Only the block state is read (no block entity, no hardness, no ownership). A position in a chunk that is not
      * loaded, or outside the build height, is not a log; the call never loads a chunk. Either side; read-only; cheap.
      * False for null arguments.</p>
      */
     public static boolean isWoodLog(Level level, BlockPos pos) {
-        if (level == null || pos == null || !level.hasChunkAt(pos)) return false;
+        if (level == null || pos == null || level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos)) return false;
         return Utils.isWoodLog(level, pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    /**
+     * Where {@link #breakFurthestBlock} would break a block, without breaking anything: the end of the greedy walk that
+     * starts at the clicked log. Not a 1.7.10 method; it exists so that a caller can ask a claims or protection mod about
+     * the cell that will be broken, which can lie up to 24 blocks sideways and 48 up or down from {@code pos}
+     * (see the walk described at {@link #breakFurthestBlock}).
+     *
+     * <p>The answer is the cell the next {@code breakFurthestBlock(level, pos, block, player)} call breaks, as long as no
+     * block changes in between and the player is allowed to break it; it is {@code pos} itself when no other log
+     * qualifies. It is a new immutable position. Felling a tree with protection is therefore a loop of: find the cell, ask
+     * your protection about that cell, call {@code breakFurthestBlock} only if it agrees (and stop the loop when it does not).</p>
+     *
+     * <p>Null when nothing would be broken: a null argument, a {@code pos} outside the build height or in a chunk that is
+     * not loaded, a start that is not exactly {@code block} or is not a log ({@link #isWoodLog}), and a start that cannot
+     * be broken. Read-only, loads no chunk (a cell in an unloaded chunk is no link of the walk), and keeps no state, so it
+     * works on either side and on any thread that may read the level.</p>
+     *
+     * @param level the level
+     * @param pos   the clicked log, where the walk starts
+     * @param block the block the walk follows, normally {@code level.getBlockState(pos).getBlock()}
+     */
+    public static BlockPos findFurthestBlock(Level level, BlockPos pos, Block block) {
+        if (level == null || pos == null || block == null || level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos)) return null;
+        BlockState start = level.getBlockState(pos);
+        if (start.getBlock() != block || !Utils.isWoodLogState(start) || start.getDestroySpeed(level, pos) < 0.0F) return null;
+        return BlockUtils.findFurthestBlock(level, pos.getX(), pos.getY(), pos.getZ(), block);
     }
 
     /**
@@ -517,12 +558,14 @@ public class ThaumcraftApiHelper {
      * crossed; a branch that is scanned first and ends early hides a longer branch (the walk is the first local
      * maximum, not the farthest log of the tree); a neighbouring tree of the same wood is followed too. The walk never
      * leaves the box |dx| &lt;= 24, |dy| &lt;= 48, |dz| &lt;= 24 around {@code pos}; the first scanned cell outside the box
-     * ends the whole walk (an original quirk: the remaining cells of that scan are not looked at).</p>
+     * ends the whole walk (an original quirk: the remaining cells of that scan are not looked at).
+     * {@link #findFurthestBlock} answers where it ends without breaking anything.</p>
      *
-     * <p><b>What is broken.</b> Only the cell the walk ended on; the logs on the way stay. When no cell qualifies that
-     * cell is {@code pos} itself, <em>whatever block it holds</em>: the original never checked the start, because the
-     * axe called {@link #isWoodLog} first. Do the same, and pass the block that is at {@code pos}, or a stone will be
-     * mined by a call meant for a tree.</p>
+     * <p><b>What is broken.</b> Only the cell the walk ended on; the logs on the way stay. The start must itself be a log
+     * of {@code block}: for any other start (air, dirt, a chest...) nothing is broken and the answer is false. (The
+     * original broke the start whatever it was, because its axe called {@link #isWoodLog} first; as a public helper
+     * this one asks that itself, so a position forwarded by a client cannot be used to mine an arbitrary block.)
+     * When no other log qualifies, the start itself is the cell that is broken.</p>
      *
      * <p><b>Drops.</b> The block is removed and drops its normal loot, rolled with the main-hand item of
      * {@code player} (Fortune and Silk Touch count), as items at the broken cell; they do not follow the player. A
@@ -530,36 +573,53 @@ public class ThaumcraftApiHelper {
      *
      * <p><b>Tool wear: none.</b> The held item takes no damage, the player gets no statistics or exhaustion, and no
      * loader break event is fired; the player's own Axe of the Stream does not use this helper in the port (it breaks
-     * through the normal break path and wears the axe). <b>No protection check:</b> spawn protection, the world border,
-     * claims and permission mods are not asked for any cell, and the broken cell can be up to 24 blocks sideways and
-     * 48 up or down from {@code pos}. An add-on that cares must check {@code level.mayInteract(player, pos)} or walk
-     * the tree itself.</p>
+     * through the normal break path and wears the axe).</p>
      *
-     * <p><b>Afterwards</b> every cell within three blocks of the broken one gets a scheduled block tick 150 to 299 ticks
-     * later (the original's delayed neighbourhood update, which the leaves around a felled log answer) and clients see
-     * the block update.</p>
+     * <p><b>Protection.</b> The broken cell is far from {@code pos} and unknown before the call, so the game's own rules
+     * are applied to <em>that</em> cell: it must be inside the world border, and for a non-null player it must not be
+     * under spawn protection ({@code level.mayInteract(player, cell)}), and the player's game mode must allow breaking
+     * it (a spectator, and an adventure player without a tool that may break it, break nothing). When a rule refuses, the
+     * answer is false and nothing is changed. A claims, land-protection or permission mod is <b>not</b> asked, and no
+     * loader break event is fired, for any cell (the original asked nothing either): on claimed land call
+     * {@link #findFurthestBlock} first, ask that mod about the cell it returns, and only then call this method. Do not
+     * check only the clicked {@code pos}: it is not the cell that is broken.</p>
      *
-     * <p><b>Return value.</b> True when the walk ended on a cell that is not air and can be broken: that cell was handed
-     * to the harvester (like the original, true does not prove the block was removed: another mod can veto the removal
-     * and the call still answers true). False, with nothing changed, for a client level, a null argument, a start in a
-     * chunk that is not loaded, an air start (the helper behind this method answers true for air and plays a break
-     * effect), and an unbreakable block such as bedrock at the end of the walk. So {@code while (breakFurthestBlock(...))} ends
-     * once the start cell is air.</p>
+     * <p><b>Afterwards</b> every loaded cell within three blocks of the broken one gets a scheduled block tick 150 to 299
+     * ticks later (the original's delayed neighbourhood update, which the leaves around a felled log answer) and clients
+     * see the block update.</p>
+     *
+     * <p><b>Return value.</b> True when the walk ended on a cell that is not air and can be broken, and the rules above
+     * agreed: that cell was handed to the harvester (like the original, true does not prove the block was removed:
+     * another mod can veto the removal and the call still answers true). False, with nothing changed, for a client
+     * level, a null argument, a start that is not a log of {@code block}, a start in a chunk that is not loaded, an end
+     * that a protection rule refuses and an end that cannot be broken. So {@code while (breakFurthestBlock(...))} ends
+     * once the start cell is air; put a limit on the loop anyway.</p>
      *
      * <p><b>Side and thread.</b> Server side, on the server thread; on another thread it throws
-     * {@link IllegalStateException}, because the walk keeps its state in static fields (as the original did) and is not
-     * reentrant. Cells inside the box that lie in unloaded chunks are read, and so loaded, like any block read.</p>
+     * {@link IllegalStateException}, because it breaks blocks and spawns items. It reads only loaded chunks and loads
+     * none: a cell in an unloaded chunk is no link of the walk (the original read, and so generated, such a chunk).
+     * Unlike the original it keeps no static state, so it is reentrant.</p>
      *
      * @param level  the level; a client level returns false
      * @param pos    the clicked log, where the walk starts
      * @param block  the block the walk follows, normally {@code level.getBlockState(pos).getBlock()}
-     * @param player the player who breaks it; decides the drops; may be null
+     * @param player the player who breaks it; decides the drops and the rules above; may be null
      */
     public static boolean breakFurthestBlock(Level level, BlockPos pos, Block block, Player player) {
         if (!(level instanceof ServerLevel server) || pos == null || block == null) return false;
         if (!server.getServer().isSameThread()) throw new IllegalStateException("breakFurthestBlock may only be called on the server thread");
-        if (!server.hasChunkAt(pos) || server.getBlockState(pos).isAir()) return false;
-        return BlockUtils.breakFurthestBlock(server, pos.getX(), pos.getY(), pos.getZ(), block, player);
+        BlockPos end = findFurthestBlock(server, pos, block);
+        if (end == null || !mayBreakFar(server, end, player)) return false;
+        return BlockUtils.breakFurthestBlockAt(server, pos, end, player, false, 0);
+    }
+
+    /** The game's own rules for breaking one block at a distance on behalf of a player (or of nobody). */
+    private static boolean mayBreakFar(ServerLevel level, BlockPos pos, Player player) {
+        if (!level.getWorldBorder().isWithinBounds(pos)) return false;
+        if (player == null) return true;
+        if (!level.mayInteract(player, pos)) return false;
+        return !(player instanceof ServerPlayer serverPlayer)
+                || !serverPlayer.blockActionRestricted(level, pos, serverPlayer.gameMode.getGameModeForPlayer());
     }
 
     /**

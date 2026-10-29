@@ -34,6 +34,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.joml.Vector3f;
 import thaumcraft.api.ItemApi;
+import thaumcraft.api.ThaumcraftSoundIds;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.baubles.BaubleType;
@@ -132,7 +133,7 @@ public class ItemXPTalisman extends Item implements IBauble, ITTinkererRegistera
     private static void consumeXPOrb(Level level, ExperienceOrb orb) {
         if (!level.isClientSide) {
             orb.discard();
-            BasicItemSupport.playThaumcraftSound(level, orb, "zap", orb.getValue() / 10F, 1F);
+            BasicItemSupport.playThaumcraftSound(level, orb, ThaumcraftSoundIds.ZAP, orb.getValue() / 10F, 1F);
         } else {
             // 1.7.10: a green wisp of the size xp / 5 (Thaumcraft's particle engine is not API: a green dust particle)
             level.addParticle(new DustParticleOptions(new Vector3f(0.1F, 0.9F, 0.1F), Mth.clamp(orb.getValue() / 5F, 0.5F, 4F)),

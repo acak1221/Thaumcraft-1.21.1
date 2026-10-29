@@ -17,10 +17,15 @@ public final class PrimalWispParticle extends SingleQuadParticle implements thau
     private final float initialSize;
     private final int destination;
     private final Entity target;
+    /** Original FXWisp.shrink: true fades the mote out linearly over its life, false grows it for half the life and shrinks it for the rest. */
+    private final boolean shrink;
     /** Original FXWisp:44 - the quad size of the mote is the particle scale, the half size is 0.5f * scale. */
     public static float moteQuadSize(float scale) { return scale; }
     private PrimalWispParticle(ClientLevel level,double x,double y,double z,float size,int type,Entity target,boolean physics,float gravity){
-        super(level,x,y,z);this.target=target;xd=yd=zd=0;xo=x;yo=y;zo=z;
+        this(level,x,y,z,size,type,target,physics,gravity,true);
+    }
+    private PrimalWispParticle(ClientLevel level,double x,double y,double z,float size,int type,Entity target,boolean physics,float gravity,boolean shrink){
+        super(level,x,y,z);this.target=target;this.shrink=shrink;xd=yd=zd=0;xo=x;yo=y;zo=z;
         // The original FXWisp:44 keeps the particle scale of the caller and draws the mote with the half size
         // 0.5f * scale * ageScale. The vanilla particle engine halves the quad size, so the quad size is the
         // scale itself. The original never randomises that size.
@@ -56,6 +61,24 @@ public final class PrimalWispParticle extends SingleQuadParticle implements thau
             add(mote);
         }
     }
+    /**
+     * Original {@code ClientProxy.wispFX2}: one wisp of a primal colour that drifts with the given gravity.
+     *
+     * @param type   0 to 5, the colour of the original types
+     * @param noClip whether the wisp passes through blocks (the original {@code clip} argument sets {@code noClip})
+     */
+    public static void spawn(ClientLevel level,double x,double y,double z,float size,int type,boolean shrink,boolean noClip,float gravity){
+        add(new PrimalWispParticle(level,x,y,z,size,type,null,!noClip,gravity,shrink));
+    }
+    /**
+     * Original {@code ClientProxy.wispFX3}: one wisp of a primal colour that flies from a point to another and arrives when it dies
+     * (its velocity is the distance over its lifetime, as in the original constructor).
+     */
+    public static void spawnToward(ClientLevel level,double x,double y,double z,double tx,double ty,double tz,float size,int type,boolean shrink,float gravity){
+        var mote=new PrimalWispParticle(level,x,y,z,size,type,null,true,gravity,shrink);
+        if(mote.lifetime>0){mote.xd=(tx-mote.x)/mote.lifetime;mote.yd=(ty-mote.y)/mote.lifetime;mote.zd=(tz-mote.z)/mote.lifetime;}
+        add(mote);
+    }
     @Override public void tick(){
         xo=x;yo=y;zo=z;if(age++>=lifetime){remove();return;}yd-=.04D*gravity;move(xd,yd,zd);
         if(target!=null){
@@ -66,7 +89,15 @@ public final class PrimalWispParticle extends SingleQuadParticle implements thau
             if(!Double.isFinite(xd+yd+zd))remove();
         }else{xd*=.98F;yd*=.98F;zd*=.98F;if(onGround){xd*=.7F;zd*=.7F;}}
     }
-    @Override public float getQuadSize(float partial){return initialSize*(lifetime-age)/(float)lifetime;}
+    @Override public float getQuadSize(float partial){return shrink?initialSize*(lifetime-age)/(float)lifetime:initialSize*sizeFactor(false,age,lifetime);}
+    /**
+     * The share of its full size a typed wisp has at an age (original FXWisp render: {@code shrink} fades it out over the whole life; otherwise it
+     * grows to full size at half the life and shrinks again, {@code age / (lifetime / 2)} folded at one).
+     */
+    public static float sizeFactor(boolean shrink,int age,int lifetime){
+        if(shrink)return(lifetime-age)/(float)lifetime;
+        float scale=age/(float)Math.max(1,lifetime/2);return scale>1?2-scale:scale;
+    }
     @Override protected float getU0(){return 0;}
     @Override protected float getU1(){return .125F;}
     @Override protected float getV0(){return .875F;}

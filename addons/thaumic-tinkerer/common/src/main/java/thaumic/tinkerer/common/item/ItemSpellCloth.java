@@ -13,7 +13,7 @@
  */
 package thaumic.tinkerer.common.item;
 
-import net.minecraft.util.Mth;
+import java.awt.Color;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -70,11 +70,11 @@ public class ItemSpellCloth extends Item implements ITTinkererRegisterable {
 
     /**
      * 1.7.10 {@code getColorFromItemStack}: hue 0.75 (violet), saturation from 0.5 for a new cloth down to 0 for a worn-out
-     * one, full brightness. Opaque ARGB, as the item colour handler expects.
+     * one, full brightness ({@code Color.HSBtoRGB}, as the original). Opaque ARGB, as the item colour handler expects.
      */
     public static int color(ItemStack stack) {
         float max = stack.getMaxDamage();
         float saturation = (max - (float) stack.getDamageValue()) / max * 0.5F;
-        return 0xFF000000 | Mth.hsvToRgb(0.75F, saturation, 1F);
+        return Color.HSBtoRGB(0.75F, saturation, 1F);
     }
 }

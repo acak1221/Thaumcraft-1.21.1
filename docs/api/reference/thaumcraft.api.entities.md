@@ -4,7 +4,7 @@
 
 [All packages](README.md)
 
-Types: [`IEldritchMob`](#ieldritchmob), [`ITaintedMob`](#itaintedmob), [`IThaumcraftBoss`](#ithaumcraftboss)
+Types: [`IEldritchMob`](#ieldritchmob), [`ITaintedMob`](#itaintedmob), [`IThaumcraftBoss`](#ithaumcraftboss), [`ThaumcraftEntities`](#thaumcraftentities)
 
 ## IEldritchMob
 
@@ -40,3 +40,304 @@ void generateName()
 ```
 
 Original `EntityThaumcraftBoss.generateName`. The base boss does not name itself at all, the eldritch warden and the eldritch construct do.
+
+## ThaumcraftEntities
+
+```java
+public final class ThaumcraftEntities
+```
+
+The stable keys of the creatures and projectiles of Thaumcraft an add-on may need to recognise.
+
+1.7.10 add-ons recognised a Thaumcraft entity by its class (`thaumcraft.common.entities.monster.EntityWisp`, `EntityGolemBase`...), which is not public in 1.21.1. The identity of an entity is now its `EntityType`, registered under the `thaumcraft` namespace; these keys are those identities, so an add-on never writes the strings. `IEldritchMob`, `ITaintedMob` and `IThaumcraftBoss` stay the way to ask for a whole family; a key names one creature.
+
+The keys exist from the first line of the class, the entity types are registered by Thaumcraft before `IThaumcraftAddon.onThaumcraftReady`. `holder` and `type` throw `IllegalStateException` while a key is not registered. Everything here is safe on any thread once the registry is frozen.
+
+```java
+if (ThaumcraftEntities.is(target, ThaumcraftEntities.GOLEM)) { ... }       // an entity in hand
+EntityType<?> wisp = ThaumcraftEntities.type(ThaumcraftEntities.WISP);       // a type for a spawner or a predicate
+```
+
+<a id="thaumcraftentities-wisp"></a>
+```java
+public static final ResourceKey<EntityType<?>> WISP
+```
+
+Original `EntityWisp`: the wisp of an aspect.
+
+<a id="thaumcraftentities-firebat"></a>
+```java
+public static final ResourceKey<EntityType<?>> FIREBAT
+```
+
+Original `EntityFireBat`.
+
+<a id="thaumcraftentities-brainy_zombie"></a>
+```java
+public static final ResourceKey<EntityType<?>> BRAINY_ZOMBIE
+```
+
+Original `EntityBrainyZombie`.
+
+<a id="thaumcraftentities-giant_brainy_zombie"></a>
+```java
+public static final ResourceKey<EntityType<?>> GIANT_BRAINY_ZOMBIE
+```
+
+Original `EntityGiantBrainyZombie`.
+
+<a id="thaumcraftentities-pech"></a>
+```java
+public static final ResourceKey<EntityType<?>> PECH
+```
+
+Original `EntityPech`.
+
+<a id="thaumcraftentities-mind_spider"></a>
+```java
+public static final ResourceKey<EntityType<?>> MIND_SPIDER
+```
+
+Original `EntityMindSpider`.
+
+<a id="thaumcraftentities-thaumic_slime"></a>
+```java
+public static final ResourceKey<EntityType<?>> THAUMIC_SLIME
+```
+
+Original `EntityThaumicSlime`.
+
+<a id="thaumcraftentities-cultist_cleric"></a>
+```java
+public static final ResourceKey<EntityType<?>> CULTIST_CLERIC
+```
+
+Original `EntityCultistCleric`.
+
+<a id="thaumcraftentities-cultist_knight"></a>
+```java
+public static final ResourceKey<EntityType<?>> CULTIST_KNIGHT
+```
+
+Original `EntityCultistKnight`.
+
+<a id="thaumcraftentities-cultist_leader"></a>
+```java
+public static final ResourceKey<EntityType<?>> CULTIST_LEADER
+```
+
+Original `EntityCultistLeader`.
+
+<a id="thaumcraftentities-cultist_portal"></a>
+```java
+public static final ResourceKey<EntityType<?>> CULTIST_PORTAL
+```
+
+Original `EntityCultistPortal`.
+
+<a id="thaumcraftentities-cultist_portal_greater"></a>
+```java
+public static final ResourceKey<EntityType<?>> CULTIST_PORTAL_GREATER
+```
+
+Original `EntityCultistPortalGreater`.
+
+<a id="thaumcraftentities-eldritch_guardian"></a>
+```java
+public static final ResourceKey<EntityType<?>> ELDRITCH_GUARDIAN
+```
+
+Original `EntityEldritchGuardian`.
+
+<a id="thaumcraftentities-eldritch_warden"></a>
+```java
+public static final ResourceKey<EntityType<?>> ELDRITCH_WARDEN
+```
+
+Original `EntityEldritchWarden`.
+
+<a id="thaumcraftentities-eldritch_golem"></a>
+```java
+public static final ResourceKey<EntityType<?>> ELDRITCH_GOLEM
+```
+
+Original `EntityEldritchGolem`.
+
+<a id="thaumcraftentities-eldritch_crab"></a>
+```java
+public static final ResourceKey<EntityType<?>> ELDRITCH_CRAB
+```
+
+Original `EntityEldritchCrab`.
+
+<a id="thaumcraftentities-watcher"></a>
+```java
+public static final ResourceKey<EntityType<?>> WATCHER
+```
+
+Original `EntityWatcher`.
+
+<a id="thaumcraftentities-inhabited_zombie"></a>
+```java
+public static final ResourceKey<EntityType<?>> INHABITED_ZOMBIE
+```
+
+Original `EntityInhabitedZombie`.
+
+<a id="thaumcraftentities-taint_creeper"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_CREEPER
+```
+
+Original `EntityTaintCreeper`.
+
+<a id="thaumcraftentities-taint_spider"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_SPIDER
+```
+
+Original `EntityTaintSpider`.
+
+<a id="thaumcraftentities-taint_swarm"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_SWARM
+```
+
+Original `EntityTaintSwarm`.
+
+<a id="thaumcraftentities-taint_swarmer"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_SWARMER
+```
+
+Original `EntityTaintSporeSwarmer`.
+
+<a id="thaumcraftentities-taint_spore"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_SPORE
+```
+
+Original `EntityTaintSpore`.
+
+<a id="thaumcraftentities-taint_crawler"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_CRAWLER
+```
+
+Original `EntityTaintCrawler`.
+
+<a id="thaumcraftentities-taint_seed"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_SEED
+```
+
+Original `EntityTaintSeed`.
+
+<a id="thaumcraftentities-taint_seed_prime"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINT_SEED_PRIME
+```
+
+Original `EntityTaintSeedPrime`.
+
+<a id="thaumcraftentities-taintacle"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTACLE
+```
+
+Original `EntityTaintacle`.
+
+<a id="thaumcraftentities-taintacle_small"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTACLE_SMALL
+```
+
+Original `EntityTaintacleSmall`.
+
+<a id="thaumcraftentities-taintacle_giant"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTACLE_GIANT
+```
+
+Original `EntityTaintacleGiant`.
+
+<a id="thaumcraftentities-tainted_chicken"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTED_CHICKEN
+```
+
+Original `EntityTaintChicken`.
+
+<a id="thaumcraftentities-tainted_cow"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTED_COW
+```
+
+Original `EntityTaintCow`.
+
+<a id="thaumcraftentities-tainted_pig"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTED_PIG
+```
+
+Original `EntityTaintPig`.
+
+<a id="thaumcraftentities-tainted_sheep"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTED_SHEEP
+```
+
+Original `EntityTaintSheep`.
+
+<a id="thaumcraftentities-tainted_villager"></a>
+```java
+public static final ResourceKey<EntityType<?>> TAINTED_VILLAGER
+```
+
+Original `EntityTaintVillager`.
+
+<a id="thaumcraftentities-golem"></a>
+```java
+public static final ResourceKey<EntityType<?>> GOLEM
+```
+
+Original `EntityGolemBase`: every golem, whatever its material and core.
+
+<a id="thaumcraftentities-traveling_trunk"></a>
+```java
+public static final ResourceKey<EntityType<?>> TRAVELING_TRUNK
+```
+
+Original `EntityTravelingTrunk`.
+
+<a id="thaumcraftentities-frost_shard"></a>
+```java
+public static final ResourceKey<EntityType<?>> FROST_SHARD
+```
+
+Original `EntityFrostShard`: the shard of the frost focus.
+
+<a id="thaumcraftentities-holder"></a>
+```java
+public static Holder<EntityType<?>> holder(ResourceKey<EntityType<?>> key)
+```
+
+The registered entity type of a key, as the holder the 1.21.1 entity calls take.
+
+**Throws:** `IllegalStateException` — when the key is not registered (Thaumcraft's registration has not run yet, or the key is not one of this class)
+
+<a id="thaumcraftentities-type"></a>
+```java
+public static EntityType<?> type(ResourceKey<EntityType<?>> key)
+```
+
+The registered entity type of a key.
+
+**Throws:** `IllegalStateException` — when the key is not registered, see `holder`
+
+<a id="thaumcraftentities-is"></a>
+```java
+public static boolean is(Entity entity, ResourceKey<EntityType<?>> key)
+```
+
+Whether an entity is of the type of a key: the recogniser that replaces `entity instanceof EntityWisp`. An entity of an add-on's own type, a vanilla entity and `null` are no match; this never throws for an unregistered key.

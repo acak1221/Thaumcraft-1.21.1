@@ -1,0 +1,21 @@
+{
+  "description": {
+    "translate": "enchantment.thaumictinkerer.ascent_boost"
+  },
+  "supported_items": "#thaumictinkerer:enchantable/ascent_boost",
+  "weight": 1,
+  "max_level": 4,
+  "min_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "legs"
+  ],
+  "effects": {}
+}

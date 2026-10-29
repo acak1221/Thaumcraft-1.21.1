@@ -164,13 +164,16 @@ public class FocusBelt extends Item implements IBauble, IFocusPouch {
 
     /**
      * The belt's own use. A pouch is never put on by a click, so unlike the talisman it needs no equipsOnUse: the Baubles
-     * menu puts it on, and the selector lists its foci either way.
+     * menu puts it on, and the selector lists its foci either way. A belt that holds data it cannot read is left alone, as the
+     * selector leaves it alone.
      */
     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack belt = player.getItemInHand(hand);
         ItemStack other = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         if (level.isClientSide) return InteractionResultHolder.success(belt);
-        ItemStack[] cells = getInventory(belt);
+        ItemStack[] cells;
+        try { cells = getInventory(belt); }
+        catch (IllegalArgumentException unreadable) { return InteractionResultHolder.fail(belt); } // foreign data: change nothing
         if (player.isShiftKeyDown()) {
             for (int cell = CELLS - 1; cell >= 0; cell--) {
                 if (cells[cell].isEmpty()) continue;
@@ -194,8 +197,8 @@ public class FocusBelt extends Item implements IBauble, IFocusPouch {
 
 | Метод | Контракт |
 |---|---|
-| `getInventory(pouch)` | все ячейки по порядку, `ItemStack.EMPTY` для пустой, никогда не `null`; длина — число ячеек и для одного стака не меняется; независимые копии; вызывается на обеих сторонах. Для содержимого, которое вы не можете прочитать, бросьте `IllegalArgumentException`: выбор тогда игнорирует этот мешочек и не трогает его |
-| `setInventory(pouch, contents)` | заменяет все ячейки переданного стака (длина та же, что у `getInventory`); копируйте то, что оставляете, и больше ничего не меняйте. Поток сервера. Выбор вызывает его на живом стаке, который остаётся в своём слоте, и на черновых копиях, пока строит план |
+| `getInventory(pouch)` | все ячейки по порядку, `ItemStack.EMPTY` для пустой, никогда не `null`; длина — число ячеек и для одного стака не меняется; независимые копии; вызывается на обеих сторонах. Для содержимого, которое вы не можете прочитать, бросьте `IllegalArgumentException`: выбор тогда игнорирует этот мешочек и не трогает его (любое другое `RuntimeException` обрабатывается так же и пишется в журнал один раз, поэтому ваша ошибка не уронит клиент, но это не способ сказать «не читается») |
+| `setInventory(pouch, contents)` | заменяет все ячейки переданного стака (длина та же, что у `getInventory`); копируйте то, что оставляете, и больше ничего не меняйте. Поток сервера. Выбор вызывает его на живом стаке, который остаётся в своём слоте, и на черновых копиях, пока строит план. Если он бросает исключение, ничего не теряется: пока выбор строит план, мешочек не отдаёт и не принимает фокус, а исключение на живом стаке отменяет выбор и возвращает все уже записанные стаки на место |
 
 Что выбор делает с мешочком:
 

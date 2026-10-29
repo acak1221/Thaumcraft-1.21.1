@@ -224,7 +224,9 @@ ESSENTIA_BOWL_TYPE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id("
 
 ## Эффекты
 
-`ThaumcraftFX` отправляет с сервера пакеты эффектов, которые аддоны 1.7.10 собирали сами:
+`ThaumcraftFX` отправляет эффекты с сервера. Большинство его методов — это пакеты эффектов, которые аддоны 1.7.10 собирали
+сами; у `sparkle`, `burst`, `blockRunes` и `smokeSpiral` исходного пакета нет (это серверные двойники чисто клиентских вызовов
+`proxy`, последняя строка):
 
 | Вызов | Исходный пакет |
 |---|---|
@@ -234,6 +236,8 @@ ESSENTIA_BOWL_TYPE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id("
 | `bubbles(level, pos, rgb)` | `PacketFXBlockBubble` |
 | `essentiaTrail(level, consumer, source, aspect)` | `PacketFXEssentiaSource` |
 | `visDrain(level, consumer, node, aspect)` | `PacketFXVisDrain` |
+| `sparkle(level, x, y, z, size, type, gravity)`, `burst(level, x, y, z, size)`, `blockRunes(level, x, y, z, r, g, b, duration, gravity)`, `smokeSpiral(level, x, y, z, radius, start, minY, rgb)` | нет: серверные двойники `Thaumcraft.proxy.sparkle`, `burst`, `blockRunes` и `smokeSpiral`, которые были клиентскими вызовами |
 
-Клиентские частицы `Thaumcraft.proxy` (`sparkle`, `beam`, `wispFX`...) — внутренности `thaumcraft.client.fx` без
-стабильного фасада: используйте частицы ванили или свои.
+Клиентские частицы `Thaumcraft.proxy` (`sparkle`, `burst`, `wispFX`, `blockRunes`, `beamCont`, `smokeSpiral`,
+`essentiaTrailFx`) — это `thaumcraft.api.client.ThaumcraftClientFX`; четыре серверных двойника выше просят каждого игрока в
+32 блоках нарисовать тот же эффект. См. [клиентские эффекты](world-and-content.md#клиентские-эффекты-частицы).

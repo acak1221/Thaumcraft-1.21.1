@@ -11,18 +11,59 @@
  */
 package thaumic.tinkerer.common.content;
 
-/** Feature group: the wand foci. */
+import dev.architectury.event.events.common.PlayerEvent;
+import net.minecraft.world.item.Item;
+import thaumic.tinkerer.client.FociClient;
+import thaumic.tinkerer.common.item.foci.FociComponents;
+import thaumic.tinkerer.common.item.foci.ItemFocusDeflect;
+import thaumic.tinkerer.common.item.foci.ItemFocusDislocation;
+import thaumic.tinkerer.common.item.foci.ItemFocusEnderChest;
+import thaumic.tinkerer.common.item.foci.ItemFocusFlight;
+import thaumic.tinkerer.common.item.foci.ItemFocusHeal;
+import thaumic.tinkerer.common.item.foci.ItemFocusSmelt;
+import thaumic.tinkerer.common.item.foci.ItemFocusTelekinesis;
+import thaumic.tinkerer.common.lib.LibItemNames;
+import thaumic.tinkerer.common.registry.TTRegistry;
+
+/**
+ * Feature group: the seven ordinary wand foci (Distortion, Dislocation, Ender Rift, Uprising, Mending, Efreet's Flame and
+ * Telekinesis). The three Kami foci belong to {@link KamiGear}.
+ *
+ * <p>Each focus is an item of its own that mounts on a wand ({@code ItemFocusBasic}); research and recipes come from the
+ * items themselves ({@code ITTinkererRegisterable}), as in 1.7.10. The registration order is the 1.7.10 one, which is the
+ * order of the creative tab.</p>
+ */
 public final class Foci implements ContentGroup {
     public static final Foci INSTANCE = new Foci();
 
     private Foci() {}
 
     @Override
-    public void register() {}
+    public void register() {
+        FociComponents.register();
+        // 1.7.10 TTCommonProxy: ItemFocusDeflect.setupBlackList().
+        ItemFocusDeflect.setupBlackList();
+
+        TTRegistry.item(LibItemNames.FOCUS_DEFLECT, () -> new ItemFocusDeflect(new Item.Properties()));
+        TTRegistry.item(LibItemNames.FOCUS_DISLOCATION, () -> new ItemFocusDislocation(new Item.Properties()));
+        TTRegistry.item(LibItemNames.FOCUS_ENDER_CHEST, () -> new ItemFocusEnderChest(new Item.Properties()));
+        TTRegistry.item(LibItemNames.FOCUS_FLIGHT, () -> new ItemFocusFlight(new Item.Properties()));
+        TTRegistry.item(LibItemNames.FOCUS_HEAL, () -> new ItemFocusHeal(new Item.Properties()));
+        TTRegistry.item(LibItemNames.FOCUS_SMELT, () -> new ItemFocusSmelt(new Item.Properties()));
+        TTRegistry.item(LibItemNames.FOCUS_TELEKINESIS, () -> new ItemFocusTelekinesis(new Item.Properties()));
+
+        // 1.7.10 PlayerTracker.onPlayerLogout: the progress of the Mending and Efreet's Flame foci is forgotten.
+        PlayerEvent.PLAYER_QUIT.register(player -> {
+            ItemFocusHeal.forget(player.getUUID());
+            ItemFocusSmelt.forget(player.getUUID());
+        });
+    }
 
     @Override
     public void ready() {}
 
     @Override
-    public void registerClient() {}
+    public void registerClient() {
+        FociClient.register();
+    }
 }

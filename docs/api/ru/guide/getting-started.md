@@ -37,7 +37,7 @@ dependencies {
 `implementation "thaumcraft:Thaumcraft-neoforge:0.1.0-alpha.7"` и запись `[[dependencies.<вашмод>]]` с
 `modId = "thaumcraft"` в `neoforge.mods.toml`.
 
-`fabric.mod.json` примера объявляет обе точки входа и зависимость:
+`fabric.mod.json` примера объявляет точки входа (`main` и `thaumcraft` объяснены ниже; `client` — класс, которому можно называть клиентские классы, см. [клиентские эффекты](world-and-content.md#клиентские-эффекты-частицы)) и зависимость:
 
 <!-- file:examples/example-addon/src/main/resources/fabric.mod.json -->
 ```json
@@ -52,6 +52,7 @@ dependencies {
   "environment": "*",
   "entrypoints": {
     "main": ["com.example.tc4addon.ExampleAddon"],
+    "client": ["com.example.tc4addon.ExampleAddonClient"],
     "thaumcraft": ["com.example.tc4addon.ExampleAddon"]
   },
   "depends": {
@@ -155,11 +156,15 @@ Thaumcraft собирает названия из ключей перевода,
 | стержень с хуком обновления, колпачок, фокус | `ExampleAddon.wandParts()`, `SparkFocus.java` | [жезлы и фокусы](wands-and-foci.md) |
 | блок, который хранит и отдаёт эссенцию и отвечает жезлу | `EssentiaBowlBlock.java`, `EssentiaBowlBlockEntity.java` | [эссенция и вис](essentia-and-vis.md) |
 | амулет со скидкой, рунным зарядом и варпом | `OrderAmulet.java` | [снаряжение и безделушки](gear-and-baubles.md) |
+| безделушка, которая оставляет правый клик себе, и список надетого | `OrderTalisman.java` | [снаряжение и безделушки](gear-and-baubles.md#безделушка-которая-оставляет-правый-клик-себе) |
+| мешочек для фокусов, который одновременно пояс и читается выбором фокуса жезла | `FocusBelt.java` | [жезлы и фокусы](wands-and-foci.md#мешочки-для-фокусов-ifocuspouch) |
 | очки исследований и завершение исследования из предмета | `InsightScroll.java` | [исследования](research.md) |
 | компонент данных с аспектами (кодеки) | `StoredAspects.java`, `ExampleAddon` | [аспекты](aspects.md#аспекты-в-компонентах-данных-файлах-данных-и-пакетах) |
 | копирование сканов и открытых аспектов между игроками | `ShareTome.java` | [исследования](research.md#сканы-открытые-аспекты-и-том-обмена) |
 | рубка дерева помощниками Топора потока | `ExampleAddon.onInitialize()` | [содержимое и мир](world-and-content.md#рубка-деревьев) |
 | варп за крафт, бонус переплавки, мешки с добычей | `ExampleAddon.moreContent()` | [содержимое и мир](world-and-content.md) |
+| существа, эффекты и звуки Thaumcraft по ключу, а не по строке | `ExampleAddon.java` (хук смерти) | [содержимое и мир](world-and-content.md#стабильные-ключи) |
+| частицы (искра, руны, луч) и значки аспектов на клиенте | `ExampleAddonClient.java` | [содержимое и мир](world-and-content.md#клиентские-эффекты-частицы), [значок аспекта](world-and-content.md#значок-аспекта-на-экране) |
 
 Запуск в клиенте разработки:
 

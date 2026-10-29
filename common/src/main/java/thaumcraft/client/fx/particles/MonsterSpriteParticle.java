@@ -45,6 +45,19 @@ public final class MonsterSpriteParticle extends SingleQuadParticle implements t
     public static float burstHalfSize(float scale) { return scale; }
     /** Exact FXBurst constructor entry, shared by the original Wisp/ShockOrb clients. */
     public static void burst(ClientLevel level,double x,double y,double z,float size) { Minecraft.getInstance().particleEngine.add(new MonsterSpriteParticle(level,x,y,z,Kind.BURST,size,0xffffff,0)); }
+    /**
+     * Original {@code ClientProxy.wispFX(world, x, y, z, size, red, green, blue)}: one free-coloured mote of the wisp, drifting with
+     * gravity 0.02, drawn only within the distance the original used for its motes (50 blocks on fancy graphics, 25 otherwise).
+     * The red component of 0 is raised to 1, the quirk of the original constructor.
+     */
+    public static void mote(ClientLevel level,double x,double y,double z,float size,float red,float green,float blue) {
+        var viewer=Minecraft.getInstance().getCameraEntity();int range=Minecraft.useFancyGraphics()?50:25;
+        if(viewer==null || viewer.distanceToSqr(x,y,z)>range*range)return;
+        var mote=new MonsterSpriteParticle(level,x,y,z,Kind.MOTE,size,0xffffff,0);
+        mote.setColor(red,green,blue);
+        if(mote.rCol==0)mote.rCol=1;
+        Minecraft.getInstance().particleEngine.add(mote);
+    }
     public static void fireBat(EntityFireBat bat) {
         if(!(bat.level() instanceof ClientLevel level))return;
         if(bat.getIsExplosive()) {

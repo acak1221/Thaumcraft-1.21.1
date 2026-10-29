@@ -25,12 +25,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.AABB;
+import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.ThaumcraftApiHelper.Scans;
 import thaumcraft.api.aspects.Aspect;
@@ -41,6 +45,7 @@ import thaumcraft.common.items.ItemJar;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.network.KnowledgeSyncPayload;
 import thaumcraft.common.lib.research.PlayerKnowledge;
+import thaumcraft.common.lib.utils.BlockUtils;
 
 /**
  * The knowledge, bonus-tag and tree-felling helpers of the add-on API ({@code ThaumcraftApiHelper}) in a running world:
@@ -206,6 +211,16 @@ public final class KnowledgeApiRuntimeChecks {
             test.assertTrue(b.capture().isEmpty(), "and sends nothing");
             test.assertTrue(!ThaumcraftApiHelper.discoverAspect(b.player, null), "no aspect, nothing discovered");
             test.assertTrue(!ThaumcraftApiHelper.discoverAspect(null, Aspect.TRAP), "no player, nothing discovered");
+            // An aspect that is not registered under its own tag (an add-on retagged it) cannot be written to the knowledge.
+            String trapTag = Aspect.TRAP.getTag();
+            Aspect.TRAP.setTag("kn_retagged_trap");
+            try {
+                test.assertTrue(!ThaumcraftApiHelper.discoverAspect(b.player, Aspect.TRAP), "a retagged aspect is not discovered");
+                test.assertTrue(b.capture().isEmpty() && !kb.hasDiscoveredAspect("kn_retagged_trap") && !kb.hasDiscoveredAspect(trapTag),
+                        "and nothing was written to the knowledge or sent");
+            } finally {
+                Aspect.TRAP.setTag(trapTag);
+            }
 
             // Server thread only: the knowledge is not thread safe.
             expectRefused(() -> ThaumcraftApiHelper.discoverAspect(b.player, Aspect.TRAP), test, "discoverAspect");
@@ -261,6 +276,22 @@ public final class KnowledgeApiRuntimeChecks {
         test.assertTrue(withContents.getAmount(Aspect.AIR) >= 32, "a filled jar shows its essentia: " + withContents.aspects);
         test.assertTrue(sameAmounts(ThaumcraftApiHelper.getObjectAspects(jar, level), withContents), "and the scan readout of the stack agrees");
 
+        // A group of damage values registered together resolves as a scan resolves it: the facade and the readout agree.
+        Item pole = Items.WARPED_FUNGUS_ON_A_STICK;
+        ThaumcraftApi.registerObjectTag(new ItemStack(pole), new int[] {0, 1, 2}, new AspectList().add(Aspect.MOTION, 3).add(Aspect.PLANT, 2));
+        try {
+            ItemStack damaged = new ItemStack(pole);
+            damaged.setDamageValue(2);
+            AspectList scan = ThaumcraftApiHelper.getObjectAspects(damaged, level);
+            test.assertTrue(scan.getAmount(Aspect.MOTION) >= 3 && scan.getAmount(Aspect.PLANT) >= 2,
+                    "fixture: the scan resolves damage 2 through the group registered at damage 0: " + scan.aspects);
+            test.assertTrue(sameAmounts(scan, ThaumcraftApiHelper.getBonusObjectTags(damaged, null, level)),
+                    "the bonus facade resolves the group the way the scan does");
+        } finally {
+            ThaumcraftApi.objectTags.remove(List.of(pole, 0));
+            for (int damage = 0; damage <= 2; damage++) ThaumcraftApi.groupedObjectTags.remove(List.of(pole, damage));
+        }
+
         // Without a stack or a world only the bonus is left.
         AspectList onlyBonus = ThaumcraftApiHelper.getBonusObjectTags(ItemStack.EMPTY, bonus, level);
         test.assertTrue(sameAmounts(bonus, onlyBonus) && onlyBonus != bonus, "an empty stack: a copy of the bonus");
@@ -280,20 +311,21 @@ public final class KnowledgeApiRuntimeChecks {
         ServerLevel level = test.getLevel();
         BlockPos at = test.absolutePos(new BlockPos(1, 2, 1));
         try {
-            for (Block block : new Block[] {Blocks.BIRCH_LOG, Blocks.SPRUCE_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG,
-                    Blocks.MANGROVE_LOG, Blocks.CHERRY_LOG, Blocks.STRIPPED_BIRCH_LOG, Blocks.BIRCH_WOOD, Blocks.CRIMSON_STEM,
-                    ThaumcraftNaturals.GREATWOOD_LOG.get(), ThaumcraftNaturals.SILVERWOOD_LOG.get()}) {
+            // The rule is membership of #minecraft:logs, which the plain oak log is part of (original Utils.isWoodLog: every block that
+            // can sustain leaves, and a log does).
+            for (Block block : new Block[] {Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.SPRUCE_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG,
+                    Blocks.MANGROVE_LOG, Blocks.CHERRY_LOG, Blocks.STRIPPED_OAK_LOG, Blocks.STRIPPED_BIRCH_LOG, Blocks.OAK_WOOD, Blocks.BIRCH_WOOD,
+                    Blocks.CRIMSON_STEM, ThaumcraftNaturals.GREATWOOD_LOG.get(), ThaumcraftNaturals.SILVERWOOD_LOG.get()}) {
                 level.setBlock(at, block.defaultBlockState(), 3);
                 test.assertTrue(ThaumcraftApiHelper.isWoodLog(level, at), block + " is in #minecraft:logs");
             }
-            for (Block block : new Block[] {Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES}) {
+            // A leaf block sustains no leaves and is no log, so a click on a hedge is no tree.
+            for (Block block : new Block[] {Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.AZALEA_LEAVES}) {
                 level.setBlock(at, block.defaultBlockState(), 3);
-                test.assertTrue(ThaumcraftApiHelper.isWoodLog(level, at), block + " is a leaf block, which the port rule counts");
+                test.assertTrue(!ThaumcraftApiHelper.isWoodLog(level, at), block + " is a leaf block, which is no log");
             }
-            // PINS THE CURRENT PORT RULE, not a verified original (see KNOWN_DEVIATIONS section 9): the plain oak log is no log.
-            level.setBlock(at, Blocks.OAK_LOG.defaultBlockState(), 3);
-            test.assertTrue(!ThaumcraftApiHelper.isWoodLog(level, at), "the plain oak log is not recognised by the port rule");
-            for (Block block : new Block[] {Blocks.AIR, Blocks.STONE, Blocks.DIRT, Blocks.OAK_PLANKS, Blocks.BIRCH_PLANKS, Blocks.BEDROCK, Blocks.CRAFTING_TABLE}) {
+            for (Block block : new Block[] {Blocks.AIR, Blocks.STONE, Blocks.DIRT, Blocks.OAK_PLANKS, Blocks.BIRCH_PLANKS, Blocks.BEDROCK, Blocks.CRAFTING_TABLE,
+                    Blocks.GOLD_BLOCK, Blocks.CHEST}) {
                 level.setBlock(at, block.defaultBlockState(), 3);
                 test.assertTrue(!ThaumcraftApiHelper.isWoodLog(level, at), block + " is no log");
             }
@@ -301,6 +333,7 @@ public final class KnowledgeApiRuntimeChecks {
             test.assertTrue(!level.hasChunkAt(far), "fixture: the far position is in no loaded chunk");
             test.assertTrue(!ThaumcraftApiHelper.isWoodLog(level, far), "an unloaded position is no log, and the call loads nothing");
             test.assertTrue(!level.hasChunkAt(far), "still not loaded");
+            test.assertTrue(!ThaumcraftApiHelper.isWoodLog(level, new BlockPos(at.getX(), level.getMaxBuildHeight() + 3, at.getZ())), "above the build height is no log");
             test.assertTrue(!ThaumcraftApiHelper.isWoodLog(null, at) && !ThaumcraftApiHelper.isWoodLog(level, null), "missing arguments");
         } finally {
             level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
@@ -426,18 +459,40 @@ public final class KnowledgeApiRuntimeChecks {
         BlockPos creativeLog = test.absolutePos(new BlockPos(1, 2, 5));
         BlockPos nobodyLog = test.absolutePos(new BlockPos(3, 2, 5));
         BlockPos offThreadLog = test.absolutePos(new BlockPos(5, 2, 5));
+        BlockPos leaves = test.absolutePos(new BlockPos(1, 2, 3));
+        BlockPos oak = test.absolutePos(new BlockPos(3, 2, 3));
+        BlockPos gold = test.absolutePos(new BlockPos(5, 2, 3));
+        BlockPos chest = test.absolutePos(new BlockPos(7, 2, 3));
         AABB area = new AABB(test.absolutePos(new BlockPos(0, 0, 0))).inflate(0, 0, 0).expandTowards(8, 8, 8);
         try (Connected survivor = new Connected(test, GameType.SURVIVAL); Connected creative = new Connected(test, GameType.CREATIVE)) {
-            // The start is never checked: with no further log the helper breaks the start, whatever it is.
+            // The start must itself be a log of the block: a position forwarded by a client cannot mine anything else.
             level.setBlock(dirt, Blocks.DIRT.defaultBlockState(), 3);
-            test.assertTrue(ThaumcraftApiHelper.breakFurthestBlock(level, dirt, Blocks.DIRT, survivor.player), "a dirt start is broken");
-            test.assertTrue(level.getBlockState(dirt).isAir(), "the dirt is gone: call isWoodLog first, as the original axe did");
-            test.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area).stream().anyMatch(item -> item.getItem().is(Items.DIRT)), "it dropped its loot to a survival player");
-            for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, area)) item.discard();
-
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, dirt, Blocks.DIRT, survivor.player), "a dirt start is refused");
+            test.assertTrue(level.getBlockState(dirt).is(Blocks.DIRT), "the dirt stays");
+            test.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area).isEmpty(), "and nothing dropped");
+            level.setBlock(leaves, Blocks.OAK_LEAVES.defaultBlockState(), 3);
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, leaves, Blocks.OAK_LEAVES, survivor.player), "a leaf start is refused: leaves are no logs");
+            test.assertTrue(level.getBlockState(leaves).is(Blocks.OAK_LEAVES), "the leaves stay");
+            level.setBlock(gold, Blocks.GOLD_BLOCK.defaultBlockState(), 3);
+            level.setBlock(chest, Blocks.CHEST.defaultBlockState(), 3);
+            for (Player who : new Player[] {survivor.player, creative.player, null}) {
+                test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, gold, Blocks.GOLD_BLOCK, who), "a gold block start is refused for " + who);
+                test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, chest, Blocks.CHEST, who), "a chest start is refused for " + who);
+            }
+            test.assertTrue(level.getBlockState(gold).is(Blocks.GOLD_BLOCK) && level.getBlockState(chest).is(Blocks.CHEST), "both stay");
             level.setBlock(bedrock, Blocks.BEDROCK.defaultBlockState(), 3);
-            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, bedrock, Blocks.BEDROCK, survivor.player), "an unbreakable start answers false");
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, bedrock, Blocks.BEDROCK, survivor.player), "bedrock is no log either");
             test.assertTrue(level.getBlockState(bedrock).is(Blocks.BEDROCK), "and stays");
+
+            // A start that holds another block than the one asked for is no start.
+            level.setBlock(oak, Blocks.OAK_LOG.defaultBlockState(), 3);
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, oak, Blocks.BIRCH_LOG, survivor.player), "the block asked for must be the block at the start");
+            test.assertTrue(level.getBlockState(oak).is(Blocks.OAK_LOG), "so the oak log stays");
+            // The plain oak log is a log: a lone one is its own end and is broken, with its loot.
+            test.assertTrue(ThaumcraftApiHelper.breakFurthestBlock(level, oak, Blocks.OAK_LOG, survivor.player), "a lone oak log is felled");
+            test.assertTrue(level.getBlockState(oak).isAir(), "it is gone");
+            test.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area).stream().anyMatch(item -> item.getItem().is(Items.OAK_LOG)), "and dropped its loot to a survival player");
+            for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, area)) item.discard();
 
             test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, air, Blocks.MANGROVE_LOG, survivor.player), "an air start answers false");
             test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, dirt, null, survivor.player), "no block, nothing to follow");
@@ -451,13 +506,149 @@ public final class KnowledgeApiRuntimeChecks {
             test.assertTrue(level.getBlockState(creativeLog).isAir() && level.getBlockState(nobodyLog).isAir(), "both are gone");
             test.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area).isEmpty(), "and neither dropped anything");
 
-            // Server thread only: the walk keeps static state.
+            // The block helper behind it takes a null player for a block the game announces to the player (a block that
+            // piglins guard dereferenced the player) and breaks the start, whatever it is: it is the original form.
+            test.assertTrue(BlockUtils.breakFurthestBlock(level, gold.getX(), gold.getY(), gold.getZ(), Blocks.GOLD_BLOCK, null), "the block helper breaks a guarded block for no player");
+            test.assertTrue(level.getBlockState(gold).isAir(), "the gold block is gone");
+            test.assertTrue(BlockUtils.breakFurthestBlock(level, chest.getX(), chest.getY(), chest.getZ(), Blocks.CHEST, null), "and a chest");
+            test.assertTrue(level.getBlockState(chest).isAir(), "the chest is gone");
+
+            // Server thread only: it breaks blocks and spawns items.
             level.setBlock(offThreadLog, Blocks.MANGROVE_LOG.defaultBlockState(), 3);
             expectRefused(() -> ThaumcraftApiHelper.breakFurthestBlock(level, offThreadLog, Blocks.MANGROVE_LOG, null), test, "breakFurthestBlock");
             test.assertTrue(level.getBlockState(offThreadLog).is(Blocks.MANGROVE_LOG), "the refused call broke nothing");
         } finally {
-            for (BlockPos pos : List.of(dirt, bedrock, air, creativeLog, nobodyLog, offThreadLog)) level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+            for (BlockPos pos : List.of(dirt, bedrock, air, creativeLog, nobodyLog, offThreadLog, leaves, oak, gold, chest)) level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, area)) item.discard();
+        }
+        test.succeed();
+    }
+
+    /** findFurthestBlock answers the cell the next break takes, reads only, and says null where nothing would be broken. */
+    public static void furthestBlockFindAnswersTheCellThatBreaks(GameTestHelper test) {
+        ServerLevel level = test.getLevel();
+        BlockPos foot = test.absolutePos(new BlockPos(2, 1, 2));
+        BlockPos top = foot.above(3);
+        BlockPos dirt = test.absolutePos(new BlockPos(5, 2, 5));
+        BlockPos leaves = test.absolutePos(new BlockPos(6, 2, 5));
+        BlockPos chest = test.absolutePos(new BlockPos(7, 2, 5));
+        BlockPos bedrock = test.absolutePos(new BlockPos(5, 2, 7));
+        AABB area = new AABB(foot).inflate(8.0, 8.0, 8.0);
+        try (Connected survivor = new Connected(test, GameType.SURVIVAL)) {
+            // A plain OAK trunk: the plain oak log is a log, and the walk follows it to the top.
+            for (int y = 0; y < 4; y++) level.setBlock(foot.above(y), Blocks.OAK_LOG.defaultBlockState(), 3);
+            BlockPos found = ThaumcraftApiHelper.findFurthestBlock(level, foot, Blocks.OAK_LOG);
+            test.assertTrue(top.equals(found), "the end of the oak trunk: " + found);
+            test.assertTrue(top.equals(ThaumcraftApiHelper.findFurthestBlock(level, foot, Blocks.OAK_LOG)), "asking twice gives the same cell");
+            for (int y = 0; y < 4; y++) test.assertTrue(level.getBlockState(foot.above(y)).is(Blocks.OAK_LOG), "nothing was broken by asking, log " + y);
+            test.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area).isEmpty() && !level.getBlockTicks().hasScheduledTick(top, Blocks.OAK_LOG),
+                    "no loot, no scheduled tick");
+            test.assertTrue(top.equals(ThaumcraftApiHelper.findFurthestBlock(level, top.below(), Blocks.OAK_LOG)), "from the log below the top the end is the top as well");
+            test.assertTrue(top.equals(ThaumcraftApiHelper.findFurthestBlock(level, top, Blocks.OAK_LOG)), "a log that is already the end is its own end");
+
+            // It is the cell that the break takes.
+            test.assertTrue(ThaumcraftApiHelper.breakFurthestBlock(level, foot, Blocks.OAK_LOG, survivor.player), "the break takes the oak trunk's end");
+            test.assertTrue(level.getBlockState(found).isAir(), "exactly the cell find answered");
+            test.assertTrue(level.getBlockState(found.below()).is(Blocks.OAK_LOG), "and not the log below");
+            BlockPos next = ThaumcraftApiHelper.findFurthestBlock(level, foot, Blocks.OAK_LOG);
+            test.assertTrue(foot.above(2).equals(next), "the next end is one log lower: " + next);
+
+            // Null where nothing would be broken.
+            level.setBlock(dirt, Blocks.DIRT.defaultBlockState(), 3);
+            level.setBlock(leaves, Blocks.OAK_LEAVES.defaultBlockState(), 3);
+            level.setBlock(chest, Blocks.CHEST.defaultBlockState(), 3);
+            level.setBlock(bedrock, Blocks.BEDROCK.defaultBlockState(), 3);
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, foot, Blocks.BIRCH_LOG) == null, "the block asked for is not the block at the start");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, dirt, Blocks.DIRT) == null, "a dirt start");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, leaves, Blocks.OAK_LEAVES) == null, "a leaf start: leaves are no logs");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, chest, Blocks.CHEST) == null, "a chest start");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, bedrock, Blocks.BEDROCK) == null, "a bedrock start");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, top.above(10), Blocks.OAK_LOG) == null, "an air start");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, new BlockPos(foot.getX(), level.getMaxBuildHeight() + 3, foot.getZ()), Blocks.OAK_LOG) == null,
+                    "a start above the build height");
+            BlockPos far = foot.offset(1_000_000, 0, 1_000_000);
+            test.assertTrue(!level.hasChunkAt(far), "fixture: the far position is in no loaded chunk");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(level, far, Blocks.OAK_LOG) == null && !level.hasChunkAt(far), "an unloaded start, and nothing was loaded");
+            test.assertTrue(ThaumcraftApiHelper.findFurthestBlock(null, foot, Blocks.OAK_LOG) == null
+                    && ThaumcraftApiHelper.findFurthestBlock(level, null, Blocks.OAK_LOG) == null
+                    && ThaumcraftApiHelper.findFurthestBlock(level, foot, null) == null, "missing arguments");
+        } finally {
+            for (BlockPos pos : List.of(dirt, leaves, chest, bedrock)) level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+            for (int y = 0; y < 4; y++) level.setBlock(foot.above(y), Blocks.AIR.defaultBlockState(), 3);
+            for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, area)) item.discard();
+        }
+        test.succeed();
+    }
+
+    /** The game's own rules are asked for the far cell that is broken, not for the clicked one. */
+    public static void furthestBlockAsksTheRulesForTheBrokenCell(GameTestHelper test) {
+        ServerLevel level = test.getLevel();
+        BlockPos start = test.absolutePos(new BlockPos(1, 2, 1));
+        BlockPos end = start.east(3);
+        AABB area = new AABB(start).inflate(8.0, 8.0, 8.0);
+        WorldBorder border = level.getWorldBorder();
+        double centerX = border.getCenterX(), centerZ = border.getCenterZ(), size = border.getSize();
+        try (Connected survivor = new Connected(test, GameType.SURVIVAL); Connected adventurer = new Connected(test, GameType.ADVENTURE);
+             Connected spectator = new Connected(test, GameType.SPECTATOR)) {
+            for (int dx = 0; dx <= 3; dx++) level.setBlock(start.east(dx), Blocks.BIRCH_LOG.defaultBlockState(), 3);
+            test.assertTrue(end.equals(ThaumcraftApiHelper.findFurthestBlock(level, start, Blocks.BIRCH_LOG)), "fixture: the walk ends three blocks east");
+
+            // Game mode: an adventure player and a spectator break nothing; the clicked cell being allowed does not matter.
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, start, Blocks.BIRCH_LOG, adventurer.player), "an adventure player breaks nothing");
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, start, Blocks.BIRCH_LOG, spectator.player), "a spectator breaks nothing");
+            for (int dx = 0; dx <= 3; dx++) test.assertTrue(level.getBlockState(start.east(dx)).is(Blocks.BIRCH_LOG), "the log " + dx + " still stands");
+            test.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area).isEmpty(), "and nothing dropped");
+
+            // World border: the clicked cell and its neighbour are inside, the broken cell is not. The border is put back afterwards.
+            border.setCenter(start.getX() + 0.5, start.getZ() + 0.5);
+            border.setSize(3.0);
+            test.assertTrue(level.getWorldBorder().isWithinBounds(start) && !level.getWorldBorder().isWithinBounds(end), "fixture: the clicked cell is inside the border, the end is not");
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, start, Blocks.BIRCH_LOG, survivor.player), "a survival player cannot break a cell outside the border");
+            test.assertTrue(!ThaumcraftApiHelper.breakFurthestBlock(level, start, Blocks.BIRCH_LOG, null), "nor can nobody: the border holds for every caller");
+            test.assertTrue(level.getBlockState(end).is(Blocks.BIRCH_LOG) && level.getBlockState(start).is(Blocks.BIRCH_LOG), "nothing changed");
+            test.assertTrue(end.equals(ThaumcraftApiHelper.findFurthestBlock(level, start, Blocks.BIRCH_LOG)),
+                    "findFurthestBlock reports the cell all the same: asking the protection is the caller's step");
+            border.setSize(9.0);
+            test.assertTrue(level.getWorldBorder().isWithinBounds(end), "fixture: a wider border contains the end");
+            test.assertTrue(ThaumcraftApiHelper.breakFurthestBlock(level, start, Blocks.BIRCH_LOG, survivor.player), "inside the border the survival player breaks the end");
+            test.assertTrue(level.getBlockState(end).isAir(), "the end is gone");
+        } finally {
+            border.setCenter(centerX, centerZ);
+            border.setSize(size);
+            for (int dx = 0; dx <= 3; dx++) level.setBlock(start.east(dx), Blocks.AIR.defaultBlockState(), 3);
+            for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, area)) item.discard();
+        }
+        test.succeed();
+    }
+
+    /**
+     * The walk and the block ticks around the broken cell read no chunk that is not loaded, and load none. The logs stand two
+     * and three blocks inside the last loaded chunk: the walk from the end scans two cells beyond the edge and the ticks reach
+     * three, while the ordinary block updates of the removal (direct neighbours only) stay inside the loaded chunk.
+     */
+    public static void furthestBlockLoadsNoChunk(GameTestHelper test) {
+        ServerLevel level = test.getLevel();
+        BlockPos origin = test.absolutePos(new BlockPos(0, 1, 0));
+        // The last loaded chunk east of the test, and the cell at its east edge: the next cell is in a chunk that is not loaded.
+        int chunkX = origin.getX() >> 4;
+        for (int step = 0; step < 64 && level.hasChunkAt(new BlockPos(((chunkX + 1) << 4), origin.getY(), origin.getZ())); step++) chunkX++;
+        BlockPos edge = new BlockPos((chunkX << 4) + 15, origin.getY(), origin.getZ());
+        BlockPos beyond = edge.east();
+        test.assertTrue(level.hasChunkAt(edge) && !level.hasChunkAt(beyond) && !level.hasChunkAt(beyond.east(2)),
+                "fixture: the cells east of " + edge + " are in no loaded chunk");
+        BlockPos start = edge.west(3);
+        BlockPos end = edge.west();
+        try {
+            for (int dx = 3; dx >= 1; dx--) level.setBlock(edge.west(dx), Blocks.SPRUCE_LOG.defaultBlockState(), 3);
+            test.assertTrue(!level.hasChunkAt(beyond), "fixture: placing the logs loaded nothing");
+            test.assertTrue(end.equals(ThaumcraftApiHelper.findFurthestBlock(level, start, Blocks.SPRUCE_LOG)), "the walk ends at the log next to the edge");
+            test.assertTrue(!level.hasChunkAt(beyond), "finding the end loaded no chunk");
+            test.assertTrue(ThaumcraftApiHelper.breakFurthestBlock(level, start, Blocks.SPRUCE_LOG, null), "that log is broken");
+            test.assertTrue(level.getBlockState(end).isAir() && level.getBlockState(start).is(Blocks.SPRUCE_LOG), "exactly that log");
+            test.assertTrue(!level.hasChunkAt(beyond), "breaking it, and the block ticks around it, loaded no chunk either");
+        } finally {
+            for (int dx = 3; dx >= 1; dx--) level.setBlock(edge.west(dx), Blocks.AIR.defaultBlockState(), 3);
+            for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, new AABB(edge).inflate(8.0))) item.discard();
         }
         test.succeed();
     }

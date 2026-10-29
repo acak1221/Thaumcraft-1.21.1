@@ -27,6 +27,7 @@ The public Thaumcraft API of the 1.21.1 port.
 | [`ThaumcraftApiHelper`](thaumcraft.api.md#thaumcraftapihelper) | The original TC4 static helper surface. |
 | [`ThaumcraftFX`](thaumcraft.api.md#thaumcraftfx) | The visual effects a 1.7.10 add-on sent to the players around a block with Thaumcraft's own packets. |
 | [`ThaumcraftMaterials`](thaumcraft.api.md#thaumcraftmaterials) | The original TC4 material constants. |
+| [`ThaumcraftSoundIds`](thaumcraft.api.md#thaumcraftsoundids) | The ids of the sounds Thaumcraft registers, so an add-on that plays "its own" wand, zap or wind sound does not write the strings. |
 | [`TileThaumcraft`](thaumcraft.api.md#tilethaumcraft) | The original TC4 base tile entity with its own custom NBT section and a custom update packet. |
 | [`WorldCoordinates`](thaumcraft.api.md#worldcoordinates) | Immutable modern location. |
 
@@ -72,6 +73,15 @@ The public Thaumcraft API of the 1.21.1 port.
 | [`IPlayerKnowledge`](thaumcraft.api.capabilities.md#iplayerknowledge) | The player knowledge contract of the add-on surface. |
 | [`NativePlayerKnowledge`](thaumcraft.api.capabilities.md#nativeplayerknowledge) | The native `IPlayerKnowledge` implementation. |
 
+## [thaumcraft.api.client](thaumcraft.api.client.md)
+
+The client-only part of the Thaumcraft API: the particles that 1.7.10 add-ons drew through `Thaumcraft.proxy` (`thaumcraft.api.client.ThaumcraftClientFX`) and the tag of an aspect in a screen (`thaumcraft.api.client.AspectRenderer`).
+
+| Type | Summary |
+|---|---|
+| [`AspectRenderer`](thaumcraft.api.client.md#aspectrenderer) | Draws the tag of an aspect in a screen or a HUD, the way Thaumcraft's own screens draw it. |
+| [`ThaumcraftClientFX`](thaumcraft.api.client.md#thaumcraftclientfx) | The client-side particle effects of Thaumcraft that 1.7.10 add-ons drew through `Thaumcraft.proxy`: the sparkle, the burst, the wisp, the block runes, the continuous beam, the smoke spiral and the essentia trail. |
+
 ## [thaumcraft.api.crafting](thaumcraft.api.crafting.md)
 
 | Type | Summary |
@@ -100,6 +110,7 @@ The public Thaumcraft API of the 1.21.1 port.
 | [`IEldritchMob`](thaumcraft.api.entities.md#ieldritchmob) | Original TC4 marker: eldritch mobs do not intentionally attack one another. |
 | [`ITaintedMob`](thaumcraft.api.entities.md#itaintedmob) | Original TC4 marker. |
 | [`IThaumcraftBoss`](thaumcraft.api.entities.md#ithaumcraftboss) | Original TC4 `EntityThaumcraftBoss` marker. |
+| [`ThaumcraftEntities`](thaumcraft.api.entities.md#thaumcraftentities) | The stable keys of the creatures and projectiles of Thaumcraft an add-on may need to recognise. |
 
 ## [thaumcraft.api.internal](thaumcraft.api.internal.md)
 
@@ -136,6 +147,7 @@ The public Thaumcraft API of the 1.21.1 port.
 |---|---|
 | [`PotionFluxTaint`](thaumcraft.api.potions.md#potionfluxtaint) | The original TC4 flux taint potion. |
 | [`PotionVisExhaust`](thaumcraft.api.potions.md#potionvisexhaust) | The original TC4 vis exhaustion potion. |
+| [`WarpEffects`](thaumcraft.api.potions.md#warpeffects) | The stable keys of the original TC4 warp effects. |
 
 ## [thaumcraft.api.research](thaumcraft.api.research.md)
 

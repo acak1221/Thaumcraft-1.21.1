@@ -46,13 +46,16 @@ public class FocusBelt extends Item implements IBauble, IFocusPouch {
 
     /**
      * The belt's own use. A pouch is never put on by a click, so unlike the talisman it needs no equipsOnUse: the Baubles
-     * menu puts it on, and the selector lists its foci either way.
+     * menu puts it on, and the selector lists its foci either way. A belt that holds data it cannot read is left alone, as the
+     * selector leaves it alone.
      */
     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack belt = player.getItemInHand(hand);
         ItemStack other = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         if (level.isClientSide) return InteractionResultHolder.success(belt);
-        ItemStack[] cells = getInventory(belt);
+        ItemStack[] cells;
+        try { cells = getInventory(belt); }
+        catch (IllegalArgumentException unreadable) { return InteractionResultHolder.fail(belt); } // foreign data: change nothing
         if (player.isShiftKeyDown()) {
             for (int cell = CELLS - 1; cell >= 0; cell--) {
                 if (cells[cell].isEmpty()) continue;

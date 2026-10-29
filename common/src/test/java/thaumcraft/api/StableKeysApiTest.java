@@ -125,8 +125,15 @@ class StableKeysApiTest {
             assertEquals("thaumcraft", key.location().getNamespace());
             assertTrue(registered.contains(key.location().getPath()), key + " is not registered by the mod");
         }
-        // Only the four registered materials have a holder; the two unregistered originals are plain objects.
-        assertEquals(registered, new TreeSet<>(keys.stream().map(key -> key.location().getPath()).toList()));
+        // The mod registers ten armour materials; the API names the four of the thaumium and void families (the originals
+        // armorMatThaumium, armorMatThaumiumFortress and armorMatVoid, plus the robe variant of the void set). The other
+        // six are adapters of the mod's own items (the goggles' "special", the "robe" and the four cultist sets), and the two
+        // originals armorMatSpecial and armorMatVoidFortress stay plain objects that were never registered under those names.
+        assertEquals(new TreeSet<>(List.of("special", "robe", "cultist_robe", "cultist_plate", "cultist_leader", "cultist_boots",
+                        "thaumium", "fortress", "void", "void_robe")), registered,
+                "the registered materials changed: decide whether the new one needs a key in ThaumcraftMaterials");
+        Set<String> named = new TreeSet<>(keys.stream().map(key -> key.location().getPath()).toList());
+        assertEquals(new TreeSet<>(List.of("thaumium", "fortress", "void", "void_robe")), named);
     }
 
     @Test void everySoundConstantIsASoundEventTheModDeclaresAndNoneIsMissing() throws Exception {

@@ -1,6 +1,7 @@
 package com.example.tc4addon;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.Registry;
@@ -8,6 +9,9 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -18,13 +22,16 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import thaumcraft.api.IThaumcraftAddon;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.ThaumcraftApiHelper;
+import thaumcraft.api.ThaumcraftSoundIds;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.CrucibleRecipe;
 import thaumcraft.api.crafting.InfusionRecipe;
 import thaumcraft.api.crafting.ShapedArcaneRecipe;
 import thaumcraft.api.crafting.ShapelessArcaneRecipe;
+import thaumcraft.api.entities.ThaumcraftEntities;
 import thaumcraft.api.items.ItemsTC;
+import thaumcraft.api.potions.WarpEffects;
 import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchItem;
 import thaumcraft.api.research.ResearchPage;
@@ -258,6 +265,18 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
         ThaumcraftApi.addSmeltingBonus(new ItemStack(Items.RAW_COPPER), new ItemStack(ItemsTC.require("copper_nugget")));
         // Loot bags: weight 15 in the common (0) and uncommon (1) bags.
         ThaumcraftApi.addLootBagItem(new ItemStack(VIS_SHARD, 2), 15, 0, 1);
+        // [/doc]
+
+        // [doc:stable-keys]
+        // Thaumcraft's creatures, effects and sounds by key, never by string. A wisp killed with the amethyst core in the hand
+        // gives its killer a minute of warp ward (the effect that suspends the warp check) and plays the sound of the wand.
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+            if (!ThaumcraftEntities.is(entity, ThaumcraftEntities.WISP) || !(source.getEntity() instanceof ServerPlayer killer)
+                    || !killer.getMainHandItem().is(AMETHYST_ROD)) return;
+            killer.addEffect(new MobEffectInstance(WarpEffects.holder(WarpEffects.WARP_WARD), 1200, 0));
+            killer.level().playSound(null, killer.blockPosition(), ThaumcraftSoundIds.event(ThaumcraftSoundIds.WAND),
+                    SoundSource.PLAYERS, 0.6F, 1.0F);
+        });
         // [/doc]
     }
 

@@ -9,6 +9,7 @@
   "environment": "*",
   "entrypoints": {
     "main": ["com.example.tc4addon.ExampleAddon"],
+    "client": ["com.example.tc4addon.ExampleAddonClient"],
     "thaumcraft": ["com.example.tc4addon.ExampleAddon"]
   },
   "depends": {

@@ -190,6 +190,8 @@ public final class Thaumcraft {
         // The original essence flow packet of the public essentia source API
         // (oracle EssentiaHandler:54 / PacketFXEssentiaSource:20-78).
         thaumcraft.common.lib.network.EssentiaFlowFxNetworking.initServer();
+        // The server twins of the client effect facade (ThaumcraftFX.sparkle, burst, blockRunes, smokeSpiral).
+        thaumcraft.common.lib.network.ClientFxNetworking.initServer();
         VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.

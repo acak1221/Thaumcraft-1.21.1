@@ -111,6 +111,59 @@ class ScanServicesTest {
         assertEquals(Set.of("@minecraft:stone", "@minecraft:dirt"), source.getScannedItems(), "the source is not touched");
     }
 
+    /** The returned count must not depend on the order of the markers of a snapshot that holds both forms of one marker. */
+    @Test void aSnapshotHoldingBothFormsOfOneMarkerCountsOnceInEitherOrder() {
+        for (List<String> order : List.of(List.of("@minecraft:stone", "#minecraft:stone"), List.of("#minecraft:stone", "@minecraft:stone"))) {
+            PlayerKnowledge knowledge = new PlayerKnowledge();
+            assertEquals(1, ThaumcraftInternalMethods.mergeScans(knowledge, items(order.toArray(new String[0]))), "order " + order);
+            assertEquals(Set.of("#minecraft:stone"), knowledge.getScannedItems(), "the advanced marker is what is left, order " + order);
+            assertEquals(0, ThaumcraftInternalMethods.mergeScans(knowledge, items(order.toArray(new String[0]))), "and a second merge adds nothing, order " + order);
+        }
+        // The same for entities and phenomena, and with the basic marker already held by the player.
+        for (List<String> order : List.of(List.of("@a", "#a"), List.of("#a", "@a"))) {
+            PlayerKnowledge knowledge = new PlayerKnowledge();
+            knowledge.scanEntity("@a");
+            knowledge.scanPhenomena("@a");
+            Scans both = new Scans(Set.of(), set(order.toArray(new String[0])), set(order.toArray(new String[0])));
+            assertEquals(2, ThaumcraftInternalMethods.mergeScans(knowledge, both), "one upgrade per kind, order " + order);
+            assertEquals(Set.of("#a"), knowledge.getScannedEntities());
+            assertEquals(Set.of("#a"), knowledge.getScannedPhenomena());
+        }
+        // The order of the other markers still follows the snapshot, whatever it holds around a superseded marker.
+        PlayerKnowledge ordered = new PlayerKnowledge();
+        assertEquals(3, ThaumcraftInternalMethods.mergeScans(ordered,
+                items("@minecraft:dirt", "@minecraft:stone", "#minecraft:stone", "#minecraft:gold_ingot")));
+        assertEquals(List.of("@minecraft:dirt", "#minecraft:stone", "#minecraft:gold_ingot"), List.copyOf(ordered.getScannedItems()));
+    }
+
+    /** getScans must not throw for what the knowledge holds: nothing bounds a marker at the source. */
+    @Test void aSnapshotLeavesOutMarkersItCannotHoldInsteadOfThrowing() {
+        PlayerKnowledge knowledge = new PlayerKnowledge();
+        String longest = "@" + "x".repeat(Scans.MAX_KEY_LENGTH - 1);
+        String tooLong = "@" + "x".repeat(Scans.MAX_KEY_LENGTH);
+        knowledge.scanItem("@minecraft:stone");
+        knowledge.scanItem(tooLong);
+        knowledge.scanItem(longest);
+        knowledge.scanEntity("#" + "y".repeat(5000));
+        knowledge.scanEntity("@entity:Pig");
+        knowledge.scanPhenomena("@" + "z".repeat(Scans.MAX_KEY_LENGTH + 1));
+        assertEquals(longest.length(), Scans.MAX_KEY_LENGTH, "fixture: the longest storable marker");
+        assertEquals(tooLong.length(), Scans.MAX_KEY_LENGTH + 1, "fixture: one character too many");
+
+        Scans scans = ThaumcraftInternalMethods.snapshot(knowledge);
+        assertEquals(List.of("@minecraft:stone", longest), List.copyOf(scans.items()), "the marker at the bound is kept, the longer one is left out");
+        assertEquals(Set.of("@entity:Pig"), scans.entities());
+        assertTrue(scans.phenomena().isEmpty());
+        // The knowledge itself is untouched.
+        assertEquals(3, knowledge.getScannedItems().size());
+        assertEquals(2, knowledge.getScannedEntities().size());
+
+        assertEquals(Scans.EMPTY, ThaumcraftInternalMethods.snapshot(null), "no knowledge: no scans");
+        PlayerKnowledge rejected = new PlayerKnowledge();
+        rejected.loadAttachment(net.minecraft.nbt.StringTag.valueOf("not a compound"), "test");
+        assertTrue(ThaumcraftInternalMethods.snapshot(rejected).isEmpty(), "knowledge that could not be read: no scans");
+    }
+
     @Test void knowledgeThatCouldNotBeReadTakesNoScans() {
         PlayerKnowledge rejected = new PlayerKnowledge();
         rejected.loadAttachment(net.minecraft.nbt.StringTag.valueOf("not a compound"), "test");

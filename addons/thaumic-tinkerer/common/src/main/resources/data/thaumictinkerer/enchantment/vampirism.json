@@ -1,0 +1,25 @@
+{
+  "description": {
+    "translate": "enchantment.thaumictinkerer.vampirism"
+  },
+  "exclusive_set": [
+    "minecraft:fire_aspect",
+    "minecraft:knockback"
+  ],
+  "supported_items": "#thaumictinkerer:enchantable/vampirism",
+  "weight": 1,
+  "max_level": 2,
+  "min_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {}
+}

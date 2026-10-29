@@ -4,7 +4,7 @@
 
 [All packages](README.md)
 
-Types: [`PotionFluxTaint`](#potionfluxtaint), [`PotionVisExhaust`](#potionvisexhaust)
+Types: [`PotionFluxTaint`](#potionfluxtaint), [`PotionVisExhaust`](#potionvisexhaust), [`WarpEffects`](#warpeffects)
 
 ## PotionFluxTaint
 
@@ -67,3 +67,94 @@ public static Holder<MobEffect> holder()
 ```
 
 The registered effect as a holder, for the native effect queries.
+
+## WarpEffects
+
+```java
+public final class WarpEffects
+```
+
+The stable keys of the original TC4 warp effects.
+
+1.7.10 add-ons found these potions by the numeric ids of Thaumcraft's configuration (`Config.potionWarpWardID`, `potionSunScornedID`, `potionDeathGazeID`, `potionBlurredID`, `potionUnHungerID`, `potionInfVisExhaustID`, `potionThaumarhiaID`) and applied them with `new PotionEffect(id, duration, amplifier)`. 1.21.1 registers its effects, so each original `Potion` subclass became a registered `MobEffect` under the `thaumcraft` namespace and the numeric id is gone. These keys are the identities of those effects, so an add-on never writes the strings itself. `PotionFluxTaint` and `PotionVisExhaust` keep the keys of the two flux effects.
+
+The keys exist from the first line of the class; the effects are registered by Thaumcraft's own registration, which has run before `IThaumcraftAddon.onThaumcraftReady`. `holder` and `instance` read the effects from the built-in registry and throw `IllegalStateException` while they are not registered yet (an add-on's own static initialiser may run earlier). Both are safe on any thread once the registry is frozen.
+
+```java
+player.addEffect(new MobEffectInstance(WarpEffects.holder(WarpEffects.WARP_WARD), 6000, 0));
+boolean hungry = player.hasEffect(WarpEffects.holder(WarpEffects.UNNATURAL_HUNGER));
+```
+
+<a id="warpeffects-warp_ward"></a>
+```java
+public static final ResourceKey<MobEffect> WARP_WARD
+```
+
+Original `PotionWarpWard`: the one beneficial effect; while it runs the warp check of the player is suspended.
+
+<a id="warpeffects-sun_scorned"></a>
+```java
+public static final ResourceKey<MobEffect> SUN_SCORNED
+```
+
+Original `PotionSunScorned`: bright light can set the afflicted on fire, darkness can heal it.
+
+<a id="warpeffects-death_gaze"></a>
+```java
+public static final ResourceKey<MobEffect> DEATH_GAZE
+```
+
+Original `PotionDeathGaze`: a passive marker; the server tick of the player runs the gaze query.
+
+<a id="warpeffects-blurred_vision"></a>
+```java
+public static final ResourceKey<MobEffect> BLURRED_VISION
+```
+
+Original `PotionBlurredVision`: a passive marker the client reads to blur the view.
+
+<a id="warpeffects-unnatural_hunger"></a>
+```java
+public static final ResourceKey<MobEffect> UNNATURAL_HUNGER
+```
+
+Original `PotionUnnaturalHunger`: food exhaustion of a player on every tick.
+
+<a id="warpeffects-infectious_vis_exhaust"></a>
+```java
+public static final ResourceKey<MobEffect> INFECTIOUS_VIS_EXHAUST
+```
+
+Original `PotionInfectiousVisExhaust`: vis exhaustion that spreads to the creatures around the afflicted.
+
+<a id="warpeffects-thaumarhia"></a>
+```java
+public static final ResourceKey<MobEffect> THAUMARHIA
+```
+
+Original `PotionThaumarhia`: now and then leaves flux goo in the empty cell at the feet of the afflicted.
+
+<a id="warpeffects-all"></a>
+```java
+public static List<ResourceKey<MobEffect>> all()
+```
+
+All seven keys, in the order above. The list is immutable.
+
+<a id="warpeffects-holder"></a>
+```java
+public static Holder<MobEffect> holder(ResourceKey<MobEffect> key)
+```
+
+The registered effect of a key, as the holder the 1.21.1 effect calls (`addEffect`, `hasEffect`, `removeEffect`, `new MobEffectInstance`) take.
+
+**Throws:** `IllegalStateException` — when the key is not registered (Thaumcraft's registration has not run yet, or the key is not one of this class)
+
+<a id="warpeffects-instance"></a>
+```java
+public static MobEffect instance(ResourceKey<MobEffect> key)
+```
+
+The registered effect of a key; the original static `instance` of the potion class was this object.
+
+**Throws:** `IllegalStateException` — when the key is not registered, see `holder`

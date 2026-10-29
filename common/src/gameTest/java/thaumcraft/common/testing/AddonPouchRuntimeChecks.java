@@ -74,9 +74,17 @@ public final class AddonPouchRuntimeChecks {
     /**
      * An add-on pouch in the manner of Thaumic Tinkerer's Bottomless Pouch: a belt bauble with a fixed number of cells, a use
      * of its own (it would open its screen; here it only counts) and its own storage. A stack may carry the flag "unreadable"
-     * (a payload of another version: {@link #getInventory} throws) or "nulls" (empty cells read as {@code null}).
+     * (a payload of another version: {@link #getInventory} throws {@link IllegalArgumentException}), "nulls" (empty cells read as
+     * {@code null}), or one of the add-on bugs the selector must survive: "explodes" ({@link #getInventory} throws
+     * {@link IllegalStateException}, as an unwrapped codec error would), "rejectsWrites" ({@link #setInventory} throws before it
+     * writes) and "poisonOnWrite" ({@link #setInventory} writes a marker that {@link #getInventory} cannot read back).
+     * {@link #writesLeft} makes every write after the n-th write its cells and then throw.
      */
     static final class Pouch extends Item implements IBauble, IFocusPouch {
+        /** -1: never fails; n >= 0: n more calls of {@link #setInventory} succeed, every later one writes and then throws. */
+        static int writesLeft = -1;
+        /** The stacks {@link #setInventory} was called with, by identity, in order (a scenario clears it before it looks). */
+        static final java.util.List<ItemStack> written = new ArrayList<>();
         final int size;
         int uses;
         Pouch(Properties properties, int size) { super(properties.stacksTo(1)); this.size = size; }
@@ -92,7 +100,8 @@ public final class AddonPouchRuntimeChecks {
         private static CompoundTag data(ItemStack stack) { return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag(); }
         @Override public ItemStack[] getInventory(ItemStack stack) {
             CompoundTag tag = data(stack);
-            if (tag.getBoolean("unreadable")) throw new IllegalArgumentException("a payload this version cannot read");
+            if (tag.getBoolean("unreadable") || tag.getBoolean("poisoned")) throw new IllegalArgumentException("a payload this version cannot read");
+            if (tag.getBoolean("explodes")) throw new IllegalStateException("a bug of the add-on");
             ItemStack[] cells = new ItemStack[size];
             Arrays.fill(cells, tag.getBoolean("nulls") ? null : ItemStack.EMPTY);
             if (tag.contains("cells")) {
@@ -108,17 +117,23 @@ public final class AddonPouchRuntimeChecks {
         }
         @Override public void setInventory(ItemStack stack, ItemStack[] contents) {
             if (contents == null || contents.length != size) throw new IllegalArgumentException("this pouch has " + size + " cells");
+            written.add(stack);
+            if (data(stack).getBoolean("rejectsWrites")) throw new IllegalStateException("this pouch cannot be written");
             var kept = new ArrayList<ItemStack>();
             for (ItemStack cell : contents) kept.add(cell == null ? ItemStack.EMPTY : cell.copy());
             Tag encoded = ItemContainerContents.CODEC.encodeStart(ops(), ItemContainerContents.fromItems(kept)).getOrThrow(IllegalStateException::new);
             CompoundTag tag = data(stack);
             tag.put("cells", encoded);
+            if (tag.getBoolean("poisonOnWrite")) tag.putBoolean("poisoned", true);
             stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            if (writesLeft == 0) throw new IllegalStateException("this pouch fails after it has written");
+            if (writesLeft > 0) writesLeft--;
         }
-        ItemStack flagged(String flag) {
-            ItemStack stack = new ItemStack(this);
+        ItemStack flagged(String flag) { return flag(new ItemStack(this), flag, true); }
+        /** Sets or clears a flag of a stack of this item (its cells are kept). */
+        static ItemStack flag(ItemStack stack, String flag, boolean on) {
             CompoundTag tag = data(stack);
-            tag.putBoolean(flag, true);
+            if (on) tag.putBoolean(flag, true); else tag.remove(flag);
             stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
             return stack;
         }
@@ -329,6 +344,147 @@ public final class AddonPouchRuntimeChecks {
             a.require(ItemStack.matches(player.getInventory().getItem(10), unreadableBefore) && a.items().isEmpty(),
                     "the unreadable pouch is left byte for byte as it was");
             refused(a, FocusSelectionSources.inventoryPouch(10, 0), "an intent naming a cell of the unreadable pouch is refused");
+        }
+        test.succeed();
+    }
+
+    /**
+     * Pouches with bugs: one whose getInventory throws something other than IllegalArgumentException, one whose setInventory
+     * throws while the selector plans, and one that writes a payload it cannot read back. The selector (listing and selection)
+     * stays up, and every refusal leaves the wand, the pouches and the slots byte for byte as they were.
+     */
+    public static void misbehavingPouchesAreContained(GameTestHelper test) {
+        try (var a = new FocusUpgradeRuntimeChecks.Actor(test, new BlockPos(4, 240, 4))) {
+            access = a.level.registryAccess();
+            Pouch.writesLeft = -1;
+            var player = a.player;
+            var worn = PlayerAccessories.get(player);
+            ItemStack old = focus(a, "old installed focus"), goodFocus = focus(a, "focus of the good pouch"), blast = focus(a, "in the exploding pouch"),
+                    refusing = focus(a, "in the pouch that refuses writes"), poisoned = focus(a, "in the pouch that poisons its write");
+
+            // main 8 poisons what it writes (readable until it is written), 9 explodes when read, 10 is fine, the worn belt refuses writes.
+            ItemStack poison = new ItemStack(pouch);
+            ItemStack[] poisonCells = cells(40);
+            poisonCells[0] = poisoned;
+            pouch.setInventory(poison, poisonCells);
+            Pouch.flag(poison, "poisonOnWrite", true);
+            player.getInventory().setItem(8, poison);
+
+            ItemStack exploding = pouch.flagged("explodes");
+            ItemStack[] explodingCells = cells(40);
+            explodingCells[0] = blast;
+            pouch.setInventory(exploding, explodingCells);
+            player.getInventory().setItem(9, exploding);
+
+            ItemStack good = new ItemStack(pouch);
+            ItemStack[] goodCells = cells(40);
+            goodCells[0] = goodFocus;
+            pouch.setInventory(good, goodCells);
+            player.getInventory().setItem(10, good);
+
+            ItemStack refuses = new ItemStack(pouch);
+            ItemStack[] refusesCells = cells(40);
+            refusesCells[0] = refusing;
+            pouch.setInventory(refuses, refusesCells);
+            Pouch.flag(refuses, "rejectsWrites", true);
+            worn.setItem(3, refuses);
+            a.equip(old, "gold", 137);
+            ItemStack explodingBefore = exploding.copy(), refusesBefore = refuses.copy();
+
+            // A pouch that throws IllegalStateException from getInventory is inactive; the exception reaches neither caller.
+            a.require(FocusSelectionSources.contents(exploding) == null, "a pouch whose getInventory throws IllegalStateException reads as inactive");
+            Set<Integer> offered = FocusSelectionSources.choices(player).stream().map(FocusSelectionSources.Choice::address).collect(Collectors.toSet());
+            a.require(offered.equals(Set.of(FocusSelectionSources.inventoryPouch(8, 0), FocusSelectionSources.inventoryPouch(10, 0), FocusSelectionSources.wornPouch(3, 0))),
+                    "the selector lists the other pouches and skips the exploding one: " + offered);
+            refused(a, FocusSelectionSources.inventoryPouch(9, 0), "an intent naming a cell of the exploding pouch is refused");
+
+            // setInventory throws while the plan is made on a scratch copy: the pouch cannot give its focus up.
+            refused(a, FocusSelectionSources.wornPouch(3, 0), "a pouch that cannot be written cannot give a focus up");
+
+            // The write succeeds but its result cannot be read back: the plan is refused, whether the pouch is the source ...
+            refused(a, FocusSelectionSources.inventoryPouch(8, 0), "a source pouch whose written copy cannot be read back refuses the selection");
+            // ... or the one the old focus would be returned to (the worn belt that refuses writes is skipped, then slot 8 comes first).
+            refused(a, FocusSelectionSources.inventoryPouch(10, 0), "a pouch the old focus would be returned to, whose written copy cannot be read back, refuses the selection");
+            a.require(ItemStack.matches(player.getInventory().getItem(8), poison) && !Pouch.data(poison).getBoolean("poisoned"),
+                    "the live poisoned-on-write pouch was never written: it is still readable");
+
+            // Control: the same selection works once the pouch writes properly. A pouch that refuses writes is skipped for the
+            // return of the old focus, and none of the two broken pouches is written on its live stack.
+            Pouch.flag(poison, "poisonOnWrite", false);
+            Pouch.written.clear();
+            boolean selected = select(a, FocusSelectionSources.inventoryPouch(10, 0));
+            ItemStack[] poisonAfter = pouch.getInventory(poison);
+            a.require(selected && ItemStack.matches(FocusData.get(a.wand), goodFocus) && ItemStack.matches(poisonAfter[1], old)
+                            && ItemStack.matches(poisonAfter[0], poisoned) && pouch.getInventory(good)[0].isEmpty(),
+                    "with the flag cleared the selection works: the old focus goes to the first pouch that takes it, the belt that refuses writes is skipped");
+            a.require(Pouch.written.stream().noneMatch(w -> w == refuses || w == exploding)
+                            && ItemStack.matches(refuses, refusesBefore) && ItemStack.matches(exploding, explodingBefore) && worn.getItem(3) == refuses
+                            && player.getInventory().getItem(9) == exploding && a.items().isEmpty(),
+                    "the exploding pouch and the pouch that refuses writes are byte for byte as they were, and no focus was dropped");
+        } finally {
+            Pouch.writesLeft = -1;
+        }
+        test.succeed();
+    }
+
+    /**
+     * A pouch that fails on the live stack after the plan was made and read back: the selection is refused and every stack that
+     * was already written, a pouch rewritten in place and a plain slot that was emptied, is put back as it was.
+     */
+    public static void aPouchThatFailsAtCommitLeavesEverythingAsItWas(GameTestHelper test) {
+        try (var a = new FocusUpgradeRuntimeChecks.Actor(test, new BlockPos(4, 240, 4))) {
+            access = a.level.registryAccess();
+            Pouch.writesLeft = -1;
+            var player = a.player;
+            var worn = PlayerAccessories.get(player);
+            ItemStack old = focus(a, "old installed focus"), fx = focus(a, "in the main pouch"), fy = focus(a, "in the worn pouch"),
+                    loose = focus(a, "loose in a slot");
+
+            ItemStack x = new ItemStack(pouch);
+            ItemStack[] xCells = cells(40);
+            xCells[0] = fx;
+            pouch.setInventory(x, xCells);
+            player.getInventory().setItem(9, x);
+            ItemStack y = new ItemStack(pouch);
+            ItemStack[] yCells = cells(40);
+            yCells[3] = fy;
+            pouch.setInventory(y, yCells);
+            worn.setItem(3, y);
+            ItemStack looseStack = loose.copy();
+            player.getInventory().setItem(20, looseStack);
+            a.equip(old, "gold", 137);
+
+            // Source pouch X in the main inventory, the old focus goes into the worn pouch Y. Two writes plan it (one per scratch
+            // copy), the third is X on its live stack and the fourth, Y on its live stack, writes and then throws.
+            Pouch.writesLeft = 3;
+            Pouch.written.clear();
+            ItemStack[] before = snapshot(a);
+            boolean changed = select(a, FocusSelectionSources.inventoryPouch(9, 0));
+            a.require(Pouch.writesLeft == 0 && Pouch.written.size() == 4 && Pouch.written.get(2) == x && Pouch.written.get(3) == y,
+                    "the failure came at the commit: both live stacks were written, X first and then Y, which threw after it wrote");
+            a.require(!changed && same(before, snapshot(a)) && player.getInventory().getItem(9) == x && worn.getItem(3) == y && a.items().isEmpty(),
+                    "X has its focus back, Y has no copy of the old focus, the wand keeps its focus, and both stacks are the same objects in their slots");
+            Pouch.writesLeft = -1;
+            boolean second = select(a, FocusSelectionSources.inventoryPouch(9, 0));
+            a.require(second && ItemStack.matches(FocusData.get(a.wand), fx) && pouch.getInventory(x)[0].isEmpty() && ItemStack.matches(pouch.getInventory(y)[0], old),
+                    "control: without the failure the same selection moves the focus to the wand and the old one into Y");
+
+            // A plain slot is emptied before the worn pouch fails: its original stack object is put back.
+            Pouch.writesLeft = 1;
+            Pouch.written.clear();
+            before = snapshot(a);
+            boolean loosely = select(a, 20);
+            a.require(Pouch.writesLeft == 0 && Pouch.written.size() == 2 && Pouch.written.get(1) == y,
+                    "the failure came at the commit, on the worn pouch, after the plain slot had been emptied");
+            a.require(!loosely && same(before, snapshot(a)) && player.getInventory().getItem(20) == looseStack && worn.getItem(3) == y && a.items().isEmpty()
+                            && ItemStack.matches(FocusData.get(a.wand), fx),
+                    "the plain slot has its original stack back, Y is as it was, and the wand keeps its focus");
+            Pouch.writesLeft = -1;
+            boolean third = select(a, 20);
+            a.require(third && ItemStack.matches(FocusData.get(a.wand), loose) && player.getInventory().getItem(20).isEmpty() && ItemStack.matches(pouch.getInventory(y)[1], fx),
+                    "control: without the failure the loose focus is mounted and the old one goes into Y");
+        } finally {
+            Pouch.writesLeft = -1;
         }
         test.succeed();
     }

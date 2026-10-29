@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "thaumictinkerer:revealing_helm",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:cleansing_talisman",
+      "required": false
+    }
+  ]
+}

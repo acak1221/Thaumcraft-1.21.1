@@ -8,7 +8,7 @@ The public Thaumcraft API of the 1.21.1 port.
 
 The API keeps the original TC4 names and semantics; every Minecraft type is the native 1.21.1 one and every class is bound to the native implementation rather than to a copy of it.
 
-Types: [`BlockCoordinates`](#blockcoordinates), [`IArchitect`](#iarchitect), [`IGoggles`](#igoggles), [`IRepairable`](#irepairable), [`IRepairableExtended`](#irepairableextended), [`IRunicArmor`](#irunicarmor), [`IScribeTools`](#iscribetools), [`IThaumcraftAddon`](#ithaumcraftaddon), [`IVisDiscountGear`](#ivisdiscountgear), [`IWarpingGear`](#iwarpinggear), [`ItemApi`](#itemapi), [`ItemRunic`](#itemrunic), [`OreDictionaryNames`](#oredictionarynames), [`ThaumcraftApi`](#thaumcraftapi), [`ThaumcraftApiHelper`](#thaumcraftapihelper), [`ThaumcraftFX`](#thaumcraftfx), [`ThaumcraftMaterials`](#thaumcraftmaterials), [`TileThaumcraft`](#tilethaumcraft), [`WorldCoordinates`](#worldcoordinates)
+Types: [`BlockCoordinates`](#blockcoordinates), [`IArchitect`](#iarchitect), [`IGoggles`](#igoggles), [`IRepairable`](#irepairable), [`IRepairableExtended`](#irepairableextended), [`IRunicArmor`](#irunicarmor), [`IScribeTools`](#iscribetools), [`IThaumcraftAddon`](#ithaumcraftaddon), [`IVisDiscountGear`](#ivisdiscountgear), [`IWarpingGear`](#iwarpinggear), [`ItemApi`](#itemapi), [`ItemRunic`](#itemrunic), [`OreDictionaryNames`](#oredictionarynames), [`ThaumcraftApi`](#thaumcraftapi), [`ThaumcraftApiHelper`](#thaumcraftapihelper), [`ThaumcraftFX`](#thaumcraftfx), [`ThaumcraftMaterials`](#thaumcraftmaterials), [`ThaumcraftSoundIds`](#thaumcraftsoundids), [`TileThaumcraft`](#tilethaumcraft), [`WorldCoordinates`](#worldcoordinates)
 
 ## BlockCoordinates
 
@@ -531,7 +531,7 @@ public static Tier toolMatElemental
 public static ArmorMaterial armorMatThaumium()
 ```
 
-Original armor materials; 1.21.1 registers them, so they are resolved through accessors.
+Original armor materials thaumium, fortress and void: 1.21.1 registers these three, so they are resolved through accessors (and have holders, see `ThaumcraftMaterials`). `armorMatSpecial()` and `armorMatVoidFortress()` are not registered.
 
 <a id="thaumcraftapi-armormatthaumiumfortress"></a>
 ```java
@@ -547,19 +547,40 @@ public static ArmorMaterial armorMatVoid()
 
 Resolves the registered void armor material; call after material registration, with no mutation.
 
+<a id="thaumcraftapi-armormatthaumiumholder"></a>
+```java
+public static net.minecraft.core.Holder<ArmorMaterial> armorMatThaumiumHolder()
+```
+
+`armorMatThaumium()` as the registry holder an `ArmorItem` takes, see `ThaumcraftMaterials.armorMatThaumiumHolder()`.
+
+<a id="thaumcraftapi-armormatthaumiumfortressholder"></a>
+```java
+public static net.minecraft.core.Holder<ArmorMaterial> armorMatThaumiumFortressHolder()
+```
+
+`armorMatThaumiumFortress()` as its registry holder, see `ThaumcraftMaterials.armorMatThaumiumHolder()`.
+
+<a id="thaumcraftapi-armormatvoidholder"></a>
+```java
+public static net.minecraft.core.Holder<ArmorMaterial> armorMatVoidHolder()
+```
+
+`armorMatVoid()` as its registry holder, see `ThaumcraftMaterials.armorMatThaumiumHolder()`.
+
 <a id="thaumcraftapi-armormatspecial"></a>
 ```java
 public static ArmorMaterial armorMatSpecial()
 ```
 
-Original `armorMatSpecial` (oracle `thaumcraft/api/ThaumcraftApi.java:52`): durability 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a field; 1.21.1 registers the material, so the native answers through an accessor.
+Original `armorMatSpecial` (oracle `thaumcraft/api/ThaumcraftApi.java:52`): durability 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a field; the native answers through an accessor with a plain `ArmorMaterial` object holding the original numbers (the iron equip sound, no repair ingredient, no worn layer). It is **not in the armour material registry** and has no holder or key: wrap it with `Holder.direct` to build an item from it, or register a material of your own. The registered `thaumcraft:special` is a different object, the adapter of the goggles (gold repair, the goggles' worn layer), not this one. See `ThaumcraftMaterials`.
 
 <a id="thaumcraftapi-armormatvoidfortress"></a>
 ```java
 public static ArmorMaterial armorMatVoidFortress()
 ```
 
-Original `armorMatVoidFortress` (oracle `thaumcraft/api/ThaumcraftApi.java:55`): durability 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a field; 1.21.1 registers the material, so the native answers through an accessor.
+Original `armorMatVoidFortress` (oracle `thaumcraft/api/ThaumcraftApi.java:55`): durability 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a field; the native answers through an accessor with a plain `ArmorMaterial` object holding the original defences. It is **not in the armour material registry** and has no holder or key: wrap it with `Holder.direct` to build an item from it, or register a material of your own. See `ThaumcraftMaterials`.
 
 <a id="thaumcraftapi-enchantfrugal"></a>
 ```java
@@ -713,7 +734,7 @@ public static List<Object> getCraftingRecipes()
 
 The original programmatic recipe list and the native recipes of the loaded level.
 
-Forced 1.21.1 change: the original kept every recipe of the game in one static list; 1.21.1 keeps the recipes of a world in the recipe manager of the loaded level. The runtime installs that manager through `net.minecraft.core.HolderLookup.Provider)` and this list answers from both.
+Forced 1.21.1 change: the original kept every recipe of the game in one static list; 1.21.1 keeps the recipes of a world in the recipe manager of the loaded level. The runtime installs that manager through `installRecipeManager(RecipeManager, net.minecraft.core.HolderLookup.Provider)` and this list answers from both.
 
 <a id="thaumcraftapi-getprogrammaticcraftingrecipes"></a>
 ```java
@@ -914,7 +935,7 @@ Null/empty items are ignored and null aspects become empty; only item identity a
 public static void registerObjectTag(Item item, int metadata, AspectList aspects)
 ```
 
-Registers item aspect amounts using native damage points (32767 is wildcard), not 1.7.10 subtype metadata. Use distinct native item IDs or `AspectList)` for flattened variants; this is not a component predicate. Null item is ignored, null aspects stores a new empty list; otherwise the live aspects reference replaces the global registration.
+Registers item aspect amounts using native damage points (32767 is wildcard), not 1.7.10 subtype metadata. Use distinct native item IDs or `registerObjectTag(TagKey, AspectList)` for flattened variants; this is not a component predicate. Null item is ignored, null aspects stores a new empty list; otherwise the live aspects reference replaces the global registration.
 
 <a id="thaumcraftapi-registerobjecttag-3"></a>
 ```java
@@ -944,14 +965,14 @@ The members a tag has now are registered at once, like the 1.7.10 ore dictionary
 public static void applyTagObjectTags()
 ```
 
-The runtime calls it once the item tags of a world are bound; see `AspectList)`.
+The runtime calls it once the item tags of a world are bound; see `registerObjectTag(TagKey, AspectList)`.
 
 <a id="thaumcraftapi-registerobjecttag-6"></a>
 ```java
 public static void registerObjectTag(String nativeItemTag, AspectList aspects)
 ```
 
-The 1.7.10 ore dictionary form: `registerObjectTag("ingotCopper", aspects)`. The name is a 1.7.10 ore dictionary name or a namespaced item tag id, resolved by `OreDictionaryNames`; see `AspectList)` for when the members are registered.
+The 1.7.10 ore dictionary form: `registerObjectTag("ingotCopper", aspects)`. The name is a 1.7.10 ore dictionary name or a namespaced item tag id, resolved by `OreDictionaryNames`; see `registerObjectTag(TagKey, AspectList)` for when the members are registered.
 
 <a id="thaumcraftapi-exists"></a>
 ```java
@@ -1096,7 +1117,7 @@ public static boolean isResearchComplete(String username, String researchkey)
 public static boolean isResearchComplete(Player player, String researchkey)
 ```
 
-Native player-scoped form of `String)`.
+Native player-scoped form of `isResearchComplete(String, String)`.
 
 ```java
 public static boolean hasDiscoveredAspect(String username, Aspect aspect)
@@ -1131,18 +1152,18 @@ Native world-scoped form: the level-free variant cannot resolve recipe-derived t
 public static AspectList getBonusObjectTags(ItemStack is, AspectList ot)
 ```
 
-Delegates to the installed handler, normalizing null results to an empty list. The 1.7.10 bonus-enrichment signature now only copies ot in the installed handler (null becomes empty), ignoring is. Use getObjectAspects(ItemStack, Level) for 1.21.1 scan-complete aspect units; no equivalent level-aware bonus facade exists here.
+The 1.7.10 signature, which cannot be answered without a world: the installed handler only returns a copy of `ot` (null becomes an empty list) and ignores `is`. The 1.7.10 enrichment of the base aspects with the contents of a container and the bonuses of equipment and enchantments is *not* done here: use `getBonusObjectTags(ItemStack, AspectList, Level)` (or `getObjectAspects(ItemStack, Level)`, which already holds all of it). Its contract differs, so do not just add the level to an old call.
 
 <a id="thaumcraftapihelper-getbonusobjecttags-2"></a>
 ```java
 public static AspectList getBonusObjectTags(ItemStack is, AspectList bonus, Level level)
 ```
 
-The complete aspects of one item as a scan sees them, plus `bonus` on top: the world-scoped form of the original `getBonusObjectTags(ItemStack, AspectList)`. Not a 1.7.10 signature.
+The aspects of one item as `getObjectAspects(ItemStack, Level)` gives them, plus `bonus` on top: the world-scoped form of the original `getBonusObjectTags(ItemStack, AspectList)`. Not a 1.7.10 signature.
 
 **This is not the 1.7.10 contract.** The original took the BASE aspects of the item in its second argument and returned them enriched with the bonuses. Here the base is already part of the result, so do not pass `getObjectAspects(stack, level)` as `bonus`: every amount would be counted twice. Pass `null` for the aspects of the stack alone, or only the extra aspects you want added.
 
-**The result** is a new list, per single item (the count of the stack is not applied), made of: the registered, recipe-derived or inferred aspects of the item (`Level)`), the contents of an essentia container (a filled jar, a phial, a crystal, wisp essence, a bound jar label), and the bonuses of worn equipment and of enchantments, culled to the six most valuable aspects (`cullTags`) without capping amounts; then `bonus` is added on top by summing, *after* the culling, so the result can hold more than six aspects. `bonus` is never modified.
+**The result** is a new list, per single item (the count of the stack is not applied). Its base part is *exactly* `getObjectAspects(stack, level)`, which is already the complete answer of a scan: the registered, recipe-derived or inferred aspects of the item (a group of damage values registered together is resolved as a scan resolves it), the contents of an essentia container (a filled jar, a phial, a crystal, wisp essence, a bound jar label), and the bonuses of worn equipment and of enchantments, culled to the six most valuable aspects (`cullTags`) without capping amounts. This method adds only `bonus`, by summing, *after* the culling, so the result can hold more than six aspects. `bonus` is never modified. When you have no bonus to add, `getObjectAspects(stack, level)` is the plain way to ask.
 
 An empty or null stack or a null level contributes nothing: the result is then a copy of `bonus` (an empty list for null). A replaced handler that answers null gives an empty list. Either side; the recipe-derived aspects are read from the recipes of `level`.
 
@@ -1231,7 +1252,7 @@ The research keys the player completed, as a new set without "@" clue markers. W
 public static boolean hasDiscoveredAspect(Player player, Aspect aspect)
 ```
 
-Player-scoped form of `Aspect)`.
+Player-scoped form of `hasDiscoveredAspect(String, Aspect)`.
 
 <a id="thaumcraftapihelper-getdiscoveredaspects-2"></a>
 ```java
@@ -1304,7 +1325,7 @@ The aspect starts with an empty research pool; an aspect the player already know
 
 Server side only, on the server thread (another thread throws `IllegalStateException`).
 
-**Returns:** true when this call discovered the aspect; false when the player already knew it, on a client, for a null player or aspect, and for an aspect that is not registered under its tag
+**Returns:** true when this call discovered the aspect; false when the player already knew it, on a client, for a null player or aspect, for an aspect that is not registered under its tag, and when the player's knowledge could not be read (it is kept untouched then, as everywhere else)
 
 <a id="thaumcraftapihelper-getscans"></a>
 ```java
@@ -1313,11 +1334,11 @@ public static Scans getScans(Player player)
 
 The scan markers of the player: everything the thaumometer recorded for items (and the blocks they were picked from), entities and phenomena (aura nodes). An immutable snapshot, so a Tome of Sharing can copy what one player scanned to another with `addScans`.
 
-**The markers are the mod's own keys** and are meant to travel unchanged, not to be built or parsed: a basic scan is `"@"` followed by the registry id of the item or the name of the entity or phenomenon, an advanced scan `"#"` followed by the same (it replaces the `"@"` marker). A marker is never empty and at most `Scans.MAX_KEY_LENGTH` characters long.
+**The markers are the mod's own keys** and are meant to travel unchanged, not to be built or parsed: a basic scan is `"@"` followed by the registry id of the item or the name of the entity or phenomenon, an advanced scan `"#"` followed by the same (it replaces the `"@"` marker). A marker is never empty and at most 1024 characters long (`Scans.MAX_KEY_LENGTH`): a longer one in the knowledge (the mod never writes one; a hand-edited save or an add-on's own scan handler could) is left out of the snapshot instead of failing the call.
 
 **Not included:** the research clues a scan revealed (`"@KEY"` entries among the completed research; `getCompletedResearch` leaves them out and `completeResearch` refuses them), the discovered aspects (`getDiscoveredAspects(Player)`) and the research points (`getAspectPool`).
 
-Both sides for the client's own player; the knowledge of another player is only known to the server. An empty snapshot for a null player.
+Both sides for the client's own player; the knowledge of another player is only known to the server. An empty snapshot for a null player and for knowledge that could not be read. Never throws for the content of the knowledge.
 
 <a id="thaumcraftapihelper-addscans"></a>
 ```java
@@ -1326,22 +1347,38 @@ public static int addScans(ServerPlayer player, Scans scans)
 
 Adds scan markers to the player's knowledge and syncs it to the client: the native counterpart of the original `ResearchManager.completeScannedObject/Entity/Phenomena`. Not a 1.7.10 helper member. The markers are those of `getScans`; they give no research points, aspects or clues, only the fact "scanned".
 
-A marker the player already has is not added again, in either of its two forms: a basic marker (`"@x"`) is skipped when the player holds `"@x"` or `"#x"`; an advanced marker (`"#x"`) is added and replaces a basic one. Adding is idempotent, and the order of the markers does not matter.
+A marker the player already has is not added again, in either of its two forms: a basic marker (`"@x"`) is skipped when the player holds `"@x"` or `"#x"`; an advanced marker (`"#x"`) is added and replaces a basic one. Adding is idempotent. The resulting knowledge and the returned count do not depend on the order of the markers: a snapshot that holds both `"@x"` and `"#x"` (an add-on can build one by hand) counts as the one marker `"#x"`.
 
 Server side only, on the server thread (another thread throws `IllegalStateException`).
 
-**Returns:** the number of markers that were new; the player is synced only when it is above zero. Zero on a client and for null arguments
+**Returns:** the number of markers that were new; the player is synced only when it is above zero. Zero on a client, for null arguments and when the player's knowledge could not be read (nothing is changed then)
 
 <a id="thaumcraftapihelper-iswoodlog"></a>
 ```java
 public static boolean isWoodLog(Level level, BlockPos pos)
 ```
 
-Whether the block at the position is a log by the rule of the Axe of the Stream: the 1.21.1 form of the original `Utils.isWoodLog(world, x, y, z)`. It answers "may the furthest-log walk of `breakFurthestBlock` step on this cell", and nothing else: it says nothing about whether the block belongs to a tree.
+Whether the block at the position is a log: the 1.21.1 form of the original `Utils.isWoodLog(world, x, y, z)`. It answers "may the furthest-log walk of `breakFurthestBlock` step on this cell", and nothing else: it says nothing about whether the block belongs to a tree.
 
-**The rule.** True for a block in the block tag `#minecraft:logs` (so every log, wood and stem of the tag, stripped ones and the Greatwood and Silverwood logs of Thaumcraft included) and for any leaf block; false for everything else, air included, and false for the plain oak log (`minecraft:oak_log`). This is the rule of the port's `Utils.isWoodLog`. The original asked the block whether it can sustain leaves (a log does) or whether a configured list of "woodLog" ore entries names it; how the port's rule differs for oak and for leaves is listed in `docs/audit/KNOWN_DEVIATIONS.md` section 9.
+**The rule.** True for a block in the block tag `#minecraft:logs`: every log, wood, stripped log and stem of the tag, the plain oak log among them, and the Greatwood and Silverwood logs of Thaumcraft. False for everything else: leaf blocks, planks, air, and a log of another mod that is not in the tag. The original accepted every non-air block that can sustain leaves (a log does, a leaf block does not) and every entry of its list of ore dictionary logs; in 1.21.1 the tag is both (original `Utils.java:202-211`, read in `docs/analysis/2026-10-19-golem-lumber.md`). It is the broad original rule, not the set of the port's own Axe of the Stream, which deliberately fells a narrower one (the unstripped logs of the six old trees and the Greatwood and Silverwood logs).
 
 Only the block state is read (no block entity, no hardness, no ownership). A position in a chunk that is not loaded, or outside the build height, is not a log; the call never loads a chunk. Either side; read-only; cheap. False for null arguments.
+
+<a id="thaumcraftapihelper-findfurthestblock"></a>
+```java
+public static BlockPos findFurthestBlock(Level level, BlockPos pos, Block block)
+```
+
+Where `breakFurthestBlock` would break a block, without breaking anything: the end of the greedy walk that starts at the clicked log. Not a 1.7.10 method; it exists so that a caller can ask a claims or protection mod about the cell that will be broken, which can lie up to 24 blocks sideways and 48 up or down from `pos` (see the walk described at `breakFurthestBlock`).
+
+The answer is the cell the next `breakFurthestBlock(level, pos, block, player)` call breaks, as long as no block changes in between and the player is allowed to break it; it is `pos` itself when no other log qualifies. It is a new immutable position. Felling a tree with protection is therefore a loop of: find the cell, ask your protection about that cell, call `breakFurthestBlock` only if it agrees (and stop the loop when it does not).
+
+Null when nothing would be broken: a null argument, a `pos` outside the build height or in a chunk that is not loaded, a start that is not exactly `block` or is not a log (`isWoodLog`), and a start that cannot be broken. Read-only, loads no chunk (a cell in an unloaded chunk is no link of the walk), and keeps no state, so it works on either side and on any thread that may read the level.
+
+**Parameters:**
+- `level` — the level
+- `pos` — the clicked log, where the walk starts
+- `block` — the block the walk follows, normally `level.getBlockState(pos).getBlock()`
 
 <a id="thaumcraftapihelper-breakfurthestblock"></a>
 ```java
@@ -1350,25 +1387,27 @@ public static boolean breakFurthestBlock(Level level, BlockPos pos, Block block,
 
 Breaks the log at the far end of a tree, as the original Axe of the Stream did when it felled a tree from the clicked log: the 1.21.1 form of the original `BlockUtils.breakFurthestBlock(world, x, y, z, block, player)`. One call breaks ONE block; felling a whole tree is a loop of the caller.
 
-**What "furthest" means.** A greedy walk, not a search of the whole tree. It starts at `pos` with a distance of zero. At each step it scans the cells within two blocks of the cell it stands on, in the order x from -2 to +2, y from +2 down to -2, z from -2 to +2, and moves to the FIRST cell that (1) holds exactly `block` (the same block, not the same tag; the log axis and other state properties are not compared), (2) satisfies `isWoodLog`, (3) can be broken (a destroy speed of zero or more) and (4) is strictly further from `pos` than the cell the walk reached before (squared distance, so an equal distance does not count). Then it repeats from there and stops when no cell qualifies. Consequences: gaps of up to two blocks and diagonals are crossed; a branch that is scanned first and ends early hides a longer branch (the walk is the first local maximum, not the farthest log of the tree); a neighbouring tree of the same wood is followed too. The walk never leaves the box |dx| &lt;= 24, |dy| &lt;= 48, |dz| &lt;= 24 around `pos`; the first scanned cell outside the box ends the whole walk (an original quirk: the remaining cells of that scan are not looked at).
+**What "furthest" means.** A greedy walk, not a search of the whole tree. It starts at `pos` with a distance of zero. At each step it scans the cells within two blocks of the cell it stands on, in the order x from -2 to +2, y from +2 down to -2, z from -2 to +2, and moves to the FIRST cell that (1) holds exactly `block` (the same block, not the same tag; the log axis and other state properties are not compared), (2) satisfies `isWoodLog`, (3) can be broken (a destroy speed of zero or more) and (4) is strictly further from `pos` than the cell the walk reached before (squared distance, so an equal distance does not count). Then it repeats from there and stops when no cell qualifies. Consequences: gaps of up to two blocks and diagonals are crossed; a branch that is scanned first and ends early hides a longer branch (the walk is the first local maximum, not the farthest log of the tree); a neighbouring tree of the same wood is followed too. The walk never leaves the box |dx| &lt;= 24, |dy| &lt;= 48, |dz| &lt;= 24 around `pos`; the first scanned cell outside the box ends the whole walk (an original quirk: the remaining cells of that scan are not looked at). `findFurthestBlock` answers where it ends without breaking anything.
 
-**What is broken.** Only the cell the walk ended on; the logs on the way stay. When no cell qualifies that cell is `pos` itself, *whatever block it holds*: the original never checked the start, because the axe called `isWoodLog` first. Do the same, and pass the block that is at `pos`, or a stone will be mined by a call meant for a tree.
+**What is broken.** Only the cell the walk ended on; the logs on the way stay. The start must itself be a log of `block`: for any other start (air, dirt, a chest...) nothing is broken and the answer is false. (The original broke the start whatever it was, because its axe called `isWoodLog` first; as a public helper this one asks that itself, so a position forwarded by a client cannot be used to mine an arbitrary block.) When no other log qualifies, the start itself is the cell that is broken.
 
 **Drops.** The block is removed and drops its normal loot, rolled with the main-hand item of `player` (Fortune and Silk Touch count), as items at the broken cell; they do not follow the player. A creative player and a null player get no drops. The game rule for block drops applies.
 
-**Tool wear: none.** The held item takes no damage, the player gets no statistics or exhaustion, and no loader break event is fired; the player's own Axe of the Stream does not use this helper in the port (it breaks through the normal break path and wears the axe). **No protection check:** spawn protection, the world border, claims and permission mods are not asked for any cell, and the broken cell can be up to 24 blocks sideways and 48 up or down from `pos`. An add-on that cares must check `level.mayInteract(player, pos)` or walk the tree itself.
+**Tool wear: none.** The held item takes no damage, the player gets no statistics or exhaustion, and no loader break event is fired; the player's own Axe of the Stream does not use this helper in the port (it breaks through the normal break path and wears the axe).
 
-**Afterwards** every cell within three blocks of the broken one gets a scheduled block tick 150 to 299 ticks later (the original's delayed neighbourhood update, which the leaves around a felled log answer) and clients see the block update.
+**Protection.** The broken cell is far from `pos` and unknown before the call, so the game's own rules are applied to *that* cell: it must be inside the world border, and for a non-null player it must not be under spawn protection (`level.mayInteract(player, cell)`), and the player's game mode must allow breaking it (a spectator, and an adventure player without a tool that may break it, break nothing). When a rule refuses, the answer is false and nothing is changed. A claims, land-protection or permission mod is **not** asked, and no loader break event is fired, for any cell (the original asked nothing either): on claimed land call `findFurthestBlock` first, ask that mod about the cell it returns, and only then call this method. Do not check only the clicked `pos`: it is not the cell that is broken.
 
-**Return value.** True when the walk ended on a cell that is not air and can be broken: that cell was handed to the harvester (like the original, true does not prove the block was removed: another mod can veto the removal and the call still answers true). False, with nothing changed, for a client level, a null argument, a start in a chunk that is not loaded, an air start (the helper behind this method answers true for air and plays a break effect), and an unbreakable block such as bedrock at the end of the walk. So `while (breakFurthestBlock(...))` ends once the start cell is air.
+**Afterwards** every loaded cell within three blocks of the broken one gets a scheduled block tick 150 to 299 ticks later (the original's delayed neighbourhood update, which the leaves around a felled log answer) and clients see the block update.
 
-**Side and thread.** Server side, on the server thread; on another thread it throws `IllegalStateException`, because the walk keeps its state in static fields (as the original did) and is not reentrant. Cells inside the box that lie in unloaded chunks are read, and so loaded, like any block read.
+**Return value.** True when the walk ended on a cell that is not air and can be broken, and the rules above agreed: that cell was handed to the harvester (like the original, true does not prove the block was removed: another mod can veto the removal and the call still answers true). False, with nothing changed, for a client level, a null argument, a start that is not a log of `block`, a start in a chunk that is not loaded, an end that a protection rule refuses and an end that cannot be broken. So `while (breakFurthestBlock(...))` ends once the start cell is air; put a limit on the loop anyway.
+
+**Side and thread.** Server side, on the server thread; on another thread it throws `IllegalStateException`, because it breaks blocks and spawns items. It reads only loaded chunks and loads none: a cell in an unloaded chunk is no link of the walk (the original read, and so generated, such a chunk). Unlike the original it keeps no static state, so it is reentrant.
 
 **Parameters:**
 - `level` — the level; a client level returns false
 - `pos` — the clicked log, where the walk starts
 - `block` — the block the walk follows, normally `level.getBlockState(pos).getBlock()`
-- `player` — the player who breaks it; decides the drops; may be null
+- `player` — the player who breaks it; decides the drops and the rules above; may be null
 
 <a id="thaumcraftapihelper-raytraceignoringsource"></a>
 ```java
@@ -1387,7 +1426,7 @@ Endpoints are world coordinates in blocks; null world/endpoints or NaN component
 public record Scans(Set<String> items, Set<String> entities, Set<String> phenomena)
 ```
 
-An immutable snapshot of the scan markers of a player, as `getScans` returns it and `addScans` takes it. Not a 1.7.10 type. The three sets keep the order of the player's knowledge; each marker is a non-empty string of at most `#MAX_KEY_LENGTH` characters (the keys of the mod are far shorter; the bound keeps the knowledge sync packet well inside the limit of an NBT string).
+An immutable snapshot of the scan markers of a player, as `getScans` returns it and `addScans` takes it. Not a 1.7.10 type. The three sets keep the order of the player's knowledge; each marker is a non-empty string of at most 1024 characters, `MAX_KEY_LENGTH` (the keys of the mod are far shorter; the bound keeps the knowledge sync packet well inside the limit of an NBT string). The constructor throws `IllegalArgumentException` for a marker that is null, empty or longer, and `NullPointerException` for a null set.
 
 **Parameters:**
 - `items` — markers of scanned items, for example `"@minecraft:diamond"`
@@ -1399,7 +1438,7 @@ An immutable snapshot of the scan markers of a player, as `getScans` returns it 
 public static final int MAX_KEY_LENGTH
 ```
 
-The longest marker a snapshot accepts; the markers the mod writes are a registry id or a node id, well below it.
+The longest marker a snapshot accepts, 1024 characters; the markers the mod writes are a registry id or a node id, well below it.
 
 <a id="scans-empty"></a>
 ```java
@@ -1437,7 +1476,7 @@ public final class ThaumcraftFX
 
 The visual effects a 1.7.10 add-on sent to the players around a block with Thaumcraft's own packets.
 
-Not a 1.7.10 class: an add-on of 1.7.10 built `thaumcraft.common.lib.network.fx.PacketFX*` itself and sent it with `PacketHandler.INSTANCE.sendToAllAround(..., 32)`. Each method here is one of those packets, with the original look, sent to the players within 32 blocks. Call them on the server thread of the level; on another thread they throw `IllegalStateException`. Colours are 0xRRGGBB.
+Not a 1.7.10 class: an add-on of 1.7.10 built `thaumcraft.common.lib.network.fx.PacketFX*` itself and sent it with `PacketHandler.INSTANCE.sendToAllAround(..., 32)`. `blockSparkle`, `blockArc`, `zap`, `bubbles`, `essentiaTrail` and `visDrain` are those packets, with the original look. `sparkle`, `burst`, `blockRunes` and `smokeSpiral` are not: the 1.7.10 proxy drew them on the client only, so they are new senders, the server twins of the matching methods of `thaumcraft.api.client.ThaumcraftClientFX`, with no original packet. All of them reach the players within 32 blocks. Call them on the server thread of the level; on another thread they throw `IllegalStateException`. Colours are 0xRRGGBB.
 
 <a id="thaumcraftfx-random_grey"></a>
 ```java
@@ -1481,6 +1520,53 @@ public static void essentiaTrail(ServerLevel level, BlockPos consumer, BlockPos 
 
 Original `PacketFXEssentiaSource`: essentia flowing from `source` to the block that drew it.
 
+<a id="thaumcraftfx-sparkle"></a>
+```java
+public static void sparkle(ServerLevel level, double x, double y, double z, float size, int type, float gravity)
+```
+
+The server twin of `ThaumcraftClientFX.sparkle`: every player within 32 blocks of the point is sent the sparkle and draws it with their own particle setting (so the sparkle is drawn with the chance of that call, not always). Not a packet of the original: the 1.7.10 proxy drew sparkles on the client only, and an add-on whose logic runs on the server had to send its own.
+
+**Throws:** `IllegalArgumentException` — for the ranges of the client method
+
+**Throws:** `IllegalStateException` — when not called on the server thread of the level
+
+**Parameters:**
+- `type` — 0 to 7, see the client method
+
+<a id="thaumcraftfx-burst"></a>
+```java
+public static void burst(ServerLevel level, double x, double y, double z, float size)
+```
+
+The server twin of `thaumcraft.api.client.ThaumcraftClientFX.burst`: the white puff of the wisp, drawn by every player within 32 blocks of the point.
+
+**Throws:** `IllegalArgumentException` — for the ranges of the client method
+
+**Throws:** `IllegalStateException` — when not called on the server thread of the level
+
+<a id="thaumcraftfx-blockrunes"></a>
+```java
+public static void blockRunes(ServerLevel level, double x, double y, double z, float red, float green, float blue, int duration, float gravity)
+```
+
+The server twin of `thaumcraft.api.client.ThaumcraftClientFX.blockRunes`: one rune glyph, drawn by every player within 32 blocks of the point. As in the client method, the position is the corner of a block and the rune appears half a block above and beside it on every axis.
+
+**Throws:** `IllegalArgumentException` — for the ranges of the client method
+
+**Throws:** `IllegalStateException` — when not called on the server thread of the level
+
+<a id="thaumcraftfx-smokespiral"></a>
+```java
+public static void smokeSpiral(ServerLevel level, double x, double y, double z, float radius, int start, int minY, int rgb)
+```
+
+The server twin of `thaumcraft.api.client.ThaumcraftClientFX.smokeSpiral`: **one** puff of smoke that travels along a spiral, drawn by every player within 32 blocks of the point. One call is one puff, not a ring; the originals make the ring by calling it 5 to 33 times with random `start` angles, and so does a server caller that wants one.
+
+**Throws:** `IllegalArgumentException` — for the ranges of the client method
+
+**Throws:** `IllegalStateException` — when not called on the server thread of the level
+
 <a id="thaumcraftfx-visdrain"></a>
 ```java
 public static void visDrain(ServerLevel level, BlockPos consumer, BlockPos node, Aspect aspect)
@@ -1497,6 +1583,8 @@ public final class ThaumcraftMaterials
 The original TC4 material constants.
 
 Forced 1.21.1 changes: `Item.ToolMaterial` became `Tier` and `ItemArmor.ArmorMaterial` became the registry-backed `ArmorMaterial`. The original numbers are preserved exactly: thaumium 3/400/7.0/2.0/22 with 2/6/5/2 armour and enchantability 25, void 4/150/8.0/3.0/10 with 3/7/6/3 and enchantability 10, fortress 40 durability with 3/7/6/3 and enchantability 25, the special armour 1/3/2/1 with enchantability 25 and the void fortress armour 4/8/7/4 with enchantability 10.
+
+**Which materials have a registry key.** 1.21.1 armour items take a `Holder<ArmorMaterial>`, not the material object the 1.7.10 `ItemArmor` constructor took. Four materials are registered under the `thaumcraft` namespace for the armour families of the original: `thaumium` (`armorMatThaumiumHolder()`), `fortress` (`armorMatThaumiumFortressHolder()`), `void` (`armorMatVoidHolder()`) and `void_robe` (`armorMatVoidRobeHolder()`, the void numbers under another worn model). Each holder is the registry reference of its `ARMORMAT_*_KEY`, so `holder.value()` is the very object `armorMatThaumium()` and its siblings return. `ARMORMAT_SPECIAL` and `ARMORMAT_VOID_FORTRESS` are plain objects with the original numbers that are not in the registry at all, and have no key or holder: to build an item from one, wrap it with `Holder.direct`, or register a material of your own with your own worn textures, which is what an add-on whose armour looks different from Thaumcraft's does. A material named `thaumcraft:special` *is* registered, but it is the adapter of the goggles (the same defences and enchantability, a gold repair ingredient and the goggles' worn layer), a different object from `ARMORMAT_SPECIAL`, and is not part of this API.
 
 ```java
 public static final Tier TOOLMAT_THAUMIUM
@@ -1548,12 +1636,168 @@ public static ArmorMaterial armorMatVoidRobe()
 
 The registered native void robe armour material.
 
+<a id="thaumcraftmaterials-armormat_thaumium_key"></a>
+```java
+public static final ResourceKey<ArmorMaterial> ARMORMAT_THAUMIUM_KEY
+```
+
+Registry key of `armorMatThaumium()`: `thaumcraft:thaumium`.
+
+<a id="thaumcraftmaterials-armormat_thaumium_fortress_key"></a>
+```java
+public static final ResourceKey<ArmorMaterial> ARMORMAT_THAUMIUM_FORTRESS_KEY
+```
+
+Registry key of `armorMatThaumiumFortress()`: `thaumcraft:fortress`.
+
+<a id="thaumcraftmaterials-armormat_void_key"></a>
+```java
+public static final ResourceKey<ArmorMaterial> ARMORMAT_VOID_KEY
+```
+
+Registry key of `armorMatVoid()`: `thaumcraft:void`.
+
+<a id="thaumcraftmaterials-armormat_void_robe_key"></a>
+```java
+public static final ResourceKey<ArmorMaterial> ARMORMAT_VOID_ROBE_KEY
+```
+
+Registry key of `armorMatVoidRobe()`: `thaumcraft:void_robe`.
+
+<a id="thaumcraftmaterials-armormatthaumiumholder"></a>
+```java
+public static Holder<ArmorMaterial> armorMatThaumiumHolder()
+```
+
+`armorMatThaumium()` as the registry holder 1.21.1 armour items take (`ArmorItem` wants a `Holder<ArmorMaterial>`); the 1.7.10 field `ThaumcraftApi.armorMatThaumium` was passed to `ItemArmor` directly. The holder is the registry reference of `ARMORMAT_THAUMIUM_KEY`, not a direct wrapper of the object.
+
+**Throws:** `IllegalStateException` — while Thaumcraft's registration has not run
+
+<a id="thaumcraftmaterials-armormatthaumiumfortressholder"></a>
+```java
+public static Holder<ArmorMaterial> armorMatThaumiumFortressHolder()
+```
+
+`armorMatThaumiumFortress()` as its registry holder, see `armorMatThaumiumHolder()`.
+
+<a id="thaumcraftmaterials-armormatvoidholder"></a>
+```java
+public static Holder<ArmorMaterial> armorMatVoidHolder()
+```
+
+`armorMatVoid()` as its registry holder, see `armorMatThaumiumHolder()`.
+
+<a id="thaumcraftmaterials-armormatvoidrobeholder"></a>
+```java
+public static Holder<ArmorMaterial> armorMatVoidRobeHolder()
+```
+
+`armorMatVoidRobe()` as its registry holder, see `armorMatThaumiumHolder()`.
+
 <a id="thaumcraftmaterials-layer"></a>
 ```java
 public static ArmorMaterial.Layer layer(String path)
 ```
 
 The worn layer of a material; the native layers are the registered resource locations.
+
+## ThaumcraftSoundIds
+
+```java
+public final class ThaumcraftSoundIds
+```
+
+The ids of the sounds Thaumcraft registers, so an add-on that plays "its own" wand, zap or wind sound does not write the strings.
+
+1.7.10 add-ons played them by name, `"thaumcraft:wand"`, `"thaumcraft:zap"`, `"thaumcraft:wind"`..., in `World.playSoundAtEntity`. In 1.21.1 each of them is a registered `SoundEvent` with the same path, declared in the mod's `sounds.json`. There is one constant for every sound event Thaumcraft registers, in the order it registers them, named after the path in capitals; the id never changes, a resource pack may replace the audio behind it. `event` resolves an id to the registered event, which `Level.playSound` and `Level.playLocalSound` take.
+
+```java
+level.playSound(null, player.blockPosition(), ThaumcraftSoundIds.event(ThaumcraftSoundIds.WAND),
+        SoundSource.PLAYERS, 1.0F, 1.0F);   // server thread: every player in range hears it
+```
+
+```java
+public static final ResourceLocation HEARTBEAT
+public static final ResourceLocation SPILL
+public static final ResourceLocation BUBBLE
+public static final ResourceLocation ALEMBICKNOCK
+public static final ResourceLocation CREAK
+public static final ResourceLocation SQUEEK
+public static final ResourceLocation GOLEMIRONSHOOT
+public static final ResourceLocation JAR
+public static final ResourceLocation SWARM
+public static final ResourceLocation SWARMATTACK
+public static final ResourceLocation FLY
+public static final ResourceLocation KEY
+public static final ResourceLocation DOORFAIL
+public static final ResourceLocation CAMERATICKS
+public static final ResourceLocation CAMERACLACK
+public static final ResourceLocation PUMP
+public static final ResourceLocation PAGE
+public static final ResourceLocation LEARN
+public static final ResourceLocation WRITE
+public static final ResourceLocation ERASE
+public static final ResourceLocation BRAIN
+public static final ResourceLocation CRYSTAL
+public static final ResourceLocation WISPDEAD
+public static final ResourceLocation WISPLIVE
+public static final ResourceLocation WAND
+public static final ResourceLocation WANDFAIL
+public static final ResourceLocation RUMBLE
+public static final ResourceLocation ICE
+public static final ResourceLocation JACOBS
+public static final ResourceLocation HHOFF
+public static final ResourceLocation HHON
+public static final ResourceLocation PECH_IDLE
+public static final ResourceLocation PECH_TRADE
+public static final ResourceLocation PECH_DICE
+public static final ResourceLocation PECH_HIT
+public static final ResourceLocation PECH_DEATH
+public static final ResourceLocation PECH_CHARGE
+public static final ResourceLocation SHOCK
+public static final ResourceLocation FIRELOOP
+public static final ResourceLocation ZAP
+public static final ResourceLocation CRAFTFAIL
+public static final ResourceLocation CRAFTSTART
+public static final ResourceLocation RUNICSHIELDEFFECT
+public static final ResourceLocation RUNICSHIELDCHARGE
+public static final ResourceLocation SWING
+public static final ResourceLocation WIND
+public static final ResourceLocation TOOL
+public static final ResourceLocation GORE
+public static final ResourceLocation ROOTS
+public static final ResourceLocation TENTACLE
+public static final ResourceLocation UPGRADE
+public static final ResourceLocation WHISPERS
+public static final ResourceLocation MONOLITH
+public static final ResourceLocation INFUSER
+public static final ResourceLocation INFUSERSTART
+public static final ResourceLocation EGIDLE
+public static final ResourceLocation EGATTACK
+public static final ResourceLocation EGDEATH
+public static final ResourceLocation EGSCREECH
+public static final ResourceLocation CRABCLAW
+public static final ResourceLocation CRABDEATH
+public static final ResourceLocation CRABTALK
+public static final ResourceLocation CHANT
+public static final ResourceLocation COINS
+public static final ResourceLocation URNBREAK
+public static final ResourceLocation EVILPORTAL
+```
+
+<a id="thaumcraftsoundids-event"></a>
+```java
+public static SoundEvent event(ResourceLocation id)
+```
+
+The registered sound event of an id.
+
+**Returns:** the registered event, never `null`
+
+**Throws:** `IllegalArgumentException` — when `id` is `null` or no sound event is registered under it (an id that does not exist, or Thaumcraft's registration has not run yet)
+
+**Parameters:**
+- `id` — one of the constants of this class, or the id of any other registered sound event
 
 ## TileThaumcraft
 

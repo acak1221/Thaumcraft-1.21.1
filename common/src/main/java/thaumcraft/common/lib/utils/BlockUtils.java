@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.common.lib.world.StreamAxeGeometry;
 
 /**
  * Original TC4 {@code thaumcraft.common.lib.utils.BlockUtils}: the block helpers of the harvesting focus, the
@@ -30,13 +31,6 @@ import net.minecraft.world.phys.Vec3;
  * that cared about the metadata uses the {@link BlockState} form.
  */
 public final class BlockUtils {
-    /** The original walk state of {@link #findBlocks}: the block the greedy search reached. */
-    private static int lastx = 0;
-    private static int lasty = 0;
-    private static int lastz = 0;
-    /** The original walk state of {@link #findBlocks}: the distance of the block it reached. */
-    private static double lastdistance = 0.0;
-
     /**
      * Integration point for the entity layer's following-item entity (original {@code EntityFollowingItem}).
      *
@@ -97,13 +91,18 @@ public final class BlockUtils {
      *
      * <p>The original removed the block without its drops and reported whether the removal happened. The native
      * removal keeps the drops for the caller, exactly as the original separated the two steps.
+     *
+     * <p>The player may be null (the original passed no player to a block that did not use it). The native
+     * {@code playerWillDestroy} of a block announces the break to the player (it angers the piglins of a block in
+     * {@code #minecraft:guarded_by_piglins} and dereferences the player to do so), so it is only called for a player;
+     * without one the block is removed as the world removes any block.
      */
     public static boolean removeBlock(Level level, int x, int y, int z, Player player) {
         if (level == null) return false;
         BlockPos pos = new BlockPos(x, y, z);
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) return false;
-        state.getBlock().playerWillDestroy(level, pos, state, player);
+        if (player != null) state.getBlock().playerWillDestroy(level, pos, state, player);
         return level.destroyBlock(pos, false, player);
     }
 
@@ -187,37 +186,28 @@ public final class BlockUtils {
     // ------------------------------------------------------------------ greedy search
 
     /**
-     * Original {@code findBlocks(World, int, int, int, Block)}: the greedy walk to the furthest connected log.
+     * Original {@code findBlocks(World, int, int, int, Block)}: the greedy walk to the furthest connected log, answered
+     * as the cell it ends on instead of being left in static fields.
      *
      * <p>The original searched a five by five by five neighbourhood around the current block, took the first
      * candidate that was further away than the last one and repeated from there. Its early exits return from the
-     * whole method, not from the loop, and that quirk is kept.
+     * whole method, not from the loop, and that quirk is kept (it is the walk of {@link StreamAxeGeometry#walk}, which
+     * the Axe of the Stream shares). A candidate is a cell that holds exactly {@code block}, is a log by
+     * {@link Utils#isWoodLog}, can be broken and lies in a loaded chunk inside the build height: an unloaded cell is
+     * no link, so the walk ends at the loaded edge and loads nothing (the original read, and so generated, such a
+     * chunk).
+     *
+     * <p>Read-only, and it does not look at the start cell itself: when no cell qualifies the answer is the start.
      */
-    public static void findBlocks(Level level, int x, int y, int z, Block block) {
-        for (int xx = -2; xx <= 2; ++xx) {
-            for (int yy = 2; yy >= -2; --yy) {
-                for (int zz = -2; zz <= 2; ++zz) {
-                    if (Math.abs(lastx + xx - x) > 24) return;
-                    if (Math.abs(lasty + yy - y) > 48) return;
-                    if (Math.abs(lastz + zz - z) > 24) return;
-                    BlockPos candidate = new BlockPos(lastx + xx, lasty + yy, lastz + zz);
-                    if (level.getBlockState(candidate).getBlock() != block) continue;
-                    if (!Utils.isWoodLog(level, candidate.getX(), candidate.getY(), candidate.getZ())) continue;
-                    if (!(level.getBlockState(candidate).getDestroySpeed(level, candidate) >= 0.0f)) continue;
-                    double xd = candidate.getX() - x;
-                    double yd = candidate.getY() - y;
-                    double zd = candidate.getZ() - z;
-                    double d = xd * xd + yd * yd + zd * zd;
-                    if (!(d > lastdistance)) continue;
-                    lastdistance = d;
-                    lastx += xx;
-                    lasty += yy;
-                    lastz += zz;
-                    findBlocks(level, x, y, z, block);
-                    return;
-                }
-            }
-        }
+    public static BlockPos findFurthestBlock(Level level, int x, int y, int z, Block block) {
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        StreamAxeGeometry.Cell end = StreamAxeGeometry.walk(x, y, z, (cx, cy, cz) -> {
+            cursor.set(cx, cy, cz);
+            if (level.isOutsideBuildHeight(cursor) || !level.hasChunkAt(cursor)) return false;
+            BlockState state = level.getBlockState(cursor);
+            return state.getBlock() == block && Utils.isWoodLogState(state) && state.getDestroySpeed(level, cursor) >= 0.0f;
+        });
+        return new BlockPos(end.x(), end.y(), end.z());
     }
 
     /** Original {@code breakFurthestBlock(World, int, int, int, Block, EntityPlayer)}. */
@@ -228,19 +218,26 @@ public final class BlockUtils {
     /** Original {@code breakFurthestBlock(World, int, int, int, Block, EntityPlayer, boolean, int)}. */
     public static boolean breakFurthestBlock(Level level, int x, int y, int z, Block block, Player player, boolean followitem, int color) {
         if (level == null) return false;
-        lastx = x;
-        lasty = y;
-        lastz = z;
-        lastdistance = 0.0;
-        findBlocks(level, x, y, z, block);
-        boolean worked = harvestBlock(level, player, lastx, lasty, lastz, followitem, color);
-        markForRenderUpdate(level, x, y, z);
+        return breakFurthestBlockAt(level, new BlockPos(x, y, z), findFurthestBlock(level, x, y, z, block), player, followitem, color);
+    }
+
+    /**
+     * The second half of {@link #breakFurthestBlock(Level, int, int, int, Block, Player, boolean, int)} for a walk that
+     * was already done: harvests the {@code end} cell, tells the clients about the start and the end, and gives every
+     * loaded cell within three blocks of the end the delayed block tick of the original (150 to 299 ticks, which the
+     * leaves around a felled log answer). Returns what {@link #harvestBlock} returns.
+     */
+    public static boolean breakFurthestBlockAt(Level level, BlockPos origin, BlockPos end, Player player, boolean followitem, int color) {
+        if (level == null || origin == null || end == null) return false;
+        boolean worked = harvestBlock(level, player, end.getX(), end.getY(), end.getZ(), followitem, color);
+        markForRenderUpdate(level, origin.getX(), origin.getY(), origin.getZ());
         if (worked) {
-            markForRenderUpdate(level, lastx, lasty, lastz);
+            markForRenderUpdate(level, end.getX(), end.getY(), end.getZ());
             for (int xx = -3; xx <= 3; ++xx) {
                 for (int yy = -3; yy <= 3; ++yy) {
                     for (int zz = -3; zz <= 3; ++zz) {
-                        BlockPos pos = new BlockPos(lastx + xx, lasty + yy, lastz + zz);
+                        BlockPos pos = end.offset(xx, yy, zz);
+                        if (level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos)) continue;
                         level.scheduleTick(pos, level.getBlockState(pos).getBlock(), 150 + level.getRandom().nextInt(150));
                     }
                 }

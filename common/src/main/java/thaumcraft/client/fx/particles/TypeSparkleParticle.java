@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -102,8 +101,8 @@ public final class TypeSparkleParticle extends Particle implements thaumcraft.cl
      * {@code rand.nextInt(6) < count}.</p>
      */
     public static int particleCount() {
-        var setting = Minecraft.getInstance().options.particles().get();
-        return setting == ParticleStatus.MINIMAL ? 0 : setting == ParticleStatus.DECREASED ? 2 : 4;
+        return thaumcraft.common.lib.fx.ClientFxRules.particleCount(Minecraft.getInstance().options.particles().get().getId(),
+                thaumcraft.common.lib.fx.ClientFxRules.SPARKLE_COUNT_BASE);
     }
 
     @Override public void tick() {

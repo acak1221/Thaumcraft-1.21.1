@@ -1,0 +1,33 @@
+{
+  "description": {
+    "translate": "enchantment.thaumictinkerer.valiance"
+  },
+  "exclusive_set": [
+    "minecraft:bane_of_arthropods",
+    "minecraft:knockback",
+    "minecraft:looting",
+    "minecraft:fire_aspect",
+    "minecraft:sweeping_edge",
+    "minecraft:mending",
+    "thaumictinkerer:dispersed_strike",
+    "thaumictinkerer:focused_strike",
+    "thaumictinkerer:final_strike",
+    "thaumictinkerer:vampirism"
+  ],
+  "supported_items": "#thaumictinkerer:enchantable/valiance",
+  "weight": 1,
+  "max_level": 5,
+  "min_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {}
+}

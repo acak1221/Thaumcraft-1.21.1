@@ -1,0 +1,24 @@
+{
+  "description": {
+    "translate": "enchantment.thaumictinkerer.quick_draw"
+  },
+  "exclusive_set": [
+    "minecraft:punch"
+  ],
+  "supported_items": "#thaumictinkerer:enchantable/quick_draw",
+  "weight": 1,
+  "max_level": 2,
+  "min_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {}
+}

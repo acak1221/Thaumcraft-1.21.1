@@ -23,7 +23,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BonemealableBlock;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.WorldCoordinates;
@@ -324,23 +323,29 @@ public final class Utils {
     }
 
     /**
-     * Original {@code isWoodLog}: is the block a log the elemental axe may harvest?
+     * Original {@code isWoodLog}: is the block a log, for the greedy log walk of {@code BlockUtils.findBlocks}?
      *
-     * <p>The original excluded the plain oak log, accepted every leaf block and then asked the {@code "woodLog"}
-     * ore dictionary, which the configuration filled with every log item. In 1.21.1 that dictionary is the
-     * {@code #minecraft:logs} block tag.
+     * <p>The oracle ({@code Utils.java:202-211}, read in {@code docs/analysis/2026-10-19-golem-lumber.md}, and the audited
+     * 1.12 reference {@code src/main/java/thaumcraft/common/lib/utils/Utils.java:282-300}) accepted every non-air block that
+     * {@code canSustainLeaves} (a log does, the plain oak log included; a leaf block does not) and then every entry of the
+     * elemental axe's list of ore dictionary logs. In 1.21.1 a block cannot answer {@code canSustainLeaves} and the
+     * ore dictionary wood-log entry is the {@code #minecraft:logs} block tag: the rule here is membership of that tag
+     * (every log, wood, stripped log and stem of the tag, the Greatwood and Silverwood logs of Thaumcraft included, the
+     * plain oak log included, no leaf block).
+     *
+     * <p>The oracle jar itself was not available when this rule was settled; the two readings above are the evidence.
+     * An earlier version of this method excluded the plain oak log and accepted every leaf block, which neither reading
+     * supports. The Axe of the Stream of the port does not use this method: it follows the narrower
+     * {@code TreeLogTraversal} set on purpose.
      */
     public static boolean isWoodLog(Level level, int x, int y, int z) {
         if (level == null) return false;
         return isWoodLogState(level.getBlockState(new BlockPos(x, y, z)));
     }
 
-    /** Pure form of {@link #isWoodLog(Level, int, int, int)}. */
+    /** Pure form of {@link #isWoodLog(Level, int, int, int)}: the state is in the block tag {@code #minecraft:logs}. */
     public static boolean isWoodLogState(BlockState state) {
-        if (state == null) return false;
-        if (state.is(net.minecraft.world.level.block.Blocks.OAK_LOG)) return false;
-        if (state.getBlock() instanceof LeavesBlock) return true;
-        return state.is(BlockTags.LOGS);
+        return state != null && state.is(BlockTags.LOGS);
     }
 
     /**

@@ -22,6 +22,19 @@ import thaumcraft.common.config.ThaumcraftEquipment;
  * thaumium 3/400/7.0/2.0/22 with 2/6/5/2 armour and enchantability 25, void 4/150/8.0/3.0/10 with 3/7/6/3
  * and enchantability 10, fortress 40 durability with 3/7/6/3 and enchantability 25, the special armour
  * 1/3/2/1 with enchantability 25 and the void fortress armour 4/8/7/4 with enchantability 10.</p>
+ *
+ * <p><b>Which materials have a registry key.</b> 1.21.1 armour items take a {@code Holder<ArmorMaterial>}, not the material
+ * object the 1.7.10 {@code ItemArmor} constructor took. Four materials are registered under the {@code thaumcraft}
+ * namespace for the armour families of the original: {@code thaumium} ({@link #armorMatThaumiumHolder()}), {@code fortress}
+ * ({@link #armorMatThaumiumFortressHolder()}), {@code void} ({@link #armorMatVoidHolder()}) and {@code void_robe}
+ * ({@link #armorMatVoidRobeHolder()}, the void numbers under another worn model). Each holder is the registry reference of
+ * its {@code ARMORMAT_*_KEY}, so {@code holder.value()} is the very object {@link #armorMatThaumium()} and its siblings
+ * return. {@link #ARMORMAT_SPECIAL} and {@link #ARMORMAT_VOID_FORTRESS} are plain objects with the original numbers that
+ * are not in the registry at all, and have no key or holder: to build an item from one, wrap it with {@code Holder.direct},
+ * or register a material of your own with your own worn textures, which is what an add-on whose armour looks different from
+ * Thaumcraft's does. A material named {@code thaumcraft:special} <em>is</em> registered, but it is the adapter of the goggles
+ * (the same defences and enchantability, a gold repair ingredient and the goggles' worn layer), a different object from
+ * {@link #ARMORMAT_SPECIAL}, and is not part of this API.</p>
  */
 public final class ThaumcraftMaterials {
     public static final Tier TOOLMAT_THAUMIUM = ThaumcraftEquipment.THAUMIUM_TIER;

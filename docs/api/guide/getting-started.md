@@ -37,7 +37,7 @@ dependencies {
 `implementation "thaumcraft:Thaumcraft-neoforge:0.1.0-alpha.7"`, plus a `[[dependencies.<yourmod>]]` entry for
 `modId = "thaumcraft"` in `neoforge.mods.toml`.
 
-The example add-on's `fabric.mod.json` declares both entrypoints and the dependency:
+The example add-on's `fabric.mod.json` declares its entrypoints (`main` and `thaumcraft` are explained below; `client` is the class that may name client classes, see [client effects](world-and-content.md#client-effects-particles)) and the dependency:
 
 <!-- file:examples/example-addon/src/main/resources/fabric.mod.json -->
 ```json
@@ -52,6 +52,7 @@ The example add-on's `fabric.mod.json` declares both entrypoints and the depende
   "environment": "*",
   "entrypoints": {
     "main": ["com.example.tc4addon.ExampleAddon"],
+    "client": ["com.example.tc4addon.ExampleAddonClient"],
     "thaumcraft": ["com.example.tc4addon.ExampleAddon"]
   },
   "depends": {
@@ -154,11 +155,15 @@ Thaumcraft builds its names from translation keys, as in 1.7.10 (now in `assets/
 | a wand rod with an update hook, a wand cap, a focus | `ExampleAddon.wandParts()`, `SparkFocus.java` | [wands and foci](wands-and-foci.md) |
 | an essentia container, transport and wand-clickable block | `EssentiaBowlBlock.java`, `EssentiaBowlBlockEntity.java` | [essentia and vis](essentia-and-vis.md) |
 | an amulet with discount, runic charge and warp | `OrderAmulet.java` | [gear and baubles](gear-and-baubles.md) |
+| a bauble that keeps its right click, and the list of what is worn | `OrderTalisman.java` | [gear and baubles](gear-and-baubles.md#a-bauble-that-keeps-its-right-click) |
+| a focus pouch that is also a belt, read by the wand's focus selector | `FocusBelt.java` | [wands and foci](wands-and-foci.md#focus-pouches-ifocuspouch) |
 | research points and research completion from an item | `InsightScroll.java` | [research](research.md) |
 | a data component that holds aspects (codecs) | `StoredAspects.java`, `ExampleAddon` | [aspects](aspects.md#aspects-in-data-components-data-files-and-packets) |
 | copying scans and discovered aspects between players | `ShareTome.java` | [research](research.md#scans-discovered-aspects-and-the-tome-of-sharing) |
 | felling a tree with the Axe of the Stream's helpers | `ExampleAddon.onInitialize()` | [world and content](world-and-content.md#felling-trees) |
 | warp on crafting, smelting bonus, loot bags | `ExampleAddon.moreContent()` | [world and content](world-and-content.md) |
+| Thaumcraft's creatures, effects and sounds by key, never by string | `ExampleAddon.java` (the death hook) | [world and content](world-and-content.md#stable-keys) |
+| particles (sparkle, runes, beam) and aspect tags drawn on the client | `ExampleAddonClient.java` | [world and content](world-and-content.md#client-effects-particles), [aspect tags](world-and-content.md#aspect-tags-in-a-screen) |
 
 Run it in a development client:
 

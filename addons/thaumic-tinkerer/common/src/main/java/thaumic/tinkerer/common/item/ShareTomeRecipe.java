@@ -8,9 +8,11 @@ package thaumic.tinkerer.common.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -18,16 +20,27 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.Level;
+import thaumcraft.api.items.ItemsTC;
 import thaumic.tinkerer.common.content.BasicItems;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 
 /**
- * A shaped recipe that only crafts while {@link ConfigHandler#enableSurvivalShareTome} is on. 1.7.10 registered the
- * recipe of the Tome of Knowledge Sharing only when the option was on; a data recipe is always loaded, so the option is
- * asked each time the grid is matched. The file is an ordinary shaped recipe with {@code "type":
- * "thaumictinkerer:share_tome"}, and the research page and the recipe viewers draw it as the shaped recipe it is.
+ * A shaped recipe that only crafts while {@link ConfigHandler#enableSurvivalShareTome} is on, and only with unused Scribing
+ * Tools.
+ *
+ * <p>1.7.10 registered the recipe of the Tome of Knowledge Sharing only when the option was on; a data recipe is always
+ * loaded, so the option is asked each time the grid is matched. The file is an ordinary shaped recipe with {@code "type":
+ * "thaumictinkerer:share_tome"}, and the research page and the recipe viewers draw it as the shaped recipe it is.</p>
+ *
+ * <p>The pattern asked for {@code new ItemStack(ConfigItems.itemInkwell)}, the Scribing Tools with the damage value 0, and
+ * a 1.7.10 shaped recipe matches the damage value of a stack that is not the wildcard exactly: only an unused set of tools
+ * (full ink) made the tome. An ingredient of 1.21.1 has no damage value, so the recipe checks it here: a used set of tools
+ * anywhere in the grid does not match.</p>
  */
 public class ShareTomeRecipe extends ShapedRecipe {
+    /** {@code thaumcraft:inkwell}, the Scribing Tools ({@code itemInkwell:0}). */
+    private static final ResourceLocation SCRIBING_TOOLS = ItemsTC.id("inkwell");
+
     private final ShapedRecipePattern pattern;
     private final ItemStack result;
 
@@ -40,7 +53,15 @@ public class ShareTomeRecipe extends ShapedRecipe {
 
     @Override
     public boolean matches(CraftingInput input, Level level) {
-        return ConfigHandler.enableSurvivalShareTome && super.matches(input, level);
+        if (!ConfigHandler.enableSurvivalShareTome || !super.matches(input, level)) return false;
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack stack = input.getItem(i);
+            if (!stack.isEmpty() && stack.getDamageValue() != 0
+                    && SCRIBING_TOOLS.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -71,6 +71,8 @@ public final class ClientSetup {
         // ClientTickEventsFML:249-269).
         thaumcraft.common.lib.network.EssentiaFlowFxNetworking.initClient(thaumcraft.client.fx.EssentiaFlowClientEffects::accept);
         thaumcraft.client.fx.EssentiaFlowClientEffects.init();
+        // The server twins of the client effect facade: the payload becomes the call of ThaumcraftClientFX it stands for.
+        thaumcraft.common.lib.network.ClientFxNetworking.initClient(thaumcraft.client.fx.ClientFxReceiver::accept);
         // The original EventHandlerNetwork.clientLogsOut restores the client's own state when the connection
         // ends (oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:69-81). The common layer owns
         // that restore, so every loader behaves like the original.

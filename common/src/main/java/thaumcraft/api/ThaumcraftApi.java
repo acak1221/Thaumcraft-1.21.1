@@ -79,7 +79,11 @@ public final class ThaumcraftApi {
     public static Tier toolMatThaumium = ThaumcraftEquipment.THAUMIUM_TIER;
     public static Tier toolMatVoid = ThaumcraftEquipment.VOID_TIER;
     public static Tier toolMatElemental = ThaumcraftEquipment.ELEMENTAL_TIER;
-    /** Original armor materials; 1.21.1 registers them, so they are resolved through accessors. */
+    /**
+     * Original armor materials thaumium, fortress and void: 1.21.1 registers these three, so they are resolved through
+     * accessors (and have holders, see {@link ThaumcraftMaterials}). {@link #armorMatSpecial()} and
+     * {@link #armorMatVoidFortress()} are not registered.
+     */
     public static ArmorMaterial armorMatThaumium() { return ThaumcraftEquipment.THAUMIUM_ARMOR_MATERIAL.get(); }
     /** Resolves the registered fortress armor material; call after material registration, with no mutation. */
     public static ArmorMaterial armorMatThaumiumFortress() { return ThaumcraftEquipment.FORTRESS_ARMOR_MATERIAL.get(); }
@@ -94,13 +98,19 @@ public final class ThaumcraftApi {
     /**
      * Original {@code armorMatSpecial} (oracle {@code thaumcraft/api/ThaumcraftApi.java:52}):
      * durability 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a
-     * field; 1.21.1 registers the material, so the native answers through an accessor.
+     * field; the native answers through an accessor with a plain {@code ArmorMaterial} object holding the original
+     * numbers (the iron equip sound, no repair ingredient, no worn layer). It is <b>not in the armour material
+     * registry</b> and has no holder or key: wrap it with {@code Holder.direct} to build an item from it, or register a
+     * material of your own. The registered {@code thaumcraft:special} is a different object, the adapter of the goggles
+     * (gold repair, the goggles' worn layer), not this one. See {@link ThaumcraftMaterials}.
      */
     public static ArmorMaterial armorMatSpecial() { return ThaumcraftMaterials.ARMORMAT_SPECIAL; }
     /**
      * Original {@code armorMatVoidFortress} (oracle {@code thaumcraft/api/ThaumcraftApi.java:55}):
      * durability 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a
-     * field; 1.21.1 registers the material, so the native answers through an accessor.
+     * field; the native answers through an accessor with a plain {@code ArmorMaterial} object holding the original
+     * defences. It is <b>not in the armour material registry</b> and has no holder or key: wrap it with
+     * {@code Holder.direct} to build an item from it, or register a material of your own. See {@link ThaumcraftMaterials}.
      */
     public static ArmorMaterial armorMatVoidFortress() { return ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS; }
     /**

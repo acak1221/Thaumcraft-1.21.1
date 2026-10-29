@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:pickaxes",
+    "#minecraft:shovels",
+    "#minecraft:axes",
+    {
+      "id": "thaumictinkerer:ichor_pick",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichor_shovel",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichor_axe",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichor_pick_gem",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichor_shovel_gem",
+      "required": false
+    },
+    {
+      "id": "thaumictinkerer:ichor_axe_gem",
+      "required": false
+    }
+  ]
+}

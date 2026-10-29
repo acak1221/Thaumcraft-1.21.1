@@ -114,13 +114,13 @@ public class WandRod {
     /** Registers a rod with the derived texture {@code thaumcraft:textures/models/wand_rod_<tag>.png} and no callback; capacity in whole vis. */
     public WandRod(String tag, int capacity, ItemStack item, int craftCost) {
         this(tag, capacity, item, craftCost, (IWandRodOnUpdate) null,
-                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + tag + ".png"));
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + lowerTag(tag) + ".png"));
     }
 
     /** Registers a rod with the derived texture {@code thaumcraft:textures/models/wand_rod_<tag>.png}; capacity in whole vis. */
     public WandRod(String tag, int capacity, ItemStack item, int craftCost, IWandRodOnUpdate onUpdate) {
         this(tag, capacity, item, craftCost, onUpdate,
-                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + tag + ".png"));
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + lowerTag(tag) + ".png"));
     }
 
     /**
@@ -135,7 +135,7 @@ public class WandRod {
         this.craftCost = rod.craftCost();
         this.item = item;
         // StaffRod uses the base material sheet, not a nonexistent *_staff PNG.
-        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + rod.baseTag() + ".png");
+        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + lowerTag(rod.baseTag()) + ".png");
         // Original ConfigItems:305: WAND_ROD_BLAZE.setGlowing(true); the native elemental rods carry their WandRodPrimalOnUpdate.
         this.glow = "blaze".equals(rod.tag());
         if (rod.passive() != null) {
@@ -219,5 +219,13 @@ public class WandRod {
             if (rod.tag.equals(tag)) return rod;
         }
         return null;
+    }
+
+    /**
+     * The tag as it appears in a resource path. Resource paths are lower case; tags are not (a tag is also a research key
+     * suffix, {@code CAP_ICHOR}), so the derived default texture of a part tagged {@code ICHOR} is {@code ..._ichor.png}.
+     */
+    static String lowerTag(String tag) {
+        return tag.toLowerCase(java.util.Locale.ROOT);
     }
 }

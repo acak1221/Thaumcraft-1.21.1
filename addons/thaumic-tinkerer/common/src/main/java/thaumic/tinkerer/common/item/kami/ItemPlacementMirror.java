@@ -31,6 +31,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import thaumcraft.api.aspects.Aspect;
@@ -83,9 +85,10 @@ public class ItemPlacementMirror extends KamiItemBase {
 
     /**
      * 1.7.10 {@code hasBlocks}: the inventory and the Black Hole Rings in it must hold {@code requiredAmount} of the block. A
-     * creative player needs them as well (only the consumption skips creative players).
+     * creative player always has them (and the placing then takes nothing from the inventory).
      */
     public static boolean hasBlocks(Player player, Block requiredBlock, int requiredAmount) {
+        if (player.getAbilities().instabuild) return true;
         Item requiredItem = requiredBlock.asItem();
         if (requiredItem == Items.AIR) return false;
         Item talismanItem = TTRegistry.item(LibItemNames.BLOCK_TALISMAN);
@@ -161,6 +164,19 @@ public class ItemPlacementMirror extends KamiItemBase {
 
     // ---- use ------------------------------------------------------------------------------------------------
 
+    /**
+     * 1.7.10 remembered a block only when {@code block.getRenderType() == 0}, the plain block model: cubes, slabs, glass,
+     * leaves, furnaces; stairs, fences, walls, doors, beds, torches, panes and ladders were refused. 1.21.1 has no render
+     * type, and nearly every block is {@link RenderShape#MODEL}, so the rule here is the shape: a block with an item whose
+     * collision shape is the full cube, or a slab or a layer of snow (the flat blocks of render type 0).
+     */
+    public static boolean canRemember(Level level, BlockPos pos, BlockState state) {
+        if (state.getRenderShape() != RenderShape.MODEL || state.getBlock().asItem() == Items.AIR) return false;
+        Block block = state.getBlock();
+        return block instanceof SlabBlock || block instanceof SnowLayerBlock
+                || Block.isShapeFullBlock(state.getShape(level, pos));
+    }
+
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
@@ -170,7 +186,7 @@ public class ItemPlacementMirror extends KamiItemBase {
         BlockState state = level.getBlockState(context.getClickedPos());
 
         if (player.isShiftKeyDown()) {
-            if (state.getRenderShape() == RenderShape.MODEL && state.getBlock().asItem() != Items.AIR) {
+            if (canRemember(level, context.getClickedPos(), state)) {
                 stack.set(KamiComponents.MIRROR_STATE.get(), state);
             }
         } else if (!level.isClientSide) {
@@ -205,7 +221,8 @@ public class ItemPlacementMirror extends KamiItemBase {
             if (level.isOutsideBuildHeight(pos) || !level.mayInteract(player, pos) || !player.mayBuild()) continue;
             placeBlockAndConsume(player, required, pos);
         }
-        KamiHooks.playThaumcraftSound(level, player, "wand", 1F, 1F);
+        // Only the server gets here: the sound goes to the player as well.
+        KamiHooks.broadcastThaumcraftSound(level, player, "wand", 1F, 1F);
     }
 
     private void placeBlockAndConsume(Player player, BlockState state, BlockPos pos) {
@@ -225,8 +242,9 @@ public class ItemPlacementMirror extends KamiItemBase {
             if (!stackInSlot.isEmpty() && stackInSlot.is(talismanItem)) talismansToCheck.add(stackInSlot);
         }
         for (ItemStack talisman : talismansToCheck) {
-            if (ItemBlockTalisman.getBlock(talisman) == state.getBlock()) {
-                ItemBlockTalisman.remove(talisman, 1);
+            // 1.7.10 stopped at the first ring bound to the block, empty or not, so a bound empty ring in front of a full one
+            // made every block free; here the first ring that really gives a block pays.
+            if (ItemBlockTalisman.getBlock(talisman) == state.getBlock() && ItemBlockTalisman.remove(talisman, 1) == 1) {
                 return;
             }
         }

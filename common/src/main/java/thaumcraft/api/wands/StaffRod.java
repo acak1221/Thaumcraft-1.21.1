@@ -21,7 +21,7 @@ public class StaffRod extends WandRod {
     /** Registers a staff rod under tag plus _staff with the derived texture; capacity in whole vis, craftCost a dimensionless factor. */
     public StaffRod(String tag, int capacity, ItemStack item, int craftCost) {
         super(tag + "_staff", capacity, item, craftCost);
-        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + tag + ".png");
+        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + WandRod.lowerTag(tag) + ".png");
     }
 
     /** Registers tag plus _staff, retaining nullable item/callback/texture; capacity in whole vis, craftCost a dimensionless factor. */
@@ -32,7 +32,7 @@ public class StaffRod extends WandRod {
     /** Registers tag plus _staff with the derived texture and a nullable callback; capacity in whole vis. */
     public StaffRod(String tag, int capacity, ItemStack item, int craftCost, IWandRodOnUpdate onUpdate) {
         super(tag + "_staff", capacity, item, craftCost, onUpdate);
-        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + tag + ".png");
+        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_rod_" + WandRod.lowerTag(tag) + ".png");
     }
 
     /** Registers tag plus _staff, retaining nullable item/texture; capacity in whole vis, craftCost a dimensionless factor. */

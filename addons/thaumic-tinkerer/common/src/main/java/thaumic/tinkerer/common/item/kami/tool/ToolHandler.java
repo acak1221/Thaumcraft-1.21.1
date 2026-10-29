@@ -13,9 +13,15 @@ package thaumic.tinkerer.common.item.kami.tool;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.utils.value.IntValue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -43,8 +49,9 @@ import thaumic.tinkerer.common.item.kami.KamiHooks;
  *
  * <p>1.7.10 {@code Material} lists become predicates over block tags (see {@link #MATERIALS_PICK} and friends); the mode
  * was the damage value of the tool and is the {@link KamiComponents#TOOL_MODE} component now. The extra blocks are broken
- * with {@code ServerPlayerGameMode.destroyBlock}, which runs the normal break of the player (drops, experience, protection
- * and other mods' break events) for every one of them; a flag keeps those inner breaks from starting the mode again.</p>
+ * with {@code ServerPlayerGameMode.destroyBlock}, which runs the normal break of the player (drops, experience and other
+ * mods' break events) for every one of them, after {@code Level.mayInteract} (spawn protection and world border, which
+ * {@code destroyBlock} does not ask); a flag keeps those inner breaks from starting the mode again.</p>
  */
 public final class ToolHandler {
     /**
@@ -168,9 +175,40 @@ public final class ToolHandler {
         }
         AABB box = new AABB(origin.getX() + xs, origin.getY() + ys, origin.getZ() + zs, origin.getX() + xe,
                 origin.getY() + ye, origin.getZ() + ze);
+        gatherItems(level, player, box);
+        // The box contains the clicked block, which the break in progress removes only after this method returns (1.7.10 broke
+        // it inside the loop and so gathered its drops too): once more at the end of the tick, when its drops are on the ground.
+        UUID playerId = player.getUUID();
+        ResourceKey<Level> dimension = level.dimension();
+        afterBreak(server -> {
+            ServerLevel there = server.getLevel(dimension);
+            ServerPlayer owner = server.getPlayerList().getPlayer(playerId);
+            if (there != null && owner != null && owner.level() == there) gatherItems(there, owner, box);
+        });
+    }
+
+    /** Moves the items on the ground in the box to the player (1.7.10: {@code item.setPosition(player.posX, player.posY + 1, player.posZ)}). */
+    private static void gatherItems(ServerLevel level, ServerPlayer player, AABB box) {
         for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, box)) {
             item.setPos(player.getX(), player.getY() + 1, player.getZ());
         }
+    }
+
+    // ---- work for the end of the tick -------------------------------------------------------------------------
+
+    private static final List<Consumer<MinecraftServer>> AFTER_BREAK = new ArrayList<>();
+
+    /** Queues work for the end of the current server tick (server thread only; the queue is emptied by {@link #onServerTickEnd}). */
+    private static void afterBreak(Consumer<MinecraftServer> work) {
+        AFTER_BREAK.add(work);
+    }
+
+    /** Architectury {@code TickEvent.SERVER_POST}: runs the work queued by {@link #afterBreak}. */
+    public static void onServerTickEnd(MinecraftServer server) {
+        if (AFTER_BREAK.isEmpty()) return;
+        List<Consumer<MinecraftServer>> work = new ArrayList<>(AFTER_BREAK);
+        AFTER_BREAK.clear();
+        for (Consumer<MinecraftServer> task : work) task.accept(server);
     }
 
     /**
@@ -182,6 +220,9 @@ public final class ToolHandler {
             Predicate<BlockState> materials) {
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) return;
+        // The vanilla break asks this only for the block the player hit; the extra blocks must not reach into spawn protection
+        // or past the world border (ServerPlayerGameMode.destroyBlock itself asks only for the game mode's restrictions).
+        if (!level.mayInteract(player, pos)) return;
         boolean bedrock = state.is(Blocks.BEDROCK);
         if (!bedrock && state.getDestroySpeed(level, pos) < 0) return;
         if (!player.hasCorrectToolForDrops(state) || !materials.test(state)) return;

@@ -43,8 +43,9 @@ import thaumic.tinkerer.common.research.TTResearchItem;
 public class BlockTransvectorInterface extends CamoDeviceBlock implements ITTinkererRegisterable {
     public static final MapCodec<BlockTransvectorInterface> CODEC = simpleCodec(BlockTransvectorInterface::new);
 
+    /** {@code setHardness(3F); setResistance(10F)}: a 1.7.10 resistance counts 0.6 of its argument, so 6 here. */
     public BlockTransvectorInterface() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 10F).requiresCorrectToolForDrops().noOcclusion());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 6F).requiresCorrectToolForDrops().noOcclusion());
     }
 
     protected BlockTransvectorInterface(Properties properties) {

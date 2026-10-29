@@ -200,9 +200,12 @@ public class TileAnimationTablet extends BlockEntity implements Container, Exten
     /** What a right click with this item does in the block in front of the tablet (1.7.10 {@code canUseItem}). */
     private static boolean canUseItem(ItemStack stack, BlockState below) {
         Item item = stack.getItem();
-        // ItemBlock, ItemReed, ItemSeeds and ItemRedstone are all block items in 1.21.1.
+        // ItemBlock, ItemReed, ItemSeeds and ItemRedstone are all block items in 1.21.1, which also covers the doors, beds,
+        // signs, skulls, carrots, potatoes and cocoa that 1.7.10 did not accept (docs/deviations/TileBlocks.md, 2.1).
         if (item instanceof BlockItem) return true;
-        return item instanceof HoeItem && (below.is(Blocks.DIRT) || below.is(Blocks.GRASS_BLOCK));
+        // Blocks.dirt of 1.7.10 was dirt, coarse dirt and podzol; the 1.21.1 hoe tills dirt and coarse dirt, not podzol.
+        return item instanceof HoeItem
+                && (below.is(Blocks.DIRT) || below.is(Blocks.COARSE_DIRT) || below.is(Blocks.GRASS_BLOCK));
     }
 
     private void reportFailure(ServerLevel serverLevel, Throwable e) {

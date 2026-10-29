@@ -151,7 +151,8 @@ public class TileEntityMobilizer extends BlockEntity {
             if (passenger == null) {
                 if (!passengerState.is(Blocks.BEDROCK)) {
                     level.setBlock(targetAbove, passengerState, Block.UPDATE_ALL);
-                    if (!passengerState.isAir() && !passengerState.is(Blocks.MOVING_PISTON)) {
+                    // 1.7.10 "piston_head" is the arm block, Blocks.PISTON_HEAD: it is copied and left where it was.
+                    if (!passengerState.isAir() && !passengerState.is(Blocks.PISTON_HEAD)) {
                         level.setBlock(above, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                     }
                 }

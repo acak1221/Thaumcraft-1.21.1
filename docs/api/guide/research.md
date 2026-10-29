@@ -193,7 +193,11 @@ public class ShareTome extends Item {
 
 - The markers are opaque keys, made to travel unchanged: `"@"` plus the registry id for a basic scan, `"#"` plus the same
   for an advanced one. Adding is idempotent; a basic marker never replaces an advanced one, an advanced one replaces a
-  basic one. `addScans` returns how many markers were new and syncs the player once, only when it is above zero.
+  basic one. `addScans` returns how many markers were new and syncs the player once, only when it is above zero; a snapshot
+  that holds both `"@x"` and `"#x"` counts as the one marker `"#x"`, whatever their order. A marker is never empty and at
+  most 1024 characters long (`Scans.MAX_KEY_LENGTH`): the `Scans` constructor throws `IllegalArgumentException` for any
+  other, and `getScans` leaves out of the snapshot a longer marker that a hand-edited save or an add-on's scan handler put
+  into the knowledge, rather than failing.
 - A scan also gives research points and may reveal a research clue. The snapshot carries neither: points are
   `addAspectPool`, and the clues (`"@KEY"` entries among the completed research) are left out of `getCompletedResearch` and
   refused by `completeResearch`, so no call copies them.

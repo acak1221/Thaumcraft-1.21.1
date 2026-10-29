@@ -2563,6 +2563,21 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockStartAndPlayerRules(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockFindAnswersTheCellThatBreaks(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockFindAnswersTheCellThatBreaks(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockAsksTheRulesForTheBrokenCell(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockAsksTheRulesForTheBrokenCell(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockLoadsNoChunk(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockLoadsNoChunk(test);
+    }
+
     private static net.minecraft.server.level.ServerPlayer notePlayer(GameTestHelper test) {
         test.assertTrue(NetworkRegistry.getCodec(ResearchNoteRequestPayload.TYPE.id(),
                         ConnectionProtocol.PLAY, PacketFlow.SERVERBOUND) != null,

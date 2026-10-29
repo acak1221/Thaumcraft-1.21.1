@@ -14,14 +14,13 @@ package thaumic.tinkerer.common.item;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -35,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.component.CustomData;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.entities.ThaumcraftEntities;
 import thaumic.tinkerer.common.block.tile.TileGolemConnector;
 import thaumic.tinkerer.common.block.tile.transvector.TileTransvector;
 import thaumic.tinkerer.common.block.tile.transvector.TileTransvectorInterface;
@@ -60,9 +60,6 @@ public class ItemConnector extends Item implements ITTinkererRegisterable {
     private static final String TAG_POS_Y = "posy";
     private static final String TAG_POS_Z = "posz";
     private static final String TAG_CONNECTING_GOLEM = "ConnectingGolem";
-
-    /** The entity type of Thaumcraft's golems: {@code EntityGolemBase} cannot be named from the API. */
-    private static final ResourceLocation GOLEM_TYPE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "golem");
 
     public ItemConnector() {
         super(new Item.Properties().stacksTo(1));
@@ -160,7 +157,9 @@ public class ItemConnector extends Item implements ITTinkererRegisterable {
         } else {
             BlockPos origin = getTarget(stack);
 
-            BlockEntity tile1 = level.isLoaded(origin) ? level.getBlockEntity(origin) : null;
+            // Like 1.7.10 this asks for the block entity at the remembered place, which loads its chunk: a device the player
+            // walked away from is found (and then "too far"), not forgotten.
+            BlockEntity tile1 = level.getBlockEntity(origin);
             if (!(tile1 instanceof TileTransvector trans)) {
                 clearTarget(stack);
 
@@ -208,7 +207,7 @@ public class ItemConnector extends Item implements ITTinkererRegisterable {
             return InteractionResult.CONSUME;
         }
         BlockPos origin = getTarget(stack);
-        BlockEntity tile1 = level.isLoaded(origin) ? level.getBlockEntity(origin) : null;
+        BlockEntity tile1 = level.getBlockEntity(origin); // loads the chunk, as 1.7.10 did (see useOn)
         if (!(tile1 instanceof TileGolemConnector trans)) {
             clearTarget(stack);
             if (level.isClientSide) return InteractionResult.PASS;
@@ -228,9 +227,9 @@ public class ItemConnector extends Item implements ITTinkererRegisterable {
         return InteractionResult.CONSUME;
     }
 
-    /** A Thaumcraft golem, recognised by its entity type (the API has no golem type). */
-    public static boolean isGolem(net.minecraft.world.entity.Entity entity) {
-        return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).equals(GOLEM_TYPE);
+    /** {@code instanceof EntityGolemBase}: a Thaumcraft golem, recognised by its entity type key of the API. */
+    public static boolean isGolem(Entity entity) {
+        return ThaumcraftEntities.is(entity, ThaumcraftEntities.GOLEM);
     }
 
     /** 1.7.10 {@code random.orb}, volume 0.8. */

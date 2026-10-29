@@ -2588,4 +2588,19 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void knowledgeApiFurthestBlockStartAndPlayerRules(GameTestHelper test) {
         thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockStartAndPlayerRules(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockFindAnswersTheCellThatBreaks(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockFindAnswersTheCellThatBreaks(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockAsksTheRulesForTheBrokenCell(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockAsksTheRulesForTheBrokenCell(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "api_tree")
+    public void knowledgeApiFurthestBlockLoadsNoChunk(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeApiRuntimeChecks.furthestBlockLoadsNoChunk(test);
+    }
 }

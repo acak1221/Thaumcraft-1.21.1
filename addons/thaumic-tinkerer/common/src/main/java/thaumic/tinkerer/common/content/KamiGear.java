@@ -14,8 +14,11 @@ package thaumic.tinkerer.common.content;
 import dev.architectury.event.events.common.BlockEvent;
 import dev.architectury.event.events.common.InteractionEvent;
 import dev.architectury.event.events.common.PlayerEvent;
+import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.menu.MenuRegistry;
+import dev.architectury.utils.Env;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
@@ -158,14 +161,19 @@ public final class KamiGear implements ContentGroup {
                         KamiArmorHandler.setArmorStatus(player, packet.armorStatus());
                     }
                 }));
-        // The payloads the server sends are known on both sides; the client receivers are registered by registerClient().
-        NetworkManager.registerS2CPayloadType(PacketArmorStatus.TYPE, PacketArmorStatus.CODEC);
-        NetworkManager.registerS2CPayloadType(PacketShadowBeam.TYPE, PacketShadowBeam.CODEC);
+        // The payloads the server sends: Architectury registers the type of an S2C payload with its client receiver
+        // (KamiGearClient), so only a dedicated server registers it here; both would make Fabric's registry throw
+        // "Packet type ... is already registered!" on a client (the integrated server shares the client's registry).
+        if (Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerS2CPayloadType(PacketArmorStatus.TYPE, PacketArmorStatus.CODEC);
+            NetworkManager.registerS2CPayloadType(PacketShadowBeam.TYPE, PacketShadowBeam.CODEC);
+        }
     }
 
     private static void registerEvents() {
         KamiArmorHandler.register();
         BlockEvent.BREAK.register(ToolHandler::onBlockBreak);
+        TickEvent.SERVER_POST.register(ToolHandler::onServerTickEnd);
         InteractionEvent.LEFT_CLICK_BLOCK.register(ItemIchorPickAdv::onLeftClickBlock);
         InteractionEvent.LEFT_CLICK_BLOCK.register(ItemProtoclay::onLeftClickBlock);
         PlayerEvent.ATTACK_ENTITY.register(ItemIchorSwordAdv::onAttackEntity);

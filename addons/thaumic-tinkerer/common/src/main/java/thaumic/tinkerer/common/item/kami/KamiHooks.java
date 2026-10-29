@@ -23,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import thaumcraft.api.ThaumcraftFX;
 import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.lib.LibBlockNames;
 import thaumic.tinkerer.common.lib.LibMisc;
@@ -45,6 +46,10 @@ public final class KamiHooks {
     /** The dimension of the Bedrock world (the contract with the KamiWorld group). */
     public static final ResourceKey<Level> BEDROCK_DIMENSION = ResourceKey.create(Registries.DIMENSION,
             LibMisc.id("bedrock"));
+
+    /** The size of 1.7.10's {@code proxy.sparkle(x, y, z, color)} and its colour index 6 (white). */
+    public static final float SPARKLE_SIZE = 1.5F;
+    public static final int SPARKLE_WHITE = 6;
 
     private static boolean warnedSoulHearts;
 
@@ -100,11 +105,38 @@ public final class KamiHooks {
                 .orElse(null);
     }
 
-    /** Plays a Thaumcraft sound at the player (1.7.10 {@code playSoundAtEntity(player, "thaumcraft:<path>", volume, pitch)}). */
+    /**
+     * Plays a Thaumcraft sound at the player (1.7.10 {@code playSoundAtEntity(player, "thaumcraft:<path>", volume, pitch)}) from
+     * code that runs on <b>both</b> sides: on a server level this overload leaves {@code player} out of the broadcast because
+     * the client of that player has played the sound itself. A sound that only the server decides on goes through
+     * {@link #broadcastThaumcraftSound}.
+     */
     public static void playThaumcraftSound(Level level, Player player, String path, float volume, float pitch) {
         SoundEvent sound = thaumcraftSound(path);
         if (sound != null) level.playSound(player, player.getX(), player.getY(), player.getZ(), sound,
                 SoundSource.PLAYERS, volume, pitch);
+    }
+
+    /**
+     * Plays a Thaumcraft sound at the player, <b>including</b> the player, for code that runs on the server only (1.7.10's
+     * {@code playSoundAtEntity} reached the actor as well): the Shadowbeam's hum, the Mirror's placing sound, the sounds of the
+     * Celestial Recall.
+     */
+    public static void broadcastThaumcraftSound(Level level, Player at, String path, float volume, float pitch) {
+        SoundEvent sound = thaumcraftSound(path);
+        if (sound != null) level.playSound(null, at.getX(), at.getY(), at.getZ(), sound, SoundSource.PLAYERS, volume, pitch);
+    }
+
+    /**
+     * 1.7.10 {@code ThaumicTinkerer.tcProxy.sparkle(x, y, z, 6)} {@code count} times around a player: white sparkles at a random
+     * point of the player's body, 0.5 blocks to each side (the Celestial Recall's departure and arrival). The original drew them
+     * on the client; the API's server twin ({@link ThaumcraftFX#sparkle}) sends them to the players around.
+     */
+    public static void sparklesAround(ServerLevel level, Player player, int count) {
+        for (int i = 0; i < count; i++) {
+            ThaumcraftFX.sparkle(level, player.getX() + level.random.nextFloat() - 0.5, player.getY() + level.random.nextFloat(),
+                    player.getZ() + level.random.nextFloat() - 0.5, SPARKLE_SIZE, SPARKLE_WHITE, 0F);
+        }
     }
 
     /** The block of the add-on with that path, or null when the group that owns it did not register it. */
@@ -135,11 +167,13 @@ public final class KamiHooks {
             player.sendSystemMessage(Component.translatable("ttmisc.noTeleport"));
             return false;
         }
-        playThaumcraftSound(level, player, "wand", 1F, 1F);
+        broadcastThaumcraftSound(level, player, "wand", 1F, 1F);
+        sparklesAround(level, player, 20);
         player.stopRiding();
         player.connection.teleport(pos.getX() + 0.5, pos.getY() + 1.6, pos.getZ() + 0.5, player.getYRot(),
                 player.getXRot());
-        playThaumcraftSound(level, player, "wand", 1F, 0.1F);
+        sparklesAround(level, player, 20);
+        broadcastThaumcraftSound(level, player, "wand", 1F, 0.1F);
         return true;
     }
 }

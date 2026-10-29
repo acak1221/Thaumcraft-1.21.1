@@ -42,21 +42,25 @@ public final class IchorTier implements Tier {
                 .component(DataComponents.UNBREAKABLE, new Unbreakable(false));
     }
 
-    /** The attack values are those of the vanilla tools of the same kind; the tier adds its damage bonus 5. */
+    /**
+     * The attack values are those of 1.7.10: the weapon modifier of a tool was its base (pickaxe 2, shovel 1, axe 3, sword 4)
+     * plus the material's damage bonus 5, so a hit of the player (hand 1) dealt 8, 7, 9 and 10. The 1.21.1 vanilla bases (1, 1.5,
+     * 5, 3) are not used. The attack speeds are the vanilla ones: 1.7.10 had no attack cooldown at all.
+     */
     public static Item.Properties pickaxeProperties() {
-        return base().attributes(DiggerItem.createAttributes(INSTANCE, 1.0F, -2.8F));
+        return base().attributes(DiggerItem.createAttributes(INSTANCE, 2.0F, -2.8F));
     }
 
     public static Item.Properties shovelProperties() {
-        return base().attributes(DiggerItem.createAttributes(INSTANCE, 1.5F, -3.0F));
+        return base().attributes(DiggerItem.createAttributes(INSTANCE, 1.0F, -3.0F));
     }
 
     public static Item.Properties axeProperties() {
-        return base().attributes(AxeItem.createAttributes(INSTANCE, 5.0F, -3.0F));
+        return base().attributes(AxeItem.createAttributes(INSTANCE, 3.0F, -3.0F));
     }
 
     public static Item.Properties swordProperties() {
-        return base().attributes(SwordItem.createAttributes(INSTANCE, 3, -2.4F));
+        return base().attributes(SwordItem.createAttributes(INSTANCE, 4, -2.4F));
     }
 
     @Override

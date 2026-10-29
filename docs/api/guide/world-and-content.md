@@ -101,36 +101,56 @@ common, 1 uncommon, 2 rare (the example adds its shard to the first two; see [re
 ## Felling trees
 
 `ThaumcraftApiHelper.isWoodLog(level, pos)` and `breakFurthestBlock(level, pos, block, player)` are the two helpers the
-Axe of the Stream used (`Utils.isWoodLog`, `BlockUtils.breakFurthestBlock`). The example add-on fells a tree when a log is
-broken with its amethyst core in the hand:
+log walk of the original Axe of the Stream used (`Utils.isWoodLog`, `BlockUtils.breakFurthestBlock`), and
+`findFurthestBlock(level, pos, block)` is a third one that has no original: it answers WHERE the next
+`breakFurthestBlock` would break, without breaking anything, so that you can ask your protection about that cell. The
+example add-on fells a tree when a log is broken with its amethyst core in the hand:
 
 <!-- snippet:felling -->
 ```java
-// Breaking a log with the amethyst core in the hand fells the whole tree, the way the Axe of the Stream did. One call
-// of breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop, its limit and the
-// permission check are the caller's. The last call of the loop breaks the clicked log itself, so the break is cancelled.
+// Breaking a log with the amethyst core in the hand fells the tree, the way the Axe of the Stream did. One call of
+// breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop and its limit are the
+// caller's. The broken block is NOT the clicked one (it can lie 24 blocks sideways or 48 up or down), so the add-on's
+// own rules are asked about the cell findFurthestBlock names, before every break. This example keeps the world spawn
+// off limits; a claims mod would be asked at the same place. (The server's spawn protection, the world border and the
+// game mode are applied to that cell by breakFurthestBlock itself.) The last pass breaks the clicked log itself, so
+// the vanilla break is cancelled.
 PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
     if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || !player.getMainHandItem().is(AMETHYST_ROD)
-            || !ThaumcraftApiHelper.isWoodLog(server, pos) || !server.mayInteract(player, pos)) return true;
-    for (int logs = 0; logs < 64 && ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player); logs++) { }
+            || !ThaumcraftApiHelper.isWoodLog(server, pos)) return true;
+    for (int logs = 0; logs < 64; logs++) {
+        BlockPos end = ThaumcraftApiHelper.findFurthestBlock(server, pos, state.getBlock());
+        if (end == null || server.getSharedSpawnPos().closerThan(end, 16.0)) break;
+        if (!ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player)) break;
+    }
     return false;
 });
 ```
 <!-- /snippet -->
 
-- `isWoodLog` is the rule of the walk, not a tree detector: a block of the `#minecraft:logs` tag counts, so do leaf blocks,
-  the plain oak log does not (see `docs/audit/KNOWN_DEVIATIONS.md`, section 9). An unloaded position is no log.
+- `isWoodLog` is the rule of the walk, not a tree detector: every block of the `#minecraft:logs` tag counts (the plain oak
+  log, stripped logs, wood, stems, the Greatwood and Silverwood logs), leaf blocks, planks and everything else do not. The
+  original accepted what can sustain leaves (a log does, a leaf block does not) or what is on its list of logs; the tag is
+  both. The Axe of the Stream of this port fells a narrower set on purpose. An unloaded position is no log, and the call
+  loads no chunk.
 - `breakFurthestBlock` breaks **one** block per call: the end of a greedy walk, not the farthest log of the tree. The walk
   starts at `pos` and repeatedly steps to the first cell within two blocks, scanned x from -2 to +2, y from +2 down to -2,
   z from -2 to +2, that holds exactly `block`, is a log and is farther from `pos` than where it stands. It crosses gaps of
   a block and diagonals, can follow a neighbouring tree of the same wood, and never leaves 24 blocks sideways or 48 up and
-  down. If no cell qualifies it breaks `pos` itself, **whatever block that is**: test `isWoodLog` first.
+  down. The start must itself be a log of `block` (anything else, a chest or dirt, answers false and is left alone); if no
+  other cell qualifies the start is the one that breaks.
 - The block drops its normal loot (rolled with the player's main-hand item; none for a creative or a null player) where it
-  stood. The tool is **not** worn, no break event fires and nothing asks for permission, spawn protection or claims for the
-  broken cell: that is the caller's job, as in the example.
-- It answers true when it handed a breakable, non-air block to the harvester and false for a client level, an unloaded
-  start, an air start or an unbreakable end, so `while (breakFurthestBlock(...))` ends when the start cell is air; put a
-  limit on it anyway. Server thread only (`IllegalStateException` elsewhere): the walk keeps static state, as in the original.
+  stood. The tool is **not** worn, the player gets no exhaustion and no loader break event fires.
+- **Protection is asked about the cell that breaks, which is not the clicked one.** The call applies the world border, the
+  server's spawn protection and the player's game mode to that cell and answers false when one refuses. It does **not** ask
+  a claims or land-protection mod and fires no break event, for any cell: call `findFurthestBlock` first, ask that mod about
+  the cell it returns, and call `breakFurthestBlock` only if it agrees (the example does this before every break; checking
+  only `pos` protects nothing, the far end can be 24 blocks away). It answers the same cell the next break will take, as long
+  as nothing changes in between, and `null` where nothing would be broken.
+- `breakFurthestBlock` answers true when it handed a breakable, non-air block to the harvester and false for a client level,
+  a start that is not a log of `block`, an unloaded start or an end that a protection rule refuses, so a loop ends when the
+  start cell is air; put a limit on it anyway. Server thread only (`IllegalStateException` elsewhere); it keeps no state
+  and loads no chunk (a cell in an unloaded chunk is no link of the walk).
 
 ## Client effects: particles
 

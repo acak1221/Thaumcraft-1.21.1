@@ -63,7 +63,7 @@ public class ItemFocusShadowbeam extends ItemModKamiFocus {
             return;
         }
         if (player.getRandom().nextInt(10) == 0) {
-            KamiHooks.playThaumcraftSound(player.level(), player, "brain", 0.5F, 1F);
+            KamiHooks.broadcastThaumcraftSound(player.level(), player, "brain", 0.5F, 1F);
         }
         List<Vec3> path = ShadowBeam.fire(server, potency, ConfigHandler.baseDamageShadowbeam);
         PacketShadowBeam packet = new PacketShadowBeam(path);

@@ -92,7 +92,7 @@ Do not register from parallel NeoForge mod constructors: the registries of the A
 | `Thaumcraft.proxy.getResearchManager()`, `PlayerKnowledge` | `ThaumcraftApiHelper`, see section 4 |
 | `ItemWandCasting` methods | `thaumcraft.api.wands.WandHelper`, see section 8 |
 | `Config.allowMirrors`, `Config.wardedStone` (client copies `CallowMirrors`, `CwardedStone`) | `ThaumcraftApi.isMirrorsAllowed()`, `isWardedStoneAllowed()`, see section 4 |
-| `Utils.isWoodLog`, `BlockUtils.breakFurthestBlock` | `ThaumcraftApiHelper.isWoodLog(level, pos)`, `breakFurthestBlock(level, pos, block, player)`, see section 4 |
+| `Utils.isWoodLog`, `BlockUtils.breakFurthestBlock` | `ThaumcraftApiHelper.isWoodLog(level, pos)`, `breakFurthestBlock(level, pos, block, player)` and, new, `findFurthestBlock(level, pos, block)`, see section 4 |
 
 ## 4. Reaching Thaumcraft content and player knowledge
 
@@ -123,12 +123,18 @@ Scan markers are not research: the clue markers (`"@KEY"` among the completed re
 `getCompletedResearch` nor accepted by `completeResearch`, and `Scans` does not carry them. Read the switches when a
 player acts, not when you register research, so that both sides register the same content.
 
-The tree helpers of the Axe of the Stream are `ThaumcraftApiHelper.isWoodLog(level, pos)` and
-`breakFurthestBlock(level, pos, block, player)`. Same walk as 1.7.10 (a greedy walk of the first qualifying cell within two
-blocks, boxed to 24/48/24 blocks around the start; it breaks one block per call, drops its loot, wears no tool and checks
-no permission), but server thread only, `false` for a client level, an unloaded start and an air start, and no chunk is
-loaded by `isWoodLog`. Whether leaves and the plain oak log count as logs is a difference to review
-(`docs/audit/KNOWN_DEVIATIONS.md` section 9). See [the guide](guide/world-and-content.md#felling-trees).
+The log walk of the Axe of the Stream is `ThaumcraftApiHelper.isWoodLog(level, pos)` and
+`breakFurthestBlock(level, pos, block, player)`, plus `findFurthestBlock(level, pos, block)`, which answers where the next
+break would happen without breaking anything. Same walk as 1.7.10 (a greedy walk of the first qualifying cell within two
+blocks, boxed to 24/48/24 blocks around the start; it breaks one block per call, drops its loot, wears no tool), with these
+differences: server thread only, `false` for a client level, an unloaded start, an air start and a start that is not a log
+of `block` (the original broke any start), no chunk is loaded, and the world border, the spawn protection and the game mode
+are applied to the cell that breaks. **A claims or land-protection mod is not asked, and no break event fires:** the broken
+cell can lie 24 blocks sideways or 48 up or down from the clicked one, so call `findFurthestBlock`, ask your protection about
+that cell, and only then `breakFurthestBlock` (checking the clicked position protects nothing). `isWoodLog` is the block
+tag `#minecraft:logs` (the plain oak log counts, leaves do not): what the original's "can sustain leaves, or is on the list of
+logs" comes to in 1.21.1. See `docs/audit/KNOWN_DEVIATIONS.md` section 9 and
+[the guide](guide/world-and-content.md#felling-trees).
 
 Tests: GameTests `addonResearchJoinsGameplay` (completion, warp, completed set), `knowledgeApiScansAndDiscovery`,
 `knowledgeApiWoodLogRule`, `knowledgeApiFurthestBlock*`; `ScansApiTest`, `ScanServicesTest`, `ServerSwitchesApiTest`,
@@ -304,7 +310,7 @@ a focus, an amulet bauble with a discount, runic charge and warp, a talisman bau
 (`IBauble.equipsOnUse`) and reads `BaublesApi.getWorn`, a belt that is also a focus pouch (`IFocusPouch`), an essentia
 container that feeds tubes and answers a wand, an item that grants research points from a data component that holds
 aspects (the codecs of `AspectList`), a Tome of Sharing that copies scans and discovered aspects between players, a hook
-that fells a tree with `isWoodLog` and `breakFurthestBlock`, a kill hook that uses the stable keys of a wisp, the warp ward and the wand sound, a client entrypoint
+that fells a tree with `isWoodLog`, `findFurthestBlock` and `breakFurthestBlock` (asking its own rule about the cell that breaks), a kill hook that uses the stable keys of a wisp, the warp ward and the wand sound, a client entrypoint
 that draws sparkles, runes and a beam while the amethyst core is held and the aspect tags of the held item on the HUD, and a
 research tab with nine entries. It imports nothing but
 `thaumcraft.api` (`ExampleAddonApiOnlyTest` keeps it so) and is compiled by every build; the guides quote it.

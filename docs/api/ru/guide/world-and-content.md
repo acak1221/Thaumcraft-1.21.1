@@ -103,38 +103,58 @@ ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 ## Рубка деревьев
 
 `ThaumcraftApiHelper.isWoodLog(level, pos)` и `breakFurthestBlock(level, pos, block, player)` — два помощника, которыми
-пользовался Топор потока (`Utils.isWoodLog`, `BlockUtils.breakFurthestBlock`). Аддон из примера валит дерево, когда бревно
-ломают с аметистовой сердцевиной в руке:
+пользовался обход брёвен оригинального Топора потока (`Utils.isWoodLog`, `BlockUtils.breakFurthestBlock`), а
+`findFurthestBlock(level, pos, block)` — третий, у которого оригинала нет: он отвечает, ГДЕ сломает следующий вызов
+`breakFurthestBlock`, ничего не ломая, чтобы вы могли спросить свою защиту об этой клетке. Аддон из примера валит дерево,
+когда бревно ломают с аметистовой сердцевиной в руке:
 
 <!-- snippet:felling -->
 ```java
-// Breaking a log with the amethyst core in the hand fells the whole tree, the way the Axe of the Stream did. One call
-// of breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop, its limit and the
-// permission check are the caller's. The last call of the loop breaks the clicked log itself, so the break is cancelled.
+// Breaking a log with the amethyst core in the hand fells the tree, the way the Axe of the Stream did. One call of
+// breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop and its limit are the
+// caller's. The broken block is NOT the clicked one (it can lie 24 blocks sideways or 48 up or down), so the add-on's
+// own rules are asked about the cell findFurthestBlock names, before every break. This example keeps the world spawn
+// off limits; a claims mod would be asked at the same place. (The server's spawn protection, the world border and the
+// game mode are applied to that cell by breakFurthestBlock itself.) The last pass breaks the clicked log itself, so
+// the vanilla break is cancelled.
 PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
     if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || !player.getMainHandItem().is(AMETHYST_ROD)
-            || !ThaumcraftApiHelper.isWoodLog(server, pos) || !server.mayInteract(player, pos)) return true;
-    for (int logs = 0; logs < 64 && ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player); logs++) { }
+            || !ThaumcraftApiHelper.isWoodLog(server, pos)) return true;
+    for (int logs = 0; logs < 64; logs++) {
+        BlockPos end = ThaumcraftApiHelper.findFurthestBlock(server, pos, state.getBlock());
+        if (end == null || server.getSharedSpawnPos().closerThan(end, 16.0)) break;
+        if (!ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player)) break;
+    }
     return false;
 });
 ```
 <!-- /snippet -->
 
-- `isWoodLog` — правило обхода, а не определитель дерева: блок из тега `#minecraft:logs` проходит, листва тоже, обычное
-  дубовое бревно — нет (см. `docs/audit/KNOWN_DEVIATIONS.md`, раздел 9). Позиция в незагруженном чанке — не бревно.
+- `isWoodLog` — правило обхода, а не определитель дерева: проходит каждый блок из тега `#minecraft:logs` (обычное
+  дубовое бревно, обтёсанные брёвна, древесина, грибные стволы, брёвна Великого дерева и Серебряного дерева), а листва,
+  доски и всё остальное — нет. Оригинал пропускал то, что может держать листву (бревно может, листва нет), или то, что
+  есть в его списке брёвен; тег — и то и другое. Топор потока этого порта рубит более узкий набор намеренно. Позиция в
+  незагруженном чанке — не бревно, и вызов не загружает чанков.
 - `breakFurthestBlock` ломает **один** блок за вызов: конец жадного обхода, а не самое дальнее бревно дерева. Обход
   начинается в `pos` и раз за разом шагает в первую клетку в пределах двух блоков (перебор: x от −2 до +2, y от +2 вниз до
   −2, z от −2 до +2), где стоит ровно `block`, которая является бревном и дальше от `pos`, чем текущая. Он перешагивает
   промежутки в один блок и диагонали, может уйти на соседнее дерево той же породы и не выходит за 24 блока в стороны и 48
-  вверх и вниз. Если ни одна клетка не подходит, ломается сам `pos`, **какой бы блок там ни был**: сначала проверьте
-  `isWoodLog`.
+  вверх и вниз. Стартовая клетка сама должна быть бревном из `block` (всё остальное, сундук или земля, даёт false и
+  остаётся нетронутым); если другой подходящей клетки нет, ломается сама стартовая.
 - Блок выпадает с обычной добычей (она определяется предметом в основной руке игрока; для творческого игрока и для null
-  выпадения нет) там, где он стоял. Инструмент **не** изнашивается, событие разрушения не вызывается и никто не спрашивает
-  разрешения, защиты спауна или приватов для сломанной клетки: это забота вызывающего, как в примере.
-- Ответ true, когда в сборщик отдан ломаемый блок, не воздух; false для клиентского мира, незагруженного старта, старта в
-  воздухе и неразрушимого конца, поэтому `while (breakFurthestBlock(...))` заканчивается, когда стартовая клетка стала
-  воздухом; всё равно поставьте предел. Только поток сервера (в другом — `IllegalStateException`): обход хранит
-  состояние в статических полях, как в оригинале.
+  выпадения нет) там, где он стоял. Инструмент **не** изнашивается, игрок не устаёт, событие разрушения загрузчика не
+  вызывается.
+- **Защиту нужно спрашивать о той клетке, которая ломается, а не о той, по которой кликнули.** Вызов применяет к этой
+  клетке границу мира, защиту спауна сервера и режим игры игрока и отвечает false, если что-то из этого запрещает. Он
+  **не** спрашивает мод приватов или защиты земли и не вызывает события разрушения ни для какой клетки: сначала вызовите
+  `findFurthestBlock`, спросите этот мод о возвращённой клетке и вызывайте `breakFurthestBlock`, только если он согласен
+  (пример делает так перед каждым разрушением; проверка одного `pos` ничего не защищает, дальний конец может быть в 24
+  блоках). Метод отвечает той же клеткой, которую сломает следующий вызов, пока ничего не изменилось, и `null`, где
+  ломать нечего.
+- `breakFurthestBlock` отвечает true, когда в сборщик отдан ломаемый блок, не воздух, и false для клиентского мира,
+  старта, который не бревно из `block`, незагруженного старта и конца, который запрещает правило защиты, поэтому цикл
+  заканчивается, когда стартовая клетка стала воздухом; всё равно поставьте предел. Только поток сервера (в другом —
+  `IllegalStateException`); состояния он не хранит и чанков не загружает (клетка в незагруженном чанке не звено обхода).
 
 ## Клиентские эффекты: частицы
 

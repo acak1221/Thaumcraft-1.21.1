@@ -131,6 +131,23 @@ class WandAddonPartsTest {
         assertThrows(IllegalArgumentException.class, () -> WandMaterials.rod("junit_ember"));
     }
 
+    /**
+     * A tag is also the suffix of a research key (ROD_ICHORCLOTH, CAP_ICHOR), so an add-on may tag a part in upper case; the
+     * texture path derived from it must still be a legal lower-case resource path (found by the Thaumic Tinkerer add-on, whose
+     * Ichor parts are tagged like the research keys of 1.7.10).
+     */
+    @Test void theDerivedTextureOfAnUpperCaseTagIsALegalResourcePath() {
+        WandRod rod = new WandRod("JUNIT_ICHORCLOTH", 100, new ItemStack(Items.BLAZE_ROD), 10);
+        WandCap cap = new WandCap("JUNIT_ICHOR", 0.7F, new ItemStack(Items.GOLD_INGOT), 10);
+        StaffRod staff = new StaffRod("JUNIT_STAFF", 100, new ItemStack(Items.STICK), 10);
+        assertEquals("thaumcraft:textures/models/wand_rod_junit_ichorcloth.png", rod.getTexture().toString());
+        assertEquals("thaumcraft:textures/models/wand_cap_junit_ichor.png", cap.getTexture().toString());
+        assertEquals("thaumcraft:textures/models/wand_rod_junit_staff.png", staff.getTexture().toString());
+        assertEquals("ROD_JUNIT_ICHORCLOTH", rod.getResearch(), "the research key keeps the tag as it was written");
+        assertEquals("CAP_JUNIT_ICHOR", cap.getResearch());
+        assertSame(rod, WandRod.rods.get("JUNIT_ICHORCLOTH"));
+    }
+
     @Test void anAddonStaffRodIsAStaffNamedAfterItsPlainRod() {
         StaffRod staff = new StaffRod("junit_ember", 200, ItemStack.EMPTY, 15);
         var resolved = WandMaterials.rod("junit_ember_staff");

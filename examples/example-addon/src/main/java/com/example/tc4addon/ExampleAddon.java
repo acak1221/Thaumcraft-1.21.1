@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -103,13 +104,21 @@ public final class ExampleAddon implements ModInitializer, IThaumcraftAddon {
                 BlockEntityType.Builder.of(EssentiaBowlBlockEntity::new, ESSENTIA_BOWL).build(null));
         // [/doc]
         // [doc:felling]
-        // Breaking a log with the amethyst core in the hand fells the whole tree, the way the Axe of the Stream did. One call
-        // of breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop, its limit and the
-        // permission check are the caller's. The last call of the loop breaks the clicked log itself, so the break is cancelled.
+        // Breaking a log with the amethyst core in the hand fells the tree, the way the Axe of the Stream did. One call of
+        // breakFurthestBlock breaks ONE block (the far end of its walk) and wears no tool; the loop and its limit are the
+        // caller's. The broken block is NOT the clicked one (it can lie 24 blocks sideways or 48 up or down), so the add-on's
+        // own rules are asked about the cell findFurthestBlock names, before every break. This example keeps the world spawn
+        // off limits; a claims mod would be asked at the same place. (The server's spawn protection, the world border and the
+        // game mode are applied to that cell by breakFurthestBlock itself.) The last pass breaks the clicked log itself, so
+        // the vanilla break is cancelled.
         PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
             if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || !player.getMainHandItem().is(AMETHYST_ROD)
-                    || !ThaumcraftApiHelper.isWoodLog(server, pos) || !server.mayInteract(player, pos)) return true;
-            for (int logs = 0; logs < 64 && ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player); logs++) { }
+                    || !ThaumcraftApiHelper.isWoodLog(server, pos)) return true;
+            for (int logs = 0; logs < 64; logs++) {
+                BlockPos end = ThaumcraftApiHelper.findFurthestBlock(server, pos, state.getBlock());
+                if (end == null || server.getSharedSpawnPos().closerThan(end, 16.0)) break;
+                if (!ThaumcraftApiHelper.breakFurthestBlock(server, pos, state.getBlock(), player)) break;
+            }
             return false;
         });
         // [/doc]

@@ -62,6 +62,34 @@ class CamoRulesTest {
     }
 
     @Test
+    void onlyCubeLikeBlocksAreValid() {
+        // The 1.7.10 render types were the plain cube, the log and the pillar; every other shape was refused.
+        assertTrue(CamoRules.isValidCamo(Blocks.OAK_LEAVES.defaultBlockState()), "leaves were render type 0");
+        assertTrue(CamoRules.isValidCamo(Blocks.QUARTZ_PILLAR.defaultBlockState()), "the pillar");
+        assertTrue(CamoRules.isValidCamo(Blocks.DISPENSER.defaultBlockState()), "a dispenser was a plain cube");
+        assertFalse(CamoRules.isValidCamo(Blocks.OAK_STAIRS.defaultBlockState()), "stairs (render type 10)");
+        assertFalse(CamoRules.isValidCamo(Blocks.OAK_FENCE.defaultBlockState()), "a fence (render type 11)");
+        assertFalse(CamoRules.isValidCamo(Blocks.GLASS_PANE.defaultBlockState()), "a pane (render type 18)");
+        assertFalse(CamoRules.isValidCamo(Blocks.OAK_SLAB.defaultBlockState()), "a slab is no cube in the port");
+        assertFalse(CamoRules.isValidCamo(Blocks.TORCH.defaultBlockState()), "a torch (render type 2)");
+        assertFalse(CamoRules.isValidCamo(Blocks.DANDELION.defaultBlockState()), "a flower (render type 1)");
+        assertFalse(CamoRules.isValidCamo(Blocks.WHITE_CARPET.defaultBlockState()), "a carpet");
+        assertFalse(CamoRules.isValidCamo(Blocks.OAK_DOOR.defaultBlockState()), "a door (render type 7)");
+        assertFalse(CamoRules.isValidCamo(Blocks.LADDER.defaultBlockState()), "a ladder (render type 8)");
+        assertFalse(CamoRules.isValidCamo(Blocks.RAIL.defaultBlockState()), "a rail (render type 9)");
+    }
+
+    @Test
+    void onlyThePumpkinsAreTurnedToTheClickedSide() {
+        // BlockDirectional of 1.7.10: the pumpkins. A furnace or dispenser was not directional and keeps its default state.
+        BlockState furnace = CamoRules.change(new ItemStack(Items.FURNACE), Direction.EAST).state();
+        assertEquals(Blocks.FURNACE.defaultBlockState(), furnace);
+        BlockState lantern = CamoRules.change(new ItemStack(Items.JACK_O_LANTERN), Direction.WEST).state();
+        assertNotNull(lantern);
+        assertEquals(Direction.WEST, lantern.getValue(BlockStateProperties.HORIZONTAL_FACING));
+    }
+
+    @Test
     void aBlockItemWhoseBlockIsNotValidDoesNothing() {
         assertEquals(CamoRules.Change.Kind.NONE, CamoRules.change(new ItemStack(Items.CHEST), Direction.NORTH).kind());
         assertEquals(CamoRules.Change.Kind.NONE, CamoRules.change(new ItemStack(Items.BARRIER), Direction.NORTH).kind());

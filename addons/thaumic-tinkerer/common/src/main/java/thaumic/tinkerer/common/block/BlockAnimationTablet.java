@@ -77,8 +77,12 @@ public class BlockAnimationTablet extends BaseEntityBlock implements ITTinkererR
     /** {@code setBlockBounds(0, 0, 0, 1, 1/16*2, 1)}. */
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 2, 16);
 
+    /**
+     * {@code setHardness(3F); setResistance(50F)}. A 1.7.10 resistance is stored times three and read back divided by five
+     * (0.6 of the argument), which is what 1.21.1 {@code strength} takes: 30.
+     */
     public BlockAnimationTablet() {
-        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 50F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+        this(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3F, 30F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
     }
 
     protected BlockAnimationTablet(Properties properties) {
@@ -158,7 +162,7 @@ public class BlockAnimationTablet extends BaseEntityBlock implements ITTinkererR
             boolean activated = state.getValue(POWERED);
             if (!activated && !tablet.getIsBreaking() && tablet.isIdle()) {
                 level.setBlock(pos, state.setValue(FACING, nextFacing(state.getValue(FACING))), Block.UPDATE_ALL);
-                level.playSound(null, pos, DeviceSounds.WAND_TOOL, net.minecraft.sounds.SoundSource.BLOCKS, 0.6F, 1F);
+                level.playSound(null, pos, DeviceSounds.wandTool(), net.minecraft.sounds.SoundSource.BLOCKS, 0.6F, 1F);
             } else {
                 // Rare chance this might happen, but better to cope for it.
                 player.sendSystemMessage(Component.translatable("ttmisc.animationTablet.notRotatable"));

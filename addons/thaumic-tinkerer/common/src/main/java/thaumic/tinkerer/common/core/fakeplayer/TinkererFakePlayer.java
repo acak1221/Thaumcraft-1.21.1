@@ -19,6 +19,7 @@ import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,7 +62,22 @@ public class TinkererFakePlayer extends ServerPlayer {
         super(level.getServer(), level, profile, ClientInformation.createDefault());
         this.connection = new SilentConnection(level, this, profile);
         this.getAbilities().instabuild = false;
-        this.setOnGround(true);
+        // Not on the ground, as the 1.7.10 FakePlayer (never ticked, so never landed): the player breaks blocks at a fifth
+        // of the speed (Player.getDestroySpeed, 1.7.10 getBreakSpeed had the same rule), and its attacks are neither
+        // sweeping (a charged sword swing on the ground also hurts the mobs next to the target) nor critical.
+    }
+
+    /**
+     * The fake player earns no advancements: the {@code ServerPlayer} constructor registers the criterion listeners of its
+     * profile, so a kill of the Tablet or a block of the Placer could complete an advancement, give its rewards and announce
+     * "[ThaumcraftTablet] has made the advancement ..." in the chat. The listeners are taken off whenever the advancements are
+     * asked for (every trigger asks), which also covers the re-registration of a data pack reload.
+     */
+    @Override
+    public PlayerAdvancements getAdvancements() {
+        PlayerAdvancements advancements = super.getAdvancements();
+        if (advancements != null) advancements.stopListening();
+        return advancements;
     }
 
     /** The super constructor looks up the world spawn height through the chunk source: not needed, and it loads chunks. */

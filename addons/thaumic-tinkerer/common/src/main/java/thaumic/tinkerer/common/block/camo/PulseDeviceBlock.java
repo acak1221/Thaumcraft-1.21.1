@@ -95,7 +95,7 @@ public abstract class PulseDeviceBlock extends CamoDeviceBlock {
         if (!WandHelper.isWand(stack)) return null;
         if (!level.isClientSide) {
             level.setBlock(pos, state.setValue(FACING, hit.getDirection()), Block.UPDATE_ALL);
-            level.playSound(null, pos, DeviceSounds.WAND_TOOL, SoundSource.BLOCKS, 0.6F, 1F);
+            level.playSound(null, pos, DeviceSounds.wandTool(), SoundSource.BLOCKS, 0.6F, 1F);
         }
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }

@@ -71,7 +71,7 @@ public class WandCap {
         this.setTag(tag);
         this.baseCostModifier = discount;
         this.specialCostModifierAspects = null;
-        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_cap_" + this.getTag() + ".png");
+        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_cap_" + lowerTag(this.getTag()) + ".png");
         this.item = item;
         this.setCraftCost(craftCost);
         caps.put(tag, this);
@@ -91,7 +91,7 @@ public class WandCap {
         this.baseCostModifier = discount;
         this.specialCostModifierAspects = specialAspects;
         this.specialCostModifier = discountSpecial;
-        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_cap_" + this.getTag() + ".png");
+        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_cap_" + lowerTag(this.getTag()) + ".png");
         this.item = item;
         this.setCraftCost(craftCost);
         caps.put(tag, this);
@@ -117,7 +117,7 @@ public class WandCap {
             this.specialCostModifier = cap.specialModifier();
         }
         this.item = item;
-        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_cap_" + cap.tag() + ".png");
+        this.texture = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand_cap_" + lowerTag(cap.tag()) + ".png");
         caps.put(cap.tag(), this);
     }
 
@@ -185,5 +185,13 @@ public class WandCap {
             if (cap.tag.equals(tag)) return cap;
         }
         return null;
+    }
+
+    /**
+     * The tag as it appears in a resource path. Resource paths are lower case; tags are not (a tag is also a research key
+     * suffix, {@code CAP_ICHOR}), so the derived default texture of a part tagged {@code ICHOR} is {@code ..._ichor.png}.
+     */
+    static String lowerTag(String tag) {
+        return tag.toLowerCase(java.util.Locale.ROOT);
     }
 }

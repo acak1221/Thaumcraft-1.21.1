@@ -14,6 +14,7 @@ package thaumic.tinkerer.common.item.kami.armor;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Abilities;
@@ -29,12 +30,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.api.ThaumcraftFX;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 import thaumic.tinkerer.common.core.handler.kami.KamiArmorHandler;
 import thaumic.tinkerer.common.item.kami.ItemKamiResource;
+import thaumic.tinkerer.common.item.kami.KamiHooks;
 import thaumic.tinkerer.common.item.kami.KamiResearch;
 import thaumic.tinkerer.common.lib.LibItemNames;
 import thaumic.tinkerer.common.lib.LibResearch;
@@ -107,7 +110,7 @@ public class ItemGemChest extends ItemIchorclothArmorAdv {
      * 1.7.10 {@code ItemFocusDeflect.protectFromProjectiles(player, null)} (the Distortion focus belongs to the Foci
      * group; this is the Kami copy of the same rule): every arrow and thrown object within 4 blocks (3 above and to the
      * east/south) that was not shot by the player is moved along its flight by twice its distance from the player, which
-     * carries it past. The experience bottle is exempt, as in the original blacklist.
+     * carries it past. The experience bottle is exempt, as in the original blacklist; so is a projectile that is stuck.
      */
     public static void protectFromProjectiles(Player player, int range) {
         Level level = player.level();
@@ -117,11 +120,27 @@ public class ItemGemChest extends ItemIchorclothArmorAdv {
             if (!(projectile instanceof AbstractArrow || projectile instanceof ThrowableProjectile)) continue;
             if (projectile instanceof ThrownExperienceBottle || projectile.getOwner() == player) continue;
             Vec3 motion = projectile.getDeltaMovement();
-            if (motion.lengthSqr() < 1.0E-7) continue;
+            if (motion.lengthSqr() < 1.0E-7 || isStuck(projectile)) continue;
             double distance = projectile.position().distanceTo(player.position());
             Vec3 shift = motion.normalize().scale(distance * 2);
+            // 1.7.10 drew six white sparkles at the place the projectile was pushed away from (on the client).
+            if (level instanceof ServerLevel server) {
+                for (int i = 0; i < 6; i++) {
+                    ThaumcraftFX.sparkle(server, projectile.getX(), projectile.getY(), projectile.getZ(),
+                            KamiHooks.SPARKLE_SIZE, KamiHooks.SPARKLE_WHITE, 0F);
+                }
+            }
             projectile.setPos(projectile.getX() + shift.x, projectile.getY() + shift.y, projectile.getZ() + shift.z);
         }
+    }
+
+    /**
+     * A projectile that did not move during its last tick. In 1.7.10 an arrow that had hit a block had no motion left and was
+     * ignored; in 1.21.1 it keeps the vector of its hit while it sticks in the block ({@code AbstractArrow.inGround} is
+     * protected), so the rule is "has not moved": its position is the position it started the tick with.
+     */
+    static boolean isStuck(Projectile projectile) {
+        return projectile.getX() == projectile.xo && projectile.getY() == projectile.yo && projectile.getZ() == projectile.zo;
     }
 
     @Override

@@ -9,22 +9,33 @@
 package thaumic.tinkerer.client.render.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumic.tinkerer.common.block.camo.CamoDeviceBlockEntity;
 
 /**
  * Draws the camouflage of a device: while a camouflage is set the device's own model is not rendered (its block state has
  * {@code camo=true}), and this renderer draws the block it imitates instead (1.7.10 asked the camouflaged block for the
- * icon of each side). The state is drawn like a block in a block entity renderer: from its model, lit by the light at the
- * device, without ambient occlusion and with the default tint.
+ * icon of each side).
+ *
+ * <p>The state is drawn the way the piston renderer draws a moving block: from its model, at the device's position, in the
+ * world. That gives the lighting of the surroundings (the light of the six neighbours, ambient occlusion included, not the
+ * light at the device's own cell, which is dark for an opaque device such as the Golem Connector), the tint of the position
+ * and the culling of the faces that rest against an opaque neighbour. It does not get the chunk mesh's own batching or
+ * the models of mods that hook the chunk renderer.</p>
  */
 public class RenderTileCamoDevice<T extends CamoDeviceBlockEntity> implements BlockEntityRenderer<T> {
 
     private final BlockRenderDispatcher blockRenderer;
+    /** The model renderer reseeds the source for every quad list; it is the render thread's own, not the level's. */
+    private final RandomSource random = RandomSource.create();
 
     public RenderTileCamoDevice(BlockEntityRendererProvider.Context context) {
         this.blockRenderer = context.getBlockRenderDispatcher();
@@ -33,7 +44,9 @@ public class RenderTileCamoDevice<T extends CamoDeviceBlockEntity> implements Bl
     @Override
     public void render(T device, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         BlockState camo = device.getCamo();
-        if (camo == null) return;
-        blockRenderer.renderSingleBlock(camo, poseStack, buffer, packedLight, packedOverlay);
+        Level level = device.getLevel();
+        if (camo == null || level == null) return;
+        VertexConsumer consumer = buffer.getBuffer(ItemBlockRenderTypes.getMovingBlockRenderType(camo));
+        blockRenderer.renderBatched(camo, device.getBlockPos(), level, poseStack, consumer, true, random);
     }
 }

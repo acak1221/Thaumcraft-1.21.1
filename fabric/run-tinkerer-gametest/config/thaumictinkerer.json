@@ -1,0 +1,31 @@
+{
+  "general": {
+    "modFlight.enabled": true,
+    "tooltipIndicators.enabled": true,
+    "shareTome.survival.enabled": true,
+    "debugCommands.enabled": false,
+    "oreDictMetal.enabled": true,
+    "repairTconTools.enabled": false,
+    "forbiddenDimensions": [],
+    "focusOfDislocationBlacklist": [],
+    "imbuedFire.enabled": true,
+    "imbuedFireSpread.enabled": true,
+    "imbuedFire.cake.enabled": true,
+    "cropsAllowBonemeal.enabled": false,
+    "soulHeart.height": 49
+  },
+  "kami": {
+    "kami.forceenabled": true,
+    "placementMirror.blocks.show": true,
+    "kamiLeggingsLightPlacing.enabled": false,
+    "kamiBootsDirtIntoGrass.enabled": true,
+    "bedrockDimension.oreBlacklist": [],
+    "bedrockDimension.oreDensity": 1
+  },
+  "balance.shadowbeam": {
+    "aerVisCost": 15,
+    "ordoVisCost": 25,
+    "perditioVisCost": 25,
+    "baseDamage": 8
+  }
+}

@@ -1,11 +1,13 @@
 package thaumic.tinkerer.testing;
 
+import com.mojang.authlib.GameProfile;
 import dev.architectury.event.events.common.BlockEvent;
 import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.registry.menu.MenuRegistry;
 import java.util.List;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -15,16 +17,20 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -32,6 +38,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.ItemApi;
 import thaumcraft.api.ThaumcraftApiHelper;
@@ -47,6 +54,7 @@ import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.block.tile.TileEnchanter;
 import thaumic.tinkerer.common.block.tile.container.ContainerEnchanter;
 import thaumic.tinkerer.common.content.Enchantments;
+import thaumic.tinkerer.common.core.fakeplayer.TinkererFakePlayer;
 import thaumic.tinkerer.common.enchantment.AttackBoost;
 import thaumic.tinkerer.common.enchantment.BreakSpeedControl;
 import thaumic.tinkerer.common.enchantment.EnchantmentFormulas;
@@ -86,6 +94,10 @@ public final class EnchantmentsRuntimeChecks {
         static final ResourceKey<Enchantment> FORTUNE = net.minecraft.world.item.enchantment.Enchantments.FORTUNE;
         static final ResourceKey<Enchantment> MENDING = net.minecraft.world.item.enchantment.Enchantments.MENDING;
         static final ResourceKey<Enchantment> FEATHER_FALLING = net.minecraft.world.item.enchantment.Enchantments.FEATHER_FALLING;
+        static final ResourceKey<Enchantment> BANE_OF_ARTHROPODS = net.minecraft.world.item.enchantment.Enchantments.BANE_OF_ARTHROPODS;
+        static final ResourceKey<Enchantment> SILK_TOUCH = net.minecraft.world.item.enchantment.Enchantments.SILK_TOUCH;
+        static final ResourceKey<Enchantment> THORNS = net.minecraft.world.item.enchantment.Enchantments.THORNS;
+        static final ResourceKey<Enchantment> FIRE_ASPECT = net.minecraft.world.item.enchantment.Enchantments.FIRE_ASPECT;
     }
 
     // ---- helpers ---------------------------------------------------------------------------------------------------
@@ -113,6 +125,7 @@ public final class EnchantmentsRuntimeChecks {
      * to the world's default, and creative would let every block break). Nothing ticks a mock player; the checks call
      * {@code doTick} where time has to pass for it.
      */
+    @SuppressWarnings("removal") // the only mock that is a ServerPlayer (game mode, attribute and network paths need one)
     private static ServerPlayer player(GameTestHelper test) {
         ServerPlayer player = test.makeMockServerPlayerInLevel();
         player.setGameMode(GameType.SURVIVAL);
@@ -850,6 +863,218 @@ public final class EnchantmentsRuntimeChecks {
             test.assertTrue(Math.abs(plain.getDeltaMovement().length() - 1.5D) < 1.0E-6, "an ordinary bow is not touched");
             finish(test, player);
         });
+    }
+
+    // ---- the item types of the 1.7.10 Enchanter ------------------------------------------------------------------------
+
+    private static ItemStack itemOf(GameTestHelper test, String id) {
+        Item item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(id)).orElse(null);
+        test.assertTrue(item != null, "the item " + id + " exists in the world");
+        return new ItemStack(item);
+    }
+
+    private static boolean offers(GameTestHelper test, ItemStack stack, ResourceKey<Enchantment> key) {
+        return EnchantmentManager.canApply(test.getLevel().registryAccess(), stack, key, List.of());
+    }
+
+    /**
+     * 1.7.10 asked {@code enchant.canApply(stack) && enchant.type.canEnchantItem(item)}, the narrow type: swords for the
+     * weapon enchantments, {@code ItemTool} for the diggers (no hoe, no shears), chest armor for Thorns, any armor of the
+     * slot for the legs and boots. The Enchanter asks the primary items of 1.21.1 (and refuses hoes and shears) for the same.
+     */
+    public static void theEnchanterOffersWhatTheTypesOf1710AllowedAndNotWhatTheWiderTagsOf121Allow(GameTestHelper test) {
+        ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
+        ItemStack axe = new ItemStack(Items.DIAMOND_AXE);
+        ItemStack pick = new ItemStack(Items.DIAMOND_PICKAXE);
+        ItemStack shovel = new ItemStack(Items.DIAMOND_SHOVEL);
+        ItemStack hoe = new ItemStack(Items.DIAMOND_HOE);
+        ItemStack shears = new ItemStack(Items.SHEARS);
+        ItemStack mace = new ItemStack(Items.MACE);
+
+        for (ResourceKey<Enchantment> weapon : List.of(Vanilla.SHARPNESS, Vanilla.SMITE, Vanilla.BANE_OF_ARTHROPODS, Vanilla.FIRE_ASPECT)) {
+            test.assertTrue(offers(test, sword, weapon), weapon.location() + " goes on a sword");
+            test.assertTrue(!offers(test, axe, weapon), weapon.location() + " does not go on an axe in the Enchanter (an anvil takes it)");
+            test.assertTrue(!offers(test, mace, weapon), weapon.location() + " does not go on a mace");
+            test.assertTrue(!offers(test, pick, weapon), weapon.location() + " does not go on a pickaxe");
+        }
+        for (ResourceKey<Enchantment> digger : List.of(Vanilla.EFFICIENCY, Vanilla.FORTUNE, Vanilla.SILK_TOUCH)) {
+            for (ItemStack tool : List.of(pick, axe, shovel)) {
+                test.assertTrue(offers(test, tool, digger), digger.location() + " goes on " + tool.getItem());
+            }
+            test.assertTrue(!offers(test, hoe, digger), digger.location() + " does not go on a hoe (ItemHoe was no ItemTool)");
+            test.assertTrue(!offers(test, shears, digger), digger.location() + " does not go on shears");
+            test.assertTrue(!offers(test, sword, digger), digger.location() + " does not go on a sword");
+        }
+        test.assertTrue(offers(test, hoe, Vanilla.UNBREAKING) && offers(test, shears, Vanilla.UNBREAKING),
+                "Unbreaking goes on everything that wears, as 'breakable' did");
+
+        test.assertTrue(offers(test, new ItemStack(Items.DIAMOND_CHESTPLATE), Vanilla.THORNS), "Thorns on a chestplate");
+        for (Item other : List.of(Items.DIAMOND_HELMET, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS)) {
+            test.assertTrue(!offers(test, new ItemStack(other), Vanilla.THORNS), "Thorns (armor_torso) not on " + other);
+        }
+
+        // the items of Thaumcraft that the types accepted and no vanilla tag lists
+        ItemStack crimson = itemOf(test, "thaumcraft:crimson_sword");
+        for (ResourceKey<Enchantment> key : List.of(Vanilla.SHARPNESS, Vanilla.LOOTING, Vanilla.FIRE_ASPECT, Vanilla.UNBREAKING,
+                ModEnchantments.vampirism, ModEnchantments.finalStrike, ModEnchantments.valiance, ModEnchantments.focusedStrike,
+                ModEnchantments.dispersedStrikes)) {
+            test.assertTrue(offers(test, crimson, key), key.location() + " goes on the Crimson Blade");
+        }
+        ItemStack crusher = itemOf(test, "thaumcraft:primal_crusher");
+        for (ResourceKey<Enchantment> key : List.of(Vanilla.EFFICIENCY, Vanilla.FORTUNE, Vanilla.SILK_TOUCH, Vanilla.UNBREAKING,
+                ModEnchantments.shatter, ModEnchantments.tunnel, ModEnchantments.desintegrate, ModEnchantments.autoSmelt)) {
+            test.assertTrue(offers(test, crusher, key), key.location() + " goes on the Primal Crusher");
+        }
+        for (String legs : List.of("cultist_robe_legs", "cultist_plate_legs", "cultist_leader_legs")) {
+            ItemStack stack = itemOf(test, "thaumcraft:" + legs);
+            test.assertTrue(offers(test, stack, ModEnchantments.ascentBoost) && offers(test, stack, ModEnchantments.pounce),
+                    "Ascent Boost and Pounce go on " + legs);
+        }
+        ItemStack cultistBoots = itemOf(test, "thaumcraft:cultist_boots");
+        test.assertTrue(offers(test, cultistBoots, ModEnchantments.slowFall) && offers(test, cultistBoots, ModEnchantments.shockwave),
+                "Slow Fall and Shockwave go on the boots of the Crimson Cult");
+
+        if (TTRegistry.hasItem(LibItemNames.BLOOD_SWORD)) {
+            ItemStack blade = TTRegistry.stack(LibItemNames.BLOOD_SWORD);
+            for (ResourceKey<Enchantment> key : List.of(Vanilla.SHARPNESS, Vanilla.SMITE, Vanilla.KNOCKBACK, Vanilla.FIRE_ASPECT, Vanilla.LOOTING,
+                    Vanilla.UNBREAKING, ModEnchantments.finalStrike, ModEnchantments.valiance, ModEnchantments.focusedStrike,
+                    ModEnchantments.dispersedStrikes)) {
+                test.assertTrue(offers(test, blade, key), key.location() + " goes on the Cursed Spirit's Blade, an ItemSword");
+            }
+            test.assertTrue(!offers(test, blade, ModEnchantments.vampirism), "but Vampirism does not");
+        }
+        test.succeed();
+    }
+
+    /**
+     * The 1.7.10 enchantments had the weight 0, which the anvil turned into no cost per level from a tool and one per level
+     * from a book. An anvil cost of 0 in the data gives the same: {@code max(1, 0 / 2)} for a book, and the vanilla anvil
+     * refuses a result whose enchantment cost is 0.
+     */
+    public static void theAnvilChargesOnePerLevelForABookAndNothingForAToolOfTheEnchantmentsOfTheAddOn(GameTestHelper test) {
+        ServerPlayer player = player(test);
+        ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
+        book.enchant(holder(test, ModEnchantments.valiance), 5);
+        ItemStack donor = enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5);
+
+        AnvilMenu fromBook = new AnvilMenu(0, player.getInventory());
+        fromBook.getSlot(0).set(new ItemStack(Items.DIAMOND_SWORD));
+        fromBook.getSlot(1).set(book);
+        fromBook.createResult();
+        ItemStack result = fromBook.getSlot(2).getItem();
+        test.assertTrue(ModEnchantments.level(result, ModEnchantments.valiance) == 5, "the book gives Valiance V: " + result);
+        test.assertTrue(fromBook.getCost() == 5, "one per level from a book: " + fromBook.getCost());
+
+        AnvilMenu fromTool = new AnvilMenu(0, player.getInventory());
+        fromTool.getSlot(0).set(new ItemStack(Items.DIAMOND_SWORD));
+        fromTool.getSlot(1).set(donor);
+        fromTool.createResult();
+        test.assertTrue(fromTool.getSlot(2).getItem().isEmpty(), "nothing per level from a tool, so the anvil has nothing to charge for: "
+                + fromTool.getSlot(2).getItem());
+        finish(test, player);
+    }
+
+    // ---- breaking the Enchanter --------------------------------------------------------------------------------------
+
+    private static List<ItemEntity> dropsAround(GameTestHelper test, BlockPos relative) {
+        return test.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(test.absolutePos(relative)).inflate(2.0D));
+    }
+
+    private static boolean dropped(List<ItemEntity> drops, java.util.function.Predicate<ItemStack> what) {
+        return drops.stream().anyMatch(drop -> what.test(drop.getItem()));
+    }
+
+    /**
+     * {@code breakBlock} of 1.7.10 dropped the tool and the wand out of the table, and the block (a stone-like block that
+     * needs a pickaxe) dropped itself: with a pickaxe the block, the tool and the wand fall; with a bare hand the contents
+     * still fall and the block does not.
+     */
+    public static void breakingTheEnchanterDropsTheBlockTheToolAndTheWand(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test);
+        Item enchanterItem = TTRegistry.block(LibBlockNames.ENCHANTER).asItem();
+        BlockPos absolute = test.absolutePos(ENCHANTER);
+
+        for (boolean withPickaxe : new boolean[] { true, false }) {
+            String how = withPickaxe ? "with a pickaxe: " : "with a bare hand: ";
+            TileEnchanter tile = enchanter(test);
+            tile.setItem(TileEnchanter.SLOT_TOOL, new ItemStack(Items.DIAMOND_SWORD));
+            tile.setItem(TileEnchanter.SLOT_WAND, fullWand(test));
+            player.setItemInHand(InteractionHand.MAIN_HAND, withPickaxe ? new ItemStack(Items.IRON_PICKAXE) : ItemStack.EMPTY);
+
+            test.assertTrue(player.gameMode.destroyBlock(absolute), how + "the block breaks");
+            test.assertTrue(test.getLevel().getBlockState(absolute).isAir(), how + "and is gone");
+            List<ItemEntity> drops = dropsAround(test, ENCHANTER);
+            test.assertTrue(dropped(drops, stack -> stack.is(Items.DIAMOND_SWORD)), how + "the tool fell out of the table");
+            test.assertTrue(dropped(drops, WandHelper::isWand), how + "the wand fell out of the table");
+            test.assertTrue(dropped(drops, stack -> stack.is(enchanterItem)) == withPickaxe,
+                    how + "the block " + (withPickaxe ? "drops itself" : "needs a pickaxe to drop"));
+            drops.forEach(ItemEntity::discard);
+        }
+        finish(test, player);
+    }
+
+    // ---- the fake player of the Animation Tablet ----------------------------------------------------------------------
+
+    private static TinkererFakePlayer fakePlayer(GameTestHelper test, ItemStack held) {
+        TinkererFakePlayer fake = new TinkererFakePlayer(test.getLevel(), new GameProfile(UUID.randomUUID(), "[TTEnchantTest]"));
+        Vec3 at = test.absoluteVec(new Vec3(3.5, 1.0, 3.5));
+        fake.placeAt(at.x, at.y, at.z, 0F, 0F);
+        fake.getInventory().setItem(0, held);
+        fake.getInventory().selected = 0;
+        return fake;
+    }
+
+    /**
+     * The dig speed of a player that is never ticked: the owner of the fake player (the Animation Tablet) calls
+     * {@code BreakSpeedControl.updateFor(player, target)} before it asks {@code getDestroyProgress}, as the 1.7.10 event
+     * fired inside that call. Dirt goes at once with Disintegrate, cobblestone does not go at all.
+     */
+    public static void aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor(GameTestHelper test) {
+        floor(test);
+        BlockPos dirt = new BlockPos(3, 1, 2);
+        BlockPos stone = new BlockPos(5, 1, 2);
+        test.setBlock(dirt, Blocks.DIRT);
+        test.setBlock(stone, Blocks.COBBLESTONE);
+        TinkererFakePlayer fake = fakePlayer(test, enchanted(test, new ItemStack(Items.DIAMOND_SHOVEL), ModEnchantments.desintegrate, 1));
+        BlockState dirtState = test.getLevel().getBlockState(test.absolutePos(dirt));
+        BlockState stoneState = test.getLevel().getBlockState(test.absolutePos(stone));
+
+        float plain = dirtState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(dirt));
+        test.assertTrue(plain < 1F, "without the call the shovel digs dirt at its plain speed: " + plain);
+
+        BreakSpeedControl.updateFor(fake, test.absolutePos(dirt));
+        test.assertTrue(dirtState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(dirt)) >= 1F,
+                "with the call the dirt goes in one tick: " + dirtState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(dirt)));
+        BreakSpeedControl.updateFor(fake, test.absolutePos(stone));
+        test.assertTrue(stoneState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(stone)) == 0F, "cobblestone is not for Disintegrate");
+        test.succeed();
+    }
+
+    /**
+     * The attack of a fake player: {@code TinkererFakePlayer.attackEntity} is what the Animation Tablet calls, and in
+     * 1.7.10 the {@code LivingHurtEvent} multiplied its damage like a player's. Valiance V below half health is 1.5 times.
+     *
+     * <p>This check FAILS until the owner of {@code TinkererFakePlayer} brackets its {@code attack} with
+     * {@code AttackBoost.beforeAttack/afterAttack} (docs/api-requests/Enchantments.md, section 5); its wrapper is not
+     * "required" for that reason.</p>
+     */
+    public static void aFakePlayerAttackGetsTheEnchantmentsOfItsSword(GameTestHelper test) {
+        floor(test);
+        TinkererFakePlayer fake = fakePlayer(test, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+        Pig pig = toughPig(test, new Vec3(3, 1, 2));
+        fake.setHealth(5F);
+        fake.refreshHeldItemModifiers();
+        double base = fake.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        test.assertTrue(base > 1D, "the sword is in the attack damage of the fake player: " + base);
+
+        float before = pig.getHealth();
+        fake.attackEntity(pig);
+        float dealt = before - pig.getHealth();
+        test.assertTrue(Math.abs(dealt - base * 1.5D) < 0.01D, "Valiance V multiplies the blow of the fake player by 1.5: the pig took "
+                + dealt + " of " + base);
+        test.assertTrue(!fake.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "and the attack is disarmed again");
+        test.succeed();
     }
 
     public static void everyHandlerIsRegisteredOnce(GameTestHelper test) {

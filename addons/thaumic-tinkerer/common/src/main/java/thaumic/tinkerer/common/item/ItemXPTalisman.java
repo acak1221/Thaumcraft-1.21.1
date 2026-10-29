@@ -16,6 +16,7 @@ package thaumic.tinkerer.common.item;
 import java.util.List;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -130,9 +131,73 @@ public class ItemXPTalisman extends Item implements IBauble, ITTinkererRegistera
         return InteractionResultHolder.pass(stack);
     }
 
-    private static void consumeXPOrb(Level level, ExperienceOrb orb) {
+    /**
+     * The orbs one entity stands for. 1.21.1 merges the orbs of the same value that lie close together into one entity that
+     * carries a count ({@code ExperienceOrb.count}, private, saved as {@code Count}); 1.7.10 had one entity per orb. The
+     * count is not sent to the client, which therefore sees one orb.
+     */
+    public static int orbCount(ExperienceOrb orb) {
+        CompoundTag tag = new CompoundTag();
+        orb.addAdditionalSaveData(tag);
+        return Math.max(1, tag.getInt("Count"));
+    }
+
+    /**
+     * The running totals of one pass over the orbs near the wearer: the variables {@code xpToAdd} and {@code maxXP} of the
+     * 1.7.10 loop, with its arithmetic quirk kept (after every orb {@code maxXP} loses the <em>whole</em> running total, not
+     * just the orb, so the pass can end early). A 1.21.1 entity that stands for {@code count} orbs is offered as {@code count}
+     * orbs of 1.7.10, one after the other, so the result is that of {@code count} separate entities.
+     */
+    public static final class Pass {
+        /** The points taken so far. */
+        public int xpToAdd;
+        /** The room that is left, as the quirk computes it. */
+        public int maxXP;
+        /** True when the room is used up and the pass ends. */
+        public boolean full;
+
+        public Pass(int maxXP) {
+            this.maxXP = maxXP;
+        }
+
+        /** Offers an entity of {@code count} orbs of {@code value} points each; returns how many of the orbs are taken. */
+        public int offer(int value, int count) {
+            int taken = 0;
+            for (int unit = 0; unit < count; unit++) {
+                boolean fits = xpToAdd + value <= maxXP;
+                if (fits) {
+                    xpToAdd += value;
+                    taken++;
+                } else if (xpToAdd == 0) {
+                    break; // nothing changes from here on: maxXP stays, and the next orb would not fit either
+                }
+
+                maxXP -= xpToAdd;
+
+                if (maxXP <= 0) {
+                    full = true;
+                    break;
+                }
+            }
+            return taken;
+        }
+    }
+
+    /**
+     * Takes {@code taken} of the {@code count} orbs the entity stands for: the entity disappears when all of them are taken,
+     * else it keeps the rest. The count has no setter, so it goes through the entity's own save and load of its data (value,
+     * age and health are written back unchanged).
+     */
+    private static void consumeXPOrb(Level level, ExperienceOrb orb, int taken, int count) {
         if (!level.isClientSide) {
-            orb.discard();
+            if (taken >= count) {
+                orb.discard();
+            } else {
+                CompoundTag tag = new CompoundTag();
+                orb.addAdditionalSaveData(tag);
+                tag.putInt("Count", count - taken);
+                orb.readAdditionalSaveData(tag);
+            }
             BasicItemSupport.playThaumcraftSound(level, orb, ThaumcraftSoundIds.ZAP, orb.getValue() / 10F, 1F);
         } else {
             // 1.7.10: a green wisp of the size xp / 5 (Thaumcraft's particle engine is not API: a green dust particle)
@@ -203,7 +268,6 @@ public class ItemXPTalisman extends Item implements IBauble, ITTinkererRegistera
         if (!isAbsorbing(stack)) return;
 
         int currentXP = getXP(stack);
-        int xpToAdd = 0;
         int maxXP = MAX_XP - currentXP; // Max, to prevent overflow.
         if (maxXP <= 0) {
             if (!level.isClientSide) setAbsorbing(stack, false);
@@ -214,21 +278,16 @@ public class ItemXPTalisman extends Item implements IBauble, ITTinkererRegistera
                 wearer.getX() + RANGE, wearer.getY() + RANGE, wearer.getZ() + RANGE);
         List<ExperienceOrb> orbs = level.getEntitiesOfClass(ExperienceOrb.class, boundingBox);
 
+        Pass pass = new Pass(maxXP);
         for (ExperienceOrb orb : orbs) {
-            if (!orb.isRemoved()) {
-                int xp = orb.getValue();
-                if (xpToAdd + xp <= maxXP) {
-                    xpToAdd += xp;
-                    consumeXPOrb(level, orb);
-                }
-
-                maxXP -= xpToAdd;
-
-                if (maxXP <= 0) break;
-            }
+            if (orb.isRemoved()) continue;
+            int count = orbCount(orb);
+            int taken = pass.offer(orb.getValue(), count);
+            if (taken > 0) consumeXPOrb(level, orb, taken, count);
+            if (pass.full) break;
         }
         if (!level.isClientSide) {
-            setXP(stack, Math.min(MAX_XP, currentXP + xpToAdd));
+            setXP(stack, Math.min(MAX_XP, currentXP + pass.xpToAdd));
         }
     }
 }

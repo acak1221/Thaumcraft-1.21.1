@@ -136,6 +136,11 @@ class EnchantmentResourcesTest {
             assertEquals("enchantment." + NS + "." + name, ((net.minecraft.network.chat.contents.TranslatableContents)
                     enchantment.description().getContents()).getKey(), name);
             assertTrue(enchantment.effects().isEmpty(), name + ": the behaviour is in Java");
+            // EnchantmentMod(id, max, type) called super(id, 0, type): weight 0 is nothing at the 1.7.10 anvil (nothing per level
+            // from a tool, one per level from a book, which is what max(1, 0 / 2) of 1.21.1 gives for an anvil cost of 0)
+            assertEquals(0, enchantment.definition().anvilCost(), name + " anvil cost");
+            // without primary items the Enchanter (isPrimaryItem) asks the item tag, like an anvil (isSupportedItem)
+            assertTrue(enchantment.definition().primaryItems().isEmpty(), name + " has no primary items");
         }
     }
 
@@ -223,6 +228,42 @@ class EnchantmentResourcesTest {
             Set<String> values = values("/data/" + NS + "/tags/item/enchantable/" + digger + ".json");
             assertTrue(values.containsAll(List.of("#minecraft:pickaxes", "#minecraft:shovels", "#minecraft:axes")), digger);
         }
+    }
+
+    @Test
+    void theTagsHoldTheThaumcraftItemsOfTheTypesTheOriginalAccepted() {
+        // EnumEnchantmentType.weapon was ItemSword and digger was ItemTool: the Crimson Blade is a sword and the Primal Crusher a
+        // tool of Thaumcraft that no vanilla tag lists
+        for (String sword : List.of("vampirism", "final_strike", "valiance", "focused_strike", "dispersed_strike")) {
+            assertTrue(values("/data/" + NS + "/tags/item/enchantable/" + sword + ".json").contains("thaumcraft:crimson_sword"), sword);
+        }
+        for (String digger : List.of("shatter", "tunnel", "desintegrate", "auto_smelt")) {
+            assertTrue(values("/data/" + NS + "/tags/item/enchantable/" + digger + ".json").contains("thaumcraft:primal_crusher"), digger);
+        }
+        // armor_legs / armor_feet was any ItemArmor of the slot: the legs and boots of the Crimson Cult are in no vanilla tag
+        for (String legs : List.of("ascent_boost", "pounce")) {
+            assertTrue(values("/data/" + NS + "/tags/item/enchantable/" + legs + ".json").containsAll(
+                    List.of("thaumcraft:cultist_robe_legs", "thaumcraft:cultist_plate_legs", "thaumcraft:cultist_leader_legs")), legs);
+        }
+        for (String boots : List.of("slow_fall", "shockwave")) {
+            assertTrue(values("/data/" + NS + "/tags/item/enchantable/" + boots + ".json").contains("thaumcraft:cultist_boots"), boots);
+        }
+    }
+
+    @Test
+    void theVanillaEnchantableTagsHoldTheBladeAndTheCrusherForTheEnchantmentsOfTheGame() {
+        // the Cursed Spirit's Blade (an ItemSword with Thaumium enchantability) took every vanilla weapon enchantment; it is in
+        // none of the tags of the sword items (Vampirism must not go on it), so the tags of the enchantments list it
+        for (String tag : List.of("sword", "sharp_weapon", "fire_aspect", "durability")) {
+            Set<String> values = values("/data/minecraft/tags/item/enchantable/" + tag + ".json");
+            assertTrue(values.contains(NS + ":blood_sword"), tag + " lists the Cursed Spirit's Blade");
+            assertTrue(values.contains("thaumcraft:crimson_sword"), tag + " lists the Crimson Blade");
+        }
+        for (String tag : List.of("mining", "mining_loot", "durability")) {
+            assertTrue(values("/data/minecraft/tags/item/enchantable/" + tag + ".json").contains("thaumcraft:primal_crusher"), tag);
+        }
+        assertFalse(values("/data/minecraft/tags/item/swords.json").contains(NS + ":blood_sword"),
+                "the blade stays out of #minecraft:swords, which Vampirism's tag holds");
     }
 
     // ---- exclusive sets agree with the rules --------------------------------------------------------------------

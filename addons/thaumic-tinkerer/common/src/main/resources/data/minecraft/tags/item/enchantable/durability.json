@@ -8,6 +8,18 @@
     {
       "id": "thaumictinkerer:cleansing_talisman",
       "required": false
+    },
+    {
+      "id": "thaumictinkerer:blood_sword",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:crimson_sword",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:primal_crusher",
+      "required": false
     }
   ]
 }

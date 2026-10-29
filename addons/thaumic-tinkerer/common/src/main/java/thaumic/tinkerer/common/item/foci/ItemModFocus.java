@@ -102,7 +102,8 @@ public abstract class ItemModFocus extends ItemFocusBasic implements ITTinkererR
      * The block the player looks at, the replacement of the {@code MovingObjectPosition} that 1.7.10 passed to the focus.
      *
      * @param range      the length of the ray
-     * @param fluids     true when a fluid counts as a hit (the ray of the wand); false looks through it
+     * @param fluids     true when a fluid <em>source</em> counts as a hit (the ray of the wand: 1.7.10's {@code rayTraceBlocks}
+     *                   with liquids stopped only on a source block, never on flowing water or lava); false looks through fluids
      * @param collidable true when only blocks with a collision box count (the ray of {@code BlockUtils.getTargetBlock}, which
      *                   looks through grass and flowers)
      * @return a hit whose {@code getType()} is {@code MISS} when nothing was found
@@ -112,7 +113,7 @@ public abstract class ItemModFocus extends ItemFocusBasic implements ITTinkererR
         Vec3 end = eye.add(player.getViewVector(1.0F).scale(range));
         return player.level().clip(new ClipContext(eye, end,
                 collidable ? ClipContext.Block.COLLIDER : ClipContext.Block.OUTLINE,
-                fluids ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, player));
+                fluids ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE, player));
     }
 
     /** {@code ItemApi.getItem(field, meta)}: a stack of the Thaumcraft item the 1.7.10 field and metadata named. */

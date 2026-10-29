@@ -26,6 +26,10 @@
     {
       "id": "thaumictinkerer:ichorcloth_boots",
       "required": false
+    },
+    {
+      "id": "thaumcraft:cultist_boots",
+      "required": false
     }
   ]
 }

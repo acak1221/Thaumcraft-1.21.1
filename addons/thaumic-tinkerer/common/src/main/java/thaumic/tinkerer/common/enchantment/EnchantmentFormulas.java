@@ -68,10 +68,14 @@ public final class EnchantmentFormulas {
     public record Attack(int pounce, boolean pounceInAir, int finalStrike, int finalStrikeRoll, int valiance, float health,
             float maxHealth, int focused, int dispersed, int successiveStrikes) {}
 
-    /** The damage of the hit after the enchantments, in the order of the original: Pounce, Final Strike, Valiance, Focused, Dispersed. */
+    /**
+     * The damage of the hit after the enchantments, in the order of the original: Pounce, Final Strike, Valiance, Focused,
+     * Dispersed. The casts to float are the narrowing that the compound assignments ({@code amount *= 1.25D}) of the original
+     * did on their own: the arithmetic is done in double and cut to float after every step, deliberately.
+     */
     public static float modifyDamage(float amount, Attack attack) {
         if (attack.pounce() > 0 && attack.pounceInAir()) {
-            amount *= 1 + (.25 * attack.pounce());
+            amount = (float) (amount * (1 + (.25 * attack.pounce())));
         }
 
         if (attack.finalStrike() > 0 && attack.finalStrike() > attack.finalStrikeRoll()) {
@@ -79,17 +83,17 @@ public final class EnchantmentFormulas {
         }
 
         if (attack.valiance() > 0 && attack.health() / attack.maxHealth() < .5F) {
-            amount *= (1 + .1 * attack.valiance());
+            amount = (float) (amount * (1 + .1 * attack.valiance()));
         }
 
         int successiveStrikes = attack.successiveStrikes();
         if (attack.focused() > 0) {
             amount /= 2;
-            amount += (.5 * Math.max(successiveStrikes, 5) * amount * attack.focused());
+            amount = (float) (amount + (.5 * Math.max(successiveStrikes, 5) * amount * attack.focused()));
         }
         if (attack.dispersed() > 0) {
-            amount *= 1 + 0.6 * attack.dispersed() + (successiveStrikes / 5);
-            amount /= 1 + 0.25 * attack.dispersed() + (successiveStrikes * 2.5);
+            amount = (float) (amount * (1 + 0.6 * attack.dispersed() + (successiveStrikes / 5)));
+            amount = (float) (amount / (1 + 0.25 * attack.dispersed() + (successiveStrikes * 2.5)));
         }
         return amount;
     }

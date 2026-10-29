@@ -15,25 +15,16 @@ is either answered by the API or a named stand-in with the loss written down. Pr
 | A5 `isMirrorsAllowed()` | `ThaumcraftApi.isMirrorsAllowed()` | the research of Distortion, Dislocation, Ender Rift, Mending and the recipe of the Ender Rift |
 | portable-hole blacklist | block tag `#thaumcraft:portable_hole_blacklist` | Dislocation |
 | sounds | `ThaumcraftSoundIds.WAND`, `WIND` | all |
-| burst of sparkles over a block | `ThaumcraftFX.blockSparkle(ServerLevel, BlockPos, rgb)` | Dislocation (replaces `burst`) |
+| the client particles of the foci (F1, answered) | `thaumcraft.api.client.ThaumcraftClientFX.sparkle/smokeSpiral/wisp/beam` and the server twin `ThaumcraftFX.burst` | Mending, Telekinesis, Distortion (sparkle), Uprising (smokeSpiral), Efreet's Flame (wisp, beam), Dislocation (burst x8) |
 | ingredients by the 1.7.10 field names | `ItemApi.getItem/getBlock` and `legacy_ids.json` (`itemShard:0/4`, `itemResource:1/6/10`, `blockCosmeticSolid:3`, `blockMirror:0`, `itemFocusPech/Fire/Excavation/PortableHole`) | the recipes |
 
-## 1. Client particles of the foci (F1 = A8, P3)
+## 1. Client particles of the foci (F1 = A8, P3): answered, nothing is requested
 
-**Need.** 1.7.10 spawned, from the focus code on the client, `Thaumcraft.proxy.sparkle(x, y, z, type)` (Mending around the player,
-Telekinesis on every pulled item, Distortion ×6 on a shifted projectile), `smokeSpiral(world, x, y, z, radius, angle, y, rgb)` (Uprising),
-`wispFX2(world, x, y, z, size, type, shrink, gravity, gravityValue)` (Efreet's Flame) and `beamCont(world, player, x, y, z, 2, 0xFF0000, ...)`
-(Efreet's Flame, a continuous beam from the wand).
-
-**What the add-on does today.** `FociFx` adds vanilla particles on the client with `Level.addParticle`: coloured dust and `END_ROD` for
-the sparkles, dust on a circle for the spiral, `FLAME` that rises for the wisps, red dust along the line for the beam. It works and
-is cheap, but it is not the look of the original.
-
-**Proposed.** `thaumcraft.api.client.ThaumcraftClientFX` (client only), signatures in 1.21.1 types:
-`void sparkle(Level level, double x, double y, double z, int colorIndex)`, `void smokeSpiral(Level level, double x, double y, double z, float radius, int angle, int minY, int rgb)`,
-`void wisp(Level level, double x, double y, double z, float size, int type, boolean shrink, boolean gravity, float gravityValue)`,
-`void beam(Level level, Entity source, Vec3 target, int rgb, boolean continuous)`. Backing: `client/fx/ParticleEngine`, `Tc4Particle`
-and the beam renderer of the mod.
+The first version of the group drew vanilla stand-ins because the API had no client FX facade. `thaumcraft.api.client.ThaumcraftClientFX`
+now has the twins of the four proxy calls the originals made (`sparkle(level, x, y, z, type)`, `smokeSpiral(level, x, y, z, radius, start,
+minY, rgb)`, `wisp(level, x, y, z, size, type, shrink, noClip, gravity)`, `beam(level, player, to, rgb, type, reverse, endScale, impact)`)
+and `ThaumcraftFX.burst` is the server twin of the Dislocation's `burst`. `FociFx` calls them with the arguments of 1.7.10 (listed in
+`docs/deviations/Foci.md`). Open for the lead: nothing; unverified: how they look in a client.
 
 ## 2. The dial of the wand (F2, P3)
 
@@ -45,30 +36,25 @@ dial to the bottom finds the readout above the hotbar corner where nothing else 
 
 **Proposed.** `ThaumcraftApi.isWandDialAtBottom()` (client side, `false` on a server), backed by `thaumcraft.common.config.Config.dialBottom`.
 
-## 3. The server's "flying is not enabled" check (F3, P1 for servers, loader module)
+## 3. The server's "flying is not enabled" check (F3, P2 for servers: works today, the request removes a reflection)
 
 **Need.** The Focus of Uprising launches the player along his sight on every cast, and 1.7.10 reset
 `playerNetServerHandler.floatingTickCount` on each cast so that the server never counted the player as floating. In 1.21.1 the counter is
-the private `ServerGamePacketListenerImpl.aboveGroundTickCount` (and `clientIsFloating` decides whether it counts); a player who keeps
-climbing for more than four seconds on a server with `allow-flight=false` is disconnected.
+the private int `ServerGamePacketListenerImpl.aboveGroundTickCount` (and `clientIsFloating` decides whether it counts); a player who keeps
+climbing for more than four seconds on a server with `allow-flight=false` is disconnected ("Flying is not enabled on this server").
 
-**What the add-on does today.** `FociHooks.floatingTickReset` (`Consumer<ServerPlayer>`) is called on every server-side cast and does
-nothing but log one warning until a loader module assigns it. Common code cannot do more: there is no Architectury accessor for the
-field.
+**What the add-on does today.** `FociHooks.resetFloatingTicks` writes the field by reflection on the connection of the player, under its
+official name `aboveGroundTickCount` (NeoForge, development) or its intermediary name `field_14138` (Fabric in production), once per cast on the
+server. A GameTest shows it clears the counter of a real connection; if neither name exists (another Minecraft version) the first cast logs a
+warning. This is a stop-gap: it works in the add-on alone, without a mixin (the add-on has no mixin config, and `TinkererApiOnlyTest`
+forbids importing the mod's accessor) and without the lead.
 
-**Proposed (to the lead, in the loader modules, not in the API).** An accessor mixin per loader:
-
-```java
-@Mixin(ServerGamePacketListenerImpl.class)
-public interface ServerGamePacketListenerAccessor {
-    @Accessor("aboveGroundTickCount") void tt$setAboveGroundTickCount(int ticks);
-}
-```
-
-and in `ThaumicTinkererFabric.onInitialize()` (and later the NeoForge entry point):
-`FociHooks.setFloatingTickReset(player -> ((ServerGamePacketListenerAccessor) player.connection).tt$setAboveGroundTickCount(0));`.
-The same accessor serves the awakened armour of KamiGear if it ever needs it. (Alternatively the mod could expose a
-`ThaumcraftApiHelper.resetFlightKick(ServerPlayer)` for every add-on that moves players by impulse.)
+**Proposed (to the lead).** The mod already has the accessor mixin `thaumcraft.common.mixin.ServerGamePacketListenerFloatAccess`
+(`thaumcraft$setAboveGroundTickCount`, registered in `thaumcraft-common.mixins.json`; the Boots of the Traveller and the Elemental Sword use it).
+Expose it as `ThaumcraftApiHelper.resetFlightKick(ServerPlayer)` (a no-op for a fake player without a connection) for every add-on that
+moves players by impulse, then `ItemFocusFlight` calls it and `FociHooks` goes (or `ThaumicTinkererFabric.onInitialize` calls
+`FociHooks.setFloatingTickReset(ThaumcraftApiHelper::resetFlightKick)` in the meantime). Heads-up, not a request of this group:
+`thaumcraft.common.lib.utils.Utils.resetFloatCounter` writes the handler's `tickCount`, not `aboveGroundTickCount`, so it must not be used for this.
 
 ## 4. What the wand's ray hit (F4, P3, documentation)
 

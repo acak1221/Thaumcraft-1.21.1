@@ -29,6 +29,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
@@ -41,7 +42,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jetbrains.annotations.Nullable;
 import thaumcraft.api.ThaumcraftApi;
-import thaumcraft.api.ThaumcraftFX;
 import thaumcraft.api.ThaumcraftSoundIds;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
@@ -66,7 +66,8 @@ import thaumic.tinkerer.common.research.TTResearchItem;
  * <p>The cost is 5 Perditio, 5 Ordo and 1 Terra for a block, five times that for a block with a block entity, and
  * 100 Perditio, 100 Ordo and 50 Terra for a spawner. Blocks of the piston family, those on the blacklist of the config
  * ({@code focusOfDislocationBlacklist}), those of Thaumcraft's portable-hole blacklist
- * ({@code #thaumcraft:portable_hole_blacklist}) and those that cannot be broken cannot be taken.</p>
+ * ({@code #thaumcraft:portable_hole_blacklist}), those that cannot be broken, flowing water and lava, and the halves of
+ * two-part blocks ({@link #isTwoPart}) cannot be taken.</p>
  *
  * <p>Where the 1.21.1 block system differs from 1.7.10: the block's metadata is its state; the contents of a container are
  * not dropped when the block is taken (the block entity is removed first, as in 1.7.10); a block is placed only where the
@@ -132,17 +133,34 @@ public class ItemFocusDislocation extends ItemModFocus {
                 tag -> state.is(TagKey.create(Registries.BLOCK, tag)));
     }
 
+    /**
+     * A state that is one part of a block of two: the halves of a tall plant, a door, a bed. Placing it builds the other half
+     * (1.21.1 {@code DoublePlantBlock.setPlacedBy} and {@code BedBlock.setPlacedBy} set it unconditionally, over whatever
+     * stands there), and 1.7.10 could not carry it either: a half without its other half dropped as an item at once. So the
+     * focus does not take such a block (the doors and beds are on Thaumcraft's blacklist as well, but a data pack can edit that tag).
+     */
+    public static boolean isTwoPart(BlockState state) {
+        return state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) || state.hasProperty(BlockStateProperties.BED_PART);
+    }
+
+    /** A flowing fluid (a {@link LiquidBlock} that is not a source): 1.7.10's ray stopped only on sources, so the focus takes only those. */
+    private static boolean isFlowingFluid(BlockState state) {
+        return state.getBlock() instanceof LiquidBlock && !state.getFluidState().isSource();
+    }
+
     /** Whether this block may be taken (everything the 1.7.10 condition checked except the vis). */
     public static boolean canTake(BlockGetter level, BlockPos pos, BlockState state) {
         return !state.isAir() && !state.is(Blocks.MOVING_PISTON) && !state.is(Blocks.PISTON_HEAD)
+                && !isTwoPart(state) && !isFlowingFluid(state)
                 && isBlockAllowed(state) && !state.is(PORTABLE_HOLE_BLACKLIST)
                 && state.getDestroySpeed(level, pos) != -1.0F;
     }
 
     /** Whether the carried block can be put at the target: replaceable, able to stand there, free of entities, not protected. */
     public static boolean canPlaceAt(Level level, BlockPos target, BlockState state, Player player) {
-        return level.isInWorldBounds(target) && level.getBlockState(target).canBeReplaced() && state.canSurvive(level, target)
-                && level.isUnobstructed(state, target, CollisionContext.of(player)) && level.mayInteract(player, target);
+        return !isTwoPart(state) && level.isInWorldBounds(target) && level.getBlockState(target).canBeReplaced()
+                && state.canSurvive(level, target) && level.isUnobstructed(state, target, CollisionContext.of(player))
+                && level.mayInteract(player, target);
     }
 
     /** A chest that was one half of a double chest is a single chest in the focus. */
@@ -222,6 +240,12 @@ public class ItemFocusDislocation extends ItemModFocus {
     private void place(ItemStack wand, ItemStack focus, Level level, Player player, InteractionHand hand, BlockPos target,
             DislocationData carried) {
         BlockState state = carried.state();
+        if (isTwoPart(state)) {
+            // A load that no cast of this focus makes (a command or a data pack made it): placing it would build its other half
+            // over whatever stands above, and it could never be put down anywhere, so the focus would stay full for good.
+            if (!level.isClientSide) clearPickedBlock(wand, focus);
+            return;
+        }
         if (!canPlaceAt(level, target, state, player)) return;
 
         if (!level.isClientSide) {
@@ -230,7 +254,7 @@ public class ItemFocusDislocation extends ItemModFocus {
             placed.getBlock().setPlacedBy(level, target, placed, player, new ItemStack(placed.getBlock()));
             restoreTile(level, target, carried);
             clearPickedBlock(wand, focus);
-            ThaumcraftFX.blockSparkle((ServerLevel) level, target, ThaumcraftFX.RANDOM_GREY);
+            FociFx.dislocationBursts((ServerLevel) level, target, FociFx.PLACE_BURST_LIFT);
         } else {
             player.swing(hand);
         }
@@ -283,7 +307,7 @@ public class ItemFocusDislocation extends ItemModFocus {
             level.removeBlockEntity(pos);
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
             storePickedBlock(wand, focus, normalize(state), saved);
-            ThaumcraftFX.blockSparkle((ServerLevel) level, pos, ThaumcraftFX.RANDOM_GREY);
+            FociFx.dislocationBursts((ServerLevel) level, pos, 0F);
         } else {
             // The client only predicts: the server decides, takes the block and sends the changed wand back.
             if (!WandHelper.consumeAllVis(wand, player, cost, true, false)) return;

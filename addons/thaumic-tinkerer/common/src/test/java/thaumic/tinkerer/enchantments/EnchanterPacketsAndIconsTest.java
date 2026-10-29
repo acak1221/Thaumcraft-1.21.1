@@ -117,6 +117,18 @@ class EnchanterPacketsAndIconsTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void clearForgetsTheSizesSoAResourcePackWithOtherIconsIsReadAgain() throws ReflectiveOperationException {
+        java.lang.reflect.Field field = EnchantIcons.class.getDeclaredField("SIZES");
+        field.setAccessible(true);
+        java.util.Map<ResourceLocation, Integer> sizes = (java.util.Map<ResourceLocation, Integer>) field.get(null);
+        sizes.put(ResourceLocation.parse("thaumictinkerer:textures/enchant/pounce.png"), 32);
+        sizes.put(ResourceLocation.parse("thaumictinkerer:textures/enchant/missing.png"), 32);
+        EnchantIcons.clear();
+        assertTrue(sizes.isEmpty(), "the sizes and the fallbacks are gone, the next draw reads the PNG again");
+    }
+
+    @Test
     void anythingThatIsNoPngHeaderGivesTheDefaultSize() {
         assertEquals(32, EnchantIcons.pngWidth(new byte[0]));
         assertEquals(32, EnchantIcons.pngWidth(new byte[24]));

@@ -17,11 +17,7 @@ import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -81,11 +77,8 @@ public class BonemealEventHandler {
         infusedGrain.growCrops(world, pos, state);
         damageHoe(hoeOfGrowth, player);
         ThaumcraftFX.blockSparkle(server, pos, 0xFFFFFF);
-        SoundEvent wand = BuiltInRegistries.SOUND_EVENT.getOptional(ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand")).orElse(null);
-        if (wand != null) {
-            world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, wand, SoundSource.PLAYERS, 0.75F,
-                    0.9F + world.random.nextFloat() * 0.2F);
-        }
+        SimpleBlockFx.wandSound(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0.75F,
+                0.9F + world.random.nextFloat() * 0.2F);
         return EventResult.pass();
     }
 

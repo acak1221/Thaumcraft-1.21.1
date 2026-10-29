@@ -49,8 +49,8 @@ public class ItemFocusHeal extends ItemModFocus {
     private static final Map<UUID, Integer> SERVER_DATA = new ConcurrentHashMap<>();
     private static final Map<UUID, Integer> CLIENT_DATA = new ConcurrentHashMap<>();
 
-    /** The colour of the sparkles around the healed player. */
-    private static final int SPARKLE_COLOR = 0xFD00D6;
+    /** The sparkles around the healed player are the violet ones of the API ({@code sparkle(x, y, z, 0)}). */
+    private static final int SPARKLE_TYPE = FociFx.SPARKLE_VIOLET;
 
     public ItemFocusHeal(Item.Properties properties) {
         super(properties);
@@ -94,7 +94,7 @@ public class ItemFocusHeal extends ItemModFocus {
         Level level = player.level();
         int progress = data(level).merge(player.getUUID(), 1, Integer::sum);
 
-        FociFx.sparkleAround(level, player, SPARKLE_COLOR);
+        FociFx.sparkleAround(level, player, SPARKLE_TYPE);
 
         if (progress >= requiredProgress(potency)) {
             data(level).put(player.getUUID(), 0);

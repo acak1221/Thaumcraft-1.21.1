@@ -1,3 +1,8 @@
+/**
+ * This file is new in the port of Thaumic Tinkerer to Minecraft 1.21.1 for Thaumcraft 4 Reload (no 1.7.10
+ * counterpart); it is distributed under the same licence as the add-on (Creative Commons
+ * Attribution-NonCommercial-ShareAlike 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.simpleblocks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

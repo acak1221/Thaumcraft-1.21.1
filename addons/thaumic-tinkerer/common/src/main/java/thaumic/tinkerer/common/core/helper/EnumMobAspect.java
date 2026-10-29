@@ -56,6 +56,7 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.Level;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.entities.ThaumcraftEntities;
 
 /**
  * The mobs the Tablet of Necromancy can summon: three aspects (an unordered set of three soul aspects on the pedestals)
@@ -116,11 +117,12 @@ public enum EnumMobAspect {
     },
     Ghast("minecraft:ghast", new Aspect[] { Aspect.FIRE, Aspect.FLIGHT, Aspect.FLIGHT }, 0.2f, 0.6f,
             e -> e instanceof Ghast),
-    Firebat("thaumcraft:firebat", new Aspect[] { Aspect.FLIGHT, Aspect.FIRE, Aspect.MAGIC }, 1.9f, 0f,
-            e -> isType(e, "thaumcraft:firebat")),
+    Firebat(ThaumcraftEntities.FIREBAT.location().toString(), new Aspect[] { Aspect.FLIGHT, Aspect.FIRE, Aspect.MAGIC }, 1.9f,
+            0f, e -> ThaumcraftEntities.is(e, ThaumcraftEntities.FIREBAT)),
     /// Must be before Zombie because the brainy zombies of Thaumcraft extend Zombie
-    BrainyZombie("thaumcraft:brainy_zombie", new Aspect[] { Aspect.MAGIC, Aspect.UNDEAD, Aspect.FLESH }, 0.8f, 0,
-            e -> isType(e, "thaumcraft:brainy_zombie") || isType(e, "thaumcraft:giant_brainy_zombie")),
+    BrainyZombie(ThaumcraftEntities.BRAINY_ZOMBIE.location().toString(), new Aspect[] { Aspect.MAGIC, Aspect.UNDEAD, Aspect.FLESH },
+            0.8f, 0, e -> ThaumcraftEntities.is(e, ThaumcraftEntities.BRAINY_ZOMBIE)
+                    || ThaumcraftEntities.is(e, ThaumcraftEntities.GIANT_BRAINY_ZOMBIE)),
     Zombie("minecraft:zombie", new Aspect[] { Aspect.FLESH, Aspect.FLESH, Aspect.UNDEAD }, 0.8f, 0,
             e -> e instanceof Zombie),
     /** Plain skeletons only: 1.7.10 skeletons had type 0 (skeleton) and 1 (wither skeleton). */
@@ -154,8 +156,8 @@ public enum EnumMobAspect {
             e -> e instanceof Silverfish),
     Enderman("minecraft:enderman", new Aspect[] { Aspect.ELDRITCH, Aspect.ELDRITCH, Aspect.MAN }, 0.7f, 0,
             e -> e instanceof EnderMan),
-    Wisp("thaumcraft:wisp", new Aspect[] { Aspect.AIR, Aspect.MAGIC, Aspect.MAGIC }, 1.0f, 0,
-            e -> isType(e, "thaumcraft:wisp"));
+    Wisp(ThaumcraftEntities.WISP.location().toString(), new Aspect[] { Aspect.AIR, Aspect.MAGIC, Aspect.MAGIC }, 1.0f, 0,
+            e -> ThaumcraftEntities.is(e, ThaumcraftEntities.WISP));
 
     private static final Map<String, EnumMobAspect> LOOKUP = new LinkedHashMap<>();
 
@@ -179,10 +181,6 @@ public enum EnumMobAspect {
 
     public static EnumMobAspect get(String name) {
         return LOOKUP.get(name);
-    }
-
-    private static boolean isType(Entity entity, String id) {
-        return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString().equals(id);
     }
 
     private static Mob setSlimeSize(Mob entity, int size) {

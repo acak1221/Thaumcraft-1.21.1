@@ -44,6 +44,7 @@ import thaumic.tinkerer.common.block.tile.TileForcefield;
 import thaumic.tinkerer.common.block.tile.TileInfusedFarmland;
 import thaumic.tinkerer.common.block.tile.TileInfusedGrain;
 import thaumic.tinkerer.common.block.tile.TileWardedSlab;
+import thaumic.tinkerer.common.core.commands.SetTendencyCommand;
 import thaumic.tinkerer.common.core.helper.AspectCropLootManager;
 import thaumic.tinkerer.common.core.helper.BonemealEventHandler;
 import thaumic.tinkerer.common.core.helper.NumericAspectHelper;
@@ -130,6 +131,7 @@ public final class SimpleBlocks implements ContentGroup {
         registerItems();
         PotionEffectHandler.register();
         BonemealEventHandler.register();
+        SetTendencyCommand.register();
         NumericAspectHelper.init();
     }
 
@@ -209,8 +211,9 @@ public final class SimpleBlocks implements ContentGroup {
         }
 
         INFUSED_SEEDS = TTRegistry.item(LibItemNames.INFUSED_SEEDS, () -> new ItemInfusedSeeds(new Item.Properties().rarity(Rarity.RARE)));
-        // 1.7.10 getSubItems: the seeds of every primal aspect
-        for (Aspect primal : new Aspect[] { Aspect.AIR, Aspect.FIRE, Aspect.WATER, Aspect.EARTH, Aspect.ORDER, Aspect.ENTROPY }) {
+        // 1.7.10 getSubItems: the seeds of every primal aspect, in the order of Aspect.getPrimalAspects()
+        // (aer, terra, ignis, aqua, ordo, perditio)
+        for (Aspect primal : Aspect.getPrimalAspects()) {
             TTRegistry.addTabStack(() -> ItemInfusedSeeds.creativeStack(primal));
         }
     }

@@ -78,10 +78,29 @@ public class ItemInfusedPotion extends Item implements ITTinkererRegisterable {
         return variant;
     }
 
-    /** 1.7.10 {@code getItemStackDisplayName}: {@code item.infusedPotion.<Aspect>.name}. */
+    /**
+     * 1.7.10 {@code getItemStackDisplayName}: {@code item.infusedPotion.<Aspect>.name}. It is the description id too, so
+     * whatever asks the item for its name instead of the stack (the statistics screen) finds a key that exists.
+     */
+    @Override
+    public String getDescriptionId() {
+        return "item.infusedPotion." + ASPECTS[variant].getName() + ".name";
+    }
+
+    @Override
+    public String getDescriptionId(ItemStack stack) {
+        return getDescriptionId();
+    }
+
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable("item.infusedPotion." + getAspect(stack).getName() + ".name");
+        return Component.translatable(getDescriptionId());
+    }
+
+    /** 1.7.10 extended {@code ItemPotion}, whose {@code hasEffect} is true while {@code getEffects} is not empty: it glints. */
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
     }
 
     @Override
@@ -136,7 +155,7 @@ public class ItemInfusedPotion extends Item implements ITTinkererRegisterable {
     @Override
     public IRegisterableResearch getResearchItem() {
         if (variant != 0) return null;
-        TTResearchItem research = (TTResearchItem) new TTResearchItem(
+        TTResearchItem research = new TTResearchItem(
                 LibResearch.KEY_POTIONS,
                 new AspectList().add(Aspect.WATER, 5).add(Aspect.ENTROPY, 5),
                 7,

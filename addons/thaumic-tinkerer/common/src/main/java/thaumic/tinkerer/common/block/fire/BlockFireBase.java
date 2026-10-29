@@ -30,7 +30,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,10 +58,16 @@ public abstract class BlockFireBase extends FireBlock implements ITTinkererRegis
         super(properties);
     }
 
-    /** The properties of every imbued fire: the vanilla fire's (light 15, no collision, replaceable, instant break). */
+    /**
+     * The properties of every imbued fire. No collision, replaceable, instant break and random ticks, like {@code BlockFire}
+     * of 1.7.10, whose constructor called {@code setTickRandomly(true)}: a fire that has stopped scheduling itself (age 15)
+     * is still ticked at random, so it burns out when its fuel is gone and is put out by rain. The vanilla fire's light
+     * level 15 and its wood step sound were given to {@code Blocks.fire} when it was registered, not by the constructor of
+     * {@code BlockFire}, and the imbued fires never set either: they give no light and have the default (stone) sound.
+     */
     public static BlockBehaviour.Properties defaultProperties() {
         return BlockBehaviour.Properties.of().mapColor(MapColor.FIRE).replaceable().noCollission().instabreak()
-                .lightLevel(state -> 15).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY).noLootTable();
+                .randomTicks().pushReaction(PushReaction.DESTROY).noLootTable();
     }
 
     // ---- the rules ---------------------------------------------------------------------------------------------
@@ -89,10 +94,19 @@ public abstract class BlockFireBase extends FireBlock implements ITTinkererRegis
         return false;
     }
 
+    /**
+     * 1.7.10 {@code blockExists}: whether the chunk of the cell is loaded. {@code Level.isLoaded} where the reader is a
+     * level; the (deprecated) {@code LevelReader.hasChunkAt} for any other reader, which {@code canSurvive} can be given.
+     */
+    @SuppressWarnings("deprecation")
+    private static boolean isLoaded(LevelReader level, BlockPos pos) {
+        return level instanceof Level real ? real.isLoaded(pos) : level.hasChunkAt(pos);
+    }
+
     public boolean isNeighborTarget(LevelReader level, BlockPos pos) {
         for (Direction direction : Direction.values()) {
             BlockPos target = pos.relative(direction);
-            if (!level.hasChunkAt(target)) continue;
+            if (!isLoaded(level, target)) continue;
 
             if (isTransmutationTarget(level.getBlockState(target))) {
                 return true;
@@ -179,7 +193,7 @@ public abstract class BlockFireBase extends FireBlock implements ITTinkererRegis
         if (rand.nextInt(20) == 0 && (isNeighborTarget(world, pos))) {
             for (final Direction dir : Direction.values()) {
                 final BlockPos target = pos.relative(dir);
-                if (!world.hasChunkAt(target)) continue;
+                if (!world.isLoaded(target)) continue;
                 final BlockState targetState = world.getBlockState(target);
 
                 final FireRules.Rule rule = ruleFor(targetState);
@@ -249,7 +263,7 @@ public abstract class BlockFireBase extends FireBlock implements ITTinkererRegis
     }
 
     private void tryCatchFire(Level world, BlockPos pos, int strength, RandomSource rand, int meta) {
-        if (!world.hasChunkAt(pos)) return;
+        if (!world.isLoaded(pos)) return;
         final int blockFlammability = getBlockFlammability(world, pos);
 
         if (rand.nextInt(strength) >= blockFlammability) {
@@ -275,7 +289,7 @@ public abstract class BlockFireBase extends FireBlock implements ITTinkererRegis
      * can be transmuted, if the cell is empty (a gas counts as empty, as in 1.7.10).
      */
     private int getChanceOfNeighborsEncouragingFire(Level world, BlockPos pos) {
-        if (!world.hasChunkAt(pos) || !BlockGas.isAirLike(world.getBlockState(pos))) {
+        if (!world.isLoaded(pos) || !BlockGas.isAirLike(world.getBlockState(pos))) {
             return 0;
         } else {
             if (isNeighborTarget(world, pos)) {

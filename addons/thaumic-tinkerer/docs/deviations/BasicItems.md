@@ -1,8 +1,9 @@
 # BasicItems: deviations from Thaumic Tinkerer 1.7.10
 
 Group BasicItems: Spellbinding Cloth, Talisman of Remedium, Talisman of Withhold, Tome of Knowledge Sharing, Infused
-Scribing Tools, Helmet of Revealing, the helpers `ExperienceHelper`, `ItemNBTHelper` and `MiscHelper`, and the two client
-handlers `HUDHandler` and `ClientTickHandler`. Specification: the 1.7.10 sources in `/home/user/gtnewhorizons/thaumictinkerer`
+Scribing Tools, Helmet of Revealing, the helpers `ExperienceHelper`, `ItemNBTHelper` and `MiscHelper`, and the client
+handler `ClientTickHandler` (the other one of the two, `HUDHandler`, is the Foci group's `DislocationHUDHandler`, see section 8).
+Specification: the 1.7.10 sources in `/home/user/gtnewhorizons/thaumictinkerer`
 (commit in `NOTICE.md`). Everything not listed here is ported as it was: numbers (35 uses of the cloth, 100 points of the
 talisman, ten for the warp effects, range 3, 1500 points, cost 10, 800 ink, 500 durability, 5% discount), research keys,
 coordinates, aspects, recipes, tooltips, sounds and messages. Requests to the API and to the lead are in
@@ -69,6 +70,15 @@ items that have no component of their own. **One thing could not stay:** `getNBT
 - **Wear.** `damageItem` becomes `hurtAndBreak`; Unbreaking works as in 1.7.10; a talisman that breaks leaves an empty stack
   in its accessory slot (1.7.10 set the first Baubles slot to null; the slots of 1.21.1 treat an empty stack as free) and
   plays the break sound.
+- **Durability is 101 (forced, to keep the number of uses).** 1.7.10 `ItemStack.damageItem` broke an item only when its damage
+  went *above* the maximum, so `setMaxDamage(100)` allowed 101 points of wear: 101 plain removals, and 11 removals of a warp
+  effect (11 x 10 = 110 > 100; ten of them are 100, which is not above 100). 1.21.1 `hurtAndBreak` breaks an item when the
+  damage *reaches* the maximum. The talisman is therefore registered with `ItemCleansingTalisman.MAX_DAMAGE = USES + 1 = 101`;
+  the wear bar and an advanced tooltip show 101, and the break happens at the same removal as before. The same one-point shift
+  exists for every damageable item between the two versions and is **not** compensated for the Helmet of Revealing (500)
+  and the Infused Scribing Tools (800): they keep the nominal figure of the original, as Thaumcraft's own tools and armour
+  of the port do, because there the shift is not counted by anyone; the Remedium is the item whose uses are counted out in
+  steps of one and ten. (The Spellbinding Cloth keeps its 35 and gets its 36th cleaning from `wornCloth`, section 2.)
 - **Memory per wearer.** 1.7.10 kept two maps on the item instance (every talisman shared them). The port keeps them in a
   static map keyed by the player's id and forgets a player when he leaves and every player when the server stops.
 - **Click (choice).** The sneak click toggles, as before. A plain click did nothing in 1.7.10; in the port it puts the
@@ -85,6 +95,16 @@ items that have no component of their own. **One thing could not stay:** `getNBT
 - **Orbs.** `getEntitiesWithinAABB(EntityXPOrb)` becomes `getEntitiesOfClass(ExperienceOrb)` over the same cube (3 blocks in
   every direction); the consumption rule, including its quirk (`maxXP -= xpToAdd` subtracts the running total, so the loop
   can stop early), is copied. The zap sound is `thaumcraft:zap` with the volume `value / 10`.
+- **Merged orbs (forced).** 1.7.10 had one entity per orb. 1.21.1 merges close orbs of the same value into one
+  `ExperienceOrb` that carries a count (`count` is private and not sent to the client; it is saved as `Count`). The talisman
+  reads the count through the entity's own `addAdditionalSaveData` and treats the entity as `count` separate orbs of `value`
+  points, one after the other, with the 1.7.10 arithmetic (`ItemXPTalisman.Pass`); a JUnit test checks the result against the
+  1.7.10 loop over separate entities for 2000 random cases. The orbs that fit are taken, the entity keeps the rest: when
+  all are taken it disappears, otherwise the count is lowered through `readAdditionalSaveData` (value, age and health
+  unchanged), so no point of a merged orb is destroyed. Because of the quirk a big merged orb is taken over several ticks
+  (10 orbs of 100 points give 500 in the first tick and 400 in the second, as ten separate 1.7.10 orbs did). The zap sound
+  and the particle are made once per entity and tick, not once per orb. The client does not know the count, so it sees one
+  orb for the particle.
 - **Effects (forced, API gap A8).** The green wisp of Thaumcraft's particle engine at an absorbed orb (client) and the six
   sparkles at the player when a bottle is filled are internals of the mod; the port draws a green dust particle for the orb
   (client) and six happy-villager sparkles at the player (sent by the server). Same moment and place, another look.
@@ -121,7 +141,7 @@ items that have no component of their own. **One thing could not stay:** `getNBT
 
 ## 6. Infused Scribing Tools
 
-- 800 ink as durability, `IScribeTools` (the research table takes any such item), one stack, shining like an enchanted
+- 800 ink as durability (nominal figure; the 1.7.10 one-point shift of section 3 is not compensated here), `IScribeTools` (the research table takes any such item), one stack, shining like an enchanted
   item (`isFoil`), no research entry, not in the creative tab, name "(NYI)": the item is unfinished in 1.7.10 too and its
   infusion recipe stays under a research key that does not exist, so it is only for the commands.
 - **Refill recipe.** `data/thaumictinkerer/recipe/infused_inkwell0.json`: eight ink sacs (`dye:0`) around tools of any wear
@@ -134,7 +154,7 @@ items that have no component of their own. **One thing could not stay:** `getNBT
 - **Armour material (forced).** `ThaumcraftApi.armorMatThaumium` is a registry entry in 1.21.1. The helmet has its own
   material `thaumictinkerer:revealing` with the numbers of Thaumcraft's Thaumium armour (2/6/5/2 armour points,
   enchantability 25, iron equip sound, thaumium ingot to mend), because the worn texture is part of the material. Durability
-  500 as in `setMaxDamage(500)`.
+  500 as in `setMaxDamage(500)` (nominal figure; the one-point shift of section 3 is not compensated).
 - **Worn texture (forced).** `getArmorTexture` returned `textures/model/revealing.png`; the material's layer is
   `textures/models/armor/revealing_layer_1.png`, a byte-for-byte copy of the converted `textures/models/revealing.png`
   (a 64 x 32 humanoid layer).
@@ -150,24 +170,26 @@ items that have no component of their own. **One thing could not stay:** `getNBT
 
 ## 8. Client: HUDHandler and ClientTickHandler
 
-- **Focus of Dislocation overlay.** The panel (box at 4, 50, the line "Currently Dislocating", the line "Extra Contents" when
-  the block carries block-entity data, the block drawn at 16 x 16) is drawn with Architectury's `ClientGuiEvent.RENDER_HUD`
-  while a wand is in the main hand, no screen is open and the GUI is not hidden. Thaumcraft's `dialBottom` option (the
-  position of its own wand dial) is not in the API; the panel keeps the default place. The unicode flag of the font is the
-  `minecraft:uniform` font.
-- **The group does not know the focus (rule 3).** `HUDHandler` asks the focus item of the wand
-  (`WandHelper.getFocusItem`) for the contract `thaumic.tinkerer.common.item.IDislocationHudSource` (the picked block and
-  "has extra contents"), or a source given to `HUDHandler.setDislocationSource`. Neither is set, so the overlay of this
-  class stays inert. **The Foci group has meanwhile ported the same overlay itself** (`DislocationHUDHandler`, registered by
-  `FociClient`, reading its own data component), so the panel is drawn exactly once, by that class. Two ways to end the
-  duplicate, for the lead: (a) keep the Foci group's class and delete `HUDHandler` (and its line in
-  `BasicItemsClient.register()`); or (b) delete `DislocationHUDHandler` and let `ItemFocusDislocation` implement
-  `IDislocationHudSource`. Version (a) is the smaller change; the only difference between the two drawings is that the 1.7.10
-  box of the second line is as wide as the first line's text (mine) or as wide as the wider of the two (theirs).
+- **`HUDHandler` is not a class of this group any more (choice, resolved).** Its only job in 1.7.10 was the overlay of the
+  Focus of Dislocation (box at 4, 50, "Currently Dislocating", "Extra Contents", the picked block at 16 x 16). The Foci
+  group ported the same method as `DislocationHUDHandler` (registered by `FociClient`, reading the focus's own data
+  component, see `docs/deviations/Foci.md`), which is the one that can draw. The copy of this group could never draw (it
+  needed a contract, `IDislocationHudSource`, that no focus implemented), so it, the contract and its registration were
+  deleted; exactly one overlay exists. The drawn differences between the two (the second line's box is as wide as the
+  wider of the two lines in the Foci class, as wide as the first line in 1.7.10) and the missing `dialBottom` position
+  are documented in the Foci files (`docs/deviations/Foci.md`, `docs/api-requests/Foci.md`).
 - **ClientTickHandler.** Of its three jobs only the tick counter is left: the swap of the Thaumonomicon page for the
   ComputerCraft peripherals research (`GuiResearchPeripheral`, which opened a web address on Enter) is not ported with
   ComputerCraft, and the tick of `ToolModeHUDHandler` is registered by the Kami group itself and must not run twice.
-  `GuiResearchPeripheral` is skipped for the same reason.
+  `GuiResearchPeripheral` is skipped for the same reason. The counter is read by nobody in the add-on today (the Kami group's
+  `ToolModeHUDHandler` has a counter of its own); it stays as the port of the public 1.7.10 field.
+- **The text of the `PERIPHERALS` page (decision).** The entry still exists, because the Aspectalyzer and the Golem Connector
+  are its children in the book (Machines and TileBlocks groups register it). Its page text promised "Pressing ENTER right now
+  will take you to" a web page and named an address; nothing handles Enter any more, so
+  `lang-extra/basic_items.<lang>.json` replaces `ttresearch.page.PERIPHERALS.0` in all six languages with a text that says
+  that the computer link is not part of this version, in the way TileBlocks rewrote the Golem Connector pages. The shortcut
+  itself is not rebuilt: it would be a hook into the Thaumonomicon screen, which is not API. A JUnit test checks that no
+  language keeps the promise.
 
 ## 9. Helpers
 
@@ -175,6 +197,11 @@ items that have no component of their own. **One thing could not stay:** `getNBT
   more per level up to 30, 7 more beyond). 1.21.1's curve is `2L+7`, `5L-38`, `9L-158` points per level, and
   `Player.getXpNeededForNextLevel()` follows it, so the conversion between points and levels does too
   (`getExperienceForLevel(30) = 1395`, was 825). The total never goes below 0 (the 1.7.10 loop gave level -1).
+  The conversion cannot hang or wrap any more (fix): `getLevelForExperience` is a binary search instead of a loop that counts
+  up (the loop never returned for `Integer.MAX_VALUE`, because the points of a level beyond 21,863 saturate an `int`);
+  the points are computed in `long`, a level whose points do not fit gives `Integer.MAX_VALUE`, and `addPlayerXP` /
+  `getPlayerXP` saturate at the `int` range instead of wrapping to a negative total (which `Math.max(0, ...)` turned into a
+  wipe). Nothing in the add-on calls the helper today.
 - **`MiscHelper`.** `Vector3` is `Vec3`; the block event is Architectury's `BlockEvent.BREAK` (asked for a `ServerPlayer`
   only; a break by something else is not vetoed), `server()` is `GameInstance.getServer()`, the stack trace goes to the log.
   The block metadata argument is the default state of the block.

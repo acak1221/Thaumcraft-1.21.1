@@ -43,6 +43,11 @@ public final class FociGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void flightPutsTheKickCounterOfTheConnectionBackToZero(GameTestHelper test) {
+        FociRuntimeChecks.flightPutsTheKickCounterOfTheConnectionBackToZero(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void healMendsOnePointEveryThirtyTicksAndPaysPerHeal(GameTestHelper test) {
         FociRuntimeChecks.healMendsOnePointEveryThirtyTicksAndPaysPerHeal(test);
     }
@@ -145,6 +150,16 @@ public final class FociGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void dislocationCarriesWaterAsASource(GameTestHelper test) {
         FociRuntimeChecks.dislocationCarriesWaterAsASource(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void dislocationDoesNotTakeFlowingWater(GameTestHelper test) {
+        FociRuntimeChecks.dislocationDoesNotTakeFlowingWater(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void dislocationRefusesTheHalvesOfTallPlantsAndNeverOverwritesTheBlockAbove(GameTestHelper test) {
+        FociRuntimeChecks.dislocationRefusesTheHalvesOfTallPlantsAndNeverOverwritesTheBlockAbove(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

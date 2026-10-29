@@ -14,10 +14,6 @@
 package thaumic.tinkerer.common.item;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -31,8 +27,8 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.block.BlockGas;
+import thaumic.tinkerer.common.core.helper.SimpleBlockFx;
 import thaumic.tinkerer.common.lib.LibItemNames;
-import thaumic.tinkerer.common.lib.LibMisc;
 import thaumic.tinkerer.common.lib.LibResearch;
 import thaumic.tinkerer.common.registry.ITTinkererRegisterable;
 import thaumic.tinkerer.common.registry.TTRegistry;
@@ -83,11 +79,6 @@ public class ItemGasRemover extends Item implements ITTinkererRegisterable {
                 new ItemStack(Items.QUARTZ));
     }
 
-    /** The sound {@code thaumcraft:wand} of Thaumcraft, by id (null when it is not registered). */
-    public static SoundEvent wandSound() {
-        return BuiltInRegistries.SOUND_EVENT.getOptional(ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand")).orElse(null);
-    }
-
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
@@ -108,10 +99,7 @@ public class ItemGasRemover extends Item implements ITTinkererRegisterable {
                         }
                     }
                 }
-                SoundEvent wand = wandSound();
-                if (wand != null) {
-                    level.playSound(null, player.getX(), player.getY(), player.getZ(), wand, SoundSource.PLAYERS, 0.2F, 1F);
-                }
+                SimpleBlockFx.wandSound(level, player.getX(), player.getY(), player.getZ(), 0.2F, 1F);
             }
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
         }

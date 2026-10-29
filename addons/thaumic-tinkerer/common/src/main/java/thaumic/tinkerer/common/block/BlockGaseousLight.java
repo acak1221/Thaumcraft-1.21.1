@@ -36,13 +36,13 @@ public class BlockGaseousLight extends BlockGas {
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (random.nextFloat() < 0.0075F) {
-            level.addParticle(SimpleBlockFx.SPARKLE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                    (random.nextFloat() - 0.5) * 0.01, (random.nextFloat() - 0.5) * 0.01, (random.nextFloat() - 0.5) * 0.01);
+            SimpleBlockFx.sparkle(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1.0F, SimpleBlockFx.SPARKLE_YELLOW,
+                    random.nextFloat() / 2);
         }
     }
 
     @Override
     public void placeParticle(Level level, BlockPos pos) {
-        SimpleBlockFx.sparkleAt(level, pos);
+        SimpleBlockFx.sparkleAt(level, pos, SimpleBlockFx.SPARKLE_YELLOW);
     }
 }

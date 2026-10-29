@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart, see addons/thaumic-tinkerer/NOTICE.md): test-only
+ * code, distributed under the same licence as the add-on (CC BY-NC-SA 3.0).
+ */
 package thaumic.tinkerer.testing;
 
 import java.util.List;
@@ -10,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.Cow;
@@ -17,12 +22,15 @@ import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import dev.architectury.event.EventResult;
 import thaumcraft.api.aspects.Aspect;
@@ -53,8 +61,6 @@ import thaumic.tinkerer.common.registry.TTRecipes;
 import thaumic.tinkerer.common.registry.TTRegistry;
 
 /**
- * Test-only code of the port (no 1.7.10 counterpart), CC BY-NC-SA 3.0 like the add-on.
- *
  * <p>Runtime checks of the Machines group in a running server: registration, the interaction of the repairer and the
  * funnel, the funnel's transfer between two jars, the magnets, the necromancy tablet, the cursed blade and the
  * persistence of the block entities. They were written without being able to run them (no Gradle in the porting
@@ -496,6 +502,28 @@ public final class MachinesRuntimeChecks {
         finish(test, player);
     }
 
+    /**
+     * The way a player really uses the mould: through {@code Player.interactOn}, which hands the item a COPY of the held
+     * stack in creative mode (the direct calls of the other checks cannot see that).
+     */
+    public static void aSoulMouldLearnsThroughAPlayersInteractionAlsoInCreative(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = mockPlayer(test);
+        Pig pig = test.spawn(EntityType.PIG, new BlockPos(1, 1, 1));
+        for (boolean creative : new boolean[] { false, true }) {
+            player.getAbilities().instabuild = creative;
+            ItemStack mould = TTRegistry.stack(LibItemNames.SOUL_MOULD);
+            player.setItemInHand(InteractionHand.MAIN_HAND, mould);
+            InteractionResult result = player.interactOn(pig, InteractionHand.MAIN_HAND);
+            test.assertTrue(result.consumesAction(), "the click is used (creative " + creative + ")");
+            ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+            test.assertTrue(held.getItem() instanceof ItemSoulMould, "still a mould in the hand (creative " + creative + ")");
+            test.assertTrue("minecraft:pig".equals(ItemSoulMould.getPatternName(held)),
+                    "the held mould learned the pig (creative " + creative + "): " + ItemSoulMould.getPatternName(held));
+        }
+        finish(test, player);
+    }
+
     // ---- Aspectalyzer ----------------------------------------------------------------------------------------------
 
     public static void theAspectalyzerHoldsAStackAndKnowsItsAspects(GameTestHelper test) {
@@ -757,6 +785,135 @@ public final class MachinesRuntimeChecks {
             }
             finish(test, player);
         });
+    }
+
+    /**
+     * 1.7.10 {@code isNormalCube()}: true for the Aspectalyzer and the Funnel (an opaque material with the default
+     * {@code renderAsNormalBlock}), false for the Restorer (which also provides power) and the thin Attractors and Tablet.
+     */
+    public static void onlyTheAspectalyzerAndTheFunnelConductRedstoneAsIn1710(GameTestHelper test) {
+        floor(test);
+        test.setBlock(new BlockPos(5, 1, 1), Blocks.HOPPER); // the funnel stands on a hopper
+        List<BlockPos> positions = List.of(new BlockPos(1, 1, 1), new BlockPos(3, 1, 1), new BlockPos(5, 2, 1),
+                new BlockPos(1, 1, 4), new BlockPos(3, 1, 4), new BlockPos(5, 1, 4));
+        List<Block> blocks = List.of(Machines.ASPECT_ANALYZER.get(), Machines.REPAIRER.get(), Machines.FUNNEL.get(),
+                Machines.MAGNET.get(), Machines.MOB_MAGNET.get(), Machines.SUMMON.get());
+        List<Boolean> conducts = List.of(true, false, true, false, false, false);
+        for (int i = 0; i < blocks.size(); i++) {
+            test.setBlock(positions.get(i), blocks.get(i).defaultBlockState());
+            BlockPos absolute = test.absolutePos(positions.get(i));
+            BlockState state = test.getLevel().getBlockState(absolute);
+            test.assertTrue(state.is(blocks.get(i)), blocks.get(i) + " stands");
+            test.assertTrue(state.isRedstoneConductor(test.getLevel(), absolute) == conducts.get(i),
+                    blocks.get(i) + (conducts.get(i) ? " conducts redstone" : " does not conduct redstone"));
+        }
+        test.succeed();
+    }
+
+    // ---- removal and drops -----------------------------------------------------------------------------------------
+
+    /** The number of items of a kind lying around a block (dropped stacks may merge, so the counts are summed). */
+    private static int dropped(GameTestHelper test, BlockPos relative, Item item) {
+        AABB box = new AABB(test.absolutePos(relative)).inflate(3);
+        int sum = 0;
+        for (ItemEntity entity : test.getLevel().getEntitiesOfClass(ItemEntity.class, box)) {
+            if (entity.getItem().is(item)) sum += entity.getItem().getCount();
+        }
+        return sum;
+    }
+
+    /** Breaks the block as a player's tool would (drops from the loot table, then {@code onRemove}). */
+    private static void breakBlock(GameTestHelper test, BlockPos relative) {
+        test.getLevel().destroyBlock(test.absolutePos(relative), true);
+    }
+
+    public static void breakingTheAspectalyzerScattersItsStackAndDropsTheBlock(GameTestHelper test) {
+        floor(test);
+        BlockPos pos = new BlockPos(3, 1, 3);
+        test.setBlock(pos, Machines.ASPECT_ANALYZER.get().defaultBlockState());
+        TileAspectAnalyzer analyzer = tile(test, pos, TileAspectAnalyzer.class);
+        analyzer.setItem(0, new ItemStack(Items.IRON_INGOT, 40));
+        breakBlock(test, pos);
+        test.assertTrue(test.getLevel().getBlockState(test.absolutePos(pos)).isAir(), "the block is gone");
+        test.assertTrue(dropped(test, pos, Items.IRON_INGOT) == 40, "all 40 ingots left the block: " + dropped(test, pos, Items.IRON_INGOT));
+        test.assertTrue(analyzer.getItem(0).isEmpty(), "the slot was emptied");
+        test.assertTrue(dropped(test, pos, Machines.ASPECT_ANALYZER.get().asItem()) == 1, "and the block dropped itself");
+        test.succeed();
+    }
+
+    public static void breakingTheRestorerScattersItsToolAndDropsTheBlock(GameTestHelper test) {
+        floor(test);
+        BlockPos pos = new BlockPos(3, 1, 3);
+        test.setBlock(pos, Machines.REPAIRER.get().defaultBlockState());
+        TileRepairer repairer = tile(test, pos, TileRepairer.class);
+        ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
+        damaged.setDamageValue(500);
+        repairer.setItem(0, damaged);
+        breakBlock(test, pos);
+        test.assertTrue(test.getLevel().getBlockState(test.absolutePos(pos)).isAir(), "the block is gone");
+        boolean found = false;
+        for (ItemEntity entity : test.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(test.absolutePos(pos)).inflate(3))) {
+            if (entity.getItem().is(Items.DIAMOND_PICKAXE) && entity.getItem().getDamageValue() == 500) found = true;
+        }
+        test.assertTrue(found, "the pickaxe came out with its damage");
+        test.assertTrue(dropped(test, pos, Machines.REPAIRER.get().asItem()) == 1, "and the block dropped itself");
+        test.succeed();
+    }
+
+    public static void breakingTheFunnelScattersItsJarAndDropsTheBlock(GameTestHelper test) {
+        TileFunnel funnel = funnelSetup(test);
+        funnel.setItem(0, filledJar(Aspect.FIRE, 3));
+        BlockPos pos = new BlockPos(2, 2, 3);
+        breakBlock(test, pos);
+        test.assertTrue(test.getLevel().getBlockState(test.absolutePos(pos)).isAir(), "the funnel is gone");
+        test.assertTrue(dropped(test, pos, BlocksTC.jar().asItem()) == 1, "the jar came out");
+        test.assertTrue(dropped(test, pos, Machines.FUNNEL.get().asItem()) == 1, "and the funnel dropped itself");
+        test.succeed();
+    }
+
+    public static void theFunnelPopsOffWithItsJarWhenTheHopperGoes(GameTestHelper test) {
+        TileFunnel funnel = funnelSetup(test);
+        funnel.setItem(0, filledJar(Aspect.FIRE, 3));
+        BlockPos pos = new BlockPos(2, 2, 3);
+        test.setBlock(new BlockPos(2, 1, 3), Blocks.AIR);
+        test.assertTrue(test.getLevel().getBlockState(test.absolutePos(pos)).isAir(), "the funnel did not stay in the air");
+        test.assertTrue(dropped(test, pos, Machines.FUNNEL.get().asItem()) == 1, "as an item");
+        test.assertTrue(dropped(test, pos, BlocksTC.jar().asItem()) == 1, "with its jar");
+        test.succeed();
+    }
+
+    public static void breakingTheCorporealAttractorScattersItsMouldAndDropsTheBlock(GameTestHelper test) {
+        floor(test);
+        BlockPos pos = new BlockPos(3, 1, 4);
+        test.setBlock(pos, Machines.MOB_MAGNET.get().defaultBlockState());
+        TileMobMagnet magnet = tile(test, pos, TileMobMagnet.class);
+        ItemStack mould = TTRegistry.stack(LibItemNames.SOUL_MOULD);
+        magnet.setItem(0, mould);
+        breakBlock(test, pos);
+        test.assertTrue(test.getLevel().getBlockState(test.absolutePos(pos)).isAir(), "the block is gone");
+        test.assertTrue(dropped(test, pos, mould.getItem()) == 1, "the mould came out");
+        test.assertTrue(dropped(test, pos, Machines.MOB_MAGNET.get().asItem()) == 1, "and the block dropped itself");
+        test.succeed();
+    }
+
+    public static void everyMachineBlockDropsItselfFromItsLootTable(GameTestHelper test) {
+        floor(test);
+        List<Block> blocks = List.of(Machines.ASPECT_ANALYZER.get(), Machines.REPAIRER.get(), Machines.FUNNEL.get(),
+                Machines.MAGNET.get(), Machines.MOB_MAGNET.get(), Machines.SUMMON.get());
+        int x = 0;
+        for (Block block : blocks) {
+            BlockPos pos = new BlockPos(x++, 2, 2);
+            // the funnel stands on a hopper
+            test.setBlock(pos.below(), block == Machines.FUNNEL.get() ? Blocks.HOPPER : Blocks.STONE);
+            test.setBlock(pos, block.defaultBlockState());
+            BlockPos absolute = test.absolutePos(pos);
+            BlockState state = test.getLevel().getBlockState(absolute);
+            test.assertTrue(state.is(block), block + " stands at " + pos);
+            List<ItemStack> drops = Block.getDrops(state, test.getLevel(), absolute, test.getLevel().getBlockEntity(absolute));
+            test.assertTrue(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1,
+                    block + " drops exactly itself, got " + drops);
+        }
+        test.succeed();
     }
 
     public static void everyMobOfTheTableHasAnEntityType(GameTestHelper test) {

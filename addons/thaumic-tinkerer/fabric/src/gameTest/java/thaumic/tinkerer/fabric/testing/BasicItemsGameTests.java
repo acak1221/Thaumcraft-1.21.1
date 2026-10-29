@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart: tests). Distributed under the same licence as the
+ * add-on (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.fabric.testing;
 
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -60,6 +64,11 @@ public final class BasicItemsGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void xpTalismanAbsorbsOrbsInRangeUpToItsLimit(GameTestHelper test) {
         BasicItemsRuntimeChecks.xpTalismanAbsorbsOrbsInRangeUpToItsLimit(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void xpTalismanCountsEveryOrbOfAMergedOrb(GameTestHelper test) {
+        BasicItemsRuntimeChecks.xpTalismanCountsEveryOrbOfAMergedOrb(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

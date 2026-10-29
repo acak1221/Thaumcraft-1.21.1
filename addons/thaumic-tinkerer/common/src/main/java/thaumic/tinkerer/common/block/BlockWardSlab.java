@@ -34,9 +34,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.core.particles.DustParticleOptions;
-import org.joml.Vector3f;
 import thaumcraft.api.blocks.BlocksTC;
+import thaumcraft.api.client.ThaumcraftClientFX;
 import thaumic.tinkerer.common.block.tile.TileWardedSlab;
 import thaumic.tinkerer.common.content.SimpleBlocks;
 import thaumic.tinkerer.common.registry.ITTinkererRegisterable;
@@ -129,13 +128,18 @@ public class BlockWardSlab extends SlabBlock implements EntityBlock, ITTinkererR
         return aura != null && state.getBlock() == aura.getBlock();
     }
 
+    /**
+     * 1.7.10 {@code getBlocksMovement} of the block above: true for what does not stop movement (air, plants, water, a
+     * carpet or a snow layer); {@code blocksMotion} is the solidity test of 1.21.1 that matches the old material flags (the
+     * collision shape would call a carpet solid).
+     */
+    @SuppressWarnings("deprecation")
     private static boolean isPassable(BlockState state) {
         return !state.blocksMotion();
     }
 
-    private static void runes(Level level, double x, double y, double z, float r, float g, float b) {
-        level.addParticle(new DustParticleOptions(new Vector3f(r, g, b), 1.0F), x + level.random.nextDouble(), y,
-                z + level.random.nextDouble(), 0.0, 0.01, 0.0);
+    private static void runes(Level level, double x, double y, double z, float r, float g, float b, int duration, float gravity) {
+        ThaumcraftClientFX.blockRunes(level, x, y, z, r, g, b, duration, gravity);
     }
 
     /** 1.7.10 {@code randomDisplayTick}: runes in the colour of the slab's state. */
@@ -146,23 +150,23 @@ public class BlockWardSlab extends SlabBlock implements EntityBlock, ITTinkererR
         int y = pos.getY();
         int z = pos.getZ();
         if (state.getValue(POWERED)) {
-            for (int list = 0; list < 2; ++list) {
+            for (int list = 0; list < ThaumcraftClientFX.particleCount(level, 2); ++list) {
                 runes(level, x, y + 0.7F, z, 0.2F + random.nextFloat() * 0.4F, random.nextFloat() * 0.3F,
-                        0.8F + random.nextFloat() * 0.2F);
+                        0.8F + random.nextFloat() * 0.2F, 20, -0.02F);
             }
         } else {
             BlockState above1 = level.getBlockState(pos.above());
             BlockState above2 = level.getBlockState(pos.above(2));
             if (!isAiry(above1) && isPassable(above1) || !isAiry(above2) && isPassable(above1)) {
-                for (int list = 0; list < 3; ++list) {
+                for (int list = 0; list < ThaumcraftClientFX.particleCount(level, 3); ++list) {
                     runes(level, x, y + 0.7F, z, 0.9F + random.nextFloat() * 0.1F, random.nextFloat() * 0.3F,
-                            random.nextFloat() * 0.3F);
+                            random.nextFloat() * 0.3F, 24, -0.02F);
                 }
             } else {
                 for (Entity entity : level.getEntities((Entity) null, new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(1.0D, 1.0D, 1.0D))) {
                     if (entity instanceof LivingEntity && !(entity instanceof Player)) {
                         runes(level, x, y + 0.6F + random.nextFloat() * Math.max(0.8F, entity.getEyeHeight()), z,
-                                0.6F + random.nextFloat() * 0.4F, 0.0F, 0.3F + random.nextFloat() * 0.7F);
+                                0.6F + random.nextFloat() * 0.4F, 0.0F, 0.3F + random.nextFloat() * 0.7F, 20, 0.0F);
                         break;
                     }
                 }

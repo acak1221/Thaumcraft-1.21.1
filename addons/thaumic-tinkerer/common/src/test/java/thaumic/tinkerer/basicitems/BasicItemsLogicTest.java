@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart: tests). Distributed under the same licence as the
+ * add-on (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.basicitems;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,6 +60,7 @@ class BasicItemsLogicTest {
     void theNumbersAreThoseOfTheOriginalLibFeatures() {
         assertEquals(35, ItemSpellCloth.USES, "LibFeatures.SPELL_CLOTH_USES");
         assertEquals(100, ItemCleansingTalisman.USES, "LibFeatures.CLEANSING_TALISMAN_USES");
+        assertEquals(101, ItemCleansingTalisman.MAX_DAMAGE, "1.7.10 broke the item above 100: 101 points of wear");
         assertEquals(3, ItemXPTalisman.RANGE, "LibFeatures.XP_TALISMAN_RANGE");
         assertEquals(1500, ItemXPTalisman.MAX_XP, "LibFeatures.XP_TALISMAN_MAX_XP");
         assertEquals(10, ItemXPTalisman.BOTTLE_COST, "LibFeatures.XP_TALISMAN_ENCHANTING_BOTTLE_COST");
@@ -106,6 +111,82 @@ class BasicItemsLogicTest {
         assertEquals(0, ExperienceHelper.getLevelForExperience(0));
         assertEquals(0, ExperienceHelper.getLevelForExperience(6));
         assertEquals(1, ExperienceHelper.getLevelForExperience(7));
+    }
+
+    @Test
+    void theExtremesOfTheExperienceRangeTerminateAndSaturateInsteadOfWrapping() {
+        // The 1.7.10 style loop never returned for the largest amounts (the points of a level beyond 21,863 saturate the int).
+        assertEquals(21863, ExperienceHelper.getLevelForExperience(Integer.MAX_VALUE));
+        assertEquals(21863, ExperienceHelper.getLevelForExperience(Integer.MAX_VALUE - 1));
+        assertEquals(2_147_407_943, ExperienceHelper.getExperienceForLevel(21863), "the last level that fits");
+        assertEquals(Integer.MAX_VALUE, ExperienceHelper.getExperienceForLevel(21864), "the first that does not");
+        assertEquals(Integer.MAX_VALUE, ExperienceHelper.getExperienceForLevel(Integer.MAX_VALUE), "no overflow of the squares");
+        assertEquals(0, ExperienceHelper.getLevelForExperience(-1), "a negative amount is level 0");
+        assertEquals(21862, ExperienceHelper.getLevelForExperience(2_147_407_942), "one point short of the last level");
+    }
+
+    // ---- the Talisman of Withhold ---------------------------------------------------------------------------------
+
+    @Test
+    void aMergedOrbIsCountedOrbByOrbWithTheArithmeticOfTheOriginal() {
+        ItemXPTalisman.Pass all = new ItemXPTalisman.Pass(1500);
+        assertEquals(4, all.offer(7, 4), "four orbs of 7");
+        assertEquals(28, all.xpToAdd, "4 x 7 = 28 points, not 7");
+        assertFalse(all.full);
+
+        // 50 points of room: 10 (room 40), 20 (room 20), the third does not fit in 20 and the room is spent: two of twenty
+        ItemXPTalisman.Pass part = new ItemXPTalisman.Pass(50);
+        assertEquals(2, part.offer(10, 20), "two of the twenty orbs");
+        assertEquals(20, part.xpToAdd);
+        assertTrue(part.full, "and the pass ends (the quirk subtracts the whole total)");
+
+        ItemXPTalisman.Pass none = new ItemXPTalisman.Pass(5);
+        assertEquals(0, none.offer(10, 3), "an orb of 10 does not fit in 5");
+        assertEquals(0, none.xpToAdd);
+        assertFalse(none.full, "the pass goes on to the next entity");
+        assertEquals(1, none.offer(5, 1), "a smaller one does");
+        assertTrue(none.full);
+    }
+
+    @Test
+    void aMergedOrbGivesTheSameResultAsTheSeparateOrbsOf1710() {
+        java.util.Random random = new java.util.Random(1710);
+        for (int round = 0; round < 2000; round++) {
+            int room = 1 + random.nextInt(ItemXPTalisman.MAX_XP);
+            int entities = 1 + random.nextInt(6);
+            int[] values = new int[entities];
+            int[] counts = new int[entities];
+            for (int i = 0; i < entities; i++) {
+                values[i] = 1 + random.nextInt(40);
+                counts[i] = 1 + random.nextInt(60);
+            }
+
+            // the 1.7.10 loop over one entity per orb, in the same order
+            int xpToAdd = 0;
+            int maxXP = room;
+            int reference = 0;
+            loop:
+            for (int i = 0; i < entities; i++) {
+                for (int unit = 0; unit < counts[i]; unit++) {
+                    if (xpToAdd + values[i] <= maxXP) {
+                        xpToAdd += values[i];
+                        reference++;
+                    }
+                    maxXP -= xpToAdd;
+                    if (maxXP <= 0) break loop;
+                }
+            }
+
+            ItemXPTalisman.Pass pass = new ItemXPTalisman.Pass(room);
+            int taken = 0;
+            for (int i = 0; i < entities; i++) {
+                taken += pass.offer(values[i], counts[i]);
+                if (pass.full) break;
+            }
+            assertEquals(xpToAdd, pass.xpToAdd, "points, round " + round);
+            assertEquals(reference, taken, "orbs taken, round " + round);
+            assertTrue(pass.xpToAdd <= room, "never more than the room");
+        }
     }
 
     // ---- the Talisman of Remedium ---------------------------------------------------------------------------------

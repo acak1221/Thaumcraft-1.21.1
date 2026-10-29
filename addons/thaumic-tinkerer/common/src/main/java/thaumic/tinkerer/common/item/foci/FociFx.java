@@ -5,34 +5,50 @@
  */
 package thaumic.tinkerer.common.item.foci;
 
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.api.ThaumcraftFX;
 import thaumcraft.api.ThaumcraftSoundIds;
+import thaumcraft.api.client.ThaumcraftClientFX;
 
 /**
  * Sounds and particles of the wand foci.
  *
  * <p>1.7.10 played {@code thaumcraft:wand}, {@code thaumcraft:wind}, {@code fire.fire}... with
  * {@code World.playSoundAtEntity} on both sides and spawned Thaumcraft's client particles ({@code sparkle},
- * {@code smokeSpiral}, {@code wispFX2}, {@code beamCont}) from the focus code of the client. The sounds are
- * {@code Level.playSound(player, ...)} on both sides here (the casting player hears the client's copy, the others the
- * server's, so nobody hears it twice). Thaumcraft's particles have no public facade in the 1.21.1 API
- * ({@code docs/api-requests/Foci.md}); until they do, the effects are vanilla particles added on the client with
- * {@link Level#addParticle}, which does nothing on a server.</p>
+ * {@code smokeSpiral}, {@code wispFX2}, {@code beamCont}, {@code burst}) from the focus code of the client, that is, only the
+ * casting player saw them. The sounds are {@code Level.playSound(player, ...)} on both sides here (the casting player hears
+ * the client's copy, the others the server's, so nobody hears it twice). The particles are the twins of those proxy calls in
+ * the API, {@link ThaumcraftClientFX} (drawn on a client level, silently ignored on a server level), with the arguments the
+ * original passed; the one effect that the server decides on, the burst of the Focus of Dislocation, is sent to the players
+ * around with {@link ThaumcraftFX#burst}.</p>
  */
 public final class FociFx {
-    /** The sparkle of the Distortion and Telekinesis foci: a white star ({@code sparkle} of 1.7.10). */
-    public static final ParticleOptions SPARKLE = ParticleTypes.END_ROD;
+    /** The index of the violet sparkle ({@code sparkle(x, y, z, 0)} of the Mending and Telekinesis foci). */
+    public static final int SPARKLE_VIOLET = 0;
+    /** The index of the white sparkle ({@code sparkle(x, y, z, 6)} of the Distortion shield). */
+    public static final int SPARKLE_WHITE = 6;
+
+    /** The type of wisp that {@code wispFX2} of Efreet's Flame asked for. */
+    private static final int WISP_FLAME = 4;
+    /** The texture and the end of the beam of Efreet's Flame ({@code beamCont(..., 2, 0xFF0000, true, 0F, null, 1)}). */
+    private static final int BEAM_TEXTURE = 2;
+    private static final int BEAM_IMPACT = 1;
+    /** The smoke spiral of the Focus of Uprising: five puffs of the radius two. */
+    private static final int SPIRAL_PUFFS = 5;
+    private static final float SPIRAL_RADIUS = 2F;
+    /** The bursts of the Focus of Dislocation (1.7.10 looped eight times with the size 0.2). */
+    private static final int BURSTS = 8;
+    private static final float BURST_SIZE = 0.2F;
+    /** The height at which the bursts of a placed block rise above the block's base (1.7.10 added 0.65F). */
+    public static final float PLACE_BURST_LIFT = 0.65F;
 
     private FociFx() {}
 
@@ -56,73 +72,67 @@ public final class FociFx {
 
     // ---- particles (client side) -----------------------------------------------------------------------------------
 
-    private static DustParticleOptions dust(int rgb, float scale) {
-        return new DustParticleOptions(Vec3.fromRGB24(rgb & 0xFFFFFF).toVector3f(), scale);
-    }
-
-    /** {@code sparkle(x, y, z, type)}: one sparkle at a point, tinted. */
-    public static void sparkle(Level level, double x, double y, double z, int rgb) {
+    /** {@code sparkle(x, y, z, type)}: one sparkle at a point (the colour is the index of the API, 0 to 7). */
+    public static void sparkle(Level level, double x, double y, double z, int type) {
         if (!level.isClientSide) return;
-        RandomSource random = level.random;
-        level.addParticle(dust(rgb, 0.9F), x, y, z, (random.nextDouble() - 0.5) * 0.02, 0.02, (random.nextDouble() - 0.5) * 0.02);
+        ThaumcraftClientFX.sparkle(level, x, y, z, type);
     }
 
-    /** The white sparkle of the Distortion shield on a deflected projectile. */
+    /** The white sparkle of the Distortion shield on a deflected projectile ({@code sparkle(e.posX, e.posY, e.posZ, 6)}). */
     public static void whiteSparkle(Level level, Entity entity) {
-        if (!level.isClientSide) return;
-        level.addParticle(SPARKLE, entity.getX(), entity.getY(), entity.getZ(), 0.0, 0.0, 0.0);
+        sparkle(level, entity.getX(), entity.getY(), entity.getZ(), SPARKLE_WHITE);
     }
 
     /**
-     * {@code smokeSpiral(world, x, y - motionY, z, 2F, angle, (int) y, 0x9E2FF)} of the Focus of Uprising: smoke that
-     * circles the player at a radius of two blocks. Five of them per cast, as in 1.7.10.
+     * The violet sparkle of the Mending focus around the player: a random point of a box one block wide and one high.
+     * The height is counted from the eyes, as the {@code posY} of the local player of 1.7.10 was (its feet plus 1.62).
+     */
+    public static void sparkleAround(Level level, Player player, int type) {
+        if (!level.isClientSide) return;
+        sparkle(level, player.getX() + level.random.nextFloat() - 0.5F, player.getEyeY() + level.random.nextFloat(),
+                player.getZ() + level.random.nextFloat() - 0.5F, type);
+    }
+
+    /**
+     * {@code smokeSpiral(world, x, y - motionY, z, 2F, (int) (random * 360), (int) y, 0x9E2FF)} of the Focus of Uprising,
+     * five times: smoke that circles the player at a radius of two blocks and sinks. The height is the eye height, as the
+     * {@code posY} of the local player of 1.7.10 was.
      */
     public static void smokeSpiral(Level level, Player player, int rgb) {
         if (!level.isClientSide) return;
-        RandomSource random = level.random;
-        ParticleOptions smoke = dust(rgb, 1.2F);
-        for (int i = 0; i < 5; i++) {
-            double angle = random.nextInt(360) * Mth.DEG_TO_RAD;
-            double cos = Math.cos(angle);
-            double sin = Math.sin(angle);
-            level.addParticle(smoke, player.getX() + cos * 2.0, player.getY() - player.getDeltaMovement().y,
-                    player.getZ() + sin * 2.0, -sin * 0.12, 0.06, cos * 0.12);
+        double y = player.getEyeY();
+        for (int i = 0; i < SPIRAL_PUFFS; i++) {
+            ThaumcraftClientFX.smokeSpiral(level, player.getX(), y - player.getDeltaMovement().y, player.getZ(), SPIRAL_RADIUS,
+                    (int) (level.random.nextDouble() * 360), (int) y, rgb);
         }
     }
 
-    /** {@code wispFX2(..., type 4, true, true, -random / 10)}: a flame that rises, inside the block. */
+    /** {@code wispFX2(world, x, y, z, random / 2F, 4, true, true, -random / 10F)}: a flame wisp that rises, through blocks. */
     public static void flameWisp(Level level, double x, double y, double z) {
         if (!level.isClientSide) return;
-        level.addParticle(ParticleTypes.FLAME, x, y, z, 0.0, level.random.nextDouble() / 10.0, 0.0);
+        // The size must be above zero; Math.random() can in theory be zero.
+        float size = Math.max(1.0E-3F, (float) Math.random() / 2F);
+        ThaumcraftClientFX.wisp(level, x, y, z, size, WISP_FLAME, true, true, (float) -Math.random() / 10F);
     }
 
     /**
-     * {@code beamCont(world, player, x, y, z, 2, 0xFF0000, true, 0F, null, 1)}: the continuous beam from the wand to
-     * the block, as dust along the line (a few motes per tick).
+     * {@code beamCont(world, player, x, y, z, 2, 0xFF0000, true, 0F, null, 1)}: the continuous beam from the wand to the
+     * point. Called on every client tick while the focus works; the beam lets go on its own when the calls stop.
      */
     public static void beam(Level level, Player player, Vec3 target, int rgb) {
         if (!level.isClientSide) return;
-        Vec3 look = player.getViewVector(1.0F);
-        Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
-        right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
-        Vec3 from = player.getEyePosition().add(look.scale(0.5)).add(right.scale(0.25)).add(0.0, -0.25, 0.0);
-        Vec3 line = target.subtract(from);
-        double length = line.length();
-        if (length < 0.1) return;
-        ParticleOptions mote = dust(rgb, 0.7F);
-        RandomSource random = level.random;
-        int motes = Math.max(2, (int) (length * 1.5));
-        for (int i = 0; i < motes; i++) {
-            Vec3 at = from.add(line.scale(random.nextDouble()));
-            level.addParticle(mote, at.x, at.y, at.z, 0.0, 0.0, 0.0);
-        }
+        ThaumcraftClientFX.beam(level, player, target, rgb, BEAM_TEXTURE, true, 0F, BEAM_IMPACT);
     }
 
-    /** The pink and purple motes of {@code sparkle(..., 0)} around a healing player or a pulled item. */
-    public static void sparkleAround(Level level, Entity entity, int rgb) {
-        if (!level.isClientSide) return;
-        RandomSource random = level.random;
-        sparkle(level, entity.getX() + random.nextFloat() - 0.5F, entity.getY() + random.nextFloat(),
-                entity.getZ() + random.nextFloat() - 0.5F, rgb);
+    /**
+     * The eight bursts of the Focus of Dislocation over a block, sent by the server to the players around
+     * ({@code burst(world, pos.x + random, pos.y + random + lift, pos.z + random, 0.2F)}). 1.7.10 drew them on the client
+     * of the caster after the pickup (lift 0) and the placing (lift 0.65).
+     */
+    public static void dislocationBursts(ServerLevel level, BlockPos pos, float lift) {
+        for (int i = 0; i < BURSTS; i++) {
+            ThaumcraftFX.burst(level, (float) (pos.getX() + Math.random()), (float) (pos.getY() + Math.random()) + lift,
+                    (float) (pos.getZ() + Math.random()), BURST_SIZE);
+        }
     }
 }

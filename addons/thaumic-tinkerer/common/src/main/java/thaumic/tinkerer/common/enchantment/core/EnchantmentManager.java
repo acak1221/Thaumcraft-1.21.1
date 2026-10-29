@@ -28,8 +28,11 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.jetbrains.annotations.Nullable;
@@ -220,16 +223,21 @@ public final class EnchantmentManager {
 
     /**
      * {@code canApply(stack, enchant, currentEnchants)}: whether the enchantment may be added to the stack next to the ones
-     * already chosen. The item has to be one the enchantment is made for (the item tag of its data), the enchantment must
-     * not be chosen yet, and neither the rules of Thaumic Tinkerer nor the exclusive sets of the data pack may forbid it
-     * next to a chosen one.
+     * already chosen. The item has to be one the enchantment is made for, the enchantment must not be chosen yet, and neither
+     * the rules of Thaumic Tinkerer nor the exclusive sets of the data pack may forbid it next to a chosen one.
+     *
+     * <p>"Made for" is {@link Enchantment#isPrimaryItem}, not {@code isSupportedItem}: 1.7.10 asked
+     * {@code enchant.canApply(stack) && enchant.type.canEnchantItem(item)}, so the narrow type decided (Sharpness, Smite and
+     * Bane of Arthropods on swords only, Thorns on chest armor only), not the wider overrides that let an anvil put them
+     * on axes or any armor. In 1.21.1 the primary items are that narrow set; an enchantment without primary items
+     * (the fourteen of this add-on, Efficiency, Fortune, Silk Touch, ...) falls back to its supported items.</p>
      */
     public static boolean canApply(@Nullable RegistryAccess access, ItemStack stack, ResourceKey<Enchantment> enchantment,
             List<ResourceKey<Enchantment>> currentEnchants) {
         if (stack.isEmpty() || currentEnchants.contains(enchantment)) return false;
 
         Optional<Holder.Reference<Enchantment>> holder = ModEnchantments.holder(access, enchantment);
-        if (holder.isEmpty() || !holder.get().value().isSupportedItem(stack)) return false;
+        if (holder.isEmpty() || !holder.get().value().isPrimaryItem(stack)) return false;
         if (!allowsItem(enchantment, stack)) return false;
 
         if (rulesForbid(enchantment, currentEnchants)) return false;
@@ -261,9 +269,15 @@ public final class EnchantmentManager {
     /**
      * The items an enchantment is refused on although the item tag of its data lists them: Flaming Touch on the Axe of the
      * Stream, Vampirism on the Cursed Spirit's Blade, Shockwave and Slow Fall on the gem boots of the Kami armor. (The
-     * tags of the data leave these items out already; this keeps the rule when another data pack adds them.)
+     * tags of the data leave these items out already; this keeps the rule when another data pack adds them.) Also
+     * Efficiency, Fortune and Silk Touch on hoes and shears: the 1.7.10 type "digger" was {@code ItemTool}, which neither
+     * a hoe nor the shears were, while the 1.21.1 tags of these three enchantments list both.
      */
     public static boolean allowsItem(ResourceKey<Enchantment> enchantment, ItemStack stack) {
+        if (enchantment.equals(Enchantments.EFFICIENCY) || enchantment.equals(Enchantments.FORTUNE)
+                || enchantment.equals(Enchantments.SILK_TOUCH)) {
+            return !(stack.getItem() instanceof HoeItem || stack.is(ItemTags.HOES) || stack.getItem() instanceof ShearsItem);
+        }
         ResourceLocation item = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (enchantment.equals(ModEnchantments.autoSmelt)) {
             return !item.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "elemental_axe"));

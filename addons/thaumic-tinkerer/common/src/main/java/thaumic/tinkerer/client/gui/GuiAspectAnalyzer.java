@@ -25,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.client.AspectRenderer;
 import thaumic.tinkerer.client.lib.LibResources;
 import thaumic.tinkerer.common.block.tile.container.ContainerAspectAnalyzer;
 import thaumic.tinkerer.common.core.helper.AnalyzerKnowledge;
@@ -49,12 +50,12 @@ public class GuiAspectAnalyzer extends AbstractContainerScreen<ContainerAspectAn
         ItemStack stack = menu.getSlot(0).getItem();
         if (!stack.isEmpty() && minecraft != null && minecraft.player != null) {
             AspectList tags = ThaumcraftApiHelper.getObjectAspects(stack, minecraft.player.level());
-            if (tags != null && AnalyzerKnowledge.hasScanned(minecraft.player, stack, tags)) {
+            if (tags != null && AnalyzerKnowledge.hasScanned(minecraft.player, stack)) {
                 int i = 0;
                 for (Aspect aspect : tags.getAspectsSortedAmount()) {
                     int x = leftPos + 20 + i * 18;
                     int y = topPos + 58;
-                    AspectIcons.drawTag(graphics, font, x, y, aspect, tags.getAmount(aspect));
+                    AspectRenderer.draw(graphics, aspect, x, y, tags.getAmount(aspect), 0);
 
                     if (mx > x && mx < x + 16 && my > y && my < y + 16) aspectHovered = aspect;
 

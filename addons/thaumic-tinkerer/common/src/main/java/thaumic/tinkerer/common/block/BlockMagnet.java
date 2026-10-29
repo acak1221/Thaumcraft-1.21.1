@@ -16,7 +16,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -45,6 +44,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 import thaumcraft.api.ItemApi;
+import thaumcraft.api.ThaumcraftSoundIds;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.research.ResearchPage;
@@ -150,7 +150,7 @@ public class BlockMagnet extends BaseEntityBlock implements ITTinkererRegisterab
 
     /** {@code thaumcraft:key}, the sound of a wand opening a device. */
     private static SoundEvent key() {
-        return SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "key"));
+        return SoundEvent.createVariableRangeEvent(ThaumcraftSoundIds.KEY);
     }
 
     @Override

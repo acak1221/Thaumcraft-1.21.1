@@ -19,7 +19,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.ContainerHelper;
@@ -34,6 +33,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
 import thaumcraft.api.aspects.IEssentiaTransport;
+import thaumcraft.api.client.ThaumcraftClientFX;
 import thaumic.tinkerer.common.block.BlockRepairer;
 import thaumic.tinkerer.common.content.Machines;
 
@@ -71,10 +71,9 @@ public class TileRepairer extends BlockEntity implements WorldlyContainer, IAspe
         if (++ticksExisted % 10 == 0) {
             if (level.isClientSide) {
                 if (tookLastTick) {
-                    // Thaumcraft's sparkle is not public API; a vanilla particle stands in for it.
-                    level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.25 + level.random.nextDouble() / 2,
+                    ThaumcraftClientFX.sparkle(level, pos.getX() + 0.25 + level.random.nextDouble() / 2,
                             pos.getY() + 1 + level.random.nextDouble() / 2, pos.getZ() + 0.25 + level.random.nextDouble() / 2,
-                            0, 0, 0);
+                            0);
                 }
                 return;
             }

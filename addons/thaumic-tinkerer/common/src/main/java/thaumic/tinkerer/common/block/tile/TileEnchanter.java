@@ -22,7 +22,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -242,12 +241,20 @@ public class TileEnchanter extends BlockEntity implements WorldlyContainer, Exte
 
         BlockPos top = new BlockPos(pillar[0], pillar[2], pillar[1]);
         ThaumcraftFX.essentiaTrail(level, worldPosition, top, aspect);
-        level.sendParticles(ParticleTypes.ENCHANT, pillar[0] + 0.5, pillar[2] + 0.5, pillar[1] + 0.5, 3, 0.3, 0.3, 0.3, 0.0);
-        level.sendParticles(ParticleTypes.ENCHANT, worldPosition.getX() + 0.5, worldPosition.getY() + 1.25,
-                worldPosition.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.0);
+        // The two magic runes of 1.7.10 ({@code Thaumcraft.proxy.blockRunes}), same points, colours (purple), duration and
+        // gravity: one just under the top of the pillar, one above the table. The facade takes the corner of the block.
+        ThaumcraftFX.blockRunes(level, pillar[0], pillar[2] - 0.75, pillar[1], runeShade(level), 0.0F, runeShade(level), 15,
+                level.random.nextFloat() / 8F);
+        ThaumcraftFX.blockRunes(level, worldPosition.getX(), worldPosition.getY() + 0.25, worldPosition.getZ(), runeShade(level),
+                0.0F, runeShade(level), 15, level.random.nextFloat() / 8F);
         if (level.random.nextInt(5) == 0) {
             playSound(level, pillar[0] + 0.5, pillar[3] + 0.5, pillar[1] + 0.5, ThaumcraftSoundIds.EGIDLE, 0.5F, 1F);
         }
+    }
+
+    /** {@code 0.3F + rand.nextFloat() * 0.7F}: the red and the blue of a rune. */
+    private static float runeShade(ServerLevel level) {
+        return 0.3F + level.random.nextFloat() * 0.7F;
     }
 
     private static void playSound(ServerLevel level, double x, double y, double z, ResourceLocation id, float volume,
@@ -315,7 +322,7 @@ public class TileEnchanter extends BlockEntity implements WorldlyContainer, Exte
             if (y + i >= level.getMaxBuildHeight()) return -1;
 
             BlockPos pos = new BlockPos(x, y + i, z);
-            if (!level.hasChunkAt(pos)) return -1;
+            if (!level.isLoaded(pos)) return -1;
             BlockState state = level.getBlockState(pos);
             if (totem != null && state == totem) {
                 ++obsidianFound;

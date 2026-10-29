@@ -29,6 +29,7 @@ public class ContainerEnchanter extends ContainerPlayerInv {
 
     public final TileEnchanter enchanter;
 
+    @SuppressWarnings("this-escape") // addSlot and initPlayerInv, as in every menu of the mod
     public ContainerEnchanter(int containerId, Inventory playerInv, TileEnchanter enchanter) {
         super(Enchantments.enchanterMenu(), containerId, playerInv);
         this.enchanter = enchanter;

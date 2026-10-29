@@ -1,7 +1,7 @@
 # BasicItems: requests to the Thaumcraft API and to the other groups
 
 Group BasicItems: Spellbinding Cloth, Talisman of Remedium, Talisman of Withhold, Tome of Knowledge Sharing, Infused
-Scribing Tools, Helmet of Revealing, `ExperienceHelper`, `ItemNBTHelper`, `MiscHelper`, `HUDHandler`, `ClientTickHandler`.
+Scribing Tools, Helmet of Revealing, `ExperienceHelper`, `ItemNBTHelper`, `MiscHelper`, `ClientTickHandler`.
 The numbers `A1`..`A13` and `N1`..`N4` are those of `docs/API_GAPS.md` section 2. Nothing in the group reaches into
 `thaumcraft.common.*` or `thaumcraft.client.*` (the test `TinkererApiOnlyTest` checks it): each item below is either already
 answered by the API or a named workaround with the loss written down. Priorities are the group's own opinion (P1 changes
@@ -50,15 +50,10 @@ particles at the player (`ServerLevel.sendParticles`). Same moments and places, 
 **Proposed.** The client-only facade of A8, `thaumcraft.api.client.ThaumcraftClientFX.sparkle(Level, x, y, z, int colorIndex)` and
 `wisp(Level, x, y, z, float size, float r, float g, float b)`, with a server sender in `ThaumcraftFX`.
 
-## R3. The Thaumcraft wand dial position for the Focus of Dislocation overlay (P3)
+## R3. (withdrawn) The Thaumcraft wand dial position for the Focus of Dislocation overlay
 
-**Need.** `HUDHandler` of 1.7.10 put the overlay at the left edge, at `y = 50` or `height - 70` when Thaumcraft's `Config.dialBottom`
-was on (the dial of the wand's own HUD is at the other end).
-
-**What the add-on does today.** Always `y = 50`. If the port's own wand HUD sits there, the two overlap.
-
-**Proposed.** `ThaumcraftApi.isWandDialAtBottom()` (client value, as `isMirrorsAllowed` is on the client), or a note in the guide
-that the port's wand HUD never uses the left edge.
+The overlay is drawn by the Foci group's `DislocationHUDHandler`; this group's own `HUDHandler` was deleted. The request for
+`ThaumcraftApi.isWandDialAtBottom()` (the 1.7.10 `Config.dialBottom`) is in `docs/api-requests/Foci.md`.
 
 ## R4. `IRepairable` needs a tag in 1.21.1: document it (docs, P2)
 
@@ -75,12 +70,8 @@ group) and `thaumictinkerer:blood_sword` (the Machines group's `IRepairable` ite
 
 ## S. Contracts with the other groups and shared files (for the lead)
 
-- **Focus of Dislocation overlay (group Foci).** Both this group (`HUDHandler`, contract `IDislocationHudSource`) and the Foci
-  group (`DislocationHUDHandler`, registered by `FociClient`) ported the 1.7.10 `HUDHandler.drawDislocationFocusHUD`. Mine is
-  inert (it needs a source that nobody gives it) and the Foci group's draws, so nothing is drawn twice today. Pick one: (a)
-  delete `HUDHandler` here and its line in `BasicItemsClient.register()` (smaller), or (b) delete the Foci group's handler and
-  let `ItemFocusDislocation` implement `thaumic.tinkerer.common.item.IDislocationHudSource` (`pickedBlock(wand, focus)` is the stack
-  of the picked block or empty, `hasExtraContents(wand, focus)` is "the carried block has block-entity data").
+- **Focus of Dislocation overlay (group Foci).** Resolved: the overlay is `DislocationHUDHandler` of the Foci group; this
+  group's `HUDHandler` and the contract `IDislocationHudSource` were deleted, so nothing is drawn twice and nothing is inert.
 - **Tag files that two groups may want** (merge, do not overwrite): `data/thaumcraft/tags/item/enchantable/repair.json` (helm,
   blood sword), `data/minecraft/tags/item/enchantable/head_armor.json` (helm) and `data/minecraft/tags/item/enchantable/durability.json`
   (helm, Talisman of Remedium). The Kami helmets are in `data/minecraft/tags/item/head_armor.json` (KamiGear) and need nothing
@@ -90,5 +81,9 @@ group) and `thaumictinkerer:blood_sword` (the Machines group's `IRepairable` ite
 - **Recipe serializers.** `BasicItems.RECIPE_SERIALIZERS` is a `DeferredRegister` of this group (called from
   `BasicItems.register()`); `TTRegistry` needs no change. If the lead prefers one place for all registries, move the field and the
   `register()` call.
-- **ClientTickHandler.** `ToolModeHUDHandler` (KamiGear) ticks itself; `ClientTickHandler.register()` only counts
-  (`ClientTickHandler.elapsedTicks`) and must not call it.
+- **ClientTickHandler.** `ToolModeHUDHandler` (KamiGear) ticks itself and keeps its own counter; `ClientTickHandler.register()`
+  only counts (`ClientTickHandler.elapsedTicks`, read by nobody today) and must not call it. If the Kami group wants the shared
+  counter, it can read the field; if not, the class can go.
+- **Research page `PERIPHERALS.0`.** The entry is registered by the Machines and TileBlocks groups; its text is replaced by
+  `lang-extra/basic_items.*.json` (the Enter shortcut and the web address are gone). If either group ever gives the entry a
+  text of its own, the key must stay without the promise.

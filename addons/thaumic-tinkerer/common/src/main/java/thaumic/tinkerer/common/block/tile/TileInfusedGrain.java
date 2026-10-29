@@ -56,8 +56,10 @@ public class TileInfusedGrain extends TileThaumcraft implements IAspectContainer
     public static void serverTick(Level level, BlockPos pos, BlockState state, TileInfusedGrain tile) {
         RandomSource rand = level.random;
 
-        // Growth
-        if (level.getRawBrightness(pos.above(), 0) >= 9) {
+        // Growth. 1.7.10 getBlockLightValue subtracts the sky darkening of the time of day (skylightSubtracted), so a crop
+        // under open sky does not grow at night: the sky light of the cell above, less the current darkening, or the
+        // block light, whichever is brighter.
+        if (level.getRawBrightness(pos.above(), level.getSkyDarken()) >= 9) {
             int l = state.getValue(CropBlock.AGE);
             if (l < 7) {
                 int water = tile.primalTendencies.getAmount(Aspect.WATER);

@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart, see addons/thaumic-tinkerer/NOTICE.md): test-only
+ * code, distributed under the same licence as the add-on (CC BY-NC-SA 3.0).
+ */
 package thaumic.tinkerer.fabric.testing;
 
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -180,5 +184,45 @@ public final class MachinesGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void everyMobOfTheTableHasAnEntityType(GameTestHelper test) {
         MachinesRuntimeChecks.everyMobOfTheTableHasAnEntityType(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void aSoulMouldLearnsThroughAPlayersInteractionAlsoInCreative(GameTestHelper test) {
+        MachinesRuntimeChecks.aSoulMouldLearnsThroughAPlayersInteractionAlsoInCreative(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void breakingTheAspectalyzerScattersItsStackAndDropsTheBlock(GameTestHelper test) {
+        MachinesRuntimeChecks.breakingTheAspectalyzerScattersItsStackAndDropsTheBlock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void breakingTheRestorerScattersItsToolAndDropsTheBlock(GameTestHelper test) {
+        MachinesRuntimeChecks.breakingTheRestorerScattersItsToolAndDropsTheBlock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void breakingTheFunnelScattersItsJarAndDropsTheBlock(GameTestHelper test) {
+        MachinesRuntimeChecks.breakingTheFunnelScattersItsJarAndDropsTheBlock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void theFunnelPopsOffWithItsJarWhenTheHopperGoes(GameTestHelper test) {
+        MachinesRuntimeChecks.theFunnelPopsOffWithItsJarWhenTheHopperGoes(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void breakingTheCorporealAttractorScattersItsMouldAndDropsTheBlock(GameTestHelper test) {
+        MachinesRuntimeChecks.breakingTheCorporealAttractorScattersItsMouldAndDropsTheBlock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void everyMachineBlockDropsItselfFromItsLootTable(GameTestHelper test) {
+        MachinesRuntimeChecks.everyMachineBlockDropsItselfFromItsLootTable(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void onlyTheAspectalyzerAndTheFunnelConductRedstoneAsIn1710(GameTestHelper test) {
+        MachinesRuntimeChecks.onlyTheAspectalyzerAndTheFunnelConductRedstoneAsIn1710(test);
     }
 }

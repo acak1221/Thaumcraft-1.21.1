@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.Nullable;
 import thaumic.tinkerer.common.core.helper.ItemNBTHelper;
 import thaumic.tinkerer.common.lib.LibMisc;
 
@@ -42,8 +43,13 @@ import thaumic.tinkerer.common.lib.LibMisc;
  *
  * <p>The cancelled break-speed event of the original made the block unbreakable for the tool; the speed factor of zero does
  * the same for digging, and {@link #onBlockBreak} refuses the break itself (for a block that would break in one blow, and
- * for a fake player such as the tablet's, which never digs) unless the player is in creative mode, as the original did not
- * ask the speed there.</p>
+ * for a player that claims to have finished it, a fake player such as the tablet's included) unless the player is in
+ * creative mode, as the original did not ask the speed there.</p>
+ *
+ * <p>The fake player of the Animation Tablet digs with {@code state.getDestroyProgress(player, ...)} and is never ticked, so
+ * nothing calls {@link #update} for it: its owner has to call {@link #updateFor} before each of those calls
+ * ({@code docs/api-requests/Enchantments.md}, section 5). Without the call a tablet digs at the plain speed of the tool,
+ * and the veto of {@link #onBlockBreak} still applies to it.</p>
  */
 public final class BreakSpeedControl {
     /** Id of the transient attribute modifier on {@code BLOCK_BREAK_SPEED}. */
@@ -56,6 +62,20 @@ public final class BreakSpeedControl {
 
     /** Keeps the modifier of the player's dig speed in step with the tool and the target. Server side, once per tick. */
     public static void update(ServerPlayer player) {
+        update(player, null);
+    }
+
+    /**
+     * Like {@link #update(ServerPlayer)} for a player that is not ticked and does not look at what it digs, such as the fake
+     * player of the Animation Tablet: the speed is fitted to the block at {@code target} instead of the block under the
+     * crosshair, so the owner calls it right before it asks {@code state.getDestroyProgress(player, level, pos)} (in
+     * 1.7.10 the {@code BreakSpeed} event fired inside that very call). No lag, as the call comes with the target.
+     */
+    public static void updateFor(ServerPlayer player, BlockPos target) {
+        update(player, target);
+    }
+
+    private static void update(ServerPlayer player, @Nullable BlockPos target) {
         AttributeInstance attribute = player.getAttribute(Attributes.BLOCK_BREAK_SPEED);
         if (attribute == null) return;
 
@@ -70,9 +90,12 @@ public final class BreakSpeedControl {
         }
 
         double factor = 1;
-        HitResult hit = player.pick(player.blockInteractionRange(), 0.0F, false);
-        if (hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult blockHit) {
-            BlockPos pos = blockHit.getBlockPos();
+        BlockPos pos = target;
+        if (pos == null) {
+            HitResult hit = player.pick(player.blockInteractionRange(), 0.0F, false);
+            if (hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult blockHit) pos = blockHit.getBlockPos();
+        }
+        if (pos != null) {
             BlockState state = player.level().getBlockState(pos);
             if (!state.isAir()) {
                 factor = factorFor(player, held, state, player.level(), pos, shatter, tunnel, desintegrate, autoSmelt);

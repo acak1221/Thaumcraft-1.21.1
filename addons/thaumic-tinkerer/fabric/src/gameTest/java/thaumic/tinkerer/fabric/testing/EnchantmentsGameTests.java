@@ -129,4 +129,30 @@ public final class EnchantmentsGameTests implements FabricGameTest {
     public void theTableKnowsOnlyEnchantmentsOfTheWorld(GameTestHelper test) {
         EnchantmentsRuntimeChecks.theTableKnowsOnlyEnchantmentsOfTheWorld(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void theEnchanterOffersWhatTheTypesOf1710AllowedAndNotWhatTheWiderTagsOf121Allow(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.theEnchanterOffersWhatTheTypesOf1710AllowedAndNotWhatTheWiderTagsOf121Allow(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void theAnvilChargesOnePerLevelForABookAndNothingForAToolOfTheEnchantmentsOfTheAddOn(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.theAnvilChargesOnePerLevelForABookAndNothingForAToolOfTheEnchantmentsOfTheAddOn(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void breakingTheEnchanterDropsTheBlockTheToolAndTheWand(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.breakingTheEnchanterDropsTheBlockTheToolAndTheWand(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor(test);
+    }
+
+    /** Fails until TinkererFakePlayer brackets its attack with AttackBoost (docs/api-requests/Enchantments.md, section 5): not required. */
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, required = false)
+    public void aFakePlayerAttackGetsTheEnchantmentsOfItsSword(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.aFakePlayerAttackGetsTheEnchantmentsOfItsSword(test);
+    }
 }

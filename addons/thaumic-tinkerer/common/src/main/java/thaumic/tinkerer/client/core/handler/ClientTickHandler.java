@@ -24,6 +24,11 @@ import dev.architectury.event.events.client.ClientTickEvent;
  * peripherals research, which the port drops with ComputerCraft (see {@code docs/deviations/BasicItems.md}); the
  * second is registered by the Kami group itself ({@code ToolModeHUDHandler.register}) and must not run twice; so what is
  * left is the counter.</p>
+ *
+ * <p>With the Enter shortcut gone, the text of the research page {@code PERIPHERALS} must not promise it: the group's language
+ * fragments ({@code lang-extra/basic_items.*.json}) replace {@code ttresearch.page.PERIPHERALS.0} in every language with a
+ * text that says the computer link is not part of this version. The counter is read by nobody in the add-on today (the Kami
+ * group's {@code ToolModeHUDHandler} keeps one of its own); it stays because it is public in 1.7.10.</p>
  */
 public final class ClientTickHandler {
     /** Client ticks since the game started (1.7.10 {@code elapsedTicks}). */

@@ -50,8 +50,8 @@ import thaumic.tinkerer.common.registry.TTRegistry;
  *
  * <p>1.7.10 had a client twin ({@code PotionEffectHandlerClient}) that drew the particles on the client's own picture
  * of the same events. A 1.21.1 client does not see the attack of a player (damage is the server's), so the particles are
- * sent by the server instead: bursts for air, the sphere of fire, Thaumcraft's sparkles over the earth wall and a puff
- * where lava turns to obsidian. The victims are remembered by their UUID with the dimension and the game time of the
+ * sent by the server instead: Thaumcraft's bursts for air and for the lava that turns to obsidian, a cloud of flames for
+ * fire (one packet per victim and action) and Thaumcraft's sparkles over the earth wall. The victims are remembered by their UUID with the dimension and the game time of the
  * hit (1.7.10 held the entities in a static map); the tables are dropped when the server stops.</p>
  */
 public final class PotionEffectHandler {
@@ -60,6 +60,14 @@ public final class PotionEffectHandler {
     private static final Map<UUID, Hit> AIR_HITS = new HashMap<>();
     private static final Map<UUID, Hit> FIRE_HITS = new HashMap<>();
     private static boolean registered;
+
+    /** The flames the Fire potion draws around a burning victim every fifth tick (the 1.7.10 client twin drew 30 wisps). */
+    static final int FIRE_PARTICLES = 30;
+    /**
+     * The standard deviation, on each axis, of the flames around the victim: the wisps of the original sat on a sphere of
+     * radius 2.5, a count packet of the server puts them in a Gaussian cloud, and 1.5 keeps most of it inside that radius.
+     */
+    static final double FIRE_SPREAD = 1.5;
 
     private PotionEffectHandler() {}
 
@@ -144,7 +152,8 @@ public final class PotionEffectHandler {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (world.getBlockState(pos).is(Blocks.LAVA)) {
                         world.setBlock(pos, Blocks.OBSIDIAN.defaultBlockState(), 3);
-                        world.sendParticles(ParticleTypes.POOF, x + .5, y + .5, z + .5, 3, 0.25, 0.25, 0.25, 0.01);
+                        // the burst of the client twin, where lava was found: burst(x + .5, y + .5, z + .5, 1.2F)
+                        ThaumcraftFX.burst(world, x + .5, y + .5, z + .5, 1.2F);
                     }
                 }
             }
@@ -159,29 +168,19 @@ public final class PotionEffectHandler {
             Random rand = new Random();
             target.setDeltaMovement(rand.nextFloat() - .5, rand.nextFloat(), rand.nextFloat() - .5);
             target.hurtMarked = true;
-            level.sendParticles(ParticleTypes.POOF, target.getX(), target.getY(), target.getZ(), 4, 0.25, 0.25, 0.25, 0.02);
+            // the client twin's burst(target.posX, posY, posZ, .5F), every fifth tick of the second
+            ThaumcraftFX.burst(level, target.getX(), target.getY(), target.getZ(), 0.5F);
         });
 
         // Fire Potion
         tickHits(server, FIRE_HITS, 6000, (target, level) -> {
             target.igniteForSeconds(6);
-            Random rand = new Random();
-
-            for (int i = 0; i < 30; i++) {
-                double theta = rand.nextFloat() * 2 * Math.PI;
-
-                double phi = rand.nextFloat() * 2 * Math.PI;
-                double r = 2.5;
-
-                double x = r * Math.sin(theta) * Math.cos(phi);
-
-                double y = r * Math.sin(theta) * Math.sin(phi);
-
-                double z = r * Math.cos(theta);
-
-                level.sendParticles(ParticleTypes.FLAME, target.getX() + x, target.getY() + y + 1, target.getZ() + z, 1, 0.0, 0.0, 0.0,
-                        0.0);
-            }
+            // The client twin drew 30 wisps on a sphere of radius 2.5 around the victim's chest. One packet carries them
+            // all (a packet each would be thirty times the traffic for every victim, every fifth tick, for five minutes).
+            // Thaumcraft's API has no server twin of the wisp, so the particle is the vanilla flame
+            // (docs/api-requests/SimpleBlocks.md, A8).
+            level.sendParticles(ParticleTypes.FLAME, target.getX(), target.getY() + 1, target.getZ(), FIRE_PARTICLES, FIRE_SPREAD,
+                    FIRE_SPREAD, FIRE_SPREAD, 0.0);
         });
     }
 

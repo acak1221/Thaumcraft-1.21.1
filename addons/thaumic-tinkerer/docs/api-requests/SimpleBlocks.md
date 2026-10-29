@@ -6,28 +6,25 @@ Nothing below was done by reaching past `thaumcraft.api` into the mod's internal
 written down. Priorities are the group's own opinion (P1 changes what the player sees, P3 only hardens something that works
 today).
 
-## 1. Particles of the blocks (A8, P3)
+## 1. Particles of the blocks (A8, P3, mostly done)
 
-**Need.** 1.7.10 drew its effects through `Thaumcraft.proxy.sparkle`, `wispFX2`, `blockRunes`, `burst`. They are client-only
-particles of Thaumcraft with no public facade.
+**Done by the API since the first version of this file.** `thaumcraft.api.client.ThaumcraftClientFX` (`sparkle`, `wisp`,
+`blockRunes`, `burst`, `particleCount`) and the server twins in `ThaumcraftFX` (`sparkle`, `burst`, `blockRunes`,
+`smokeSpiral`) exist and the group uses them: the Gaseous Illuminae and the Nitor Gas (sparkle), the Gaseous Tenebrae (wisp,
+client), the Ward Slab (`blockRunes`), the Travel/Ward Slab and the Forcefield (sparkle, standing for `blockSparkle`), the
+Air and Water potions (`burst` from the server). `SimpleBlockFx` is the one place that picks the client or the server call.
 
-**Used by.** The sparkle of the Gaseous Illuminae, the Nitor Gas and the Forcefield (display ticks, the
-`placeParticle` of the Fume Dissipator and of a spreading), the wisp of the Gaseous Tenebrae, the runes of the Ward Slab
-(`blockRunes`: three colours), the sparkles of the Travel and Ward Slabs when walked on, the bursts of the Air and Fire
-potions, the trail between crops (this one exists: `ThaumcraftFX.essentiaTrail`) and the Earth wall
-(`ThaumcraftFX.blockSparkle`, exists).
+**Still missing, P3.**
 
-**Proposed signature.** As in `API_GAPS.md` A8: a client-only `thaumcraft.api.client.ThaumcraftClientFX` with `sparkle(Level,
-x, y, z, float size, int colour, int ticks, float gravity)`, `wisp(Level, x, y, z, ..., int type)`, `blockRunes(Level, x, y, z,
-float r, float g, float b, int lifetime, float gravity)` and `burst(Level, x, y, z, float size)`, plus the server-side senders
-in `ThaumcraftFX` for the effects that 1.7.10 triggered on the server.
+* A server twin of the wisp: `ThaumcraftFX.wisp(ServerLevel, x, y, z, size, type, shrink, noClip, gravity)` (and the wisp
+  that homes on a point). Used by the Gaseous Tenebrae that is placed or dissolved on the server (`placeParticle`, now a
+  vanilla smoke puff) and by the Fire potion (30 wisps of type 4 around the victim every fifth tick, now one packet of
+  30 vanilla flames).
+* A client `blockSparkle(Level, BlockPos, int rgb, int count)` (the PacketFXBlockSparkle look: sparkles of size 1.75 and
+  gravity 0.1 at random places in the block, in any rgb). The group draws plain sparkles of the nearest type (blue) at
+  random places in the block, because the nearest sparkle types do not include the dark blue of `'?'`/`255`.
 
-**Stub in the add-on.** `SimpleBlockFx`: `END_ROD` for the sparkle and `SMOKE` for the shadow wisp; the Ward Slab draws dust
-particles for the runes, the potion handler `POOF` and `FLAME`; sent by the server (`ServerLevel.sendParticles`) where
-1.7.10 ran on the server or on both sides, and added with `Level.addParticle` in the display ticks. When the facade exists
-`SimpleBlockFx` and these three call sites are the places to change.
-
-**Until then.** The look is vanilla; the counts and places are the original's.
+**Until then.** The look is Thaumcraft's, apart from those two; the counts and places are the original's.
 
 ## 2. Codecs of aspects (A4, P2)
 
@@ -72,7 +69,8 @@ of the add-on looking the hoe up by id.
 
 ## 5. Identifiers the add-on needs by name (A7, P3)
 
-* The sound `thaumcraft:wand` (the Fume Dissipator, the hoe handler): looked up by id; skipped if it is not registered.
+* The sound `thaumcraft:wand` (the Fume Dissipator, the hoe handler): done, `ThaumcraftSoundIds.WAND` (skipped if it is
+  not registered).
 * The Kami leggings `ichorcloth_legs_gem` (the strong Nitor Gas) are the add-on's own item.
 * The warding fence is read through `BlocksTC.state("blockAiry", 4)` (the grid of `legacy_ids.json`); a registry key
   constant would harden it.

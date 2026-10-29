@@ -1,3 +1,8 @@
+/**
+ * This file is new in the port of Thaumic Tinkerer to Minecraft 1.21.1 for Thaumcraft 4 Reload (no 1.7.10
+ * counterpart); it is distributed under the same licence as the add-on (Creative Commons
+ * Attribution-NonCommercial-ShareAlike 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.fabric.testing;
 
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -93,6 +98,11 @@ public final class SimpleBlocksGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void walkingGivesTheEffectsAgainOnlyWhenTheyRunLow(GameTestHelper test) {
+        SimpleBlocksRuntimeChecks.walkingGivesTheEffectsAgainOnlyWhenTheyRunLow(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void aWardSlabSealsTheTwoCellsAbove(GameTestHelper test) {
         SimpleBlocksRuntimeChecks.aWardSlabSealsTheTwoCellsAbove(test);
     }
@@ -130,6 +140,11 @@ public final class SimpleBlocksGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void residueInTheSoilBreedsANewAspect(GameTestHelper test) {
         SimpleBlocksRuntimeChecks.residueInTheSoilBreedsANewAspect(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void theSetCropTendencyCommandMergesATendencyAndTrimsTheSum(GameTestHelper test) {
+        SimpleBlocksRuntimeChecks.theSetCropTendencyCommandMergesATendencyAndTrimsTheSum(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -192,6 +207,11 @@ public final class SimpleBlocksGameTests implements FabricGameTest {
         SimpleBlocksRuntimeChecks.anEarthHitRaisesAWallHalfWayBetween(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100)
+    public void aForcefieldWallOverThePlayersOwnCellDoesNotSuffocateHim(GameTestHelper test) {
+        SimpleBlocksRuntimeChecks.aForcefieldWallOverThePlayersOwnCellDoesNotSuffocateHim(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void aWaterImbuedPlayerTurnsNearbyLavaIntoObsidian(GameTestHelper test) {
         SimpleBlocksRuntimeChecks.aWaterImbuedPlayerTurnsNearbyLavaIntoObsidian(test);
@@ -215,6 +235,11 @@ public final class SimpleBlocksGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void anImbuedFireBurnsOutWithoutFuelUnlessItIsASource(GameTestHelper test) {
         SimpleBlocksRuntimeChecks.anImbuedFireBurnsOutWithoutFuelUnlessItIsASource(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void aFireAtMaximumAgeIsStillTickedAtRandomAndBurnsOut(GameTestHelper test) {
+        SimpleBlocksRuntimeChecks.aFireAtMaximumAgeIsStillTickedAtRandomAndBurnsOut(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

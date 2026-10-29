@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart: tests). Distributed under the same licence as the
+ * add-on (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.basicitems;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -216,5 +220,19 @@ class BasicItemsResourcesTest {
         JsonObject en = json("/assets/" + NS + "/lang/en_us.json");
         assertTrue(en.get("ttmisc.xpTalisman.xp").getAsString().contains("%s"));
         assertTrue(en.get("ttmisc.shareTome.playerName").getAsString().contains("%s"));
+    }
+
+    @Test
+    void thePeripheralsPageNoLongerPromisesTheEnterShortcutOrTheWebPage() {
+        // GuiResearchPeripheral (Enter opened a web address) is not ported, so no language may still say it does.
+        for (String lang : List.of("en_us", "ru_ru", "de_de", "fr_fr", "ko_kr", "zh_cn")) {
+            JsonObject table = json("/assets/" + NS + "/lang/" + lang + ".json");
+            assertTrue(table.has("ttresearch.page.PERIPHERALS.0"), lang + " has the page");
+            String text = table.get("ttresearch.page.PERIPHERALS.0").getAsString();
+            for (String promise : List.of("ENTER", "ENTRÉE", "vazkii.us", "回车")) {
+                assertTrue(!text.contains(promise), lang + " still says " + promise + ": " + text);
+            }
+            assertTrue(text.contains("ComputerCraft"), lang + " still names ComputerCraft");
+        }
     }
 }

@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart, see addons/thaumic-tinkerer/NOTICE.md): test-only
+ * code, distributed under the same licence as the add-on (CC BY-NC-SA 3.0).
+ */
 package thaumic.tinkerer.machines;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,8 +25,6 @@ import thaumic.tinkerer.common.block.tile.TileRepairer;
 import thaumic.tinkerer.common.item.ItemMobAspect;
 
 /**
- * Test-only code of the port (no 1.7.10 counterpart), CC BY-NC-SA 3.0 like the add-on.
- *
  * <p>The plain rules of the machines: the magnet's range and motion, what the repairer accepts, the names of the
  * soul aspect items.</p>
  */

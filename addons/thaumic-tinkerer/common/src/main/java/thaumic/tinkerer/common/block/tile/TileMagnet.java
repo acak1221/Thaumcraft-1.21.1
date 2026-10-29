@@ -15,8 +15,6 @@ package thaumic.tinkerer.common.block.tile;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
@@ -25,6 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.api.client.ThaumcraftClientFX;
 import thaumic.tinkerer.common.block.BlockMagnet;
 import thaumic.tinkerer.common.content.Machines;
 
@@ -36,10 +35,6 @@ import thaumic.tinkerer.common.content.Machines;
  * pushes, "red"); the Corporeal Attractor ({@link TileMobMagnet}) is a block of its own (bit 1 of the metadata).</p>
  */
 public class TileMagnet extends BlockEntity {
-
-    /** Sparkle colours of the original ({@code sparkle(x, y, z, 2)} blue, {@code 4} red). */
-    private static final int PULL_COLOR = 0xFF3F7FFF;
-    private static final int PUSH_COLOR = 0xFFFF3F3F;
 
     public TileMagnet(BlockPos pos, BlockState state) {
         this(Machines.TILE_MAGNET.get(), pos, state);
@@ -86,8 +81,7 @@ public class TileMagnet extends BlockEntity {
                 if (distanceSqrd > 1) {
                     setEntityMotionFromVector(entity, new Vec3(x1, y1, z1), speedMod * 0.25F);
                     if (level.isClientSide) {
-                        level.addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT,
-                                blue ? PULL_COLOR : PUSH_COLOR), x2, y2, z2, 0, 0, 0);
+                        ThaumcraftClientFX.sparkle(level, x2, y2, z2, blue ? 2 : 4);
                     }
                 }
             }

@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart: tests). Distributed under the same licence as the
+ * add-on (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.testing;
 
 import java.util.ArrayList;
@@ -11,6 +15,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -68,7 +73,6 @@ import thaumic.tinkerer.common.item.BasicItemComponents;
 import thaumic.tinkerer.common.item.BasicItemComponents.ShareData;
 import thaumic.tinkerer.common.item.ItemCleansingTalisman;
 import thaumic.tinkerer.common.item.ItemInfusedInkwell;
-import thaumic.tinkerer.common.item.ItemRevealingHelm;
 import thaumic.tinkerer.common.item.ItemShareBook;
 import thaumic.tinkerer.common.item.ItemSpellCloth;
 import thaumic.tinkerer.common.item.ItemXPTalisman;
@@ -106,7 +110,12 @@ public final class BasicItemsRuntimeChecks {
         for (int x = 0; x <= 7; x++) for (int z = 0; z <= 7; z++) test.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
     }
 
-    /** A mock player (it joins the player list and ticks with the world, with a fresh id) at the relative position. */
+    /**
+     * A mock player (it joins the player list and ticks with the world, with a fresh id) at the relative position.
+     * {@code makeMockServerPlayerInLevel} is deprecated for removal in 1.21.1 but is the only mock of the helper that is a
+     * real {@code ServerPlayer} in the level; this is the one place of the group's checks that calls it.
+     */
+    @SuppressWarnings("removal")
     private static ServerPlayer player(GameTestHelper test, double x, double y, double z) {
         ServerPlayer player = test.makeMockServerPlayerInLevel();
         Vec3 at = test.absoluteVec(new Vec3(x, y, z));
@@ -215,7 +224,9 @@ public final class BasicItemsRuntimeChecks {
         test.assertTrue(!cloth.hasFoil(), "the cloth does not shine");
 
         ItemStack remedium = TTRegistry.stack(LibItemNames.CLEANSING_TALISMAN);
-        test.assertTrue(remedium.getMaxDamage() == 100 && remedium.getMaxStackSize() == 1, "remedium: 100, no stacking");
+        // 1.7.10 setMaxDamage(100) broke the item only above 100, i.e. after 101 points of wear: registered with 101
+        test.assertTrue(remedium.getMaxDamage() == ItemCleansingTalisman.USES + 1 && remedium.getMaxStackSize() == 1,
+                "remedium: 101 points of wear (1.7.10: 100 and 'above'), no stacking");
         test.assertTrue(remedium.getRarity() == Rarity.UNCOMMON, "remedium is uncommon");
         test.assertTrue(remedium.getItem().getEnchantmentValue() == 10, "enchantability 10, equivalent to iron");
         test.assertTrue(remedium.getItem().isValidRepairItem(remedium, TTRegistry.stack(LibItemNames.DARK_QUARTZ)),
@@ -486,13 +497,38 @@ public final class BasicItemsRuntimeChecks {
             test.assertTrue(!player.isOnFire(), "the fire is put out");
             test.assertTrue(talisman.getDamageValue() == 15, "for one point: " + talisman.getDamageValue());
 
-            // The last point breaks it.
-            talisman.setDamageValue(99);
+            // 1.7.10 broke the talisman when its damage went above 100: 100 points of wear are survived, the 101st breaks it.
+            talisman.setDamageValue(ItemCleansingTalisman.USES - 1);
             player.addEffect(new MobEffectInstance(MobEffects.WITHER, 600));
             player.tickCount = 220;
             bauble.onWornTick(talisman, player);
             test.assertTrue(!player.hasEffect(MobEffects.WITHER), "the wither is removed");
-            test.assertTrue(talisman.isEmpty(), "and the talisman is spent: " + talisman);
+            test.assertTrue(!talisman.isEmpty() && talisman.getDamageValue() == ItemCleansingTalisman.USES,
+                    "100 points of wear do not break it: " + talisman);
+            player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 600));
+            player.tickCount = 240;
+            bauble.onWornTick(talisman, player);
+            test.assertTrue(!player.hasEffect(MobEffects.HUNGER), "the hunger is removed");
+            test.assertTrue(talisman.isEmpty(), "and the 101st point spends the talisman: " + talisman);
+
+            // A warp effect (ten points) breaks it from 91 points of wear on, as in 1.7.10 (91 + 10 = 101 > 100).
+            ItemStack second = TTRegistry.stack(LibItemNames.CLEANSING_TALISMAN);
+            ItemCleansingTalisman.setEnabled(second, true);
+            second.setDamageValue(ItemCleansingTalisman.USES - 10);
+            player.addEffect(new MobEffectInstance(blurred, 600));
+            player.tickCount = 260;
+            bauble.onWornTick(second, player);
+            test.assertTrue(!second.isEmpty() && second.getDamageValue() == ItemCleansingTalisman.USES,
+                    "90 + 10 = 100 points: still whole: " + second);
+            ItemStack third = TTRegistry.stack(LibItemNames.CLEANSING_TALISMAN);
+            ItemCleansingTalisman.setEnabled(third, true);
+            third.setDamageValue(ItemCleansingTalisman.USES - 9);
+            // another warp effect: the one removed last, if it came back at once, would be removed for nothing
+            Holder<net.minecraft.world.effect.MobEffect> hunger = WarpEffects.holder(WarpEffects.UNNATURAL_HUNGER);
+            player.addEffect(new MobEffectInstance(hunger, 600));
+            player.tickCount = 280;
+            bauble.onWornTick(third, player);
+            test.assertTrue(third.isEmpty(), "91 + 10 = 101 points: broken: " + third);
         } finally {
             ItemCleansingTalisman.forget(player.getUUID());
         }
@@ -644,6 +680,55 @@ public final class BasicItemsRuntimeChecks {
         test.assertTrue(ItemXPTalisman.getXP(talisman) == ItemXPTalisman.MAX_XP && !extra.isRemoved(),
                 "and leaves the orb alone");
         extra.discard();
+        test.succeed();
+    }
+
+    /** An experience orb of 1.21.1 that stands for {@code count} orbs of {@code value} points (the count has no setter). */
+    private static ExperienceOrb mergedOrb(ServerLevel level, Vec3 at, int value, int count) {
+        ExperienceOrb orb = new ExperienceOrb(level, at.x, at.y, at.z, value);
+        CompoundTag tag = new CompoundTag();
+        orb.addAdditionalSaveData(tag);
+        tag.putInt("Count", count);
+        orb.readAdditionalSaveData(tag);
+        level.addFreshEntity(orb);
+        return orb;
+    }
+
+    public static void xpTalismanCountsEveryOrbOfAMergedOrb(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 4.5, 1, 4.5);
+        ServerLevel level = test.getLevel();
+        ItemStack talisman = TTRegistry.stack(LibItemNames.XP_TALISMAN);
+        IBauble bauble = (IBauble) talisman.getItem();
+        ItemXPTalisman.setAbsorbing(talisman, true);
+        Vec3 at = player.position().add(1, 0.5, 0);
+
+        // The orb stands for 4 orbs of 7 points: all 28 points go into the talisman, the entity goes.
+        ExperienceOrb merged = mergedOrb(level, at, 7, 4);
+        test.assertTrue(ItemXPTalisman.orbCount(merged) == 4 && merged.getValue() == 7, "the test orb is 4 x 7");
+        bauble.onWornTick(talisman, player);
+        test.assertTrue(merged.isRemoved(), "the whole merged orb is taken");
+        test.assertTrue(ItemXPTalisman.getXP(talisman) == 28, "4 x 7 = 28 points, not 7: " + ItemXPTalisman.getXP(talisman));
+
+        // Part of it fits: 50 points are free (1.7.10 arithmetic: 10, then 20 of 40 left, then 30 does not fit in 20 and the
+        // loop ends), so two of the twenty orbs are taken and the entity keeps the other eighteen.
+        ItemXPTalisman.setXP(talisman, ItemXPTalisman.MAX_XP - 50);
+        ExperienceOrb big = mergedOrb(level, at, 10, 20);
+        bauble.onWornTick(talisman, player);
+        test.assertTrue(!big.isRemoved(), "an orb that only partly fits stays");
+        test.assertTrue(ItemXPTalisman.orbCount(big) == 18 && big.getValue() == 10,
+                "with the orbs that were not taken: " + ItemXPTalisman.orbCount(big) + " x " + big.getValue());
+        test.assertTrue(ItemXPTalisman.getXP(talisman) == ItemXPTalisman.MAX_XP - 30,
+                "2 x 10 points went in: " + ItemXPTalisman.getXP(talisman));
+        big.discard();
+
+        // Nothing fits: the orb is untouched and no point is lost.
+        ItemXPTalisman.setXP(talisman, ItemXPTalisman.MAX_XP - 5);
+        ExperienceOrb none = mergedOrb(level, at, 10, 3);
+        bauble.onWornTick(talisman, player);
+        test.assertTrue(!none.isRemoved() && ItemXPTalisman.orbCount(none) == 3, "an orb of 10 does not fit in 5 points");
+        test.assertTrue(ItemXPTalisman.getXP(talisman) == ItemXPTalisman.MAX_XP - 5, "and the talisman keeps its points");
+        none.discard();
         test.succeed();
     }
 

@@ -13,6 +13,10 @@
     {
       "id": "thaumictinkerer:blood_sword",
       "required": false
+    },
+    {
+      "id": "thaumcraft:crimson_sword",
+      "required": false
     }
   ]
 }

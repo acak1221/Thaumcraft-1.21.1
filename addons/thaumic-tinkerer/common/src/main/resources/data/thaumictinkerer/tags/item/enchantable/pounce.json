@@ -9,6 +9,18 @@
     {
       "id": "thaumictinkerer:ichorcloth_legs_gem",
       "required": false
+    },
+    {
+      "id": "thaumcraft:cultist_robe_legs",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:cultist_plate_legs",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:cultist_leader_legs",
+      "required": false
     }
   ]
 }

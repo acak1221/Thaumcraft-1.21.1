@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -25,12 +26,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -51,6 +54,7 @@ import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 import thaumic.tinkerer.common.core.helper.ProjectileHelper;
 import thaumic.tinkerer.common.item.foci.FociComponents;
+import thaumic.tinkerer.common.item.foci.FociHooks;
 import thaumic.tinkerer.common.item.foci.FociComponents.DislocationData;
 import thaumic.tinkerer.common.item.foci.ItemFocusDeflect;
 import thaumic.tinkerer.common.item.foci.ItemFocusDislocation;
@@ -433,6 +437,43 @@ public final class FociRuntimeChecks {
         ((ItemFocusFlight) TTRegistry.item(LibItemNames.FOCUS_FLIGHT)).onFocusRightClick(empty, test.getLevel(), player,
                 InteractionHand.MAIN_HAND);
         test.assertTrue(player.getDeltaMovement().equals(Vec3.ZERO), "no launch without vis");
+        test.succeed();
+    }
+
+    /**
+     * The server kicks a player whose "ticks above the ground" counter passes 80 when {@code allow-flight} is off; every cast
+     * of the focus must put the counter of his connection back to zero, as 1.7.10 did with {@code floatingTickCount}.
+     */
+    public static void flightPutsTheKickCounterOfTheConnectionBackToZero(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 3.5, 1, 3.5, 90.0F, -30.0F);
+        test.assertTrue(player.connection != null, "the mock player has a connection");
+        test.assertTrue(FociHooks.canReachCounter(), "the counter field of the connection can be reached");
+        ItemStack wand = wand(test, LibItemNames.FOCUS_FLIGHT, true);
+        player.setItemInHand(InteractionHand.MAIN_HAND, wand);
+        ItemFocusFlight flight = (ItemFocusFlight) TTRegistry.item(LibItemNames.FOCUS_FLIGHT);
+
+        test.assertTrue(FociHooks.setAboveGroundTicks(player, 79), "the counter can be written");
+        test.assertTrue(FociHooks.aboveGroundTicks(player) == 79, "and read back: " + FociHooks.aboveGroundTicks(player));
+        flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
+        test.assertTrue(FociHooks.aboveGroundTicks(player) == 0, "a cast clears the counter: " + FociHooks.aboveGroundTicks(player));
+
+        // A cast that does nothing (the config switch is off, or there is no vis) does not touch it, as in 1.7.10.
+        FociHooks.setAboveGroundTicks(player, 40);
+        flight.onFocusRightClick(wand(test, LibItemNames.FOCUS_FLIGHT, false), test.getLevel(), player, InteractionHand.MAIN_HAND);
+        test.assertTrue(FociHooks.aboveGroundTicks(player) == 40, "no vis, no reset: " + FociHooks.aboveGroundTicks(player));
+
+        // A loader or the API can take the reset over, and null gives the default back.
+        int[] calls = { 0 };
+        FociHooks.setFloatingTickReset(who -> calls[0]++);
+        try {
+            flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
+            test.assertTrue(calls[0] == 1 && FociHooks.aboveGroundTicks(player) == 40, "the installed reset runs instead of the default");
+        } finally {
+            FociHooks.setFloatingTickReset(null);
+        }
+        flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
+        test.assertTrue(FociHooks.aboveGroundTicks(player) == 0 && calls[0] == 1, "the default is back");
         test.succeed();
     }
 
@@ -1061,6 +1102,64 @@ public final class FociRuntimeChecks {
         BlockState placed = test.getBlockState(new BlockPos(5, 1, 5));
         test.assertTrue(placed.is(Blocks.WATER) && placed.getFluidState().isSource(), "a source of water is put down: " + placed);
         test.assertTrue(ItemFocusDislocation.getData(wand) == null, "the focus is empty");
+        test.succeed();
+    }
+
+    /** The ray of the wand stops on a source of water, not on flowing water (1.7.10 {@code BlockLiquid.canCollideCheck}). */
+    public static void dislocationDoesNotTakeFlowingWater(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 2.5, 1, 0.5, 0.0F, 0.0F);
+        BlockPos water = new BlockPos(2, 2, 3);
+        test.setBlock(water, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 1));
+        ItemStack wand = wand(test, LibItemNames.FOCUS_DISLOCATION, true);
+        player.setItemInHand(InteractionHand.MAIN_HAND, wand);
+        AspectList before = WandHelper.getAllVis(wand);
+        wand.use(test.getLevel(), player, InteractionHand.MAIN_HAND);
+        test.assertTrue(ItemFocusDislocation.getData(wand) == null, "the ray passes through flowing water: nothing is carried");
+        dislocation().dislocate(wand, test.getLevel(), player, InteractionHand.MAIN_HAND, hit(test, water, Direction.UP));
+        test.assertTrue(ItemFocusDislocation.getData(wand) == null, "flowing water is not taken even when it is aimed at by hand");
+        test.assertTrue(test.getBlockState(water).is(Blocks.WATER), "and it stays");
+        assertNothingSpent(test, wand, before, "flowing water");
+        test.succeed();
+    }
+
+    /**
+     * {@code DoublePlantBlock.setPlacedBy} and {@code BedBlock.setPlacedBy} build their other half over whatever stands there,
+     * so the focus carries neither half of a tall plant, and a load of that kind that was made by a command is dropped instead
+     * of overwriting the block above (a barrier here).
+     */
+    public static void dislocationRefusesTheHalvesOfTallPlantsAndNeverOverwritesTheBlockAbove(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 6.5, 1, 6.5, 0.0F, 0.0F);
+        ServerLevel level = test.getLevel();
+        ItemStack wand = wand(test, LibItemNames.FOCUS_DISLOCATION, true);
+        player.setItemInHand(InteractionHand.MAIN_HAND, wand);
+        AspectList before = WandHelper.getAllVis(wand);
+
+        BlockPos lower = new BlockPos(2, 1, 2);
+        BlockPos upper = lower.above();
+        test.setBlock(lower.below(), Blocks.DIRT); // a tall plant stands on dirt, not on the stone of the floor
+        test.setBlock(lower, Blocks.ROSE_BUSH.defaultBlockState());
+        test.setBlock(upper, Blocks.ROSE_BUSH.defaultBlockState().setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER));
+        for (BlockPos half : List.of(lower, upper)) {
+            dislocation().dislocate(wand, level, player, InteractionHand.MAIN_HAND, hit(test, half, Direction.EAST));
+            test.assertTrue(ItemFocusDislocation.getData(wand) == null, "a half of a rose bush is not carried: " + half);
+        }
+        test.assertBlockPresent(Blocks.ROSE_BUSH, lower);
+        test.assertBlockPresent(Blocks.ROSE_BUSH, upper);
+        assertNothingSpent(test, wand, before, "the rose bush");
+
+        // A load made by a command: the lower half of a rose bush, to be put on grass under a barrier.
+        BlockPos grass = new BlockPos(5, 1, 5);
+        test.setBlock(grass, Blocks.GRASS_BLOCK);
+        test.setBlock(grass.above(2), Blocks.BARRIER);
+        ItemStack focus = WandHelper.getFocusItem(wand);
+        focus.set(FociComponents.DISLOCATION.get(), new DislocationData(Blocks.ROSE_BUSH.defaultBlockState(), new CompoundTag()));
+        test.assertTrue(WandHelper.setFocus(wand, focus), "the load can be set");
+        dislocation().dislocate(wand, level, player, InteractionHand.MAIN_HAND, hit(test, grass, Direction.UP));
+        test.assertBlockPresent(Blocks.BARRIER, grass.above(2));
+        test.assertTrue(test.getBlockState(grass.above()).isAir(), "nothing was put down");
+        test.assertTrue(ItemFocusDislocation.getData(wand) == null, "the load that could never be put down is dropped, the focus is not stuck");
         test.succeed();
     }
 

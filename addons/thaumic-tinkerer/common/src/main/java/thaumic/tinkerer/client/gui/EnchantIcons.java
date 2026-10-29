@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
  * The icons of the enchantments on the buttons of the Enchanter's screen. The textures of 1.7.10 come in two sizes (32
  * pixels, and 512 pixels for the Thaumic Tinkerer ones), and the screen drew whichever it was onto 16 by 16 pixels with the
  * texture coordinates 0 to 1 ({@code drawTexturedModalRect16}); 1.21.1 needs the size of the texture to do the same, which is
- * read once from the header of the PNG.
+ * read from the header of the PNG once per resource load ({@link #clear} runs when the resources reload).
  */
 public final class EnchantIcons {
     /** The size of an icon on the screen. */
@@ -42,6 +42,15 @@ public final class EnchantIcons {
     /** The width (the textures are square) of a PNG of the resource packs; 32 when it cannot be read. */
     public static int sizeOf(ResourceLocation texture) {
         return SIZES.computeIfAbsent(texture, EnchantIcons::readSize);
+    }
+
+    /**
+     * Forgets every size read so far (and the 32 that stands for a texture that could not be read). Called when the resources
+     * reload ({@code EnchantmentsClient}): a resource pack may bring icons of another size, and the buttons would draw a
+     * wrong part of them or a stretched icon with the size of the old texture.
+     */
+    public static void clear() {
+        SIZES.clear();
     }
 
     private static int readSize(ResourceLocation texture) {

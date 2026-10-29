@@ -67,8 +67,15 @@ import thaumic.tinkerer.common.research.TTResearchItem;
  * the player leaves.</p>
  */
 public class ItemCleansingTalisman extends Item implements IBauble, ITTinkererRegisterable {
-    /** {@code LibFeatures.CLEANSING_TALISMAN_USES}: the durability of the talisman. */
+    /**
+     * {@code LibFeatures.CLEANSING_TALISMAN_USES}: the maximum damage of the talisman in 1.7.10, where an item broke only when
+     * its damage went <em>above</em> the maximum, so it took {@code USES + 1} points of wear (11 removals of a warp effect,
+     * 101 plain ones). 1.21.1 breaks an item when the damage <em>reaches</em> the maximum, so the item is registered with
+     * {@link #MAX_DAMAGE} to keep the number of removals (see {@code docs/deviations/BasicItems.md}).
+     */
     public static final int USES = 100;
+    /** The maximum damage of the registered item: {@link #USES} + 1, the points of wear the 1.7.10 talisman took before it broke. */
+    public static final int MAX_DAMAGE = USES + 1;
     /**
      * The effects of warp that wear the talisman ten times as much (1.7.10 {@code Config.potionBlurredID},
      * {@code potionDeathGazeID}, {@code potionInfVisExhaustID}, {@code potionSunScornedID} and {@code potionUnHungerID}),
@@ -86,7 +93,7 @@ public class ItemCleansingTalisman extends Item implements IBauble, ITTinkererRe
     private static final Map<UUID, CleansingLogic.State> STATES = new HashMap<>();
 
     public ItemCleansingTalisman(Item.Properties properties) {
-        super(properties.durability(USES).stacksTo(1).rarity(Rarity.UNCOMMON));
+        super(properties.durability(MAX_DAMAGE).stacksTo(1).rarity(Rarity.UNCOMMON));
     }
 
     private static String id(ResourceKey<MobEffect> key) {

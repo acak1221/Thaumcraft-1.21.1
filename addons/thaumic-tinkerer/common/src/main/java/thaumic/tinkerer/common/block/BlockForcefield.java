@@ -41,9 +41,18 @@ public class BlockForcefield extends BaseEntityBlock {
         super(properties);
     }
 
+    /**
+     * Full collision, nothing else of a solid block: 1.7.10 made the wall {@code Material.air}, which is no normal cube,
+     * does not suffocate, does not block the view and is no redstone conductor. The defaults of 1.21.1 would make the wall
+     * hurt whoever stands in one of its cells (the Earth potion raises it over the plane through the drinker's own cell when
+     * the victim is close), so the three predicates are switched off.
+     */
     public static BlockBehaviour.Properties defaultProperties() {
         return BlockBehaviour.Properties.of().noOcclusion().replaceable().instabreak().noLootTable()
-                .pushReaction(PushReaction.DESTROY).noTerrainParticles();
+                .pushReaction(PushReaction.DESTROY).noTerrainParticles()
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos) -> false)
+                .isRedstoneConductor((state, level, pos) -> false);
     }
 
     @Override

@@ -1,8 +1,15 @@
+/**
+ * This file is new in the port of Thaumic Tinkerer to Minecraft 1.21.1 for Thaumcraft 4 Reload (no 1.7.10
+ * counterpart); it is distributed under the same licence as the add-on (Creative Commons
+ * Attribution-NonCommercial-ShareAlike 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.testing;
 
+import com.mojang.brigadier.CommandDispatcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -52,7 +59,6 @@ import thaumic.tinkerer.common.block.BlockCamo;
 import thaumic.tinkerer.common.block.BlockGas;
 import thaumic.tinkerer.common.block.BlockInfusedGrain;
 import thaumic.tinkerer.common.block.BlockNitorGas;
-import thaumic.tinkerer.common.block.BlockPlatform;
 import thaumic.tinkerer.common.block.BlockWardSlab;
 import thaumic.tinkerer.common.block.fire.BlockFireBase;
 import thaumic.tinkerer.common.block.tile.TileCamo;
@@ -61,12 +67,11 @@ import thaumic.tinkerer.common.block.tile.TileInfusedFarmland;
 import thaumic.tinkerer.common.block.tile.TileInfusedGrain;
 import thaumic.tinkerer.common.block.tile.TileWardedSlab;
 import thaumic.tinkerer.common.content.SimpleBlocks;
+import thaumic.tinkerer.common.core.commands.SetTendencyCommand;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 import thaumic.tinkerer.common.core.helper.AspectCropLootManager;
 import thaumic.tinkerer.common.item.InfusedSeedComponents;
 import thaumic.tinkerer.common.item.ItemBrightNitor;
-import thaumic.tinkerer.common.item.ItemGas;
-import thaumic.tinkerer.common.item.ItemGasRemover;
 import thaumic.tinkerer.common.item.ItemInfusedGrain;
 import thaumic.tinkerer.common.item.ItemInfusedPotion;
 import thaumic.tinkerer.common.item.ItemInfusedSeeds;
@@ -97,7 +102,12 @@ public final class SimpleBlocksRuntimeChecks {
         for (int x = 0; x <= 7; x++) for (int z = 0; z <= 7; z++) test.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
     }
 
-    /** A server player who is not in creative mode (the gas and the seeds are used up), standing on the floor. */
+    /**
+     * A server player who is not in creative mode (the gas and the seeds are used up), standing on the floor.
+     * {@code makeMockServerPlayerInLevel} is deprecated for removal in 1.21.1 but is the only mock of the helper that is a
+     * {@code ServerPlayer} (the other, {@code makeMockPlayer}, is a plain {@code Player}), and the other groups use it too.
+     */
+    @SuppressWarnings("removal")
     private static ServerPlayer mockPlayer(GameTestHelper test, double x, double z) {
         ServerPlayer player = test.makeMockServerPlayerInLevel();
         player.getAbilities().instabuild = false;
@@ -605,6 +615,43 @@ public final class SimpleBlocksRuntimeChecks {
         test.succeed();
     }
 
+    /**
+     * stepOn runs on every tick of walking, so the effects are given again only when they are missing or about to run out
+     * (adding the same effect on each tick re-sends it to a player and fires an advancement trigger every tick).
+     */
+    public static void walkingGivesTheEffectsAgainOnlyWhenTheyRunLow(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        Pig pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(6, 1, 6));
+        BlockPos rel = new BlockPos(3, 1, 3);
+        test.setBlock(rel, SimpleBlocks.TRAVEL_SLAB.get());
+        BlockPos abs = test.absolutePos(rel);
+        Block slab = SimpleBlocks.TRAVEL_SLAB.get();
+
+        pig.removeAllEffects();
+        pig.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 30, 1));
+        pig.addEffect(new MobEffectInstance(MobEffects.JUMP, 30, 0));
+        MobEffectInstance speedBefore = pig.getEffect(MobEffects.MOVEMENT_SPEED);
+        slab.stepOn(level, abs, level.getBlockState(abs), pig);
+        test.assertTrue(pig.getEffect(MobEffects.MOVEMENT_SPEED) == speedBefore && speedBefore.getDuration() == 30,
+                "30 ticks left: the speed is left alone, found " + pig.getEffect(MobEffects.MOVEMENT_SPEED));
+        test.assertTrue(pig.getEffect(MobEffects.JUMP).getDuration() == 30, "and so is the jump boost");
+
+        pig.removeAllEffects();
+        pig.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 15, 1));
+        pig.addEffect(new MobEffectInstance(MobEffects.JUMP, 15, 0));
+        slab.stepOn(level, abs, level.getBlockState(abs), pig);
+        test.assertTrue(pig.getEffect(MobEffects.MOVEMENT_SPEED).getDuration() == 40, "15 ticks left: given again for forty");
+        test.assertTrue(pig.getEffect(MobEffects.JUMP).getDuration() == 40, "and so is the jump boost");
+
+        pig.removeAllEffects();
+        pig.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 30, 0));
+        slab.stepOn(level, abs, level.getBlockState(abs), pig);
+        test.assertTrue(pig.getEffect(MobEffects.MOVEMENT_SPEED).getAmplifier() == 1, "a weaker speed is replaced by speed II");
+        pig.removeAllEffects();
+        test.succeed();
+    }
+
     public static void aWardSlabSealsTheTwoCellsAbove(GameTestHelper test) {
         floor(test);
         ServerLevel level = test.getLevel();
@@ -825,6 +872,51 @@ public final class SimpleBlocksRuntimeChecks {
         test.succeed();
     }
 
+    /** The debug command {@code /setCropTendency <Aspect> <Count>}, once the crop is found, and its switch. */
+    public static void theSetCropTendencyCommandMergesATendencyAndTrimsTheSum(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        BlockPos cropRel = plantRipeCrop(test, Aspect.AIR, 3);
+        TileInfusedGrain tile = tile(test, cropRel, TileInfusedGrain.class);
+        test.assertTrue(SetTendencyCommand.apply(tile, "AQUA", "30") == SetTendencyCommand.Result.DONE
+                && tile.primalTendencies.getAmount(Aspect.WATER) == 30, "the name is any case, the count is merged: " + tile.primalTendencies.getAmount(Aspect.WATER));
+        SetTendencyCommand.apply(tile, "aqua", "10");
+        test.assertTrue(tile.primalTendencies.getAmount(Aspect.WATER) == 30, "merge keeps the larger amount");
+        test.assertTrue(SetTendencyCommand.apply(tile, "Ignis", "40") == SetTendencyCommand.Result.DONE, "a second aspect");
+        int sum = 0;
+        for (int amount : tile.primalTendencies.aspects.values()) sum += amount;
+        test.assertTrue(sum == 50, "the tendencies are trimmed to fifty points, found " + sum);
+
+        int ordo = tile.primalTendencies.getAmount(Aspect.ORDER);
+        test.assertTrue(SetTendencyCommand.apply(tile, "ordo", "many") == SetTendencyCommand.Result.INVALID_NUMBER
+                && tile.primalTendencies.getAmount(Aspect.ORDER) == ordo, "a count that is no number: 'Invalid number', nothing merged");
+        test.assertTrue(SetTendencyCommand.apply(tile, "vacuos", "5") == SetTendencyCommand.Result.NO_SUCH_ASPECT
+                && SetTendencyCommand.apply(tile, "", "5") == SetTendencyCommand.Result.NO_SUCH_ASPECT, "a compound aspect does nothing");
+
+        // the trimming removes a point at a time: the largest count must not keep the server busy
+        long start = System.nanoTime();
+        test.assertTrue(SetTendencyCommand.apply(tile, "terra", Integer.toString(Integer.MAX_VALUE)) == SetTendencyCommand.Result.DONE, "the largest int");
+        test.assertTrue(System.nanoTime() - start < 2_000_000_000L, "and it returns at once");
+        sum = 0;
+        for (int amount : tile.primalTendencies.aspects.values()) sum += amount;
+        test.assertTrue(sum == 50, "still fifty points: " + sum);
+
+        // the command exists while the debug switch is on
+        CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
+        SetTendencyCommand.register(dispatcher);
+        CommandSourceStack source = level.getServer().createCommandSourceStack();
+        boolean before = ConfigHandler.enableDebugCommands;
+        try {
+            ConfigHandler.enableDebugCommands = false;
+            test.assertTrue(!dispatcher.getRoot().getChild(SetTendencyCommand.NAME).canUse(source), "switched off: nobody may use it");
+            ConfigHandler.enableDebugCommands = true;
+            test.assertTrue(dispatcher.getRoot().getChild(SetTendencyCommand.NAME).canUse(source), "switched on: everybody may (1.7.10)");
+        } finally {
+            ConfigHandler.enableDebugCommands = before;
+        }
+        test.succeed();
+    }
+
     public static void aCropGrowsInItsTileAndNotByRandomTicks(GameTestHelper test) {
         floor(test);
         ServerLevel level = test.getLevel();
@@ -972,6 +1064,9 @@ public final class SimpleBlocksRuntimeChecks {
         for (int i = 0; i < 4; i++) {
             ItemStack grain = new ItemStack(BuiltInRegistries.ITEM.get(LibMisc.id(ItemInfusedGrain.path(i))));
             ItemStack potion = new ItemStack(BuiltInRegistries.ITEM.get(LibMisc.id(ItemInfusedPotion.path(i))));
+            test.assertTrue(potion.hasFoil(), "the potion glints, as ItemPotion did");
+            test.assertTrue(potion.getItem().getDescriptionId().equals("item.infusedPotion." + ItemInfusedPotion.ASPECTS[i].getName() + ".name"),
+                    "the description id is the key of the name: " + potion.getItem().getDescriptionId());
             test.assertTrue(((ItemInfusedGrain) grain.getItem()).getAspect(grain) == aspects[i], "grain " + i);
             test.assertTrue(((ItemInfusedPotion) potion.getItem()).getAspect(potion) == aspects[i], "potion " + i);
             test.assertTrue(ItemInfusedGrain.stackFor(aspects[i]).is(grain.getItem()), "stackFor " + i);
@@ -1071,6 +1166,38 @@ public final class SimpleBlocksRuntimeChecks {
         test.assertTrue(stateAt(test, new BlockPos(3, 2, 2)).is(Blocks.STONE), "stone stays");
         test.assertTrue(stateAt(test, new BlockPos(3, 3, 3)).is(SimpleBlocks.FORCEFIELD.get()), "a free cell is filled again");
         finish(test, player);
+    }
+
+    /**
+     * The wall is raised over the plane through the drinker's own cell when the victim is within about two blocks (the
+     * 1.7.10 arithmetic, kept): the forcefield must not suffocate, block the view or conduct redstone, as its
+     * {@code Material.air} did not.
+     */
+    public static void aForcefieldWallOverThePlayersOwnCellDoesNotSuffocateHim(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        ServerPlayer player = mockPlayer(test, 2.5, 3.5);
+        Pig pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+        pig.setPos(test.absoluteVec(new Vec3(3.3, 1.0, 3.5)));
+        player.addEffect(new MobEffectInstance(ModPotions.earth(), 400));
+        PotionEffectHandler.onPlayerHit(player, pig);
+
+        // (2.5 + 3.3) / 2 = 2.9: the plane x = 2 is the player's own column
+        BlockPos feet = new BlockPos(2, 1, 3);
+        BlockPos head = new BlockPos(2, 2, 3);
+        test.assertTrue(stateAt(test, feet).is(SimpleBlocks.FORCEFIELD.get()) && stateAt(test, head).is(SimpleBlocks.FORCEFIELD.get()),
+                "the wall stands in the cells of the player's feet and head: " + stateAt(test, feet) + " " + stateAt(test, head));
+        BlockState wall = stateAt(test, feet);
+        test.assertTrue(!wall.isSuffocating(level, test.absolutePos(feet)), "the wall does not suffocate");
+        test.assertTrue(!wall.isViewBlocking(level, test.absolutePos(feet)), "the wall does not block the view");
+        test.assertTrue(!wall.isRedstoneConductor(level, test.absolutePos(feet)), "the wall conducts no redstone");
+        test.assertTrue(!wall.getCollisionShape(level, test.absolutePos(feet)).isEmpty(), "but it stops what runs into it");
+        float health = player.getHealth();
+        test.runAfterDelay(20, () -> {
+            test.assertTrue(!player.isInWall(), "the player is not in a wall");
+            test.assertTrue(player.getHealth() >= health, "and takes no damage: " + player.getHealth() + " of " + health);
+            finish(test, player);
+        });
     }
 
     public static void aWaterImbuedPlayerTurnsNearbyLavaIntoObsidian(GameTestHelper test) {
@@ -1220,6 +1347,28 @@ public final class SimpleBlocksRuntimeChecks {
         test.succeed();
     }
 
+    /**
+     * A fire of age 15 schedules no tick of its own, but {@code BlockFire} was ticked at random in 1.7.10
+     * ({@code setTickRandomly(true)}) and so it still burned out when its fuel was gone.
+     */
+    public static void aFireAtMaximumAgeIsStillTickedAtRandomAndBurnsOut(GameTestHelper test) {
+        floor(test);
+        if (!fireMechanicsOn()) {
+            test.succeed();
+            return;
+        }
+        ServerLevel level = test.getLevel();
+        level.getGameRules().getRule(GameRules.RULE_DOFIRETICK).set(true, level.getServer());
+        level.setWeatherParameters(6000, 0, false, false);
+        BlockPos old = new BlockPos(5, 1, 5);
+        test.setBlock(old, SimpleBlocks.FIRE_AIR.get().defaultBlockState().setValue(FireBlock.AGE, 15));
+        BlockState fire = stateAt(test, old);
+        test.assertTrue(fire.isRandomlyTicking(), "every imbued fire takes random ticks");
+        fire.randomTick(level, test.absolutePos(old), level.random);
+        test.assertTrue(stateAt(test, old).isAir(), "an old fire with nothing to transmute next to it goes out at a random tick");
+        test.succeed();
+    }
+
     public static void aChaosFireTurnsImbuedFireIntoPlainFire(GameTestHelper test) {
         floor(test);
         if (!fireMechanicsOn()) {
@@ -1248,7 +1397,8 @@ public final class SimpleBlocksRuntimeChecks {
         BlockPos rel = new BlockPos(3, 1, 3);
         test.setBlock(rel, SimpleBlocks.FIRE_FIRE.get().defaultBlockState().setValue(FireBlock.AGE, 0));
         BlockState fire = stateAt(test, rel);
-        test.assertTrue(fire.getLightEmission() == 15, "it shines");
+        test.assertTrue(fire.getLightEmission() == 0, "it gives no light: the imbued fires never set a light level in 1.7.10");
+        test.assertTrue(fire.isRandomlyTicking(), "it is ticked at random, as BlockFire was (setTickRandomly(true))");
         test.assertTrue(fire.is(BlockTags.FIRE), "it is fire");
         test.assertTrue(fire.canBeReplaced(), "it can be replaced");
         test.assertTrue(fire.getCollisionShape(test.getLevel(), test.absolutePos(rel)).isEmpty(), "one walks through it");

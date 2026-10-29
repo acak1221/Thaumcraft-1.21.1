@@ -3,6 +3,8 @@ package thaumic.tinkerer.foci;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.serialization.JsonOps;
@@ -21,11 +23,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,6 +38,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumic.tinkerer.common.core.helper.ProjectileHelper;
 import thaumic.tinkerer.common.item.foci.FociComponents.DislocationData;
+import thaumic.tinkerer.common.item.foci.FociHooks;
 import thaumic.tinkerer.common.item.foci.ItemFocusDeflect;
 import thaumic.tinkerer.common.item.foci.ItemFocusDislocation;
 import thaumic.tinkerer.common.item.foci.ItemFocusEnderChest;
@@ -197,6 +202,39 @@ class FociLogicTest {
         assertFalse(ItemFocusDislocation.canTake(EmptyBlockGetter.INSTANCE, pos, Blocks.MOVING_PISTON.defaultBlockState()));
         assertFalse(ItemFocusDislocation.canTake(EmptyBlockGetter.INSTANCE, pos, Blocks.COMMAND_BLOCK.defaultBlockState()),
                 "hardness -1");
+    }
+
+    @Test
+    void theHalvesOfTallPlantsDoorsAndBedsAndFlowingWaterCannotBeTaken() {
+        BlockPos pos = BlockPos.ZERO;
+        BlockState upperRose = Blocks.ROSE_BUSH.defaultBlockState().setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER);
+        assertTrue(ItemFocusDislocation.isTwoPart(Blocks.ROSE_BUSH.defaultBlockState()), "lower half of a rose bush");
+        assertTrue(ItemFocusDislocation.isTwoPart(upperRose), "upper half of a rose bush");
+        assertTrue(ItemFocusDislocation.isTwoPart(Blocks.OAK_DOOR.defaultBlockState()), "a door");
+        assertTrue(ItemFocusDislocation.isTwoPart(Blocks.RED_BED.defaultBlockState()), "a bed");
+        assertFalse(ItemFocusDislocation.isTwoPart(Blocks.CHEST.defaultBlockState()), "a chest is one block");
+        assertFalse(ItemFocusDislocation.isTwoPart(Blocks.OAK_STAIRS.defaultBlockState()), "stairs are one block");
+        for (BlockState refused : List.of(Blocks.ROSE_BUSH.defaultBlockState(), upperRose, Blocks.TALL_GRASS.defaultBlockState(),
+                Blocks.TALL_SEAGRASS.defaultBlockState(), Blocks.OAK_DOOR.defaultBlockState(), Blocks.RED_BED.defaultBlockState(),
+                Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 3), Blocks.LAVA.defaultBlockState().setValue(LiquidBlock.LEVEL, 5))) {
+            assertFalse(ItemFocusDislocation.canTake(EmptyBlockGetter.INSTANCE, pos, refused), refused + " cannot be taken");
+        }
+        assertTrue(ItemFocusDislocation.canTake(EmptyBlockGetter.INSTANCE, pos, Blocks.WATER.defaultBlockState()), "a source of water can");
+        assertTrue(ItemFocusDislocation.canTake(EmptyBlockGetter.INSTANCE, pos, Blocks.LAVA.defaultBlockState()), "a source of lava can");
+    }
+
+    @Test
+    void theFlightKickCounterCanBeReachedAndTheDefaultResetComesBackWithNull() {
+        assertTrue(FociHooks.canReachCounter(), "ServerGamePacketListenerImpl.aboveGroundTickCount (official name) is found by reflection");
+        java.util.function.Consumer<net.minecraft.server.level.ServerPlayer> original = FociHooks.floatingTickReset;
+        try {
+            FociHooks.setFloatingTickReset(player -> {});
+            assertNotSame(original, FociHooks.floatingTickReset);
+            FociHooks.setFloatingTickReset(null);
+            assertSame(original, FociHooks.floatingTickReset, "null puts the default back, as the javadoc says");
+        } finally {
+            FociHooks.setFloatingTickReset(null);
+        }
     }
 
     @Test

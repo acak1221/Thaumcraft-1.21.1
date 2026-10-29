@@ -94,7 +94,12 @@ public class ItemSoulMould extends Item implements ITTinkererRegisterable {
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target,
             InteractionHand hand) {
         if (target instanceof Player) return InteractionResult.sidedSuccess(player.level().isClientSide);
-        if (!player.level().isClientSide) setPattern(stack, target);
+        if (!player.level().isClientSide) {
+            // 1.7.10 set the pattern on the stack the player holds (getCurrentEquippedItem). In 1.21.1 Player.interactOn
+            // of a creative player passes a COPY of the held stack here, so the pattern would be lost.
+            ItemStack held = player.getItemInHand(hand);
+            setPattern(held.getItem() instanceof ItemSoulMould ? held : stack, target);
+        }
         return InteractionResult.sidedSuccess(player.level().isClientSide);
     }
 

@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +34,9 @@ import thaumic.tinkerer.common.item.foci.ItemFocusDislocation;
  * block has a block entity, "Extra Contents".
  *
  * <p>1.7.10 moved the box to the bottom of the screen with Thaumcraft's {@code dialBottom} setting; the API does not expose
- * that client setting ({@code docs/api-requests/Foci.md}), so the box is at the position of the default dial.</p>
+ * that client setting ({@code docs/api-requests/Foci.md}), so the box is at the position of the default dial. 1.7.10 looked
+ * at the wand in the main hand only; the off hand's wand counts here too. This is the only overlay of the Dislocation: the
+ * copy that BasicItems once ported was deleted.</p>
  */
 public final class DislocationHUDHandler {
     private static final int X = 4;
@@ -41,6 +44,8 @@ public final class DislocationHUDHandler {
     private static final int Y = 50;
     private static final int BACKGROUND = 0x66000000;
     private static final int TEXT_COLOR = 0xFFAA00;
+    /** 1.7.10 drew the two lines with {@code font.setUnicodeFlag(true)}: the uniform (unicode) font of 1.21.1. */
+    private static final Style UNICODE = Style.EMPTY.withFont(Minecraft.UNIFORM_FONT);
 
     private DislocationHUDHandler() {}
 
@@ -69,7 +74,7 @@ public final class DislocationHUDHandler {
         if (data == null) return;
 
         Font font = mc.font;
-        Component name = Component.translatable("ttmisc.focusDislocation.tooltip");
+        Component name = Component.translatable("ttmisc.focusDislocation.tooltip").withStyle(UNICODE);
         int width = font.width(name);
 
         graphics.fill(X - 1, Y - 1, X + 18, Y + 18, BACKGROUND);
@@ -77,7 +82,7 @@ public final class DislocationHUDHandler {
         graphics.drawString(font, name, X + 20, Y, TEXT_COLOR, true);
 
         if (data.hasTile()) {
-            Component extra = Component.translatable("ttmisc.focusDislocation.tooltipExtra");
+            Component extra = Component.translatable("ttmisc.focusDislocation.tooltipExtra").withStyle(UNICODE);
             int extraWidth = Math.max(width, font.width(extra));
             graphics.fill(X + 18, Y + 9, X + 18 + extraWidth + 4, Y + 18, BACKGROUND);
             graphics.drawString(font, extra, X + 20, Y + 9, TEXT_COLOR, true);

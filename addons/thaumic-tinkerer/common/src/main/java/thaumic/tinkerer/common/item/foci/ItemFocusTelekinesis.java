@@ -46,8 +46,8 @@ public class ItemFocusTelekinesis extends ItemModFocus {
     public static final double DISTANCE = RANGE - 1;
     /** The speed of a pulled item, in blocks per tick. */
     public static final float PULL_SPEED = 0.3333F;
-    /** The colour of the sparkles of a pulled item. */
-    private static final int SPARKLE_COLOR = 0x9C00BE;
+    /** The sparkles of a pulled item are the violet ones of the API ({@code sparkle(x, y, z, 0)}). */
+    private static final int SPARKLE_TYPE = FociFx.SPARKLE_VIOLET;
 
     public ItemFocusTelekinesis(Item.Properties properties) {
         super(properties);
@@ -75,7 +75,7 @@ public class ItemFocusTelekinesis extends ItemModFocus {
                 && WandHelper.consumeAllVis(wandstack, player, getVisCost(WandHelper.getFocusItem(wandstack)), true, false)) {
             for (ItemEntity item : entities) {
                 MiscHelper.setEntityMotionFromVector(item, target, PULL_SPEED);
-                FociFx.sparkle(player.level(), item.getX(), item.getY(), item.getZ(), SPARKLE_COLOR);
+                FociFx.sparkle(player.level(), item.getX(), item.getY(), item.getZ(), SPARKLE_TYPE);
             }
         }
     }

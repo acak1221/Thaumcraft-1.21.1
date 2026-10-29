@@ -9,6 +9,10 @@
     {
       "id": "thaumictinkerer:ichor_sword_gem",
       "required": false
+    },
+    {
+      "id": "thaumcraft:crimson_sword",
+      "required": false
     }
   ]
 }

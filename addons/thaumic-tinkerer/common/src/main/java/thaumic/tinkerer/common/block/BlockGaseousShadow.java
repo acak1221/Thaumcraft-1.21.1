@@ -43,7 +43,7 @@ public class BlockGaseousShadow extends BlockGas {
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (random.nextFloat() < 0.0075F) {
-            level.addParticle(SimpleBlockFx.SHADOW_WISP, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0.0, 0.02, 0.0);
+            SimpleBlockFx.shadowWispAt(level, pos);
         }
     }
 

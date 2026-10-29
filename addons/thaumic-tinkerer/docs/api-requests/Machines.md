@@ -1,28 +1,12 @@
 # Machines: requests to the Thaumcraft API and to the loader modules
 
 Group Machines: Aspectalyzer, Thaumic Restorer, Essentia Funnel, Kinetic and Corporeal Attractors, Necromancy Tablet,
-soul mould, soul aspects, mob display, Cursed Spirit's Blade. The numbers `A3`, `A7`, `A8`, `A9` are those of
+soul mould, soul aspects, mob display, Cursed Spirit's Blade. The numbers `A3`, `A7`, `A8`, `A9` (closed, see the end) are those of
 `docs/API_GAPS.md` section 2. Nothing below was done by reaching into `thaumcraft.common.*`: every item is either a named
 stub or a workaround with the loss written down. Priorities are the group's own opinion (P1 changes what the player
 sees, P3 only hardens something that works today).
 
-## 1. Scan check for the Aspectalyzer screen (A3, P1)
-
-**Need.** The screen of the Aspectalyzer shows the aspects of the item in the slot only if the player has scanned that
-item (1.7.10: the item hash in `Thaumcraft.proxy.getScannedObjects()`, keys `@hash` and `#hash`).
-
-**Proposed signature.** `ThaumcraftApiHelper.hasScannedItem(Player player, ItemStack stack)`; it has to work for the
-client player, because the screen asks every frame (the knowledge is synced to the client by the mod already).
-
-**Backed by.** `ScanManager.hasBeenScanned(KnowledgeAccess.get(player), "@" + itemId, ITEM)` (`ItemThaumometer` shows the
-call).
-
-**Stub in the add-on.** `thaumic.tinkerer.common.core.helper.AnalyzerKnowledge.hasScanned(Player, ItemStack, AspectList)`.
-Until the API exists it answers "the player has discovered every aspect of the item" (`ThaumcraftApiHelper.hasDiscoveredAspect`).
-That is more generous than the original: an item whose aspects the player knows from other scans is shown without being
-scanned itself. The only caller is `GuiAspectAnalyzer`; when the API arrives the body of the stub is one line.
-
-## 2. Jar identification (P3)
+## 1. Jar identification (P3)
 
 **Need.** The Funnel must (a) recognise a jar item, ordinary or void, filled or labelled, in its slot or in a hopper
 offer; (b) recognise the jar block the hopper points at; (c) know whether the item jar is "filled" in the sense of 1.7.10
@@ -36,46 +20,24 @@ block entity as `IAspectContainer`; (c) contents through `IEssentiaContainerItem
 **Proposed.** `BlocksTC.isJarItem(ItemStack)`, `BlocksTC.isVoidJar(ItemStack | BlockState)`,
 `@Nullable Aspect BlocksTC.getJarLabel(ItemStack)` (backed by `ItemJar.isJar/isVoid/getFilter`).
 
-## 3. Client sparkles (A8, P3)
-
-**Need.** The Repairer shows a sparkle above the block every 10 ticks while it mends (`tcProxy.sparkle(x, y, z, 0)`), and
-the Attractors a sparkle on every entity they move (colour 2 pulling, 4 pushing).
-
-**Workaround.** Vanilla particles: `END_ROD` for the Repairer, a coloured `ENTITY_EFFECT` (blue 0xFF3F7FFF / red
-0xFFFF3F3F) for the Attractors. Not the same look.
-
-**Proposed.** `thaumcraft.api.client.ThaumcraftClientFX.sparkle(Level, x, y, z, int colorIndex)` as in A8.
-
-## 4. Drawing an aspect tag with its amount (A9, P3)
-
-**Need.** `UtilsFX.drawTag` of the Aspectalyzer screen: the aspect icon tinted with the aspect colour and the amount in the
-small TC font.
-
-**Workaround.** `thaumic.tinkerer.client.gui.AspectIcons.drawTag(GuiGraphics, Font, x, y, Aspect, amount)` draws
-`Aspect.getImage()` tinted with `Aspect.getColor()` at 16 by 16 pixels, and the amount in the vanilla font at half size in
-the lower right corner. The digits do not look like Thaumcraft's.
-
-**Proposed.** `thaumcraft.api.client.AspectRenderer.draw(GuiGraphics, Aspect, int x, int y, int amount, int bonus)`.
-
-## 5. Loader hook: built-in item renderer for `mob_display` (to the lead, P1 for the recipe viewers)
+## 2. Loader hook: built-in item renderer for `mob_display` (NeoForge, to the lead, P1 for the recipe viewers)
 
 **Need.** `mob_display` stands for a mob (the output of a necromancy recipe, shown in recipe viewers). 1.7.10 drew the
 mob in place of the item with an `IItemRenderer`. In 1.21.1 that is a built-in item renderer, which has no Architectury
-registry.
+registry. The item model is `minecraft:builtin/entity`, so **without a hook the item is invisible**.
 
-**What exists.** `thaumic.tinkerer.client.render.item.RenderMobDisplay.render(ItemStack, ItemDisplayContext, PoseStack,
-MultiBufferSource, int light, int overlay)` draws the mob (cached per aspect row, cleared by `clearCache()`, which
-`MachinesClient` calls when the client leaves a world).
+**Done on Fabric.** `thaumic.tinkerer.fabric.client.MachinesFabricClient.register()` registers
+`RenderMobDisplay.render` with `BuiltinItemRendererRegistry`; `MachinesClient.register()` reaches it by name (the same
+way as `KamiGearFabricClient`), so nothing has to be listed in `fabric.mod.json`. It was written without a rendered
+client run: the drawing of the mob in a GUI slot and in the hand is unverified.
 
-**Needed from the lead.**
-- Fabric: `BuiltinItemRendererRegistry.INSTANCE.register(item, (stack, mode, pose, buffers, light, overlay) ->
-  RenderMobDisplay.render(stack, mode, pose, buffers, light, overlay))` for `TTRegistry.item("mob_display")`.
-- NeoForge: `RegisterClientExtensionsEvent.registerItem(IClientItemExtensions { getCustomRenderer() ... }, item)` with a
-  `BlockEntityWithoutLevelRenderer` whose `renderByItem` calls the same method.
-- Switch `assets/thaumictinkerer/models/item/mob_display.json` from the placeholder (a flat generated item) to
-  `{ "parent": "minecraft:builtin/entity" }` once the hook is in place. Until then the item shows its placeholder icon.
+**Still needed for NeoForge.** `RegisterClientExtensionsEvent.registerItem(IClientItemExtensions { getCustomRenderer() ... },
+item)` with a `BlockEntityWithoutLevelRenderer` whose `renderByItem(stack, ctx, pose, buffers, light, overlay)` calls
+`thaumic.tinkerer.client.render.item.RenderMobDisplay.render(stack, ctx, pose, buffers, light, overlay)`, for
+`TTRegistry.item("mob_display")`. `RenderMobDisplay.clearCache()` is already called by `MachinesClient` when the client
+leaves a world.
 
-## 6. Drops of a killed mob (loader event, P2)
+## 3. Drops of a killed mob (loader event, P2)
 
 **Need.** The Cursed Spirit's Blade replaces the drops of the mob it kills with soul aspects (`LivingDropsEvent` in
 1.7.10: `event.drops.clear()` and add).
@@ -90,18 +52,7 @@ not item entities and stay, as in 1.7.10 (`event.drops` held only items).
 Collection<ItemEntity> drops) }` with the loader backends `LivingDropsEvent` (NeoForge) and a mixin into
 `LivingEntity.dropAllDeathLoot` (Fabric); the Blade would then clear the collection and add its items.
 
-## 7. Stable keys for Thaumcraft entities and the key sound (A7, P3)
-
-**Need.** The Necromancy Tablet summons `thaumcraft:wisp`, `thaumcraft:firebat`, `thaumcraft:brainy_zombie` and recognises
-`thaumcraft:giant_brainy_zombie`; the Attractor opens with the sound `thaumcraft:key`.
-
-**Workaround.** The ids are strings in `EnumMobAspect` and `BlockMagnet` (`isType(entity, "thaumcraft:firebat")` compares
-the registry id; the sound is `SoundEvent.createVariableRangeEvent`). Missing entities (a build without them) make the row
-unusable but do not crash (`createEntity` returns null).
-
-**Proposed.** `thaumcraft.api.entities.ThaumcraftEntities` and `thaumcraft.api.ThaumcraftSounds` constants as in A7.
-
-## 8. Not requested, for the record
+## 4. Not requested, for the record
 
 - **ComputerCraft / OpenComputers peripherals** of the Aspectalyzer and the Kinetic Attractor are not ported (the lead's
   decision list in `API_GAPS.md` 1.11). The methods exist as plain Java: `TileAspectAnalyzer.hasItemMethod /
@@ -110,3 +61,33 @@ unusable but do not crash (`createEntity` returns null).
 - **Pedestals.** The tablet reads `BlocksTC.get("arcane_pedestal")` as a `net.minecraft.world.Container` (the block entity
   `TilePedestal` is a `WorldlyContainer`). If the pedestal ever stops being a `Container` the tablet finds nothing; a
   public `IPedestal`-like interface would make that explicit.
+
+## 5. Shared-file requests to the lead (files of other groups)
+
+These need a file that this group does not own; nothing was edited there.
+
+1. **Cursed Spirit's Blade is not enchantable with the vanilla sword enchantments** (Sharpness, Smite, Bane of Arthropods,
+   Looting, Knockback, Fire Aspect, Sweeping Edge, Unbreaking, Mending), because every one of them hangs on
+   `#minecraft:swords` (`#minecraft:enchantable/sword`, `sharp_weapon`, `weapon`, `fire_aspect`, `durability`, `vanishing`)
+   and `thaumictinkerer:blood_sword` is in no vanilla sword tag. The 1.7.10 `ItemSword` could take them. Fix, two files:
+   - `data/minecraft/tags/item/swords.json` (KamiGear's file): add `{ "id": "thaumictinkerer:blood_sword", "required": false }`.
+   - `data/thaumictinkerer/tags/item/enchantable/vampirism.json` (Enchantments' file) includes `#minecraft:swords`, which
+     would then include the blade, while the original `EnchantmentVampirism.canApply` refused `ItemBloodSword`. Replace the
+     `#minecraft:swords` entry by a dedicated tag `thaumictinkerer:swords_without_blood_sword` (the same sword list without
+     the blade) or by an explicit list of the swords. The four strike enchantments list `blood_sword` explicitly already.
+2. **NeoForge hook of `mob_display`:** section 2 above.
+3. **`assets/minecraft/atlases/blocks.json`** carries the five entity-style textures of this group's JSON models (`models/repairer`,
+   `magnet_n`, `magnet_s`, `mob_magnet_n`, `mob_magnet_s`). Two groups must not both create that file in the same jar: if
+   another group needs sources in the block atlas, merge them into this one file.
+4. **Research `PERIPHERALS`** (parent of `ASPECT_ANALYZER`, a ComputerCraft-only entry in the fork) is created by
+   `BlockAspectAnalyzer.ensurePeripheralsEntry()` unless `ResearchHelper` registers it first.
+
+## 6. Closed requests (the API now answers them; the add-on uses the API)
+
+| Request | Now |
+|---|---|
+| A3 scan check of the Aspectalyzer screen | `ThaumcraftApiHelper.hasScannedItem(player, stack)` in `AnalyzerKnowledge.hasScanned` |
+| A7 keys of Thaumcraft's entities and the key sound | `ThaumcraftEntities.WISP / FIREBAT / BRAINY_ZOMBIE / GIANT_BRAINY_ZOMBIE` in `EnumMobAspect`, `ThaumcraftSoundIds.KEY` in `BlockMagnet` |
+| A8 client sparkles | `ThaumcraftClientFX.sparkle(level, x, y, z, type)` in `TileRepairer` (type 0) and `TileMagnet` (2 pulling, 4 pushing) |
+| A9 drawing an aspect tag with its amount | `AspectRenderer.draw(graphics, aspect, x, y, amount, 0)` in `GuiAspectAnalyzer` |
+

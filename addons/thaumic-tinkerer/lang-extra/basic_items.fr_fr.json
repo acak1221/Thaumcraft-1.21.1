@@ -1,0 +1,4 @@
+{
+  "ttmisc.xpTalisman.xp": "XP: %s",
+  "ttresearch.page.PERIPHERALS.0": "Dans le mod d'origine, certains blocs de Thaumic Tinkerer, comme certains blocs de Thaumcraft, pouvaient servir de périphériques ComputerCraft.<BR><BR>La liaison avec les ordinateurs ne fait pas partie de cette version : les méthodes de ces périphériques n'existent pas ici et il n'y a pas de page de documentation à ouvrir. Les blocs eux-mêmes fonctionnent comme des blocs ordinaires."
+}

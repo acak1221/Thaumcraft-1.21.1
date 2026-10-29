@@ -29,6 +29,8 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
 - **Soul mould.** 1.7.10 stored the legacy entity name (`EntityList.getEntityString`, e.g. `Pig`) in the NBT key `pattern`.
   The port stores the registry id of the entity type (`minecraft:pig`) in the same key of the custom data. The tooltip
   names the mob with the entity type's own description; a mould of an entity type that no longer exists shows the id.
+  The pattern is written to the stack the player holds (as `getCurrentEquippedItem` did), not to the stack the item
+  callback receives: in creative mode `Player.interactOn` passes a copy there, which would lose the pattern.
 - **Cursed Spirit's Blade.** The flag `Activated` (int 0/1) is in the custom data. The "active" icon (1.7.10: icon index
   by the NBT flag) is the item model override on `custom_model_data = 1`, which the blade sets and removes together with
   the flag.
@@ -50,10 +52,11 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   call them. `getAspectsMethod` returns the tags sorted as the game sorts aspects.
 - **Slot filter.** `SlotLimitedHasAspects` becomes "`ThaumcraftApiHelper.getObjectAspects(stack, level)` is not empty",
   which includes the contents of essentia containers and the bonus tags, as a scan does. The slot holds a stack of 64.
-- **Scan check is a stub (API gap A3).** The screen shows the aspects only if the player scanned the item. The API cannot
-  tell, so `AnalyzerKnowledge.hasScanned` answers "the player discovered every aspect of the item", which shows slightly
-  more than the original.
-- **Aspect icons.** `UtilsFX.drawTag` is not API: `AspectIcons.drawTag` draws the tinted glyph and the amount (A9).
+- **Scan check.** As in the original, the screen shows the aspects only if the player scanned the item:
+  `AnalyzerKnowledge.hasScanned` is `ThaumcraftApiHelper.hasScannedItem(player, stack)`, which covers the `@` and `#`
+  markers (a scan and an advanced scan) and works for the client's own player. The item is identified by its registry id,
+  not by a hash of item and damage, because 1.21.1 has no metadata.
+- **Aspect icons.** `UtilsFX.drawTag(x, y, aspect, amount, 0, zLevel)` is `AspectRenderer.draw(graphics, aspect, x, y, amount, 0)`.
 - **GUI.** `openGui` with a GUI id becomes a `MenuType` (`ContainerAspectAnalyzer`) opened with `player.openMenu`;
   shift-click moves between the slot and the inventory. A click opens it also with an item in the hand, as the original.
 
@@ -73,7 +76,12 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
 - **`getAspects()` of an empty repairer** returns an empty list instead of `null` (goggles read it every frame). Stacks
   that are in the slot still show `ENTROPY = damage`, also at 0.
 - **Update packet.** The slot and `tookLastTick` are sent with the standard block entity update packet and update tag.
-- **Sparkles.** A vanilla `END_ROD` particle every 10 ticks while `tookLastTick` (A8).
+- **Sparkles.** `ThaumcraftClientFX.sparkle(level, x, y, z, 0)` (violet) every 10 ticks while `tookLastTick`, at the same
+  random point above the block as the original.
+- **Not a redstone conductor (fix).** 1.7.10 `isNormalCube()` was false for the Restorer (`renderAsNormalBlock()` false,
+  `canProvidePower()` true), so a repeater or a lever pointing into it did not power it or the wires beside it. The 1.21.1
+  default (`isRedstoneConductor` = full collision shape) would make it a conductor, so the block properties switch that
+  off. The Funnel stays a conductor, as in 1.7.10 (a normal cube there); the Attractors and the Tablet have partial shapes.
 - **Model and renderer.** The frame and the glass (`ModelRepairer`) are a generated JSON model (`repairer`, from the box
   list of the Java model), textured with `textures/models/repairer.png` and rotated by the blockstate, in the translucent
   render layer. `RenderTileRepairer` is the block entity renderer and draws what the 1.7.10 tile renderer drew besides the
@@ -97,7 +105,7 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   item in `TileFunnel`. In 1.21.1 the jar is one item whose `setAspects(stack, empty)` clears the contents and keeps the
   label; an unlabelled emptied jar is a plain stackable jar again, a labelled one stays a one-item stack. The funnel's
   `isFilledJar` is "holds essentia, or does not stack".
-- **Jar identification** goes through ids and `IEssentiaContainerItem` (request 2 of the API requests).
+- **Jar identification** goes through ids and `IEssentiaContainerItem` (request 1 of the API requests).
 - **Block entity API.** `ISidedInventory` becomes `WorldlyContainer`; `IAspectContainer` is read-only (shows the jar's
   aspects to goggles), as in 1.7.10.
 - **AE2 `IMovableTile` is not ported.**
@@ -113,7 +121,8 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   pulling stops within one block (squared distance 1), pushing always moves, speed 0.25 along the vector to the block centre, normalised
   when longer than one block. Dropped items are measured from their centre: 1.7.10 positioned items at their centre
   (`posY` included `yOffset`), 1.21.1 at their feet, so the port adds half the height for items only. Both sides run, as
-  before; the client only adds particles (A8).
+  before; the client only adds `ThaumcraftClientFX.sparkle` on every entity it moves (type 2 pulling, 4 pushing, at the entity's
+  position as the original; a dropped item at its centre).
 - **Corporeal Attractor (`TileMobMagnet`).** Selects living entities that are not players; ageable mobs only when the
   adult flag matches `isBaby()`; with a soul mould in the slot only entities of the mould's type
   (`BuiltInRegistries.ENTITY_TYPE` id against the pattern). A mould without a pattern selects nothing, as in 1.7.10
@@ -152,7 +161,8 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   covers the cat; the horse row covers horse, donkey, mule, skeleton horse and zombie horse; `PigZombie` is the zombified
   piglin; the skeleton row is the plain skeleton and the wither skeleton row the wither skeleton (1.7.10 had one class with
   a type); Thaumcraft's mobs (`thaumcraft:wisp`, `firebat`, `brainy_zombie`, `giant_brainy_zombie`) are recognised by
-  registry id because their classes are not API (request 7). The "must be before" order comments of the original are kept
+  registry key (`ThaumcraftEntities.WISP`, `FIREBAT`, `BRAINY_ZOMBIE`, `GIANT_BRAINY_ZOMBIE`, tested with `ThaumcraftEntities.is`)
+  because their classes are not API. The "must be before" order comments of the original are kept
   for the subclasses (mooshroom before cow, magma cube before slime, cave spider before spider, brainy zombie before
   zombie).
 - **Spawning.** `onSpawnWithEgg(null)` becomes `finalizeSpawn(..., MobSpawnType.SPAWN_EGG, null)`; the wither skeleton
@@ -168,9 +178,11 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   registration (`CROP`, tag `messis`) won the key, `summon1.json` is the messis recipe. Names are lowercase because
   resource locations must be. The infusion recipe per aspect (8 condensed around 1 condensed, instability 4,
   10 of the aspect) and the object tag of the basic form (8 of the aspect) are registered as before.
-- **Mob display.** The renderer exists (`RenderMobDisplay.render`) but needs a loader hook that this group cannot write
-  (request 5); until then the item is drawn with a placeholder icon. NEI/JEI-style "necromancy recipes" for recipe viewers
-  are not provided.
+- **Mob display.** `RenderMobDisplay.render` draws the mob in place of the item (model `minecraft:builtin/entity`). The
+  built-in item renderer needs a loader hook: on Fabric `thaumic.tinkerer.fabric.client.MachinesFabricClient` registers it
+  (reached by name from `MachinesClient`); on NeoForge the hook is still missing (request 2 of the API requests), and until
+  it exists the item is invisible there. It was not inspected on a rendered frame. NEI/JEI-style "necromancy recipes"
+  for recipe viewers are not provided.
 - **Tooltip of a soul aspect** shows the aspect name as the game spells it (`Aspect.getName()`); the infused ones glow.
 
 ## 8. Cursed Spirit's Blade
@@ -187,9 +199,14 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   damage; the port skips exactly the damage the handler itself deals (a flag held while it hurts the wielder).
 - **Drop replacement (forced, workaround).** `LivingDropsEvent` has no Architectury equivalent. The drops of a mob killed
   by a player attack with an activated blade are replaced by the soul aspects of the mob (one per aspect of its row, a
-  pick-up delay of 10 ticks) using the death, add-entity and end-of-level-tick events (request 6). The soul aspects appear a moment
+  pick-up delay of 10 ticks) using the death, add-entity and end-of-level-tick events (request 3). The soul aspects appear a moment
   after the death, at the end of the level tick, not in the same call as in 1.7.10.
 - **Model.** `blood_sword_0` / `blood_sword_active` with the override described in section 2.
+- **Enchanting (open, shared files).** The blade is not in `#minecraft:swords`, so the vanilla sword enchantments (Sharpness,
+  Smite, Bane of Arthropods, Looting, Knockback, Fire Aspect, Sweeping Edge, Unbreaking, Mending) cannot be put on it, while
+  the 1.7.10 `ItemSword` took them. Only the four strike enchantments of the add-on list it. The fix is in two files of
+  other groups (`data/minecraft/tags/item/swords.json` and the Vampirism tag, which must keep refusing the blade): request
+  in section 5 of `docs/api-requests/Machines.md`.
 
 ## 9. Values checked against the original on purpose
 
@@ -221,5 +238,7 @@ crucible (beast 4, mind 8, senses 8) on an ender pearl under the key `MAGNETS`.
 
 - ComputerCraft and OpenComputers peripherals (Aspectalyzer, Attractors), AE2 `IMovableTile`, Tinkers' Construct
   tool repair, NEI integration, Waila providers (not this group's job in the new build).
-- The loader hook for the mob display renderer, a real scan check, vanilla-quality sparkles: the requests above.
+- The NeoForge hook for the mob display renderer, and the enchantability of the blade (shared tag files): the requests
+  above. (The scan check, the sparkles, the aspect tag drawing and the Thaumcraft entity keys use the API since the
+  review.)
 - Recipe-viewer pages for the necromancy recipes.

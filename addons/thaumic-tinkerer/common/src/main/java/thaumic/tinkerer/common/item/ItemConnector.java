@@ -160,7 +160,7 @@ public class ItemConnector extends Item implements ITTinkererRegisterable {
         } else {
             BlockPos origin = getTarget(stack);
 
-            BlockEntity tile1 = level.hasChunkAt(origin) ? level.getBlockEntity(origin) : null;
+            BlockEntity tile1 = level.isLoaded(origin) ? level.getBlockEntity(origin) : null;
             if (!(tile1 instanceof TileTransvector trans)) {
                 clearTarget(stack);
 
@@ -208,7 +208,7 @@ public class ItemConnector extends Item implements ITTinkererRegisterable {
             return InteractionResult.CONSUME;
         }
         BlockPos origin = getTarget(stack);
-        BlockEntity tile1 = level.hasChunkAt(origin) ? level.getBlockEntity(origin) : null;
+        BlockEntity tile1 = level.isLoaded(origin) ? level.getBlockEntity(origin) : null;
         if (!(tile1 instanceof TileGolemConnector trans)) {
             clearTarget(stack);
             if (level.isClientSide) return InteractionResult.PASS;

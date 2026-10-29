@@ -41,7 +41,7 @@ public final class PacketTile {
     public static <T extends BlockEntity, M extends AbstractContainerMenu> T resolve(ServerPlayer sender, BlockPos pos,
             Class<T> tileType, Class<M> menuType, Function<M, ? extends BlockEntity> tileOfMenu) {
         ServerLevel level = sender.serverLevel();
-        if (!level.hasChunkAt(pos)) return null;
+        if (!level.isLoaded(pos)) return null;
         BlockEntity entity = level.getBlockEntity(pos);
         if (!tileType.isInstance(entity)) return null;
         AbstractContainerMenu open = sender.containerMenu;

@@ -88,7 +88,7 @@ public class TileEntityMobilizer extends BlockEntity {
 
     public void verifyRelay() {
         BlockPos firstPos = new BlockPos(firstRelayX, worldPosition.getY(), firstRelayZ);
-        if (level == null || !level.hasChunkAt(firstPos)) return;
+        if (level == null || !level.isLoaded(firstPos)) return;
         BlockEntity te = level.getBlockEntity(firstPos);
         if (te instanceof TileEntityRelay relay) {
             relay.verifyPartner();
@@ -114,7 +114,7 @@ public class TileEntityMobilizer extends BlockEntity {
         if (linked && time % 100 == 0 && !level.hasNeighborSignal(worldPosition)) {
             // Target coordinates to check
             BlockPos target = worldPosition.offset(movementDirection.getStepX(), 0, movementDirection.getStepZ());
-            if (level.hasChunkAt(target)) {
+            if (level.isLoaded(target)) {
                 // Switch direction if at end of track
                 if (!level.getBlockState(target).isAir() || !level.getBlockState(target.above()).isAir()) {
                     movementDirection = movementDirection.getOpposite();
@@ -130,7 +130,7 @@ public class TileEntityMobilizer extends BlockEntity {
 
     private void move(ServerLevel level) {
         BlockPos target = worldPosition.offset(movementDirection.getStepX(), 0, movementDirection.getStepZ());
-        if (!level.hasChunkAt(target)) return;
+        if (!level.isLoaded(target)) return;
         // Check for abandoned TEs
         if (!(level.getBlockState(worldPosition).getBlock() instanceof BlockMobilizer)) return;
         // Check if the space the mobilizer will move into is empty

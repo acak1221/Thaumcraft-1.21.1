@@ -92,7 +92,7 @@ public abstract class TileTransvector extends CamoDeviceBlockEntity {
     @Nullable
     public final BlockEntity getTile() {
         if (target == null || level == null) return null;
-        if (!level.hasChunkAt(target)) return null;
+        if (!level.isLoaded(target)) return null;
 
         BlockEntity tile = level.getBlockEntity(target);
 

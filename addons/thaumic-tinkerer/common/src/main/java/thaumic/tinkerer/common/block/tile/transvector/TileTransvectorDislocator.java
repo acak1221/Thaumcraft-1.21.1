@@ -76,7 +76,7 @@ public class TileTransvectorDislocator extends TileTransvector implements Redsto
         }
 
         // The end must be loaded (1.7.10 loaded it on demand; it still skipped the swap when it was not loaded).
-        if (!serverLevel.hasChunkAt(endCoords)) return;
+        if (!serverLevel.isLoaded(endCoords)) return;
 
         BlockPos targetCoords = getBlockTarget();
         List<Entity> entitiesAtEnd = getEntitiesAtPoint(serverLevel, endCoords);

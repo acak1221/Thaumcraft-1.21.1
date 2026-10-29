@@ -14,13 +14,11 @@ package thaumic.tinkerer.common.block.tile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.joml.Vector3f;
+import thaumcraft.api.client.ThaumcraftClientFX;
 import thaumic.tinkerer.common.content.TileBlocks;
 
 /**
@@ -44,13 +42,13 @@ public class TileEntityRelay extends BlockEntity {
     /** The relay at this position of the row (same height), or null when it is not there or not loaded. */
     private TileEntityRelay relayAt(int x, int z) {
         BlockPos pos = new BlockPos(x, worldPosition.getY(), z);
-        if (level == null || !level.hasChunkAt(pos)) return null;
+        if (level == null || !level.isLoaded(pos)) return null;
         return level.getBlockEntity(pos) instanceof TileEntityRelay relay ? relay : null;
     }
 
     public void verifyPartner() {
         BlockPos partnerPos = new BlockPos(partnerX, worldPosition.getY(), partnerZ);
-        if (level == null || !level.hasChunkAt(partnerPos)) return;
+        if (level == null || !level.isLoaded(partnerPos)) return;
         TileEntityRelay te = relayAt(partnerX, partnerZ);
         if (!(hasPartner && te != null && te.partnerX == worldPosition.getX() && te.partnerZ == worldPosition.getZ())) {
             hasPartner = false;
@@ -88,9 +86,9 @@ public class TileEntityRelay extends BlockEntity {
                         sparkle((float) (0.5 + i + xInc), (float) (yCoord + 0.5), (float) (j + 0.5 + zInc),
                                 xCoord < partnerX || zCoord > partnerX ? 2 : 14);
                     }
-                    j += Math.copySign(1, partnerZ - zCoord);
+                    j += step(partnerZ - zCoord);
                 } while (j < partnerZ);
-                i += Math.copySign(1, partnerX - xCoord);
+                i += step(partnerX - xCoord);
 
             } while (i < partnerX);
         }
@@ -104,7 +102,7 @@ public class TileEntityRelay extends BlockEntity {
                 int j = zCoord;
                 do {
                     BlockPos pos = new BlockPos(i, yCoord, j);
-                    if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof TileEntityMobilizer te) {
+                    if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof TileEntityMobilizer te) {
                         te.verifyRelay();
                         if (!te.linked) {
                             te.firstRelayX = xCoord;
@@ -124,25 +122,29 @@ public class TileEntityRelay extends BlockEntity {
                         }
                     }
 
-                    j += Math.copySign(1, partnerZ - zCoord);
+                    j += step(partnerZ - zCoord);
                 } while (j < partnerZ);
-                i += Math.copySign(1, partnerX - xCoord);
+                i += step(partnerX - xCoord);
             } while (i < partnerX);
         }
     }
 
     /**
-     * The beam sparkle. 1.7.10 used the Thaumcraft sparkle particle of type 2 (blue) or 14 (white); the client side of that
-     * has no API, so this draws the same colours with the vanilla dust particle.
+     * The step of the original loops, {@code Math.copySign(1, difference)}: -1 for a negative difference, +1 otherwise
+     * (zero included). The original added that float to an {@code int}, which stops advancing once the coordinate reaches
+     * 2^24 in absolute value, so a linked pair beyond +-16,777,216 blocks hung the server thread in its tick loop. The
+     * integer step is the same for every coordinate below that (see docs/deviations/TileBlocks.md, 2.3).
+     */
+    static int step(int difference) {
+        return difference < 0 ? -1 : 1;
+    }
+
+    /**
+     * The beam sparkle: the Thaumcraft sparkle particle of the API, which rolls the original's four-in-six chance itself. The
+     * original types were 2 (blue) and 14 (white); the API knows the colours 0 to 7, white being 6.
      */
     private void sparkle(float x, float y, float z, int type) {
-        RandomSource random = level.random;
-        // The original drew a sparkle in four of six calls (at the default particle setting).
-        if (random.nextInt(6) >= 4) return;
-        Vector3f color = type == 2
-                ? new Vector3f(0.2F, 0.2F, 0.7F + random.nextFloat() * 0.3F)
-                : new Vector3f(1F, 1F, 1F);
-        level.addParticle(new DustParticleOptions(color, 1.0F), x, y, z, 0, 0, 0);
+        ThaumcraftClientFX.sparkle(level, x, y, z, type == 2 ? 2 : 6);
     }
 
     public void checkForPartner() {

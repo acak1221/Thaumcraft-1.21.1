@@ -111,7 +111,7 @@ public class TileRPlacer extends CamoDeviceBlockEntity implements Container, Ext
         if (stack.isEmpty()) return;
 
         BlockPos target = getTargetPos();
-        if (!serverLevel.hasChunkAt(target) || !serverLevel.getBlockState(target).isAir()) return;
+        if (!serverLevel.isLoaded(target) || !serverLevel.getBlockState(target).isAir()) return;
 
         if (player == null) player = new TinkererFakePlayer(serverLevel, PROFILE);
         Direction orientation = getOrientation();

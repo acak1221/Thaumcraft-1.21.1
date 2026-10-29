@@ -8,13 +8,13 @@ No text was translated or edited. A value changed only where a literal `%` becam
 
 | Source | Target | Keys in .lang | Keys in .json | Renamed keys | Duplicates | Escaped `%` | Fragment files | Fragment keys |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `en_US.lang` | `en_us.json` | 478 | 645 | 114 | 1 | 1 | 6 | 14 |
+| `en_US.lang` | `en_us.json` | 478 | 646 | 114 | 1 | 1 | 6 | 18 |
 | `en_GB.lang` | `en_gb.json` | 14 | 14 | 1 | 0 | 0 | 0 | 0 |
-| `de_DE.lang` | `de_de.json` | 437 | 578 | 101 | 1 | 1 | 2 | 2 |
-| `fr_Fr.lang` | `fr_fr.json` | 464 | 619 | 102 | 1 | 1 | 2 | 2 |
-| `ko_KR.lang` | `ko_kr.json` | 421 | 562 | 91 | 1 | 1 | 2 | 2 |
-| `ru_RU.lang` | `ru_ru.json` | 467 | 641 | 105 | 1 | 1 | 7 | 21 |
-| `zh_CN.lang` | `zh_cn.json` | 469 | 624 | 107 | 1 | 1 | 2 | 2 |
+| `de_DE.lang` | `de_de.json` | 437 | 578 | 101 | 1 | 1 | 3 | 5 |
+| `fr_Fr.lang` | `fr_fr.json` | 464 | 619 | 102 | 1 | 1 | 3 | 5 |
+| `ko_KR.lang` | `ko_kr.json` | 421 | 562 | 91 | 1 | 1 | 3 | 5 |
+| `ru_RU.lang` | `ru_ru.json` | 467 | 642 | 105 | 1 | 1 | 7 | 25 |
+| `zh_CN.lang` | `zh_cn.json` | 469 | 624 | 107 | 1 | 1 | 3 | 5 |
 
 ## Key families
 
@@ -107,22 +107,26 @@ New 1.21.1-only keys live in `addons/thaumic-tinkerer/lang-extra/<group>.<lang>.
 | `en_us` | `addons/thaumic-tinkerer/lang-extra/kami_gear.en_us.json` | 1 | none |
 | `en_us` | `addons/thaumic-tinkerer/lang-extra/kami_world.en_us.json` | 1 | `ttresearch.page.DIMENSION_SHARDS.0` |
 | `en_us` | `addons/thaumic-tinkerer/lang-extra/simple_blocks.en_us.json` | 4 | none |
-| `en_us` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.en_us.json` | 6 | none |
+| `en_us` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.en_us.json` | 10 | `ttresearch.page.INTERFACE.0`, `ttresearch.page.GOLEM_CONNECTOR.0`, `ttresearch.page.GOLEM_CONNECTOR.3` |
 | `de_de` | `addons/thaumic-tinkerer/lang-extra/kami_world.de_de.json` | 1 | `ttresearch.page.DIMENSION_SHARDS.0` |
 | `de_de` | `addons/thaumic-tinkerer/lang-extra/machines.de_de.json` | 1 | none |
+| `de_de` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.de_de.json` | 3 | `ttresearch.page.INTERFACE.0`, `ttresearch.page.GOLEM_CONNECTOR.0`, `ttresearch.page.GOLEM_CONNECTOR.3` |
 | `fr_fr` | `addons/thaumic-tinkerer/lang-extra/kami_world.fr_fr.json` | 1 | `ttresearch.page.DIMENSION_SHARDS.0` |
 | `fr_fr` | `addons/thaumic-tinkerer/lang-extra/machines.fr_fr.json` | 1 | none |
+| `fr_fr` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.fr_fr.json` | 3 | `ttresearch.page.INTERFACE.0`, `ttresearch.page.GOLEM_CONNECTOR.0`, `ttresearch.page.GOLEM_CONNECTOR.3` |
 | `ko_kr` | `addons/thaumic-tinkerer/lang-extra/kami_world.ko_kr.json` | 1 | `ttresearch.page.DIMENSION_SHARDS.0` |
 | `ko_kr` | `addons/thaumic-tinkerer/lang-extra/machines.ko_kr.json` | 1 | none |
+| `ko_kr` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.ko_kr.json` | 3 | `ttresearch.page.INTERFACE.0`, `ttresearch.page.GOLEM_CONNECTOR.0`, `ttresearch.page.GOLEM_CONNECTOR.3` |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/basic_items.ru_ru.json` | 1 | none |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/foci.ru_ru.json` | 1 | none |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/kami_gear.ru_ru.json` | 1 | none |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/kami_world.ru_ru.json` | 1 | `ttresearch.page.DIMENSION_SHARDS.0` |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/machines.ru_ru.json` | 1 | none |
 | `ru_ru` | `addons/thaumic-tinkerer/lang-extra/simple_blocks.ru_ru.json` | 10 | none |
-| `ru_ru` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.ru_ru.json` | 6 | none |
+| `ru_ru` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.ru_ru.json` | 10 | `ttresearch.page.INTERFACE.0`, `ttresearch.page.GOLEM_CONNECTOR.0`, `ttresearch.page.GOLEM_CONNECTOR.3` |
 | `zh_cn` | `addons/thaumic-tinkerer/lang-extra/kami_world.zh_cn.json` | 1 | `ttresearch.page.DIMENSION_SHARDS.0` |
 | `zh_cn` | `addons/thaumic-tinkerer/lang-extra/machines.zh_cn.json` | 1 | none |
+| `zh_cn` | `addons/thaumic-tinkerer/lang-extra/tile_blocks.zh_cn.json` | 3 | `ttresearch.page.INTERFACE.0`, `ttresearch.page.GOLEM_CONNECTOR.0`, `ttresearch.page.GOLEM_CONNECTOR.3` |
 
 ## Verbatim-kept `tile.` / `item.` keys (decide by hand)
 

@@ -40,6 +40,8 @@ public final class ClientFxRules {
     public static final int SPARKLE_MULTIPLIER = SparkleCallRules.SPARKLE_MULTIPLIER;
     /** The size of the sparkle that the type only overload draws (the original {@code sparkle(x, y, z, color)}). */
     public static final float TYPE_ONLY_SPARKLE_SIZE = 1.5F;
+    /** The gravity of the sparkle that the type only overload draws: none, it hangs in the air. */
+    public static final float TYPE_ONLY_SPARKLE_GRAVITY = 0.0F;
 
     private ClientFxRules() {}
 
@@ -131,9 +133,19 @@ public final class ClientFxRules {
             throw new IllegalArgumentException("impact must be 0 to " + MAX_BEAM_IMPACT + ", was " + impact);
     }
 
-    /** The checks of {@code essentiaTrail(level, from, to, phase, rgb, scale)}; the distance is checked by {@link #trailInRange}. */
+    /** The check of the scale of {@code essentiaTrail(level, from, to, phase, rgb, scale)}; the distance is checked by {@link #trailInRange}. */
     public static void essentiaTrail(float scale) {
         size("scale", scale);
+    }
+
+    /**
+     * The checks of {@code essentiaTrail(level, from, to, phase, rgb, scale)}: both block positions inside the world, then the scale.
+     * (A block position is three ints and can name a place far outside the world; the client would drop such a mote silently.)
+     */
+    public static void essentiaTrail(int fromX, int fromY, int fromZ, int toX, int toY, int toZ, float scale) {
+        coordinate("from.x", fromX); coordinate("from.y", fromY); coordinate("from.z", fromZ);
+        coordinate("to.x", toX); coordinate("to.y", toY); coordinate("to.z", toZ);
+        essentiaTrail(scale);
     }
 
     /** Whether two block positions are close enough for the trail the client draws (the essence flow rule: 64 blocks). */
@@ -156,12 +168,14 @@ public final class ClientFxRules {
 
     /**
      * The particle count of the original {@code ClientProxy.particleCount(base)} for a particle setting: none at the
-     * minimal setting, {@code base} at the decreased one and {@code 2 * base} at all.
+     * minimal setting, {@code base} at the decreased one and {@code 2 * base} at all. The doubling saturates at
+     * {@link Integer#MAX_VALUE} (the original's {@code int} multiplication would wrap to a negative count for a base above
+     * {@code 2^30}), so the answer for a non-negative base is never negative.
      *
      * @param setting 0 for all, 1 for decreased, 2 for minimal (the ordinal of {@code ParticleStatus})
      */
     public static int particleCount(int setting, int base) {
-        return setting == 2 ? 0 : setting == 1 ? base : base * 2;
+        return setting == 2 ? 0 : setting == 1 ? base : base > Integer.MAX_VALUE / 2 ? Integer.MAX_VALUE : base * 2;
     }
 
     /**

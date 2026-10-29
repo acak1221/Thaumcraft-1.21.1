@@ -14,8 +14,9 @@ import thaumcraft.api.aspects.Aspect;
  * {@link #bubbles}, {@link #essentiaTrail} and {@link #visDrain} are those packets, with the original look. {@link #sparkle},
  * {@link #burst}, {@link #blockRunes} and {@link #smokeSpiral} are not: the 1.7.10 proxy drew them on the client only, so
  * they are new senders, the server twins of the matching methods of {@link thaumcraft.api.client.ThaumcraftClientFX}, with no
- * original packet. All of them reach the players within 32 blocks. Call them on the server thread of the level; on another
- * thread they throw {@link IllegalStateException}. Colours are 0xRRGGBB.</p>
+ * original packet. They reach the players within 32 blocks of the point, except {@link #visDrain}, which reaches the players
+ * within 64 blocks of the consumer (and is thinned by the original's half second throttle per consumer). Call them on the
+ * server thread of the level; on another thread they throw {@link IllegalStateException}. Colours are 0xRRGGBB.</p>
  */
 public final class ThaumcraftFX {
     /** The original random grey of {@link #blockSparkle}. */

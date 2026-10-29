@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart): runtime checks of the KamiGear group, run by the Fabric GameTests. Distributed under the same licence as the add-on
+ * (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.testing;
 
 import java.util.List;
@@ -17,7 +21,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,6 +41,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.baubles.IBauble;
@@ -52,6 +62,7 @@ import thaumic.tinkerer.common.item.kami.ItemProtoclay;
 import thaumic.tinkerer.common.item.kami.ItemSkyPearl;
 import thaumic.tinkerer.common.item.kami.KamiComponents;
 import thaumic.tinkerer.common.item.kami.KamiComponents.TalismanStore;
+import thaumic.tinkerer.common.item.kami.armor.ItemGemChest;
 import thaumic.tinkerer.common.item.kami.armor.ItemIchorclothArmorAdv;
 import thaumic.tinkerer.common.item.kami.foci.ItemFocusXPDrain;
 import thaumic.tinkerer.common.item.kami.foci.ShadowBeam;
@@ -886,6 +897,221 @@ public final class KamiGearRuntimeChecks {
 
         // A potency level makes it hit harder (damage 2 -> 2 + 0.2 * 2 * 5 = 4 at potency 5).
         test.assertTrue(ShadowBeam.damage(2, 5) == 4, "potency raises the damage");
+        test.succeed();
+    }
+
+    // ---- review round: regressions of the findings --------------------------------------------------------------------------
+
+    /** Wall of stone at z = 4 (x 0..6, y 1..5) and a player in front of it who looks at it; the mirror holds cobblestone. */
+    private static ServerPlayer mirrorHolder(GameTestHelper test, ItemStack mirror) {
+        floor(test);
+        for (int x = 0; x <= 6; x++) for (int y = 1; y <= 5; y++) test.setBlock(new BlockPos(x, y, 4), Blocks.STONE);
+        ServerPlayer player = player(test, 3.5, 1, 1.5, 0, 0);
+        mirror.set(KamiComponents.MIRROR_STATE.get(), Blocks.COBBLESTONE.defaultBlockState());
+        player.setItemInHand(InteractionHand.MAIN_HAND, mirror);
+        return player;
+    }
+
+    public static void mirrorNeedsNoBlocksInCreativeMode(GameTestHelper test) {
+        ItemStack mirror = TTRegistry.stack(LibItemNames.PLACEMENT_MIRROR);
+        ServerPlayer player = mirrorHolder(test, mirror);
+        ItemPlacementMirror item = (ItemPlacementMirror) mirror.getItem();
+        test.assertTrue(!ItemPlacementMirror.hasBlocks(player, Blocks.COBBLESTONE, 9), "a survival player with nothing has no blocks");
+        item.placeAllBlocks(mirror, player);
+        test.assertTrue(test.getBlockState(new BlockPos(3, 2, 3)).isAir(), "and the mirror places nothing for them");
+
+        // 1.7.10 hasBlocks: "if (player.capabilities.isCreativeMode) return true"; the placing then consumes nothing.
+        player.getAbilities().instabuild = true;
+        try {
+            test.assertTrue(ItemPlacementMirror.hasBlocks(player, Blocks.COBBLESTONE, 9), "a creative player always has the blocks");
+            item.placeAllBlocks(mirror, player);
+            for (int x = 2; x <= 4; x++) {
+                for (int y = 2; y <= 4; y++) {
+                    test.assertTrue(test.getBlockState(new BlockPos(x, y, 3)).is(Blocks.COBBLESTONE), "cobblestone at " + x + "," + y);
+                }
+            }
+            test.assertTrue(count(player, Items.COBBLESTONE) == 0, "from an empty inventory");
+        } finally {
+            player.getAbilities().instabuild = false;
+        }
+        test.succeed();
+    }
+
+    public static void mirrorPaysFromTheFirstRingThatHasBlocks(GameTestHelper test) {
+        ItemStack mirror = TTRegistry.stack(LibItemNames.PLACEMENT_MIRROR);
+        ServerPlayer player = mirrorHolder(test, mirror);
+        ItemStack empty = TTRegistry.stack(LibItemNames.BLOCK_TALISMAN);
+        empty.set(KamiComponents.TALISMAN_STORE.get(), new TalismanStore(blockId(Blocks.COBBLESTONE), 0));
+        ItemStack full = TTRegistry.stack(LibItemNames.BLOCK_TALISMAN);
+        full.set(KamiComponents.TALISMAN_STORE.get(), new TalismanStore(blockId(Blocks.COBBLESTONE), 20));
+        player.getInventory().setItem(0, empty);
+        player.getInventory().setItem(1, full);
+
+        ((ItemPlacementMirror) mirror.getItem()).placeAllBlocks(mirror, player);
+        test.assertTrue(test.getBlockState(new BlockPos(3, 3, 3)).is(Blocks.COBBLESTONE), "the square was placed");
+        test.assertTrue(ItemBlockTalisman.getBlockCount(empty) == 0, "the empty ring stays empty");
+        test.assertTrue(ItemBlockTalisman.getBlockCount(full) == 11,
+                "the full ring paid for all nine blocks, " + ItemBlockTalisman.getBlockCount(full) + " remain");
+        test.succeed();
+    }
+
+    public static void mirrorRefusesStairsAndTakesSlabs(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 6.5, 1, 6.5, 0, 0);
+        ItemStack mirror = TTRegistry.stack(LibItemNames.PLACEMENT_MIRROR);
+        player.setItemInHand(InteractionHand.MAIN_HAND, mirror);
+        player.setShiftKeyDown(true);
+
+        test.setBlock(new BlockPos(2, 1, 2), Blocks.OAK_STAIRS);
+        click(test, player, new BlockPos(2, 1, 2), Direction.UP);
+        test.assertTrue(ItemPlacementMirror.getBlockState(mirror) == null, "stairs are not remembered (1.7.10 render type 10)");
+        test.setBlock(new BlockPos(2, 1, 2), Blocks.OAK_DOOR);
+        click(test, player, new BlockPos(2, 1, 2), Direction.UP);
+        test.assertTrue(ItemPlacementMirror.getBlockState(mirror) == null, "doors are not remembered");
+        test.setBlock(new BlockPos(2, 1, 2), Blocks.STONE_SLAB);
+        click(test, player, new BlockPos(2, 1, 2), Direction.UP);
+        test.assertTrue(ItemPlacementMirror.getBlockState(mirror) != null && ItemPlacementMirror.getBlockState(mirror).is(Blocks.STONE_SLAB),
+                "slabs are");
+        test.succeed();
+    }
+
+    public static void pouchMenuWritesOnlyToThePouchItWasOpenedFor(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 6.5, 1, 6.5, 0, 0);
+        ItemStack first = TTRegistry.stack(LibItemNames.ICHOR_POUCH);
+        ItemStack second = TTRegistry.stack(LibItemNames.ICHOR_POUCH);
+        player.getInventory().selected = 0;
+        player.getInventory().setItem(0, first);
+        player.getInventory().setItem(1, second);
+        IFocusPouch api = (IFocusPouch) first.getItem();
+
+        ContainerIchorPouch menu = new ContainerIchorPouch(9, player.getInventory(), InteractionHand.MAIN_HAND);
+        // A modified client may select another hotbar slot while the menu is open (the server accepts that packet).
+        player.getInventory().selected = 1;
+        menu.getSlot(0).set(new ItemStack(Items.DIAMOND, 5));
+        test.assertTrue(api.getInventory(first)[0].is(Items.DIAMOND) && api.getInventory(first)[0].getCount() == 5,
+                "the pouch the menu was opened for got the diamonds");
+        test.assertTrue(api.getInventory(second)[0].isEmpty(), "the pouch that is in the hand now got nothing");
+        test.assertTrue(menu.stillValid(player), "the opened pouch has not moved, so the menu stays open");
+
+        // The hotbar key of the pouch's own slot cannot move it, whichever slot is selected.
+        menu.clicked(ItemIchorPouch.SIZE, 0, ClickType.SWAP, player);
+        test.assertTrue(player.getInventory().getItem(0) == first, "the swap with the pouch's slot is refused");
+
+        // Something else writes the pouch (the wand's focus selector does): the menu closes and does not write over it.
+        ItemStack[] outside = api.getInventory(first);
+        outside[3] = new ItemStack(Items.GOLD_INGOT, 2);
+        api.setInventory(first, outside);
+        test.assertTrue(!menu.stillValid(player), "a write behind the open menu closes it");
+        menu.getSlot(1).set(new ItemStack(Items.STONE));
+        menu.removed(player);
+        test.assertTrue(api.getInventory(first)[3].is(Items.GOLD_INGOT), "and the outside write survives");
+        test.assertTrue(api.getInventory(first)[1].isEmpty(), "the menu's stale cells were not written");
+
+        // A pouch that is replaced in its slot closes the menu too.
+        player.getInventory().setItem(0, first);
+        ContainerIchorPouch again = new ContainerIchorPouch(10, player.getInventory(), InteractionHand.MAIN_HAND);
+        test.assertTrue(again.stillValid(player), "freshly opened");
+        player.getInventory().setItem(0, second);
+        test.assertTrue(!again.stillValid(player), "another pouch in the slot is not the pouch of the menu");
+        test.succeed();
+    }
+
+    public static void catAmuletScaresCreepersAndLeavesProvokedAndBrainMobsAlone(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 3.5, 1, 3.5, 0, 0);
+        ItemStack amulet = TTRegistry.stack(LibItemNames.CAT_AMULET);
+        IBauble bauble = (IBauble) amulet.getItem();
+        test.assertTrue(bauble.getBaubleType(amulet) == thaumcraft.api.baubles.BaubleType.AMULET, "an amulet");
+
+        Creeper creeper = test.spawnWithNoFreeWill(EntityType.CREEPER, new BlockPos(5, 1, 3));
+        Sheep sheep = test.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(1, 1, 3));
+        Zombie hunter = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 6));
+        Zombie avenger = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 1));
+        Piglin piglin = test.spawnWithNoFreeWill(EntityType.PIGLIN, new BlockPos(6, 1, 6));
+        creeper.setTarget(player);
+        hunter.setTarget(player);
+        avenger.setTarget(player);
+        avenger.setLastHurtByMob(player);
+        piglin.setTarget(player);
+
+        // Mobs with no brain memories (all of these but the piglin) used to make the amulet throw.
+        try {
+            bauble.onWornTick(amulet, player);
+        } catch (RuntimeException e) {
+            test.fail("the amulet threw: " + e);
+        }
+        test.assertTrue(creeper.getTarget() == null, "the creeper lost the wearer");
+        test.assertTrue(sheep.isAlive() && sheep.getTarget() == null, "the sheep was left alone");
+        test.assertTrue(hunter.getTarget() == null, "the zombie that merely hunted the wearer lost them");
+        test.assertTrue(avenger.getTarget() == player, "the zombie the wearer hit keeps its revenge");
+        test.assertTrue(piglin.getTarget() == player, "a mob that thinks with a brain is not touched");
+        test.succeed();
+    }
+
+    public static void stuckProjectilesAreNotPushedByTheRobes(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 3.5, 1, 3.5, 0, 0);
+        Arrow flying = test.spawn(EntityType.ARROW, new BlockPos(5, 2, 3));
+        Arrow stuck = test.spawn(EntityType.ARROW, new BlockPos(5, 2, 5));
+        for (Arrow arrow : new Arrow[] { flying, stuck }) {
+            arrow.setNoGravity(true);
+            arrow.setDeltaMovement(-1, 0, 0);
+        }
+        double stuckX = stuck.getX();
+        // A flying arrow started its tick one step behind where it is; a stuck one has not moved (its vector is kept in 1.21.1).
+        flying.xo = flying.getX() + 1;
+        stuck.xo = stuck.getX();
+        double flyingX = flying.getX();
+
+        ItemGemChest.protectFromProjectiles(player, 0);
+        test.assertTrue(flying.getX() < flyingX - 1, "the flying arrow was carried past the wearer, x = " + flying.getX());
+        test.assertTrue(stuck.getX() == stuckX, "the stuck arrow stayed where it is, x = " + stuck.getX());
+        test.succeed();
+    }
+
+    public static void awakenedPickaxeGathersTheDropsOfTheClickedBlockToo(GameTestHelper test) {
+        ItemStack pick = TTRegistry.stack(LibItemNames.ICHOR_PICK_GEM);
+        ToolHandler.changeMode(pick);
+        ServerPlayer player = wallAndMiner(test, pick);
+        player.gameMode.destroyBlock(test.absolutePos(new BlockPos(3, 2, 4)));
+        // 1.7.10 broke the clicked block inside the loop and moved its drops too; here they are moved at the end of the tick.
+        test.runAfterDelay(2, () -> {
+            AABB nearWall = AABB.encapsulatingFullBlocks(test.absolutePos(new BlockPos(-1, 0, -1)), test.absolutePos(new BlockPos(8, 8, 8)));
+            int atWall = 0;
+            int atPlayer = 0;
+            for (ItemEntity item : test.getLevel().getEntitiesOfClass(ItemEntity.class, nearWall)) {
+                if (!item.getItem().is(Items.COBBLESTONE)) continue;
+                if (item.distanceToSqr(player) < 9) atPlayer += item.getItem().getCount();
+                else atWall += item.getItem().getCount();
+            }
+            test.assertTrue(atWall == 0, atWall + " cobblestone were left at the wall");
+            test.assertTrue(atPlayer == 25, "all 25 drops came to the player, found " + atPlayer);
+            test.succeed();
+        });
+    }
+
+    public static void awakenedShovelColumnModeTakesOnlyTheSameBlockAlongTheColumn(GameTestHelper test) {
+        floor(test);
+        for (int y = 1; y <= 12; y++) test.setBlock(new BlockPos(3, y, 4), Blocks.DIRT);
+        test.setBlock(new BlockPos(3, 5, 4), Blocks.STONE);
+        test.setBlock(new BlockPos(2, 2, 4), Blocks.DIRT);
+        ItemStack shovel = TTRegistry.stack(LibItemNames.ICHOR_SHOVEL_GEM);
+        ToolHandler.changeMode(shovel);
+        ToolHandler.changeMode(shovel);
+        ServerPlayer player = player(test, 3.5, 1, 1.5, 0, 0);
+        player.setItemInHand(InteractionHand.MAIN_HAND, shovel);
+
+        // The ray meets the block at (3, 2, 4); the column mode takes 8 blocks below it and 7 above (1.7.10), dirt only.
+        player.gameMode.destroyBlock(test.absolutePos(new BlockPos(3, 2, 4)));
+        for (int y = 1; y <= 9; y++) {
+            BlockState state = test.getBlockState(new BlockPos(3, y, 4));
+            test.assertTrue(y == 5 ? state.is(Blocks.STONE) : state.isAir(), "y=" + y + " is " + state);
+        }
+        for (int y = 10; y <= 12; y++) {
+            test.assertTrue(test.getBlockState(new BlockPos(3, y, 4)).is(Blocks.DIRT), "y=" + y + " is beyond the seven above");
+        }
+        test.assertTrue(test.getBlockState(new BlockPos(2, 2, 4)).is(Blocks.DIRT), "the neighbouring column stays");
         test.succeed();
     }
 }

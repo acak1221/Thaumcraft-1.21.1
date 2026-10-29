@@ -19,6 +19,7 @@ import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
@@ -47,20 +48,36 @@ public final class IchorTier implements Tier {
      * plus the material's damage bonus 5, so a hit of the player (hand 1) dealt 8, 7, 9 and 10. The 1.21.1 vanilla bases (1, 1.5,
      * 5, 3) are not used. The attack speeds are the vanilla ones: 1.7.10 had no attack cooldown at all.
      */
+    public static ItemAttributeModifiers pickaxeAttributes() {
+        return DiggerItem.createAttributes(INSTANCE, 2.0F, -2.8F);
+    }
+
+    public static ItemAttributeModifiers shovelAttributes() {
+        return DiggerItem.createAttributes(INSTANCE, 1.0F, -3.0F);
+    }
+
+    public static ItemAttributeModifiers axeAttributes() {
+        return AxeItem.createAttributes(INSTANCE, 3.0F, -3.0F);
+    }
+
+    public static ItemAttributeModifiers swordAttributes() {
+        return SwordItem.createAttributes(INSTANCE, 4, -2.4F);
+    }
+
     public static Item.Properties pickaxeProperties() {
-        return base().attributes(DiggerItem.createAttributes(INSTANCE, 2.0F, -2.8F));
+        return base().attributes(pickaxeAttributes());
     }
 
     public static Item.Properties shovelProperties() {
-        return base().attributes(DiggerItem.createAttributes(INSTANCE, 1.0F, -3.0F));
+        return base().attributes(shovelAttributes());
     }
 
     public static Item.Properties axeProperties() {
-        return base().attributes(AxeItem.createAttributes(INSTANCE, 3.0F, -3.0F));
+        return base().attributes(axeAttributes());
     }
 
     public static Item.Properties swordProperties() {
-        return base().attributes(SwordItem.createAttributes(INSTANCE, 4, -2.4F));
+        return base().attributes(swordAttributes());
     }
 
     @Override

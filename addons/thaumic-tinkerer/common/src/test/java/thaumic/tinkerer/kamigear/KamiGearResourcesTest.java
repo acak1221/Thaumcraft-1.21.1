@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart): JUnit tests of the data files of the KamiGear group. Distributed under the same licence as the add-on
+ * (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.kamigear;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -233,5 +237,28 @@ class KamiGearResourcesTest {
         JsonObject strings = json("/assets/" + NS + "/lang/en_us.json");
         assertEquals("Ichorium Adorned", strings.get("item.Wand.ICHOR.cap").getAsString());
         assertEquals("Ichor Woven Silverwood", strings.get("item.Wand.ICHORCLOTH.rod").getAsString());
+    }
+
+    // ---- the registrar -------------------------------------------------------------------------------------------
+
+    /**
+     * Fabric's payload registry throws "Packet type ... is already registered!" when a client registers an S2C payload type
+     * twice, and Architectury registers the type of an S2C payload with its client receiver. The registrar therefore registers
+     * the types itself on a dedicated server only; this test reads the source because a client cannot be started here.
+     */
+    @Test
+    void theServerPayloadTypesAreRegisteredOnTheDedicatedServerOnly() throws IOException {
+        java.nio.file.Path file = java.nio.file.Path.of("common", "src", "main", "java", "thaumic", "tinkerer", "common",
+                "content", "KamiGear.java");
+        String text = java.nio.file.Files.readString(file);
+        int guard = text.indexOf("if (Platform.getEnvironment() == Env.SERVER) {");
+        assertTrue(guard >= 0, "the guard is there");
+        int end = text.indexOf("}", guard);
+        int calls = 0;
+        for (int at = text.indexOf("registerS2CPayloadType("); at >= 0; at = text.indexOf("registerS2CPayloadType(", at + 1)) {
+            calls++;
+            assertTrue(at > guard && at < end, "an S2C payload type is registered outside the server guard at offset " + at);
+        }
+        assertEquals(2, calls, "the armour status and the beam");
     }
 }

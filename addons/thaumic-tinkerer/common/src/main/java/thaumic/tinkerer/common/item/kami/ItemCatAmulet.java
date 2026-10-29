@@ -13,9 +13,13 @@ package thaumic.tinkerer.common.item.kami;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -42,8 +46,9 @@ import thaumic.tinkerer.common.research.TTResearchItem;
  * <p>1.7.10 rewrote the goals of every mob around the wearer once and for good: a creeper's "avoid ocelots" goal
  * avoided players from then on, and every "nearest attackable player" goal of any mob targeted an ender crystal
  * instead. 1.21.1 goals have final fields and Fabric would have to reach them by name, so the effect is applied again
- * every tick while the amulet is worn and ends with it (see {@code docs/deviations/KamiGear.md}): mobs within 10 x 4
- * blocks drop the wearer as a target, creepers lose the fuse (a creeper that was already swelling stops) and walk away.</p>
+ * every tick while the amulet is worn and ends with it (see {@code docs/deviations/KamiGear.md}): creepers within 10 x 4
+ * blocks lose the fuse (a creeper that was already swelling stops) and walk away, and mobs that would hunt the wearer
+ * without having been provoked lose that target (see {@link #stopsLookingFor}).</p>
  */
 public class ItemCatAmulet extends KamiItemBase implements IBauble {
     private static final int RANGE = 10;
@@ -67,17 +72,30 @@ public class ItemCatAmulet extends KamiItemBase implements IBauble {
         AABB box = new AABB(wearer.getX() - RANGE, wearer.getY() - RANGE_Y, wearer.getZ() - RANGE, wearer.getX() + RANGE,
                 wearer.getY() + RANGE_Y, wearer.getZ() + RANGE);
         for (Mob mob : level.getEntitiesOfClass(Mob.class, box)) {
-            if (mob.getTarget() == wearer) mob.setTarget(null);
-            if (mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(target -> target == wearer).isPresent()) {
-                mob.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
-            }
             if (mob instanceof Creeper creeper) {
-                // 1.7.10: timeSinceIgnited = 2 and no attack target.
+                // 1.7.10: timeSinceIgnited = 2 and no attack target, for every creeper around, whoever it was after.
                 creeper.setTarget(null);
                 creeper.setSwellDir(-1);
                 flee(creeper, wearer);
+            } else if (stopsLookingFor(mob, wearer)) {
+                mob.setTarget(null);
             }
         }
+    }
+
+    /**
+     * What the swapped goals of 1.7.10 amounted to for the other mobs: a mob with a "nearest attackable player" goal never found the
+     * wearer, but a mob that already had a target, or hit back at the wearer, went on. So a mob loses the wearer as its target
+     * only if it is after the wearer without having been hurt by the wearer lately (a mob hit by the wearer keeps its revenge
+     * for the 100 ticks the game remembers it). Left alone, because 1.7.10's goals did not reach them: the neutral mobs (wolves,
+     * bees, zombified piglins... which are after the wearer only when angered), the Wither and Endermen (their own targeting) and the
+     * mobs that think with a brain (Warden, piglins, hoglins: they did not exist, and reading a memory the brain does not have
+     * throws).
+     */
+    private static boolean stopsLookingFor(Mob mob, LivingEntity wearer) {
+        if (mob.getTarget() != wearer || mob.getLastHurtByMob() == wearer) return false;
+        if (mob instanceof NeutralMob || mob instanceof WitherBoss || mob instanceof EnderMan) return false;
+        return !mob.getBrain().checkMemory(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED);
     }
 
     private static void flee(Creeper creeper, LivingEntity from) {

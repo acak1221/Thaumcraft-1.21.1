@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -36,9 +37,11 @@ import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.config.ThaumcraftMonsters;
 import thaumcraft.common.config.ThaumcraftWarp;
 import thaumcraft.common.entities.golems.EntityGolemBase;
+import thaumcraft.common.entities.golems.EntityTravelingTrunk;
 import thaumcraft.common.entities.monster.EntityBrainyZombie;
 import thaumcraft.common.entities.monster.EntityFireBat;
 import thaumcraft.common.entities.monster.EntityWisp;
+import thaumcraft.common.entities.monster.*;
 import thaumcraft.common.entities.projectile.EntityFrostShard;
 
 /**
@@ -143,6 +146,34 @@ public final class StableKeysRuntimeChecks {
         }
         test.assertTrue(!ThaumcraftEntities.is(null, ThaumcraftEntities.WISP) && !ThaumcraftEntities.is(made.get(0), null), "null on either side is no match");
         test.assertTrue(!ThaumcraftEntities.is(test.spawnWithNoFreeWill(EntityType.PIG, 1, 2, 1), ThaumcraftEntities.WISP), "a vanilla pig is no wisp");
+        // Every key creates exactly the class its Javadoc names: a key whose path points at another existing entity (two paths
+        // swapped) passes everything above, since each entity is still recognised by exactly one key.
+        Map<ResourceKey<EntityType<?>>, Class<? extends Entity>> classes = Map.ofEntries(
+                Map.entry(ThaumcraftEntities.WISP, EntityWisp.class), Map.entry(ThaumcraftEntities.FIREBAT, EntityFireBat.class),
+                Map.entry(ThaumcraftEntities.BRAINY_ZOMBIE, EntityBrainyZombie.class), Map.entry(ThaumcraftEntities.GIANT_BRAINY_ZOMBIE, EntityGiantBrainyZombie.class),
+                Map.entry(ThaumcraftEntities.PECH, EntityPech.class), Map.entry(ThaumcraftEntities.MIND_SPIDER, EntityMindSpider.class),
+                Map.entry(ThaumcraftEntities.THAUMIC_SLIME, EntityThaumicSlime.class),
+                Map.entry(ThaumcraftEntities.CULTIST_CLERIC, EntityCultistCleric.class), Map.entry(ThaumcraftEntities.CULTIST_KNIGHT, EntityCultistKnight.class),
+                Map.entry(ThaumcraftEntities.CULTIST_LEADER, EntityCultistLeader.class), Map.entry(ThaumcraftEntities.CULTIST_PORTAL, EntityCultistPortal.class),
+                Map.entry(ThaumcraftEntities.CULTIST_PORTAL_GREATER, EntityCultistPortalGreater.class),
+                Map.entry(ThaumcraftEntities.ELDRITCH_GUARDIAN, EntityEldritchGuardian.class), Map.entry(ThaumcraftEntities.ELDRITCH_WARDEN, EntityEldritchWarden.class),
+                Map.entry(ThaumcraftEntities.ELDRITCH_GOLEM, EntityEldritchGolem.class), Map.entry(ThaumcraftEntities.ELDRITCH_CRAB, EntityEldritchCrab.class),
+                Map.entry(ThaumcraftEntities.WATCHER, EntityWatcher.class), Map.entry(ThaumcraftEntities.INHABITED_ZOMBIE, EntityInhabitedZombie.class),
+                Map.entry(ThaumcraftEntities.TAINT_CREEPER, EntityTaintCreeper.class), Map.entry(ThaumcraftEntities.TAINT_SPIDER, EntityTaintSpider.class),
+                Map.entry(ThaumcraftEntities.TAINT_SWARM, EntityTaintSwarm.class), Map.entry(ThaumcraftEntities.TAINT_SWARMER, EntityTaintSporeSwarmer.class),
+                Map.entry(ThaumcraftEntities.TAINT_SPORE, EntityTaintSpore.class), Map.entry(ThaumcraftEntities.TAINT_CRAWLER, EntityTaintCrawler.class),
+                Map.entry(ThaumcraftEntities.TAINT_SEED, EntityTaintSeed.class), Map.entry(ThaumcraftEntities.TAINT_SEED_PRIME, EntityTaintSeedPrime.class),
+                Map.entry(ThaumcraftEntities.TAINTACLE, EntityTaintacle.class), Map.entry(ThaumcraftEntities.TAINTACLE_SMALL, EntityTaintacleSmall.class),
+                Map.entry(ThaumcraftEntities.TAINTACLE_GIANT, EntityTaintacleGiant.class),
+                Map.entry(ThaumcraftEntities.TAINTED_CHICKEN, EntityTaintChicken.class), Map.entry(ThaumcraftEntities.TAINTED_COW, EntityTaintCow.class),
+                Map.entry(ThaumcraftEntities.TAINTED_PIG, EntityTaintPig.class), Map.entry(ThaumcraftEntities.TAINTED_SHEEP, EntityTaintSheep.class),
+                Map.entry(ThaumcraftEntities.TAINTED_VILLAGER, EntityTaintVillager.class),
+                Map.entry(ThaumcraftEntities.GOLEM, EntityGolemBase.class), Map.entry(ThaumcraftEntities.TRAVELING_TRUNK, EntityTravelingTrunk.class),
+                Map.entry(ThaumcraftEntities.FROST_SHARD, EntityFrostShard.class));
+        test.assertTrue(classes.keySet().equals(distinct), "the class table covers exactly the keys of ThaumcraftEntities: " + classes.size() + " of " + keys.size());
+        for (int i = 0; i < keys.size(); i++)
+            test.assertTrue(made.get(i).getClass() == classes.get(keys.get(i)),
+                    keys.get(i).location() + " creates " + made.get(i).getClass().getSimpleName() + ", expected " + classes.get(keys.get(i)).getSimpleName());
         // The right class behind the names an add-on is most likely to ask for.
         test.assertTrue(ThaumcraftEntities.type(ThaumcraftEntities.WISP).create(level) instanceof EntityWisp, "wisp: EntityWisp");
         test.assertTrue(ThaumcraftEntities.type(ThaumcraftEntities.FIREBAT).create(level) instanceof EntityFireBat, "firebat: EntityFireBat");
@@ -193,6 +224,17 @@ public final class StableKeysRuntimeChecks {
         // The two originals that were never registered under their own names stay plain objects with the original numbers.
         test.assertTrue(BuiltInRegistries.ARMOR_MATERIAL.getKey(ThaumcraftMaterials.ARMORMAT_SPECIAL) == null, "armorMatSpecial is a plain object");
         test.assertTrue(BuiltInRegistries.ARMOR_MATERIAL.getKey(ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS) == null, "armorMatVoidFortress is a plain object");
+        test.assertTrue(ThaumcraftApi.armorMatSpecial() == ThaumcraftMaterials.ARMORMAT_SPECIAL && ThaumcraftApi.armorMatVoidFortress() == ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS,
+                "the 1.7.10 accessors answer the plain objects");
+        // Their numbers: the defences and the enchantability of the originals (the durability factor is on the item, not here).
+        test.assertTrue(ThaumcraftMaterials.ARMORMAT_SPECIAL.enchantmentValue() == 25, "armorMatSpecial: enchantability 25");
+        test.assertTrue(ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS.enchantmentValue() == 10, "armorMatVoidFortress: enchantability 10");
+        var special = ThaumcraftMaterials.ARMORMAT_SPECIAL.defense();
+        test.assertTrue(special.get(ArmorItem.Type.HELMET) == 1 && special.get(ArmorItem.Type.CHESTPLATE) == 3
+                && special.get(ArmorItem.Type.LEGGINGS) == 2 && special.get(ArmorItem.Type.BOOTS) == 1, "armorMatSpecial: defence 1/3/2/1 but " + special);
+        var fortress = ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS.defense();
+        test.assertTrue(fortress.get(ArmorItem.Type.HELMET) == 4 && fortress.get(ArmorItem.Type.CHESTPLATE) == 8
+                && fortress.get(ArmorItem.Type.LEGGINGS) == 7 && fortress.get(ArmorItem.Type.BOOTS) == 4, "armorMatVoidFortress: defence 4/8/7/4 but " + fortress);
     }
 
     private static void sounds(GameTestHelper test) {

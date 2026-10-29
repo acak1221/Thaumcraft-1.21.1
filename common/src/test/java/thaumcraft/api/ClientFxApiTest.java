@@ -72,6 +72,19 @@ class ClientFxApiTest {
         assertThrows(IllegalArgumentException.class, () -> ThaumcraftClientFX.particleCount(null, -1));
     }
 
+    @Test void theBlockPositionsOfAnEssentiaTrailMustBeInsideTheWorld() {
+        // A BlockPos is three ints and can name a place far outside the world; the facade says it checks every position.
+        assertRefused("from.x", () -> ThaumcraftClientFX.essentiaTrail(null, new BlockPos(30_000_033, 0, 0), BlockPos.ZERO, 0, 0, 1.0F));
+        assertRefused("from.y", () -> ThaumcraftClientFX.essentiaTrail(null, new BlockPos(0, -100_000_000, 0), BlockPos.ZERO, 0, 0, 1.0F));
+        assertRefused("from.z", () -> ThaumcraftClientFX.essentiaTrail(null, new BlockPos(0, 0, Integer.MAX_VALUE), BlockPos.ZERO, 0, 0, 1.0F));
+        assertRefused("to.x", () -> ThaumcraftClientFX.essentiaTrail(null, BlockPos.ZERO, new BlockPos(-30_000_033, 0, 0), 0, 0, 1.0F));
+        assertRefused("to.y", () -> ThaumcraftClientFX.essentiaTrail(null, BlockPos.ZERO, new BlockPos(0, 100_000_000, 0), 0, 0, 1.0F));
+        assertRefused("to.z", () -> ThaumcraftClientFX.essentiaTrail(null, BlockPos.ZERO, new BlockPos(0, 0, Integer.MIN_VALUE), 0, 0, 1.0F));
+        // The limit itself passes, and the scale is still checked.
+        ThaumcraftClientFX.essentiaTrail(null, new BlockPos(30_000_032, -64, -30_000_032), new BlockPos(-30_000_032, 320, 30_000_032), 0, 0, 16.0F);
+        assertRefused("scale", () -> ThaumcraftClientFX.essentiaTrail(null, BlockPos.ZERO, BlockPos.ZERO, 0, 0, 16.5F));
+    }
+
     @Test void theBeamNeedsItsOwnerAndItsEnds() {
         assertThrows(NullPointerException.class, () -> ThaumcraftClientFX.beam(null, (net.minecraft.world.entity.Entity) null, Vec3.ZERO, Vec3.ZERO, 0xFF0000, 2, true, 0.0F, 1), "owner");
         assertThrows(NullPointerException.class, () -> ThaumcraftClientFX.beam(null, (net.minecraft.world.entity.player.Player) null, Vec3.ZERO, 0xFF0000, 2, true, 0.0F, 1), "player");
@@ -145,7 +158,10 @@ class ClientFxApiTest {
         assertEquals(4, ClientFxRules.BEAM_TYPES);
         assertEquals(6, ClientFxRules.SPARKLE_ROLL, "the proxy sparkle rolls one in six");
         assertEquals(6, ClientFxRules.SPARKLE_MULTIPLIER, "and lives 3 * 6 ticks");
+        // The type-only sparkle forwards these two named constants to the long form (the forwarding itself needs a client level
+        // to observe; the constants it forwards are the audited legacy source's size 1.5 and no gravity).
         assertEquals(1.5F, ClientFxRules.TYPE_ONLY_SPARKLE_SIZE);
+        assertEquals(0.0F, ClientFxRules.TYPE_ONLY_SPARKLE_GRAVITY, 0.0F);
         assertEquals(0xABCDEF, ClientFxRules.rgb(0xFFABCDEF), "only the low 24 bits of a colour count");
         assertEquals(0xFFFFFF, ClientFxRules.rgb(-1));
         // Oracle ClientProxy.java:917-922: the rune is placed half a block from the point on every axis.
@@ -168,6 +184,13 @@ class ClientFxApiTest {
         assertEquals(4, ClientFxRules.particleCount(1, 4));
         assertEquals(0, ClientFxRules.particleCount(2, 4));
         assertEquals(0, ClientFxRules.particleCount(0, 0));
+        // The doubling at "all" saturates instead of wrapping to a negative count: the facade documents "zero or more".
+        assertEquals(Integer.MAX_VALUE, ClientFxRules.particleCount(0, Integer.MAX_VALUE));
+        assertEquals(Integer.MAX_VALUE - 1, ClientFxRules.particleCount(0, Integer.MAX_VALUE / 2), "the largest base that doubles exactly");
+        assertEquals(Integer.MAX_VALUE, ClientFxRules.particleCount(0, Integer.MAX_VALUE / 2 + 1));
+        assertEquals(Integer.MAX_VALUE, ClientFxRules.particleCount(1, Integer.MAX_VALUE), "decreased is the base itself");
+        assertEquals(0, ClientFxRules.particleCount(2, Integer.MAX_VALUE));
+        assertEquals(0, ThaumcraftClientFX.particleCount(null, Integer.MAX_VALUE), "a server level has no particles whatever the base");
         assertEquals(net.minecraft.client.ParticleStatus.ALL.getId(), 0);
         assertEquals(net.minecraft.client.ParticleStatus.DECREASED.getId(), 1);
         assertEquals(net.minecraft.client.ParticleStatus.MINIMAL.getId(), 2);

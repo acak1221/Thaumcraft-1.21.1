@@ -44,7 +44,7 @@ class ResourceIntegrityTest {
             "ttmisc.connector.complete", "ttmisc.connector.interffail", "ttmisc.connector.notinterf",
             "ttmisc.connector.notpresent", "ttmisc.connector.toofar", "ttmisc.golemconnector.set",
             "ttmisc.golemconnector.complete", "ttmisc.golemconnector.notinterf", "ttmisc.golemconnector.notpresent",
-            "ttmisc.leftClick", "ttmisc.rightClick", "ttmisc.redstoneControl" };
+            "ttmisc.leftClick", "ttmisc.rightClick", "ttmisc.redstoneControl", "tooltip.thaumictinkerer.golem_connector" };
 
     private static JsonObject json(String resource) throws IOException {
         try (InputStream in = ResourceIntegrityTest.class.getClassLoader().getResourceAsStream(resource)) {

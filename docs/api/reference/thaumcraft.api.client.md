@@ -131,7 +131,7 @@ The client-side particle effects of Thaumcraft that 1.7.10 add-ons drew through 
 public static int particleCount(Level level, int base)
 ```
 
-The original `Thaumcraft.proxy.particleCount(base)`: how many particles a loop of the add-on should draw at the player's particle setting. `0` at "minimal", `base` at "decreased", `2 * base` at "all". Always `0` for a server level or `null`.
+The original `Thaumcraft.proxy.particleCount(base)`: how many particles a loop of the add-on should draw at the player's particle setting. `0` at "minimal", `base` at "decreased", `2 * base` at "all" (saturating at `Integer.MAX_VALUE` for a `base` above half of it, so the answer is never negative). Always `0` for a server level or `null`.
 
 **Throws:** `IllegalArgumentException` — when `base` is negative
 
@@ -182,12 +182,12 @@ The original `Thaumcraft.proxy.burst(world, x, y, z, scale)`: the white puff of 
 public static void wisp(Level level, double x, double y, double z, float size, float red, float green, float blue)
 ```
 
-The original `Thaumcraft.proxy.wispFX(world, x, y, z, size, red, green, blue)`: one mote of the wisp in any colour. It lives about 36 to 51 ticks, grows to full size by half its life and shrinks again, drifts with gravity `0.02`, is pushed out of solid blocks and is not drawn farther from the camera than 50 blocks (25 on fast graphics). A red of exactly 0 is drawn as 1, a quirk of the original.
+The original `Thaumcraft.proxy.wispFX(world, x, y, z, size, red, green, blue)`: one mote of the wisp in any colour. It lives about 36 to 51 ticks, grows to full size by half its life and shrinks again, drifts with gravity `0.02`, is pushed out of solid blocks and is not drawn farther from the camera than 50 blocks (25 on fast graphics). A red of exactly 0 is drawn as 1, a quirk of the original, and since a negative red is clamped to 0 first, **a red of 0 or less is drawn as 1**: to get a mote without red, pass a small positive number such as `0.004`.
 
 **Parameters:**
 - `level` — a client level; anything else draws nothing
 - `size` — the scale, above 0 and at most 16 (the wisp entity uses 0.1)
-- `red` — 0 to 1; any finite value is accepted and one outside that range is clamped to it
+- `red` — 0 to 1; any finite value is accepted and one outside that range is clamped to it; 0 or less draws as 1 (see above)
 - `green` — 0 to 1, clamped like `red`
 - `blue` — 0 to 1, clamped like `red`
 
@@ -255,7 +255,7 @@ The original drew the beam from the tip of the wand in the player's hand, which 
 
 **Throws:** `NullPointerException` — when `owner`, `from` or `to` is `null`
 
-**Throws:** `IllegalArgumentException` — for the ranges above (a texture outside 0 to 3, an `endScale` outside 0 to 8, an `impact` outside 0 to 5, a non-finite end), also when `level` is not a client level; checked before `owner` is looked at
+**Throws:** `IllegalArgumentException` — for the ranges above (a texture outside 0 to 3, an `endScale` outside 0 to 8, an `impact` outside 0 to 5, a non-finite end or one outside the world). The ranges are checked on every side: a server level or `null` that gets past them draws nothing. They are checked before `owner` is looked at
 
 **Parameters:**
 - `level` — a client level; anything else draws nothing
@@ -319,10 +319,12 @@ The original `Thaumcraft.proxy.essentiaTrailFx(world, x, y, z, tx, ty, tz, count
 
 **Throws:** `NullPointerException` — when `from` or `to` is `null`
 
+**Throws:** `IllegalArgumentException` — for a `scale` outside the range or a block position outside the world; checked on every side, like the other methods
+
 **Parameters:**
 - `level` — a client level; anything else draws nothing
-- `from` — the block the mote starts in
-- `to` — the block it flies to; farther than 64 blocks from `from` nothing is drawn
+- `from` — the block the mote starts in; a coordinate outside the world is refused
+- `to` — the block it flies to, likewise; farther than 64 blocks from `from` nothing is drawn
 - `phase` — the original `count`: the wobble of the mote follows `sin(phase / 2)`, `sin(phase / 3)` and `sin(phase / 4)`, so pass a running counter (the age of the block entity) to make a stream curl
 - `rgb` — the colour, `0xRRGGBB`, usually `aspect.getColor()`
 - `scale` — the size, above 0 and at most 16 (the originals used 0.5 to 1)

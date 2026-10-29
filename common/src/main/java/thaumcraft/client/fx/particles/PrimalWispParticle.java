@@ -68,15 +68,28 @@ public final class PrimalWispParticle extends SingleQuadParticle implements thau
      * @param noClip whether the wisp passes through blocks (the original {@code clip} argument sets {@code noClip})
      */
     public static void spawn(ClientLevel level,double x,double y,double z,float size,int type,boolean shrink,boolean noClip,float gravity){
-        add(new PrimalWispParticle(level,x,y,z,size,type,null,!noClip,gravity,shrink));
+        Spec spec=spec(x,y,z,size,type,shrink,noClip,gravity);
+        add(new PrimalWispParticle(level,spec.x(),spec.y(),spec.z(),spec.size(),spec.type(),null,spec.physics(),spec.gravity(),spec.shrink()));
     }
+    /**
+     * What {@link #spawn} gives the constructor, as plain values: the facade's two adjacent booleans {@code shrink} and
+     * {@code noClip} become the constructor's {@code shrink} and {@code physics} ({@code physics} is the opposite of
+     * {@code noClip}). A particle needs a client level, so this pure step is where a unit test pins the mapping.
+     */
+    public record Spec(double x,double y,double z,float size,int type,boolean shrink,boolean physics,float gravity){}
+    /** The constructor arguments of {@code wispFX2}: {@code noClip} (the original {@code clip} argument) turns the physics off. */
+    public static Spec spec(double x,double y,double z,float size,int type,boolean shrink,boolean noClip,float gravity){
+        return new Spec(x,y,z,size,type,shrink,!noClip,gravity);
+    }
+    /** The speed per tick that covers {@code from} to {@code to} in {@code lifetime} ticks (the velocity of {@code wispFX3}). */
+    public static double velocityToward(double from,double to,int lifetime){return(to-from)/lifetime;}
     /**
      * Original {@code ClientProxy.wispFX3}: one wisp of a primal colour that flies from a point to another and arrives when it dies
      * (its velocity is the distance over its lifetime, as in the original constructor).
      */
     public static void spawnToward(ClientLevel level,double x,double y,double z,double tx,double ty,double tz,float size,int type,boolean shrink,float gravity){
         var mote=new PrimalWispParticle(level,x,y,z,size,type,null,true,gravity,shrink);
-        if(mote.lifetime>0){mote.xd=(tx-mote.x)/mote.lifetime;mote.yd=(ty-mote.y)/mote.lifetime;mote.zd=(tz-mote.z)/mote.lifetime;}
+        if(mote.lifetime>0){mote.xd=velocityToward(mote.x,tx,mote.lifetime);mote.yd=velocityToward(mote.y,ty,mote.lifetime);mote.zd=velocityToward(mote.z,tz,mote.lifetime);}
         add(mote);
     }
     @Override public void tick(){
@@ -89,7 +102,7 @@ public final class PrimalWispParticle extends SingleQuadParticle implements thau
             if(!Double.isFinite(xd+yd+zd))remove();
         }else{xd*=.98F;yd*=.98F;zd*=.98F;if(onGround){xd*=.7F;zd*=.7F;}}
     }
-    @Override public float getQuadSize(float partial){return shrink?initialSize*(lifetime-age)/(float)lifetime:initialSize*sizeFactor(false,age,lifetime);}
+    @Override public float getQuadSize(float partial){return initialSize*sizeFactor(shrink,age,lifetime);}
     /**
      * The share of its full size a typed wisp has at an age (original FXWisp render: {@code shrink} fades it out over the whole life; otherwise it
      * grows to full size at half the life and shrinks again, {@code age / (lifetime / 2)} folded at one).

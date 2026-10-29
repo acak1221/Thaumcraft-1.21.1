@@ -76,9 +76,11 @@ ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
   happened by `onThaumcraftReady`: asking for an effect, entity type or material earlier (a static initialiser of
   yours) throws `IllegalStateException`, and `ThaumcraftSoundIds.event` throws `IllegalArgumentException` for an id that is
   not a registered sound. Resolve inside a handler or after the hook, as the snippet does. `ThaumcraftEntities.is` never throws.
-- `armorMatSpecial()` and `armorMatVoidFortress()` are plain objects with the original numbers and are **not in the armour
-  material registry at all**, so they have no key or holder: build an item from one with `Holder.direct(...)`, or register an
-  `ArmorMaterial` of your own with your own worn textures. A material named `thaumcraft:special` *is* registered, but it is the
+- `armorMatSpecial()` and `armorMatVoidFortress()` are plain objects with the original defences (1/3/2/1 and 4/8/7/4) and
+  enchantability (25 and 10) and are **not in the armour material registry at all**, so they have no key or holder: build an
+  item from one with `Holder.direct(...)`, or register an `ArmorMaterial` of your own with your own worn textures. The
+  durability factor of the originals (25 and 18) is a property of the item in 1.21.1, so it is not in these objects: set it on
+  the item you build. A material named `thaumcraft:special` *is* registered, but it is the
   goggles' adapter (the same defences, a gold repair ingredient and the goggles' worn layer): a different object from
   `armorMatSpecial()`, and not part of the API.
 - Tested by the unit test `StableKeysApiTest` (every key is well formed and names an id the mod registers) and by the GameTest
@@ -166,7 +168,7 @@ nothing; `thaumcraft.api.client.ThaumcraftClientFX` is that proxy, with a `Level
 | `beamCont(world, player, tx, ty, tz, type, color, reverse, endmod, input, impact)` | `beam(level, player, to, rgb, type, reverse, endScale, impact)`, `beam(level, owner, from, to, rgb, type, reverse, endScale, impact)` | the continuous beam of the excavation focus, from the tip of the player's wand (`wandTip(player)`) or from a point you give; call it every tick, there is no `input` handle (and mind the phase of the call, below) |
 | `smokeSpiral(world, x, y, z, radius, start, miny, color)` | `smokeSpiral(level, x, y, z, radius, start, minY, rgb)` | **one** puff of smoke that travels along a spiral; the ring of the Sword of the Zephyr is 5 calls and the awakening warden's 33, each with a random `start` angle, so loop |
 | `essentiaTrailFx(world, x, y, z, tx, ty, tz, count, color, scale)` | `essentiaTrail(level, from, to, phase, rgb, scale)` | one mote of essentia between two blocks |
-| `particleCount(base)` | `particleCount(level, base)` | 0 at "minimal", `base` at "decreased", `2 * base` at "all" |
+| `particleCount(base)` | `particleCount(level, base)` | 0 at "minimal", `base` at "decreased", `2 * base` at "all" (never negative: it stops at the largest `int`) |
 
 <!-- snippet:client-fx -->
 ```java
@@ -201,8 +203,10 @@ ClientTickEvents.START_CLIENT_TICK.register(client -> {
 - **Arguments are checked first, on every side.** A non-finite number, a coordinate outside the world, a size of zero or less
   (or over 16), a type outside its range (a beam texture of 4 or more, an end scale over 8, an impact over 5), a rune or spiral
   outside its limits throws `IllegalArgumentException`, so a mistake shows in a server-only test too. The ranges are in the
-  Javadoc of each method. A colour component (`wisp`, `blockRunes`) may be any finite number and is clamped to 0 to 1: the
-  original packed it into a byte unchecked, and a component of 2 spilled into the next channel.
+  Javadoc of each method (this holds for the two block positions of `essentiaTrail` too). A colour component (`wisp`,
+  `blockRunes`) may be any finite number and is clamped to 0 to 1: the original packed it into a byte unchecked, and a component
+  of 2 spilled into the next channel. The `wisp` keeps the original's quirk that a red of exactly 0 is drawn as 1, so with the
+  clamp **a red of 0 or less draws as full red**: pass a small positive red (`0.004`) for a mote without red.
 - **The beam's glint counts down, so the phase of the call matters.** Thaumcraft steps its beams at the end of every client
   tick and the step lowers `impact` by one, as the particle of the original did. Called before that step (an item's or
   entity's client tick, a block's tick, a network task, `ClientTickEvents.START_CLIENT_TICK`, as the example does) the glint is
@@ -222,10 +226,12 @@ ClientTickEvents.START_CLIENT_TICK.register(client -> {
   the same for every viewer: it does not follow the hand model of the first or third person view. The form with an entity takes
   the start from you.
 - **Seen on a frame: no.** The argument rules, the geometry rules and the server senders are covered by `ClientFxApiTest`,
-  `ClientFxPayloadTest`, `ClientFxParticleRulesTest` and the GameTest `clientFxServerTwinsCheckAndSendOnTheServerThread` (which
-  reads the real bytes the sender writes for a player in range and shows a player out of range gets none). The particles
-  are the ones Thaumcraft's own effects use; how they look from a call of yours was not inspected, and the client half of the
-  server twins was not exercised by a connected client.
+  `ClientFxPayloadTest`, `ClientFxParticleRulesTest`, `ClientFxReceiverTest` (which slot of a received payload becomes which
+  argument of the call it stands for) and the GameTest `clientFxServerTwinsCheckAndSendOnTheServerThread` (which reads the real
+  bytes the sender writes for a player in range and shows a player out of range gets none, and checks `wandTip(player)` against
+  the formula for a known yaw and pitch). The particles are the ones Thaumcraft's own effects use; how they look from a call of
+  yours was not inspected, and the client half of the server twins was not exercised by a connected client: only the mapping
+  from the payload to the call is tested, not what the call then draws.
 
 ## Aspect tags in a screen
 

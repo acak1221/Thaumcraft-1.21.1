@@ -24,18 +24,22 @@ import thaumic.tinkerer.common.core.handler.ConfigHandler;
  *       {@code ConfigHandler.showPlacementMirrorBlocks} is on.</li>
  * </ul>
  *
- * <p>Either list this class as a {@code client} entrypoint of {@code fabric.mod.json} or call {@link #register()} once from
- * {@code ThaumicTinkererFabricClient}; doing both registers everything twice.</p>
+ * <p>{@code KamiGearClient.register()} calls {@link #register()} by name on Fabric, so nothing has to be listed in
+ * {@code fabric.mod.json}. {@link #register()} registers only once, so listing this class as a {@code client} entrypoint
+ * as well, or calling it from {@code ThaumicTinkererFabricClient}, is harmless.</p>
  */
 public final class KamiGearFabricClient implements ClientModInitializer {
+    private static boolean registered;
+
     @Override
     public void onInitializeClient() {
         register();
     }
 
-    /** Registers the two hooks; does nothing while the Kami content is off. */
-    public static void register() {
-        if (!ConfigHandler.enableKami) return;
+    /** Registers the two hooks (once); does nothing while the Kami content is off. */
+    public static synchronized void register() {
+        if (registered || !ConfigHandler.enableKami) return;
+        registered = true;
 
         LivingEntityFeatureRendererRegistrationCallback.EVENT.register(
                 (entityType, renderer, helper, context) -> {

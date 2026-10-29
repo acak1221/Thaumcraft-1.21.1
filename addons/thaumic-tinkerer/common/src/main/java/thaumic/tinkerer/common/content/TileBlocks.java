@@ -11,6 +11,7 @@
  */
 package thaumic.tinkerer.common.content;
 
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.RegistrySupplier;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import thaumcraft.api.ItemApi;
 import thaumcraft.api.ThaumcraftApi;
 import thaumic.tinkerer.client.TileBlocksClient;
+import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.block.BlockAnimationTablet;
 import thaumic.tinkerer.common.block.BlockGolemConnector;
 import thaumic.tinkerer.common.block.BlockRPlacer;
@@ -126,6 +128,21 @@ public final class TileBlocks implements ContentGroup {
 
         PacketTabletButton.register();
         PacketPlacerButton.register();
+    }
+
+    /**
+     * After the registrations: the loader glue of the Transvector Interface's fluids. Fabric's is in the Fabric module, which
+     * common code cannot link against, so the class is reached by name; NeoForge has none yet (docs/api-requests/TileBlocks.md,
+     * section 6).
+     */
+    @Override
+    public void ready() {
+        if (!Platform.isFabric()) return;
+        try {
+            Class.forName("thaumic.tinkerer.fabric.TileBlocksFabric").getMethod("register").invoke(null);
+        } catch (ReflectiveOperationException | LinkageError e) {
+            ThaumicTinkerer.LOG.error("TileBlocks: the Fabric glue of the Transvector Interface's fluids failed: {}", e.toString());
+        }
     }
 
     @Override

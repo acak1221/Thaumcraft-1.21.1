@@ -97,9 +97,10 @@ public final class ThaumcraftApi {
     public static net.minecraft.core.Holder<ArmorMaterial> armorMatVoidHolder() { return ThaumcraftMaterials.armorMatVoidHolder(); }
     /**
      * Original {@code armorMatSpecial} (oracle {@code thaumcraft/api/ThaumcraftApi.java:52}):
-     * durability 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a
+     * durability factor 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a
      * field; the native answers through an accessor with a plain {@code ArmorMaterial} object holding the original
-     * numbers (the iron equip sound, no repair ingredient, no worn layer). It is <b>not in the armour material
+     * defences and enchantability (the iron equip sound, no repair ingredient, no worn layer); the durability factor is a
+     * property of the item in 1.21.1 and is not in the object. It is <b>not in the armour material
      * registry</b> and has no holder or key: wrap it with {@code Holder.direct} to build an item from it, or register a
      * material of your own. The registered {@code thaumcraft:special} is a different object, the adapter of the goggles
      * (gold repair, the goggles' worn layer), not this one. See {@link ThaumcraftMaterials}.
@@ -107,9 +108,10 @@ public final class ThaumcraftApi {
     public static ArmorMaterial armorMatSpecial() { return ThaumcraftMaterials.ARMORMAT_SPECIAL; }
     /**
      * Original {@code armorMatVoidFortress} (oracle {@code thaumcraft/api/ThaumcraftApi.java:55}):
-     * durability 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a
+     * durability factor 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a
      * field; the native answers through an accessor with a plain {@code ArmorMaterial} object holding the original
-     * defences. It is <b>not in the armour material registry</b> and has no holder or key: wrap it with
+     * defences and enchantability; the durability factor is a property of the item in 1.21.1 and is not in the object.
+     * It is <b>not in the armour material registry</b> and has no holder or key: wrap it with
      * {@code Holder.direct} to build an item from it, or register a material of your own. See {@link ThaumcraftMaterials}.
      */
     public static ArmorMaterial armorMatVoidFortress() { return ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS; }

@@ -36,6 +36,27 @@ class ClientFxParticleRulesTest {
         assertEquals(1.0F - 1.0F / 18.0F, PrimalWispParticle.sizeFactor(false, 19, 37), 1.0E-6F);
     }
 
+    @Test void theTwoBooleansOfTheTypedWispReachTheConstructorInTheirOwnSlots() {
+        // wispFX2(.., size, type, shrink, clip, gravity): the facade passes (shrink, noClip) and the particle wants (shrink, physics);
+        // physics is the opposite of noClip. Two adjacent booleans are what a swap would corrupt without a compile error.
+        var shrinking = PrimalWispParticle.spec(1.0, 2.0, 3.0, 0.5F, 2, true, false, 0.07F);
+        assertEquals(new PrimalWispParticle.Spec(1.0, 2.0, 3.0, 0.5F, 2, true, true, 0.07F), shrinking);
+        var passingThroughBlocks = PrimalWispParticle.spec(1.0, 2.0, 3.0, 0.5F, 2, false, true, 0.07F);
+        assertEquals(false, passingThroughBlocks.shrink(), "shrink is the first boolean");
+        assertEquals(false, passingThroughBlocks.physics(), "noClip turns the physics off");
+        var both = PrimalWispParticle.spec(0, 0, 0, 1.0F, 0, true, true, 0.0F);
+        assertTrue(both.shrink() && !both.physics());
+        var neither = PrimalWispParticle.spec(0, 0, 0, 1.0F, 0, false, false, 0.0F);
+        assertTrue(!neither.shrink() && neither.physics());
+    }
+
+    @Test void aWispThatFliesTowardsAPointCoversTheDistanceInItsLifetime() {
+        // wispFX3: the velocity is the distance over the lifetime on each axis.
+        assertEquals(1.0, PrimalWispParticle.velocityToward(1.0, 11.0, 10), 1.0E-12);
+        assertEquals(-0.5, PrimalWispParticle.velocityToward(4.0, 0.0, 8), 1.0E-12);
+        assertEquals(0.0, PrimalWispParticle.velocityToward(3.0, 3.0, 40), 0.0);
+    }
+
     @Test void aLifetimeOfOneDoesNotDivideByZero() {
         assertEquals(0.0F, PrimalWispParticle.sizeFactor(false, 0, 1), 1.0E-6F);
         assertTrue(Float.isFinite(PrimalWispParticle.sizeFactor(false, 1, 1)));

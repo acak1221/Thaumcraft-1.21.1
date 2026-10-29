@@ -544,7 +544,16 @@ public final class KnowledgeApiRuntimeChecks {
             test.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area).isEmpty() && !level.getBlockTicks().hasScheduledTick(top, Blocks.OAK_LOG),
                     "no loot, no scheduled tick");
             test.assertTrue(top.equals(ThaumcraftApiHelper.findFurthestBlock(level, top.below(), Blocks.OAK_LOG)), "from the log below the top the end is the top as well");
-            test.assertTrue(top.equals(ThaumcraftApiHelper.findFurthestBlock(level, top, Blocks.OAK_LOG)), "a log that is already the end is its own end");
+            // "Furthest" is measured from the clicked log: the same trunk clicked at its top ends at the foot, and a log with no
+            // other log within reach is its own end.
+            test.assertTrue(foot.equals(ThaumcraftApiHelper.findFurthestBlock(level, top, Blocks.OAK_LOG)), "clicked at the top, the walk runs down to the foot");
+            BlockPos lone = test.absolutePos(new BlockPos(1, 2, 7));
+            level.setBlock(lone, Blocks.OAK_LOG.defaultBlockState(), 3);
+            try {
+                test.assertTrue(lone.equals(ThaumcraftApiHelper.findFurthestBlock(level, lone, Blocks.OAK_LOG)), "a log with no other log within reach is its own end");
+            } finally {
+                level.setBlock(lone, Blocks.AIR.defaultBlockState(), 3);
+            }
 
             // It is the cell that the break takes.
             test.assertTrue(ThaumcraftApiHelper.breakFurthestBlock(level, foot, Blocks.OAK_LOG, survivor.player), "the break takes the oak trunk's end");

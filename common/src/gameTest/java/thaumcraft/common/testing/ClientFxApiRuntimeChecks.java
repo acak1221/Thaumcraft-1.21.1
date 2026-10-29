@@ -128,6 +128,7 @@ public final class ClientFxApiRuntimeChecks {
             ThaumcraftClientFX.beam(level, owner, start, end, 0xFF0000, 0, false, 0.0F, 0);
             ThaumcraftClientFX.beam(level, owner, end, 0xFF0000, 3, true, 8.0F, 5);
             test.assertTrue(ThaumcraftClientFX.wandTip(near).distanceTo(near.getEyePosition()) < 0.4, "the wand tip is within a third of a block of the eye");
+            wandTipFollowsTheYawAndTheLook(test, near);
             test.assertTrue(ThaumcraftClientFX.particleCount(level, 5) == 0, "a server level has no particles");
             CompletableFuture.runAsync(() -> ThaumcraftClientFX.sparkle(level, x, y, z, 1.0F, 2, 0.0F)).join();
             expectRefused(test, () -> ThaumcraftClientFX.sparkle(level, x, y, z, 1.0F, 9, 0.0F), IllegalArgumentException.class, "the client facade checks its arguments on a server too");
@@ -137,6 +138,38 @@ public final class ClientFxApiRuntimeChecks {
             for (ServerPlayer player : new ServerPlayer[]{near, far})
                 if (player != null && level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player);
         }
+    }
+
+    /**
+     * The tip of the wand, {@code wandTip(Player)}, against the documented formula with a yaw and a pitch chosen so that a wrong
+     * mapping shows: the eye is moved {@code 0.066} against the cosine and {@code 0.04} against the sine of the yaw (the yaw of the
+     * player, in radians), {@code 0.06} down and {@code 0.3} along the look vector. The expected point is built from the numbers
+     * below, not from the code under test; a yaw of 90 and a pitch of 30 make the pitch (30) read as a yaw, the look and the
+     * offset swapped, or a missing term all land more than a hundredth of a block away.
+     */
+    private static void wandTipFollowsTheYawAndTheLook(GameTestHelper test, ServerPlayer player) {
+        float yaw = 90.0F, pitch = 30.0F;
+        player.setYRot(yaw);
+        player.setYHeadRot(yaw);
+        player.setXRot(pitch);
+        // Standing: the look vector of the game for these angles, from first principles.
+        double y = Math.toRadians(yaw), p = Math.toRadians(pitch);
+        Vec3 look = new Vec3(-Math.sin(y) * Math.cos(p), -Math.sin(p), Math.cos(y) * Math.cos(p));
+        test.assertTrue(player.getLookAngle().distanceTo(look) < 1.0E-4, "the mock player looks where the angles say: " + player.getLookAngle() + " against " + look);
+        Vec3 eye = player.getEyePosition();
+        Vec3 expected = eye.add(-Math.cos(y) * 0.066, -0.06, -Math.sin(y) * 0.04).add(look.scale(0.3));
+        Vec3 tip = ThaumcraftClientFX.wandTip(player);
+        test.assertTrue(tip.distanceTo(expected) < 1.0E-3, "the wand tip is " + tip + " but the formula gives " + expected);
+        // The literal offset for this yaw and pitch, (-0.2598, -0.21, -0.04) from the eye, so the numbers are visible in a failure.
+        test.assertTrue(Math.abs((tip.x - eye.x) - (-0.3 * Math.cos(p))) < 1.0E-3 && Math.abs((tip.y - eye.y) - (-0.06 - 0.3 * Math.sin(p))) < 1.0E-3
+                && Math.abs((tip.z - eye.z) - (-0.04)) < 1.0E-3, "the wand tip is offset " + tip.subtract(eye) + " from the eye");
+        // Another yaw moves the sideways offset: the yaw of the player is read, not the pitch.
+        player.setYRot(0.0F);
+        player.setYHeadRot(0.0F);
+        player.setXRot(0.0F);
+        Vec3 south = ThaumcraftClientFX.wandTip(player).subtract(player.getEyePosition());
+        test.assertTrue(Math.abs(south.x - (-0.066)) < 1.0E-3 && Math.abs(south.y - (-0.06)) < 1.0E-3 && Math.abs(south.z - 0.3) < 1.0E-3,
+                "looking south the tip is (-0.066, -0.06, 0.3) from the eye but " + south);
     }
 
     /** Replaces the connection listener of a mock player by one that keeps the client effect payloads it is asked to send. */

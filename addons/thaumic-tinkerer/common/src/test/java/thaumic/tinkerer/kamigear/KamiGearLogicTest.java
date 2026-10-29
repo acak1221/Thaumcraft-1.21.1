@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart): JUnit tests of the plain rules of the KamiGear group. Distributed under the same licence as the add-on
+ * (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.kamigear;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +21,11 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,9 +35,12 @@ import thaumic.tinkerer.common.item.kami.KamiComponents.PearlTarget;
 import thaumic.tinkerer.common.item.kami.KamiComponents.TalismanStore;
 import thaumic.tinkerer.common.item.kami.foci.ItemFocusXPDrain;
 import thaumic.tinkerer.common.item.kami.foci.ShadowBeam;
+import thaumic.tinkerer.common.item.kami.tool.IchorTier;
 import thaumic.tinkerer.common.item.kami.tool.ToolHandler;
 import thaumic.tinkerer.common.lib.LibItemNames;
+import thaumic.tinkerer.common.network.packet.kami.PacketArmorStatus;
 import thaumic.tinkerer.common.network.packet.kami.PacketShadowBeam;
+import thaumic.tinkerer.common.network.packet.kami.PacketToggleArmor;
 
 /**
  * Test-only code of the port (no 1.7.10 counterpart), CC BY-NC-SA 3.0 like the add-on.
@@ -135,6 +146,39 @@ class KamiGearLogicTest {
         assertTrue(alongZ.stream().allMatch(offset -> offset[0] == 0), "odd rotation: a wall in the z direction");
     }
 
+    @Test
+    void theMirrorRemembersOnlyTheBlocksOfTheOldPlainBlockModel() {
+        var at = BlockPos.ZERO;
+        // 1.7.10 render type 0: cubes, slabs, glass, leaves, furnaces, snow layers.
+        for (var block : List.of(Blocks.STONE, Blocks.COBBLESTONE, Blocks.GLASS, Blocks.OAK_LEAVES, Blocks.FURNACE,
+                Blocks.OAK_PLANKS, Blocks.STONE_SLAB, Blocks.SNOW, Blocks.DIRT)) {
+            assertTrue(ItemPlacementMirror.canRemember(EmptyBlockGetter.INSTANCE, at, block.defaultBlockState()),
+                    block + " is remembered");
+        }
+        // Refused: stairs, fences, walls, doors, beds, torches, panes, ladders, chests, plants, air.
+        for (var block : List.of(Blocks.OAK_STAIRS, Blocks.OAK_FENCE, Blocks.COBBLESTONE_WALL, Blocks.OAK_DOOR, Blocks.RED_BED,
+                Blocks.TORCH, Blocks.GLASS_PANE, Blocks.LADDER, Blocks.CHEST, Blocks.DANDELION, Blocks.AIR, Blocks.WATER)) {
+            assertFalse(ItemPlacementMirror.canRemember(EmptyBlockGetter.INSTANCE, at, block.defaultBlockState()),
+                    block + " is refused");
+        }
+    }
+
+    // ---- the tools -----------------------------------------------------------------------------------------------
+
+    private static double weaponModifier(ItemAttributeModifiers modifiers) {
+        return modifiers.modifiers().stream().filter(entry -> entry.attribute().equals(Attributes.ATTACK_DAMAGE))
+                .mapToDouble(entry -> entry.modifier().amount()).sum();
+    }
+
+    @Test
+    void theIchoriumToolsKeepTheDamageOf1710() {
+        // 1.7.10: base 2 / 1 / 3 / 4 (pickaxe, shovel, axe, sword) + the material's 5; a hit adds the player's own 1.
+        assertEquals(7.0, weaponModifier(IchorTier.pickaxeAttributes()), 1.0E-9);
+        assertEquals(6.0, weaponModifier(IchorTier.shovelAttributes()), 1.0E-9);
+        assertEquals(8.0, weaponModifier(IchorTier.axeAttributes()), 1.0E-9);
+        assertEquals(9.0, weaponModifier(IchorTier.swordAttributes()), 1.0E-9);
+    }
+
     // ---- the Shadowbeam -------------------------------------------------------------------------------------------
 
     @Test
@@ -235,5 +279,21 @@ class KamiGearLogicTest {
         List<Vec3> read = PacketShadowBeam.CODEC.decode(big).points();
         assertEquals(PacketShadowBeam.MAX_POINTS, read.size());
         assertFalse(big.isReadable(), "nothing but the capped points was written");
+    }
+
+    @Test
+    void theArmourSwitchPacketsCarryTheirFlag() {
+        for (boolean status : new boolean[] { true, false }) {
+            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+            PacketToggleArmor.CODEC.encode(buf, new PacketToggleArmor(status));
+            assertEquals(status, PacketToggleArmor.CODEC.decode(buf).armorStatus(), "client to server");
+            assertFalse(buf.isReadable());
+
+            PacketArmorStatus.CODEC.encode(buf, new PacketArmorStatus(status));
+            assertEquals(status, PacketArmorStatus.CODEC.decode(buf).armorStatus(), "server to client");
+            assertFalse(buf.isReadable());
+        }
+        assertEquals("toggle_armor", PacketToggleArmor.TYPE.id().getPath());
+        assertEquals("armor_status", PacketArmorStatus.TYPE.id().getPath());
     }
 }

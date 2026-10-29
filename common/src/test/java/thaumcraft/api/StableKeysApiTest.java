@@ -16,7 +16,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +50,13 @@ import thaumcraft.api.potions.WarpEffects;
  */
 class StableKeysApiTest {
     private static final Path CONFIG = Path.of("src/main/java/thaumcraft/common/config");
+    private static final Path ENTITY_KEYS = Path.of("src/main/java/thaumcraft/api/entities/ThaumcraftEntities.java");
+    /** A key of {@code ThaumcraftEntities} with the class its Javadoc names (the comment line before it reads "Original EntityWisp"). */
+    private static final Pattern DOCUMENTED_KEY = Pattern.compile(
+            "/\\*\\* Original \\{@code (Entity\\w+)\\}[^*]*\\*/\\s*public static final ResourceKey<EntityType<\\?>> (\\w+) = key\\(\"([a-z_0-9]+)\"\\);");
+    /** A registration of an entity type with the class it creates: {@code RegistrySupplier<EntityType<EntityWisp>> WISP = ENTITIES.register("wisp"}. */
+    private static final Pattern REGISTERED_TYPE = Pattern.compile(
+            "RegistrySupplier<EntityType<(Entity\\w+)>>\\s+\\w+\\s*=\\s*ENTITIES\\.register\\(\"([a-z_0-9]+)\"");
 
     @BeforeAll static void bootstrap() {
         SharedConstants.tryDetectVersion();
@@ -62,7 +71,6 @@ class StableKeysApiTest {
             ResourceKey<T> key = (ResourceKey<T>) field.get(null);
             assertEquals(registry.location(), key.registry(), field.getName() + " is a key of the wrong registry");
             assertEquals("thaumcraft", key.location().getNamespace(), field.getName());
-            assertEquals(field.getName().toLowerCase(java.util.Locale.ROOT).replace("tainted_", "tainted_"), field.getName().toLowerCase(java.util.Locale.ROOT));
             keys.add(key);
         }
         return keys;
@@ -112,6 +120,60 @@ class StableKeysApiTest {
         for (String path : List.of("wisp", "firebat", "brainy_zombie", "golem", "frost_shard")) {
             assertTrue(keys.contains(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("thaumcraft", path))), path);
         }
+    }
+
+    @Test void everyEntityKeyIsTiedToTheClassItsJavadocNamesAndTheUnkeyedTypesArePinned() throws Exception {
+        // A key whose path points at another existing entity (a swap of two paths) passes the "registered and distinct" check of
+        // the test above; this one ties each key to the class its Javadoc promises through the registration that makes the type.
+        Map<String, String> documented = new TreeMap<>();
+        Matcher keyLine = DOCUMENTED_KEY.matcher(Files.readString(ENTITY_KEYS));
+        while (keyLine.find()) documented.put(keyLine.group(3), keyLine.group(1));
+        List<ResourceKey<EntityType<?>>> keys = keysOf(ThaumcraftEntities.class, Registries.ENTITY_TYPE);
+        assertEquals(keys.size(), documented.size(), "every key has a Javadoc line 'Original {@code EntityX}' this test can read");
+        assertEquals(new TreeSet<>(keys.stream().map(key -> key.location().getPath()).toList()), documented.keySet());
+
+        Map<String, String> registered = new TreeMap<>();
+        try (Stream<Path> files = Files.list(CONFIG)) {
+            for (Path file : files.filter(path -> path.toString().endsWith(".java")).toList()) {
+                Matcher registration = REGISTERED_TYPE.matcher(Files.readString(file));
+                while (registration.find()) registered.put(registration.group(2), registration.group(1));
+            }
+        }
+        assertEquals(registeredPaths("ENTITIES"), registered.keySet(), "every entity registration was read with its class");
+        for (Map.Entry<String, String> key : documented.entrySet())
+            assertEquals(key.getValue(), registered.get(key.getKey()), "the key " + key.getKey() + " creates the class its Javadoc names");
+
+        // The registered types that have no key, pinned like the armour materials are: a new entity type must make someone decide
+        // whether an add-on needs to recognise it.
+        Set<String> unkeyed = new TreeSet<>(registered.keySet());
+        unkeyed.removeAll(documented.keySet());
+        assertEquals(new TreeSet<>(List.of("alumentum", "aspect_orb", "bottle_taint", "dart", "eldritch_orb", "ember", "explosive_orb",
+                        "falling_taint", "follow_item", "golem_bobber", "golem_orb", "inventory_item", "item_grate", "pech_blast",
+                        "permanent_item", "primal_arrow", "primal_orb", "shock_orb", "special_item")), unkeyed,
+                "the registered entity types without a key changed: decide whether the new one needs a key in ThaumcraftEntities");
+    }
+
+    @Test void theTwoPlainArmourObjectsHoldTheOriginalNumbers() {
+        // armorMatSpecial and armorMatVoidFortress are the originals' two materials that were never registered: plain objects with
+        // the original defences and enchantability (the durability factor is on the item in 1.21.1, not in the object).
+        ArmorMaterial special = ThaumcraftMaterials.ARMORMAT_SPECIAL, fortress = ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS;
+        assertSame(special, ThaumcraftApi.armorMatSpecial());
+        assertSame(fortress, ThaumcraftApi.armorMatVoidFortress());
+        assertEquals(25, special.enchantmentValue(), "armorMatSpecial: enchantability 25");
+        assertEquals(10, fortress.enchantmentValue(), "armorMatVoidFortress: enchantability 10");
+        assertDefence(special, 1, 3, 2, 1);
+        assertDefence(fortress, 4, 8, 7, 4);
+        assertEquals(0.0F, special.toughness());
+        assertEquals(0.0F, fortress.knockbackResistance());
+        assertTrue(special.layers().isEmpty() && fortress.layers().isEmpty(), "no worn layer: an add-on brings its own");
+    }
+
+    private static void assertDefence(ArmorMaterial material, int helmet, int chest, int legs, int boots) {
+        var defence = material.defense();
+        assertEquals(helmet, defence.get(net.minecraft.world.item.ArmorItem.Type.HELMET), "helmet");
+        assertEquals(chest, defence.get(net.minecraft.world.item.ArmorItem.Type.CHESTPLATE), "chestplate");
+        assertEquals(legs, defence.get(net.minecraft.world.item.ArmorItem.Type.LEGGINGS), "leggings");
+        assertEquals(boots, defence.get(net.minecraft.world.item.ArmorItem.Type.BOOTS), "boots");
     }
 
     @Test void theArmourMaterialKeysNameMaterialsTheModRegisters() throws Exception {

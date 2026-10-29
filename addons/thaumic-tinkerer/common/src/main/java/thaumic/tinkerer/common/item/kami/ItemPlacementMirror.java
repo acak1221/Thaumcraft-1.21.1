@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -170,7 +171,7 @@ public class ItemPlacementMirror extends KamiItemBase {
      * type, and nearly every block is {@link RenderShape#MODEL}, so the rule here is the shape: a block with an item whose
      * collision shape is the full cube, or a slab or a layer of snow (the flat blocks of render type 0).
      */
-    public static boolean canRemember(Level level, BlockPos pos, BlockState state) {
+    public static boolean canRemember(BlockGetter level, BlockPos pos, BlockState state) {
         if (state.getRenderShape() != RenderShape.MODEL || state.getBlock().asItem() == Items.AIR) return false;
         Block block = state.getBlock();
         return block instanceof SlabBlock || block instanceof SnowLayerBlock

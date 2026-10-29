@@ -82,6 +82,21 @@ DIR_MAP = {
 # Resource-root files that belong to a texture directory (the target name follows the same rule).
 ROOT_TEXTURES = {"remotePlacer.png": "gui"}
 
+# Byte-for-byte copies that 1.21.1 wants under a second path (target below textures/ -> converted source below textures/):
+# a mob effect icon is read from textures/mob_effect/<effect id>.png, and an armour material layer from
+# textures/models/armor/<layer name>_layer_<1|2>.png. The sources stay where the 1.7.10 code expects them.
+DERIVED_COPIES = {
+    "mob_effect/potion_air.png": "item/potion_aer.png",
+    "mob_effect/potion_earth.png": "item/potion_terra.png",
+    "mob_effect/potion_fire.png": "item/potion_ignis.png",
+    "mob_effect/potion_water.png": "item/potion_aqua.png",
+    "models/armor/ichor_layer_1.png": "models/ichor_1.png",
+    "models/armor/ichor_layer_2.png": "models/ichor_2.png",
+    "models/armor/ichor_gem_layer_1.png": "models/ichor_gem_1.png",
+    "models/armor/ichor_gem_layer_2.png": "models/ichor_gem_2.png",
+    "models/armor/revealing_layer_1.png": "models/revealing.png",
+}
+
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 PATH_COMPONENT = re.compile(r"^[a-z0-9._-]+$")
 KEY_SEGMENT = re.compile(r"^[a-z0-9_]+$")
@@ -605,6 +620,17 @@ def build(source: Path, root: Path = ROOT) -> Plan:
     add_research_keys(results, set(kami))
     warnings = merge_fragments(results, root)
 
+    by_new = {t.new: t for t in textures}
+    derived: dict[str, str] = {}
+    for target, source in sorted(DERIVED_COPIES.items()):
+        origin = by_new.get(f"{NEW_TEXTURES}/{source}")
+        if origin is None:
+            raise ConversionError(f"derived copy {target!r}: no converted texture {source!r}")
+        new = f"{NEW_TEXTURES}/{target}"
+        if new in by_new:
+            raise ConversionError(f"derived copy {target!r} collides with a converted texture")
+        derived[new] = origin.new
+
     mapping = {t.old: t.new for t in textures}
     for texture in textures:
         hashes[texture.old] = sha256(texture.data)
@@ -616,6 +642,8 @@ def build(source: Path, root: Path = ROOT) -> Plan:
         outputs[f"{LANG_EXTRA}/.gitkeep"] = b""  # keeps the (still empty) fragment directory in git
     for texture in textures:
         outputs[f"{TARGET_RESOURCES}/{texture.new}"] = texture.data
+    for new, source in derived.items():
+        outputs[f"{TARGET_RESOURCES}/{new}"] = by_new[source].data
     for result in results.values():
         outputs[f"{TARGET_RESOURCES}/{result.target}"] = dumps(result.values).encode("utf-8")
 
@@ -638,6 +666,7 @@ def build(source: Path, root: Path = ROOT) -> Plan:
         },
         "directory_map": dict(sorted(DIR_MAP.items())),
         "duplicates": dict(sorted(duplicates.items())),
+        "derived_copies": dict(sorted(derived.items())),
         "lang_files": {r.source: r.target for _, r in sorted(results.items())},
         "lang_key_map": lang_key_map,
         "kami_research": {"keys": kami, "java_sha256": java_hashes},
@@ -897,6 +926,7 @@ def orphans(plan: Plan, root: Path) -> list[str]:
         previous = json.loads(map_file.read_text(encoding="utf-8"))
         old = {f"{TARGET_RESOURCES}/{new}" for new in previous.get("mapping", {}).values()}
         old |= {f"{TARGET_RESOURCES}/{e['new']}" for e in previous.get("duplicates", {}).values() if e.get("copied")}
+        old |= {f"{TARGET_RESOURCES}/{new}" for new in previous.get("derived_copies", {})}
         old |= {f"{TARGET_RESOURCES}/{new}" for new in previous.get("lang_files", {}).values()}
     except (OSError, ValueError, AttributeError):
         return []

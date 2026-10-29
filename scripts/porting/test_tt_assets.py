@@ -98,6 +98,10 @@ def make_source(base, textures=None, lang=None, root_files=None, java=True):
 
 class TempCase(unittest.TestCase):
     def setUp(self):
+        # The synthetic source trees of these tests hold a few textures, not the ones the derived copies need.
+        patcher = mock.patch.object(tt, "DERIVED_COPIES", {})
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.base = Path(self.tmp.name)
@@ -315,7 +319,8 @@ class PercentTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             make_source(base / "source")
-            plan = tt.build(base / "source", base / "repo")
+            with mock.patch.object(tt, "DERIVED_COPIES", {}):
+                plan = tt.build(base / "source", base / "repo")
         en = json.loads(plan.outputs[f"{tt.TARGET_RESOURCES}/{tt.NEW_LANG}/en_us.json"])
         self.assertEqual("Gives 30%% off and %s", en["ttresearch.page.PLAIN.0"])
 
@@ -687,7 +692,15 @@ class CommittedOutputTest(unittest.TestCase):
     def test_every_texture_on_disk_is_in_the_mapping(self):
         on_disk = {p.relative_to(self.resources).as_posix() for p in (self.resources / tt.NEW_TEXTURES).rglob("*")
                    if p.is_file()}
-        self.assertEqual(set(self.document["mapping"].values()), on_disk)
+        self.assertEqual(set(self.document["mapping"].values()) | set(self.document["derived_copies"]), on_disk)
+
+    def test_derived_copies_are_byte_identical_to_their_converted_source(self):
+        derived = self.document["derived_copies"]
+        self.assertEqual(len(tt.DERIVED_COPIES), len(derived))
+        for new, source in derived.items():
+            self.assertIn(source, set(self.document["mapping"].values()), new)
+            self.assertEqual((self.resources / source).read_bytes(), (self.resources / new).read_bytes(), new)
+            self.assertTrue(new.startswith(f"{tt.NEW_TEXTURES}/mob_effect/") or new.startswith(f"{tt.NEW_TEXTURES}/models/armor/"), new)
 
     def test_each_mcmeta_sits_next_to_its_png(self):
         new = set(self.document["mapping"].values())
@@ -739,10 +752,12 @@ class CommittedOutputTest(unittest.TestCase):
                                      f"{locale} {key}")
             derived_names = {k.removeprefix("tc.research_name.") for k in data if k.startswith("tc.research_name.")}
             derived_texts = {k.removeprefix("tc.research_text.") for k in data if k.startswith("tc.research_text.")}
-            self.assertEqual(set(names), derived_names - {k.removeprefix("tc.research_name.") for k in overridden
-                                                            if k.startswith("tc.research_name.")}, locale)
-            self.assertEqual(set(lores), derived_texts - {k.removeprefix("tc.research_text.") for k in overridden
-                                                            if k.startswith("tc.research_text.")}, locale)
+            over_names = {k.removeprefix("tc.research_name.") for k in overridden if k.startswith("tc.research_name.")}
+            over_texts = {k.removeprefix("tc.research_text.") for k in overridden if k.startswith("tc.research_text.")}
+            # A fragment may supply or replace the name/text of an entry (e.g. one the pinned fork had disabled):
+            # such keys are outside the derivation, everything else must be derived exactly.
+            self.assertEqual(set(names) - over_names, derived_names - over_names, locale)
+            self.assertEqual(set(lores) - over_texts, derived_texts - over_texts, locale)
 
     def test_known_values(self):
         en = json.loads((self.resources / tt.NEW_LANG / "en_us.json").read_text(encoding="utf-8"))

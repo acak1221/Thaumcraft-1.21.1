@@ -26,6 +26,17 @@
       "sha256": "e6e6a5576352e5800b351fadd655635066d490f67efabdc7b4e2628be5fc13f5"
     }
   },
+  "derived_copies": {
+    "assets/thaumictinkerer/textures/mob_effect/potion_air.png": "assets/thaumictinkerer/textures/item/potion_aer.png",
+    "assets/thaumictinkerer/textures/mob_effect/potion_earth.png": "assets/thaumictinkerer/textures/item/potion_terra.png",
+    "assets/thaumictinkerer/textures/mob_effect/potion_fire.png": "assets/thaumictinkerer/textures/item/potion_ignis.png",
+    "assets/thaumictinkerer/textures/mob_effect/potion_water.png": "assets/thaumictinkerer/textures/item/potion_aqua.png",
+    "assets/thaumictinkerer/textures/models/armor/ichor_gem_layer_1.png": "assets/thaumictinkerer/textures/models/ichor_gem_1.png",
+    "assets/thaumictinkerer/textures/models/armor/ichor_gem_layer_2.png": "assets/thaumictinkerer/textures/models/ichor_gem_2.png",
+    "assets/thaumictinkerer/textures/models/armor/ichor_layer_1.png": "assets/thaumictinkerer/textures/models/ichor_1.png",
+    "assets/thaumictinkerer/textures/models/armor/ichor_layer_2.png": "assets/thaumictinkerer/textures/models/ichor_2.png",
+    "assets/thaumictinkerer/textures/models/armor/revealing_layer_1.png": "assets/thaumictinkerer/textures/models/revealing.png"
+  },
   "lang_files": {
     "assets/ttinkerer/lang/de_DE.lang": "assets/thaumictinkerer/lang/de_de.json",
     "assets/ttinkerer/lang/en_GB.lang": "assets/thaumictinkerer/lang/en_gb.json",

@@ -29,6 +29,22 @@ class AspectRendererTest {
         assertTrue(AspectRenderer.AMOUNT_TOP + 9 * 0.5 > AspectRenderer.TAG_SIZE - 1, "and sits at its bottom edge");
     }
 
+    @Test void drawHandsItsFourIntsToTheRendererInTheirOwnFields() {
+        // draw() builds its layout through layout(): the swap of two adjacent ints of the public signature (x, y, amount, bonus)
+        // would show here, not only in AspectTagLayoutTest, which calls AspectTagLayout.of directly.
+        var tag = AspectRenderer.layout(4, 5, 6, 7);
+        assertEquals(4, tag.x(), "x is the third parameter of draw, after graphics and aspect");
+        assertEquals(5, tag.y());
+        assertEquals(6, tag.amount());
+        assertEquals(7, tag.bonus());
+        assertEquals(1.0F, tag.scale(), 0.0F, "the public tag is drawn at its own size");
+        var other = AspectRenderer.layout(-3, 120, 0, 2);
+        assertEquals(-3, other.x());
+        assertEquals(120, other.y());
+        assertEquals(0, other.amount());
+        assertEquals(2, other.bonus());
+    }
+
     @Test void nothingToDrawIsNotAnError() {
         AspectRenderer.draw(null, null, 4, 5, 6, 0);
     }

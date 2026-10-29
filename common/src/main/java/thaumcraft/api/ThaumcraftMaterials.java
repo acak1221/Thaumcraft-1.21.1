@@ -41,20 +41,24 @@ public final class ThaumcraftMaterials {
     public static final Tier TOOLMAT_VOID = ThaumcraftEquipment.VOID_TIER;
     public static final Tier TOOLMAT_ELEMENTAL = ThaumcraftEquipment.ELEMENTAL_TIER;
 
-    /** Original armorMatSpecial: 1/3/2/1, enchantability 25. */
+    /**
+     * Original armorMatSpecial: 1/3/2/1, enchantability 25 (and the durability factor 25, which is not in the object: in 1.21.1
+     * the armour item sets its own durability).
+     */
     public static final ArmorMaterial ARMORMAT_SPECIAL = new ArmorMaterial(
             Map.of(ArmorItem.Type.HELMET, 1, ArmorItem.Type.CHESTPLATE, 3, ArmorItem.Type.LEGGINGS, 2, ArmorItem.Type.BOOTS, 1),
             25, equipSound(), () -> Ingredient.EMPTY, List.of(), 0, 0);
     /**
-     * Original armorMatVoidFortress: 4/8/7/4, durability 18, enchantability 10.
+     * Original armorMatVoidFortress: 4/8/7/4, enchantability 10 (and the durability factor 18, which is not in the object).
      *
      * <p>Oracle {@code thaumcraft/api/ThaumcraftApi.java:55}:
-     * {@code EnumHelper.addArmorMaterial("VOIDFORTRESS", 18, new int[]{4, 8, 7, 4}, 10)}. The
-     * enchantability of 1.7.10 lives on the item in 1.21.1 and has no place in the material.</p>
+     * {@code EnumHelper.addArmorMaterial("VOIDFORTRESS", 18, new int[]{4, 8, 7, 4}, 10)}. The object holds the defences and
+     * the enchantability ({@code enchantmentValue()}, 10); the durability factor 18 of 1.7.10 is a property of the item in
+     * 1.21.1 (the armour item sets its own durability), so an item built from this object has to set 18 itself.</p>
      */
     public static final ArmorMaterial ARMORMAT_VOID_FORTRESS = new ArmorMaterial(
             Map.of(ArmorItem.Type.HELMET, 4, ArmorItem.Type.CHESTPLATE, 8, ArmorItem.Type.LEGGINGS, 7, ArmorItem.Type.BOOTS, 4),
-            18, equipSound(), () -> Ingredient.EMPTY, List.of(), 0, 0);
+            10, equipSound(), () -> Ingredient.EMPTY, List.of(), 0, 0);
 
     private ThaumcraftMaterials() {}
 

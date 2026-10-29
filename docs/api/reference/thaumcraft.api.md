@@ -573,14 +573,14 @@ public static net.minecraft.core.Holder<ArmorMaterial> armorMatVoidHolder()
 public static ArmorMaterial armorMatSpecial()
 ```
 
-Original `armorMatSpecial` (oracle `thaumcraft/api/ThaumcraftApi.java:52`): durability 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a field; the native answers through an accessor with a plain `ArmorMaterial` object holding the original numbers (the iron equip sound, no repair ingredient, no worn layer). It is **not in the armour material registry** and has no holder or key: wrap it with `Holder.direct` to build an item from it, or register a material of your own. The registered `thaumcraft:special` is a different object, the adapter of the goggles (gold repair, the goggles' worn layer), not this one. See `ThaumcraftMaterials`.
+Original `armorMatSpecial` (oracle `thaumcraft/api/ThaumcraftApi.java:52`): durability factor 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a field; the native answers through an accessor with a plain `ArmorMaterial` object holding the original defences and enchantability (the iron equip sound, no repair ingredient, no worn layer); the durability factor is a property of the item in 1.21.1 and is not in the object. It is **not in the armour material registry** and has no holder or key: wrap it with `Holder.direct` to build an item from it, or register a material of your own. The registered `thaumcraft:special` is a different object, the adapter of the goggles (gold repair, the goggles' worn layer), not this one. See `ThaumcraftMaterials`.
 
 <a id="thaumcraftapi-armormatvoidfortress"></a>
 ```java
 public static ArmorMaterial armorMatVoidFortress()
 ```
 
-Original `armorMatVoidFortress` (oracle `thaumcraft/api/ThaumcraftApi.java:55`): durability 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a field; the native answers through an accessor with a plain `ArmorMaterial` object holding the original defences. It is **not in the armour material registry** and has no holder or key: wrap it with `Holder.direct` to build an item from it, or register a material of your own. See `ThaumcraftMaterials`.
+Original `armorMatVoidFortress` (oracle `thaumcraft/api/ThaumcraftApi.java:55`): durability factor 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a field; the native answers through an accessor with a plain `ArmorMaterial` object holding the original defences and enchantability; the durability factor is a property of the item in 1.21.1 and is not in the object. It is **not in the armour material registry** and has no holder or key: wrap it with `Holder.direct` to build an item from it, or register a material of your own. See `ThaumcraftMaterials`.
 
 <a id="thaumcraftapi-enchantfrugal"></a>
 ```java
@@ -1371,7 +1371,7 @@ public static BlockPos findFurthestBlock(Level level, BlockPos pos, Block block)
 
 Where `breakFurthestBlock` would break a block, without breaking anything: the end of the greedy walk that starts at the clicked log. Not a 1.7.10 method; it exists so that a caller can ask a claims or protection mod about the cell that will be broken, which can lie up to 24 blocks sideways and 48 up or down from `pos` (see the walk described at `breakFurthestBlock`).
 
-The answer is the cell the next `breakFurthestBlock(level, pos, block, player)` call breaks, as long as no block changes in between and the player is allowed to break it; it is `pos` itself when no other log qualifies. It is a new immutable position. Felling a tree with protection is therefore a loop of: find the cell, ask your protection about that cell, call `breakFurthestBlock` only if it agrees (and stop the loop when it does not).
+The answer is the cell the next `breakFurthestBlock(level, pos, block, player)` call breaks, as long as no block changes in between and the player is allowed to break it; it is `pos` itself when no other log qualifies. "Furthest" is measured from `pos`: the same trunk clicked at its top ends at its foot. It is a new immutable position. Felling a tree with protection is therefore a loop of: find the cell, ask your protection about that cell, call `breakFurthestBlock` only if it agrees (and stop the loop when it does not).
 
 Null when nothing would be broken: a null argument, a `pos` outside the build height or in a chunk that is not loaded, a start that is not exactly `block` or is not a log (`isWoodLog`), and a start that cannot be broken. Read-only, loads no chunk (a cell in an unloaded chunk is no link of the walk), and keeps no state, so it works on either side and on any thread that may read the level.
 
@@ -1389,7 +1389,7 @@ Breaks the log at the far end of a tree, as the original Axe of the Stream did w
 
 **What "furthest" means.** A greedy walk, not a search of the whole tree. It starts at `pos` with a distance of zero. At each step it scans the cells within two blocks of the cell it stands on, in the order x from -2 to +2, y from +2 down to -2, z from -2 to +2, and moves to the FIRST cell that (1) holds exactly `block` (the same block, not the same tag; the log axis and other state properties are not compared), (2) satisfies `isWoodLog`, (3) can be broken (a destroy speed of zero or more) and (4) is strictly further from `pos` than the cell the walk reached before (squared distance, so an equal distance does not count). Then it repeats from there and stops when no cell qualifies. Consequences: gaps of up to two blocks and diagonals are crossed; a branch that is scanned first and ends early hides a longer branch (the walk is the first local maximum, not the farthest log of the tree); a neighbouring tree of the same wood is followed too. The walk never leaves the box |dx| &lt;= 24, |dy| &lt;= 48, |dz| &lt;= 24 around `pos`; the first scanned cell outside the box ends the whole walk (an original quirk: the remaining cells of that scan are not looked at). `findFurthestBlock` answers where it ends without breaking anything.
 
-**What is broken.** Only the cell the walk ended on; the logs on the way stay. The start must itself be a log of `block`: for any other start (air, dirt, a chest...) nothing is broken and the answer is false. (The original broke the start whatever it was, because its axe called `isWoodLog` first; as a public helper this one asks that itself, so a position forwarded by a client cannot be used to mine an arbitrary block.) When no other log qualifies, the start itself is the cell that is broken.
+**What is broken.** Only the cell the walk ended on; the logs on the way stay. The start must itself be a log of `block`: for any other start (air, dirt, a chest...) nothing is broken and the answer is false. (The original method did not look at its start and relied on the axe having called `isWoodLog` first; as a public helper this one asks that itself, so a position forwarded by a client cannot be used to mine an arbitrary block.) When no other log qualifies, the start itself is the cell that is broken.
 
 **Drops.** The block is removed and drops its normal loot, rolled with the main-hand item of `player` (Fortune and Silk Touch count), as items at the broken cell; they do not follow the player. A creative player and a null player get no drops. The game rule for block drops applies.
 
@@ -1476,7 +1476,7 @@ public final class ThaumcraftFX
 
 The visual effects a 1.7.10 add-on sent to the players around a block with Thaumcraft's own packets.
 
-Not a 1.7.10 class: an add-on of 1.7.10 built `thaumcraft.common.lib.network.fx.PacketFX*` itself and sent it with `PacketHandler.INSTANCE.sendToAllAround(..., 32)`. `blockSparkle`, `blockArc`, `zap`, `bubbles`, `essentiaTrail` and `visDrain` are those packets, with the original look. `sparkle`, `burst`, `blockRunes` and `smokeSpiral` are not: the 1.7.10 proxy drew them on the client only, so they are new senders, the server twins of the matching methods of `thaumcraft.api.client.ThaumcraftClientFX`, with no original packet. All of them reach the players within 32 blocks. Call them on the server thread of the level; on another thread they throw `IllegalStateException`. Colours are 0xRRGGBB.
+Not a 1.7.10 class: an add-on of 1.7.10 built `thaumcraft.common.lib.network.fx.PacketFX*` itself and sent it with `PacketHandler.INSTANCE.sendToAllAround(..., 32)`. `blockSparkle`, `blockArc`, `zap`, `bubbles`, `essentiaTrail` and `visDrain` are those packets, with the original look. `sparkle`, `burst`, `blockRunes` and `smokeSpiral` are not: the 1.7.10 proxy drew them on the client only, so they are new senders, the server twins of the matching methods of `thaumcraft.api.client.ThaumcraftClientFX`, with no original packet. They reach the players within 32 blocks of the point, except `visDrain`, which reaches the players within 64 blocks of the consumer (and is thinned by the original's half second throttle per consumer). Call them on the server thread of the level; on another thread they throw `IllegalStateException`. Colours are 0xRRGGBB.
 
 <a id="thaumcraftfx-random_grey"></a>
 ```java
@@ -1597,16 +1597,16 @@ public static final Tier TOOLMAT_ELEMENTAL
 public static final ArmorMaterial ARMORMAT_SPECIAL
 ```
 
-Original armorMatSpecial: 1/3/2/1, enchantability 25.
+Original armorMatSpecial: 1/3/2/1, enchantability 25 (and the durability factor 25, which is not in the object: in 1.21.1 the armour item sets its own durability).
 
 <a id="thaumcraftmaterials-armormat_void_fortress"></a>
 ```java
 public static final ArmorMaterial ARMORMAT_VOID_FORTRESS
 ```
 
-Original armorMatVoidFortress: 4/8/7/4, durability 18, enchantability 10.
+Original armorMatVoidFortress: 4/8/7/4, enchantability 10 (and the durability factor 18, which is not in the object).
 
-Oracle `thaumcraft/api/ThaumcraftApi.java:55`: `EnumHelper.addArmorMaterial("VOIDFORTRESS", 18, new int[]{4, 8, 7, 4}, 10)`. The enchantability of 1.7.10 lives on the item in 1.21.1 and has no place in the material.
+Oracle `thaumcraft/api/ThaumcraftApi.java:55`: `EnumHelper.addArmorMaterial("VOIDFORTRESS", 18, new int[]{4, 8, 7, 4}, 10)`. The object holds the defences and the enchantability (`enchantmentValue()`, 10); the durability factor 18 of 1.7.10 is a property of the item in 1.21.1 (the armour item sets its own durability), so an item built from this object has to set 18 itself.
 
 <a id="thaumcraftmaterials-armormatthaumium"></a>
 ```java

@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart): the Fabric GameTest wrappers of the KamiGear checks. Distributed under the same licence as the add-on
+ * (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.fabric.testing;
 
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -115,5 +119,45 @@ public final class KamiGearGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void shadowbeamHurtsWhatItCrossesAndBouncesOffWalls(GameTestHelper test) {
         KamiGearRuntimeChecks.shadowbeamHurtsWhatItCrossesAndBouncesOffWalls(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void mirrorNeedsNoBlocksInCreativeMode(GameTestHelper test) {
+        KamiGearRuntimeChecks.mirrorNeedsNoBlocksInCreativeMode(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void mirrorPaysFromTheFirstRingThatHasBlocks(GameTestHelper test) {
+        KamiGearRuntimeChecks.mirrorPaysFromTheFirstRingThatHasBlocks(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void mirrorRefusesStairsAndTakesSlabs(GameTestHelper test) {
+        KamiGearRuntimeChecks.mirrorRefusesStairsAndTakesSlabs(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void pouchMenuWritesOnlyToThePouchItWasOpenedFor(GameTestHelper test) {
+        KamiGearRuntimeChecks.pouchMenuWritesOnlyToThePouchItWasOpenedFor(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void catAmuletScaresCreepersAndLeavesProvokedAndBrainMobsAlone(GameTestHelper test) {
+        KamiGearRuntimeChecks.catAmuletScaresCreepersAndLeavesProvokedAndBrainMobsAlone(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void stuckProjectilesAreNotPushedByTheRobes(GameTestHelper test) {
+        KamiGearRuntimeChecks.stuckProjectilesAreNotPushedByTheRobes(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void awakenedPickaxeGathersTheDropsOfTheClickedBlockToo(GameTestHelper test) {
+        KamiGearRuntimeChecks.awakenedPickaxeGathersTheDropsOfTheClickedBlockToo(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void awakenedShovelColumnModeTakesOnlyTheSameBlockAlongTheColumn(GameTestHelper test) {
+        KamiGearRuntimeChecks.awakenedShovelColumnModeTakesOnlyTheSameBlockAlongTheColumn(test);
     }
 }

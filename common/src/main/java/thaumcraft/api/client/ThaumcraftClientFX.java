@@ -55,8 +55,9 @@ public final class ThaumcraftClientFX {
 
     /**
      * The original {@code Thaumcraft.proxy.particleCount(base)}: how many particles a loop of the add-on should draw at the
-     * player's particle setting. {@code 0} at "minimal", {@code base} at "decreased", {@code 2 * base} at "all". Always {@code 0}
-     * for a server level or {@code null}.
+     * player's particle setting. {@code 0} at "minimal", {@code base} at "decreased", {@code 2 * base} at "all" (saturating at
+     * {@link Integer#MAX_VALUE} for a {@code base} above half of it, so the answer is never negative). Always {@code 0} for a
+     * server level or {@code null}.
      *
      * @param level a level; only a client level gives a non-zero answer
      * @param base  the count the add-on wants at the decreased setting, zero or more
@@ -96,7 +97,7 @@ public final class ThaumcraftClientFX {
      * @param type  the colour, 0 to 7, see the long form
      */
     public static void sparkle(Level level, double x, double y, double z, int type) {
-        sparkle(level, x, y, z, ClientFxRules.TYPE_ONLY_SPARKLE_SIZE, type, 0.0F);
+        sparkle(level, x, y, z, ClientFxRules.TYPE_ONLY_SPARKLE_SIZE, type, ClientFxRules.TYPE_ONLY_SPARKLE_GRAVITY);
     }
 
     /**
@@ -116,11 +117,12 @@ public final class ThaumcraftClientFX {
      * The original {@code Thaumcraft.proxy.wispFX(world, x, y, z, size, red, green, blue)}: one mote of the wisp in any colour.
      * It lives about 36 to 51 ticks, grows to full size by half its life and shrinks again, drifts with gravity {@code 0.02},
      * is pushed out of solid blocks and is not drawn farther from the camera than 50 blocks (25 on fast graphics). A red of
-     * exactly 0 is drawn as 1, a quirk of the original.
+     * exactly 0 is drawn as 1, a quirk of the original, and since a negative red is clamped to 0 first, <b>a red of 0 or less
+     * is drawn as 1</b>: to get a mote without red, pass a small positive number such as {@code 0.004}.
      *
      * @param level a client level; anything else draws nothing
      * @param size  the scale, above 0 and at most 16 (the wisp entity uses 0.1)
-     * @param red   0 to 1; any finite value is accepted and one outside that range is clamped to it
+     * @param red   0 to 1; any finite value is accepted and one outside that range is clamped to it; 0 or less draws as 1 (see above)
      * @param green 0 to 1, clamped like {@code red}
      * @param blue  0 to 1, clamped like {@code red}
      */
@@ -235,8 +237,9 @@ public final class ThaumcraftClientFX {
      *                 call while the beam hits something, as Thaumcraft's own foci do, and 0 while it does not
      * @throws NullPointerException     when {@code owner}, {@code from} or {@code to} is {@code null}
      * @throws IllegalArgumentException for the ranges above (a texture outside 0 to 3, an {@code endScale} outside 0 to 8, an
-     *                                  {@code impact} outside 0 to 5, a non-finite end), also when {@code level} is not a
-     *                                  client level; checked before {@code owner} is looked at
+     *                                  {@code impact} outside 0 to 5, a non-finite end or one outside the world). The ranges are
+     *                                  checked on every side: a server level or {@code null} that gets past them draws nothing.
+     *                                  They are checked before {@code owner} is looked at
      */
     public static void beam(Level level, Entity owner, Vec3 from, Vec3 to, int rgb, int type, boolean reverse, float endScale, int impact) {
         java.util.Objects.requireNonNull(from, "from");
@@ -306,18 +309,20 @@ public final class ThaumcraftClientFX {
      * transfer between two blocks, ask the server with {@link thaumcraft.api.ThaumcraftFX#essentiaTrail}.)
      *
      * @param level a client level; anything else draws nothing
-     * @param from  the block the mote starts in
-     * @param to    the block it flies to; farther than 64 blocks from {@code from} nothing is drawn
+     * @param from  the block the mote starts in; a coordinate outside the world is refused
+     * @param to    the block it flies to, likewise; farther than 64 blocks from {@code from} nothing is drawn
      * @param phase the original {@code count}: the wobble of the mote follows {@code sin(phase / 2)}, {@code sin(phase / 3)} and
      *              {@code sin(phase / 4)}, so pass a running counter (the age of the block entity) to make a stream curl
      * @param rgb   the colour, {@code 0xRRGGBB}, usually {@code aspect.getColor()}
      * @param scale the size, above 0 and at most 16 (the originals used 0.5 to 1)
-     * @throws NullPointerException when {@code from} or {@code to} is {@code null}
+     * @throws NullPointerException     when {@code from} or {@code to} is {@code null}
+     * @throws IllegalArgumentException for a {@code scale} outside the range or a block position outside the world; checked on
+     *                                  every side, like the other methods
      */
     public static void essentiaTrail(Level level, BlockPos from, BlockPos to, int phase, int rgb, float scale) {
         java.util.Objects.requireNonNull(from, "from");
         java.util.Objects.requireNonNull(to, "to");
-        ClientFxRules.essentiaTrail(scale);
+        ClientFxRules.essentiaTrail(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ(), scale);
         if (client(level)) ClientFxFacade.essentiaTrail(level, from, to, phase, rgb, scale);
     }
 }

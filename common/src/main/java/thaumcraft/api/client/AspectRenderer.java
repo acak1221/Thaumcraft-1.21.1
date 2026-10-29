@@ -88,6 +88,14 @@ public final class AspectRenderer {
     public static void draw(GuiGraphics graphics, Aspect aspect, int x, int y, int amount, int bonus) {
         if (aspect == null) return;
         java.util.Objects.requireNonNull(graphics, "graphics");
-        ThaumcraftRecipeDisplay.drawAspectTag(graphics, Minecraft.getInstance().font, aspect, AspectTagLayout.of(x, y, amount, bonus, 1.0F));
+        ThaumcraftRecipeDisplay.drawAspectTag(graphics, Minecraft.getInstance().font, aspect, layout(x, y, amount, bonus));
+    }
+
+    /**
+     * The layout {@link #draw} hands to the renderer: the four ints of {@code draw} in their own fields, at the scale of 1 (the
+     * public tag is never scaled). Pure, so a unit test can pin the mapping of the adjacent ints without a screen.
+     */
+    static AspectTagLayout layout(int x, int y, int amount, int bonus) {
+        return AspectTagLayout.of(x, y, amount, bonus, 1.0F);
     }
 }

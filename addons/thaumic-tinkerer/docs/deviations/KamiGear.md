@@ -8,9 +8,10 @@ recipes, research keys and positions, aspects, tooltips, sounds, config use) is 
 
 How this was checked (honestly): the research entries (key, aspects, column, row, complexity, warp, parents) and all 30
 recipes (instability, aspects) were compared with the 1.7.10 source by script, the ingredient lists of a dozen recipes by hand;
-the add-on compiles with `tools/compile.sh`; the pure logic and the data files are covered by JUnit tests that were run with a
-hand-written stand-in for JUnit (JUnit Jupiter is not available offline); the GameTests compile but **were not run** (no Gradle
-and no game in the porting session). Nothing here has been seen in a running client.
+the add-on compiles with `tools/compile.sh` (also with `-g`, which adds the GameTest sources); the pure logic and the data files are
+covered by 31 JUnit tests (KamiGear's 30 and `TinkererApiOnlyTest`) that were run with the real JUnit Jupiter launcher from the
+Gradle cache, without Gradle; the GameTests compile but **were not run** (no Gradle and no game in the porting session). Nothing
+here has been seen in a running client, and no GameTest of the review round has been run.
 
 ## 1. Identity: registry paths, components, models
 
@@ -84,9 +85,12 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
   had put the metadata back to 0 before the loop). The gas block removes itself when no carrier is near (SimpleBlocks group).
 - **Robes of the Stratosphere.** Flight is `Abilities.mayfly`, granted and taken away by the server every tick for players the
   armour has granted it (and only for them: a creative player keeps theirs); the projectile deflection is the Kami copy of the
-  Distortion rule (the Foci group owns the focus). The wings are a render layer (`WingsLayer`, the model `ModelWings`), added to
-  the player renderers by the loader glue (`docs/api-requests/KamiGear.md` section 4). The flap animation resets the wings to the
-  rest pose when the wearer stops flying (1.7.10 left the last angle).
+  Distortion rule (the Foci group owns the focus). Projectiles that did not move during their last tick (an arrow in a block
+  keeps its hit vector in 1.21.1, where 1.7.10's had no motion left) are not pushed; a projectile that spawned this tick counts as
+  not having moved and is looked at one tick later. The six white sparkles per deflected projectile of the original are sent by
+  `ThaumcraftFX.sparkle` (the server twin of the client sparkle: request A8, now in the API). The wings are a render layer
+  (`WingsLayer`, the model `ModelWings`), added to the player renderers by the loader glue (`docs/api-requests/KamiGear.md`
+  section 4). The flap animation resets the wings to the rest pose when the wearer stops flying (1.7.10 left the last angle).
 
 ## 4. Tools
 
@@ -95,6 +99,9 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
   tooltip hidden. `Item.isEnchantable` is overridden to true because an unbreakable item would otherwise refuse enchantments (1.7.10
   allowed them). The tools are in the vanilla item tags `pickaxes`/`shovels`/`axes`/`swords` through the add-on's own copy of those
   tag files (optional entries, so the tags still load with Kami off).
+- **Attack damage** is the 1.7.10 one: the weapon modifier is the tool's base (pickaxe 2, shovel 1, axe 3, sword 4, passed to
+  `createAttributes`) plus the tier's 5, so a hit with the player's own 1 deals 8, 7, 9 and 10 (the vanilla 1.21.1 bases 1, 1.5, 5, 3
+  are not used). The attack speeds are the vanilla ones, because 1.7.10 had no attack cooldown (see the sword below).
 - **`Material` lists become predicates over block tags** (`ToolHandler.MATERIALS_SHOVEL/PICK/AXE`): the shovel list is
   `#minecraft:mineable/shovel`; the pickaxe list is `#minecraft:mineable/pickaxe`, bedrock, glass-sounding blocks and the shovel list
   (the 1.7.10 list is the concatenation); the axe list is `#minecraft:mineable/axe`, leaves, plants (bush blocks), sugar cane and
@@ -102,7 +109,11 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
 - **`onBlockStartBreak` is `BlockEvent.BREAK`** (Architectury). The extra blocks of the square, line and column modes are broken
   with `ServerPlayerGameMode.destroyBlock`, which gives them the player's normal break (drops, experience, claims and other
   mods' break events) instead of the hand-made copy of `ItemInWorldManager.tryHarvestBlock`; a thread-local flag keeps those inner
-  breaks from starting the mode again. The items on the ground in the box are moved to the player as before.
+  breaks from starting the mode again. `destroyBlock` asks only for the game mode's restrictions, so every extra block is first
+  checked with `Level.mayInteract` (spawn protection, world border), which vanilla asks only for the block the player hits; a
+  block it refuses is left standing (1.7.10 had no such protection). The items on the ground in the box are moved to the player
+  as before, and once more at the end of the server tick (`TickEvent.SERVER_POST`), because the clicked block is part of the
+  box and the break in progress drops its items only after `BlockEvent.BREAK` returns (1.7.10 broke it inside the loop).
 - **Blocks that cannot be broken at all** (hardness -1: end portal frames, barriers...) are left alone by the extra breaks; the pinned
   fork would have destroyed them (it only filtered by material). Bedrock is broken only in the Bedrock dimension and not in the top two layers, as before.
 - **Column mode** (Shovel): the pinned fork lost the "same block" filter (`removeBlocksInIteration(..., block, ...)` is called with the
@@ -125,7 +136,7 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
   sneaking. Those two vanilla abilities themselves are new (1.7.10 had neither) and are inherited by all four shovels and axes.
 - **Tree mode** is the 1.7.10 loop over Thaumcraft's own two helpers (now API, request A6): while the clicked cell is not air, break
   the furthest block of the walk that starts there. Their rules apply: oak logs are not logs for them (the original's rule), no tool
-  wear, no protection check and no break event for the felled logs, a walk limited to 24 blocks sideways and 48 up or down. Two
+  wear, no protection check (spawn protection included) and no break event for the felled logs, a walk limited to 24 blocks sideways and 48 up or down. Two
   small differences: the loop stops after 1024 blocks or when the helper breaks nothing (1.7.10 would loop forever if a break was
   vetoed), and the gathered items keep their normal pickup delay (1.7.10 added 20 ticks to their age, which has no counterpart).
 - **Sword, area mode.** 1.7.10 had no attack cooldown; without a fast attack speed every hit after the first would deal a fifth
@@ -157,21 +168,31 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
 - The square, the cost and the range (5 blocks) are those of 1.7.10 (`squareOffsets` is the original arithmetic as a pure method, tested for every side, pitch, rotation and size 3 to 11).
 - **Protection.** Every placement asks `Level.mayInteract` and `Player.mayBuild` (spawn protection, world border and adventure mode);
   1.7.10 placed wherever the square reached. Blocks outside the build height are skipped.
-- **Payment.** As in 1.7.10 the blocks must be in the inventory or in Black Hole Rings in it, for creative players too (only the
-  consumption is skipped for creative players); the inventory is paid first, then the rings.
+- **Payment.** The blocks must be in the inventory or in Black Hole Rings in it; a creative player always has them and the
+  placing takes nothing from them (1.7.10 `hasBlocks`: `if (player.capabilities.isCreativeMode) return true`), the ghost blocks included.
+  The inventory is paid first, then the rings; the first ring that really gives a block pays (1.7.10 stopped at the first ring bound
+  to the block, empty or not, which made the blocks free when a bound empty ring came first).
+- **Sound.** The placing sound is played by the server for everyone near, the player included (`KamiHooks.broadcastThaumcraftSound`);
+  `Level.playSound(player, ...)` on a server level leaves that player out.
 - **Reach.** The server aims with the reach of the player (`blockInteractionRange`, 1.7.10: the game mode's reach), the client with
   5 blocks, so the preview can show a square at the very edge that the server does not place, as before.
-- **Choosing the block.** A sneak-click chooses the clicked block if it is a normal full-model block *that has an item*; 1.7.10 took
-  any block with render type 0, also one that could not be paid for.
+- **Choosing the block.** 1.7.10 took a block with render type 0: cubes, slabs, glass, leaves, furnaces, snow layers, and also
+  carpets, pressure plates, buttons, trapdoors, cake; not stairs, fences, walls, doors, beds, torches, panes, ladders. 1.21.1 has no
+  render type and nearly every block is `RenderShape.MODEL`, so `ItemPlacementMirror.canRemember` takes a block *that has an
+  item* whose shape is the full cube, or a slab or a layer of snow. That keeps out everything the original kept out, but
+  also the flat render-type-0 blocks that are not slabs or snow (carpets, plates, buttons, trapdoors, cake), which 1.7.10 took.
 - **Ghost blocks.** The translucent blocks are drawn from the loader's after-world hook (`PlacementMirrorPredictionRenderer.render`, alpha 0.6, only
   while the player holds the mirror and has the blocks; config `showPlacementMirrorBlocks`). Not seen in a running client.
 
 ## 7. Bottomless Pouch
 
 - 13 x 9 cells; opens on a right click in either hand (`MenuRegistry.ofExtended`; the opening packet carries the hand); the
-  cells are saved into the pouch whenever one changes, and again when the menu closes. The pouch's own slot cannot be clicked,
-  moved with a hotbar key or shift-clicked, and the menu closes when the pouch leaves the hand (1.7.10's duplication hole).
-  Pouches (Thaumcraft's and this one) cannot be put in. The dimensions of `ConfigHandler.forbiddenDimensions` keep it shut.
+  cells are saved into the pouch whenever one changes, and again when the menu closes. The menu holds the stack it was opened for
+  (the 1.7.10 `pouch` field) and never looks at the hand again, so selecting another hotbar slot while it is open (a client may send
+  that) cannot redirect the writes into a second pouch. The pouch's own slot cannot be clicked, moved with its hotbar key (or the
+  off hand key) or shift-clicked, and the menu closes when that stack leaves its inventory slot (1.7.10's duplication hole) or when
+  something else writes the pouch's contents behind the open menu (the wand's focus selector does; the menu then does not write
+  its stale cells over it). Pouches (Thaumcraft's and this one) cannot be put in. The dimensions of `ConfigHandler.forbiddenDimensions` keep it shut.
 - It is an `IFocusPouch` (request A2, now API) and a belt `IBauble`, so the wand's focus selector offers the foci in it. The selector
   lists at most the first 128 cells (the pouch has 117).
 - The screen title key `container.thaumictinkerer.ichor_pouch` is new (the screen draws no title, as in 1.7.10).
@@ -181,9 +202,16 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
 1.7.10 rewrote the goals of every mob around the wearer once and for good, which made a creeper's "avoid ocelots" goal avoid players
 from then on and every "nearest attackable player" goal target an ender crystal instead; the effect survived the amulet being taken off
 and was lost on a reload. 1.21.1 goals are final fields, so the amulet applies the effect again **every tick while worn** and the effect
-ends with it: mobs within 10 x 4 blocks drop the wearer as a target, creepers lose their fuse (a creeper that was already swelling
-stops) and walk away from the wearer. No permanent change to any mob. Only the wearer is protected: the 1.7.10 change of the goals
-made those mobs ignore (and creepers avoid) every player, which is not reproduced (a goal swap cannot be limited to one player either).
+ends with it. No permanent change to any mob. Scope, narrowed to what the 1.7.10 goals did:
+
+- **Creepers** within 10 x 4 blocks lose their target and their fuse (a creeper that was already swelling stops: 1.7.10 set
+  `timeSinceIgnited = 2`) and walk away from the wearer (6 blocks, speed 1.0, 1.2 when closer than 7), whoever they were after.
+- **Other mobs** within the same box lose the wearer as their target only if they are after the wearer *without being provoked*: a mob
+  that the wearer hurt in the last 100 ticks keeps its revenge (1.7.10's goals only stopped mobs from *finding* a player; a mob that
+  already had a target, or struck back, went on). Left alone: neutral mobs (`NeutralMob`: wolves, bees, polar bears, zombified piglins...),
+  the Wither and Endermen (their targeting was not a "nearest attackable player" goal), and every mob that thinks with a brain (Warden,
+  piglins, hoglins, villagers...: they did not exist, and the amulet must not read a brain memory a mob does not have, which throws).
+  A goal swap cannot be limited to one player either, so 1.7.10 made those mobs ignore every player; only the wearer is spared here.
 
 ## 9. Foci
 
@@ -191,16 +219,22 @@ made those mobs ignore (and creepers avoid) every player, which is not reproduce
   the 300 steps of 0.15 blocks, the entity margin 0.3 and the mirror rule are those of 1.7.10; an entity on the way takes the hit and
   the beam goes on, a block reflects it (a Nether portal does not: an `EntityThrowable` only "enters" it). The beam is simulated by `ShadowBeam` (a pure
   function of the world, no entity); the **visuals** are a packet with the path to the players within 64 blocks and black dust particles
-  along it, where 1.7.10 spawned an `FXSparkle` per step (request A8).
+  along it, where 1.7.10 spawned a custom black `FXSparkle` subclass per step (request K3). The hum (`thaumcraft:brain`) is played by
+  the server for everyone near, the shooter included.
 - **Experience Drain.** 5 vis (+20% per potency) per tick for 15 experience points (-1 per frugal level, scaled to what fits);
   `getExperienceForLevel` and `getLevelForExperience` use the **1.21.1 experience curve** (7 + 2 per level up to 15, and so on), not the
   1.7.10 one of the original helper (17 per level up to 15, `1.5 L^2 - 29.5 L + 360` up to 30...), because the experience bar of
   a 1.21.1 player follows the new curve; the cost stays 15 experience *points*.
-  The focus colour runs through the rainbow on the client. The tooltips reuse Thaumcraft's own keys `item.Focus.cost2` (foci)
+  The focus colour runs through the rainbow on the client: the icon is a grey texture, tinted by an item colour handler
+  (`KamiGearClient.registerItemColors`, 1.7.10 `getColorFromItemStack`). The tooltips reuse Thaumcraft's own keys `item.Focus.cost2` (foci)
   and `tc.visdiscount` (armour).
 - **Celestial Recall.** Held for three seconds, with an attuned pearl in the hotbar, teleports to that pearl's gateway of the
   same dimension for 40 vis each of Aer, Terra and Ordo, through `KamiHooks.warpGateTeleporter` (the gateway belongs to the KamiWorld
   group). The research is registered only while Thaumcraft's mirrors are allowed (`ThaumcraftApi.isMirrorsAllowed()`), as in 1.7.10.
+  The two jump sounds and the 20 white sparkles before and after the jump of `TileWarpGate.teleportPlayer` belong to the gateway code
+  that the hook calls: the default hook (`KamiHooks.teleportToWarpGate`, used only while KamiWorld has not replaced it) plays both
+  and sends the sparkles (`ThaumcraftFX.sparkle`); the KamiWorld group's `TileWarpGate.teleportPlayer` plays the sounds and **sends no
+  sparkles yet** (see the report: a request to that group).
 - **`canApplyUpgrade`.** The original Kami foci answered true for every upgrade; the port keeps the base rule (an upgrade must be
   one the focus lists in `getPossibleUpgradesByRank`, see `docs/API_GAPS.md` 3b). The Shadowbeam and the Experience Drain list
   frugal and potency on every rank and the Recall frugal only, which is what the focal manipulator offered before, so the only
@@ -211,12 +245,20 @@ made those mobs ignore (and creepers avoid) every player, which is not reproduce
 - **HUD message.** The mode of a tool, the size of the mirror and the state of an armour piece are drawn above the hotbar by
   `ToolModeHUDHandler` (`ClientGuiEvent.RENDER_HUD`): 400 ticks, fading out, in the 1.7.10 rainbow colour (`cos(ticks / 250)`).
 - **Wings and ghost blocks** need the two loader hooks (`docs/api-requests/KamiGear.md` section 4); Fabric has them
-  (`fabric/.../client/KamiGearFabricClient.java`, **not yet listed as an entrypoint** in `fabric.mod.json`: the lead's file), NeoForge not yet.
+  (`fabric/.../client/KamiGearFabricClient.java`), which `KamiGearClient.register()` starts by name on Fabric (`Platform.isFabric()`),
+  so `fabric.mod.json` needs no entry (listing the class as a `client` entrypoint as well is harmless: it registers once). NeoForge has none yet.
+- **Network.** The two S2C payload types (`armor_status`, `shadow_beam`) are registered by their client receivers
+  (`KamiGearClient`); `KamiGear.registerNetwork()` registers them itself only on a dedicated server (`Platform.getEnvironment() ==
+  Env.SERVER`), because Fabric's payload registry throws when a client registers a type twice. `PacketToggleArmor` is C2S and is
+  registered on both sides.
 - **Models.** The 33 items have JSON item models (`assets/thaumictinkerer/models/item/<path>.json`); the awakened tools and the ring have the
   override models of their modes/state. Nothing was looked at in a running client.
 
 ## 11. Deliberately not carried over
 
-- `GameRegistry.addShapelessRecipe(9 x nugget <- ichorium)` is a data recipe: `data/thaumictinkerer/recipe/ichor_nuggets.json`.
+- `GameRegistry.addShapelessRecipe(9 x nugget <- ichorium)` is a data recipe: `data/thaumictinkerer/recipe/ichor_nuggets.json`. It is
+  not conditional on `enableKami`: with the option off `ichorium` does not exist and the game logs **one recipe parse error** at data
+  load (the tag files are optional entries and cause none). A load condition would be loader-specific
+  (`fabric:load_conditions` / `neoforge:conditions`) and could not be tried here.
 - The item class `ItemKamiBase` is `KamiItemBase`; `ItemKamiResource.getRarity` per damage value is the per-item rarity above.
 - The creative tab entry of the 1.7.10 mod's `ichor wand` is the tab stack above.

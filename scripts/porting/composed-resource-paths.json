@@ -72,7 +72,10 @@
       "site": "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java",
       "kind": "file",
       "paths": [
+        "thaumcraft:textures/misc/beam.png",
+        "thaumcraft:textures/misc/beam1.png",
         "thaumcraft:textures/misc/beam2.png",
+        "thaumcraft:textures/misc/beam3.png",
         "thaumcraft:textures/misc/particles.png"
       ],
       "note": ""
@@ -966,6 +969,10 @@
       "ResourceLocation.parse(id)"
     ],
     "common/src/main/java/thaumcraft/api/ThaumcraftMaterials.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
+    "common/src/main/java/thaumcraft/api/ThaumcraftSoundIds.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
     ],
     "common/src/main/java/thaumcraft/api/WorldCoordinates.java": [
@@ -981,26 +988,32 @@
     "common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)"
     ],
+    "common/src/main/java/thaumcraft/api/entities/ThaumcraftEntities.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
+    ],
     "common/src/main/java/thaumcraft/api/items/ItemsTC.java": [
       "ResourceLocation.tryParse(name)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
+    ],
+    "common/src/main/java/thaumcraft/api/potions/WarpEffects.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
     ],
     "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/foci/\"+key+\".png\")"
     ],
     "common/src/main/java/thaumcraft/api/wands/StaffRod.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+WandRod.lowerTag(tag)+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+WandRod.lowerTag(tag)+\".png\")"
     ],
     "common/src/main/java/thaumcraft/api/wands/WandCap.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+this.getTag()+\".png\")",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+this.getTag()+\".png\")",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+cap.tag()+\".png\")"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+lowerTag(this.getTag())+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+lowerTag(this.getTag())+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_cap_\"+lowerTag(cap.tag())+\".png\")"
     ],
     "common/src/main/java/thaumcraft/api/wands/WandRod.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+tag+\".png\")",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+rod.baseTag()+\".png\")"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+lowerTag(tag)+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+lowerTag(tag)+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/wand_rod_\"+lowerTag(rod.baseTag())+\".png\")"
     ],
     "common/src/main/java/thaumcraft/client/BoreClientEffects.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path+\".png\")"
@@ -1458,15 +1471,15 @@
     ]
   },
   "source_contracts": {
-    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "06ad89e81104dd938eddcbf3f0034051740f759eca13fc5badcd3089f0a98f6b",
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "348e3afb2533acbf984b7fd3f105a240ee8dcb2cf3d793b469f8095cadb8199f",
     "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": "d30a772140f079ffe0dc439aac08300d6bdb298907c05598b3aab5d24299f2ce",
-    "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "dfe13669bea48e0824519c0bc316302da0b1565cf4aba70d64ec8189a39ece9f",
-    "common/src/main/java/thaumcraft/api/wands/WandCap.java": "69e012ede97de067a218a273552b6acc2b4e7c6d698e0ede9390ab4783cc3cf3",
-    "common/src/main/java/thaumcraft/api/wands/WandRod.java": "c1f0ca9c0395fa55d54a6cd9facacd4b8569ad925b9e1f2da5969d05137423c1",
+    "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "d5dfd3daa9e1894ef00eeb7d8fe4e4357dc536701d450eee45ae771efcf5745c",
+    "common/src/main/java/thaumcraft/api/wands/WandCap.java": "7e2b9baeb986547a352dde829f0da1a945c54583e464ddcc29976d9b20c8a6aa",
+    "common/src/main/java/thaumcraft/api/wands/WandRod.java": "0e2bd6a4981952f2ae1f702b328c1bcad451d711a8f131b66e69515adb84bd80",
     "common/src/main/java/thaumcraft/client/BoreClientEffects.java": "99563c98766c47450475e263f412100d61724c624b6b9050b6330b85295c8433",
     "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "0129a3a85f941d1ef4b7d7a03abaa56da1489872026c1ed5fc78e465a69324b9",
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
-    "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "8a82c324559a31c13e51f1bfe8dabbf9b3cabad505e7bdc3c1749c480bf76bae",
+    "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "428815e78254cd03baf1008438295ad93616201a0f2735de0b01d4d8b10a376d",
     "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "b69e2cd79835f398d5d4c3b76dc21f725bb16aab58e0d97ff08d90ebadd711a3",
     "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": "7ed2c201abea159fca1baa780c3f7334bb01c6a410fd4b6ce45ecc1c98b500a5",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
@@ -1477,7 +1490,7 @@
     "common/src/main/java/thaumcraft/client/fx/particles/WardHitParticle.java": "13b59286b12f7b99a128c4d46a32447fa38f517f03313e54988dd806f6a28f57",
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
     "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",
-    "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "7b79ce511e397760b8b05c7cd35df2be79d5d695cf6f0f1426513fd25dd8fef6",
+    "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "a70cb05e8fa4861308e6b0eacd1f668e3c588fa2adf9cdeca7b58b7d923e666a",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "1300a7e9586ec7603409e3f9429b671bd0e22f92841cf46dcec694228f8f4306",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "93d14fa2b44a81fc91ca9db2e1c87a49f631e1f1512f332dc0e48237f7c70c8e",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "ecfc90fcd0873efb9b6a8a09116b7d76ff457a1bfb6e3e81eb29fcc430c4e480",

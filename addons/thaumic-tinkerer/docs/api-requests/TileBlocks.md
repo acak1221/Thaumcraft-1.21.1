@@ -2,8 +2,9 @@
 
 Group TileBlocks: Animation Tablet, Remote Placer, Levitational Locomotive and Relay, Golem Connector, Transvector
 Interface, Transvector Dislocator, Transvector Binder. The numbers `A5`, `A7`, `A8`, `A11` are those of
-`docs/API_GAPS.md` section 2. Nothing below was done by reaching into `thaumcraft.common.*`: every item is a named stub or a
-workaround with the loss written down. Priorities are the group's own opinion (P1 changes what the player sees, P3 only
+`docs/API_GAPS.md` section 2. Nothing below was done by reaching into `thaumcraft.common.*`: every open item is a named
+stub with the loss written down. Sections 2 to 5 (the entity key, the sparkle, the sound ids, the mirrors switch) are
+answered by the API and kept for the record. Priorities are the group's own opinion (P1 changes what the player sees, P3 only
 hardens something that works today).
 
 ## 1. Golem view for the Golem Connector (A11, P3)
@@ -49,32 +50,21 @@ peripheral logic (`GolemConnectorMethods`, 15 methods) already runs on `GolemAcc
 **Until then.** The Golem Connector remembers its golem (the Binder's sneak-click works, the UUID is saved, the golem is
 found every 100 ticks within thirty blocks) but every question about the golem answers "no golem".
 
-## 2. Stable entity key for the golem (A7, P3)
+## 2. Stable entity key for the golem (A7): answered
 
-**Need.** The Binder and the Golem Connector recognise a golem by `EntityGolemBase`.
+`ItemConnector.isGolem` is `ThaumcraftEntities.is(entity, ThaumcraftEntities.GOLEM)`. Nothing to request. If A11 is built,
+`GolemApi.view(entity) != null` could replace it.
 
-**Workaround.** The entity type id `thaumcraft:golem` (`ItemConnector.isGolem`, one `ResourceLocation` constant). It works
-today; request A7 (`thaumcraft.api.entities.ThaumcraftEntities` with `ResourceKey<EntityType<?>>`) only hardens it. If A11
-is built, `GolemApi.view(entity) != null` replaces it.
+## 3. Client sparkles for the Relay beam (A8): answered
 
-## 3. Client sparkles for the Relay beam (A8, P3)
+`TileEntityRelay` draws the beam with `ThaumcraftClientFX.sparkle(level, x, y, z, type)` on the client, as `tcProxy.sparkle`
+was called: the original types 2 (blue) and 14 (white) are the API's 2 and 6, and the API rolls the original's four-in-six
+chance. Nothing to request.
 
-**Need.** `TileEntityRelay` draws the beam between two linked relays with `tcProxy.sparkle(x, y, z, type)` every tick on the
-client, type 2 (blue) or 14 (white), on a loop over the line; the sparkle is a Thaumcraft particle with its own sprite,
-drift and fade.
+## 4. Sound constants (A7): answered
 
-**Workaround.** The vanilla dust particle (`DustParticleOptions`) in a blue or a white, with the same loops and the
-original's four-in-six chance. It does not twinkle or drift as the original's does.
-
-**Proposed.** `thaumcraft.api.client.ThaumcraftClientFX.sparkle(Level, double x, double y, double z, int colorIndex)` as in A8.
-
-## 4. Sound constants (A7, P3)
-
-**Need.** The wand click sound `thaumcraft:tool` (volume 0.6, pitch 1) when a wand turns the Tablet, the Remote Placer or the
-Dislocator.
-
-**Workaround.** `DeviceSounds.WAND_TOOL = SoundEvent.createVariableRangeEvent(thaumcraft:tool)`; the sound is registered by
-the mod (`assets/thaumcraft/sounds.json`). A constant in the API would remove the string.
+The wand click is `ThaumcraftSoundIds.event(ThaumcraftSoundIds.TOOL)` (`DeviceSounds.wandTool()`), resolved when it is
+played. Nothing to request.
 
 ## 5. Mirrors switch (A5): answered
 
@@ -82,14 +72,19 @@ the mod (`assets/thaumcraft/sounds.json`). A constant in the API would remove th
 
 ## 6. Requests to the loader modules (to the lead)
 
-* **Fluids and energy through the Transvector Interface (P1 for pipe and cable users).** `TileTransvectorInterface`
-  forwards items, aspects and essentia, but 1.21.1 has no common fluid or energy interface. The Interface needs, per
-  loader, a capability or transfer-storage provider for its block that asks `TileTransvector.getTile()` (public, returns
-  the bound block entity or null) for the bound block's own capability and returns it:
-  * Fabric: Fabric Transfer API `FluidStorage.SIDED` and `ItemStorage.SIDED` are not needed for items (the `WorldlyContainer`
-    is found by hoppers and pipes already); fluids and, if wanted, Team Reborn Energy `EnergyStorage.SIDED`.
-  * NeoForge: `Capabilities.FluidHandler.BLOCK`, `Capabilities.EnergyStorage.BLOCK`.
-  The 1.7.10 Interface forwarded `IFluidHandler`, CoFH RF and IC2 EU.
+* **Fluids through the Transvector Interface: done for Fabric, to do for NeoForge (P1 for pipe and tank users).**
+  `thaumic.tinkerer.fabric.TileBlocksFabric` (new file of the Fabric module, called by name from `TileBlocks.ready()` on
+  Fabric, like `KamiGearFabricClient`) registers `FluidStorage.SIDED` for `TileBlocks.interfaceType()` and returns the fluid
+  storage of the block `TileTransvector.getTile()` is bound to, for the same side. No change to a shared file was needed.
+  NeoForge still needs the same with `Capabilities.FluidHandler.BLOCK` (and the `RegisterCapabilitiesEvent`), with
+  `TileTransvector.getTile()` as the one source; the common code has no hook for it, so the NeoForge module (the lead)
+  has to call the equivalent of `TileBlocksFabric.register()` once the block entity type is registered.
+* **Energy through the Transvector Interface (P2).** The 1.7.10 Interface forwarded CoFH RF and IC2 EU. 1.21.1 needs, per
+  loader, an energy capability (Fabric: Team Reborn Energy `EnergyStorage.SIDED`, which is not a dependency of the add-on
+  and is outside the import list of PORTING_RULES; NeoForge: `Capabilities.EnergyStorage.BLOCK`) that asks
+  `TileTransvector.getTile()` for the bound block's own energy storage. Not done on either loader.
+* **Hook for loader glue (P3).** `TileBlocks.ready()` reaches the Fabric class by name (`Platform.isFabric()`), the way the
+  Kami gear reaches its client glue. A common `ContentGroup` hook for loader modules would replace both.
 * **Computer peripherals (P3).** The Tablet (`tt_animationTablet`), the Interface and the Golem Connector
   (`tt_golemconnector`) were ComputerCraft and OpenComputers peripherals. The plain-Java surface is there:
   `TileAnimationTablet.trigger/getRotation/setRotation/setLeftClick/setRedstone` (+ fields), and

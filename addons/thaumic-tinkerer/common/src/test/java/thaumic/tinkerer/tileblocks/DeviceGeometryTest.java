@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumic.tinkerer.common.block.BlockAnimationTablet;
 import thaumic.tinkerer.common.block.camo.PulseDeviceBlock;
+import thaumic.tinkerer.common.block.tile.TileEntityRelay;
 import thaumic.tinkerer.common.block.tile.TileRPlacer;
 
 /**
@@ -70,5 +71,30 @@ class DeviceGeometryTest {
     void theOriginalAimedAnEastFacingPlacerToTheWest() {
         assertEquals(POS.west(3), TileRPlacer.targetFor(POS, Direction.EAST, 3, true), "the 1.7.10 copy and paste");
         assertEquals(POS.east(3), TileRPlacer.targetFor(POS, Direction.EAST, 3, false), "what the facing says");
+    }
+
+    @Test
+    void theRelayLoopsStepLikeCopySignOfOne() {
+        // Math.copySign(1, difference): -1 below zero, +1 for zero and above (copySign(1, 0) is +1).
+        assertEquals(1, TileEntityRelay.step(0));
+        assertEquals(1, TileEntityRelay.step(9));
+        assertEquals(-1, TileEntityRelay.step(-1));
+        assertEquals(-1, TileEntityRelay.step(-32));
+    }
+
+    @Test
+    void theRelayLoopsAdvanceBeyondTwoToThe24() {
+        // The original added the float of copySign to the int counter, which stops advancing at +-16,777,216, so a linked
+        // pair out there hung the server thread. The integer step ends the walk after the 32 blocks between the relays.
+        for (int start : new int[] { 16_777_216, 16_777_300, 20_000_000, -20_000_000, 29_999_960 }) {
+            int partner = start + 32;
+            int j = start;
+            int iterations = 0;
+            do {
+                j += TileEntityRelay.step(partner - start);
+                iterations++;
+            } while (j < partner && iterations < 1000);
+            assertEquals(32, iterations, "the walk from " + start);
+        }
     }
 }

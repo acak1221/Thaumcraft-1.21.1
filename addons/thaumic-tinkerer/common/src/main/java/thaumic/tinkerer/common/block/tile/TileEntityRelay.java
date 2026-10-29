@@ -135,7 +135,7 @@ public class TileEntityRelay extends BlockEntity {
      * 2^24 in absolute value, so a linked pair beyond +-16,777,216 blocks hung the server thread in its tick loop. The
      * integer step is the same for every coordinate below that (see docs/deviations/TileBlocks.md, 2.3).
      */
-    static int step(int difference) {
+    public static int step(int difference) {
         return difference < 0 ? -1 : 1;
     }
 

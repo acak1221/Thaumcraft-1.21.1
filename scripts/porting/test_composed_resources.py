@@ -23,7 +23,7 @@ class ComposedResourcesTest(unittest.TestCase):
     def test_all_audited_expansions_exist_and_atlas_sprites_are_stitched(self):
         checks = self.validate()
         self.assertEqual(49, checks['checked_composed_sites'])
-        self.assertEqual(288, checks['checked_composed_files'])
+        self.assertEqual(290, checks['checked_composed_files'])  # +beam.png, +beam3.png: the client effect facade draws beam types 0 to 3
         self.assertEqual(23, checks['checked_composed_sprites'])
         with patch.object(composed, 'validate', side_effect=ValueError('composed guard reached')):
             with self.assertRaisesRegex(ValueError, 'composed guard reached'):

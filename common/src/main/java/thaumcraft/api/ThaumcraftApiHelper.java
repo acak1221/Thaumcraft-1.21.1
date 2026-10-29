@@ -524,7 +524,8 @@ public class ThaumcraftApiHelper {
      *
      * <p>The answer is the cell the next {@code breakFurthestBlock(level, pos, block, player)} call breaks, as long as no
      * block changes in between and the player is allowed to break it; it is {@code pos} itself when no other log
-     * qualifies. It is a new immutable position. Felling a tree with protection is therefore a loop of: find the cell, ask
+     * qualifies. "Furthest" is measured from {@code pos}: the same trunk clicked at its top ends at its foot. It is a new
+     * immutable position. Felling a tree with protection is therefore a loop of: find the cell, ask
      * your protection about that cell, call {@code breakFurthestBlock} only if it agrees (and stop the loop when it does not).</p>
      *
      * <p>Null when nothing would be broken: a null argument, a {@code pos} outside the build height or in a chunk that is
@@ -563,9 +564,9 @@ public class ThaumcraftApiHelper {
      *
      * <p><b>What is broken.</b> Only the cell the walk ended on; the logs on the way stay. The start must itself be a log
      * of {@code block}: for any other start (air, dirt, a chest...) nothing is broken and the answer is false. (The
-     * original broke the start whatever it was, because its axe called {@link #isWoodLog} first; as a public helper
-     * this one asks that itself, so a position forwarded by a client cannot be used to mine an arbitrary block.)
-     * When no other log qualifies, the start itself is the cell that is broken.</p>
+     * original method did not look at its start and relied on the axe having called {@link #isWoodLog} first; as a
+     * public helper this one asks that itself, so a position forwarded by a client cannot be used to mine an arbitrary
+     * block.) When no other log qualifies, the start itself is the cell that is broken.</p>
      *
      * <p><b>Drops.</b> The block is removed and drops its normal loot, rolled with the main-hand item of
      * {@code player} (Fortune and Silk Touch count), as items at the broken cell; they do not follow the player. A

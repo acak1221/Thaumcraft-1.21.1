@@ -44,18 +44,24 @@ common code.
 **What the add-on does today.** `KamiHooks.thaumcraftSound(path)` looks up `thaumcraft:<path>` in `BuiltInRegistries.SOUND_EVENT`
 and plays nothing when it is missing. Works; a constant in the API would harden it.
 
-## 3. Client sparkles for the Shadowbeam (K3 = A8, P3)
+## 3. Client sparkles for the Shadowbeam (K3, P3; the generic sparkle is A8, now in the API)
 
-**Need.** 1.7.10 spawned a dark `FXSparkle` at every step of the beam on the shooter's side.
+**Need.** 1.7.10 spawned a custom black `FXSparkle` subclass (scale `size`, colour 0.001, five ticks to live, no shrinking, no
+slow-down) at every step of the beam on the shooter's side.
 
 **What the add-on does today.** The server sends `PacketShadowBeam` (the first visible point, every bounce and the end, at
 most 96 points) to the players around, and `ShadowBeamClientHandler` draws vanilla dust particles along that path. Not the
-same look. Proposed: `thaumcraft.api.client.ThaumcraftClientFX.sparkle(Level, x, y, z, int colorIndex)` (A8).
+same look. A8 has arrived in the API (`ThaumcraftClientFX.sparkle`, `ThaumcraftFX.sparkle`) and the add-on uses the server twin for the
+white sparkles of the Celestial Recall and of the Robes' deflection; it does **not** use it for the beam, because the beam is hundreds of
+steps per tick (a packet each) and the API's sparkles shrink away and fall, unlike the original particle. Proposed if wanted: a
+`ThaumcraftClientFX.sparkle` variant with a fixed life, no shrink, no slow-down and a custom colour.
 
 ## 4. Loader hooks (to the lead)
 
-Architectury has no event for these two, so the add-on provides the code and the Fabric entrypoint class
-`thaumic.tinkerer.fabric.client.KamiGearFabricClient` registers them. NeoForge needs the same two hooks (deferred):
+Architectury has no event for these two, so the add-on provides the code and the Fabric class
+`thaumic.tinkerer.fabric.client.KamiGearFabricClient` registers them. `KamiGearClient.register()` (common) starts that class by
+name on Fabric, so no change of `fabric.mod.json` is needed (the class implements `ClientModInitializer` and registers only once, so
+listing it as a `client` entrypoint later is harmless). NeoForge needs the same two hooks (deferred):
 
 - **Player render layer.** `thaumic.tinkerer.client.render.kami.WingsLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>, EntityModelSet)`
   must be added to every player renderer (Fabric: `LivingEntityFeatureRendererRegistrationCallback`; NeoForge:
@@ -85,3 +91,18 @@ KamiGear does not reference the KamiWorld classes; it reaches them like this (al
 - **Sky Pearl.** `ItemSkyPearl.setValues/isAttuned/getPos/getDim/addInfo` are the static methods that the gateway block and its screens
   call; the pearl's recipe is registered under the research `WARP_GATE`, which KamiWorld registers.
 - **ICHOR research.** `ResearchHelper.kamiResearch` of 1.7.10 is `KamiGear.ichorResearch()` (null until `ready()` and with Kami off).
+
+## 6. Requests to the lead and to other groups (shared files; nothing here was edited by the KamiGear group)
+
+- **KamiWorld, `common/content/KamiWorld.java` line 93: the same S2C registration blocker.** `NetworkManager.registerS2CPayloadType(PacketSoulHearts.TYPE, ...)`
+  runs on the client as well, and `KamiWorldClient` registers the receiver for the same type, which makes Fabric's
+  `PayloadTypeRegistry.playS2C()` throw `IllegalArgumentException: Packet type ... is already registered!` on every client start. Fix as in
+  `KamiGear.registerNetwork()`: guard the call with `if (Platform.getEnvironment() == Env.SERVER)` (`dev.architectury.platform.Platform`,
+  `dev.architectury.utils.Env`). Architectury's own documentation: the receiver registers the type on the client, `registerS2CPayloadType` is for the server.
+- **KamiWorld, `TileWarpGate.teleportPlayer`: the 20 + 20 white sparkles of 1.7.10 are missing.** Call `KamiHooks.sparklesAround(serverLevel, player, 20)`
+  before the jump (after the first sound) and after it (before the second), as `KamiHooks.teleportToWarpGate` does.
+- **Lead, `client/lib/LibResources.java` lines 59 to 62.** `MODEL_ARMOR_ICHOR_1`, `_2`, `MODEL_ARMOR_ICHOR_GEM_1`, `_2` name files that do not exist
+  (`ichor1.png`...). They are unused; delete them, or point them at `textures/models/armor/ichor_layer_1.png`, `ichor_layer_2.png`,
+  `ichor_gem_layer_1.png`, `ichor_gem_layer_2.png`.
+- **Lead, `fabric/src/main/resources/fabric.mod.json`: optional.** The Kami client glue is started by name from `KamiGearClient`; listing
+  `thaumic.tinkerer.fabric.client.KamiGearFabricClient` as a `client` entrypoint is not needed and harmless.

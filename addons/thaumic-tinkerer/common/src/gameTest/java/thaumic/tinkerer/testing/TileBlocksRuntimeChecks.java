@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -31,6 +32,7 @@ import thaumcraft.api.items.ItemsTC;
 import thaumcraft.api.research.ResearchCategories;
 import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.block.BlockAnimationTablet;
+import thaumic.tinkerer.common.block.BlockRPlacer;
 import thaumic.tinkerer.common.block.camo.CamoDeviceBlock;
 import thaumic.tinkerer.common.block.camo.PulseDeviceBlock;
 import thaumic.tinkerer.common.block.tile.TileEntityMobilizer;
@@ -49,6 +51,8 @@ import thaumic.tinkerer.common.lib.LibBlockNames;
 import thaumic.tinkerer.common.lib.LibItemNames;
 import thaumic.tinkerer.common.lib.LibMisc;
 import thaumic.tinkerer.common.lib.LibResearch;
+import thaumic.tinkerer.common.network.packet.PacketPlacerButton;
+import thaumic.tinkerer.common.network.packet.PacketTabletButton;
 import thaumic.tinkerer.common.registry.TTRecipes;
 
 /**
@@ -365,8 +369,96 @@ public final class TileBlocksRuntimeChecks {
         TileRPlacer placer = tile(test, placerPos, TileRPlacer.class);
         ContainerRemotePlacer placerMenu = new ContainerRemotePlacer(8, player.getInventory(), placer);
         test.assertTrue(placerMenu.slots.size() == 37, "37 slots in the placer menu");
-        test.assertTrue(!placerMenu.slots.get(0).mayPlace(new ItemStack(Items.STICK)), "the placer takes blocks only");
+        // The 1.7.10 screen slot was a plain Slot: it takes any item. Only automation (hoppers, Container.canPlaceItem) is
+        // restricted to blocks; see remotePlacerSpillsAndRefuses.
+        test.assertTrue(placerMenu.slots.get(0).mayPlace(new ItemStack(Items.STICK)), "the placer's screen slot takes any item, as in 1.7.10");
         test.assertTrue(placerMenu.slots.get(0).mayPlace(new ItemStack(Items.STONE)), "the placer takes a block");
+        test.succeed();
+    }
+
+    // ---- the packets of the two screens ----------------------------------------------------------------------------
+
+    /**
+     * The server side of the two button packets: only a sender that has the menu of that very block entity open changes
+     * it, and the placer's distance is clamped to 1..4.
+     */
+    public static void menuPacketsCheckTheSender(GameTestHelper test) {
+        floor(test);
+        TinkererFakePlayer sender = player(test);
+        BlockPos tabletPos = placeTablet(test, new BlockPos(2, 1, 3), Direction.NORTH, ItemStack.EMPTY, true, false);
+        BlockPos otherPos = placeTablet(test, new BlockPos(4, 1, 3), Direction.NORTH, ItemStack.EMPTY, true, false);
+        BlockPos placerPos = new BlockPos(6, 1, 3);
+        test.setBlock(placerPos, TileBlocks.remotePlacerBlock());
+        TileAnimationTablet tablet = tile(test, tabletPos, TileAnimationTablet.class);
+        TileAnimationTablet other = tile(test, otherPos, TileAnimationTablet.class);
+        TileRPlacer placer = tile(test, placerPos, TileRPlacer.class);
+        BlockPos absTablet = test.absolutePos(tabletPos);
+        BlockPos absOther = test.absolutePos(otherPos);
+        BlockPos absPlacer = test.absolutePos(placerPos);
+
+        // No menu open: nothing is changed.
+        test.assertTrue(!new PacketTabletButton(absTablet, false, true).apply(sender), "a tablet packet without an open menu is refused");
+        test.assertTrue(!new PacketPlacerButton(absPlacer, 3).apply(sender), "a placer packet without an open menu is refused");
+        test.assertTrue(tablet.leftClick && !tablet.redstone && placer.blocks == 1, "and nothing changed");
+
+        // The tablet's menu is open: that tablet only.
+        sender.containerMenu = new ContainerAnimationTablet(7, sender.getInventory(), tablet);
+        test.assertTrue(!new PacketTabletButton(absOther, false, true).apply(sender), "another tablet than the open one is refused");
+        test.assertTrue(other.leftClick && !other.redstone, "the other tablet is untouched");
+        test.assertTrue(!new PacketPlacerButton(absPlacer, 3).apply(sender), "a placer is refused while a tablet menu is open");
+        test.assertTrue(!new PacketTabletButton(absPlacer, false, true).apply(sender), "a position with no tablet is refused");
+        test.assertTrue(!new PacketTabletButton(new BlockPos(1_000_000, 64, 1_000_000), false, true).apply(sender), "an unloaded position is refused");
+        test.assertTrue(new PacketTabletButton(absTablet, false, true).apply(sender), "the open tablet takes the modes");
+        test.assertTrue(!tablet.leftClick && tablet.redstone, "right click and redstone: " + tablet.leftClick + "/" + tablet.redstone);
+
+        // The placer's menu is open: the distance is clamped.
+        sender.containerMenu = new ContainerRemotePlacer(8, sender.getInventory(), placer);
+        test.assertTrue(new PacketPlacerButton(absPlacer, 3).apply(sender), "the open placer takes the distance");
+        test.assertTrue(placer.blocks == 3, "three blocks: " + placer.blocks);
+        test.assertTrue(new PacketPlacerButton(absPlacer, 99).apply(sender) && placer.blocks == 4, "more than four is four: " + placer.blocks);
+        test.assertTrue(new PacketPlacerButton(absPlacer, -7).apply(sender) && placer.blocks == 1, "less than one is one: " + placer.blocks);
+        test.assertTrue(!new PacketTabletButton(absTablet, true, false).apply(sender), "a tablet is refused while the placer menu is open");
+        test.succeed();
+    }
+
+    /** Sneaking with a wand opens the placer's menu; a plain wand click through IWandable is left to the block. */
+    public static void placerWandOpensTheMenuOnlyWhileSneaking(GameTestHelper test) {
+        floor(test);
+        BlockPos placerPos = new BlockPos(3, 1, 3);
+        test.setBlock(placerPos, TileBlocks.remotePlacerBlock());
+        TileRPlacer placer = tile(test, placerPos, TileRPlacer.class);
+        BlockPos abs = test.absolutePos(placerPos);
+        BlockRPlacer block = TileBlocks.remotePlacerBlock();
+        ServerPlayer viewer = test.makeMockServerPlayerInLevel();
+        ItemStack wand = new ItemStack(ItemsTC.wand());
+
+        int plain = block.onWandRightClick(test.getLevel(), wand, viewer, abs.getX(), abs.getY(), abs.getZ(), 1, 0);
+        test.assertTrue(plain < 0, "a plain click is not handled by IWandable: " + plain);
+        test.assertTrue(!(viewer.containerMenu instanceof ContainerRemotePlacer), "and opens no menu");
+
+        viewer.setShiftKeyDown(true);
+        int sneaking = block.onWandRightClick(test.getLevel(), wand, viewer, abs.getX(), abs.getY(), abs.getZ(), 1, 0);
+        test.assertTrue(sneaking == 1, "a sneaking click is handled: " + sneaking);
+        test.assertTrue(viewer.containerMenu instanceof ContainerRemotePlacer menu && menu.placer == placer,
+                "the placer's menu is open: " + viewer.containerMenu);
+        test.succeed();
+    }
+
+    // ---- the fake player ---------------------------------------------------------------------------------------------
+
+    /**
+     * The fake player earns no advancements: a kill by it (the Animation Tablet's sword) does not complete "Monster Hunter"
+     * as it would for a player with the same profile.
+     */
+    public static void fakePlayerEarnsNoAdvancements(GameTestHelper test) {
+        floor(test);
+        TinkererFakePlayer fake = player(test);
+        net.minecraft.advancements.AdvancementHolder holder = test.getLevel().getServer().getAdvancements()
+                .get(ResourceLocation.withDefaultNamespace("adventure/kill_a_mob"));
+        test.assertTrue(holder != null, "the vanilla advancement is loaded");
+        net.minecraft.world.entity.monster.Zombie zombie = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
+        net.minecraft.advancements.CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(fake, zombie, test.getLevel().damageSources().generic());
+        test.assertTrue(!fake.getAdvancements().getOrStartProgress(holder).isDone(), "the fake player did not earn Monster Hunter");
         test.succeed();
     }
 

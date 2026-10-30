@@ -30,7 +30,7 @@ mode does not fell oak trees), `breakFurthestBlock` wears no tool and asks neith
 **Answer.** Not an API interface of Thaumcraft but a loader event of the add-on, `TinkererEvents.LIVING_ARMOR_ABSORB`
 (`thaumic.tinkerer.common.hooks`), posted from `LivingEntity.getDamageAfterArmorAbsorb` (Fabric: `LivingEntityArmorMixin`). The first proposal
 of this request (an `IArmorAbsorption` interface that the mod would apply in one place) is therefore **not needed**; the Thaumcraft mod itself was not touched.
-The full description of the event is in `docs/deviations/KamiGear.md` section 13 (text for `docs/HOOKS.md`).
+The full description of the event is in `docs/HOOKS.md` section 14 (it was first written as `docs/deviations/KamiGear.md` section 13).
 
 *What the event gives*: the listener is called for every armour step of every living entity (a source of the tag `bypasses_armor` excepted), with the damage
 that comes to the step and the amount vanilla's formula takes off, and **replaces that amount** (held between 0 and the blow). That is the power of
@@ -100,25 +100,24 @@ KamiGear does not reference the KamiWorld classes; it reaches them like this (al
 
 ## 6. Requests to the lead and to other groups (shared files; nothing here was edited by the KamiGear group)
 
-- **`LIVING_JUMP` order: Gem Boots run after Ascent Boost (the reverse of 1.7.10).** Both listeners register in the `register()` phase and `ContentGroups.ALL`
-  has Enchantments before KamiGear, so a Gem Boots wearer with Ascent Boost leggings jumps `0.42 x factor + 0.3` (0.93 for Ascent Boost I, 1.35 for III) where 1.7.10
-  gave `(0.42 + 0.3) x factor` (1.08, 1.80): the boots' handler was registered in `preInit`, `ModEnchantmentHandler` in `init`, both at normal priority.
-  The cheapest fix matches the original's phases: `Enchantments.register()` calls `ModEnchantments.initEnchantments()` (it only registers the event handler)
-  from `Enchantments.ready()` instead. Alternatives: KamiGear before Enchantments in `ContentGroups.ALL`, or a priority on the `TinkererEvents` listeners. The GameTest
-  `KamiGearRuntimeChecks.gemBootsAndAscentBoostLeggingsComposeTheirJumps` pins today's 0.93 / 1.35 and says in its comment what to change (the two numbers) after the fix.
-  Details: `docs/deviations/KamiGear.md` section 3.
-- **Documents of the lead that this group's `LIVING_ARMOR_ABSORB` makes false** (not edited here): `docs/DEVIATIONS.md` section 4, the bullet "Armour absorption of Kami
-  armour (`ISpecialArmor`): needs a hook on `getDamageAfterArmorAbsorb`; not written"; `docs/API_GAPS.md` line 82 ("`ISpecialArmor` has no counterpart (3a)") and line 239
-  ("`ISpecialArmor` ... becomes `UNBREAKABLE` + attribute modifiers or a hurt event"); `docs/HOOKS.md` section 3, the sentence "It still needs a hook on
-  `getDamageAfterArmorAbsorb`. Not written." (lines 92-93) and the sentence of section 10 "The armour absorption K1 needs a hook of its own" (line 282). The text for the new
-  row of the section 1 table and for the NeoForge notes is in `docs/deviations/KamiGear.md` section 13.
-- **KamiWorld, `common/content/KamiWorld.java` line 93: the same S2C registration blocker.** `NetworkManager.registerS2CPayloadType(PacketSoulHearts.TYPE, ...)`
-  runs on the client as well, and `KamiWorldClient` registers the receiver for the same type, which makes Fabric's
-  `PayloadTypeRegistry.playS2C()` throw `IllegalArgumentException: Packet type ... is already registered!` on every client start. Fix as in
-  `KamiGear.registerNetwork()`: guard the call with `if (Platform.getEnvironment() == Env.SERVER)` (`dev.architectury.platform.Platform`,
-  `dev.architectury.utils.Env`). Architectury's own documentation: the receiver registers the type on the client, `registerS2CPayloadType` is for the server.
-- **KamiWorld, `TileWarpGate.teleportPlayer`: the 20 + 20 white sparkles of 1.7.10 are missing.** Call `KamiHooks.sparklesAround(serverLevel, player, 20)`
-  before the jump (after the first sound) and after it (before the second), as `KamiHooks.teleportToWarpGate` does.
+- **`LIVING_JUMP` order: Gem Boots before Ascent Boost, as in 1.7.10 - ANSWERED.** The first wiring registered both listeners in the `register()` phase with
+  Enchantments before KamiGear in `ContentGroups.ALL`, so a Gem Boots wearer with Ascent Boost leggings jumped `0.42 x factor + 0.3` (0.93 for Ascent Boost I, 1.35 for III)
+  where 1.7.10 gave `(0.42 + 0.3) x factor` (1.08, 1.80): the boots' handler was registered in `preInit`, `ModEnchantmentHandler` in `init`, both at normal priority. The
+  cheapest fix, which matched the original's phases, was taken: the Enchantments group registers Ascent Boost's listener from `Enchantments.ready()`
+  (`ModEnchantments.initJump()`, `ModEnchantmentHandler.registerJump()`), the phase after every `register()`, while the Gem Boots' listener stays in `KamiGear.register()`. The GameTest
+  `KamiGearRuntimeChecks.gemBootsAndAscentBoostLeggingsComposeTheirJumps` pins 1.08 and 1.80. Details: `docs/deviations/KamiGear.md` section 3, `docs/HOOKS.md` section 2.
+- **Documents of the lead that this group's `LIVING_ARMOR_ABSORB` made false - UPDATED by the lead:** `docs/DEVIATIONS.md` (the bullet "Armour absorption of Kami
+  armour (`ISpecialArmor`): needs a hook ...; not written" is gone from the "Not ported" list and is described in section 3), `docs/API_GAPS.md` (the two rows that said
+  "`ISpecialArmor` has no counterpart" and "becomes `UNBREAKABLE` + attribute modifiers or a hurt event"), `docs/HOOKS.md` (the sentence of section 3 that said the hook was not
+  written, section 10, and the new section 14, which carries the text of `docs/deviations/KamiGear.md` section 13).
+- **KamiWorld, `common/content/KamiWorld.java`: the same S2C registration blocker - ANSWERED.** `NetworkManager.registerS2CPayloadType(PacketSoulHearts.TYPE, ...)`
+  ran on the client as well, and `KamiWorldClient` registers the receiver for the same type, which makes Fabric's `PayloadTypeRegistry.playS2C()` throw
+  `IllegalArgumentException: Packet type ... is already registered!` on every client start. The call is now guarded as in `KamiGear.registerNetwork()`:
+  `if (Platform.getEnvironment() == Env.SERVER)` (`KamiWorld.java`, the block with the comment that says so). That the guard works on a client was **not run**
+  (no client was started); it is read from the code.
+- **KamiWorld, `TileWarpGate.teleportPlayer`: the 20 + 20 white sparkles of 1.7.10 - ANSWERED.** The Recall path, `teleportPlayer(ServerPlayer, BlockPos)` (what the
+  Focus of Celestial Recall reaches through `KamiHooks.warpGateTeleporter`), now sends them from the server with `KamiHooks.sparklesAround` before and after the
+  jump (`TileWarpGate.java`; `deviations/KamiWorld.md` section 4). Only the gateway's own menu and map path has none, as in 1.7.10.
 - **Lead, `client/lib/LibResources.java` lines 59 to 62.** `MODEL_ARMOR_ICHOR_1`, `_2`, `MODEL_ARMOR_ICHOR_GEM_1`, `_2` name files that do not exist
   (`ichor1.png`...). They are unused; delete them, or point them at `textures/models/armor/ichor_layer_1.png`, `ichor_layer_2.png`,
   `ichor_gem_layer_1.png`, `ichor_gem_layer_2.png`.

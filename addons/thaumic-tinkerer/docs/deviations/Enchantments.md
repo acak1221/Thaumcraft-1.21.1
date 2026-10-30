@@ -131,8 +131,9 @@ goes on to deal, and not for the ones it ignores (dead or invulnerable victim) o
 
 ## 4. Movement and shooting enchantments (loader events `LIVING_JUMP`, `LIVING_FALL`, `USE_ITEM_TICK`)
 
-All four are listeners of `TinkererEvents` (`docs/HOOKS.md` sections 5 to 7), registered once by `ModEnchantments.initEnchantments()`
-on both sides. The events that run on both sides run their listener on both, so the rule of every listener that changes a
+All four are listeners of `TinkererEvents` (`docs/HOOKS.md` sections 5 to 7), registered once on both sides: Slow Fall, Shockwave and Quick Draw by
+`ModEnchantments.initEnchantments()`, which `Enchantments.register()` calls, and Ascent Boost's by `ModEnchantments.initJump()`, which `Enchantments.ready()`
+calls (see the Ascent Boost bullet). The events that run on both sides run their listener on both, so the rule of every listener that changes a
 number both sides compute is the same on both; the one with an effect on the world (Shockwave) acts on the server only.
 
 - **Ascent Boost** (`LIVING_JUMP`). The motion of the jump, set just before the event, is multiplied by `(L + 2) / 2` (the
@@ -140,7 +141,12 @@ number both sides compute is the same on both; the one with an effect on the wor
   guessed the jump from the tick of the local player (`EnchantmentClientHandler`) is deleted; the server's player gets the
   boost too, from the same event (a real server player jumps from the movement packet, `HOOKS.md` section 5), so the server does
   not expect a lower jump than the client makes. As HOOKS.md says, the server also posts it for any other upward take-off of a player
-  that the client reports as leaving the ground.
+  that the client reports as leaving the ground. **Order against the Gem Boots**: the listener is registered in the ready phase
+  (`Enchantments.ready()` → `ModEnchantments.initJump()` → `ModEnchantmentHandler.registerJump()`), after every group's `register()`, so it runs
+  after the Gem Boots' listener, which `KamiGear.register()` registers; that is the order of 1.7.10 (boots in `preInit`, `ModEnchantmentHandler` in
+  `init`): the boots add their 0.3 and Ascent Boost multiplies the sum, 1.08 for Ascent Boost I and 1.80 for III (`docs/deviations/KamiGear.md` section 3;
+  the GameTest `gemBootsAndAscentBoostLeggingsComposeTheirJumps` pins the numbers). The first wiring registered it in `register()`, before KamiGear's, which
+  reversed the order.
 - **Slow Fall** has two parts, as `onEntityUpdate` had one block. (1) *The motion and the cloud*: on the client that simulates
   the fall of its own player, `TickEvent.PLAYER_PRE` divides the vertical motion by `1 + .33 L` (the float literal of the
   original) and spawns the cloud while the player falls faster than `-0.0784`, for 2.9 blocks or more, not sneaking, with the
@@ -169,12 +175,14 @@ number both sides compute is the same on both; the one with an effect on the wor
     registration. Inside this group it is Slow Fall, then Shockwave (so the wave sees a fall of 2.9 blocks, never more, on boots
     that carry both: the GameTest `shockwaveHurtsTheCreaturesAroundALanding` puts both on one pair of boots, a combination that
     the Enchanter and the exclusive sets forbid, and sees no wave from ten blocks). Shockwave's `LOW` priority of 1.7.10 (after
-    the handlers of every other mod) is **not reproduced against other groups**: `ContentGroups.ALL` runs Enchantments before
-    KamiGear, so the Gem Boots' `LIVING_FALL` listener (it sets the distance to 0) is registered after both of ours and Shockwave
-    sees the distance before the boots zero it. `docs/deviations/KamiGear.md` describes the same order. There is no live effect
+    the handlers of every other mod) is **not reproduced against other groups**: Slow Fall's and Shockwave's listeners are registered in
+    `Enchantments.register()` (through `ModEnchantments.initEnchantments()`) and the Gem Boots' `LIVING_FALL` listener (it sets the distance to
+    0) in `KamiGear.register()`, and `ContentGroups.ALL` runs Enchantments before KamiGear, so the boots' listener comes after both of ours and Shockwave
+    sees the distance before the boots zero it. (Only Ascent Boost's jump listener was moved to `Enchantments.ready()`, so that the boots come first
+    for the jump, see the Ascent Boost bullet above; the fall listeners were not moved.) `docs/deviations/KamiGear.md` describes the same order. There is no live effect
     through the Enchanter or an anvil, because the boot tags of Slow Fall and Shockwave do not list the Gem Boots (section 1); a
-    stack with both, made by a command or another mod, would blast. Closing it is the order of the groups in `ContentGroups`,
-    which is the lead's.
+    stack with both, made by a command or another mod, would blast. Closing it would take a later registration phase for Slow Fall and
+    Shockwave or another order of the groups in `ContentGroups`, which is the lead's; nothing is done because the case has no live effect.
 - **Quick Draw** (`USE_ITEM_TICK`). The draw clock is the entity's own `useItemRemaining`, which the bow pose, the HUD and
   the power of the arrow (`releaseUsing`) read, so the rule of the original changes the real thing: per tick
   `speedup = L / 6`, plus one when the clock is a multiple of `6 - L % 6`, and the clock becomes `Math.max(2, clock - speedup)`.

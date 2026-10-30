@@ -16,7 +16,7 @@ speed through `EntityEvent.ADD`); the behaviour of the group is in `docs/deviati
 
 **What the NeoForge module has to post** (not written yet; `docs/HOOKS.md` sections 3 to 7 give the NeoForge counterpart of each):
 `LIVING_DAMAGE`, `BREAK_SPEED`, `LIVING_JUMP`, `LIVING_FALL` and `USE_ITEM_TICK`. Without the poster of an event on NeoForge the
-enchantments that listen to it do nothing there: no damage factors and Vampirism (`LIVING_DAMAGE`), no Shatter, Tunnel, Disintegrate
+enchantments that listen to it would do nothing there (nothing was run on NeoForge): no damage factors and Vampirism (`LIVING_DAMAGE`), no Shatter, Tunnel, Disintegrate
 and Flaming Touch speed (`BREAK_SPEED`), no Ascent Boost, no Slow Fall landing nor Shockwave, no Quick Draw. The group needs nothing
 else from the loaders.
 

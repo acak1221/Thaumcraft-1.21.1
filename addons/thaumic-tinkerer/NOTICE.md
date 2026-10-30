@@ -19,7 +19,8 @@ Consequences, because the licence is ShareAlike and NonCommercial:
   except the build scripts named below) is licensed under **CC BY-NC-SA 3.0**, not under the MIT licence of the rest of
   this repository. It must not be sold or used commercially, and further adaptations must carry the same licence.
 - The MIT licence of the repository root covers the files outside this directory and the build files that wire the
-  add-on into the build: `fabric.gradle`, `neoforge.gradle` and `tools/`. They contain no Thaumic Tinkerer code.
+  add-on into the build: `fabric.gradle` and `tools/`. They contain no Thaumic Tinkerer code. (There is no NeoForge build file of
+  the add-on yet; one that wires the add-on into the build would be covered by the same sentence.)
 - The add-on jar is a separate download; the Thaumcraft jar contains none of it.
 - Publishing the port does not establish rights in Thaumcraft 4 (Azanor), which Thaumic Tinkerer is a derivative work
   of, nor in Minecraft.

@@ -129,8 +129,10 @@ public class ItemGemBoots extends ItemIchorclothArmorAdv {
      * factor (honey) and Jump Boost act on the jump only. Runs on both sides: the client's own jump and the server's
      * ({@code KamiArmorHandler.getArmorStatus} answers with the side's own copy of the flag, synchronised by the packets).
      *
-     * <p>Ascent Boost's listener runs <i>before</i> this one (the Enchantments group registers first), so the 0.3 is added after its factor;
-     * 1.7.10 ran the boots first and the factor multiplied the sum (docs/deviations/KamiGear.md section 3).</p>
+     * <p>This listener runs <i>before</i> Ascent Boost's: it is registered by {@code KamiGear.register()} and the Enchantments group
+     * registers Ascent Boost's in its ready phase ({@code ModEnchantments.initJump()}), so the 0.3 is added first and the factor
+     * multiplies the sum, as in 1.7.10, where the boots' handler was registered in {@code preInit} and Ascent Boost's in {@code init}
+     * (docs/deviations/KamiGear.md section 3).</p>
      */
     public static void onLivingJump(LivingEntity entity) {
         ItemStack boots = bootsOf(entity);

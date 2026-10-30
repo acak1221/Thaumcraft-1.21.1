@@ -122,7 +122,8 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
     ward pieces are worn together with Ichorcloth, Thaumcraft leaves a ward piece out of the formula's armour value for a hit it took a share of, and
     the listener does not repeat that adjustment (it cannot: it is Thaumcraft's internal), so such a piece also counts in the formula's share.
   - **Needs a poster on NeoForge.** The group needs the NeoForge poster of `LIVING_ARMOR_ABSORB` (section 13), of `LIVING_JUMP` and of `LIVING_FALL`; without
-    them the Gem Boots do not jump higher and do not stop fall damage, and the Ichorcloth is plain armour.
+    them the Gem Boots would not jump higher, switched-off Gem Boots would no longer spare the wearer a fall (switched-on boots still zero the fall distance every
+    tick, below), and the Ichorcloth would be plain armour (nothing of it was run on NeoForge).
 - **Gregtech hazard protection and the Thaumic Boots mod** (`IHazardProtector`, `IBoots`, optional in the pinned fork) are not ported:
   neither mod exists for 1.21.1.
 - **The toggle key** "Toggle Awakened Armor" (category "Thaumic Tinkerer") is bound to **no key**, as `Keyboard.KEY_NONE` in the
@@ -145,29 +146,24 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
   a client-driven player. As in the original, the speed boost and the step height while moving ignore the disable switches. Dirt turns to grass
   under the wearer only while the piece is switched on and `shouldKamiBootsDoGrass` is on. The Thaumic Boots mod's tags `jump`, `speed`, `omni` and
   `inertiacanceling` are not ported (that mod does not exist for 1.21.1): the jump modifier is 1.
-  - **Order against Ascent Boost: reversed, not closable inside the group, pinned by a GameTest.** Both are `LIVING_JUMP` listeners
-    and run in the order they were registered. 1.7.10 built the Gem Boots in `TTRegistry.preInit` (the constructor chain calls `registerEvents()`, which
-    registers `ItemGemBoots.EventHandler`) and registered `ModEnchantmentHandler` from `ModEnchantments.initEnchantments()`, called by `TTCommonProxy.init`;
-    both handlers are at normal priority, and Forge runs equal priorities in registration order, so the boots came first: `motionY = (0.42 + 0.3) x factor`,
-    with Ascent Boost's `factor = (level + 2) / 2` (the highest level on the four armour slots, not while sneaking): **1.08 for Ascent Boost I, 1.80 for III**.
-    Here `ThaumicTinkerer.init()` runs the groups' `register()` in the order of `ContentGroups.ALL`, and the Enchantments group registers its listener
-    (`ModEnchantments.initEnchantments()` in `Enchantments.register()`) before KamiGear registers the boots' (`KamiGear.register()`, `KamiArmorHandler.register()`),
-    so Ascent Boost multiplies the plain jump and the boots add 0.3 after it: `0.42 x factor + 0.3`, **0.93 for I and 1.35 for III**. Ascent Boost is a leg
-    enchantment (leggings of any kind, also the Ichorcloth ones), so Gem Boots with Ascent Boost leggings is an ordinary combination, and it jumps lower
-    than in 1.7.10 (the GameTest `gemBootsAndAscentBoostLeggingsComposeTheirJumps` pins the numbers above; both effects arrive, each under its own conditions).
-    The boots' listener cannot be moved ahead of Enchantments' from inside this group (both register in the `register()` phase and the groups run in the
-    order of `ContentGroups.ALL`; the files that decide it are the Enchantments group's and the lead's). Request to the lead, three ways, the first matching the
-    original's own order (`preInit` before `init`): (1) `Enchantments.register()` calls `ModEnchantments.initEnchantments()` (which only registers the event
-    handler) from `Enchantments.ready()` instead, the phase after every `register()`; (2) `ContentGroups.ALL` with KamiGear before Enchantments (also changes the
-    registration order of the groups' items); (3) a priority for the listeners of `TinkererEvents`. After it, the two numbers in the check become 1.08 and 1.80
-    and this paragraph goes.
+  - **Order against Ascent Boost: the original's, pinned by a GameTest.** Both are `LIVING_JUMP` listeners and run in the order they were registered.
+    1.7.10 built the Gem Boots in `TTRegistry.preInit` (the constructor chain calls `registerEvents()`, which registers `ItemGemBoots.EventHandler`) and registered
+    `ModEnchantmentHandler` from `ModEnchantments.initEnchantments()`, called by `TTCommonProxy.init`; both handlers are at normal priority, and Forge runs equal
+    priorities in registration order (recalled, not read: no Forge 1.7.10 source is on this machine), so the boots came first: `motionY = (0.42 + 0.3) x factor`, with Ascent Boost's `factor = (level + 2) / 2` (the highest level on
+    the four armour slots, not while sneaking): **1.08 for Ascent Boost I, 1.80 for III**. Here the boots' listener is registered by `KamiGear.register()`
+    (`KamiArmorHandler.register()`) and Ascent Boost's by `Enchantments.ready()` (`ModEnchantments.initJump()`, `ModEnchantmentHandler.registerJump()`), the phase after every
+    group's `register()`, so the boots come first as in 1.7.10 and the jump is the original's 1.08 and 1.80 (the first wiring registered Ascent Boost's listener in
+    `Enchantments.register()`, before KamiGear's, which reversed the order and gave 0.93 and 1.35; the request of `api-requests/KamiGear.md` section 6 was answered by the move).
+    Ascent Boost is a leg enchantment (leggings of any kind, also the Ichorcloth ones), so Gem Boots with Ascent Boost leggings is an ordinary combination; the
+    GameTest `gemBootsAndAscentBoostLeggingsComposeTheirJumps` pins the numbers above (both effects arrive, each under its own conditions).
   - **Order against Shockwave and Slow Fall: immaterial.** Shockwave on the Gem Boots would blast with the real distance here (it ran at LOW priority, after the
     boots, in 1.7.10 and saw 0), but that case cannot arise: the Gem Boots cannot carry either enchantment, in the original
     (`EnchantmentShockwave.canApply` is false for `ItemGemBoots`, `EnchantmentSlowFall.canApply` is `!(item instanceof ItemGemBoots)`) and here (the item
     tags `enchantable/shockwave` and `enchantable/slow_fall` do not list `ichorcloth_boots_gem`, and `EnchantmentManager.allowsItem` repeats the exclusion in code;
     `docs/deviations/Enchantments.md` section 1). Shockwave reads only the feet slot, so it could meet the Gem Boots only by `/enchant` or a data pack, and
-    then the order of the `LIVING_FALL` listeners (Slow Fall, Shockwave, then the boots') would show; nothing is done about that. (The comment in
-    `ModEnchantmentHandler.register()` that blames the group order for the Shockwave case is in the Enchantments group's file and was not edited.)
+    then the order of the `LIVING_FALL` listeners (Slow Fall and Shockwave, registered by `Enchantments.register()`, then the boots', registered by `KamiGear.register()`)
+    would show; nothing is done about that, and only Ascent Boost's jump listener was moved to `Enchantments.ready()`. (The comment in `ModEnchantmentHandler.register()`
+    says the same.)
 - **Leggings of the Burning Mantle.** Unchanged; the light feature (config `shouldKamiLegsDoLightFeature`, off by default) places
   `nitor_gas` with the integer state property `level` = 1 on the player and level 0 on the five cells in front (the 1.7.10 code
   had put the metadata back to 0 before the loop). The gas block removes itself when no carrier is near (SimpleBlocks group).
@@ -321,8 +317,9 @@ ends with it. No permanent change to any mob. Scope, narrowed to what the 1.7.10
   group). The research is registered only while Thaumcraft's mirrors are allowed (`ThaumcraftApi.isMirrorsAllowed()`), as in 1.7.10.
   The two jump sounds and the 20 white sparkles before and after the jump of `TileWarpGate.teleportPlayer` belong to the gateway code
   that the hook calls: the default hook (`KamiHooks.teleportToWarpGate`, used only while KamiWorld has not replaced it) plays both
-  and sends the sparkles (`ThaumcraftFX.sparkle`); the KamiWorld group's `TileWarpGate.teleportPlayer` plays the sounds and **sends no
-  sparkles yet** (see the report: a request to that group).
+  and sends the sparkles (`ThaumcraftFX.sparkle`); the KamiWorld group's `TileWarpGate.teleportPlayer(ServerPlayer, BlockPos)`, which the KamiWorld registrar
+  gives to that hook, plays the sounds and sends the same 20 + 20 sparkles from the server (`KamiHooks.sparklesAround`; `deviations/KamiWorld.md` section 4). Only the
+  gateway's own menu and map path has none, as in 1.7.10 (the request made to that group is answered).
 - **`canApplyUpgrade`.** The original Kami foci answered true for every upgrade; the port keeps the base rule (an upgrade must be
   one the focus lists in `getPossibleUpgradesByRank`, see `docs/API_GAPS.md` 3b). The Shadowbeam and the Experience Drain list
   frugal and potency on every rank and the Recall frugal only, which is what the focal manipulator offered before, so the only
@@ -363,7 +360,7 @@ The port collects the requirements in `KamiResearchItem.registerResearch()`, aft
 requires all of them: it is never available earlier than in 1.7.10, and the list is the same on every start. `docs/PARITY_REPORT.md`
 section 3 and `known_differences.json` carry this difference; the parity test checks the port's list against exactly this rule.
 
-## 13. The loader events of the group (and the new `LIVING_ARMOR_ABSORB`, text for `docs/HOOKS.md`)
+## 13. The loader events of the group (and the new `LIVING_ARMOR_ABSORB`; the event's text now lives in `docs/HOOKS.md` section 14)
 
 The group used to work around three missing Forge events (section 3 says how) and now listens to the loader events of `docs/HOOKS.md`. All three
 are registered once, from `KamiArmorHandler.register()` (which `KamiGear.register()` calls), and answer only for their own items:
@@ -430,8 +427,8 @@ posted and not reduced; a bystander is left as vanilla; a pig in a Fortress ches
     honey (0.21) the 0.3 comes on top (0.51); the jump strength attribute is untouched; the jump key's own path (`setJumping` and a tick) carries the wearer 0.72 up.
   * `gemBootsLandWithoutFallDamageWhateverTheSwitchesSay`: a landing of 10 blocks costs a bare player 7, the wearer 0 (piece off, master off too), plain boots and Gem Boots on the head 7; a listener registered
     after the boots' sees distance 0.
-  * `gemBootsAndAscentBoostLeggingsComposeTheirJumps`: Gem Boots with diamond leggings enchanted Ascent Boost I (0.93) and III (1.35), the order of the listeners as it is today (see section 3: 1.7.10 gave 1.08 and
-    1.80); Ascent Boost alone 0.63; sneaking, only the boots (0.72); boots switched off, Ascent Boost alone (1.05); no leggings, the boots alone.
+  * `gemBootsAndAscentBoostLeggingsComposeTheirJumps`: Gem Boots with diamond leggings enchanted Ascent Boost I (1.08) and III (1.80), the boots first as in 1.7.10 (section 3); Ascent Boost
+    alone 0.63; sneaking, only the boots (0.72); boots switched off, Ascent Boost alone (1.05); no leggings, the boots alone.
   * `ichorclothSetTakesEightyFivePercentOfBlowsAndLeavesBypassingDamageAlone`, `ichorclothPartialAndMixedSetsKeepTheOtherArmourAndLeaveOtherWearersAlone` (with a diamond chestplate, toughness 2, beside Ichorcloth leggings:
     5.85 of 10, where the same set without the toughness would let 6.25 through),
     `ichorclothPiecesShowTheOriginalArmourAndNeverWear`: the numbers of section 3 (blows of 1, 10, 40; starvation, magic, fall, drowning; both sets; switches; partial, mixed, iron, wrong slot, bare, a zombie; another

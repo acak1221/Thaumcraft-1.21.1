@@ -17,8 +17,10 @@ internal name): the one real gap was a loader hook (sections 1 and 1b: **answere
 | research of the player | `ThaumcraftApiHelper.getCompletedResearch(player)`, `ResearchCategories.getResearch("ICHOR").parentsHidden` | `KamiUnlockedCommand` |
 | the wand sound | `ThaumcraftSoundIds.WAND` / `ThaumcraftSoundIds.event` | `TileWarpGate` (the stable key K2/A7 asked for) |
 
-Not needed after all: A8 (client sparkles) for the gateway, because the original's sparkles of the teleport never ran (they sit
-in `if (worldObj.isRemote)` of a method that only runs on the server).
+Not needed after all: A8 (client sparkles) for the gateway. The original's sparkles of the teleport sit in `if (worldObj.isRemote)` of a method that ran on the server
+only on the gateway's own menu and map path, so they never showed there; on the Recall path of the Focus of Celestial Recall they did show on the client, and
+the port sends them from the server through `KamiHooks.sparklesAround` (`TileWarpGate.teleportPlayer(ServerPlayer, BlockPos)`, `deviations/KamiWorld.md` section 4),
+which needs no client particle API.
 
 ## 1. A hook that changes the amount of a hit (S1, new, P2; shared with K1 of `KamiGear.md`) - ANSWERED
 

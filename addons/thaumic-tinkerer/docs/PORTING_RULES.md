@@ -51,15 +51,19 @@ cannot do, or a reproducible crash/exploit, and is written down in `docs/deviati
 - Menus: `MenuRegistry.ofExtended`/`of` (Architectury) registered in `TTRegistry.MENUS`; screens with
   `MenuRegistry.registerScreenFactory` in `registerClient()`. Networking: `CustomPacketPayload` records with a
   `StreamCodec`, registered with `NetworkManager.registerReceiver(Side.C2S/S2C, ...)`; S2C payload types must also be
-  registered on the server (`NetworkManager.registerS2CPayloadType`) from `register()`.
+  registered on the server (`NetworkManager.registerS2CPayloadType`) from `register()`, **but only on a dedicated server**: guard the call with
+  `if (Platform.getEnvironment() == Env.SERVER)` (`dev.architectury.platform.Platform`, `dev.architectury.utils.Env`). On a client the receiver registered
+  in `registerClient()` already registers the type, and a second registration (the integrated server shares the client's registry) makes Fabric's
+  `PayloadTypeRegistry` throw "Packet type ... is already registered!". `KamiGear.registerNetwork()` and `KamiWorld.register()` are the examples.
 - Renderers: `BlockEntityRendererRegistry.register`, `EntityRendererRegistry`, `ColorHandlerRegistry`,
   `ItemPropertiesRegistry`, `RenderTypeRegistry` (all `dev.architectury.registry.client...`) from `registerClient()`.
   The 1.7.10 ISBRH/`IItemRenderer`/`ModelBase` renderers become JSON models where the shape is static, otherwise block
   entity renderers. Keep client-only classes (anything importing `net.minecraft.client`) in `thaumic.tinkerer.client`.
 - Events: Architectury events (`dev.architectury.event.events.common.*`) where they exist; where they do not, say so in
   your report (the lead adds a loader hook) instead of using a Fabric-only API in common code. The loader hooks that exist are
-  in `docs/HOOKS.md` (`thaumic.tinkerer.common.hooks.TinkererEvents`: damage amount, dig speed, jump, fall, item use tick, death
-  drops; `FloatingTicks`; `thaumic.tinkerer.client.hooks.ItemRenderers`): use them instead of a workaround.
+  in `docs/HOOKS.md` (`thaumic.tinkerer.common.hooks.TinkererEvents`: damage amount, armour absorption (`LIVING_ARMOR_ABSORB`, what 1.7.10 asked
+  `ISpecialArmor`), dig speed, jump, fall, item use tick, death drops; `FloatingTicks`; `thaumic.tinkerer.client.hooks.ItemRenderers`): use them instead of a
+  workaround. They are posted on Fabric only; the NeoForge posters are not written (HOOKS.md section 9).
 - Config: the static fields of `ConfigHandler` (same names as 1.7.10). Enchantments, dimensions, damage types are data
   (`data/thaumictinkerer/...`); 1.7.10 numeric ids are gone.
 - Do not hold a `Level`, `Player` or `BlockEntity` in a static field. Server logic runs on the server thread; check

@@ -16,7 +16,7 @@ run there as well. The GameTests (`KamiWorldRuntimeChecks`, 20 checks) run on a 
 (`:fabric:runTinkererGameTest`, filter `kamiworldgametests.*`) and **pass there**: 17 of 17 in the integration round (section 10 says what
 that round changed in the tests and why), 19 of 19 after the hooks round (the groups moved from their workarounds to the real events of
 `docs/HOOKS.md`: the hooks-round bullet of section 10; run with the 12 `hooksgametests.*` of that day, 31 of 31) and 20 of 20 after the review round
-(the review-round bullet of section 10; run with the 13 `hooksgametests.*` that exist now, 33 of 33). The JUnit tests of the group
+(the review-round bullet of section 10; run with the 13 `hooksgametests.*` that existed then, 33 of 33; `HooksGameTests` has 14 methods now, one more than in that run). The JUnit tests of the group
 (`KamiWorldLogicTest` 24, `KamiWorldResourcesTest` 14) pass under the real JUnit Jupiter (`:fabric:tinkererTest --tests 'thaumic.tinkerer.kamiworld.*'`). Nothing here has been seen in a running client:
 the screens, the HUD, the model of the gateway and the renderer are untested visually, and a hit taken in the survival of a real
 client was never seen either.
@@ -214,7 +214,7 @@ bedrock and the click goes on (a held block is placed against it), as in `onBloc
   both games (`Player.hurt` / `EntityPlayer.attackEntityFrom`), so the amount the pool sees is the scaled one as in 1.7.10.
   **The group needs the poster of `LIVING_DAMAGE` on every loader: on Fabric it is `LivingEntityHurtMixin`; on NeoForge (the
   `LivingIncomingDamageEvent` handler of `HOOKS.md` section 3, with `TinkererEvents.framesRefuse`) it does not exist yet, and
-  until it does the Soul Hearts do not act there at all** (the fallback ran on NeoForge before; it is gone).
+  until it does the Soul Hearts would not act there at all** (the Architectury fallback, written for both loaders, is gone; it was never run on NeoForge).
 - **The invulnerability frames (what the event contract changes).** In 1.7.10 `EntityLivingBase.attackEntityFrom` set
   `hurtResistantTime = 20` **before** `damageEntity` posted the event. So a hit that the pool swallowed completely still began
   the frames: while `hurtResistantTime > 10` (nine more ticks) a hit that was not stronger than `lastDamage` (the *raw*
@@ -288,7 +288,7 @@ bedrock and the click goes on (a held block is placed against it), as in `onBloc
     scaled a falling block, or whatever the later listener changed. Not exercised by a check; the pool itself is charged right in every case.
   - `bypasses_cooldown` sources start new frames every time (the pool's too); empty in vanilla, so **not exercised** by a check.
   - 1.7.10 reduced a falling anvil/block by a quarter for a helmet *before* the frames; here that happens after the event (`HOOKS.md`
-    section 3, item 7), so such a hit is charged at its full amount.
+    section 3 and the table of section 13, item 7), so such a hit is charged at its full amount.
   - The pool is charged on the server only; the client learns the number from `PacketSoulHearts`, sent after every hit that is
     charged (and not for a hit the frames refuse), as 1.7.10 sent it after every event.
   - **Other listeners of `LIVING_DAMAGE` and the pool's frames.** `ContentGroups.ALL` runs the Enchantments group before this one, so its
@@ -335,7 +335,7 @@ uses another loot table dropping nothing; the shard rolled by the loot system, w
 is not registered (the Kami gear group failed to load) the listener logs one warning and drops nothing: an exception in a listener
 would be thrown into the mob's death. Differences that remain: none known in behaviour. **The group needs the poster of
 `LIVING_DROPS` on every loader**: on Fabric it is `LivingEntityDropsMixin` with the capture mixins; on NeoForge (`LivingDropsEvent`,
-`HOOKS.md` section 8) it does not exist yet, and until it does no shard drops there (the loot-table pools worked on NeoForge before; they are gone).
+`HOOKS.md` section 8) it does not exist yet, and until it does there would be no shard drops there (the loot-table pools, written for both loaders, are gone; they were never run on NeoForge).
 
 The chance is rolled with `DimensionalShardDropHandler.dice` (`Math::random`), a public field that only the GameTests replace to make a roll
 certain; the real dice are checked on 12,800 real deaths (`shardDropsComeFromRealDeathsWithTheChanceOfTheOriginal`).

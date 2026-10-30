@@ -14,6 +14,8 @@ import dev.architectury.event.EventResult;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -80,12 +82,28 @@ public final class TinkererEvents {
      * a hit of zero damage (a snowball) is not posted. For a player the amount is already scaled by the difficulty
      * ({@code Player.hurt} does that before it calls the living entity's).
      *
+     * <p><b>Hits that the invulnerability frames refuse are not posted.</b> While the frames of an earlier hit run
+     * ({@code invulnerableTime > 10}), vanilla ignores a hit that is not stronger than the last one
+     * ({@code amount <= lastHurt}), unless the source bypasses the cooldown; the poster applies that test first
+     * ({@link #framesRefuse}) and posts only a hit that vanilla goes on to deal, so a listener with a side effect (Soul Hearts
+     * spending its pool) is not charged for a hit the game would have thrown away, as in 1.7.10, whose event came after that
+     * test. What is posted is still the amount <i>before</i> the shield, freezing and helmet adjustments, which come later, so
+     * the test is made on it; where those adjustments could make vanilla decide the other way (freezing multiplies by five
+     * and is always posted, a helmet takes a quarter off) the hit is posted and the game's own test follows the listener's
+     * result.</p>
+     *
      * <p>A listener may change the amount by returning a different one (the next listener sees it), and cancels the damage
      * by returning zero: {@code LivingEntity.hurt} then returns {@code false} at once, as for an invulnerable entity - no
      * damage, no hurt animation or sound, no knockback, no invulnerability frames, nothing is recorded as the last hit. Once
-     * a listener cancels, the ones after it are not called.</p>
+     * a listener cancels, the ones after it are not called. <b>Because a cancel starts no frames, the same hit comes again
+     * as soon as the source repeats it</b> (lava, fire and cactus hit every tick, and vanilla's frames let one in about ten
+     * through): a listener that cancels a hit and has a side effect for it, such as taking points off a pool, is called for
+     * every repeat and has to keep its own count of ticks if it wants the 1.7.10 rate (see {@code HOOKS.md} sections 3 and 10).
+     * The frames that follow a hit that is dealt compare the <i>listener's result</i> with the next hit, as they did in
+     * 1.7.10 compare the amount that came out of the event.</p>
      *
-     * <p>Not posted when a mod sets the health directly instead of hurting the entity.</p>
+     * <p>Not posted when a mod sets the health directly instead of hurting the entity, and not for the entities whose
+     * {@code hurt} does not call {@code LivingEntity.hurt} (the armour stand).</p>
      */
     public static final Event<LivingDamage> LIVING_DAMAGE = EventFactory.of(listeners -> {
         if (listeners.isEmpty()) return NO_DAMAGE_LISTENERS;
@@ -110,6 +128,22 @@ public final class TinkererEvents {
         if (!(amount > 0.0F)) return amount;
         float result = LIVING_DAMAGE.invoker().onLivingDamage(victim, source, amount);
         return result > 0.0F ? result : 0.0F;
+    }
+
+    /**
+     * Vanilla's invulnerability-frame test of {@code LivingEntity.hurt}, for the poster to apply before it posts
+     * {@link #LIVING_DAMAGE}: true when the game will refuse a hit of {@code amount} in the frames of an earlier hit
+     * ({@code invulnerableTime > 10}, the source does not bypass the cooldown, and {@code amount <= lastHurt}), so there is
+     * nothing to post. A freezing hit on a type that takes extra damage from it (striders, blazes, magma cubes) is never
+     * called refused: the game multiplies it by five before it compares.
+     *
+     * @param lastHurt the entity's {@code lastHurt} (what the last dealt hit counted for; protected in {@code LivingEntity},
+     *                 so each loader module reads it its own way)
+     */
+    public static boolean framesRefuse(LivingEntity victim, DamageSource source, float amount, float lastHurt) {
+        if (!((float) victim.invulnerableTime > 10.0F) || source.is(DamageTypeTags.BYPASSES_COOLDOWN)) return false;
+        if (source.is(DamageTypeTags.IS_FREEZING) && victim.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)) return false;
+        return amount <= lastHurt;
     }
 
     // ---- BREAK_SPEED -----------------------------------------------------------------------------------------------
@@ -142,7 +176,9 @@ public final class TinkererEvents {
      * progress itself. That includes a {@code ServerPlayer} that is never ticked, such as the fake player of the Animation
      * Tablet when it calls {@code state.getDestroyProgress(fakePlayer, level, pos)}. Not posted for a block that cannot be
      * dug at all (hardness -1), for the instant breaking of creative mode, or for a block whose class overrides
-     * {@code getDestroyProgress} without calling {@code super}.
+     * {@code getDestroyProgress} without calling {@code super}: in vanilla 1.21.1 that is the bamboo and the bamboo
+     * shoot, which give a progress of 1 (an instant break) to anyone with a sword in the main hand, so a listener cannot make
+     * a player unable to cut bamboo with a sword.
      *
      * <p>The speed is the dig speed that goes into {@code speed / hardness / 30} (or {@code / 100} when the tool does not
      * harvest the block). A listener changes it by returning another value; a result of zero or less means that the player
@@ -190,8 +226,12 @@ public final class TinkererEvents {
      * Posted on <b>both sides</b> at the end of {@code LivingEntity.jumpFromGround}, after the vertical motion of the jump
      * (and the push of a sprinting jump) is applied: the entity's delta movement already holds the jump, and a listener may
      * change it ({@code entity.setDeltaMovement}, as Ascent Boost does). The 1.7.10 {@code LivingJumpEvent}. Posted for every
-     * living entity that jumps by that method (players by the jump key, mobs by their jump control); not posted when the
-     * jump power is zero, and not for a mounted horse's jump, a swimming bob or a slime's own hop that do not use the method.
+     * living entity that jumps by that method: mobs by their jump control, the client's own player by the jump key
+     * ({@code aiStep}), and a <b>server</b> player when {@code ServerGamePacketListenerImpl.handleMovePlayer} sees it leave
+     * the ground upwards (it is not the jump key that the server hears, only the movement), so on the server the event also
+     * fires for any other take-off with an upward move that the client reports with {@code onGround} false. Not posted when
+     * the jump power is zero, and not for a mounted horse's jump, a swimming bob or a slime's own hop that do not use the
+     * method.
      * The server's player and the client's copy of the same player each run it, so a listener has to change the motion by
      * the same rule on both sides. It cannot be cancelled.
      */
@@ -259,9 +299,12 @@ public final class TinkererEvents {
      * as well and the local player plays the sound of a hard fall by that count: a listener that only runs on the server
      * (Slow Fall taking the damage away) would leave the client with the thud of a fall that did nothing. <b>A listener with an
      * effect on the world (Shockwave's blast) must test {@code entity.level().isClientSide} and act on the server only.</b>
-     * Posted for every living entity that lands with a fall distance (including one that has no damage to take: the
-     * distance is the listener's to look at), and for the passengers of a vehicle that lands (each with the distance the
-     * vehicle's event left). A listener may change the distance and the damage multiplier in {@code fall} (Slow Fall,
+     * Posted for every living entity that lands with a fall distance and goes through {@code LivingEntity.causeFallDamage}
+     * (including one that has no damage to take: the distance is the listener's to look at), and for the passengers of a
+     * vehicle that lands (each with the distance the vehicle's event left). <b>Not posted for horses, donkeys, mules,
+     * llamas and the like</b> ({@code AbstractHorse} and {@code Llama} override {@code causeFallDamage} without calling
+     * {@code super}, and hurt their riders themselves with {@code Entity.hurt}): neither the mount nor its rider gets the
+     * event, the rider takes the damage through {@link #LIVING_DAMAGE} only. NeoForge's {@code LivingFallEvent} has the same gap. A listener may change the distance and the damage multiplier in {@code fall} (Slow Fall,
      * Shockwave's threshold), and may cancel the fall: {@code causeFallDamage} then returns {@code false} at once, without
      * damage, sound or the fall of the passengers.
      */
@@ -296,8 +339,10 @@ public final class TinkererEvents {
          * @param entity    the entity that holds the use of an item (a bow being drawn, food being eaten)
          * @param stack     the stack in use
          * @param remaining the ticks of use that remain, as the entity counts them: {@code getUseItemRemainingTicks()}
-         * @return the remaining ticks to go on with; return {@code remaining} to leave it alone. A result below 1 is raised
-         *         to 1 by the poster, so the use ends on this tick as it does in vanilla when the count runs down to zero.
+         * @return the remaining ticks to go on with; return {@code remaining} to leave it alone. When the use was counting
+         *         down ({@code remaining >= 1}) a result below 1 is raised to 1 by the poster, so the use ends on this tick as
+         *         it does in vanilla when the count runs down to zero. A use that is not counting down ({@code remaining <= 0},
+         *         the duration of an item with no use time) is left as it is when no listener changed it.
          */
         int onUseItemTick(LivingEntity entity, ItemStack stack, int remaining);
     }
@@ -326,11 +371,16 @@ public final class TinkererEvents {
     /**
      * Runs the listeners of {@link #USE_ITEM_TICK} (the loader modules call this).
      *
-     * @return the remaining ticks to set, at least 1
+     * @return the remaining ticks to set: {@code remaining} itself when no listener changed it (so the game is untouched with
+     *         nobody listening, and an item whose use time is zero, which vanilla counts down from 0 into the negative and
+     *         never completes, keeps doing that); otherwise the listeners' result, raised to at least 1 when the use was
+     *         counting down ({@code remaining >= 1}), because the game ends a use when the decrement reaches exactly zero and
+     *         a count that was taken below that would never end it
      */
     public static int postUseItemTick(LivingEntity entity, ItemStack stack, int remaining) {
         int result = USE_ITEM_TICK.invoker().onUseItemTick(entity, stack, remaining);
-        return result < 1 ? 1 : result;
+        if (result == remaining) return remaining;
+        return remaining >= 1 && result < 1 ? 1 : result;
     }
 
     // ---- LIVING_DROPS ----------------------------------------------------------------------------------------------
@@ -363,8 +413,12 @@ public final class TinkererEvents {
      * have produced their item entities and before any of them is in the world (the 1.7.10 {@code LivingDropsEvent}, and
      * NeoForge's). The listener sees the drops as a mutable list and may remove, replace or add to them, or cancel them all.
      * Only the item entities of the victim are in the list (what it spawns at its own position through
-     * {@code spawnAtLocation}, and a player's inventory); experience orbs are not items and are not in it, as in 1.7.10, and
-     * an item that another mod spawns somewhere else with {@code addFreshEntity} is not captured. Whatever stays in the list
+     * {@code spawnAtLocation} during its death loot, and a player's inventory); experience orbs
+     * are not items and are not in it, as in 1.7.10, and an item that another mod spawns somewhere else with
+     * {@code addFreshEntity} is not captured. A loader poster must also take what an override spawns <i>before</i> it calls
+     * {@code super.dropAllDeathLoot}: in vanilla 1.21.1 that is the item in the fox's mouth (NeoForge moves that drop into
+     * {@code dropEquipment}, the Fabric mixin {@code FoxDropCaptureMixin} opens the capture early), so the fox's held item is
+     * in the list like any other drop. Whatever stays in the list
      * is added to the level after the listeners, in order.
      *
      * <p>When nobody listens the loot is spawned as vanilla does (see {@link #hasLivingDropsListeners()}).</p>

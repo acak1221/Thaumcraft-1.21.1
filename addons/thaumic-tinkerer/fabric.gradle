@@ -20,14 +20,19 @@ sourceSets {
  // Runtime assertions of the add-on, run by the tinkererGameTest server (see below).
  thaumicTinkererGameTest {
   java.srcDirs = [new File(ttDir, 'common/src/gameTest/java'), new File(ttDir, 'fabric/src/gameTest/java')]
-  resources.srcDirs = [new File(ttDir, 'fabric/src/gameTest/resources')]
+  // fabric/...: the harness mod (fabric.mod.json, mixins); common/...: the parity oracle (tt_oracle/*.json) extracted from the 1.7.10 source
+  resources.srcDirs = [new File(ttDir, 'fabric/src/gameTest/resources'), new File(ttDir, 'common/src/gameTest/resources')]
   compileClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.compileClasspath
   runtimeClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.runtimeClasspath
  }
  // JUnit tests of the add-on's plain logic.
  thaumicTinkererTest {
-  java.srcDirs = [new File(ttDir, 'common/src/test/java')]
-  resources.srcDirs = [new File(ttDir, 'common/src/test/resources')]
+  // The plain-Java comparison logic of the parity check lives in the GameTest tree (common/src/gameTest/java/.../testing/parity)
+  // so the GameTest can use it; the unit tests compile it too (nothing else of that tree: the checks need a world) and read the
+  // oracle from the same resource directory.
+  java.srcDirs = [new File(ttDir, 'common/src/test/java'), new File(ttDir, 'common/src/gameTest/java')]
+  java.exclude 'thaumic/tinkerer/testing/*.java', 'thaumic/tinkerer/fabric/**'
+  resources.srcDirs = [new File(ttDir, 'common/src/test/resources'), new File(ttDir, 'common/src/gameTest/resources')]
   compileClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.compileClasspath
   runtimeClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.runtimeClasspath
  }

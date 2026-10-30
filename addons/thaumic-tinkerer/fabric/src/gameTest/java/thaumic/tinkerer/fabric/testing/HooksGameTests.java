@@ -18,6 +18,11 @@ public final class HooksGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void livingDamageIsNotPostedForHitsTheInvulnerabilityFramesRefuse(GameTestHelper test) {
+        HooksRuntimeChecks.livingDamageIsNotPostedForHitsTheInvulnerabilityFramesRefuse(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void livingDamageSeesAFakePlayersBlowAndAZombiesBlowOnAPlayer(GameTestHelper test) {
         HooksRuntimeChecks.livingDamageSeesAFakePlayersBlowAndAZombiesBlowOnAPlayer(test);
     }

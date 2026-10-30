@@ -26,7 +26,10 @@ import thaumic.tinkerer.fabric.hooks.DropCapture;
  * wrapped: while the original runs, the item entities that the victim itself spawns are collected by
  * {@link DropCapture} ({@code EntityDropCaptureMixin}, {@code ServerPlayerDropCaptureMixin}) instead of entering the level;
  * afterwards the listeners edit the list, and what is left is added to the level in order, unless they cancelled.
- * Nothing changes when nobody listens: the original runs as it is.
+ * The capture is ended before the listeners run (so anything they spawn goes into the world at once). A capture of the same
+ * victim that is already open, because the entity's own override spawned something before calling {@code super} and
+ * {@code FoxDropCaptureMixin} began it, is taken over instead of opened again. Nothing changes when nobody listens: the
+ * original runs as it is.
  */
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityDropsMixin {
@@ -40,7 +43,9 @@ public abstract class LivingEntityDropsMixin {
             return;
         }
         LivingEntity victim = (LivingEntity) (Object) this;
-        DropCapture capture = DropCapture.begin(victim);
+        // an override that spawns before it calls super (the fox's mouth item, FoxDropCaptureMixin) has opened the capture already
+        DropCapture open = DropCapture.current();
+        DropCapture capture = open != null && open.owner() == victim ? open : DropCapture.begin(victim);
         try {
             original.call(level, source);
         } finally {

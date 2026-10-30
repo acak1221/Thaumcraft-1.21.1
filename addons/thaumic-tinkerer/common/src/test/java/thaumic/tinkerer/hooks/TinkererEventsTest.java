@@ -204,6 +204,17 @@ class TinkererEventsTest {
     @Test
     void useItemTickChainsAndNeverGoesBelowOne() {
         assertEquals(40, TinkererEvents.postUseItemTick(null, null, 40), "no listener");
+        // an item with no use time counts 0, -1, -2 in vanilla and never completes: nobody listening must not change that
+        assertEquals(0, TinkererEvents.postUseItemTick(null, null, 0), "no listener, a use that is not counting down: untouched");
+        assertEquals(-3, TinkererEvents.postUseItemTick(null, null, -3), "and a negative count too");
+        TinkererEvents.UseItemTick leaveAlone = (entity, stack, remaining) -> remaining;
+        TinkererEvents.USE_ITEM_TICK.register(leaveAlone);
+        try {
+            assertEquals(0, TinkererEvents.postUseItemTick(null, null, 0), "a listener that changes nothing changes nothing");
+            assertEquals(7, TinkererEvents.postUseItemTick(null, null, 7));
+        } finally {
+            TinkererEvents.USE_ITEM_TICK.unregister(leaveAlone);
+        }
         TinkererEvents.UseItemTick takeThree = (entity, stack, remaining) -> remaining - 3;
         TinkererEvents.UseItemTick takeTwo = (entity, stack, remaining) -> remaining - 2;
         TinkererEvents.USE_ITEM_TICK.register(takeThree);
@@ -212,6 +223,8 @@ class TinkererEventsTest {
             assertEquals(35, TinkererEvents.postUseItemTick(null, null, 40));
             assertEquals(1, TinkererEvents.postUseItemTick(null, null, 4), "the use ends on this tick, not before it begins");
             assertEquals(1, TinkererEvents.postUseItemTick(null, null, 2), "and never below one");
+            assertEquals(-5, TinkererEvents.postUseItemTick(null, null, 0),
+                    "a use that was not counting down is the listener's to change, not raised to one");
         } finally {
             TinkererEvents.USE_ITEM_TICK.unregister(takeThree);
             TinkererEvents.USE_ITEM_TICK.unregister(takeTwo);

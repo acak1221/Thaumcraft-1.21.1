@@ -24,7 +24,7 @@ rewired** to them; the rewiring is a separate step (section 10 says per event wh
 | `LIVING_JUMP` | `LivingJumpEvent` | both | `LivingEntity.jumpFromGround`, `TAIL` | `LivingEvent.LivingJumpEvent` | Enchantments (Ascent Boost), KamiGear (Gem Boots' jump) |
 | `LIVING_FALL` | `LivingFallEvent` (`distance`, cancel) | both | `LivingEntity.causeFallDamage`, `HEAD` | `LivingFallEvent` (`setDistance`, `setDamageMultiplier`, cancel) | Enchantments (Shockwave, Slow Fall), KamiGear (Gem Boots set the distance to 0) |
 | `USE_ITEM_TICK` | `EntityPlayer.itemInUseCount` (written every tick by the Quick Draw handler) | both | `LivingEntity.updateUsingItem`, `HEAD` | `LivingEntityUseItemEvent.Tick` (`setDuration`) | Enchantments (Quick Draw) |
-| `LIVING_DROPS` | `LivingDropsEvent` (`drops`, cancel) | server | `LivingEntity.dropAllDeathLoot` wrapped; capture in `Entity.spawnAtLocation(ItemStack, float)` and `ServerPlayer.drop(ItemStack, boolean, boolean)` | `LivingDropsEvent` (`getDrops()`, cancel) | Machines (Cursed Spirit's Blade), KamiWorld (`DimensionalShardDropHandler`) |
+| `LIVING_DROPS` | `LivingDropsEvent` (`drops`, cancel) | server | `LivingEntity.dropAllDeathLoot` wrapped (and `Fox.dropAllDeathLoot`); capture in `Entity.spawnAtLocation(ItemStack, float)` and `ServerPlayer.drop(ItemStack, boolean, boolean)` | `LivingDropsEvent` (`getDrops()`, cancel) | Machines (Cursed Spirit's Blade), KamiWorld (`DimensionalShardDropHandler`) |
 | `FloatingTicks` | `NetHandlerPlayServer.floatingTickCount` | server | accessor mixin on `ServerGamePacketListenerImpl.aboveGroundTickCount` | an access transformer or the same mixin | Foci (Uprising) |
 | `ItemRenderers` | `MinecraftForgeClient.registerItemRenderer` | client | Fabric API `BuiltinItemRendererRegistry` | `RegisterClientExtensionsEvent` + `IClientItemExtensions` | Machines (Mob Display) |
 
@@ -55,9 +55,28 @@ compare the hit with the last one, before armour, Protection, Resistance and Abs
 the damage (blow, arrow, thorns, fall, fire). For a player the amount is already scaled by the difficulty (`Player.hurt` does it
 before `super.hurt`). A hit of zero damage (a snowball) is not posted.
 
+*Not posted for a hit the invulnerability frames refuse.* While the frames of an earlier hit run (`invulnerableTime > 10`) vanilla
+throws away a hit that is not stronger than the last one (`amount <= lastHurt`) unless the source is in the damage-type tag
+`bypasses_cooldown` (empty in vanilla 1.21.1). The Fabric poster makes the same test first (`TinkererEvents.framesRefuse(victim, source,
+amount, lastHurt)`, the one rule for both loaders) and posts only a hit that the game goes on to deal. A listener with a side effect
+(Soul Hearts spending points) is therefore not charged for the lava, fire or cactus hit that vanilla would have refused: the 1.7.10 event
+came after that test as well. The test uses the amount as the event sees it, so the later steps of `hurt` can still decide differently
+in two corners: a hit that a shield blocks or a helmet reduces (`* 0.75`, falling blocks) is posted with its full amount and may be
+refused afterwards; and a freezing hit on a strider, blaze or magma cube (the game multiplies it by five before it compares) is always
+posted. The GameTest `livingDamageIsNotPostedForHitsTheInvulnerabilityFramesRefuse` pins this (the bypass branch only if a data pack
+puts a damage type in the tag; none is in vanilla).
+
 *A listener may* change the amount (the next listener sees it) or cancel by returning zero. A cancel makes `hurt` return `false` at
 once, **as for an invulnerable entity**: no damage, no hurt animation or sound, no knockback, no invulnerability frames, no last
 damage source. The listeners after a cancel are not called.
+
+*A cancel starts no frames, so the same hit comes again as soon as its source repeats it.* Lava, fire ticks and cactus call `hurt` every tick
+and vanilla lets one in about ten through because the first hit's frames refuse the rest; after a cancelled hit there are no frames, and the
+next tick's hit is posted again. A listener that cancels with a side effect (Soul Hearts taking a covered hit off the pool and returning
+zero) is called for every repeat and would drain the pool about ten times faster than 1.7.10, where `hurtResistantTime` was set before the
+event. The rewiring must not rely on the frames for that: either keep the hit alive by returning the uncovered rest (when it is above zero
+the hit is dealt and the frames start, with the listener's result as `lastHurt`), or keep a per-player tick stamp of the last absorbed hit and
+let hits within ten ticks of it through without charging the pool. The `livingDamageIsNotPostedFor...` test shows the repeat being posted.
 
 *Differences from Forge's `LivingHurtEvent` of 1.7.10*
 
@@ -68,12 +87,16 @@ damage source. The listeners after a cancel are not called.
 * A cancel in 1.7.10 only skipped `damageEntity`: knockback and the hurt animation still happened. Here a cancel is a refusal of the
   whole hit.
 * 1.7.10 passed the amount after shield blocking; here a hit that a shield will block is posted with its full amount.
+* 1.7.10 compared the frames with the *raw* amount and posted the event with the difference (`amount - lastDamage`); here the event gets the whole
+  amount of a hit that goes on to be dealt, and the frames compare the *listener's result* with the next hit.
 * The armour of KamiGear (`ISpecialArmor`, `docs/api-requests/KamiGear.md` section 1) is **not** served by this event: it sat
   *after* the event in 1.7.10 (inside the armour calculation). It still needs a hook on `getDamageAfterArmorAbsorb`. Not written.
 
 *NeoForge*: a handler of `LivingIncomingDamageEvent` calls `TinkererEvents.postLivingDamage(entity, event.getSource(), event.getAmount())`,
 `event.setAmount(result)` and `event.setCanceled(true)` when the result is zero (the event is posted by `CommonHooks.onEntityIncomingDamage`
-at the same place of `hurt`).
+at the same place of `hurt`). NeoForge's event is posted *before* the frames test too and has no filter of its own, so the handler must first call
+`TinkererEvents.framesRefuse(entity, event.getSource(), event.getAmount(), lastHurt)` and return without posting when it is true; `lastHurt` is a protected field of
+`LivingEntity` there as well, so the NeoForge module needs an access transformer or an accessor mixin for it.
 
 *Fabric*: `LivingEntityHurtMixin`, an `@Inject(cancellable)` at the `INVOKE` of `isSleeping()` with a `@Local(argsOnly)` `LocalFloatRef` of
 the amount (MixinExtras). Every override of `hurt` that reaches `LivingEntity.hurt` through `super` is covered (players: `ServerPlayer.hurt`
@@ -98,7 +121,9 @@ never null from this poster; the parameter is `@Nullable` for posters that do no
 (the block never breaks, the crack does not grow; it is the same on both sides).
 
 *Not posted* for a block that cannot be dug (hardness -1), for the instant breaking of creative mode, or for a block class that
-overrides `getDestroyProgress` without calling `super` (none in vanilla; Thaumcraft's overrides call it).
+overrides `getDestroyProgress` without calling `super`. In vanilla 1.21.1 those are `BambooStalkBlock` and `BambooSaplingBlock`: they return
+`1.0F` (an instant break) for anyone with a sword in the main hand without asking `Player.getDestroySpeed`, so a "cannot dig" listener (Shatter and
+the like) cannot stop a sword cutting bamboo. Thaumcraft's overrides call `super`.
 
 *Differences*: Forge's event returned `-1` on cancel, which gave a **negative** progress; here "cannot dig" is a progress of exactly
 zero. The 1.7.10 event also fired for the wear of the tool (`damageItem(1)` every tick it fired); that part is the Enchantments group's
@@ -120,9 +145,14 @@ void onLivingJump(LivingEntity entity)
 
 *Posted* on both sides at the end of `LivingEntity.jumpFromGround`, after the vertical motion (and the sprint push) were applied and
 `hasImpulse` was set: the entity's delta movement holds the jump and the listener may change it (`entity.setDeltaMovement`). Players
-jump with the key (`aiStep` → `jumpFromGround`), mobs with their jump control. Not posted when the jump power is zero. The server player and
-the client's copy each run it; a boost has to be the same on both. A mounted horse's jump, a slime's hop and swimming up do not use
-the method and do not post. It cannot be cancelled.
+jump with the key on the client (`aiStep` → `jumpFromGround`), mobs with their jump control. **A real server player does not jump from the key:**
+the server's `jumping` flag is set from input only while the player is a passenger, and the server learns of a jump from the movement packet:
+`ServerGamePacketListenerImpl.handleMovePlayer` calls `player.jumpFromGround()` whenever the player was on the ground, the packet says it is
+not and the move is upwards (read from the 1.21.1 bytecode, not run). So on the server the event fires for any upward take-off of that kind
+(a launch from a piston or a wind charge as well as the key), as it did in 1.7.10, where the server also took the jump from the client's
+packet. Not posted when the jump power is zero. The server player and the client's copy each run it; a boost has to be the same on both. A
+mounted horse's jump, a slime's hop and swimming up do not use the method and do not post. It cannot be cancelled. (The GameTest drives the
+`aiStep` path with `setJumping(true)`; both paths end in the same `jumpFromGround`, which is where the mixin sits.)
 
 *NeoForge*: `LivingEvent.LivingJumpEvent` (`CommonHooks.onLivingJump`, same position) → `TinkererEvents.postLivingJump(entity)`.
 *Fabric*: `LivingEntityMotionMixin`, `@Inject` at `TAIL` (the early `return` for no jump power is not matched by `TAIL`).
@@ -138,7 +168,12 @@ multiplier of the block landed on. 1.7.10's `LivingFallEvent` was posted from `E
 NeoForge's has no side check, so this is not a server-only event: the local player plays the sound of a hard fall from its own copy
 of the landing, so a listener that takes the damage away must run on the client too. **A listener with an effect on the world
 (Shockwave's blast) must act only when `!entity.level().isClientSide`.** Posted for every living entity that lands with a fall
-distance, and for the passengers of a landing vehicle (with the distance the vehicle's event left).
+distance and goes through `LivingEntity.causeFallDamage`, and for the passengers of a landing vehicle that does (with the distance the vehicle's
+event left). **Not for horses, donkeys, mules, skeleton and zombie horses and llamas:** `AbstractHorse` and `Llama` override `causeFallDamage`, work
+the damage out themselves (`calculateFallDamage`) and call `hurt` on themselves and `Entity.hurt` on their indirect passengers without ever calling
+`super`, so neither the mount nor its rider is posted, and Slow Fall or Gem Boots on a rider do not shorten the mount's fall (the rider's damage still
+goes through `LIVING_DAMAGE`). 1.7.10 was no better for the rider (the event named the horse); NeoForge's patched `AbstractHorse` and `Llama` have no
+`onLivingFall` call either, so both loaders agree. A mixin on those two methods would close it on Fabric; it has not been written.
 
 *A listener may* change the distance and the damage multiplier, or cancel with an interrupting `EventResult`
 (`EventResult.interruptFalse()` by convention): `causeFallDamage` returns `false` at once, with no damage, no sound and no fall for
@@ -159,8 +194,10 @@ drawn bow, food being eaten, a raised shield). The value is the entity's own `us
 agrees with the listener: the `onUseTick` of the item that tick, the decrement and the completion test, `getTicksUsingItem` (which the
 bow's pose and the HUD follow), and `releaseUsing(…, timeLeft)`, where `BowItem` works the arrow's power out from
 `useDuration - timeLeft`. Quick Draw takes extra ticks off each tick (`remaining - speedup`), the 1.7.10 `itemInUseCount` rule; the
-`Math.max(2, …)` floor of the original is the listener's to apply. A result below 1 is raised to 1 by the poster, so the use ends on
-this tick as vanilla's does at zero, and cannot go negative. It cannot be cancelled. The client runs it for its own copy, so Quick
+`Math.max(2, …)` floor of the original is the listener's to apply. When the use was counting down (`remaining >= 1`) a result below 1 is raised
+to 1 by the poster, so the use ends on this tick as vanilla's does at zero, and cannot go negative. **With no listener, or a listener that changes
+nothing, the poster returns `remaining` untouched**: `Item.getUseDuration` is 0 for everything that is not food, and a use that starts at 0 counts
+0, -1, -2 and never completes in vanilla (a hold-to-use item of another mod relies on that), so the clamp must not apply to it. It cannot be cancelled. The client runs it for its own copy, so Quick
 Draw must compute the same on both sides (it only reads the stack's enchantments).
 
 *NeoForge*: `LivingEntityUseItemEvent.Tick` (`EventHooks.onItemUseTick`, same place) → `TinkererEvents.postUseItemTick(entity, stack, event.getDuration())`
@@ -175,7 +212,7 @@ EventResult onLivingDrops(LivingEntity victim, DamageSource source, List<ItemEnt
 ```
 
 *Posted* on the server when a living entity has died and its death loot is worked out (`LivingEntity.dropAllDeathLoot`, which
-`die`, `ServerPlayer.die` and the fox call): **after** the loot table, the custom loot and the equipment (and for a player the
+`die` and `ServerPlayer.die` call; the fox calls it after dropping its mouth item): **after** the loot table, the custom loot and the equipment (and for a player the
 inventory) have produced their item entities, **before** any is in the world. `drops` is a live mutable list: remove, replace, add
 (`new ItemEntity(level, x, y, z, stack)`), clear. What is left is added to the level in order. `lootingLevel` is the level of Looting
 on the weapon of `source.getEntity()` (0 without a living attacker); `recentlyHit` is `lastHurtByPlayerTime > 0` (the loot tables' "killed by
@@ -187,12 +224,21 @@ are not item entities and are not in the list (as in 1.7.10: `event.drops` held 
 with `addFreshEntity`, or an entity that another entity spawns, is not captured. A drop by hand (the drop key) is not affected: no capture is open.
 When nobody listens the original runs untouched (`TinkererEvents.hasLivingDropsListeners()`).
 
+*The fox*: `Fox.dropAllDeathLoot` drops the item in the fox's mouth with `spawnAtLocation` **before** it calls `Animal.dropAllDeathLoot`, so the wrapper
+on `LivingEntity.dropAllDeathLoot` alone would start its capture too late and the item would enter the world at once, unseen. `FoxDropCaptureMixin`
+wraps the fox's override, begins the capture of that fox around it, and the living-entity wrapper takes the open capture of the same victim over
+(it ends it before it posts, so anything a listener spawns goes straight into the world). The mouth item is then in the list like any other drop, as
+in NeoForge, whose patched `Fox` moves that drop into `dropEquipment()` inside the captured section. The GameTest has a control (a fox killed with
+nobody listening drops the emerald) and the listener case. Any other vanilla override that spawns before `super` would need the same wrap; the only
+one in 1.21.1 that was found by reading the `dropAllDeathLoot` overrides is the fox.
+
 *NeoForge*: `LivingDropsEvent` (`CommonHooks.onLivingDrops`; NeoForge does the capture itself with `Entity.captureDrops`, and passes a
 `Collection`, a list in practice) → `TinkererEvents.postLivingDrops(entity, event.getSource(), new ArrayList<>(event.getDrops()), TinkererEvents.lootingLevel(level, source),
 event.isRecentlyHit())`, then replace the contents of `event.getDrops()` and cancel on an interrupt.
 
 *Fabric*: `LivingEntityDropsMixin` (`@WrapMethod` around `dropAllDeathLoot`), `EntityDropCaptureMixin` and `ServerPlayerDropCaptureMixin`
-(`@WrapOperation` on their `Level.addFreshEntity` call → `DropCapture.offer`), `DropCapture` (a per-thread, per-entity, nesting capture).
+(`@WrapOperation` on their `Level.addFreshEntity` call → `DropCapture.offer`), `FoxDropCaptureMixin` (begins the capture around `Fox.dropAllDeathLoot`,
+see above), `DropCapture` (a per-thread, per-entity, nesting capture).
 
 ## 9. `FloatingTicks`, `ItemRenderers`, and the NeoForge plan
 
@@ -229,7 +275,10 @@ NeoForge events of the table in section 1 onto the `TinkererEvents.post…` meth
   of those two checks can become required); `LIVING_JUMP` for Ascent Boost; `LIVING_FALL` for Shockwave (server only!) and Slow Fall;
   `USE_ITEM_TICK` for Quick Draw (the arrow-speed workaround through `EntityEvent.ADD` goes).
 * **KamiWorld**: `LIVING_DAMAGE` with `SoulHeartHandler.modifyIncomingDamage` (for `ServerPlayer` victims), then `SoulHeartHandler.exactDamageHook = true`;
-  `LIVING_DROPS` for `DimensionalShardDropHandler`.
+  `LIVING_DROPS` for `DimensionalShardDropHandler`. **Mind section 3: a covered hit that the listener cancels starts no frames**, so a continuous source
+  (lava, fire, cactus) is posted every tick and `modifyIncomingDamage` would take its points every tick; the refused hits are filtered by the poster, but
+  the covered ones are not. Give the player a tick stamp of the last covered hit and charge the pool once per ten ticks (as the frames did in 1.7.10), or
+  the pool of 20 points is gone in five ticks of lava.
 * **KamiGear**: `LIVING_JUMP` and `LIVING_FALL` for the Gem Boots. (The armour absorption K1 needs a hook of its own, section 3.)
 * **Machines**: `LIVING_DROPS` for the Cursed Spirit's Blade (its note-and-refuse workaround goes); `ItemRenderers.register` for the Mob Display.
 * **Foci**: `FociHooks.setFloatingTickReset(FloatingTicks.RESET)` from the group's start-up.
@@ -262,21 +311,48 @@ tick, drops listeners and `hasLivingDropsListeners`, `ItemRenderers` queue and d
 mixin classes, `fabric.mod.json` lists the config, no class names a mixin class, handler prefix, common code does not import loader code).
 
 GameTest (`HooksGameTests`, run with `-PtinkererGameTestFilter='hooksgametests.*'`), each registering its listeners inside the check, answering only for its own
-entities and taking them away in a `finally`:
+entities and taking them away in a `finally` (or, where a check waits for ticks, in a `guarded` cleanup that also runs when the part before the wait fails, since a failed
+GameTest does not run the callbacks it still has pending):
 
 | Check | What it proves |
 |---|---|
 | `livingDamageIsPostedBeforeArmourAndChainsInOrder` | a zombie's blow on a pig with 20 armour points: the listener sees 10 (not the armoured 4), the armour then works on the halved/chained amount, order (10·2)−3 = 17 vs (10−3)·2 = 14, source carries the zombie |
 | `livingDamageCancelIsLikeInvulnerableAndFramesFollowTheListener` | a cancelled hit leaves health, frames, hurt time, knockback and last damage source exactly as an invulnerable pig does; the frames compare the listener's result |
+| `livingDamageIsNotPostedForHitsTheInvulnerabilityFramesRefuse` | a counting listener: a first hit is posted; a weaker and an equal hit in the frames are refused by the game and **not posted**; a stronger one is posted with its own amount and deals the difference; after the frames a weak hit is posted; a cancelled hit starts no frames and its repeat is posted again; a freezing hit on a blaze is posted although 3 is not above the last 10 (the game compares 15); a source of the `bypasses_cooldown` tag is posted in the frames if one exists |
 | `livingDamageSeesAFakePlayersBlowAndAZombiesBlowOnAPlayer` | `TinkererFakePlayer.attackEntity` (diamond sword) and a zombie against a mock server player (difficulty-scaled amount) |
 | `livingDamageSeesAnArrow` | a real arrow flight and hit, shooter in the source |
 | `breakSpeedIsPostedForAServerPlayerAndAFakePlayer` | `state.getDestroyProgress` for a mock server player and a never-ticked fake player: factor, position, state, order of two listeners, cannot dig = 0, and a real `ServerPlayerGameMode` dig start that breaks the dirt at once with a ×1000 listener |
-| `livingJumpIsPostedAfterTheJumpMotionIsApplied` | a pig's `jumpFromGround` (listener sees 0.42 and doubles it) and a player's jump key through `doTick` |
-| `livingFallIsPostedOnLandingAndCanHalveOrCancel` | three pigs really fall 10.5 blocks (the harness's barrier ceiling at relative y = 9 is opened for the columns): the listener sees the distance vanilla counts (about 9.7: the movement of the landing tick is not in it), the untouched pig takes the damage of that distance, the halved one the damage of half of it, the cancelled one nothing (no frames); on the server; a player's `causeFallDamage` cancelled |
-| `useItemTickExtendsABowDraw` | two mock players draw a bow for 12 ticks: the draw clock reads 3× with the listener, and the released arrow flies at 3.0 against under 2.0 |
-| `livingDropsAreEditedBeforeTheyEnterTheWorld` | a pig killed by the fake player with Looting III: sees pork, level 3, recently hit, nothing in the world yet; add a diamond / remove the pork / clear / cancel; experience orbs unaffected; plain again afterwards |
+| `livingJumpIsPostedAfterTheJumpMotionIsApplied` | a pig's `jumpFromGround` (listener sees 0.42 and doubles it) and a player's jump through `setJumping(true)` and `doTick` (the `aiStep` path): the listener sees 0.42, the player rises 0.84 in that tick and keeps (0.84 - 0.08) * 0.98 of vertical motion, not the 0.3332 of a plain jump |
+| `livingFallIsPostedOnLandingAndCanHalveOrCancel` | four pigs really fall 10.5 blocks (the harness's barrier ceiling at relative y = 9 is opened for the columns): the listener sees the distance vanilla counts (about 9.7: the movement of the landing tick is not in it), the untouched pig takes the damage of that distance, the halved one the damage of half of it, the cancelled one nothing (no frames), the one whose damage multiplier the listener sets to 0.5 the damage of `ceil((distance - safe) * 0.5)` (the multiplier seen is the stone's 1); on the server; a player's `causeFallDamage` cancelled |
+| `useItemTickExtendsABowDraw` | two mock players draw a bow for 12 ticks: the draw clock reads 3× with the listener, the listener always gets the bow that is in use (`stack == getUseItem()`), and the released arrow flies at 3.0 against under 2.0 |
+| `livingDropsAreEditedBeforeTheyEnterTheWorld` | a pig killed by the fake player with Looting III: sees pork, level 3, recently hit, the fake player as the attacker, nothing in the world yet; add a diamond / remove the pork / clear / cancel; experience orbs unaffected; a pig killed by plain damage: looting 0, not recently hit, no attacker; a pig that has a bystander spawn an emerald during its death: the list holds its own gold and pork and not the emerald, which is in the world at once; a fox's mouth item (spawned before `super`) is in the list, with a control that it drops with nobody listening; the listener count is back to what it was before; plain again afterwards |
 | `livingDropsCoverAPlayersInventoryButNotADropByHand` | `ServerPlayer.die` offers the inventory and a cleared list drops nothing; a drop by hand is immediate |
 | `floatingTicksReadAndResetTheRealCounter` | the accessor against an independent reflective read of the private field on a real connection, the connection's own `tick()` resetting the same counter, no connection, the fake player's connection |
 
+**Mutation checks** (done by hand once, after the review fixes; the sources were changed, the GameTests run, the sources put back): with `framesRefuse` always false
+`livingDamageIsNotPostedForHitsTheInvulnerabilityFramesRefuse` failed ("neither was posted: [10.0, 8.0, 10.0]"); with the `LIVING_JUMP` injection at `HEAD` instead of `TAIL`
+the jump check failed (the listener saw 0.0); with the damage-multiplier write-back of `LIVING_FALL` removed the fall check failed; with the `ItemStack` of `USE_ITEM_TICK`
+replaced by `ItemStack.EMPTY` the bow check failed (the last two failed in a delayed callback, whose message is not in the server log, so only the name of the failing test is
+known); with `recentlyHit` fixed to `true` the drops check failed ("and no player hit the pig lately"); with the owner guard of `DropCapture.offer` removed the same check failed
+("the bystander's emerald is not [in the list]"); with `FoxDropCaptureMixin` taken out of the config it failed at "the fox's mouth item is in the list: []". Each mutation
+failed exactly the check that owns it. Not mutation-tested: the rest of the assertions (they were only shown to pass).
+
 **Not run, because a server cannot**: that the same events are posted on the client (the dig prediction, the jump, the bow draw and the fall of the local player).
 The posting code is the vanilla classes' own, shared by both sides; `HOOKS.md` relies on that. A client run with a listener would show it.
+
+## 13. Where the events are not posted (vanilla 1.21.1, read from the bytecode)
+
+One list, so that a group author does not assume full coverage. Items 1 and 3 are the same on NeoForge (checked in its patched jar: no `onLivingFall` in `AbstractHorse`
+or `Llama`, bamboo asks `canPerformAction(SWORD_DIG)` and returns 1 without `getDigSpeed`); item 4 was not looked up in NeoForge. The Fabric mixins could close them, none is
+written because no group needs them yet. (The fox's mouth item, which a first reading of the wrapped method would have put here, **is** covered: section 8.)
+
+| # | Gap | Effect | Event |
+|---|---|---|---|
+| 1 | `AbstractHorse.causeFallDamage` and `Llama.causeFallDamage` never call `super` | no `LIVING_FALL` for horses, donkeys, mules, skeleton/zombie horses, llamas; the rider is hurt through `Entity.hurt` (still `LIVING_DAMAGE`) and gets no event of its own | `LIVING_FALL` |
+| 2 | An entity of another mod that spawns items before `super.dropAllDeathLoot` (the fox does and is handled) | those items enter the world at once | `LIVING_DROPS` |
+| 3 | `BambooStalkBlock` and `BambooSaplingBlock` return `1.0F` for a sword without `super` | a "cannot dig" listener cannot stop a sword cutting bamboo; no event is posted for it | `BREAK_SPEED` |
+| 4 | `ArmorStand.hurt` does not call `LivingEntity.hurt` | no event for armour stands | `LIVING_DAMAGE` |
+| 5 | A real server player's jump comes from `handleMovePlayer`, not from the key | the event also fires for other upward take-offs of a player on the server | `LIVING_JUMP` |
+| 6 | Hits the invulnerability frames certainly refuse are not posted; a covered hit that a listener cancels starts no frames | see section 3 | `LIVING_DAMAGE` |
+| 7 | Shield-blocked and helmet-reduced hits are posted with the full amount | the game's later steps may still refuse them | `LIVING_DAMAGE` |
+| 8 | Client side of every "both sides" event is not run by a test | the dig prediction, the jump, the fall and the bow of the local player rely on the vanilla code being shared | all |

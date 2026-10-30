@@ -5,6 +5,7 @@ import dev.architectury.event.EventResult;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,17 +17,21 @@ import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.projectile.Arrow;
@@ -77,6 +82,20 @@ public final class HooksRuntimeChecks {
         player.moveTo(at.x, at.y, at.z, 0F, 0F);
         player.getInventory().clearContent();
         return player;
+    }
+
+    /**
+     * Runs {@code body}; when it throws (a failed assertion), runs {@code cleanup} first and rethrows. A failed GameTest does not
+     * run the callbacks it still has waiting, so a listener registered before a delayed callback is taken away here when the
+     * part up to the delay fails, and by the callback's own {@code finally} afterwards.
+     */
+    private static void guarded(Runnable cleanup, Runnable body) {
+        try {
+            body.run();
+        } catch (RuntimeException | Error failure) {
+            cleanup.run();
+            throw failure;
+        }
     }
 
     private static void finish(GameTestHelper test, ServerPlayer... players) {
@@ -340,12 +359,20 @@ public final class HooksRuntimeChecks {
             shotBy.add(source.getEntity() == shooter);
             return amount - 1F;
         };
-        TinkererEvents.LIVING_DAMAGE.register(cut);
         Arrow arrow = new Arrow(level, shooter, new ItemStack(Items.ARROW), null);
-        Vec3 from = test.absoluteVec(new Vec3(1.5, 1.4, 3.5));
-        arrow.setPos(from.x, from.y, from.z);
-        arrow.shoot(1, 0, 0, 1.5F, 0F);
-        level.addFreshEntity(arrow);
+        Runnable cleanup = () -> {
+            TinkererEvents.LIVING_DAMAGE.unregister(cut);
+            arrow.discard();
+            shooter.discard();
+            pig.discard();
+        };
+        TinkererEvents.LIVING_DAMAGE.register(cut);
+        guarded(cleanup, () -> {
+            Vec3 from = test.absoluteVec(new Vec3(1.5, 1.4, 3.5));
+            arrow.setPos(from.x, from.y, from.z);
+            arrow.shoot(1, 0, 0, 1.5F, 0F);
+            level.addFreshEntity(arrow);
+        });
         test.runAfterDelay(6, () -> {
             try {
                 test.assertTrue(seen.size() == 1, "the arrow's hit posted the event once: " + seen);
@@ -353,13 +380,82 @@ public final class HooksRuntimeChecks {
                 test.assertTrue(seen.get(0) >= 2F && seen.get(0) <= 3F, "an arrow of speed 1.5 and base damage 2 hits for about 3: " + seen);
                 near(test, 1000F - pig.getHealth(), seen.get(0) - 1F, "the pig lost what the listener left");
             } finally {
-                TinkererEvents.LIVING_DAMAGE.unregister(cut);
-                arrow.discard();
-                shooter.discard();
-                pig.discard();
+                cleanup.run();
             }
             test.succeed();
         });
+    }
+
+    /**
+     * A hit that the invulnerability frames refuse is not posted (the game would throw it away, so a listener with a side effect
+     * is not charged for it), a hit it goes on to deal is, the frames compare what the previous listener result was, a cancelled
+     * hit starts no frames (so a repeat of it is posted again), and a freezing hit on a type that takes extra damage from freezing
+     * is always posted because the game multiplies it by five before it compares.
+     */
+    public static void livingDamageIsNotPostedForHitsTheInvulnerabilityFramesRefuse(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        Zombie zombie = zombie(test, 1.5, 1, 3.5);
+        Pig pig = tough(test, EntityType.PIG, 3.5, 1, 3.5);
+        Pig cancelled = tough(test, EntityType.PIG, 3.5, 1, 5.5);
+        Blaze blaze = tough(test, EntityType.BLAZE, 5.5, 1, 3.5);
+        DamageSource blow = level.damageSources().mobAttack(zombie);
+        DamageSource freeze = level.damageSources().freeze();
+        List<Float> pigSaw = new ArrayList<>();
+        List<Float> cancelledSaw = new ArrayList<>();
+        List<Float> blazeSaw = new ArrayList<>();
+        TinkererEvents.LivingDamage counter = (victim, source, amount) -> {
+            if (victim == pig) pigSaw.add(amount);
+            if (victim == cancelled) {
+                cancelledSaw.add(amount);
+                return 0F;
+            }
+            if (victim == blaze) blazeSaw.add(amount);
+            return amount;
+        };
+        Runnable cleanup = () -> {
+            TinkererEvents.LIVING_DAMAGE.unregister(counter);
+            for (Mob mob : List.of(zombie, pig, cancelled, blaze)) mob.discard();
+        };
+        TinkererEvents.LIVING_DAMAGE.register(counter);
+        guarded(cleanup, () -> {
+            test.assertTrue(pig.hurt(blow, 10F) && pig.getHealth() == 990F, "a first hit is dealt");
+            test.assertTrue(pigSaw.equals(List.of(10F)) && pig.invulnerableTime == 20, "and posted: " + pigSaw + ", frames " + pig.invulnerableTime);
+
+            test.assertTrue(!pig.hurt(blow, 8F) && pig.getHealth() == 990F, "a weaker hit in the frames is refused by the game");
+            test.assertTrue(!pig.hurt(blow, 10F) && pig.getHealth() == 990F, "and so is an equal one");
+            test.assertTrue(pigSaw.equals(List.of(10F)), "neither was posted: " + pigSaw);
+
+            test.assertTrue(pig.hurt(blow, 14F) && pig.getHealth() == 986F, "a stronger hit in the frames deals the difference: " + pig.getHealth());
+            test.assertTrue(pigSaw.equals(List.of(10F, 14F)), "and is posted with its own amount, not the difference: " + pigSaw);
+
+            pig.invulnerableTime = 10; // the frames are over (they count down from 20 and only block above 10)
+            test.assertTrue(pig.hurt(blow, 3F) && pig.getHealth() == 983F, "after the frames a weak hit is dealt whole");
+            test.assertTrue(pigSaw.equals(List.of(10F, 14F, 3F)), "and posted: " + pigSaw);
+
+            // a cancel starts no frames: the same hit, repeated at once, is posted again (lava, fire and cactus do this every tick)
+            test.assertTrue(!cancelled.hurt(blow, 4F) && cancelled.invulnerableTime == 0, "a cancelled hit starts no frames");
+            test.assertTrue(!cancelled.hurt(blow, 4F), "the repeat is cancelled as well");
+            test.assertTrue(cancelledSaw.equals(List.of(4F, 4F)), "and posted again, both times: " + cancelledSaw);
+
+            // freezing on a type that takes it five times over: 2 -> 10 as the last hit, then 3 -> 15 is more than 10 although 3 is not more than 10
+            test.assertTrue(blaze.hurt(freeze, 2F) && blaze.getHealth() == 990F, "a freezing hit on a blaze deals five times its amount: " + blaze.getHealth());
+            test.assertTrue(blaze.hurt(freeze, 3F) && blaze.getHealth() == 985F, "a second one of 3 is 15, five more than the 10 before: " + blaze.getHealth());
+            test.assertTrue(blazeSaw.equals(List.of(2F, 3F)), "both were posted although 3 is not above the last 10: " + blazeSaw);
+
+            // a source that bypasses the cooldown is never refused by the frames; vanilla 1.21.1 puts no damage type in that tag, so
+            // this is exercised only if a data pack (or another mod) does
+            Optional<DamageSource> bypass = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).holders()
+                    .filter(type -> type.is(DamageTypeTags.BYPASSES_COOLDOWN)).findFirst().map(DamageSource::new);
+            if (bypass.isPresent()) {
+                pig.hurt(blow, 20F); // a strong hit, dealt in the frames of the last one
+                pigSaw.clear();
+                pig.hurt(bypass.get(), 1F);
+                test.assertTrue(pigSaw.equals(List.of(1F)), "a hit that bypasses the cooldown is posted in the frames");
+            }
+        });
+        cleanup.run();
+        test.succeed();
     }
 
     // ---- BREAK_SPEED -----------------------------------------------------------------------------------------------
@@ -485,12 +581,20 @@ public final class HooksRuntimeChecks {
             // the player's own path: the jump key (setJumping) on the ground, one tick of the player
             who.clear();
             seenY.clear();
+            // (This is the aiStep path of vanilla, the one the client's own player and a mounted player take. A real server player
+            // is made to jump by ServerGamePacketListenerImpl.handleMovePlayer when it reports leaving the ground upwards; it calls
+            // the same jumpFromGround, which is where the event is posted.)
+            double floorY = test.absoluteVec(new Vec3(0, 1, 0)).y;
             player.setOnGround(true);
             player.setJumping(true);
             player.doTick();
             test.assertTrue(who.equals(List.of(player)), "the jump key on the ground made the server player jump once: " + who.size());
-            test.assertTrue(player.getDeltaMovement().y > seenY.get(0) * 1.5D || player.getY() > test.absoluteVec(new Vec3(0, 1, 0)).y + 0.1D,
-                    "the doubled jump is the player's motion: " + player.getDeltaMovement().y + " after " + seenY.get(0));
+            test.assertTrue(Math.abs(seenY.get(0) - 0.42D) < 1.0E-4D, "the listener saw the motion of the player's jump already applied: " + seenY.get(0));
+            // the doubled 0.84 carried the player up in the tick's move, then gravity and drag act: (0.84 - 0.08) * 0.98 = 0.7448 (a plain jump leaves 0.3332)
+            test.assertTrue(Math.abs(player.getY() - (floorY + 0.84D)) < 0.02D,
+                    "the doubled jump is what moved the player: " + (player.getY() - floorY) + " above the floor (0.84 expected)");
+            test.assertTrue(Math.abs(player.getDeltaMovement().y - 0.7448D) < 0.01D,
+                    "and what is left of it after the tick: " + player.getDeltaMovement().y + " (0.7448 expected)");
         } finally {
             TinkererEvents.LIVING_JUMP.unregister(boost);
         }
@@ -505,29 +609,33 @@ public final class HooksRuntimeChecks {
     // ---- LIVING_FALL -----------------------------------------------------------------------------------------------
 
     /**
-     * Three pigs fall from 10.5 blocks above the floor onto stone: one is left alone, one has its fall cancelled, one has the
-     * distance halved. The listener sees the distance vanilla counted (the fall height less the movement of the landing tick,
-     * about 9.7 here), and what each pig lost is worked out from that distance with the damage formula. A player's fall is
-     * cancelled through {@code Player.causeFallDamage}.
+     * Four pigs fall from 10.5 blocks above the floor onto stone: one is left alone, one has its fall cancelled, one has the
+     * distance halved, one has the damage multiplier halved. The listener sees the distance vanilla counted (the fall height
+     * less the movement of the landing tick, about 9.7 here) and the multiplier of the stone (1), and what each pig lost is worked
+     * out from that with the damage formula. A player's fall is cancelled through {@code Player.causeFallDamage}.
      */
     public static void livingFallIsPostedOnLandingAndCanHalveOrCancel(GameTestHelper test) {
         floor(test);
         ServerLevel level = test.getLevel();
-        // The harness closes the 8-high test area with a ceiling of barrier blocks at relative y = 9: open three columns of it, so
+        // The harness closes the 8-high test area with a ceiling of barrier blocks at relative y = 9: open the columns of it, so
         // the pigs can fall from above it (11.5) to the floor (top at 1.0), 10.5 blocks.
         List<BlockPos> ceiling = new ArrayList<>();
         for (int x = 0; x <= 6; x++) for (int z = 2; z <= 4; z++) ceiling.add(new BlockPos(x, 9, z));
         ceiling.forEach(pos -> test.setBlock(pos, Blocks.AIR));
-        Pig plain = tough(test, EntityType.PIG, 1.5, 11.5, 3.5);
-        Pig cancelled = tough(test, EntityType.PIG, 3.5, 11.5, 3.5);
-        Pig halved = tough(test, EntityType.PIG, 5.5, 11.5, 3.5);
-        for (Pig pig : List.of(plain, cancelled, halved)) {
+        Pig plain = tough(test, EntityType.PIG, 1.0, 11.5, 3.5);
+        Pig cancelled = tough(test, EntityType.PIG, 2.5, 11.5, 3.5);
+        Pig halved = tough(test, EntityType.PIG, 4.0, 11.5, 3.5);
+        Pig scaled = tough(test, EntityType.PIG, 5.5, 11.5, 3.5);
+        List<Pig> pigs = List.of(plain, cancelled, halved, scaled);
+        for (Pig pig : pigs) {
             pig.setNoAi(false);
             pig.removeFreeWill(); // gravity yes, wandering no
         }
         List<Float> plainSaw = new ArrayList<>();
         List<Float> cancelledSaw = new ArrayList<>();
         List<Float> halvedSaw = new ArrayList<>();
+        List<Float> scaledSaw = new ArrayList<>();
+        List<Float> multiplierSeen = new ArrayList<>();
         List<Boolean> clientSide = new ArrayList<>();
         TinkererEvents.LivingFall listener = (entity, fall) -> {
             if (entity == cancelled) {
@@ -538,13 +646,17 @@ public final class HooksRuntimeChecks {
                 halvedSaw.add(fall.getDistance());
                 fall.setDistance(fall.getDistance() / 2F);
             }
+            if (entity == scaled) {
+                scaledSaw.add(fall.getDistance());
+                multiplierSeen.add(fall.getDamageMultiplier());
+                fall.setDamageMultiplier(0.5F);
+            }
             if (entity == plain) {
                 plainSaw.add(fall.getDistance());
                 clientSide.add(entity.level().isClientSide);
             }
             return EventResult.pass();
         };
-        TinkererEvents.LIVING_FALL.register(listener);
         ServerPlayer player = player(test, 6.5, 1, 1.5);
         List<Float> playerSaw = new ArrayList<>();
         TinkererEvents.LivingFall cancelPlayer = (entity, fall) -> {
@@ -552,24 +664,32 @@ public final class HooksRuntimeChecks {
             playerSaw.add(fall.getDistance());
             return EventResult.interruptFalse();
         };
+        Runnable cleanup = () -> {
+            TinkererEvents.LIVING_FALL.unregister(listener);
+            TinkererEvents.LIVING_FALL.unregister(cancelPlayer);
+            for (Pig pig : pigs) pig.discard();
+            ceiling.forEach(pos -> test.setBlock(pos, Blocks.BARRIER));
+            player.discard();
+        };
+        TinkererEvents.LIVING_FALL.register(listener);
         TinkererEvents.LIVING_FALL.register(cancelPlayer);
-        try {
+        guarded(cleanup, () -> {
             player.setHealth(20F);
             test.assertTrue(!player.causeFallDamage(12F, 1F, level.damageSources().fall()), "a cancelled fall returns false");
             test.assertTrue(playerSaw.equals(List.of(12F)) && player.getHealth() == 20F, "and the player takes nothing: " + player.getHealth());
-        } finally {
             TinkererEvents.LIVING_FALL.unregister(cancelPlayer);
-        }
+        });
         test.runAfterDelay(45, () -> {
             try {
                 float safe = (float) plain.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
-                test.assertTrue(plain.onGround() && cancelled.onGround() && halved.onGround(), "all three pigs have landed");
-                test.assertTrue(plainSaw.size() == 1 && cancelledSaw.size() == 1 && halvedSaw.size() == 1,
-                        "each pig's landing posted the event once: " + plainSaw + cancelledSaw + halvedSaw);
+                test.assertTrue(pigs.stream().allMatch(Pig::onGround), "all four pigs have landed");
+                test.assertTrue(plainSaw.size() == 1 && cancelledSaw.size() == 1 && halvedSaw.size() == 1 && scaledSaw.size() == 1,
+                        "each pig's landing posted the event once: " + plainSaw + cancelledSaw + halvedSaw + scaledSaw);
                 test.assertTrue(clientSide.equals(List.of(false)), "and the pig that was left alone was seen on the server");
-                for (float distance : List.of(plainSaw.get(0), cancelledSaw.get(0), halvedSaw.get(0))) {
+                for (float distance : List.of(plainSaw.get(0), cancelledSaw.get(0), halvedSaw.get(0), scaledSaw.get(0))) {
                     test.assertTrue(distance > 9F && distance < 10.5F, "the listener saw the distance of a 10.5 block fall as vanilla counts it: " + distance);
                 }
+                test.assertTrue(multiplierSeen.equals(List.of(1F)), "and the damage multiplier of the stone it landed on: " + multiplierSeen);
                 float seen = plainSaw.get(0);
                 near(test, 1000F - plain.getHealth(), Mth.ceil(seen - safe), "an untouched fall costs the vanilla damage of the distance seen");
                 test.assertTrue(plain.getHealth() < 1000F, "and it is some damage");
@@ -577,12 +697,13 @@ public final class HooksRuntimeChecks {
                 float halfSeen = halvedSaw.get(0) / 2F;
                 near(test, 1000F - halved.getHealth(), Mth.ceil(halfSeen - safe), "the halved distance costs the damage of half the distance seen");
                 test.assertTrue(halved.getHealth() > plain.getHealth(), "and that is less than the untouched fall");
+                // the multiplier the listener left is what the damage was worked out with (vanilla: ceil((distance - safe) * multiplier))
+                near(test, 1000F - scaled.getHealth(), Mth.ceil((scaledSaw.get(0) - safe) * 0.5F), "the halved multiplier costs half the damage of the distance seen");
+                test.assertTrue(scaled.getHealth() > plain.getHealth() && scaled.getHealth() < 1000F, "which is less than the untouched fall and still some damage");
             } finally {
-                TinkererEvents.LIVING_FALL.unregister(listener);
-                for (Pig pig : List.of(plain, cancelled, halved)) pig.discard();
-                ceiling.forEach(pos -> test.setBlock(pos, Blocks.BARRIER));
+                cleanup.run();
             }
-            finish(test, player);
+            test.succeed();
         });
     }
 
@@ -604,9 +725,11 @@ public final class HooksRuntimeChecks {
             player.getInventory().selected = 0;
         }
         List<Integer> remainings = new ArrayList<>();
+        List<Boolean> rightStack = new ArrayList<>();
         TinkererEvents.UseItemTick takeTwo = (entity, stack, remaining) -> {
             if (entity != quick) return remaining;
             remainings.add(remaining);
+            rightStack.add(stack.is(Items.BOW) && stack == quick.getUseItem());
             return remaining - 2;
         };
         TinkererEvents.USE_ITEM_TICK.register(takeTwo);
@@ -627,6 +750,8 @@ public final class HooksRuntimeChecks {
                         + quickTicks + " against " + plainTicks);
                 test.assertTrue(remainings.size() == plainTicks, "the listener was called once per tick, with the count so far: " + remainings.size());
                 test.assertTrue(remainings.get(0) == full, "first with the full count " + full + ": " + remainings.get(0));
+                test.assertTrue(rightStack.size() == remainings.size() && !rightStack.contains(false),
+                        "and each time with the bow that the entity is using (the very stack of getUseItem): " + rightStack);
                 test.assertTrue(quick.getUseItemRemainingTicks() == full - quickTicks, "the count the entity holds is the listener's");
 
                 plain.releaseUsingItem();
@@ -655,16 +780,20 @@ public final class HooksRuntimeChecks {
     /**
      * A pig is killed by the fake player with a Looting III sword: the listener sees the drops before they are in the world,
      * the looting level and the recent-hit flag; it adds a diamond, removes the pork, clears the list or cancels. Experience
-     * orbs are not touched.
+     * orbs are not touched. A pig killed by plain damage is posted with no looting and no recent hit, and a pig that has another
+     * entity spawn an item during its death has only its own items in the list.
      */
     public static void livingDropsAreEditedBeforeTheyEnterTheWorld(GameTestHelper test) {
         floor(test);
         ServerLevel level = test.getLevel();
-        test.assertTrue(!TinkererEvents.hasLivingDropsListeners(), "nobody listens when the check starts");
+        // other groups may keep permanent listeners of this event (the Cursed Blade, the dimensional shards): the check only
+        // claims that its own listener makes the difference
+        boolean listenedBefore = TinkererEvents.hasLivingDropsListeners();
         ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
         sword.enchant(enchantment(test, Enchantments.LOOTING), 3);
         TinkererFakePlayer fake = fakePlayer(test, sword);
         Vec3 spot = new Vec3(3.5, 1, 3.5);
+        Vec3 bystanderSpot = new Vec3(6.5, 1, 6.5);
 
         // control: the plain death of a pig drops pork and no diamond
         Pig control = tough(test, EntityType.PIG, spot.x, spot.y, spot.z);
@@ -678,11 +807,22 @@ public final class HooksRuntimeChecks {
         plain.forEach(ItemEntity::discard);
         control.discard();
 
+        // control for the fox: its mouth item is dropped by Fox.dropAllDeathLoot before it calls super
+        Fox foxControl = tough(test, EntityType.FOX, spot.x, spot.y, spot.z);
+        foxControl.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.EMERALD));
+        foxControl.setHealth(1F);
+        fake.attackEntity(foxControl);
+        List<ItemEntity> foxPlain = itemsAround(test, spot, 2D);
+        test.assertTrue(foxControl.isDeadOrDying() && has(foxPlain, Items.EMERALD), "control: the fox's mouth item is in the world: " + foxPlain);
+        foxPlain.forEach(ItemEntity::discard);
+        foxControl.discard();
+
+        List<LivingEntity> mine = new ArrayList<>(); // the victims of this check: the listener answers only for them
         List<Object[]> seen = new ArrayList<>();
-        int[] mode = { 0 }; // 0 add a diamond, 1 remove the pork, 2 clear, 3 cancel
+        int[] mode = { 0 }; // 0 add a diamond, 1 remove the pork, 2 clear, 3 cancel, 4 leave alone
         TinkererEvents.LivingDrops listener = (victim, source, drops, looting, recentlyHit) -> {
-            if (!(victim instanceof Pig) || source.getEntity() != fake) return EventResult.pass();
-            seen.add(new Object[] { new ArrayList<>(drops), looting, recentlyHit, drops.stream().anyMatch(e -> e.isAlive()), drops.stream().allMatch(e -> e.level().getEntity(e.getId()) == null) });
+            if (!mine.contains(victim)) return EventResult.pass();
+            seen.add(new Object[] { new ArrayList<>(drops), looting, recentlyHit, drops.stream().allMatch(e -> e.level().getEntity(e.getId()) == null), source });
             switch (mode[0]) {
                 case 0 -> drops.add(new ItemEntity(level, victim.getX(), victim.getY(), victim.getZ(), new ItemStack(Items.DIAMOND)));
                 case 1 -> drops.removeIf(e -> e.getItem().is(Items.PORKCHOP));
@@ -694,13 +834,22 @@ public final class HooksRuntimeChecks {
             }
             return EventResult.pass();
         };
+        List<Entity> cleanupEntities = new ArrayList<>();
+        Runnable cleanup = () -> {
+            TinkererEvents.LIVING_DROPS.unregister(listener);
+            cleanupEntities.forEach(Entity::discard);
+            fake.discard();
+        };
         TinkererEvents.LIVING_DROPS.register(listener);
-        try {
+        guarded(cleanup, () -> {
             test.assertTrue(TinkererEvents.hasLivingDropsListeners(), "the listener is registered");
+            AABB orbBox = new AABB(test.absoluteVec(spot), test.absoluteVec(spot)).inflate(3D);
             for (int scenario = 0; scenario < 4; scenario++) {
                 mode[0] = scenario;
                 seen.clear();
                 Pig pig = tough(test, EntityType.PIG, spot.x, spot.y, spot.z);
+                cleanupEntities.add(pig);
+                mine.add(pig);
                 pig.setHealth(1F);
                 fake.attackEntity(pig);
                 String what = "scenario " + scenario + ": ";
@@ -711,7 +860,8 @@ public final class HooksRuntimeChecks {
                 test.assertTrue(has(offered, Items.PORKCHOP), what + "the loot table's pork was in the list the listener got");
                 test.assertTrue((Integer) call[1] == 3, what + "the looting level of the sword: " + call[1]);
                 test.assertTrue((Boolean) call[2], what + "recently hit by a player");
-                test.assertTrue((Boolean) call[4], what + "and none of the offered entities was in the world yet");
+                test.assertTrue((Boolean) call[3], what + "and none of the offered entities was in the world yet");
+                test.assertTrue(((DamageSource) call[4]).getEntity() == fake, what + "the source names the fake player");
                 List<ItemEntity> world = itemsAround(test, spot, 2D);
                 switch (scenario) {
                     case 0 -> test.assertTrue(has(world, Items.PORKCHOP) && has(world, Items.DIAMOND), what + "pork and the added diamond: " + world);
@@ -719,26 +869,90 @@ public final class HooksRuntimeChecks {
                     case 2 -> test.assertTrue(world.isEmpty(), what + "a cleared list drops nothing: " + world);
                     default -> test.assertTrue(world.isEmpty(), what + "a cancel drops nothing: " + world);
                 }
-                test.assertTrue(!level.getEntitiesOfClass(ExperienceOrb.class, new AABB(test.absoluteVec(spot), test.absoluteVec(spot)).inflate(3D)).isEmpty(),
-                        what + "experience is not an item drop and still comes");
+                test.assertTrue(!level.getEntitiesOfClass(ExperienceOrb.class, orbBox).isEmpty(), what + "experience is not an item drop and still comes");
                 world.forEach(ItemEntity::discard);
-                level.getEntitiesOfClass(ExperienceOrb.class, new AABB(test.absoluteVec(spot), test.absoluteVec(spot)).inflate(3D)).forEach(ExperienceOrb::discard);
-                pig.discard();
+                level.getEntitiesOfClass(ExperienceOrb.class, orbBox).forEach(ExperienceOrb::discard);
             }
-        } finally {
-            TinkererEvents.LIVING_DROPS.unregister(listener);
-        }
-        test.assertTrue(!TinkererEvents.hasLivingDropsListeners(), "the listener is gone again");
+
+            // killed by plain damage, no player: no looting, no recent hit, the pork is still offered
+            mode[0] = 4;
+            seen.clear();
+            Pig plainKill = tough(test, EntityType.PIG, spot.x, spot.y, spot.z);
+            cleanupEntities.add(plainKill);
+            mine.add(plainKill);
+            plainKill.setHealth(1F);
+            test.assertTrue(plainKill.hurt(level.damageSources().generic(), 5F) && plainKill.isDeadOrDying(), "plain damage kills the pig");
+            test.assertTrue(seen.size() == 1, "the death posted the event once: " + seen.size());
+            test.assertTrue((Integer) seen.get(0)[1] == 0, "no attacker, no looting: " + seen.get(0)[1]);
+            test.assertTrue(!(Boolean) seen.get(0)[2], "and no player hit the pig lately");
+            test.assertTrue(((DamageSource) seen.get(0)[4]).getEntity() == null, "the source has no attacker");
+            @SuppressWarnings("unchecked")
+            List<ItemEntity> offeredPlain = (List<ItemEntity>) seen.get(0)[0];
+            test.assertTrue(has(offeredPlain, Items.PORKCHOP), "the pork is offered all the same");
+            itemsAround(test, spot, 2D).forEach(ItemEntity::discard);
+
+            // another entity spawns an item during the death: only the victim's own spawns are taken. The victim's custom loot spawns
+            // a gold ingot of its own and has a bystander spawn an emerald; the list holds the gold (and the pork), not the emerald,
+            // and clearing the list leaves the emerald in the world.
+            Pig bystander = tough(test, EntityType.PIG, bystanderSpot.x, bystanderSpot.y, bystanderSpot.z);
+            cleanupEntities.add(bystander);
+            Pig victim = new Pig(EntityType.PIG, level) {
+                @Override
+                protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource source, boolean recentlyHit) {
+                    super.dropCustomDeathLoot(serverLevel, source, recentlyHit);
+                    this.spawnAtLocation(new ItemStack(Items.GOLD_INGOT));
+                    bystander.spawnAtLocation(new ItemStack(Items.EMERALD));
+                }
+            };
+            Vec3 at = test.absoluteVec(spot);
+            victim.moveTo(at.x, at.y, at.z, 0F, 0F);
+            victim.setNoAi(true);
+            level.addFreshEntity(victim);
+            cleanupEntities.add(victim);
+            mine.add(victim);
+            mode[0] = 2; // clear the list
+            seen.clear();
+            victim.setHealth(1F);
+            fake.attackEntity(victim);
+            test.assertTrue(victim.isDeadOrDying() && seen.size() == 1, "the custom victim died and the event was posted once: " + seen.size());
+            @SuppressWarnings("unchecked")
+            List<ItemEntity> offeredCustom = (List<ItemEntity>) seen.get(0)[0];
+            test.assertTrue(has(offeredCustom, Items.GOLD_INGOT) && has(offeredCustom, Items.PORKCHOP), "the victim's own gold and pork are in the list: " + offeredCustom);
+            test.assertTrue(!has(offeredCustom, Items.EMERALD), "the bystander's emerald is not: " + offeredCustom);
+            test.assertTrue(itemsAround(test, spot, 2D).isEmpty(), "the cleared list left nothing of the victim's");
+            test.assertTrue(has(itemsAround(test, bystanderSpot, 1.5D), Items.EMERALD), "and the bystander's emerald went into the world at once, untouched");
+            itemsAround(test, bystanderSpot, 1.5D).forEach(ItemEntity::discard);
+            level.getEntitiesOfClass(ExperienceOrb.class, orbBox).forEach(ExperienceOrb::discard);
+
+            // the fox spawns its mouth item before it calls super.dropAllDeathLoot: it is in the list all the same (and a cleared list keeps it out)
+            Fox fox = tough(test, EntityType.FOX, spot.x, spot.y, spot.z);
+            cleanupEntities.add(fox);
+            mine.add(fox);
+            fox.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.EMERALD));
+            mode[0] = 2; // clear the list
+            seen.clear();
+            fox.setHealth(1F);
+            fake.attackEntity(fox);
+            test.assertTrue(fox.isDeadOrDying() && seen.size() == 1, "the fox died and the event was posted once: " + seen.size());
+            @SuppressWarnings("unchecked")
+            List<ItemEntity> offeredFox = (List<ItemEntity>) seen.get(0)[0];
+            test.assertTrue(has(offeredFox, Items.EMERALD), "the fox's mouth item is in the list: " + offeredFox);
+            test.assertTrue((Boolean) seen.get(0)[3], "and was not in the world yet");
+            test.assertTrue(itemsAround(test, spot, 2D).isEmpty(), "a cleared list keeps the mouth item out of the world: " + itemsAround(test, spot, 2D));
+            level.getEntitiesOfClass(ExperienceOrb.class, orbBox).forEach(ExperienceOrb::discard);
+        });
+        TinkererEvents.LIVING_DROPS.unregister(listener);
+        test.assertTrue(TinkererEvents.hasLivingDropsListeners() == listenedBefore, "the listener is gone again (as it was before: " + listenedBefore + ")");
 
         // a death after that is the plain one again
         Pig after = tough(test, EntityType.PIG, spot.x, spot.y, spot.z);
+        cleanupEntities.add(after);
         after.setHealth(1F);
         fake.attackEntity(after);
         List<ItemEntity> world = itemsAround(test, spot, 2D);
         test.assertTrue(has(world, Items.PORKCHOP) && !has(world, Items.DIAMOND), "unregistered: the plain drops again");
         world.forEach(ItemEntity::discard);
-        after.discard();
-        fake.discard();
+        cleanup.run();
         test.succeed();
     }
 

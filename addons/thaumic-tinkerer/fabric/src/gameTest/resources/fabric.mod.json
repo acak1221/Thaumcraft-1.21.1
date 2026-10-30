@@ -15,7 +15,8 @@
       "thaumic.tinkerer.fabric.testing.MachinesGameTests",
       "thaumic.tinkerer.fabric.testing.KamiGearGameTests",
       "thaumic.tinkerer.fabric.testing.KamiWorldGameTests",
-      "thaumic.tinkerer.fabric.testing.HooksGameTests"
+      "thaumic.tinkerer.fabric.testing.HooksGameTests",
+      "thaumic.tinkerer.fabric.testing.ParityGameTests"
     ]
   },
   "depends": {

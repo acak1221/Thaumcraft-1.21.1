@@ -57,7 +57,7 @@ OUT_DIR = "addons/thaumic-tinkerer/common/src/gameTest/resources/tt_oracle"
 LEGACY_IDS = "common/src/main/resources/data/thaumcraft/tc4/legacy_ids.json"
 PORT_LIB = "addons/thaumic-tinkerer/common/src/main/java/thaumic/tinkerer/common/lib"
 ASPECT_JAVA = "common/src/main/java/thaumcraft/api/aspects/Aspect.java"
-CATEGORY = "THAUMICTINKERER"
+CATEGORY_CONSTANT = ("LibResearch", "CATEGORY_THAUMICTINKERER")
 
 
 class OracleError(Exception):
@@ -1177,6 +1177,7 @@ class StackV:
         self.line = line
         self.file = file
         self.via: str | None = None
+        self.fields: dict = {}
 
 
 class OrOre:
@@ -1233,6 +1234,8 @@ class RecipeV:
         self.instability: int | None = None
         self.input = None        # infusion central item / crucible catalyst
         self.stuff: list = []
+        self.stuff_texts: list[str] = []
+        self.custom_class: str | None = None
         self.file = file
         self.line = line
         self.kind = ""
@@ -1246,6 +1249,13 @@ class MultiV:
 
 class RegistryV:
     """``ThaumicTinkerer.registry``."""
+
+
+class SuperV:
+    """``super`` inside a method of ``cls``."""
+
+    def __init__(self, cls: ClassInfo):
+        self.cls = cls
 
 
 # --------------------------------------------------------------------------- interpreter
@@ -1281,7 +1291,7 @@ class InterpBase:
         self.node_sites: dict[int, tuple] = {}
         self.diagnostics: list[str] = []
         self.numeric_aspects: list[AspectV] = []
-        self.keepalive: list = []
+        self.custom_recipes: list[tuple] = []     # (RecipeV, Inst): CraftingManager.getRecipeList().add(...) in a constructor
 
     # ---- parsing on demand
     def body_ast(self, m: MethodInfo):
@@ -1410,28 +1420,46 @@ class InterpBase:
             if toks[i].val not in self.CONTROL_KEYWORDS and toks[i].val != "{":
                 p = Parser(toks[i:j] + [Tok("eof", "", 0, 0)], ctor.owner.file)
                 try:
-                    out.append(p.expr())
+                    out.append(p.stmt())
                 except ParseError:
                     pass
             i = j
         ctor.ast = out
         return out
 
-    def ctor_statement(self, node, ctx: Ctx, cls: ClassInfo, inst: Inst) -> None:
+    def ctor_statement(self, stmt, ctx: Ctx, cls: ClassInfo, inst: Inst) -> None:
+        if stmt[0] == "local":
+            try:
+                self.run_stmt(stmt, ctx)
+            except (OracleError, KeyError, IndexError, TypeError, AttributeError, ValueError):
+                pass
+            return
+        if stmt[0] != "expr":
+            return
+        node = stmt[1]
         if node[0] == "call" and node[1] is None and node[2] == "this":
-            self.construct(cls, [self.ev(a, ctx) for a in node[3]], inst=inst)
+            self.construct(cls, [self.lenient(a, ctx) for a in node[3]], inst=inst)
         elif node[0] == "call" and node[1] is None and node[2] == "super":
-            args = [self.ev(a, ctx) for a in node[3]]
+            args = [self.lenient(a, ctx) for a in node[3]]
             sup = self.superclass(cls)
             if sup is not None:
                 self.construct(sup, args, inst=inst)
-            elif cls.extends == "BlockSlab" and args:
-                inst.fields["field_150004_a"] = args[0]
+            else:
+                for position, name in SUPER_FIELDS.get(cls.extends or "", {}).items():
+                    if position < len(args):
+                        inst.fields[name] = args[position]
         else:
             try:
                 self.ev(node, ctx)
             except (OracleError, KeyError, IndexError, TypeError, AttributeError, ValueError):
                 pass
+
+    def lenient(self, node, ctx: Ctx):
+        """Evaluate a constructor argument; what the interpreter does not model stays symbolic."""
+        try:
+            return self.ev(node, ctx)
+        except Unsupported:
+            return Sym(unparse(node))
 
     # ---- method calls
     def call_method(self, m: MethodInfo, args: list, this: Inst | None, parent: Ctx | None):
@@ -1446,7 +1474,10 @@ class InterpBase:
         ctx.locals = dict(zip(params, args))
         if parent is not None:
             ctx.conds = copy.deepcopy(parent.conds)
-        outcomes = self.run_stmts(self.body_ast(m)[1], ctx)
+        try:
+            outcomes = self.run_stmts(self.body_ast(m)[1], ctx)
+        except Unsupported as error:
+            raise Unsupported(f"{error} [in {m.owner.name}.{m.name}]") from error
         values = [o[2] for o in outcomes if o[1] == "return"]
         if len(outcomes) > 1 and not all(self.same(values[0], v) for v in values[1:]):
             raise Unsupported(f"{m.owner.name}.{m.name}: forks inside an expression")
@@ -1677,6 +1708,9 @@ class InterpBase:
             raise Unsupported("this outside an instance")
         return ctx.this
 
+    def ev_super(self, node, ctx):
+        return SuperV(ctx.cls)
+
     def ev_cast(self, node, ctx):
         return self.ev(node[2], ctx)
 
@@ -1737,6 +1771,12 @@ class InterpBase:
             return Sym("registry." + name)
         if isinstance(target, Sym):
             return Sym(f"{target.text}.{name}")
+        if target is None:
+            return Sym(f"null.{name}")
+        if isinstance(target, StackV):
+            if name == "stackSize":
+                return target.count
+            return target.fields.get(name)      # the NBT tag (stackTagCompound) starts as null and is not interpreted
         raise Unsupported(f"field {name} of {type(target).__name__}")
 
     def namespace_field(self, ns: str, name: str, ctx: Ctx):
@@ -1918,6 +1958,8 @@ class InterpBase:
             if isinstance(holder, Inst):
                 holder.fields[target[2]] = value
                 return
+            if isinstance(holder, StackV):
+                holder.fields[target[2]] = value
             return
         if kind == "index":
             arr = self.ev(target[1], ctx)
@@ -2027,6 +2069,12 @@ class Interp(InterpBase):
             return self.static_call(recv.name, name, args, node, ctx)
         if isinstance(recv, RegistryV):
             return self.registry_call(name, args, ctx)
+        if isinstance(recv, SuperV):
+            sup = self.superclass(recv.cls)
+            m = self.pick(self.find_methods(sup, name), len(args)) if sup is not None else None
+            if m is not None:
+                return self.call_method(m, args, ctx.this, ctx)
+            return Sym(f"super.{name}()")
         if isinstance(recv, Inst):
             m = self.pick(self.find_methods(recv.cls, name), len(args))
             if m is not None:
@@ -2078,8 +2126,20 @@ class Interp(InterpBase):
             raise Unsupported(f"String.{name}")
         if isinstance(recv, AspectV):
             return recv.tag if name == "getTag" else Sym(f"Aspect.{name}()")
+        if isinstance(recv, Sym) and name == "add" and recv.text.endswith("getRecipeList()") and len(args) == 1 \
+                and isinstance(args[0], Inst):
+            # CraftingManager.getInstance().getRecipeList().add(new SomeRecipe(...)): a recipe class of the add-on
+            self.evaluated.add(id(node))
+            self.node_sites[id(node)] = (file, line, "getRecipeList().add")
+            recipe = RecipeV("CraftingManager", None, file, line)
+            recipe.kind = "crafting_custom"
+            recipe.custom_class = args[0].cls.name
+            self.custom_recipes.append((recipe, ctx.this))
+            return True
         if isinstance(recv, Sym):
             return Sym(f"{recv.text}.{name}()")
+        if recv is None:
+            return Sym(f"null.{name}()")
         raise Unsupported(f"call {name} on {type(recv).__name__}")
 
 
@@ -2138,6 +2198,7 @@ class Interp(InterpBase):
             recipe.kind = "crafting_shapeless" if name == "addShapelessRecipe" else "crafting_shaped"
             recipe.output = args[0]
             recipe.stuff = flatten_varargs(args[1:]) if name == "addShapelessRecipe" else list(args[1:])
+            recipe.stuff_texts = arg_texts(node[3])[1:]
             ctx.recipes.append(recipe)
             return recipe
         if ns == "ThaumcraftApi" and (name.startswith("add") and name.endswith("Recipe") or name == "addWarpToResearch"):
@@ -2306,44 +2367,35 @@ class Interp(InterpBase):
 
 
     def new_recipe(self, tname, args, file, line, texts):
+        r = RecipeV(tname, args[0], file, line)
         if tname == "ThaumicTinkererArcaneRecipe":
-            r = RecipeV(tname, args[0], file, line)
             r.kind = "arcane_shaped"
             r.research, r.output, r.aspects = args[1], args[2], args[3]
-            r.stuff = flatten_varargs(args[4:]) if len(args) == 5 and isinstance(args[4], list) else list(args[4:])
-            r.stuff_texts = texts[len(texts) - len(r.stuff):] if r.stuff else []
-        return r
-        if tname == "ThaumicTinkererCrucibleRecipe":
-            r = RecipeV(tname, args[0], file, line)
+            rest = args[4:]
+        elif tname == "ThaumicTinkererCrucibleRecipe":
             r.kind = "crucible"
             r.research = args[0]
             r.output, r.input, r.aspects = args[1], args[2], args[3]
-            r.stuff_texts = texts[len(texts) - len(r.stuff):] if r.stuff else []
-        return r
-        if tname == "ThaumicTinkererCraftingBenchRecipe":
-            r = RecipeV(tname, args[0], file, line)
+            rest = []
+        elif tname == "ThaumicTinkererCraftingBenchRecipe":
             r.kind = "crafting_shaped"
             r.output = args[1]
-            r.stuff = flatten_varargs(args[2:]) if len(args) == 3 and isinstance(args[2], list) else list(args[2:])
-            r.stuff_texts = texts[len(texts) - len(r.stuff):] if r.stuff else []
-        return r
-        if tname == "ThaumicTinkererInfusionRecipe":
-            r = RecipeV(tname, args[0], file, line)
+            rest = args[2:]
+        elif tname == "ThaumicTinkererInfusionRecipe":
             r.kind = "infusion"
-            if isinstance(args[2], int):
+            if isinstance(args[2], int):       # (name, output, instability, aspects, input, stuff...)
                 r.research = args[0]
                 offset = 1
-            else:
+            else:                              # (name, research, output, instability, aspects, input, stuff...)
                 r.research = args[1]
                 offset = 2
             r.output, r.instability, r.aspects, r.input = args[offset], args[offset + 1], args[offset + 2], args[offset + 3]
             rest = args[offset + 4:]
-            r.stuff = flatten_varargs(rest) if len(rest) == 1 and isinstance(rest[0], list) else list(rest)
-            r.stuff_texts = texts[len(texts) - len(r.stuff):] if r.stuff else []
+        else:
+            raise Unsupported(f"unknown recipe wrapper {tname}")
+        r.stuff = flatten_varargs(rest) if len(rest) == 1 and isinstance(rest[0], list) else list(rest)
+        r.stuff_texts = texts[len(texts) - len(r.stuff):] if r.stuff else []
         return r
-        raise Unsupported(f"unknown recipe wrapper {tname}")
-
-
 
     # ---- the start-up of the original mod
     LOADERS = ("loadSimpleBlock", "loadMetaBlock", "loadSimpleItem", "loadMetaItem")
@@ -2357,17 +2409,25 @@ class Interp(InterpBase):
         if method is None:
             raise OracleError("TTRegistry.preInit not found")
         loads = []
+        assigned: dict[int, str] = {}      # id(load call) -> the static field it is assigned to
+        for node in walk(self.body_ast(method)):
+            if node[0] == "assign" and node[1] == "=" and node[2][0] == "name":
+                assigned[id(node[3])] = node[2][1]
+            elif node[0] == "local":
+                for name, init in node[2]:
+                    if init is not None:
+                        assigned[id(init)] = name
         for node in walk(self.body_ast(method)):
             if node[0] == "call" and node[1] is None and node[2] in self.LOADERS:
                 arg = node[3][0]
                 if arg[0] != "new":
                     raise OracleError(f"TTRegistry:{node[4]}: {node[2]} of something that is not `new`")
-                loads.append((node[4], node[2], arg))
+                loads.append((node[4], node[2], arg, assigned.get(id(node))))
         loads.sort(key=lambda entry: entry[0])
         if not loads:
             raise OracleError("TTRegistry.preInit loads nothing")
         ctx = Ctx(reg, None)
-        for line, loader, arg in loads:
+        for line, loader, arg, target in loads:
             cls = self.classes.get(arg[1])
             if cls is None:
                 raise OracleError(f"TTRegistry:{line}: class {arg[1]} not found")
@@ -2385,6 +2445,8 @@ class Interp(InterpBase):
                 instances.extend(extra)
             for i, inst in enumerate(instances):
                 inst.index = i
+            if target is not None:
+                self.statics[("TTRegistry", target)] = base
             (self.registry_blocks if is_block else self.registry_items)[cls.name] = instances
         for instances in list(self.registry_items.values()) + list(self.registry_blocks.values()):
             for inst in instances:
@@ -2417,7 +2479,9 @@ class Interp(InterpBase):
         for call in STARTUP_CALLS:
             ns, method = call.split(".")
             cls = self.classes.get(ns)
-            m = self.pick(self.find_methods(cls, method), 0) if cls else None
+            if cls is None:
+                continue        # a source tree without the helper (the pinned checkout has it)
+            m = self.pick(self.find_methods(cls, method), 0)
             if m is None:
                 raise OracleError(f"start-up call {call} not found")
             self.call_method(m, [], None, None)
@@ -2427,11 +2491,12 @@ class Interp(InterpBase):
         recipes: list[tuple] = []
         for inst in order:
             if inst.reg_when is None:
-                self.diagnostics.append(f"{inst.cls.name}: shouldRegister() is false, its recipes and research are not registered")
-                continue
+                self.diagnostics.append(f"{inst.cls.name}: shouldRegister() is false, so 1.7.10 never registers its recipes and research")
             for value, ctx in self.run_entry(inst.cls, "getRecipeItem", inst):
                 for r in self.flatten(value, ctx.recipes, RecipeV):
-                    recipes.append((r, self.merge_when(inst.reg_when, ctx.conds), inst))
+                    recipes.append((r, self.merge_when(inst.reg_when or [], ctx.conds), inst))
+        for recipe, owner in self.custom_recipes:
+            recipes.append((recipe, self.merge_when(owner.reg_when or [] if owner else [], {}), owner))
         research: list[tuple] = []
         helper = self.classes.get("ResearchHelper")
         m = self.pick(self.find_methods(helper, "initResearch"), 0) if helper else None
@@ -2442,11 +2507,9 @@ class Interp(InterpBase):
             for r in self.flatten(None, c.research, ResearchV):
                 research.append((r, self.merge_when([], c.conds), None))
         for inst in order:
-            if inst.reg_when is None:
-                continue
             for value, ctx in self.run_entry(inst.cls, "getResearchItem", inst):
                 for r in self.flatten(value, ctx.research, ResearchV):
-                    research.append((r, self.merge_when(inst.reg_when, ctx.conds), inst))
+                    research.append((r, self.merge_when(inst.reg_when or [], ctx.conds), inst))
         return research, recipes
 
     @staticmethod
@@ -2491,6 +2554,10 @@ class Interp(InterpBase):
 # Calls the original makes at start-up that the interpreter has to replay because recipes read their result
 # (TTCommonProxy.java:128 calls NumericAspectHelper.init(); the mob essences loop over its list).
 STARTUP_CALLS = ("NumericAspectHelper.init",)
+
+# Fields the vanilla superclass constructors set from their arguments, which the add-on's own code reads:
+# BlockSlab(boolean isDouble, Material) sets field_150004_a, ItemArmor(material, renderIndex, armorType) sets armorType.
+SUPER_FIELDS = {"BlockSlab": {0: "field_150004_a"}, "ItemArmor": {2: "armorType"}}
 
 # Vanilla 1.7.10 field -> 1.21.1 id. A string is for every damage value; a dict maps the damage value.
 # Anything that is not in the table is reported as unresolved, never guessed.
@@ -2544,7 +2611,11 @@ VANILLA: dict[str, object] = {
                   10: "minecraft:lime_dye", 11: "minecraft:yellow_dye", 12: "minecraft:light_blue_dye",
                   13: "minecraft:magenta_dye", 14: "minecraft:orange_dye", 15: "minecraft:bone_meal"},
     "Items.fish": {0: "minecraft:cod", 1: "minecraft:salmon", 2: "minecraft:tropical_fish", 3: "minecraft:pufferfish"},
-    "Items.potionitem": {0: "minecraft:potion"},
+    # the potion effect is a data component on 1.21.1: Items.potionitem damage 8195 is fire resistance, 8198 night vision
+    "Items.potionitem": {0: "minecraft:potion", 8195: "minecraft:potion", 8198: "minecraft:potion"},
+    "Blocks.leaves": {0: "minecraft:oak_leaves", 1: "minecraft:spruce_leaves", 2: "minecraft:birch_leaves",
+                      3: "minecraft:jungle_leaves"},
+    "Blocks.grass": "minecraft:grass_block",
     "Items.porkchop": "minecraft:porkchop",
     "Items.beef": "minecraft:beef",
     "Items.golden_helmet": "minecraft:golden_helmet",
@@ -2590,10 +2661,25 @@ VANILLA: dict[str, object] = {
     "Blocks.redstone_block": "minecraft:redstone_block",
 }
 
-# (class, damage value) -> the Lib*Names constant of the port that names the separate 1.21.1 item or block.
-# 1.7.10 stored these variants in the damage value; the port made them separate registry entries (docs/deviations/*.md).
-# Filled from the pairs the extraction actually meets; an unlisted pair is reported as unresolved.
-TT_META: dict[tuple[str, int], tuple[str, str]] = {}
+# 1.7.10 stored variants of one Thaumic Tinkerer item or block in its damage value; the port made them separate registry
+# entries. (class, damage value) -> (Lib*Names class, constant) of the port, or (class, constant, index) for an array
+# constant. Evidence: docs/deviations/*.md and the port's own Lib*Names.
+TT_META: dict[tuple[str, int], tuple] = {
+    ("BlockDarkQuartz", 1): ("LibBlockNames", "DARK_QUARTZ_CHISELED"),     # LibBlockNames.java: the 3 variants are 3 blocks
+    ("BlockDarkQuartz", 2): ("LibBlockNames", "DARK_QUARTZ_PILLAR"),
+    ("BlockMagnet", 1): ("LibBlockNames", "MOB_MAGNET"),                   # the mob magnet was damage value 1 of the magnet
+    # damage value 1 of the Talisman of Withhold was its "absorbing" state: a data component of the same item now
+    # (docs/deviations/BasicItems.md section 1)
+    ("ItemXPTalisman", 1): ("same_item",),
+}
+for _meta in range(8):                                                     # LibItemNames.KAMI_RESOURCE_NAMES, in the original order
+    TT_META[("ItemKamiResource", _meta)] = ("LibItemNames", "KAMI_RESOURCE_NAMES", _meta)
+# Variants whose port path is built by a function of the damage value (ItemInfusedGrain.path, ItemInfusedPotion.path,
+# ItemMobAspect.path in the port): damage value -> suffix. The infused grain and potion use the four primal aspects in
+# the order of PRIMAL_ASPECT_ENUM (aer, ignis, terra, aqua); the mob aspect uses NumericAspectHelper's order and the form
+# damage // 21 (0 basic, 1 condensed, 2 infused).
+PRIMAL_SUFFIXES = ("aer", "ignis", "terra", "aqua")
+WILDCARD = 32767     # OreDictionary.WILDCARD_VALUE: any damage value of the item
 
 
 # --------------------------------------------------------------------------- resolution
@@ -2601,8 +2687,9 @@ TT_META: dict[tuple[str, int], tuple[str, str]] = {}
 class Resolver:
     """Turns the item values of the original into the JSON of the oracle and, where mechanical, 1.21.1 ids."""
 
-    def __init__(self, interp: Interp, legacy: dict, port_names: dict[str, dict[str, str]]):
+    def __init__(self, interp: Interp, legacy: dict, port_names: dict[str, dict[str, str]], category: str):
         self.interp = interp
+        self.category = category
         self.legacy = legacy
         self.port_names = port_names
         self.unresolved: list[dict] = []
@@ -2616,26 +2703,50 @@ class Resolver:
             return None
         return inst.cls.name if self.multi.get(inst.cls.name, 1) == 1 else f"{inst.cls.name}#{inst.index}"
 
+    def lib(self, lib: str, const: str):
+        return self.port_names.get(lib, {}).get(const)
+
     def resolve_tt(self, inst: Inst, meta: int):
+        cls = inst.cls.name
         name = self.interp.tt_name(inst)
-        if meta != 0:
-            mapped = TT_META.get((inst.cls.name, meta))
-            if mapped is None:
-                return None, f"damage value {meta} of {inst.cls.name} has no entry in TT_META"
-            lib, const = mapped
-            value = self.port_names.get(lib, {}).get(const)
-            if value is None:
-                return None, f"{lib}.{const} does not exist in the port"
+        if meta == WILDCARD:
+            meta = 0
+        if cls in ("ItemInfusedGrain", "ItemInfusedPotion"):
+            base = self.lib("LibItemNames", "INFUSED_GRAIN" if cls == "ItemInfusedGrain" else "INFUSED_POTION")
+            if meta < len(PRIMAL_SUFFIXES) and base:
+                return f"thaumictinkerer:{base}_{PRIMAL_SUFFIXES[meta]}", None
+            return None, f"damage value {meta} of {cls}"
+        if cls == "ItemMobAspect":
+            base = self.lib("LibItemNames", "MOB_ASPECT")
+            values = self.interp.numeric_aspects
+            if meta < 0 or meta >= 63 or meta % 21 >= len(values):
+                return None, f"damage value {meta} of ItemMobAspect is not an aspect"
+            tag = values[meta % 21].fields["aspect"].tag
+            form = ("", "condensed_", "infused_")[meta // 21]
+            return f"thaumictinkerer:{base}_{form}{tag}", None
+        mapped = TT_META.get((cls, meta))
+        if mapped == ("same_item",):
+            mapped, meta = None, 0
+        if mapped is not None:
+            value = self.lib(mapped[0], mapped[1])
+            if len(mapped) == 3 and isinstance(value, list):
+                value = value[mapped[2]]
+            if not isinstance(value, str):
+                return None, f"{mapped[0]}.{mapped[1]} does not exist in the port"
             return "thaumictinkerer:" + value, None
+        if meta != 0:
+            return None, f"damage value {meta} of {cls} has no entry in TT_META"
         if not isinstance(name, LibStr):
-            return None, f"{inst.cls.name} has no Lib name constant ({name!r})"
+            return None, f"{cls} has no Lib name constant ({name!r})"
         lib, const = name.ref.split(".")
-        value = self.port_names.get(lib, {}).get(const)
+        value = self.lib(lib, const)
         if value is None:
             return None, f"{name.ref} does not exist in the port"
         return "thaumictinkerer:" + value, None
 
     def resolve_vanilla(self, ref: str, meta: int):
+        if meta == WILDCARD:
+            meta = 0
         entry = VANILLA.get(ref)
         if entry is None:
             return None, f"{ref} is not in the VANILLA table"
@@ -2646,6 +2757,8 @@ class Resolver:
         return None, f"{ref} damage value {meta} is not in the VANILLA table"
 
     def resolve_tc(self, ref: str, meta: int):
+        if meta == WILDCARD:
+            meta = 0
         kind = "item" if ref.startswith("ConfigItems.") else "block"
         field = ref.split(".", 1)[1]
         row = self.legacy.get((kind, field, meta))
@@ -2674,6 +2787,8 @@ class Resolver:
             raise Unsupported(f"{where}: ItemStack of {item!r}")
         doc = {"text": st.text, "kind": kind, "ref": ref, "count": st.count, "meta": st.meta, "resolved": resolved,
                "unresolved": why}
+        if st.meta == WILDCARD:
+            doc["wildcard"] = True
         if st.via:
             doc["via"] = st.via
         if why:
@@ -2694,6 +2809,53 @@ class Resolver:
         if isinstance(value, (Inst, ItemV)):
             return self.stack(StackV(value, 1, 0, text, 0, "?"), where)
         raise Unsupported(f"{where}: ingredient {text} is {value!r}")
+
+
+def merge_complementary(docs: list[dict]) -> list[dict]:
+    """Merge entries that are identical except for one condition that is true in one and false in the other.
+
+    The interpreter forks a path at every `if` on a configuration flag or a loaded mod, so what was built before the
+    `if` appears once per branch; if the branches do not change it, the flag has no effect and is dropped.
+    """
+    changed = True
+    while changed:
+        changed = False
+        groups: dict[str, list[dict]] = {}
+        for d in docs:
+            body = json.dumps({k: v for k, v in d.items() if k not in ("when", "order")}, sort_keys=True)
+            groups.setdefault(body, []).append(d)
+        merged: list[dict] = []
+        consumed: set[int] = set()
+        for d in docs:
+            if id(d) in consumed:
+                continue
+            body = json.dumps({k: v for k, v in d.items() if k not in ("when", "order")}, sort_keys=True)
+            partner = None
+            for other in groups[body]:
+                if other is d or id(other) in consumed:
+                    continue
+                a = {(w["expr"], w["kind"]): w["value"] for w in d["when"]}
+                b = {(w["expr"], w["kind"]): w["value"] for w in other["when"]}
+                if a.keys() != b.keys():
+                    continue
+                diff = [k for k in a if a[k] != b[k]]
+                if len(diff) == 1:
+                    partner = (other, diff[0])
+                    break
+            if partner is None:
+                merged.append(d)
+                continue
+            other, drop = partner
+            consumed.add(id(other))
+            consumed.add(id(d))
+            joined = dict(d)
+            if "order" in joined:
+                joined["order"] = min(d["order"], other["order"])
+            joined["when"] = [w for w in d["when"] if (w["expr"], w["kind"]) != drop]
+            merged.append(joined)
+            changed = True
+        docs = merged
+    return docs
 
 
 def clamp_complexity(value: int) -> int:
@@ -2738,7 +2900,7 @@ def research_doc(r: ResearchV, when: list, inst: Inst | None, res: Resolver) -> 
     pages = [page_json(p, r.key) for p in r.pages]
     return {
         "key": r.key,
-        "category": CATEGORY,
+        "category": res.category,
         "kami": r.kami,
         "class": r.cls_name,
         "aspects": aspects_json(r.tags),
@@ -2757,15 +2919,24 @@ def research_doc(r: ResearchV, when: list, inst: Inst | None, res: Resolver) -> 
         "textPages": sum(1 for p in r.pages if p.kind == "text"),
         "when": when_json(when),
         "owner": res.owner(inst) if inst is not None else "ResearchHelper.initResearch",
+        "registered": inst is None or inst.reg_when is not None,
         "source": source_ref(r.file, r.line),
     }
 
 
 def recipe_doc(r: RecipeV, when: list, inst: Inst | None, res: Resolver) -> dict:
-    where = f"recipe {r.name or r.output.text}"
-    doc: dict = {"name": r.name, "kind": r.kind, "research": r.research}
+    where = f"recipe {r.name or (r.output.text if r.output else r.custom_class)}"
+    doc: dict = {"name": r.name or None, "kind": r.kind, "research": r.research}      # "" = unnamed (ConfigResearch.recipes skips it)
     if r.kind == "crafting_shapeless":
         doc["research"] = None
+    if r.kind == "crafting_custom":
+        doc["recipeClass"] = r.custom_class
+        doc["output"] = None
+        doc["when"] = when_json(when)
+        doc["owner"] = res.owner(inst) if inst is not None else None
+        doc["registered"] = inst is None or inst.reg_when is not None
+        doc["source"] = source_ref(r.file, r.line)
+        return doc
     doc["output"] = res.stack(r.output, where + " output")
     if r.aspects is not None:
         doc["aspects"] = aspects_json(r.aspects)
@@ -2792,6 +2963,7 @@ def recipe_doc(r: RecipeV, when: list, inst: Inst | None, res: Resolver) -> dict
             raise Unsupported(f"{where}: pattern symbols {missing} have no ingredient")
     doc["when"] = when_json(when)
     doc["owner"] = res.owner(inst) if inst is not None else None
+    doc["registered"] = inst is None or inst.reg_when is not None
     doc["source"] = source_ref(r.file, r.line)
     return doc
 
@@ -2838,6 +3010,9 @@ def scan_sites(label: str, toks: list[Tok]) -> list[tuple]:
             sites.append((label, tok.line, "ThaumcraftApi." + toks[i + 2].val))
         elif tok.val in ("registerResearchItem",) and toks[i - 1].val == "." and toks[i + 1].val == "(":
             sites.append((label, tok.line, tok.val))
+        elif tok.val == "getRecipeList" and toks[i + 1].val == "(" and toks[i + 2].val == ")" and toks[i + 3].val == "." \
+                and toks[i + 4].val == "add":
+            sites.append((label, tok.line, "getRecipeList().add"))
     return sites
 
 
@@ -2875,6 +3050,8 @@ def load_port_names(root: Path, hashes: dict[str, str]) -> dict[str, dict[str, s
                 value = interp.static_value(cls, fname)
                 if isinstance(value, str):
                     names[lib][fname] = str(value)
+                elif isinstance(value, list) and all(isinstance(v, str) for v in value):
+                    names[lib][fname] = [str(v) for v in value]
     return names
 
 
@@ -2926,19 +3103,29 @@ def build(source: Path, root: Path = ROOT) -> Plan:
     if plan.errors:
         return plan
 
-    res = Resolver(interp, legacy, port_names)
+    lib = classes.get(CATEGORY_CONSTANT[0])
+    if lib is None or CATEGORY_CONSTANT[1] not in lib.fields:
+        raise OracleError("{}.{} not found".format(*CATEGORY_CONSTANT))
+    category = interp.static_value(lib, CATEGORY_CONSTANT[1])
+    if not isinstance(category, str):
+        raise OracleError("{}.{} is not a string".format(*CATEGORY_CONSTANT))
+    res = Resolver(interp, legacy, port_names, str(category))
     research_docs = []
     for r, when, inst in research:
         if when is None:
             continue
         research_docs.append(research_doc(r, when, inst, res))
     recipe_docs = []
-    for r, when, inst in recipes:
+    for order, (r, when, inst) in enumerate(recipes):
         if when is None:
             continue
-        recipe_docs.append(recipe_doc(r, when, inst, res))
+        doc = recipe_doc(r, when, inst, res)
+        doc["order"] = order          # registration order: the last recipe of a name is the one a research page shows
+        recipe_docs.append(doc)
+    research_docs = merge_complementary(research_docs)
+    recipe_docs = merge_complementary(recipe_docs)
     research_docs.sort(key=lambda d: (d["key"], json.dumps(d["when"])))
-    recipe_docs.sort(key=lambda d: (d["name"] or "", d["kind"], d["source"], json.dumps(d["when"])))
+    recipe_docs.sort(key=lambda d: d["order"])
 
     # diagnostics
     names_seen: dict[str, int] = {}
@@ -2961,7 +3148,7 @@ def build(source: Path, root: Path = ROOT) -> Plan:
         entry = per_file.setdefault(file, {"research": 0, "recipes": 0})
         if kind in RESEARCH_SITE_TYPES:
             entry["research"] += 1
-        elif kind.startswith(("Thaumic", "GameRegistry")):
+        elif kind.startswith(("Thaumic", "GameRegistry", "getRecipeList")):
             entry["recipes"] += 1
     sources_digest = sha256(json.dumps({**inputs, **scan_hashes}, sort_keys=True).encode())
     keys = sorted({d["key"] for d in research_docs})

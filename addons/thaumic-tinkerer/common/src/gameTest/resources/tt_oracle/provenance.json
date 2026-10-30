@@ -1,0 +1,674 @@
+{
+  "generator": "scripts/porting/tt_oracle.py",
+  "source": {
+    "repository": "https://github.com/GTNewHorizons/ThaumicTinkerer",
+    "commit": "28f4def938e80d7a0b6f433c2b84300dfb7c35ce",
+    "license": "CC BY-NC-SA 3.0"
+  },
+  "provenance_digest": "2368a285efc347aef6d71dc843019e79f03e76d5872a56d85d740c5e39ed0950",
+  "pin": "the source checkout must be at the commit above (git rev-parse HEAD) unless --allow-unpinned",
+  "inputs": {
+    "addons/thaumic-tinkerer/common/src/main/java/thaumic/tinkerer/common/lib/LibBlockNames.java": "0e581f5da4c85b7e823b66568d5bd9d199d2d145b822e35f01ba400739ed8374",
+    "addons/thaumic-tinkerer/common/src/main/java/thaumic/tinkerer/common/lib/LibItemNames.java": "c223c4ff2e871262b655af418c29ddc8d72d92150ab1e81951ea20dd7bf0cc57",
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "5aada38c48286bbe8cdfae31d8361c12744de0d1f529b3d422d70f15d4c33fa3",
+    "common/src/main/resources/data/thaumcraft/tc4/legacy_ids.json": "d992b87d88686b55580ccf3b9840d77a421a427bea52d32eef682de1ede61a7c"
+  },
+  "sources": {
+    "src/main/java/thaumic/tinkerer/api/INoRemoveEnchant.java": "8f954b1fa1fb4100c0c40e85ff6d0191c8d9078997a4c45ed00d61b2b53a524f",
+    "src/main/java/thaumic/tinkerer/api/InterModCommsOperations.java": "934317139739586c8a9561341e5e1db7315cf0f90d005593e68e4e26e77428ff",
+    "src/main/java/thaumic/tinkerer/client/core/handler/ClientTickHandler.java": "dc695179cd2e2cfdd78174c11ddf3cacb2d439b791ce7e460738639b0fa741bf",
+    "src/main/java/thaumic/tinkerer/client/core/handler/GemArmorKeyHandler.java": "b5f91f218c7315e26c4529659d6ef4941a16132d077e68853be0c8450ab33b01",
+    "src/main/java/thaumic/tinkerer/client/core/handler/HUDHandler.java": "facc3d80ff04176d99f2d980f08f38de7e7d02ec67eac4c6f683c9381de02fd2",
+    "src/main/java/thaumic/tinkerer/client/core/handler/kami/KamiArmorClientHandler.java": "550cddb30f66a72ea5e3605836856d54aadf010c40e6b95d6a9b1a2f3e57ee3b",
+    "src/main/java/thaumic/tinkerer/client/core/handler/kami/PlacementMirrorPredictionRenderer.java": "d6eb8409d2975f2d83a725fc2dbcf4f6800a914b6e9b87ff5c54eeedd8804981",
+    "src/main/java/thaumic/tinkerer/client/core/handler/kami/SoulHeartClientHandler.java": "03a9eac454268da9927dd63993e08bb2af13e361a0fdc035a5adfb73c876d634",
+    "src/main/java/thaumic/tinkerer/client/core/handler/kami/ToolModeHUDHandler.java": "329f4f59481636a74eea53230d94c7c3693f9bed426e454cd037490925b7c494",
+    "src/main/java/thaumic/tinkerer/client/core/helper/ClientHelper.java": "231e1ffb4e2ef32253dd66b348a9a773a3657f32508329972b34f35b13be53e0",
+    "src/main/java/thaumic/tinkerer/client/core/helper/IconHelper.java": "e8866f09eb1f3ef80582055e02976da39b96eb35075f1f572ad5ddcc832976d4",
+    "src/main/java/thaumic/tinkerer/client/core/proxy/TTClientProxy.java": "909ef7b4206c1293e85e1b6246fabe8c1fad0f8efba6dfd0781f6549684a46e6",
+    "src/main/java/thaumic/tinkerer/client/gui/GuiAnimationTablet.java": "aba14aec16866e55edaf595030780a767df1677144ca16ff83a1690e6edbbe99",
+    "src/main/java/thaumic/tinkerer/client/gui/GuiAspectAnalyzer.java": "4aa6bda6d399feb5b1a7468ec84f696b47ab4fbc7101df0cfd0d4347b7aa815b",
+    "src/main/java/thaumic/tinkerer/client/gui/GuiEnchanting.java": "d66a4e96eb82dcfcb904841fd6bcb52a909485201da6a6d3393ac93c9522f50c",
+    "src/main/java/thaumic/tinkerer/client/gui/GuiMobMagnet.java": "88dd818fc0267bee013d91be6c3c0f1d55e46ec057f03b3d01edefe8a31568be",
+    "src/main/java/thaumic/tinkerer/client/gui/GuiRemotePlacer.java": "c3711913ac1d6b067546ce8c72f601c80299d0876dac11a3de0548fa497b5cb4",
+    "src/main/java/thaumic/tinkerer/client/gui/GuiResearchPeripheral.java": "8c0f79d17f091a2c3d32949e179f1cdd7e106d1192806312b34c7c4b4469bd11",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonAT.java": "6c05f8249c8ca22a46a41abaf4e8cf55feb9d0ad022d5188ae2240023f6c1d4c",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonATRadio.java": "8b71de8a0c0fa3ac56d16092585025db7281e3d62ea7a0b11e222029b4d18569",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonEnchant.java": "af057759c232449bb32682da1c11967ab3d4090063a0e8e23497d2fe18c51176",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonEnchanterLevel.java": "fa15e43b40327eeb036c76d6376b520c506c9526fa6ef7f7765a5f555b3d3957",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonEnchantment.java": "9532ccd6a54f6fb4c68287a7dec5189cd6e279aeb9ed8df8be89cab739554069",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonFramedEnchantment.java": "0ffceccb892844d893c21b8f19293f7f1882d5fa980a360d50508f7549546d18",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonMM.java": "b2382e466ee4519252cc8efdb3d0a7366079466c421ec12428fe9e35a24095e1",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonMMRadio.java": "f073b7b1a5142b5bd385dd05abba2946ac1a1670fbb8a0cd0daa535a38f71c12",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonRP.java": "e15f9b4a7bf44b07f70e75c3db0934a0251aa80248c5afb203a559d3b3ed6036",
+    "src/main/java/thaumic/tinkerer/client/gui/button/GuiButtonRPRadio.java": "d4b7ffc7f8c403d18f77a1431f9160ad37c507d8faf7a6bc494c7a7512b9fe4e",
+    "src/main/java/thaumic/tinkerer/client/gui/button/IRadioButton.java": "047cbd1c76091807fbec55c4be164e225f0aff9a07a7b9ef2723b3600da9a852",
+    "src/main/java/thaumic/tinkerer/client/gui/button/kami/GuiButtonWG.java": "3be41061f6a5ffd832e08e15999b8075ee1a733ccbe28d7c6168219d1e73fb9a",
+    "src/main/java/thaumic/tinkerer/client/gui/kami/GuiIchorPouch.java": "f480870e68f8440e5bf487db7a7f68d999ddc8d00ab99e26d984b0a6a28260c7",
+    "src/main/java/thaumic/tinkerer/client/gui/kami/GuiWarpGate.java": "6785f0e59be3ce4c4a41827e625ff5b0b2c40cd2c544a7a0daddc5abbdb09642",
+    "src/main/java/thaumic/tinkerer/client/gui/kami/GuiWarpGateDestinations.java": "39a4ba597fa8126494e91d536baf866472fbd85ce3c70a2ff5044b274e190555",
+    "src/main/java/thaumic/tinkerer/client/lib/LibRenderIDs.java": "dd6893ba06c3aca431574b6a9f0338e713413958b9aadf3b17b08477b79e2bdd",
+    "src/main/java/thaumic/tinkerer/client/lib/LibResources.java": "641da2ea2ded26921ff5cfaf1621e6c8fdc5891cf65aaa8912a2dd359c5ad9c8",
+    "src/main/java/thaumic/tinkerer/client/model/ModelMagnet.java": "d589bfd73f09eb1b9a4c05e4e5538a8ea5c4fb4f5eb664930d6c5b91e70fcbdd",
+    "src/main/java/thaumic/tinkerer/client/model/ModelRelay.java": "09252c161195bfaaf8ff8751891fa11249f59a50e810561dd6ae268ca2e13885",
+    "src/main/java/thaumic/tinkerer/client/model/ModelRepairer.java": "626cd68beaed79741f0b9ea6e0c65811faf1e25378e5f5f66b7ef922c028a430",
+    "src/main/java/thaumic/tinkerer/client/model/kami/ModelSpinningCubes.java": "aac59f52bf45e6cc12c2305d542a6e848c7c0e147112ff1d0005aebe9097c06e",
+    "src/main/java/thaumic/tinkerer/client/model/kami/ModelWings.java": "508ff462aa2db6b0d715f1b148d0735f0ea7208c98f0be7212ca6506e57e62c2",
+    "src/main/java/thaumic/tinkerer/client/nei/NEIConfig.java": "2381c334144599270e3ee262bde51506ca6b0f4f4552727ecd31a14b8e6c6124",
+    "src/main/java/thaumic/tinkerer/client/nei/NEIInfusedSeedRecipeHandler.java": "89dc59948a7a01c80c9e695781b120d0f4d612fbf55111453e25917f6187cd33",
+    "src/main/java/thaumic/tinkerer/client/nei/NEINecromancyHandler.java": "25f984488dde835f5b8d54bfb16dec64e696289be7a9125bf5a3c790d7146375",
+    "src/main/java/thaumic/tinkerer/client/render/block/RenderInfusedCrops.java": "71e475ce3e0e5553052f61cbddf27327cffd3c3a500ea1261c43f1dca07f3834",
+    "src/main/java/thaumic/tinkerer/client/render/block/RenderMagnet.java": "1ca185706a7ba20827d18b7fcb1e1e7a86ddc74989637276e8e934adc046c8bb",
+    "src/main/java/thaumic/tinkerer/client/render/block/RenderRepairer.java": "0c2037e3db0070ef2ba90eb8c39e5b55776f6a99ee5940b83848669bd107b1a1",
+    "src/main/java/thaumic/tinkerer/client/render/block/kami/RenderWarpGate.java": "842e1f186ce79f63248e2ea1ca1b33a75130a1957f2efe069ce956bdef92af93",
+    "src/main/java/thaumic/tinkerer/client/render/item/RenderGenericSeeds.java": "e3729be2a4278e66b1d1f71060aa535560878966a0d597ee80b0905e9a834101",
+    "src/main/java/thaumic/tinkerer/client/render/item/RenderMobDisplay.java": "b3c1a4e7c6e002303daf32b857b8d9478f44eec0e3d6a71aab11dcd8aeaf1dea",
+    "src/main/java/thaumic/tinkerer/client/render/item/kami/RenderPlacementMirror.java": "5771e7476bb1221b1f6f5853effd33c594b1294e3b1812b7c741fb8f4ea4ebc4",
+    "src/main/java/thaumic/tinkerer/client/render/tile/RenderTileAnimationTablet.java": "e6f70de794b6b10520ef614317e806e3f6f1af4446ae5ff524c73824c899648d",
+    "src/main/java/thaumic/tinkerer/client/render/tile/RenderTileEnchanter.java": "0e822c0ba02af67e23854783772afe88f84cb15c12c838d7175943e4fd18c57d",
+    "src/main/java/thaumic/tinkerer/client/render/tile/RenderTileFunnel.java": "ccbca3ebc2f889adf525230a0bb05017ea412ff4e8e20af4812368bb7d43603c",
+    "src/main/java/thaumic/tinkerer/client/render/tile/RenderTileMagnet.java": "875b72b638a0a6fec69dd3d3222547e2276bd52311d5da0ef6cda3ae5720b3b4",
+    "src/main/java/thaumic/tinkerer/client/render/tile/RenderTileRelay.java": "1a8f29076879327438ca84306f72cc104e7ac9b36100d0eabe3c9d3b12fcfda5",
+    "src/main/java/thaumic/tinkerer/client/render/tile/RenderTileRepairer.java": "75d8a4e1a164b55c77a19831d872dc5e0ea9a9291e08d6ce126f9731e9803beb",
+    "src/main/java/thaumic/tinkerer/client/render/tile/kami/RenderTileWarpGate.java": "c7258ffcf560a15e3a3f61e2422db2867f496b5bb65b5f2e043a18022f289634",
+    "src/main/java/thaumic/tinkerer/common/ThaumicTinkerer.java": "9766b0554e09f341f31ca16f0a3d741c4e7cb1bc979cb07ee455629801b401e4",
+    "src/main/java/thaumic/tinkerer/common/block/BlockAnimationTablet.java": "21894e09f4e265398b9a9f01eb10cc562aaef6905f2d193e37e72f0b95f934b2",
+    "src/main/java/thaumic/tinkerer/common/block/BlockAspectAnalyzer.java": "26b14866cb967fd3441c84e49514dae8cb7ca25740a244115246e951ab7b72bd",
+    "src/main/java/thaumic/tinkerer/common/block/BlockCamo.java": "0c3c7ae9d37cb05f02757dc1f5a6c7442e321af77e622c1ece0bde3dbbafaaea",
+    "src/main/java/thaumic/tinkerer/common/block/BlockEnchanter.java": "cd0347d0c4fa8cf34c32872e35e644bce1ca93a1824237fc0e607ac390cb4dde",
+    "src/main/java/thaumic/tinkerer/common/block/BlockForcefield.java": "1241167dfb5f7cdbc0df2da1276800a372f5fa6eb5cec58bf671b6a728bb60e0",
+    "src/main/java/thaumic/tinkerer/common/block/BlockFunnel.java": "6bc8948bf1f70939b14561facf029f3fad3a41bf1e31e7e990a9f7a3be556177",
+    "src/main/java/thaumic/tinkerer/common/block/BlockGas.java": "787a84c83ff87a1d1b8d07bc0f950d16b7cec494332f8bd4beac4e5523951b0c",
+    "src/main/java/thaumic/tinkerer/common/block/BlockGaseousLight.java": "0d1352524a67b85e3595d640910fc71b45f3da0e958865dd34518e70dcebffbb",
+    "src/main/java/thaumic/tinkerer/common/block/BlockGaseousShadow.java": "cc669e9cc152166d7de1eedcec8da5d6ba1a66d3d4ed47a644e12fdf54b0d152",
+    "src/main/java/thaumic/tinkerer/common/block/BlockGolemConnector.java": "78040351b0105ecaf6992eca619b92b9757b07a15e00488683cf676eef14db12",
+    "src/main/java/thaumic/tinkerer/common/block/BlockInfusedFarmland.java": "fc5a57cedc17005440b1ac1fe6ca94130e6c1da07cfb9cc43fe932ad1b64bb77",
+    "src/main/java/thaumic/tinkerer/common/block/BlockInfusedGrain.java": "8136b3330aa16a21fff866f24412dc2bcd8b6aea2a1f148475510504bf0b402c",
+    "src/main/java/thaumic/tinkerer/common/block/BlockMagnet.java": "16d04498818713084034697e2bff7f67f8078b332b652720cc8eeb7eedb06011",
+    "src/main/java/thaumic/tinkerer/common/block/BlockMod.java": "914dd1e5f25e83b748a9ab9fa71e3aefcfe0d24c3f87d191f304cc38a398a003",
+    "src/main/java/thaumic/tinkerer/common/block/BlockModContainer.java": "a0625be8b64625849f1ea3b2c66077b83c6416bcc9cc44d0883384a4d9ce276c",
+    "src/main/java/thaumic/tinkerer/common/block/BlockNitorGas.java": "42a028a21e75e80662a5ccd2ca6e1c8dbfd3a5c72a521b07602cef6e05618637",
+    "src/main/java/thaumic/tinkerer/common/block/BlockPlatform.java": "7f1536cb90d9313527f1c741117ae537672c48f8c03d264c70df0b84577c170a",
+    "src/main/java/thaumic/tinkerer/common/block/BlockRPlacer.java": "a891072e4e9cf8400a06e04c37138e3403e91a6ebe69cdd07f5e152c7f3e775a",
+    "src/main/java/thaumic/tinkerer/common/block/BlockRepairer.java": "edbd78e4faa743a0d92c70ff7d2088896b4817f2b75e90eb54205c2f4a73bf16",
+    "src/main/java/thaumic/tinkerer/common/block/BlockSummon.java": "58e9d132de63ec385ef7fd12be56b38ef130bdce0b6748e9d7f0b0c64c2a7104",
+    "src/main/java/thaumic/tinkerer/common/block/BlockTravelSlab.java": "3ea808e1a988fc2d44430666b14569fb5236557429d0c96219493527c45565bb",
+    "src/main/java/thaumic/tinkerer/common/block/BlockTravelStairs.java": "0c985f8bc07769e1576214f837dbdfd7a66f79471b7cf715b5c20d3a7abcfcd5",
+    "src/main/java/thaumic/tinkerer/common/block/BlockWardSlab.java": "2dd201576767673fbfa1288b7834d11b6018cc7afdca39a6630d226b6a7a2b45",
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireAir.java": "60a5737c7a05e4ab0b0d23cea9d81026d7aa5e6f7aa926cb356a7f8fa73b5c1b",
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireBase.java": "33c96a3290b255b040efc3b7f537d84e99c67b45dbe1d574d1aefe3a3871a937",
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireChaos.java": "6f546bbddf78140acf59c85fb09984683c899887bc2589a430db26c769ec454d",
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireEarth.java": "781ebf9197a6c6b70e8e9aec519a87270f5e1fce830e751e61cd7156b8c96872",
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireIgnis.java": "56ec01e91af40e20c1d8d636eb666714a767ac63a4f083de7e0bca9c3063888c",
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireOrder.java": "11a1be582b2b88958ae02f007c37022279b4f78a1e6a2406a06218c4075a1f14",
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireWater.java": "fe8e460db9347374e3c23136f5299094550547c02e2320b27d84043e970514eb",
+    "src/main/java/thaumic/tinkerer/common/block/kami/BlockBedrockPortal.java": "c077f7be0b33c107429b40232b428b461c30b6b59ed55b1427dfa0c1a0410d81",
+    "src/main/java/thaumic/tinkerer/common/block/kami/BlockWarpGate.java": "cd9f9361fdb769f68f7bd8ebb3d17160dbbc791c71486a44735fe6b41e0bca9b",
+    "src/main/java/thaumic/tinkerer/common/block/mobilizer/BlockMobilizer.java": "64303c3f7eb5c667a89e7a4c84b538dbb4f09e47f67dbb3701a0580e036f903e",
+    "src/main/java/thaumic/tinkerer/common/block/mobilizer/BlockMobilizerRelay.java": "5b9f9d3bef7ec98407d841eabca580c81332c6727b15cccddc695fb28bc6b001",
+    "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartz.java": "03f27b33ab9f7ae30145e8a86d1dbd76bb4673eca5b764d6b2a51038c38447c5",
+    "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartzSlab.java": "741b064296977092381081aa17612888d1495c5278640b2732f196d44f639b70",
+    "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartzStairs.java": "400eced6f4949611d0fe9b1fc876bad828685a5563a965c6391deb450914ed84",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileAspectAnalyzer.java": "643f788a14a96188b98a998809447fe26ca31f6592fbd11dde368fe6a1174696",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileCamo.java": "02c38314a2a923ec08533adebead360d7be3f4f2509f2cb82413d3d21fdca93f",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileEnchanter.java": "45aae08be6f7f15f1a894329c53a832591b1ba0d2f9b9a2d8c46752e561e7260",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileEntityMobilizer.java": "f1759c20f2ecaef0ef67ac109e4f94b991b64c0dd64bde3a1c3982858a79449b",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileEntityRelay.java": "3c2fdb5b47047d3f3685a1d3145b8d19333e09d162ca1e62434d11335b886918",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileForcefield.java": "352a9c44fda1d12e1c1fe5d8231d4a08097898141e6ad1bd9cffe06b18aa127d",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileFunnel.java": "93fd46d6b94ee60342520a2c453153939fb355ce1ed308eef2bfdd1f6578b77b",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileGolemConnector.java": "d81b91b9f5f548907c74d5df2e2b0d884070f8d9f951ae0c03ef61c0b4f4ce58",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileInfusedFarmland.java": "e64084f163bf6f12fb1436f12648cbaa2f5428f983e69230a0dd464ad0f829af",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileInfusedGrain.java": "360e0743eb163b7e50db9617e104aa3714619c1df87abf71bde137b84fc4eed0",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileMagnet.java": "4c67ac98891acb726244f24849bf09ddfe61610bfc1d7df93794db8e71df913e",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileMobMagnet.java": "cc4e17b1a14b4ee1e76e40ac9a8c78803b0a4e1ce2aa9ff1d76c1b4b6c287798",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileRPlacer.java": "e21e5772499cbd586b37280b1e164c1637d9d72872e293123fc43ac5014ba0d1",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileRepairer.java": "54a5385d9bfb606fd815ff8f245487dd10b2fbd189b731d2ceb2215e2e4cb613",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileSummon.java": "856d0061a41c5482b42ee77360e68802295811183ff4b083ecf86ec5f73e3b4b",
+    "src/main/java/thaumic/tinkerer/common/block/tile/TileWardedSlab.java": "f3d60a515e4194cdbbb2e84817a14adc72df88e0504ffe63b5eb4ccafd0610f1",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/ContainerAnimationTablet.java": "5d74655ba0ae996a56bf6bfcb3057eb1ae5f341c8b0013c5defbbcda31540bab",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/ContainerAspectAnalyzer.java": "31d4ead7e3b54c1457cbc55072e768176e71ea6893c5be557ebf271d3a7101b6",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/ContainerEnchanter.java": "bce7fcb4d1fd84e30531d448fe441018be9191560070ae411821b56e45367a28",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/ContainerMobMagnet.java": "058051e6c560b5719b94834551fda85109df2946ba081dc200bb1d6759b16551",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/ContainerPlayerInv.java": "e8c8fc89ab7459c7d8a4e0bfcdad77949cdf1b294beed32de1c11bd0cb2d6fec",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/ContainerRemotePlacer.java": "a95e6bafd28d79706faafc73b43dfcd88ec21aeccd4ed7d11a69cf5ad72ea7c5",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/kami/ContainerIchorPouch.java": "f909023982df298bc9e8969b20b97a7c789f48aab81cefec8e93f0c9d7a436bd",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/kami/ContainerWarpGate.java": "5592019b4b2cdb81314a9a1d64d970f2a716d87bba0c91196ba3cdf3754ecf57",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/slot/SlotMobMagnet.java": "e442c631e26ce3e89bc6a871902bb88b6e9890d8bad40159e2c254d2097eb32c",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/slot/SlotResearchTableOverride.java": "a9bf8189fdf56dcc23eb07b9f6a0a086853d5abf8765939141c8dcbcba53a781",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/slot/SlotTool.java": "da009be707da840130ae8d41bb5a55d13987b71b1172fb5f48f0746dfe934fed",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/slot/SlotWand.java": "1dec2c784906656fc56f423d70517580e0a8db79179b3eebe5e5ad28823c4715",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/slot/kami/SlotNoPouches.java": "af6062e348f37293797a1600f26d08a6d8b213ed384a8a41d90812b821ba6b20",
+    "src/main/java/thaumic/tinkerer/common/block/tile/container/slot/kami/SlotSkyPearl.java": "047ae1b45c5ad204afb3684fb7c20b0f169a0ba42181558789cded6ca8b0447a",
+    "src/main/java/thaumic/tinkerer/common/block/tile/kami/TileBedrockPortal.java": "abaab31c26b2104c3d41e3632e600a5ff5ed041a7473969d0792198a5949708b",
+    "src/main/java/thaumic/tinkerer/common/block/tile/kami/TileWarpGate.java": "20711387e75fb0a29af6fb38b2f4c6b6fa01b8ac272f308c362c08c338993c44",
+    "src/main/java/thaumic/tinkerer/common/block/tile/tablet/TabletFakePlayer.java": "8af8dee2328ed69a81eec08c8c31eb4cc8378573eff1751f78b593e7a919965d",
+    "src/main/java/thaumic/tinkerer/common/block/tile/tablet/TileAnimationTablet.java": "6ddd51d39d45a7ad19706a57f22ba6d51924e50d437fc136315e83598f2de075",
+    "src/main/java/thaumic/tinkerer/common/block/tile/transvector/TileTransvector.java": "de25d5661dce8d712829c4e983e2346e8326678b434cd1907722ad4e81956ceb",
+    "src/main/java/thaumic/tinkerer/common/block/tile/transvector/TileTransvectorDislocator.java": "b65fc4b32bdb822173690d093100247f12cf9589783151d7750a49a75c8bfbce",
+    "src/main/java/thaumic/tinkerer/common/block/tile/transvector/TileTransvectorInterface.java": "6dec5d98d647ea9b5546faa9be7d0988a53cd68971a6cc4f3d64c5fd509987ff",
+    "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorDislocator.java": "e63d195edf2a30da98635b9e5e2ec7110634ce1557dba20d6dba29fb1cff0030",
+    "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorInterface.java": "61b9268ed6772d9c6fc2aad030c200e690033be54218719f2c2b927d7d6e0097",
+    "src/main/java/thaumic/tinkerer/common/compat/BloodMagic.java": "7de8f54e869ca0fecf7f53d7115aea58a788716f90f2f699d9554578ce0fb2e5",
+    "src/main/java/thaumic/tinkerer/common/compat/BotaniaFunctions.java": "2bc35aaf4d4250743982342317b002584d46abae15079617157d3bd451618740",
+    "src/main/java/thaumic/tinkerer/common/compat/EMTCompat.java": "e999ae9b0bc8e226f2e0b2657c12ba4a7b4e15d3def26c475ba4435d5dcafd75",
+    "src/main/java/thaumic/tinkerer/common/compat/EnderIO.java": "5f2c44b9acae58c4a163b67b0711f0341186bc4675724788e4566839ddad5822",
+    "src/main/java/thaumic/tinkerer/common/compat/EnderStorageFunctions.java": "7de47ead0ddf0c781eef169b46d66e4ae11f6d97244e2dc3e4d9bc4bc61fa866",
+    "src/main/java/thaumic/tinkerer/common/compat/FumePeripheral.java": "6bbd699d6de207267d619daa6a45446df5b61c31199b5f45d2342cede88da15e",
+    "src/main/java/thaumic/tinkerer/common/compat/FumeTool.java": "2dc8b762c08b4433c2696fd73b59fa4aee6b176c421067324e8bf2d5f5cf2d0b",
+    "src/main/java/thaumic/tinkerer/common/compat/IndustrialcraftUnloadHelper.java": "25ef1ce750368267eab01273bd6fd68049cb95316af93131e1f5131fde194377",
+    "src/main/java/thaumic/tinkerer/common/compat/InfusedSeedsPlanter.java": "c365d1a6b703271dfaf7556a131781c4364495d3488d1820333bb0ade6892e5d",
+    "src/main/java/thaumic/tinkerer/common/compat/LoadedMods.java": "84fd25a8247b20bdcf7bb3f3a97dda0e9700b27c9b9ba17a3369ded6a5614015",
+    "src/main/java/thaumic/tinkerer/common/compat/MagnetProvider.java": "8b571e1800e420ccfc426af4fb81c35401523f52cb0f1a30dcae96b493671c1a",
+    "src/main/java/thaumic/tinkerer/common/compat/OCCompat.java": "87c71c4203c2986ee52ae55da093239947874859b3d8794d5a27f1530bf9586f",
+    "src/main/java/thaumic/tinkerer/common/compat/TTinkererProvider.java": "8e3a7d755bf49ac104360fee13a0875f63809cae05a891325f420ab3ce03d103",
+    "src/main/java/thaumic/tinkerer/common/compat/TinkersConstructCompat.java": "223545c88f3364136dc4e617609bfe148e696d907f3e0fd0682149995d5fc8d1",
+    "src/main/java/thaumic/tinkerer/common/core/commands/KamiUnlockedCommand.java": "fd4463482e8e5d43fdbe3e387ef073d59a1bc39678f07d5abcc6aeffdaf645fd",
+    "src/main/java/thaumic/tinkerer/common/core/commands/MaxResearchCommand.java": "726340f63871520a9613d3079a1fb6d79b17241d8d6affce40fc267efa5cd42b",
+    "src/main/java/thaumic/tinkerer/common/core/commands/SetTendencyCommand.java": "1bd4ec9ba56625339254f93678341467eff75d8aec9fda017dfeea58328ee755",
+    "src/main/java/thaumic/tinkerer/common/core/golems/EnumGolemCores.java": "d76bf06aac5c67e859899017bb93861edaabd8580450671c98eef4c303aa0651",
+    "src/main/java/thaumic/tinkerer/common/core/golems/EnumGolemDecorations.java": "282f612cd64949284d6c0bc06afa7b7c4bb358c14a09e6278c8923ce18642997",
+    "src/main/java/thaumic/tinkerer/common/core/handler/ConfigHandler.java": "46a447d79f80cbda4e7ab39c0fa0f44166817d1e45a2f803be5b98a5d8cd2ccd",
+    "src/main/java/thaumic/tinkerer/common/core/handler/ModCreativeTab.java": "f69b6ed3d5f5f2ded23113f54f03fc45bd1d7b22897b70937436c4288161e2e3",
+    "src/main/java/thaumic/tinkerer/common/core/handler/kami/DimensionalShardDropHandler.java": "b9fb173ba72e917b9de0a0587a721ae33eb6966d797352046749bd54cd66f6e6",
+    "src/main/java/thaumic/tinkerer/common/core/handler/kami/KamiArmorHandler.java": "ed9885b10382600c632713f97df8d2ea388da0e6e02473401ad39e47404ffd7e",
+    "src/main/java/thaumic/tinkerer/common/core/handler/kami/KamiDimensionHandler.java": "78e63729e0c6455d8c5be16846ea77ebb67a1acc0698cf47e4889e6901d5a269",
+    "src/main/java/thaumic/tinkerer/common/core/handler/kami/SoulHeartHandler.java": "910176d97eb7a3c7df2c7216b06f6e98381ff5dc9e32fea4f562a0752dcee331",
+    "src/main/java/thaumic/tinkerer/common/core/handler/updater/ThreadUpdateChecker.java": "3e2becd75c20cccb89c3d5545d1d3f5d24cf91f551ff2effdffa9bc83fc5f714",
+    "src/main/java/thaumic/tinkerer/common/core/handler/updater/UpdateHandler.java": "f58040c614287ae2e848b95b9a4915b95466f96ee55b8d00a10e0559c355eb03",
+    "src/main/java/thaumic/tinkerer/common/core/helper/AspectCropLootManager.java": "2407b319b2accd76f69167e06b9e917fd345cd5a563c4b4f8330d0060bbfe233",
+    "src/main/java/thaumic/tinkerer/common/core/helper/BonemealEventHandler.java": "187ccf08fb117e8bf26425dc65708134b90a6c28913b9053f99aecb988188320",
+    "src/main/java/thaumic/tinkerer/common/core/helper/EnumMobAspect.java": "eab4d0cabd45666e2f6d78542d9c519814e61e0c31fddd256e02ee966d189cf5",
+    "src/main/java/thaumic/tinkerer/common/core/helper/ExperienceHelper.java": "36e4b6dc43e1a8ee51b60ab9514b31b8aacb9caf5c06c27468edf5f3613f5d85",
+    "src/main/java/thaumic/tinkerer/common/core/helper/FakeContainerCrafting.java": "e27e97f7035f295e4f6c2eaf16b70d21b5cbc904aa9034ab767e07ec8bef6ec5",
+    "src/main/java/thaumic/tinkerer/common/core/helper/ItemNBTHelper.java": "8d593c3288f91894f1fd4141e57e00a4fc87923e9608d7fc8258780b8022e06d",
+    "src/main/java/thaumic/tinkerer/common/core/helper/MiscHelper.java": "0e963caa41d78f1de884368455120dc76e3f98c39e5d53f4ce7ce1cb1ae03e6d",
+    "src/main/java/thaumic/tinkerer/common/core/helper/NumericAspectHelper.java": "dd77197911b2a11f8a3d9322154661d9fa79b57f138de774b15cecc091f8ae28",
+    "src/main/java/thaumic/tinkerer/common/core/helper/ProjectileHelper.java": "28956732a1c52558e5c6e60a2eafd201d193dd1428f55147747385faf1b7e17c",
+    "src/main/java/thaumic/tinkerer/common/core/helper/ReflectionHelper.java": "f93e890f6fe3d7c280b668f6d8e650447905247c11e65b39d287d54e07553019",
+    "src/main/java/thaumic/tinkerer/common/core/helper/Tuple4Int.java": "95c18a762e5bc1d4e69403eae48f3e0af568561eedd13412af881a906eff8f4a",
+    "src/main/java/thaumic/tinkerer/common/core/proxy/TTCommonProxy.java": "026a1ce0cc99b817be2ddd361da3b12963f779431ecfe0e8c40d2dccb579cef1",
+    "src/main/java/thaumic/tinkerer/common/dim/ChunkProviderBedrock.java": "0929a27e85a878a87cfee2a2dc1b17aa8e78824c64a7d497f48d4f747be230b0",
+    "src/main/java/thaumic/tinkerer/common/dim/EnumOreFrequency.java": "c487fd0fc2b443a529b9d1efcd8bb2f4cdec3152b0e6312cbf84b223a827cedf",
+    "src/main/java/thaumic/tinkerer/common/dim/OreClusterGenerator.java": "e7ff431d39de067ffa6eaa9324c63b9564f40c063da5c65ae75435411c23fe0e",
+    "src/main/java/thaumic/tinkerer/common/dim/TeleporterBedrock.java": "ebdec5cbbbe64ec6fa830d880ca971431499984dc66b67cb83b0f2a31e3aaaf8",
+    "src/main/java/thaumic/tinkerer/common/dim/WorldProviderBedrock.java": "f052b018c5b79054736265ac42c7b41fcabb2fbf06530d2ecaa01d9637e896c9",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentAscentBoost.java": "be85c5208ee045a64b1fc6e4965fd2c7012eb43a65d916fb063107fac779a23f",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentAutoSmelt.java": "d592386f0ee358192aaaa357a7732fb4ceb00e7bc7a142a531739f42d8452cf7",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentDesintegrate.java": "cd9fc1673ac32079290a6bf135a0a0e167cd8076fd0a3ca915a30f0f5b212255",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentDispersedStrikes.java": "ca51ad54a38c0e0618427aa7dd4f47d7f246c38df020e74bff66ef33283d1ba0",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentFinalStrike.java": "e85d33451d3d8830ad4dff67d4f593c443c6139a3144c9235b25fae7c0bf8ab8",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentFocusedStrikes.java": "238d2537c71db31608301050a5b2519877912ae0581f5aba96a460a192afbe92",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentMod.java": "3a3003c9955d0a9c57015d266b159a7f3e25b3d7c7e1450023a2eec95044c26e",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentPounce.java": "6e0189d627c52304d631822809a60f6252ec135f3ad1e0e9c2b4e4263aa62ab4",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentQuickDraw.java": "f084eeb7d4c15d66e216d53cc6ce529ae58cd27bb6580170629557442bb4307a",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentShatter.java": "6a565f2d56ab426bbfdd3be7da369b550c9ed96c9872f31bc92871edff55c8a1",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentShockwave.java": "61704fa610c820e9cec23e5df24b5685b745e43c6d2b7b06c47bbae2bee9da87",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentSlowFall.java": "7cefdcaa466174615b08ee1d1de909faf77a45a38712dfe6b2a6668cb544bc8d",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentTunnel.java": "ac675ff7adced63f10968853ab392b87b2002260fb54b838207fe9c88ecce81d",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentValiance.java": "5a951f96024db513afc00c7baa074b57cf67a16221c33cca1c2bb60aa496fedc",
+    "src/main/java/thaumic/tinkerer/common/enchantment/EnchantmentVampirism.java": "f26e557f40b9a512f54ef511b15d58a28f69c350e5a24367c04efff4e609cf29",
+    "src/main/java/thaumic/tinkerer/common/enchantment/ModEnchantmentHandler.java": "4c951082eb80502aaa76582a30097b45e2ca622a696e7daa8701f9a2e1367680",
+    "src/main/java/thaumic/tinkerer/common/enchantment/ModEnchantments.java": "947a37c34fcf380348508dfbbbe65ca7013048561d561601c25d2607255faab4",
+    "src/main/java/thaumic/tinkerer/common/enchantment/core/EnchantmentData.java": "bf3b95cc45ca9e3bda124259c615deeff1dc56c68ef620c3a8733491819bb772",
+    "src/main/java/thaumic/tinkerer/common/enchantment/core/EnchantmentManager.java": "59e62a93a2a54eded19d2b1ab2ff3d60c2b771b0df4bedf8488feda8184ac148",
+    "src/main/java/thaumic/tinkerer/common/enchantment/core/IEnchantmentRule.java": "ce63b9e9e0f86d545df88b4c568507b78784cf5317d44d2a6a84dcc11c0ba237",
+    "src/main/java/thaumic/tinkerer/common/enchantment/core/rule/BasicCompatibilityRule.java": "976eb1f4e2c1b16c0aaf32514de64c9033246177664ed3717f5da3cca6acc9e6",
+    "src/main/java/thaumic/tinkerer/common/item/ItemBlockFire.java": "1f61a0e26cb0edf06505b27c56cf256bb8a8f44da90241b94a4c3ef97299b080",
+    "src/main/java/thaumic/tinkerer/common/item/ItemBlockMagnet.java": "3e777d4377f9c00b0314a5b6b4b2697f0395883f64e62ae0180c7ebbfac49b2e",
+    "src/main/java/thaumic/tinkerer/common/item/ItemBloodSword.java": "b07925e6b52f27ae03ad746c7e84d46dfb0294f5b04222d9f4fd86f89fa1d223",
+    "src/main/java/thaumic/tinkerer/common/item/ItemBrightNitor.java": "6deedf6d306dc5f459be0622b58e200d08fd59bd8c1913802e8efc8be9d1ba1a",
+    "src/main/java/thaumic/tinkerer/common/item/ItemCleansingTalisman.java": "aceae1e370725b869cdf9fc3eeeac7ca175c89c8a2caa8b1ce2d59920d8ff790",
+    "src/main/java/thaumic/tinkerer/common/item/ItemConnector.java": "f61d8538c7159b5309258b5acd49d4fa2d29bb1b6d018c0da39d873bf48f10d6",
+    "src/main/java/thaumic/tinkerer/common/item/ItemGas.java": "99634f98f6feb91bb2f412628207653a0d9aaca5756a04761f29e22951132734",
+    "src/main/java/thaumic/tinkerer/common/item/ItemGasRemover.java": "28c097393365431531d64940313922cef54523df88dbf8af8f8d7fe6954ef819",
+    "src/main/java/thaumic/tinkerer/common/item/ItemInfusedGrain.java": "33eb81c63cce59f853d0251970394579e05e8c653327958a6246d9aba326eddc",
+    "src/main/java/thaumic/tinkerer/common/item/ItemInfusedInkwell.java": "48c6e0e64b70a6539d0e77e56e2b0fb26aa2286fd97aefd4cf25c5e09c9011e2",
+    "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java": "74a8f58eedb269de892219b0ea0d9c38eb48b4aa423f315488e8f9102b9f5031",
+    "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java": "c33a709febdf2fc6514fe8de6d9e0141ccddfe3e35d5269879981f71bb28c5b7",
+    "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java": "914e02d09917dc038bd65b13d82d460c8e2ea354ddac7c403f61b90f23fb6e67",
+    "src/main/java/thaumic/tinkerer/common/item/ItemMobDisplay.java": "efef6072c38a22c35436d4046fc794ee08030bcb2f27e7b352fff445d19485bd",
+    "src/main/java/thaumic/tinkerer/common/item/ItemRevealingHelm.java": "d273a45218508e139b6db120aff4ad147958c535ffe64a1c2aa4c42297c51a45",
+    "src/main/java/thaumic/tinkerer/common/item/ItemShareBook.java": "4585b596de6de032f5774803c8dfca1ff13bc3b1310e714e28c1eb519c529736",
+    "src/main/java/thaumic/tinkerer/common/item/ItemSoulMould.java": "82b3332e6557c9b476d2494f3f589152dc46671fb9126969fa64a4a2a450ed1e",
+    "src/main/java/thaumic/tinkerer/common/item/ItemSpellCloth.java": "45b689c6255c8dff9bc4a319b33ad06b107ccf7b9364de3a8f4ddc533dcabad5",
+    "src/main/java/thaumic/tinkerer/common/item/ItemTravelSlab.java": "aadceae70801cc0106956537ce6e21d75b1637fd3d255c057bb572504859fe1d",
+    "src/main/java/thaumic/tinkerer/common/item/ItemWardSlab.java": "84a1fbd42b45cd71ff234d87f42e46b23ac428e4b73b12e56dea35cd6343979d",
+    "src/main/java/thaumic/tinkerer/common/item/ItemXPTalisman.java": "9c8a4552f1cbe7ee654d39914463d6bcd5ed07b1b587101790cda0bc84272031",
+    "src/main/java/thaumic/tinkerer/common/item/SpellClothCraftingHandler.java": "1eadd9ce54166b7b4b611fe75599bc09dc4f8f1fbc99f39b8e9e1ab61fbaead5",
+    "src/main/java/thaumic/tinkerer/common/item/SpellClothRecipe.java": "a7a7eebdba464db2fa08cdf0f6a74f807f446c6545d48b39a56c13afcf9316f9",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDeflect.java": "dbf44209e3d70b0ef99bfe26616c9a1b941ea43d2f8b875c24a86af27f166797",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDislocation.java": "09e847f9130dd439e0340ecdb9de8851717ac680e8d2a9559ed76a8ccd659c99",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusEnderChest.java": "d08e66d936c058e34b8f76c25b59608b924dd3820387a11ce5d2222bfa5adc08",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusFlight.java": "505f27045d5150cddf52bbf3599441fbb5764b384e91bf06cd4e8a33763f09a6",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusHeal.java": "6b213d61de0e049051783ea094b5e323468c2b819c67387feb0a1a589d581f37",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusSmelt.java": "ce064b4a9024018f3fdf87ac16173673e3bf7ca4be36f2a1169b6dcf17ec5183",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusTelekinesis.java": "30cf1fbdb1f1d7c13f253d0759453482134a1fcb85d3411c11523ea7b2a46405",
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemModFocus.java": "725dea5c3850c138c7bd37cb4b6b4ecb8e73853e21333280e2762a4cba57be9a",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemBlockTalisman.java": "111d514cd2bd2866e8234829f45e25a636cdd64417bae814e5d73784aacc96cd",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemBlockWarpGate.java": "c24420a8493af5e7eb4e029a1e9d3c589c2be2820fc28ec7728dc7c857f90bbf",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemCatAmulet.java": "b4db6fe03eaa15e0fc9ccf4404d68538f2586df95cabb54aaa784722ff438444",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemIchorPouch.java": "3db3fa42d5b4a7eadf29a40686b58bd2a005eabb51465844c7886d9e50a0c546",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java": "c1d98e7007915f8aad2223f99817d6d829dec714ca82ebcac2d26a4d736a0823",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemPlacementMirror.java": "9d2b5ee8ba73fc1127d7f37c99ab73eb8f4a9d2a75385948dc827400bc487a25",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemProtoclay.java": "f2672aaeedc659d5381819b0ecaebae5fcc0a931ebe0d00566cc16dd4ca490c4",
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemSkyPearl.java": "b5db27534edc10bd0bc54b4e7682b3ffc25cb928c23c460692934d4bee6f1d17",
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemBoots.java": "ac30cefed58ad378d4a02b37e2b03d89b50739eafc5e6063be5482d49fd41764",
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemChest.java": "f82e8215464e529585238d90995056b8de89687a31361ecba2bca9375fac089e",
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemHelm.java": "9a8d5580ef94db211baf968215713039ce714a9ba7f442fc5a46680ff66de4ad",
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemLegs.java": "a2de43ded25d42ba67e13b4dc3a04c532a8c1c23781d196aac9d10bf05ddd5de",
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmor.java": "4bec63053bd19e5ddba11287ba63e25f086d4113693ae84fd5bc58ba7953bc18",
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmorAdv.java": "d4c1793a9c354d62c876551fceb289071a035e6fb4cbda7d0beeb98b3aa22469",
+    "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusRecall.java": "851b157a716a74793372eece96f6af54a215c8f56e6181481cd09ec588a32727",
+    "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusShadowbeam.java": "57d405964833d8259a50ee28608617e56c2c16e7620af537d7a383a265243752",
+    "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusXPDrain.java": "ba27c2cb85dd4e3c1b553d0797002fec194b164d31c02738db16eec02b103adc",
+    "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemModKamiFocus.java": "70101d62c3d996bde67cf59aeb1b9e5ee3e69d86f5b60f0b046aac43390b556e",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/IAdvancedTool.java": "56aca7e8493f749cbc0e47a16e045a68060c9d8a5f2b397a9aa5fe2d47be47b0",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorAxe.java": "5c7a6e5dcc62e1a9f2c4cc39e221fd375eb4968c4d5bb5a53ea3db1cef8c880b",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorAxeAdv.java": "34915087fb08074cc99e9665d06c6b515a0c088a1267ad83e3cb38f68b363c5f",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPick.java": "e12b5edf84f71133e578a8a487f260fae868368237a9dfa22843a5575c0b617f",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPickAdv.java": "5206b94c2c8ce68ad38c39c7e7f7f13c2f8b2baade3372a26c6939c9270ba904",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorShovel.java": "6c7b1fe596af0cc048ae6617a428a8c593a37fc1f1f2ceccba3ffa0a9dd2e670",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorShovelAdv.java": "e61e86b044ac6bc3bca9ffa5c3ec3da9d9448fb5c62f95b612a7e23255e90a3f",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorSword.java": "7a2728fd402ccc3e04204e7b3c734cabeec9392519afce63329dd31eb194d607",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorSwordAdv.java": "7179281a315c95c40766b7a32a01ba7066d87a46e726898935b089642a2cb0af",
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ToolHandler.java": "9eeb5a049fb4fa21a5b383fe2b85db72548c4fee566575cb2e0085d130414d94",
+    "src/main/java/thaumic/tinkerer/common/item/kami/wand/CapIchor.java": "9dcf33aeea541f0593b0ddc240fc92bcf8eb68d4eae38568fc5cda2cadcbcc5f",
+    "src/main/java/thaumic/tinkerer/common/item/kami/wand/RodIchorcloth.java": "42896a5c18b918778604d767fc98ddcf50c39ed1df7223fe3296fb0f06851919",
+    "src/main/java/thaumic/tinkerer/common/item/quartz/ItemDarkQuartz.java": "88f90c074b4fe6ec1f8619d90f65168201dacd4b6261005ead2d44030d3831ea",
+    "src/main/java/thaumic/tinkerer/common/item/quartz/ItemDarkQuartzBlock.java": "27d30ee2669bf3b9263f20000e0fabc8a7a74b34ca58ea31457a2395b8d69430",
+    "src/main/java/thaumic/tinkerer/common/item/quartz/ItemDarkQuartzSlab.java": "c9e51485c4ecbd271264b45a8624b4ea2e1d4db896dd228a974f88d335856117",
+    "src/main/java/thaumic/tinkerer/common/lib/LibBlockIDs.java": "654acbceb8600baaac1103fba95ae7ea8d49daf67e5aaeb8ea7bfa4dab9a51f3",
+    "src/main/java/thaumic/tinkerer/common/lib/LibBlockNames.java": "124f3e034f134e9a62abd46c14f1b9f93b53653447ca98205a33777ec1f0112b",
+    "src/main/java/thaumic/tinkerer/common/lib/LibEnchantIDs.java": "9e8dc761a2d9b32412b5fffd8510377b99dbdcebb344c46eff8a18ce8da761bc",
+    "src/main/java/thaumic/tinkerer/common/lib/LibEnchantNames.java": "d5a5cbaf10e65fc4a5c93a4bd049945936ece0e99312161062d3911ae9ceef15",
+    "src/main/java/thaumic/tinkerer/common/lib/LibFeatures.java": "6d6ac54e25097abd6917a69a90b597306f9faa963ae65d8be8a7e2d853b42d4f",
+    "src/main/java/thaumic/tinkerer/common/lib/LibGuiIDs.java": "16cea8e280d0d8557d35fac6e62b9b6a7d49454f70dbbcd03fb4ada46639bb8f",
+    "src/main/java/thaumic/tinkerer/common/lib/LibItemNames.java": "c779a7f1df731773802c213481b2a7074527cda456a2a9a2072191771265a14d",
+    "src/main/java/thaumic/tinkerer/common/lib/LibMisc.java": "404783d54025a8ed3a0ae9dbca6dda32007dd0b332a8e087477f416648252bac",
+    "src/main/java/thaumic/tinkerer/common/lib/LibResearch.java": "1dcd22eb3b1a6ef908493fd028cfefbfc15773e0ec94157ba0b9ea7bf154d87c",
+    "src/main/java/thaumic/tinkerer/common/multipart/MultipartHandler.java": "e54ff4c6dc725535775a48d4148c1e048661936fa5d9da7e0aa3490661e42f65",
+    "src/main/java/thaumic/tinkerer/common/multipart/PartCandle.java": "3a0384edffd48947fceec45d1b9f2ad0c254e06c3180e05e4361593c56c8cb2c",
+    "src/main/java/thaumic/tinkerer/common/multipart/PartNitor.java": "823d445246629796ea98c70a00e42f9cbe5f515048dd2818bb0d32541ad71f69",
+    "src/main/java/thaumic/tinkerer/common/multipart/RegisterBlockPart.java": "b137fc22b98b57bc328cd6354ce0216cc02b5e74094664ecbbdf8e8750c93d9b",
+    "src/main/java/thaumic/tinkerer/common/network/AbstractPacket.java": "15b71bf49e100eb34f6345b6ef84bdd5e3485150785cc337b92fd63df4df4664",
+    "src/main/java/thaumic/tinkerer/common/network/GuiHandler.java": "980ee79e3dcc053d9315d09014a2f0a40e9cf00b06f0aade2f0fddb945529f34",
+    "src/main/java/thaumic/tinkerer/common/network/PlayerTracker.java": "6ae5548f14bb8ecdd60f424f20a34b5457f924e4e1a42aca703e4f45064a2560",
+    "src/main/java/thaumic/tinkerer/common/network/packet/PacketEnchanterAddEnchant.java": "7ff4cb5edcfc6bd9107e677a084aef842b3bfe2674e19a5058ac8a85adfe3bdb",
+    "src/main/java/thaumic/tinkerer/common/network/packet/PacketEnchanterStartWorking.java": "cfde30667968215de167e9326bc73a5c18bbb9663bdf3677fb9e432a9e304a09",
+    "src/main/java/thaumic/tinkerer/common/network/packet/PacketMobMagnetButton.java": "27d1131011839162a8145594b3b98f86b0ce2616dcd120551c8cf340ae089465",
+    "src/main/java/thaumic/tinkerer/common/network/packet/PacketPlacerButton.java": "2b18322eddfffad929650d302996000809a5d5366521f984c0a58d90382219a7",
+    "src/main/java/thaumic/tinkerer/common/network/packet/PacketTabletButton.java": "66013d66ed653f96fb08862cb130b4881c7e8e5e01c4f89ba473849890dc3e7a",
+    "src/main/java/thaumic/tinkerer/common/network/packet/PacketTile.java": "94d4147271065e44b53450d640ad16e0dd93e2b950724ebc87adb5a000174189",
+    "src/main/java/thaumic/tinkerer/common/network/packet/kami/PacketSoulHearts.java": "c22ad530bdaf495f2edf49e407ea3b48907248f87054ffca08e84ed4b9230b3e",
+    "src/main/java/thaumic/tinkerer/common/network/packet/kami/PacketToggleArmor.java": "3c3af0573f65e623a97a25efde02460ee5ed70d7dafede5d37be6d888e16bda1",
+    "src/main/java/thaumic/tinkerer/common/network/packet/kami/PacketWarpGateButton.java": "1967946857261e87672e60eba865c9575ceaf3d65f4e5f67d3a2a147de85f0d1",
+    "src/main/java/thaumic/tinkerer/common/network/packet/kami/PacketWarpGateTeleport.java": "2ce4aefdaee9a84e9b9dff2ef64315f6adfb07c57143b1f721a8ceaf79efd545",
+    "src/main/java/thaumic/tinkerer/common/peripheral/OpenComputers/DriverArcaneBore.java": "94b2789b6c0ab78d17c3abeaaafa88140ff0bd0137b719f9baf4686721bd9a05",
+    "src/main/java/thaumic/tinkerer/common/peripheral/OpenComputers/DriverArcaneEar.java": "e01c2f0760e8dccea71b549e3a652ecf2f139d4c4082408be8e4f8bae997ed01",
+    "src/main/java/thaumic/tinkerer/common/peripheral/OpenComputers/DriverBrainInAJar.java": "3a6f8f1331224753a3eb79d7db0826366c6af9d7d3d69d03ce26c1e23883d563",
+    "src/main/java/thaumic/tinkerer/common/peripheral/OpenComputers/DriverDeconstructor.java": "109fda1dcca4f6e8a12dafe1ea7336a946aa5f7db11d82b93414873339325063",
+    "src/main/java/thaumic/tinkerer/common/peripheral/OpenComputers/DriverEssentiaTransport.java": "6297a818e619b7753b449e6fc63ebba8c0964a71a8f189efb6b59b2c76750fb1",
+    "src/main/java/thaumic/tinkerer/common/peripheral/OpenComputers/DriverIAspectContainer.java": "310c0ad9292fcf7525f9a97696bd2d554237dd5cb400a36021aed34dc96a2900",
+    "src/main/java/thaumic/tinkerer/common/peripheral/OpenComputers/ManagedTileEntityEnvironment.java": "7c6befc395c4f2f6055fa9d297bf0543ea2d84f25ad4cd0a86cb946067c27039",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralArcaneBore.java": "14c123ecc74fd3ceb60a91b40ab50cf1939df9c9bb32fb36a3def47f1cdb4307",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralArcaneEar.java": "c95fc49fa7e8160221516ac82afb57be3e81813830917bac3bfca6ba4bb6e45f",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralAspectContainer.java": "b390e32925649f8bdac095c6d32b0e66795d3d4aa32bb5f9590f688396c056de",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralBrainInAJar.java": "0bfe6f9f1c0730f7628052b538492a1724e874d3a43fc4fb766eb1d072e18211",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralDeconstructor.java": "5e0d29d21e5cdb5c62448b5fad1c30dd5220c052d5ea638d6ed777c2eff8c9b4",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralEssentiaTransport.java": "4fa1512eb792662f9c49505ec863112509a411d24d3126fab75e193cf917f20c",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralHandler.java": "3da6f41e4b92d0c3a76f93c1f509d71b011b0f3ee92fbfab50c0db4369f16390",
+    "src/main/java/thaumic/tinkerer/common/peripheral/PeripheralTransvectorInterface.java": "0ae2424c9d44b494d733559e8ac883ecb281b8feb1ba3fe822b6a70793359157",
+    "src/main/java/thaumic/tinkerer/common/peripheral/implementation/ArcaneEarImplementation.java": "01faae40140c8c0b92a943c3e7ee39b4c4afacbdf4611281278f527bc3a1fc2f",
+    "src/main/java/thaumic/tinkerer/common/peripheral/implementation/IAspectContainerImplementation.java": "76bea69eeba806bd0e69c1ff973a759b97adc5549c3b712feb4fb423b51821fc",
+    "src/main/java/thaumic/tinkerer/common/potion/DummyPotions.java": "92e8a8b18e05dc985a7e0635bbc9efdcaa1f3d81d396eebcbaa8cd7d52adc376",
+    "src/main/java/thaumic/tinkerer/common/potion/ModPotions.java": "49a36e584841b81352051b426c0377892f98654641bb6126c093a8dfe85f09ad",
+    "src/main/java/thaumic/tinkerer/common/potion/PotionEffectHandlerClient.java": "c16f6db7ef2ea7a549b6d81cf9ddb2142346a01ab45eb0e45c75e852720af331",
+    "src/main/java/thaumic/tinkerer/common/potion/PotionEffectHandlerServer.java": "e91a465716bac7e05e7002bd26124fabad2c1a27b37d7b590b631c67af25abe4",
+    "src/main/java/thaumic/tinkerer/common/registry/IMultiTileEntityBlock.java": "1c33741f0f247a5e1d55b829d4a0a20659e3d5533414333018f0d9289f9f2fc8",
+    "src/main/java/thaumic/tinkerer/common/registry/ITTinkererBlock.java": "8b8e797ae92cf3668006e382a17604d9445af5b74b08c0026734d0f2d25adff1",
+    "src/main/java/thaumic/tinkerer/common/registry/ITTinkererItem.java": "4ed0d035ec63be423d92df702da9b6a31539a503336bbbdd91aba0bf452cd046",
+    "src/main/java/thaumic/tinkerer/common/registry/ITTinkererRegisterable.java": "058600c2e0b58e407789ca4477d26f50a0e836894c8fce9b4166e96c6ea77ab9",
+    "src/main/java/thaumic/tinkerer/common/registry/ItemBase.java": "ad33001dd4cf82cff987a383082ce799360601cbc1d99f0cccfa25f2cdc1a612",
+    "src/main/java/thaumic/tinkerer/common/registry/ItemKamiBase.java": "ec47088ac6348b33acf30cf73dd396f2d0fcad1abbd974c64228b6f3baac719e",
+    "src/main/java/thaumic/tinkerer/common/registry/ItemStackCompatator.java": "319aabfeb5144d3c0734429d467daf12afe5b11f10fb7d9e4509dc24f996c326",
+    "src/main/java/thaumic/tinkerer/common/registry/TTRegistry.java": "3bfb91327fb28c0551590a8a962c5d11d0be15473b154e2b2811f049aab22882",
+    "src/main/java/thaumic/tinkerer/common/registry/ThaumicTinkererArcaneRecipe.java": "92f191f53b401d1b8f52dae484a778e112e52b6badbf19a32aa336c4f8d1e0ed",
+    "src/main/java/thaumic/tinkerer/common/registry/ThaumicTinkererCraftingBenchRecipe.java": "b15c0fbb8674262f5e0b2c6d16034bb260cb548913bd83eab838488dcb1cb049",
+    "src/main/java/thaumic/tinkerer/common/registry/ThaumicTinkererCrucibleRecipe.java": "87a9a0cb97cea00280fddc3a26125d2015d80e027ddaa00aa92845cfb56f801f",
+    "src/main/java/thaumic/tinkerer/common/registry/ThaumicTinkererInfusionRecipe.java": "61ac6ea7f6187a74dc815f62e3aa6392f12fdb84f2dcd6556000e4f6250a31d3",
+    "src/main/java/thaumic/tinkerer/common/registry/ThaumicTinkererRecipe.java": "7589de2c1079a3b5c3b16c8f9c2ba765407f4b28dbd5eb7461105a879496154a",
+    "src/main/java/thaumic/tinkerer/common/registry/ThaumicTinkererRecipeMulti.java": "a94e432dbf4bdcee580fdc4855ddfb212de451edacf85c05edae704551d3486a",
+    "src/main/java/thaumic/tinkerer/common/research/EnderStorageRecepie.java": "083fd8c90460fb198c62017e044025ae372e2f1b16a428e06ce11bd5803f1616",
+    "src/main/java/thaumic/tinkerer/common/research/IRegisterableResearch.java": "29284bb2599a6c45b96df1b398434bd56eae5906e7b1fea1ccd5df4f806e5316",
+    "src/main/java/thaumic/tinkerer/common/research/KamiResearchItem.java": "80d7cffa69aab1afcfa36d5c8d9acc53d41a9d05df3d80998b8491278078e169",
+    "src/main/java/thaumic/tinkerer/common/research/RecipeHelper.java": "ab9eac8416d1043662e29258b3e5b3f11ba7859d51dfa5a32c8c4d6c0424bd13",
+    "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java": "e6a12b9db8c8fecf5f0a59f9a41ba8b0737a2020d654e27785e0a8229916d635",
+    "src/main/java/thaumic/tinkerer/common/research/TTResearchItem.java": "2b9ad27f7a7bfd9c7e5d0aa3dc592d6dd59fb2a3d505f45578b809d847b6a451",
+    "src/main/java/thaumic/tinkerer/common/research/TTResearchItemMulti.java": "515b550e5d6093d86a39de1eb7895a88695472da5810341303841f33bd76d317",
+    "src/main/java/thaumic/tinkerer/mixins/early/AccessorItemInWorldManager.java": "184b404e72d5157b05e54553b8917f05cfb01fad9861a3b8acd6e646ad430022",
+    "src/main/java/thaumic/tinkerer/mixins/early/renderer/MixinRenderBlocks.java": "2744e30c65c924a444a84faf196d98e197444bef0418b02371c5158dc8d4d4df",
+    "src/main/java/thaumic/tinkerer/preloader/ThaumicTLoaderContainer.java": "7b9c0875c0089e99c8da55fb8d9867e083884153f224ab0e12aff9e67b12f7ce"
+  },
+  "constructions": {
+    "src/main/java/thaumic/tinkerer/common/block/BlockAnimationTablet.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockAspectAnalyzer.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockEnchanter.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockFunnel.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockGolemConnector.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockMagnet.java": {
+      "research": 1,
+      "recipes": 2
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockPlatform.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockRPlacer.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockRepairer.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockSummon.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockTravelSlab.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockTravelStairs.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/BlockWardSlab.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireAir.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireChaos.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireEarth.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireIgnis.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireOrder.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireWater.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/kami/BlockWarpGate.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/mobilizer/BlockMobilizer.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/mobilizer/BlockMobilizerRelay.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartz.java": {
+      "research": 0,
+      "recipes": 3
+    },
+    "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartzSlab.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartzStairs.java": {
+      "research": 0,
+      "recipes": 2
+    },
+    "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorDislocator.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorInterface.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemBloodSword.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemBrightNitor.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemCleansingTalisman.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemConnector.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemGas.java": {
+      "research": 2,
+      "recipes": 2
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemGasRemover.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemInfusedInkwell.java": {
+      "research": 0,
+      "recipes": 2
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java": {
+      "research": 2,
+      "recipes": 4
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java": {
+      "research": 0,
+      "recipes": 6
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java": {
+      "research": 0,
+      "recipes": 2
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemRevealingHelm.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemShareBook.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemSoulMould.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemSpellCloth.java": {
+      "research": 1,
+      "recipes": 2
+    },
+    "src/main/java/thaumic/tinkerer/common/item/ItemXPTalisman.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDeflect.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDislocation.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusEnderChest.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusFlight.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusHeal.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusSmelt.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusTelekinesis.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemBlockTalisman.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemCatAmulet.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemIchorPouch.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java": {
+      "research": 6,
+      "recipes": 6
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemPlacementMirror.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemProtoclay.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/ItemSkyPearl.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemBoots.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemChest.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemHelm.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemLegs.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmor.java": {
+      "research": 1,
+      "recipes": 4
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusRecall.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusShadowbeam.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusXPDrain.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorAxe.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorAxeAdv.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPick.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPickAdv.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorShovel.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorShovelAdv.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorSword.java": {
+      "research": 0,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorSwordAdv.java": {
+      "research": 1,
+      "recipes": 1
+    },
+    "src/main/java/thaumic/tinkerer/common/item/quartz/ItemDarkQuartz.java": {
+      "research": 1,
+      "recipes": 2
+    },
+    "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java": {
+      "research": 15,
+      "recipes": 0
+    }
+  },
+  "totals": {
+    "source_files": 334,
+    "research_sites": 79,
+    "recipe_sites": 98,
+    "research_entries": 81,
+    "research_keys": 78,
+    "recipes": 130,
+    "recipe_kinds": {
+      "arcane_shaped": 28,
+      "crafting_custom": 1,
+      "crafting_shaped": 30,
+      "crafting_shapeless": 1,
+      "crucible": 15,
+      "infusion": 55
+    }
+  },
+  "recipe_names_registered_more_than_once": [
+    "DARK_QUARTZ0",
+    "PAVETRAVEL",
+    "SUMMON",
+    "SUMMON1"
+  ],
+  "page_references_without_recipe": [],
+  "unresolved_items": []
+}

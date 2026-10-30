@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart): runtime checks of the KamiWorld group, run by the Fabric GameTests. Distributed under the same licence as the add-on
+ * (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.testing;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -31,7 +35,6 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.ThaumcraftApiHelper;
@@ -287,9 +290,14 @@ public final class KamiWorldRuntimeChecks {
         test.assertTrue(in.speed().equals(Vec3.ZERO), "no momentum");
         int x = portalPos.getX();
         int z = portalPos.getZ();
-        test.assertTrue(bedrock.getBlockState(new BlockPos(x, TeleporterBedrock.FLOOR_Y, z)).is(Blocks.BEDROCK), "bedrock below the cavity");
+        // The ore veins of the dimension start as high as layer 250 and reach layer 251 at most (1.7.10 and here alike), and the
+        // portal only clears stone and bedrock: whether a vein of this world's seed crosses the column is chance, so the
+        // layers 249 to 251 may hold an ore block instead of bedrock or air. Layers 252 and above never do.
+        test.assertTrue(!bedrock.getBlockState(new BlockPos(x, TeleporterBedrock.FLOOR_Y, z)).isAir(), "something solid below the cavity");
         for (int y = TeleporterBedrock.CAVITY_MIN_Y; y <= TeleporterBedrock.CAVITY_MAX_Y; y++) {
-            test.assertTrue(bedrock.getBlockState(new BlockPos(x, y, z)).isAir(), "air at " + y);
+            BlockState cell = bedrock.getBlockState(new BlockPos(x, y, z));
+            test.assertTrue(cell.isAir() || (y <= 251 && !cell.is(Blocks.STONE) && !cell.is(Blocks.BEDROCK)),
+                    "air at " + y + " (an ore of a vein is left alone at 250 and 251): " + cell);
         }
         test.assertTrue(bedrock.getBlockState(new BlockPos(x, TeleporterBedrock.EXIT_Y, z)).is(portal), "the exit portal at 254");
         test.assertTrue(bedrock.getBlockState(new BlockPos(x, 255, z)).is(Blocks.BEDROCK), "bedrock above it");
@@ -318,6 +326,7 @@ public final class KamiWorldRuntimeChecks {
         Zombie zombie = EntityType.ZOMBIE.create(bedrock);
         test.assertTrue(portal.getPortalDestination(bedrock, zombie, new BlockPos(x, 254, z)) == null,
                 "only players leave the Bedrock dimension");
+        test.assertTrue(portal.getPortalDestination(overworld, zombie, portalPos) == null, "only players enter the Bedrock dimension");
         ServerLevel nether = overworld.getServer().getLevel(Level.NETHER);
         if (nether != null) {
             test.assertTrue(portal.getPortalDestination(nether, player, new BlockPos(0, 64, 0)) == null, "the Nether is no surface world");
@@ -325,23 +334,26 @@ public final class KamiWorldRuntimeChecks {
         finish(test, player);
     }
 
-    /** An item in an Overworld portal is carried to the cavity of the Bedrock dimension by the game's own portal processing. */
-    public static void portalCarriesAnItemFromTheOverworldToTheBedrockCavity(GameTestHelper test) {
+    /**
+     * 1.7.10 sent players only (the tile entity that would have sent everything never existed in the world): an item lying in
+     * an Overworld portal stays in the Overworld, and the portal has no destination for it.
+     */
+    public static void portalLeavesNonPlayersAlone(GameTestHelper test) {
         floor(test);
         test.setBlock(new BlockPos(3, 1, 3), Blocks.STONE);
         test.setBlock(new BlockPos(3, 2, 3), KamiWorld.portalBlock());
         BlockPos portalPos = test.absolutePos(new BlockPos(3, 2, 3));
-        ServerLevel bedrock = bedrock(test);
         ItemEntity item = test.spawnItem(Items.COBBLESTONE, 3.5F, 2.2F, 3.5F);
-        AABB cavity = new AABB(portalPos.getX(), 249, portalPos.getZ(), portalPos.getX() + 1, 254, portalPos.getZ() + 1);
-        test.succeedWhen(() -> {
-            test.assertTrue(item.isRemoved(), "the item left the Overworld");
-            List<ItemEntity> arrived = bedrock.getEntitiesOfClass(ItemEntity.class, cavity,
-                    entity -> entity.getItem().is(Items.COBBLESTONE));
-            test.assertTrue(arrived.size() == 1, "the item arrived in the Bedrock cavity: " + arrived.size());
-            test.assertTrue(bedrock.getBlockState(new BlockPos(portalPos.getX(), 254, portalPos.getZ())).is(KamiWorld.portalBlock()),
-                    "the exit portal was made");
-            arrived.forEach(ItemEntity::discard);
+        Zombie zombie = EntityType.ZOMBIE.create(test.getLevel());
+        test.assertTrue(zombie != null, "a zombie can be made");
+        test.assertTrue(KamiWorld.portalBlock().getPortalDestination(test.getLevel(), item, portalPos) == null, "no destination for an item");
+        test.assertTrue(KamiWorld.portalBlock().getPortalDestination(test.getLevel(), zombie, portalPos) == null, "no destination for a mob");
+        test.runAfterDelay(40, () -> {
+            test.assertTrue(!item.isRemoved() && item.level() == test.getLevel(), "the item is still in the Overworld after two seconds");
+            test.assertTrue(Math.abs(item.getX() - (portalPos.getX() + 0.5)) < 1.0 && Math.abs(item.getZ() - (portalPos.getZ() + 0.5)) < 1.0,
+                    "and still at the portal: " + item.position());
+            item.discard();
+            test.succeed();
         });
     }
 

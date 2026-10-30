@@ -13,11 +13,14 @@ package thaumic.tinkerer.fabric;
 
 import net.fabricmc.api.ClientModInitializer;
 import thaumic.tinkerer.common.ThaumicTinkerer;
+import thaumic.tinkerer.fabric.client.FabricItemRenderers;
 
 /** Fabric {@code client} entrypoint. */
 public final class ThaumicTinkererFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        // The backends of the client hooks (docs/HOOKS.md) come first: the groups register against them in initClient().
+        FabricItemRenderers.install();
         ThaumicTinkerer.initClient();
     }
 }

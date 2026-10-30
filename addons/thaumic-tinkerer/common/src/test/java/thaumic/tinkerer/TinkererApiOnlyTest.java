@@ -22,7 +22,8 @@ class TinkererApiOnlyTest {
     private static final List<String> COMMON_ALLOWED = List.of("java.", "javax.", "net.minecraft.", "com.mojang.",
             "dev.architectury.", "com.google.", "org.slf4j.", "org.apache.", "it.unimi.dsi.fastutil.", "io.netty.",
             "org.jetbrains.", "org.joml.", "com.electronwill.", "thaumcraft.api.", "thaumic.tinkerer.");
-    private static final List<String> FABRIC_ALLOWED = List.of("net.fabricmc.");
+    // The Fabric tree also holds mixins (thaumic.tinkerer.fabric.mixin): Mixin and MixinExtras are the loader's, not the mod's.
+    private static final List<String> FABRIC_ALLOWED = List.of("net.fabricmc.", "org.spongepowered.", "com.llamalad7.");
 
     @Test
     void thePluginSourcesImportOnlyThePublicApi() throws IOException {

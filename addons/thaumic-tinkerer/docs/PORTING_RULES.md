@@ -57,7 +57,9 @@ cannot do, or a reproducible crash/exploit, and is written down in `docs/deviati
   The 1.7.10 ISBRH/`IItemRenderer`/`ModelBase` renderers become JSON models where the shape is static, otherwise block
   entity renderers. Keep client-only classes (anything importing `net.minecraft.client`) in `thaumic.tinkerer.client`.
 - Events: Architectury events (`dev.architectury.event.events.common.*`) where they exist; where they do not, say so in
-  your report (the lead adds a loader hook) instead of using a Fabric-only API in common code.
+  your report (the lead adds a loader hook) instead of using a Fabric-only API in common code. The loader hooks that exist are
+  in `docs/HOOKS.md` (`thaumic.tinkerer.common.hooks.TinkererEvents`: damage amount, dig speed, jump, fall, item use tick, death
+  drops; `FloatingTicks`; `thaumic.tinkerer.client.hooks.ItemRenderers`): use them instead of a workaround.
 - Config: the static fields of `ConfigHandler` (same names as 1.7.10). Enchantments, dimensions, damage types are data
   (`data/thaumictinkerer/...`); 1.7.10 numeric ids are gone.
 - Do not hold a `Level`, `Player` or `BlockEntity` in a static field. Server logic runs on the server thread; check

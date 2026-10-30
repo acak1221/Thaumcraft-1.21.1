@@ -1,3 +1,7 @@
+/**
+ * New in the 1.21.1 port of Thaumic Tinkerer (no 1.7.10 counterpart): the Fabric GameTest wrappers of the KamiWorld checks. Distributed under the same licence as the add-on
+ * (CC BY-NC-SA 3.0, see addons/thaumic-tinkerer/NOTICE.md).
+ */
 package thaumic.tinkerer.fabric.testing;
 
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -27,9 +31,9 @@ public final class KamiWorldGameTests implements FabricGameTest {
         KamiWorldRuntimeChecks.portalDestinationsFollowTheRules(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
-    public void portalCarriesAnItemFromTheOverworldToTheBedrockCavity(GameTestHelper test) {
-        KamiWorldRuntimeChecks.portalCarriesAnItemFromTheOverworldToTheBedrockCavity(test);
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void portalLeavesNonPlayersAlone(GameTestHelper test) {
+        KamiWorldRuntimeChecks.portalLeavesNonPlayersAlone(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

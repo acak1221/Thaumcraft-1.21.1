@@ -21,7 +21,7 @@ renderer are untested visually.
 | 1.7.10 | 1.21.1 |
 |---|---|
 | block `warpGate` (+ `ItemBlockWarpGate`, a plain item block that was never registered on its own) | block and item `thaumictinkerer:warp_gate` (`LibBlockNames.WARP_GATE`), block entity type and menu type of the same path |
-| block `portal` (`BlockBedrockPortal`, no item) | block `thaumictinkerer:bedrock_portal` (`LibBlockNames.PORTAL`), no item, no block entity (section 3) |
+| block `portal` (`BlockBedrockPortal`; `getItemBlock()` returned null, so `GameRegistry` registered the default item block, and the block was in the creative tab) | block `thaumictinkerer:bedrock_portal` (`LibBlockNames.PORTAL`) with the default item, a creative tab entry and an item model, no block entity (section 3) |
 | dimension id -19 (`bedrockDimensionID`, config), `WorldProviderBedrock`, `ChunkProviderBedrock` | the dimension `thaumictinkerer:bedrock` (`WorldProviderBedrock.KEY`): `data/thaumictinkerer/dimension/bedrock.json`, `dimension_type/bedrock.json`, `worldgen/biome/bedrock.json`, generator type `thaumictinkerer:bedrock` (`ChunkGeneratorBedrock`, a `DeferredRegister` of `Registries.CHUNK_GENERATOR` in `KamiWorld`) |
 | ore dictionary names of `EnumOreFrequency` | the same names, resolved to item tags by `OreDictionaryNames`; "first ore" is the member with the lowest registry id |
 | `PacketSoulHearts`, `PacketWarpGateButton`, `PacketWarpGateTeleport` (`SimpleNetworkWrapper`, ids 142+) | `CustomPacketPayload` records `soul_hearts` (S2C), `warp_gate_button`, `warp_gate_teleport` (C2S) |
@@ -37,7 +37,7 @@ loading; with Kami off the dimension exists but nothing leads there and nothing 
 `ThaumicTinkerer.preInit` registration of the provider type and the dimension (`DimensionManager`) and the config option
 `bedrockDimensionID` (0 disabled the dimension) are gone; `enableKami` is the switch.
 
-Classes of the original not ported as classes: `TileBedrockPortal` (section 3), `KamiDimensionHandler` (already ported by the
+Classes of the original not ported as classes: `TileBedrockPortal` (section 3: it never ran in 1.7.10), `KamiDimensionHandler` (already ported by the
 KamiGear group as `ItemIchorPickAdv.onLeftClickBlock`, which the KamiGear docs say KamiWorld must not register again),
 `WorldProviderBedrock`'s methods (section 2: the class remains as the home of the dimension key and two predicates),
 `BlockBedrockPortal.travelToDimension` (a public copy of `Entity.travelToDimension` that nothing called),
@@ -71,8 +71,14 @@ KamiGear group as `ItemIchorPickAdv.onLeftClickBlock`, which the KamiGear docs s
   (`isReplaceableOreGen(bedrock)`). The vein is the 1.7.10 `WorldGenMinable.generate` loop line by line (the table `sin`, the
   order of the draws), now `OreClusterGenerator.generateVein`. A vein reaches at most the chunk and the one east and south of it
   (it starts 8 to 23 blocks into the chunk's column and swings at most four blocks), which the generation region of the features
-  step allows; the written area is checked (`reaches`) and the outer layers (y 0 and 1, 252 to 255) never hold ore, so the entrance
-  cavity of the portal (section 3) is never cut by a vein. Blocks are placed with the flag "update clients" (1.7.10: flag 2).
+  step allows; the written area is checked (`reaches`). The outer layers (y 0 and 1, 252 to 255) never hold ore: a vein starts at
+  y 250 at most and its ellipsoids reach 251 at most. **The portal cavity is not safe from ore** (this document said so before
+  and was wrong): the layers 250 and 251 of a column can hold an ore block (measured with the real `generateVein`, 2,000,000
+  veins started at y = 250: 36.3 percent placed a block at y 250, 0.35 percent at y 251, none above 251). The entrance only clears
+  stone and bedrock (section 3), so an ore block of a vein stays in the cavity, as in 1.7.10 (the original cleared the same two
+  blocks); the traveller who arrives at 251 then stands in it for the rare vein that reaches 251 (and on it for a vein at 250).
+  Kept as it was: it needs a vein start at the very top of the range to cross a given column. Blocks are placed with the flag
+  "update clients" (1.7.10: flag 2).
   Differences: (a) the veins are generated per chunk when it reaches the features step, in the order the server generates
   chunks, so a vein in a neighbour is shaped by what that neighbour already took (1.7.10 had the same order dependence through
   `populate`); (b) with no valid ore at all the cluster is skipped (1.7.10 threw on `nextInt(0)`); (c) the iron-ore fallback of
@@ -97,21 +103,28 @@ box, not opaque, stone sound, `canEntityDestroy == false` (the block is in `mine
 files in the `minecraft` namespace that are new in this group), `canHarvestBlock == false`. Right-clicking it turns it back into
 bedrock and the click goes on (a held block is placed against it), as in `onBlockActivated`.
 
-- **Travelling.** 1.7.10 sent players from `onEntityCollidedWithBlock` (with a `TeleporterBedrock` that placed nothing) and
-  everything else from `TileBedrockPortal.updateEntity` with the vanilla teleporter, which built a Nether portal in the
-  Bedrock dimension for every item, mob or arrow that touched the block. In 1.21.1 the block is a vanilla `Portal`:
-  `entityInside` hands an entity to the game's portal processing, which changes its dimension at the end of its tick with no
-  waiting time and no screen effect, to the `DimensionTransition` of `getPortalDestination`. The tile entity is not needed
-  and is not ported. Differences: (a) non-player entities no longer cause a stray Nether portal; in a surface world they arrive
-  at the cavity like players; in the Bedrock dimension only players leave (the tile entity "travelled" them to the dimension
-  they were already in); (b) the 1.7.10 portal checked `isSurfaceWorld()`; the 1.21.1 predicate is "has sky light, no ceiling and
-  is not the Bedrock dimension" (`WorldProviderBedrock.isSurfaceWorld`), which is the Overworld and similar mod dimensions, not
-  the Nether or the End; (c) the game's portal cooldown (10 ticks for players, 15 seconds for others) applies.
+- **Travelling.** Players only, in both directions. 1.7.10 sent a player from `onEntityCollidedWithBlock` (`entity instanceof
+  EntityPlayer`, on the way in and on the way out) with a `TeleporterBedrock` that placed nothing. The block also named a
+  `TileBedrockPortal` whose `updateEntity` would have sent *every* entity in the block to the dimension, but that tile entity
+  never existed in a world: `BlockBedrockPortal extends BlockMod` (a plain `Block`), is no `ITileEntityProvider` and does not
+  override `hasTileEntity`, which then answers false (the default of Forge 1.7.10's `Block.hasTileEntity(int)` is `this instanceof ITileEntityProvider`), so `createTileEntity` was never called and `updateEntity` never ran (the
+  class was only registered by name). Items, mobs, arrows and boats therefore always passed through the portal untouched, and
+  they still do. An earlier version of this port assumed the tile worked and sent every entity (and built a Nether portal in the
+  Bedrock dimension for each); that was wrong and is removed: `entityInside` and `getPortalDestination` accept `Player` only.
+  In 1.21.1 the block is a vanilla `Portal`: `entityInside` hands the player to the game's portal processing, which changes its
+  dimension at the end of its tick with no waiting time and no screen effect, to the `DimensionTransition` of
+  `getPortalDestination`. The tile entity is not needed and is not ported. Differences: (a) the 1.7.10 portal checked
+  `isSurfaceWorld()`; the 1.21.1 predicate is "has sky light, no ceiling and is not the Bedrock dimension"
+  (`WorldProviderBedrock.isSurfaceWorld`), which is the Overworld and similar mod dimensions, not the Nether or the End; (b) the
+  game's portal cooldown (10 ticks for a player) applies.
 - **In** (`TeleporterBedrock.toBedrock`): the Bedrock column with the portal's x and z is loaded, layer 249 becomes stone if it
   is air, layers 250 to 253 are cleared when they are stone or bedrock (other blocks stay), the bedrock at 254 becomes the
   portal, and the traveller arrives at the middle of the block at y = 251 with yaw and pitch 0, no momentum.
 - **Out** (`TeleporterBedrock.toSurface`): the Overworld (dimension 0 whatever the player came from), a random column
-  `(int) x + nextInt(100) - 50` (and z), scanned down from y = 120 for the first block that is not air (leaves and water count),
+  `(int) x + nextInt(100) - 50` (and z; the original read `entity.posX` after `transferPlayerToDimension`, which in the Forge
+  1.7.10 of the fork scales the position by `oldProvider.getMovementFactor() / newProvider.getMovementFactor()`, 1 / 1 for the
+  Bedrock dimension and the Overworld since neither overrides it, so it is the portal's own x and z, as here; the 8-fold
+  scaling is the Nether's. This rests on a recollection of that Forge patch: no 1.7.10 server source is on disk to check it), scanned down from y = 120 for the first block that is not air (leaves and water count),
   three blocks above it; a column that is air all the way down gets a stone at 119 first (1.7.10: at `y <= 1`; the floor is the
   world's bottom + 1). **Deviation:** the 1.7.10 scan started at 120 even inside rock, so a landing under a mountain put the
   player inside it; here a start cell that is not air sends the scan to the top of the column (`WORLD_SURFACE` heightmap), and
@@ -139,8 +152,12 @@ bedrock and the click goes on (a held block is placed against it), as in `onBloc
 - **Teleport.** The same checks and messages: the destination must be a gateway that does not refuse (`ttmisc.noDest`,
   `ttmisc.noTeleport`), the player is taken off a mount and put at `(x + 0.5, y + 1.6, z + 0.5)` of the destination block with the
   sound `thaumcraft:wand` before (pitch 1) and after (pitch 0.1) at volume 1, once per gateway and tick (`teleportedThisTick`,
-  cleared by the block entity tick). The sparkles of the original are written inside `if (worldObj.isRemote)` in a method that
-  only ever runs on the server, so they never showed; they are not ported. The sound is played for everyone nearby **including**
+  cleared by the block entity tick). The sparkles of the original (20 before the jump, 20 after) are written inside
+  `if (player.worldObj.isRemote)` in `teleportPlayer(EntityPlayer, ChunkCoordinates)`: they showed on the client of a player
+  who used the Focus of Celestial Recall (its `onUsingFocusTick` runs on both sides), and never on the gateway's own menu and map
+  path (the packet handler `teleportPlayer(player, slot)` runs on the server only). Ported for the Recall path: the server sends
+  them to the clients (`KamiHooks.sparklesAround`, `teleportPlayer(ServerPlayer, BlockPos)`, which the registrar gives to
+  `KamiHooks.warpGateTeleporter`); the menu and map path has none, as before. The sound is played for everyone nearby **including**
   the teleported player (`level.playSound(null, ...)`; 1.7.10's `playSoundAtEntity` reached every player).
 - **Cross-dimension (requested, an extension).** 1.7.10 looked for a gateway at the pearl's coordinates in the *player's own*
   dimension, so its map skipped the pearls of other dimensions and the pearl's `dim` only decided a red "Different Dimension" line.
@@ -232,8 +249,27 @@ is required" for a non-player. The three words are literal English texts, as in 
 
 ## 9. Deliberately not carried over
 
-- The Nether portal that the vanilla teleporter built in the Bedrock dimension for non-player entities (section 3).
 - The truncation of damage for players without soul hearts (section 5).
-- Sparkles of the gateway teleport (dead code in the original, section 4).
 - `y == -1` hiding a destination on the map (section 4).
 - The configurable dimension id and the option to disable the dimension (section 1).
+
+## 10. Open items and cross-group references
+
+- **Gateway tooltip (Jade).** The original `TTinkererProvider` (Waila, lines 94-98) showed one line over the Celestial Gateway:
+  `ttwaila.allowIncoming` when the block entity's `locked` flag is **true** and `ttwaila.disallowIncoming` when it is false. That is
+  the inverse of what the flag does (`teleportPlayer` refuses a gateway whose `locked` is true), so the original tooltip lies; the
+  lead decides whether the Jade port copies it or fixes it. The keys are in the generated base language files; nothing reads them
+  yet because the Waila/Jade providers are not a class of this group. They belong to the lead's Waila-to-Jade port
+  (`docs/API_GAPS.md` item 10). **Not done.**
+- **Classes of the KamiGear group that this group uses** (PORTING_RULES 1.3 says groups reach each other by registry path):
+  `ItemSkyPearl` (the static `isAttuned`, `getPos`, `getDim`, `getX`, `getZ`, `addInfo` and the `instanceof` test in
+  `TileWarpGate`, `ContainerWarpGate` and `GuiWarpGateDestinations`), `SlotSkyPearl` (`ContainerWarpGate`), `ModelSpinningCubes`
+  (`RenderTileWarpGate`) and `KamiHooks` (`KamiWorld`, `KamiWorldClient`, `TileWarpGate`). They are the contract that the KamiGear
+  group documents for this group (`docs/api-requests/KamiGear.md` section 5; `SlotSkyPearl` and `ModelSpinningCubes` were ported
+  by that group for the gateway). The attunement of a pearl is a data component with its own static accessors, and the gateway's
+  screens read and write it all the time, so there is no registry-path equivalent that does not copy the component's code.
+  Behaviour is unaffected and it compiles; the lead decides whether PORTING_RULES gets an explicit exception for these four
+  helpers or the helpers move to a neutral package (a request to the lead, not a change of this group).
+- **Not run.** The GameTests of this group (`KamiWorldRuntimeChecks`) compile with `tools/compile.sh -g` but were not run; the
+  changed portal checks (`portalLeavesNonPlayersAlone`, the ore-tolerant cavity assertion of `portalDestinationsFollowTheRules`)
+  are new since the review.

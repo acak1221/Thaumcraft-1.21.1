@@ -39,13 +39,15 @@ import thaumic.tinkerer.common.dim.WorldProviderBedrock;
  * creative tab entry: 1.7.10 returned null from {@code getItemBlock()}, which made {@code GameRegistry} register the default
  * item block, and the block set the creative tab.
  *
- * <p>1.7.10 did this twice over: the block moved <i>players</i> from {@code onEntityCollidedWithBlock} (with the
- * {@code TeleporterBedrock} that placed nothing, and the cavity work of {@link TeleporterBedrock}), and its tile entity
- * {@code TileBedrockPortal} sent <i>every</i> entity in the block to the dimension with the vanilla teleporter (which also
- * built a Nether portal there). Here the block is a vanilla {@link Portal}: an entity that stands in it is sent by the
- * game's own portal processing, at the end of its tick, to the destination of {@link #getPortalDestination}: the
- * Bedrock dimension from a surface world (any entity), the Overworld from the Bedrock dimension (players only, as
- * before). The tile entity is not needed any more.</p>
+ * <p>1.7.10 moved <i>players only</i>: {@code onEntityCollidedWithBlock} sent an {@code EntityPlayer} through
+ * {@code transferPlayerToDimension} (with the {@code TeleporterBedrock} that placed nothing, and the cavity work of
+ * {@link TeleporterBedrock}). The block also named a {@code TileBedrockPortal} that sent every entity in the block to the
+ * dimension, but that tile entity never existed in the world: the block is a plain {@code BlockMod} that is no
+ * {@code ITileEntityProvider} and does not override {@code hasTileEntity}, so {@code createTileEntity} was never called
+ * and {@code updateEntity} never ran. Items, mobs and arrows passed through the portal untouched, and so they do here.
+ * The block is a vanilla {@link Portal}: a player who stands in it is sent by the game's own portal processing, at the end
+ * of the tick, to the destination of {@link #getPortalDestination}: the Bedrock dimension from a surface world, the
+ * Overworld from the Bedrock dimension.</p>
  *
  * <p>Right-clicking the portal turns it back into bedrock (1.7.10 {@code onBlockActivated}); the click then goes on, so
  * a held block is placed against it as before.</p>
@@ -76,15 +78,14 @@ public class BlockBedrockPortal extends Block implements Portal {
     }
 
     /**
-     * 1.7.10 {@code onEntityCollidedWithBlock} and {@code TileBedrockPortal.updateEntity}: an entity in the block is
-     * handed to the portal processing. Only a surface world and the Bedrock dimension have a destination; in the Bedrock
-     * dimension only players leave (1.7.10's tile entity "travelled" the others to the dimension they were in).
+     * 1.7.10 {@code onEntityCollidedWithBlock}: a player in the block is handed to the portal processing. Only a surface
+     * world and the Bedrock dimension have a destination, and only players use it (the original tested
+     * {@code entity instanceof EntityPlayer} on both ways).
      */
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!(level instanceof ServerLevel)) return;
-        boolean bedrock = WorldProviderBedrock.isBedrock(level);
-        if (bedrock ? !(entity instanceof Player) : !WorldProviderBedrock.isSurfaceWorld(level)) return;
+        if (!(level instanceof ServerLevel) || !(entity instanceof Player)) return;
+        if (!WorldProviderBedrock.isBedrock(level) && !WorldProviderBedrock.isSurfaceWorld(level)) return;
         if (entity.canUsePortal(false)
                 && Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move(-pos.getX(), -pos.getY(), -pos.getZ())),
                         Shapes.block(), BooleanOp.AND)) {
@@ -107,11 +108,13 @@ public class BlockBedrockPortal extends Block implements Portal {
     @Nullable
     @Override
     public DimensionTransition getPortalDestination(ServerLevel level, Entity entity, BlockPos pos) {
+        // 1.7.10 sent players only, on both ways.
+        if (!(entity instanceof Player)) return null;
         MinecraftServer server = level.getServer();
         if (WorldProviderBedrock.isBedrock(level)) {
             // 1.7.10 sent players to dimension 0 regardless of where they came from.
             ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-            if (overworld == null || !(entity instanceof Player)) return null;
+            if (overworld == null) return null;
             return TeleporterBedrock.toSurface(overworld, entity.getX(), entity.getZ(), level.getRandom());
         }
         if (!WorldProviderBedrock.isSurfaceWorld(level)) return null;

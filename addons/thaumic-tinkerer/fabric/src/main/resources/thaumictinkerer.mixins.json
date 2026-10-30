@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "thaumic.tinkerer.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "BlockBehaviourBreakSpeedMixin",
+    "EntityDropCaptureMixin",
+    "LivingEntityDropsMixin",
+    "LivingEntityHurtMixin",
+    "LivingEntityMotionMixin",
+    "LivingEntityUseItemMixin",
+    "ServerGamePacketListenerFloatingMixin",
+    "ServerPlayerDropCaptureMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

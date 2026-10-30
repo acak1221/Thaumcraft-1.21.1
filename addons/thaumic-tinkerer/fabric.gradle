@@ -47,6 +47,34 @@ tasks.named('processThaumicTinkererResources') {
 }
 tasks.named('check') { dependsOn 'compileThaumicTinkererJava', 'compileThaumicTinkererGameTestJava' }
 
+// Mixin refmap of the add-on (the mixins are in addons/thaumic-tinkerer/fabric/src/main/java/thaumic/tinkerer/fabric/mixin,
+// the config is fabric/src/main/resources/thaumictinkerer.mixins.json, listed under "mixins" of its fabric.mod.json).
+// Loom (architectury-loom 1.11) puts EVERY source set that exists when it initialises on the Mixin annotation processor, each
+// with its own refmap named <sourceSet>-<archivesName>-<project>-refmap.json next to the classes (here
+// thaumicTinkerer-Thaumcraft-fabric-fabric-refmap.json). The processor of the source set carries MixinExtras as well, so
+// @WrapOperation / @WrapMethod / @Local are in the refmap. remapThaumicTinkererJar then adds "refmap" to the mixin config in
+// the jar (MixinRefmapService: the config is listed in fabric.mod.json and the jar holds the refmap), so nothing has to be
+// declared here. Do NOT call loom.mixin.add(sourceSet, name) for this source set: the first explicit add() switches the
+// defaults off for all the other source sets, Thaumcraft's own included (their refmaps would stop being written).
+// What this does is to fail the compile if the processor wrote no refmap, or one without an entry for a mixin that has an
+// injector (@Inject, @WrapOperation, @WrapMethod, @Accessor, ...), so a production jar cannot silently lose its remapping.
+tasks.named('compileThaumicTinkererJava') {
+ doLast {
+  def mixinDir = new File(ttDir, 'fabric/src/main/java/thaumic/tinkerer/fabric/mixin')
+  def mixinFiles = mixinDir.exists() ? mixinDir.listFiles({ File f -> f.name.endsWith('.java') } as FileFilter).toList() : []
+  def withInjectors = mixinFiles.findAll { it.getText('UTF-8') =~ /@(Inject|WrapOperation|WrapMethod|ModifyVariable|ModifyArg|ModifyReturnValue|ModifyExpressionValue|Redirect|Accessor|Invoker)\b/ }
+  if (!withInjectors.isEmpty()) {
+   def refmaps = destinationDirectory.get().asFile.listFiles({ File f -> f.name.endsWith('-refmap.json') } as FileFilter)
+   if (refmaps == null || refmaps.length == 0) {
+    throw new GradleException('Thaumic Tinkerer has mixins but the Mixin annotation processor wrote no refmap into ' + destinationDirectory.get().asFile)
+   }
+   def mapped = new groovy.json.JsonSlurper().parse(refmaps[0], 'UTF-8').mappings.keySet()
+   def missing = withInjectors.collect { 'thaumic/tinkerer/fabric/mixin/' + (it.name - '.java') }.findAll { !mapped.contains(it) }
+   if (!missing.isEmpty()) throw new GradleException('The refmap ' + refmaps[0].name + ' has no entry for ' + missing)
+  }
+ }
+}
+
 def tinkererModRoots = files(sourceSets.thaumicTinkerer.output)
 // Fabric Loader reads one mod per classpath group: groups are separated by a doubled path separator.
 def tinkererGameTestGroups = tinkererModRoots.asPath + File.pathSeparator + File.pathSeparator + files(sourceSets.thaumicTinkererGameTest.output).asPath

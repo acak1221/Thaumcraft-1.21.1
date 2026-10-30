@@ -48,6 +48,24 @@ float SoulHeartHandler.modifyIncomingDamage(ServerPlayer player, float amount) /
 and set `SoulHeartHandler.exactDamageHook = true` once at start-up, which silences the Architectury fallback. The same hook would
 also serve `KamiGear`'s armour absorption (K1, `ISpecialArmor`), which has the same limit.
 
+**Status after the integration round.** The Fabric poster now exists (`TinkererEvents.LIVING_DAMAGE`, `docs/HOOKS.md` section 3), the group
+does not use it yet and `exactDamageHook` is false, so the fallback is what runs (and what `soulHeartsAbsorbDamageBeforeHealth` checks, by
+the part it shares with the exact rule; the exact rule is checked on its seam). The change to make once the other groups' checks are not
+being run against the tree (a global listener alters every hit a mock player takes) and only on Fabric until NeoForge has a poster:
+
+```java
+// KamiWorld.register(), after SoulHeartHandler.register(); Platform.isFabric() until the NeoForge poster of HOOKS.md section 9 exists
+if (Platform.isFabric()) {
+    TinkererEvents.LIVING_DAMAGE.register((victim, source, amount) ->
+            victim instanceof ServerPlayer player ? SoulHeartHandler.modifyIncomingDamage(player, amount) : amount);
+    SoulHeartHandler.exactDamageHook = true;
+}
+```
+
+`modifyIncomingDamage` returns 0 when the pool covers the hit, which the event treats as a refusal of the whole hit (no hurt animation, no
+knockback, no frames: HOOKS.md section 3) - the covered hit of 1.7.10 still had them, so a covered hit becomes silent. Nothing in the
+fallback's tests breaks (`soulHeartsAbsorbDamageBeforeHealth` reads `exactDamageHook` for its one differing number).
+
 ## 2. Loader modules (to the lead)
 
 Nothing else of this group needs a loader hook:

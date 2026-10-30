@@ -887,11 +887,14 @@ public final class MachinesRuntimeChecks {
         BlockPos pos = new BlockPos(3, 1, 4);
         test.setBlock(pos, Machines.MOB_MAGNET.get().defaultBlockState());
         TileMobMagnet magnet = tile(test, pos, TileMobMagnet.class);
-        ItemStack mould = TTRegistry.stack(LibItemNames.SOUL_MOULD);
-        magnet.setItem(0, mould);
+        // The slot keeps this very instance and the scattering splits it down to count 0, and a stack of count 0 reports
+        // Items.AIR as its item: the item to look for is taken before the block is broken.
+        Item mouldItem = TTRegistry.item(LibItemNames.SOUL_MOULD);
+        magnet.setItem(0, new ItemStack(mouldItem));
         breakBlock(test, pos);
         test.assertTrue(test.getLevel().getBlockState(test.absolutePos(pos)).isAir(), "the block is gone");
-        test.assertTrue(dropped(test, pos, mould.getItem()) == 1, "the mould came out");
+        test.assertTrue(magnet.getItem(0).isEmpty(), "the slot was emptied");
+        test.assertTrue(dropped(test, pos, mouldItem) == 1, "the mould came out");
         test.assertTrue(dropped(test, pos, Machines.MOB_MAGNET.get().asItem()) == 1, "and the block dropped itself");
         test.succeed();
     }

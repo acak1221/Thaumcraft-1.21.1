@@ -12,9 +12,12 @@ hand-written stand-in for JUnit Jupiter** (the real one is not available offline
 dimension type and biome JSON were parsed with the game's own codecs (`DimensionType.DIRECT_CODEC`, `Biome.DIRECT_CODEC`,
 `ChunkGeneratorBedrock.CODEC` over the dimension file's generator object) in a throw-away program on the game classes, and the
 chunk fill, the ore selection with bound item tags and the ore clusters through `applyBiomeDecoration` (with a proxy world) were
-run there as well. The GameTests (`KamiWorldRuntimeChecks`, 15 checks) **compile but were not run** (no Gradle and no game in
-the porting session). Nothing here has been seen in a running client: the screens, the HUD, the model of the gateway and the
-renderer are untested visually.
+run there as well. The GameTests (`KamiWorldRuntimeChecks`, 17 checks) were first run on a real Fabric dedicated server in the
+integration round (`:fabric:runTinkererGameTest`, filter `kamiworldgametests.*`) and **pass there** (17 of 17; section 10 says what
+that round changed in the tests and why). The JUnit tests of the group (`KamiWorldLogicTest`, `KamiWorldResourcesTest`) pass under the
+real JUnit Jupiter (`:fabric:tinkererTest --tests 'thaumic.tinkerer.kamiworld.*'`). Nothing here has been seen in a running client:
+the screens, the HUD, the model of the gateway and the renderer are untested visually, and a hit taken in the survival of a real
+client was never seen either.
 
 ## 1. Identity: registry paths, data
 
@@ -270,6 +273,40 @@ is required" for a non-player. The three words are literal English texts, as in 
   screens read and write it all the time, so there is no registry-path equivalent that does not copy the component's code.
   Behaviour is unaffected and it compiles; the lead decides whether PORTING_RULES gets an explicit exception for these four
   helpers or the helpers move to a neutral package (a request to the lead, not a change of this group).
-- **Not run.** The GameTests of this group (`KamiWorldRuntimeChecks`) compile with `tools/compile.sh -g` but were not run; the
-  changed portal checks (`portalLeavesNonPlayersAlone`, the ore-tolerant cavity assertion of `portalDestinationsFollowTheRules`)
-  are new since the review.
+- **The GameTest run (integration round).** The 17 checks of the group pass in a real run of the Fabric GameTest server. What the
+  first run showed, and what was done about it (no check was weakened or removed):
+  - *Five checks failed with "the Bedrock dimension exists"* (`bedrockDimensionIsSolidBedrockWithOreVeins`,
+    `bedrockOreConfigDecidesDensityAndBlacklist`, `portalDestinationsFollowTheRules`, `registrationIsComplete`,
+    `warpGateTakesAPearlOfAnotherDimension`): the level `thaumictinkerer:bedrock` was not there. **Cause: the test world, not the
+    dimension.** Vanilla's `GameTestServer.create` builds its dimensions from the *flat world preset* only
+    (`WorldPresets.FLAT.createWorldDimensions().bake(registry)` with `registry = new MappedRegistry<>(Registries.LEVEL_STEM, ...)
+    .freeze()`, an empty registry), whereas a normal server bakes the preset (or the `level.dat` list) against the level stems of the
+    data packs, which is how `data/thaumictinkerer/dimension/bedrock.json` becomes a level in a real world. So no data-pack dimension has
+    a level in the vanilla GameTest world (Thaumcraft's own `thaumcraft:outer_lands` is missing from the add-on's run for the same
+    reason, hence its "dimension is NOT registered" line; the mod's own GameTest run avoids it with an override of the flat preset in
+    `common/src/gameTest/resources/data/minecraft/worldgen/world_preset/flat.json`). The data pack was not at fault: the dimension
+    type, the biome and the dimension file decode without a message in the server log. **Fix (test set-up only):**
+    `fabric/src/gameTest/resources/data/minecraft/worldgen/world_preset/flat.json`, the vanilla preset (the same three dimensions,
+    the same flat layers) plus a copy of the dimension file under `thaumictinkerer:bedrock`. A new check,
+    `bedrockDimensionFileDecodesAndIsTheLevelOfTheTestWorld`, decodes the real file with the server's registries (the path of the data
+    pack loader, so what a normal world gets), compares it to the copy in the preset and to the running level; a JUnit test
+    (`theFlatPresetOfTheGameTestWorldHoldsTheDimensionFileAsItIs`) pins the copy to the file. The leftover world of
+    `fabric/run-tinkerer-gametest` did not hide the dimension (the list of levels is rebuilt from the preset at every start and was
+    never read from the saved `level.dat`; only saved chunks persist between runs); the saved chunks of the Bedrock dimension were
+    deleted once (`world/dimensions/thaumictinkerer`) before the run that proved it from a cold start.
+  - *`soulHeartsAbsorbDamageBeforeHealth` failed with "it costs 3 soul hearts: 5"*: a wrong set-up. A new `ServerPlayer` refuses every
+    hit for 60 ticks (`spawnInvulnerableTime`, counted down by `ServerPlayer.tick`) before any event is posted, so the hit of the check
+    changed neither health nor the pool. The hits now come after 65 ticks (`runAfterDelay`, as the Hooks checks do). The handler was right.
+    The check asserts what the Architectury fallback and the exact rule share (a covered hit costs the pool and no health; a hit the
+    pool does not cover costs the pool and then the rest) and, for a player without hearts, says which rule is running
+    (`SoulHeartHandler.exactDamageHook`: 16.5 health after a hit of 1.5 under the fallback, 17 under the exact rule). It does not assert
+    what the fallback gets wrong (the knockback and the invulnerability frames of a covered hit are lost; the fraction of a hit is kept
+    for a player without hearts). The exact rule has its own check on its seam, `soulHeartsExactRuleCutsTheFractionOfEveryHit`
+    (`modifyIncomingDamage`: 3.9 against 5 hearts leaves nothing and costs 3, 4.9 against 2 leaves 2, 1.5 with no hearts leaves 1,
+    0.5 is gone, a hit that is not positive is returned as it is, 100 against 20 leaves 80).
+  - *`groupHadNoRegistrationFailures`* failed in the first round only as a cascade of another group's research clash and passes now.
+- **Still the fallback.** `LIVING_DAMAGE` of `docs/HOOKS.md` exists on Fabric, but nothing registers a listener to it and
+  `exactDamageHook` is false: the Architectury fallback runs. It was not wired in this round on purpose: a listener that truncates
+  every hit of every player would change, for every group at once, the numbers that checks read from the mock players they hurt (not
+  measured: it was not tried while other groups were running), and NeoForge has no poster yet (the flag would be false there). The
+  change, ready to apply, is in `docs/api-requests/KamiWorld.md` section 1.

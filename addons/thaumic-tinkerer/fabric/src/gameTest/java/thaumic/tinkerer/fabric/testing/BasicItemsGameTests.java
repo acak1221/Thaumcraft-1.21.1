@@ -52,6 +52,11 @@ public final class BasicItemsGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void cleansingTalismanWorksFromTheAmuletSlot(GameTestHelper test) {
+        BasicItemsRuntimeChecks.cleansingTalismanWorksFromTheAmuletSlot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void xpTalismanSwitchesOnSneakClickAndKeepsItsPoints(GameTestHelper test) {
         BasicItemsRuntimeChecks.xpTalismanSwitchesOnSneakClickAndKeepsItsPoints(test);
     }

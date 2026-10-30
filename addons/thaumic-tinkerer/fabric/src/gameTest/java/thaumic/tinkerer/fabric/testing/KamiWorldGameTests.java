@@ -16,6 +16,11 @@ public final class KamiWorldGameTests implements FabricGameTest {
         KamiWorldRuntimeChecks.registrationIsComplete(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void bedrockDimensionFileDecodesAndIsTheLevelOfTheTestWorld(GameTestHelper test) {
+        KamiWorldRuntimeChecks.bedrockDimensionFileDecodesAndIsTheLevelOfTheTestWorld(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600)
     public void bedrockDimensionIsSolidBedrockWithOreVeins(GameTestHelper test) {
         KamiWorldRuntimeChecks.bedrockDimensionIsSolidBedrockWithOreVeins(test);
@@ -56,9 +61,15 @@ public final class KamiWorldGameTests implements FabricGameTest {
         KamiWorldRuntimeChecks.warpGateMenuMovesOnlyPearls(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    /** Waits out the 60 ticks of spawn protection of the mock player before it is hurt. */
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void soulHeartsAbsorbDamageBeforeHealth(GameTestHelper test) {
         KamiWorldRuntimeChecks.soulHeartsAbsorbDamageBeforeHealth(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void soulHeartsExactRuleCutsTheFractionOfEveryHit(GameTestHelper test) {
+        KamiWorldRuntimeChecks.soulHeartsExactRuleCutsTheFractionOfEveryHit(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

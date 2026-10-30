@@ -79,6 +79,14 @@ items that have no component of their own. **One thing could not stay:** `getNBT
   and the Infused Scribing Tools (800): they keep the nominal figure of the original, as Thaumcraft's own tools and armour
   of the port do, because there the shift is not counted by anyone; the Remedium is the item whose uses are counted out in
   steps of one and ten. (The Spellbinding Cloth keeps its 35 and gets its 36th cleaning from `wornCloth`, section 2.)
+- **Order of the effects (fix).** "One new effect per pass" needs a fixed order of the wearer's effects. 1.7.10 walked a `HashMap`
+  of small potion ids, which gives the same order every time (for the vanilla effects, the lowest id first). The 1.21.1 map of
+  active effects is keyed by registry holders, which hash by identity, so its order changes from run to run and would decide
+  which effect is the one removed at a cost (and whether a warp effect costs 10 or 1 first). The talisman sorts the harmful
+  effects by their registry id (the registration order, which for the vanilla effects is the 1.7.10 order of their ids), so
+  slowness goes before poison whichever was applied first.
+- **Creative players.** A creative player is cleansed but the talisman is not worn out: `hurtAndBreak` ignores a player with
+  infinite materials, as 1.7.10 `ItemStack.damageItem` ignored creative players. Nothing is done about it on purpose.
 - **Memory per wearer.** 1.7.10 kept two maps on the item instance (every talisman shared them). The port keeps them in a
   static map keyed by the player's id and forgets a player when he leaves and every player when the server stops.
 - **Click (choice).** The sneak click toggles, as before. A plain click did nothing in 1.7.10; in the port it puts the

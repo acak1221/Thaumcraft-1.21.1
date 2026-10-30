@@ -120,3 +120,8 @@ javac.*.args
 # Local agent worktrees
 /.claude/worktrees/
 addons/thaumic-tinkerer/.tmp/
+
+# generated run directories of the Thaumic Tinkerer add-on (worlds, logs, options)
+**/run-tinkerer-gametest/
+**/run-tinkerer-client/
+addons/thaumic-tinkerer/.tmp/

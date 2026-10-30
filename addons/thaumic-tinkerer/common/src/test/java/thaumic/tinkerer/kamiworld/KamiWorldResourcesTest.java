@@ -179,6 +179,28 @@ class KamiWorldResourcesTest {
         assertTrue(exists("/data/" + NS + "/worldgen/biome/" + biome + ".json"));
     }
 
+    /**
+     * The vanilla GameTestServer bakes only the dimensions of the flat world preset, so the test resources of the add-on
+     * override that preset with the three vanilla dimensions plus a copy of the Bedrock dimension (a normal world needs only the
+     * data-pack file). The copy must be the file; {@code KamiWorldRuntimeChecks} compares them again in the running server.
+     * The file is not on the JUnit class path (it belongs to the GameTest source set): it is read from the add-on directory,
+     * the working directory of {@code :fabric:tinkererTest}, and the test is skipped when it is run from elsewhere.
+     */
+    @Test
+    void theFlatPresetOfTheGameTestWorldHoldsTheDimensionFileAsItIs() throws IOException {
+        java.nio.file.Path preset = java.nio.file.Path.of("fabric/src/gameTest/resources/data/minecraft/worldgen/world_preset/flat.json");
+        org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.isRegularFile(preset), "run from addons/thaumic-tinkerer");
+        JsonObject dimensions;
+        try (java.io.Reader reader = java.nio.file.Files.newBufferedReader(preset, StandardCharsets.UTF_8)) {
+            dimensions = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("dimensions");
+        }
+        assertEquals(json("/data/" + NS + "/dimension/bedrock.json"), dimensions.get(WorldProviderBedrock.KEY.location().toString()),
+                "the copy in the preset is the dimension file");
+        for (String vanilla : List.of("minecraft:overworld", "minecraft:the_nether", "minecraft:the_end")) {
+            assertTrue(dimensions.has(vanilla), "the preset still has " + vanilla);
+        }
+    }
+
     @Test
     void theDimensionKeyAndTheLayersAgreeWithTheCode() {
         assertEquals(NS + ":bedrock", WorldProviderBedrock.KEY.location().toString());

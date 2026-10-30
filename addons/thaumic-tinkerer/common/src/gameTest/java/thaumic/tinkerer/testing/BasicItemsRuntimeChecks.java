@@ -48,6 +48,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -61,6 +62,7 @@ import thaumcraft.api.ItemApi;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.baubles.BaubleType;
+import thaumcraft.api.baubles.BaublesApi;
 import thaumcraft.api.baubles.IBauble;
 import thaumcraft.api.items.ItemsTC;
 import thaumcraft.api.nodes.IRevealer;
@@ -95,6 +97,11 @@ import thaumic.tinkerer.common.registry.TTRegistry;
  * recipe of the Infused Scribing Tools and the Helmet of Revealing's interfaces, discount and armour. They were written
  * without being able to run them as GameTests (no Gradle in the porting session): the first run may show a wrong assumption
  * of a check as well as a defect.</p>
+ *
+ * <p>Two facts about the mock player of {@code GameTestHelper.makeMockServerPlayerInLevel} that the checks rely on: it joins a
+ * server whose default game mode is creative, so a check that counts durability or needs a full inventory to refuse an item
+ * switches it to survival first (a creative player never wears an item out and swallows what does not fit); and it is not in
+ * the connection list, so nothing ticks it: a check that needs the player's ticks calls {@code doTick}.</p>
  */
 public final class BasicItemsRuntimeChecks {
     private BasicItemsRuntimeChecks() {}
@@ -424,6 +431,20 @@ public final class BasicItemsRuntimeChecks {
         IBauble bauble = (IBauble) talisman.getItem();
         ItemCleansingTalisman.forget(player.getUUID());
         try {
+            // The mock player of the helper joins a server whose default game mode is creative, and a creative player never wears
+            // an item out (vanilla's ItemStack.hurtAndBreak, 1.7.10's damageItem alike): the talisman still removes the effect,
+            // for nothing. Everything below counts durability, so the player is switched to survival afterwards.
+            player.setGameMode(GameType.CREATIVE);
+            ItemStack free = TTRegistry.stack(LibItemNames.CLEANSING_TALISMAN);
+            ItemCleansingTalisman.setEnabled(free, true);
+            player.addEffect(new MobEffectInstance(MobEffects.POISON, 600));
+            player.tickCount = 20;
+            bauble.onWornTick(free, player);
+            test.assertTrue(!player.hasEffect(MobEffects.POISON), "a creative player is cleansed too");
+            test.assertTrue(free.getDamageValue() == 0, "but the talisman is not worn out: " + free.getDamageValue());
+            ItemCleansingTalisman.forget(player.getUUID());
+            player.setGameMode(GameType.SURVIVAL);
+
             // Switched off: nothing happens.
             player.addEffect(new MobEffectInstance(MobEffects.POISON, 600));
             player.tickCount = 20;
@@ -437,18 +458,20 @@ public final class BasicItemsRuntimeChecks {
             bauble.onWornTick(talisman, player);
             test.assertTrue(player.hasEffect(MobEffects.POISON), "only every 20th tick works");
 
-            // One harmful effect per pass; the others wait, the harmless ones stay.
+            // One harmful effect per pass; the others wait, the harmless ones stay. The effect with the lowest registry id goes
+            // first (slowness before poison), as 1.7.10 walked its effects by id; the order does not depend on the order in which
+            // the effects were applied (poison was applied first here).
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 600));
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 600));
             player.tickCount = 20;
             bauble.onWornTick(talisman, player);
-            test.assertTrue(!player.hasEffect(MobEffects.POISON), "the first harmful effect is removed");
-            test.assertTrue(player.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "the second waits for the next second");
+            test.assertTrue(!player.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "the first harmful effect (lowest id) is removed");
+            test.assertTrue(player.hasEffect(MobEffects.POISON), "the second waits for the next second");
             test.assertTrue(player.hasEffect(MobEffects.MOVEMENT_SPEED), "a beneficial effect is never touched");
             test.assertTrue(talisman.getDamageValue() == 1, "one point of durability: " + talisman.getDamageValue());
             player.tickCount = 40;
             bauble.onWornTick(talisman, player);
-            test.assertTrue(!player.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "the second effect goes on the next pass");
+            test.assertTrue(!player.hasEffect(MobEffects.POISON), "the second effect goes on the next pass");
             test.assertTrue(talisman.getDamageValue() == 2, "two points now");
 
             // An effect that is applied again right after its removal is permanent: removed for nothing.
@@ -535,6 +558,56 @@ public final class BasicItemsRuntimeChecks {
         test.succeed();
     }
 
+    /**
+     * The real path of the worn-tick contract: a plain click puts the talisman into the amulet slot (the port's hand equip,
+     * {@code IBauble.equipsOnUse}), the mod's own accessory ticking calls {@code onWornTick} once per player tick, and the
+     * damage lands on the stack in the slot. A mock player is not in the connection list, so nothing ticks it: the check does
+     * what the connection would ({@code doTick}). The effect is removed on a tick whose count is a multiple of 20, the next
+     * effect exactly 20 ticks later, and each removal wears the worn talisman by one point.
+     */
+    public static void cleansingTalismanWorksFromTheAmuletSlot(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test, 4.5, 1, 4.5);
+        player.setGameMode(GameType.SURVIVAL);
+        player.setShiftKeyDown(false);
+        ItemCleansingTalisman.forget(player.getUUID());
+        ItemStack talisman = TTRegistry.stack(LibItemNames.CLEANSING_TALISMAN);
+        ItemCleansingTalisman.setEnabled(talisman, true);
+        player.setItemInHand(InteractionHand.MAIN_HAND, talisman);
+
+        Item talismanItem = talisman.getItem(); // the click consumes the stack in the hand, and an empty stack answers air
+        test.assertTrue(BaublesApi.getWorn(player).isEmpty(), "nothing is worn yet");
+        player.gameMode.useItem(player, test.getLevel(), talisman, InteractionHand.MAIN_HAND);
+        List<ItemStack> worn = BaublesApi.getWorn(player);
+        test.assertTrue(worn.size() == 1 && worn.get(0).is(talismanItem), "a plain click puts it into the amulet slot: " + worn);
+        test.assertTrue(ItemCleansingTalisman.isEnabled(worn.get(0)) && worn.get(0).getDamageValue() == 0,
+                "it is still switched on and new");
+        test.assertTrue(player.getMainHandItem().isEmpty(), "and the hand is empty");
+
+        player.addEffect(new MobEffectInstance(MobEffects.POISON, 600));
+        long[] removedAt = {-1, -1};
+        test.onEachTick(() -> {
+            player.doTick();
+            long now = test.getTick();
+            if (removedAt[0] < 0) {
+                if (!player.hasEffect(MobEffects.POISON)) {
+                    removedAt[0] = now;
+                    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 600));
+                }
+            } else if (removedAt[1] < 0 && !player.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
+                removedAt[1] = now;
+            }
+        });
+        test.succeedWhen(() -> {
+            test.assertTrue(removedAt[1] >= 0, "the worn talisman has not removed both effects yet: " + removedAt[0] + ", " + removedAt[1]);
+            test.assertTrue(removedAt[1] - removedAt[0] == 20, "one effect per second: removed at " + removedAt[0] + " and " + removedAt[1]);
+            List<ItemStack> now = BaublesApi.getWorn(player);
+            test.assertTrue(now.size() == 1 && now.get(0).getDamageValue() == 2,
+                    "two removals, two points of wear on the worn stack: " + now);
+            ItemCleansingTalisman.forget(player.getUUID());
+        });
+    }
+
     // ---- the Talisman of Withhold --------------------------------------------------------------------------------------
 
     public static void xpTalismanSwitchesOnSneakClickAndKeepsItsPoints(GameTestHelper test) {
@@ -610,12 +683,17 @@ public final class BasicItemsRuntimeChecks {
         test.assertTrue(ItemXPTalisman.getXP(talisman) == 5 && count(player, Items.GLASS_BOTTLE) == 2,
                 "under 10 points nothing is bottled and the bottles stay");
 
-        // A full inventory: the bottle is dropped at the player.
+        // A full inventory: the bottle is dropped at the player. Two details of the set-up: a creative player (the mock player
+        // of the helper is one, the test server's default game mode) swallows what does not fit instead of dropping it
+        // (Inventory.add answers true and empties the stack, in 1.7.10 as well), so the player is switched to survival; and the
+        // talisman has to go back into the hand after the inventory is filled, because the click uses the stack in the hand.
+        player.setGameMode(GameType.SURVIVAL);
         ItemXPTalisman.setXP(talisman, 10);
         player.getInventory().clearContent();
         for (int slot = 0; slot < player.getInventory().items.size(); slot++) {
             player.getInventory().items.set(slot, new ItemStack(Items.DIRT, 64));
         }
+        player.setItemInHand(InteractionHand.MAIN_HAND, talisman);
         player.getInventory().items.set(30, new ItemStack(Items.GLASS_BOTTLE, 2));
         talisman.getItem().use(level, player, InteractionHand.MAIN_HAND);
         test.assertTrue(ItemXPTalisman.getXP(talisman) == 0, "the points are spent");

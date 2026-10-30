@@ -14,6 +14,7 @@
 package thaumic.tinkerer.common.item;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -210,8 +212,13 @@ public class ItemCleansingTalisman extends Item implements IBauble, ITTinkererRe
         CleansingLogic.State state = STATES.computeIfAbsent(player.getUUID(), id -> new CleansingLogic.State());
 
         // The harmful effects that have a duration of their own; effects without one (infinite, or a flash) are skipped.
+        // 1.7.10 walked a HashMap of small potion ids, so the order was the same every time (lowest id first for the vanilla
+        // effects); the 1.21.1 map is keyed by registry holders, which hash by identity, so its order changes from run to run
+        // and would decide which effect is the one removed at a cost. The registry order restores a fixed order.
+        List<MobEffectInstance> active = new ArrayList<>(player.getActiveEffects());
+        active.sort(Comparator.comparingInt(instance -> BuiltInRegistries.MOB_EFFECT.getId(instance.getEffect().value())));
         Map<String, Holder<MobEffect>> effects = new LinkedHashMap<>();
-        for (MobEffectInstance instance : player.getActiveEffects()) {
+        for (MobEffectInstance instance : active) {
             if (instance.isInfiniteDuration() || instance.getDuration() < 20) continue;
             Holder<MobEffect> effect = instance.getEffect();
             String id = effect.unwrapKey().map(key -> key.location().toString()).orElse(null);

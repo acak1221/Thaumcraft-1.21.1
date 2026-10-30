@@ -61,7 +61,9 @@ import thaumic.tinkerer.common.registry.TTRecipes;
  * <p>Runtime checks of the TileBlocks group in a running server: registration, the persistence of every block entity, the
  * Animation Tablet breaking, attacking, placing and using, the Remote Placer, the Transvector Dislocator and Interface,
  * the Binder, the camouflage and the Levitational Locomotive on its track. They were written without being able to run
- * them (no Gradle in the porting session): the first run may show a wrong assumption of a check as well as a defect.</p>
+ * them (no Gradle in the porting session) and corrected after the first run on a dedicated server (see
+ * docs/deviations/TileBlocks.md, section 4). Mind that the test areas of one run lie side by side at random places: a
+ * check must not leave made-up data in a ticking block entity, and the relays of different checks need heights of their own.</p>
  */
 public final class TileBlocksRuntimeChecks {
     private TileBlocksRuntimeChecks() {}
@@ -174,19 +176,31 @@ public final class TileBlocksRuntimeChecks {
         test.assertTrue(placerLoaded.getItem(0).is(Items.COBBLESTONE) && placerLoaded.getItem(0).getCount() == 12, "the placer's block");
         test.assertTrue(placerLoaded.getCamo() == Blocks.GLASS.defaultBlockState(), "the placer's camouflage");
 
-        // The interface: the binding, the camouflage.
+        // The interface: the binding, the camouflage. The binding must be to a block entity (a chest here): an interface
+        // keeps a binding only while there is a block entity to stand in for (as in 1.7.10, where getTile() ended the
+        // binding of a plain block, setTarget on a stone block ends it at once).
         BlockPos interfacePos = new BlockPos(5, 1, 1);
         test.setBlock(interfacePos, TileBlocks.interfaceBlock());
         TileTransvectorInterface iface = tile(test, interfacePos, TileTransvectorInterface.class);
-        BlockPos below = test.absolutePos(new BlockPos(5, 0, 1));
-        iface.setTarget(below);
+        BlockPos chestPos = new BlockPos(5, 1, 3);
+        test.setBlock(chestPos, Blocks.CHEST);
+        BlockPos bound = test.absolutePos(chestPos);
+        iface.setTarget(bound);
+        test.assertTrue(bound.equals(iface.getTarget()), "the interface is bound to the chest before it is saved: " + iface.getTarget());
         iface.setCamo(Blocks.OAK_LOG.defaultBlockState());
         TileTransvectorInterface ifaceLoaded = reload(test, iface, TileTransvectorInterface.class);
-        test.assertTrue(below.equals(ifaceLoaded.getTarget()), "the interface's binding: " + ifaceLoaded.getTarget());
+        test.assertTrue(bound.equals(ifaceLoaded.getTarget()), "the interface's binding: " + ifaceLoaded.getTarget());
         test.assertTrue(ifaceLoaded.getCamo() == Blocks.OAK_LOG.defaultBlockState(), "the interface's camouflage");
         TileTransvectorInterface unbound = reload(test, tile(test, interfacePos, TileTransvectorInterface.class), TileTransvectorInterface.class);
         unbound.setTarget(null);
         test.assertTrue(reload(test, unbound, TileTransvectorInterface.class).getTarget() == null, "an unbound interface stays unbound");
+        // 1.7.10 used y == -1 for "not bound"; here -1 is a real height, and a binding at that height survives a reload
+        // (a detached block entity: with no level it does not look for the block entity it is bound to).
+        TileTransvectorInterface lowest = new TileTransvectorInterface(test.absolutePos(interfacePos), TileBlocks.interfaceBlock().defaultBlockState());
+        BlockPos atMinusOne = new BlockPos(7, -1, 7);
+        lowest.setTarget(atMinusOne);
+        test.assertTrue(atMinusOne.equals(reload(test, lowest, TileTransvectorInterface.class).getTarget()),
+                "a binding at height -1 comes back: " + reload(test, lowest, TileTransvectorInterface.class).getTarget());
 
         // The golem connector: the id of the golem.
         BlockPos connectorPos = new BlockPos(6, 1, 1);
@@ -218,6 +232,10 @@ public final class TileBlocksRuntimeChecks {
         relay.partnerZ = -88;
         TileEntityRelay relayLoaded = reload(test, relay, TileEntityRelay.class);
         test.assertTrue(relayLoaded.hasPartner && relayLoaded.partnerX == 77 && relayLoaded.partnerZ == -88, "the relay's partner");
+        // The made-up link data must not stay in a ticking block entity (a relay with a partner that far away is stale data,
+        // see relayDropsAStalePartner), nor the locomotive that would start sliding along its made-up track.
+        test.setBlock(relayPos, Blocks.AIR);
+        test.setBlock(mobilizerPos, Blocks.AIR);
         test.succeed();
     }
 
@@ -340,13 +358,39 @@ public final class TileBlocksRuntimeChecks {
         test.succeed();
     }
 
-    /** The item comes out when the tablet is broken. */
+    /**
+     * The item comes out when the tablet is broken, and so does the tablet. (GameTestHelper.destroyBlock removes the block
+     * without drops, so the break goes through Level.destroyBlock with drops, and then through a player with and without a
+     * pickaxe: the tablet is a metal block that only a pickaxe harvests.)
+     */
     public static void tabletSpillsItsItem(GameTestHelper test) {
         floor(test);
+        // The three tablets stand apart, the drops are counted over the whole test area (nothing else drops here).
+        BlockPos middle = new BlockPos(4, 1, 4);
+        net.minecraft.world.item.Item tabletItem = TileBlocks.animationTabletBlock().asItem();
         BlockPos tabletPos = placeTablet(test, new BlockPos(3, 1, 3), Direction.NORTH, new ItemStack(Items.COBBLESTONE, 40), true, false);
-        test.destroyBlock(tabletPos);
-        test.assertTrue(countItems(test, Items.COBBLESTONE, tabletPos, 3) == 40, "the 40 cobblestone are on the ground");
-        test.assertTrue(countItems(test, TileBlocks.animationTabletBlock().asItem(), tabletPos, 3) == 1, "and the tablet itself dropped");
+        test.getLevel().destroyBlock(test.absolutePos(tabletPos), true);
+        test.assertBlockPresent(Blocks.AIR, tabletPos);
+        test.assertTrue(countItems(test, Items.COBBLESTONE, middle, 8) == 40, "the 40 cobblestone are on the ground");
+        test.assertTrue(countItems(test, tabletItem, middle, 8) == 1, "and the tablet itself dropped");
+
+        // Mined by a player with an iron pickaxe: the tablet drops, with the item inside.
+        BlockPos minedPos = placeTablet(test, new BlockPos(6, 1, 6), Direction.NORTH, new ItemStack(Items.IRON_INGOT, 3), true, false);
+        TinkererFakePlayer miner = player(test);
+        giveItem(miner, new ItemStack(Items.IRON_PICKAXE));
+        miner.gameMode.destroyBlock(test.absolutePos(minedPos));
+        test.assertBlockPresent(Blocks.AIR, minedPos);
+        test.assertTrue(countItems(test, tabletItem, middle, 8) == 2, "mined with a pickaxe the tablet drops too: " + countItems(test, tabletItem, middle, 8));
+        test.assertTrue(countItems(test, Items.IRON_INGOT, middle, 8) == 3, "and its item with it");
+
+        // Mined by a bare hand: the block goes, the block does not drop (the item inside still does).
+        BlockPos handPos = placeTablet(test, new BlockPos(1, 1, 6), Direction.NORTH, new ItemStack(Items.GOLD_INGOT, 2), true, false);
+        TinkererFakePlayer bare = player(test);
+        giveItem(bare, ItemStack.EMPTY);
+        bare.gameMode.destroyBlock(test.absolutePos(handPos));
+        test.assertBlockPresent(Blocks.AIR, handPos);
+        test.assertTrue(countItems(test, tabletItem, middle, 8) == 2, "a bare hand does not harvest the tablet: " + countItems(test, tabletItem, middle, 8));
+        test.assertTrue(countItems(test, Items.GOLD_INGOT, middle, 8) == 2, "but the item inside still comes out");
         test.succeed();
     }
 
@@ -681,7 +725,9 @@ public final class TileBlocksRuntimeChecks {
         test.assertTrue(!iface.isBound(), "an interface cannot be bound to another interface");
 
         TileBlocks.connectorItem().useOn(useOn(test, player, chestPos));
-        test.assertTrue(chestPos.equals(test.relativePos(iface.getTarget())), "the interface is bound to the chest: " + iface.getTarget());
+        // (Compared as absolute positions: GameTestHelper.relativePos of 1.21.1 turns the position by 180 degrees.)
+        test.assertTrue(test.absolutePos(chestPos).equals(iface.getTarget()),
+                "the interface is bound to the chest: " + iface.getTarget() + ", wanted " + test.absolutePos(chestPos));
         test.assertTrue(!ItemConnector.hasTarget(binder), "and the binder forgot the device");
 
         // The range of an interface is four blocks: five is refused (the binder keeps the device), four binds.
@@ -695,7 +741,8 @@ public final class TileBlocksRuntimeChecks {
         TileBlocks.connectorItem().useOn(useOn(test, player, new BlockPos(6, 1, 1)));
         test.assertTrue(!far.isBound() && ItemConnector.hasTarget(binder), "five blocks away is too far, and the binder keeps the device");
         TileBlocks.connectorItem().useOn(useOn(test, player, new BlockPos(5, 1, 1)));
-        test.assertTrue(new BlockPos(5, 1, 1).equals(test.relativePos(far.getTarget())), "four blocks away binds: " + far.getTarget());
+        test.assertTrue(test.absolutePos(new BlockPos(5, 1, 1)).equals(far.getTarget()),
+                "four blocks away binds: " + far.getTarget() + ", wanted " + test.absolutePos(new BlockPos(5, 1, 1)));
         test.succeed();
     }
 
@@ -789,31 +836,53 @@ public final class TileBlocksRuntimeChecks {
 
     // ---- the levitational locomotive ---------------------------------------------------------------------------
 
+    /*
+     * A relay looks for a partner in the four lines of its own height up to 32 blocks away (and, as in 1.7.10, keeps the
+     * LAST relay it finds, so the farthest one, with no regard for the nearest). The GameTest areas of a run stand side by
+     * side, 13 blocks apart, so the relays of one check would find the relays of its neighbours and be linked to those.
+     * Every check that places relays therefore has a height of its own (relative y), and nothing else of the group puts a
+     * relay at the same height: blockEntitiesPersist uses 1, the locomotive checks 2 (passenger at 3), 4 and 5, the relay
+     * checks 6 and 7, the stale-partner check 3.
+     */
+    private static final int CARRY_TRACK_Y = 2;
+    private static final int TURN_TRACK_Y = 4;
+    private static final int POWERED_TRACK_Y = 5;
+    private static final int RELAY_CHECK_Y = 6;
+    private static final int RELAY_QUIRK_Y = 7;
+    private static final int RELAY_STALE_Y = 3;
+
     private static void track(GameTestHelper test, BlockPos first, BlockPos second, BlockPos mobilizer) {
         test.setBlock(first, TileBlocks.relayBlock());
         test.setBlock(second, TileBlocks.relayBlock());
         test.setBlock(mobilizer, TileBlocks.mobilizerBlock());
     }
 
-    /** Two relays find each other, link the locomotive between them, and it slides one block east with its passenger. */
+    /**
+     * Two relays find each other, link the locomotive between them, and it slides one block east with its passenger. The
+     * relays look for each other when the game time is a multiple of 40 and link the locomotive then; the locomotive
+     * moves when the game time is 1 modulo 100, so a move comes within 140 ticks of the start.
+     */
     public static void locomotiveCarriesItsPassenger(GameTestHelper test) {
         floor(test);
-        BlockPos first = new BlockPos(1, 1, 3);
-        BlockPos second = new BlockPos(6, 1, 3);
-        BlockPos mobilizer = new BlockPos(3, 1, 3);
+        int y = CARRY_TRACK_Y;
+        BlockPos first = new BlockPos(1, y, 3);
+        BlockPos second = new BlockPos(6, y, 3);
+        BlockPos mobilizer = new BlockPos(3, y, 3);
+        BlockPos passenger = mobilizer.above();
+        BlockPos passengerAfter = new BlockPos(4, y + 1, 3);
         track(test, first, second, mobilizer);
-        test.setBlock(new BlockPos(3, 2, 3), Blocks.CHEST);
-        ChestBlockEntity chest = tile(test, new BlockPos(3, 2, 3), ChestBlockEntity.class);
+        test.setBlock(passenger, Blocks.CHEST);
+        ChestBlockEntity chest = tile(test, passenger, ChestBlockEntity.class);
         chest.setItem(0, new ItemStack(Items.DIAMOND, 7));
         test.succeedWhen(() -> {
             test.assertBlockPresent(Blocks.AIR, mobilizer);
-            test.assertBlockPresent(TileBlocks.mobilizerBlock(), new BlockPos(4, 1, 3));
-            test.assertBlockPresent(Blocks.CHEST, new BlockPos(4, 2, 3));
-            test.assertBlockPresent(Blocks.AIR, new BlockPos(3, 2, 3));
-            ChestBlockEntity moved = tile(test, new BlockPos(4, 2, 3), ChestBlockEntity.class);
+            test.assertBlockPresent(TileBlocks.mobilizerBlock(), new BlockPos(4, y, 3));
+            test.assertBlockPresent(Blocks.CHEST, passengerAfter);
+            test.assertBlockPresent(Blocks.AIR, passenger);
+            ChestBlockEntity moved = tile(test, passengerAfter, ChestBlockEntity.class);
             test.assertTrue(moved.getItem(0).is(Items.DIAMOND) && moved.getItem(0).getCount() == 7, "the chest kept its diamonds");
-            test.assertTrue(countItems(test, Items.DIAMOND, new BlockPos(4, 2, 3), 6) == 0, "and spilled none");
-            TileEntityMobilizer moving = tile(test, new BlockPos(4, 1, 3), TileEntityMobilizer.class);
+            test.assertTrue(countItems(test, Items.DIAMOND, passengerAfter, 6) == 0, "and spilled none");
+            TileEntityMobilizer moving = tile(test, new BlockPos(4, y, 3), TileEntityMobilizer.class);
             test.assertTrue(moving.linked && moving.movementDirection == Direction.EAST, "the locomotive is still linked and still going east");
         });
     }
@@ -821,23 +890,24 @@ public final class TileBlocksRuntimeChecks {
     /** At the end of the track (something in front) the locomotive turns round and goes back. */
     public static void locomotiveTurnsRoundAtTheEndOfTheTrack(GameTestHelper test) {
         floor(test);
-        BlockPos first = new BlockPos(1, 1, 3);
-        BlockPos second = new BlockPos(6, 1, 3);
-        BlockPos mobilizer = new BlockPos(3, 1, 3);
-        track(test, first, second, mobilizer);
-        test.setBlock(new BlockPos(4, 1, 3), Blocks.STONE);
+        int y = TURN_TRACK_Y;
+        BlockPos mobilizer = new BlockPos(3, y, 3);
+        track(test, new BlockPos(1, y, 3), new BlockPos(6, y, 3), mobilizer);
+        test.setBlock(new BlockPos(4, y, 3), Blocks.STONE);
         test.succeedWhen(() -> {
-            test.assertBlockPresent(TileBlocks.mobilizerBlock(), new BlockPos(2, 1, 3));
+            test.assertBlockPresent(TileBlocks.mobilizerBlock(), new BlockPos(2, y, 3));
             test.assertBlockPresent(Blocks.AIR, mobilizer);
         });
     }
 
-    /** Redstone power stops the locomotive. */
+    /** Redstone power stops the locomotive, which stays linked all the while. */
     public static void poweredLocomotiveStays(GameTestHelper test) {
         floor(test);
-        BlockPos mobilizer = new BlockPos(3, 1, 3);
-        track(test, new BlockPos(1, 1, 3), new BlockPos(6, 1, 3), mobilizer);
-        test.setBlock(new BlockPos(3, 1, 4), Blocks.REDSTONE_BLOCK);
+        int y = POWERED_TRACK_Y;
+        BlockPos mobilizer = new BlockPos(3, y, 3);
+        track(test, new BlockPos(1, y, 3), new BlockPos(6, y, 3), mobilizer);
+        test.setBlock(new BlockPos(3, y, 4), Blocks.REDSTONE_BLOCK);
+        // Past a link (the first multiple of 40) and two moves (1 modulo 100) of an unpowered locomotive.
         test.runAfterDelay(260, () -> {
             test.assertBlockPresent(TileBlocks.mobilizerBlock(), mobilizer);
             test.assertTrue(tile(test, mobilizer, TileEntityMobilizer.class).linked, "it was linked");
@@ -845,11 +915,12 @@ public final class TileBlocksRuntimeChecks {
         });
     }
 
-    /** The relays link each other, and only each other (the nearest one in each of the four lines wins in order). */
+    /** Two relays in a line link each other, and only each other; breaking the partner ends the link. */
     public static void relaysFindEachOther(GameTestHelper test) {
         floor(test);
-        BlockPos first = new BlockPos(1, 1, 3);
-        BlockPos second = new BlockPos(6, 1, 3);
+        int y = RELAY_CHECK_Y;
+        BlockPos first = new BlockPos(1, y, 3);
+        BlockPos second = new BlockPos(6, y, 3);
         test.setBlock(first, TileBlocks.relayBlock());
         test.setBlock(second, TileBlocks.relayBlock());
         TileEntityRelay a = tile(test, first, TileEntityRelay.class);
@@ -864,5 +935,61 @@ public final class TileBlocksRuntimeChecks {
         a.verifyPartner();
         test.assertTrue(!a.hasPartner, "breaking the partner ends the link");
         test.succeed();
+    }
+
+    /**
+     * A relay that looks along its lines keeps the LAST relay it finds (from -32 to +31 blocks, no break in the original's
+     * loop), so with a second relay behind the first partner the farthest one wins and the nearer one is left with a stale
+     * partner that does not point back (its next check ends the link). This is what the original does.
+     */
+    public static void relayKeepsTheLastRelayItFinds(GameTestHelper test) {
+        floor(test);
+        int y = RELAY_QUIRK_Y;
+        BlockPos first = new BlockPos(1, y, 3);
+        BlockPos near = new BlockPos(4, y, 3);
+        BlockPos far = new BlockPos(7, y, 3);
+        test.setBlock(first, TileBlocks.relayBlock());
+        test.setBlock(near, TileBlocks.relayBlock());
+        test.setBlock(far, TileBlocks.relayBlock());
+        TileEntityRelay a = tile(test, first, TileEntityRelay.class);
+        TileEntityRelay nearRelay = tile(test, near, TileEntityRelay.class);
+        TileEntityRelay farRelay = tile(test, far, TileEntityRelay.class);
+        a.checkForPartner();
+        BlockPos absFar = test.absolutePos(far);
+        BlockPos absNear = test.absolutePos(near);
+        BlockPos absA = test.absolutePos(first);
+        test.assertTrue(a.hasPartner && a.partnerX == absFar.getX() && a.partnerZ == absFar.getZ(),
+                "the first relay's partner is the far one, not the near one (" + a.partnerX + ", " + a.partnerZ + ")");
+        test.assertTrue(farRelay.hasPartner && farRelay.partnerX == absA.getX(), "and the far one points back");
+        test.assertTrue(nearRelay.hasPartner && nearRelay.partnerX == absA.getX(), "the near one still points at the first (stale)");
+        nearRelay.verifyPartner();
+        test.assertTrue(!nearRelay.hasPartner, "and its own check ends that link: the first relay's partner is not the near one ("
+                + absNear.getX() + ")");
+        a.verifyPartner();
+        test.assertTrue(a.hasPartner, "while the pair first-far stays linked");
+        test.succeed();
+    }
+
+    /**
+     * A relay whose partner is further away than a search can reach (a relay copied far away with /clone keeps the
+     * coordinates of its old partner, whose chunk is not loaded here) ends the link at its first tick. If it kept the link,
+     * the beam loops of its tick would walk the whole rectangle to the partner and hang the server thread: this check ran
+     * into exactly that, with the made-up partner of blockEntitiesPersist, in a run where the test area happened to lie far
+     * from (77, -88).
+     */
+    public static void relayDropsAStalePartner(GameTestHelper test) {
+        floor(test);
+        BlockPos pos = new BlockPos(3, RELAY_STALE_Y, 3);
+        test.setBlock(pos, TileBlocks.relayBlock());
+        TileEntityRelay relay = tile(test, pos, TileEntityRelay.class);
+        BlockPos abs = test.absolutePos(pos);
+        relay.hasPartner = true;
+        relay.partnerX = abs.getX() + 5_000_000;
+        relay.partnerZ = abs.getZ() - 4_000_000;
+        relay.verifyPartner();
+        test.assertTrue(!relay.hasPartner, "a partner thousands of blocks away is no partner");
+        // The same through the block entity's own tick: the link is made again by hand and the next tick must end it.
+        relay.hasPartner = true;
+        test.succeedWhen(() -> test.assertTrue(!relay.hasPartner, "the tick ended the link"));
     }
 }

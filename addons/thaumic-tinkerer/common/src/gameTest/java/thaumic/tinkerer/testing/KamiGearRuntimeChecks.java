@@ -4,8 +4,10 @@
  */
 package thaumic.tinkerer.testing;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -22,6 +24,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Zombie;
@@ -37,6 +40,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -81,8 +85,10 @@ import thaumic.tinkerer.common.registry.TTRegistry;
  * mode and the persistence of the awakened tools, the Black Hole Ring (binding, filling a container, placing, the worn
  * merge), the Bottomless Pouch's menu, the Placement Mirror, the awakened armour's switches and flight, the Celestial
  * Pearl, the Protoclay, the Experience Drain's curve and the Shadowbeam. They were written without being able to run
- * them (no Gradle and no game in the porting session): the first run may show a wrong assumption of a check as well as a
- * defect.</p>
+ * them; the first real run on a Fabric dedicated server (30 checks) showed wrong assumptions of the checks and no defect
+ * of the implementation: the harness' mock player starts in Creative mode (see {@code player(...)}),
+ * {@code GameTestHelper.relativePos} is not the inverse of {@code absolutePos} for an unrotated test, a menu is opened for
+ * the selected hotbar slot, and the target of a brain mob (piglin) is its {@code ATTACK_TARGET} memory.</p>
  */
 public final class KamiGearRuntimeChecks {
     private KamiGearRuntimeChecks() {}
@@ -106,10 +112,13 @@ public final class KamiGearRuntimeChecks {
 
     /**
      * A mock player (it joins the player list and ticks with the world) put at the relative position with the given
-     * look. Survival rules apply to its inventory and abilities; only {@code isCreative()} answers true.
+     * look. The harness' mock starts in Creative mode (abilities {@code mayfly} and {@code instabuild}, and no block
+     * drops from {@code ServerPlayerGameMode.destroyBlock}), so the game mode is set to Survival here; only the
+     * overridden {@code isCreative()} of the mock keeps answering true.
      */
     private static ServerPlayer player(GameTestHelper test, double x, double y, double z, float yaw, float pitch) {
         ServerPlayer player = test.makeMockServerPlayerInLevel();
+        player.setGameMode(GameType.SURVIVAL);
         Vec3 at = test.absoluteVec(new Vec3(x, y, z));
         player.moveTo(at.x, at.y, at.z, yaw, pitch);
         player.getInventory().clearContent();
@@ -683,11 +692,16 @@ public final class KamiGearRuntimeChecks {
         // The ray meets the wall at (3, 2, 4); the 3 x 3 square stands in front of it, from that block upward.
         List<BlockPos> square = ItemPlacementMirror.getBlocksToPlace(mirror, player);
         test.assertTrue(square.size() == 9, "nine free positions, found " + square.size());
+        // GameTestHelper.relativePos is not the inverse of absolutePos for an unrotated test (it turns the position by 180
+        // degrees about the structure origin: x 2, z 3 came back as -2, -3), so the expected cells are compared as absolute
+        // positions.
+        Set<BlockPos> expectedSquare = new HashSet<>();
+        for (int x = 2; x <= 4; x++) for (int y = 2; y <= 4; y++) expectedSquare.add(test.absolutePos(new BlockPos(x, y, 3)));
         for (BlockPos pos : square) {
-            BlockPos relative = test.relativePos(pos);
-            test.assertTrue(relative.getZ() == 3 && relative.getX() >= 2 && relative.getX() <= 4 && relative.getY() >= 2
-                    && relative.getY() <= 4, "inside the square in front of the wall: " + relative);
+            test.assertTrue(expectedSquare.contains(pos), "inside the square in front of the wall: " + pos
+                    + ", relative to the test " + pos.subtract(test.absolutePos(BlockPos.ZERO)));
         }
+        test.assertTrue(new HashSet<>(square).equals(expectedSquare), "and all nine cells of it: " + square);
 
         player.getInventory().add(new ItemStack(Items.COBBLESTONE, 5));
         item.placeAllBlocks(mirror, player);
@@ -1008,7 +1022,9 @@ public final class KamiGearRuntimeChecks {
         test.assertTrue(api.getInventory(first)[3].is(Items.GOLD_INGOT), "and the outside write survives");
         test.assertTrue(api.getInventory(first)[1].isEmpty(), "the menu's stale cells were not written");
 
-        // A pouch that is replaced in its slot closes the menu too.
+        // A pouch that is replaced in its slot closes the menu too. The menu is opened for the selected slot, so the
+        // selection (moved to slot 1 above) goes back to the slot of the pouch the new menu is meant for.
+        player.getInventory().selected = 0;
         player.getInventory().setItem(0, first);
         ContainerIchorPouch again = new ContainerIchorPouch(10, player.getInventory(), InteractionHand.MAIN_HAND);
         test.assertTrue(again.stillValid(player), "freshly opened");
@@ -1033,7 +1049,11 @@ public final class KamiGearRuntimeChecks {
         hunter.setTarget(player);
         avenger.setTarget(player);
         avenger.setLastHurtByMob(player);
-        piglin.setTarget(player);
+        // A mob that thinks with a brain keeps its target in the ATTACK_TARGET memory: AbstractPiglin.getTarget() reads the
+        // memory and ignores the field that Mob.setTarget writes (setTarget(player) would leave getTarget() null).
+        piglin.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, player);
+        test.assertTrue(creeper.getTarget() == player && hunter.getTarget() == player && avenger.getTarget() == player
+                && piglin.getTarget() == player, "set-up: all four go after the wearer");
 
         // Mobs with no brain memories (all of these but the piglin) used to make the amulet throw.
         try {

@@ -167,6 +167,17 @@ public abstract class BlockFireBase extends FireBlock implements ITTinkererRegis
         return level.isRainingAt(new BlockPos(x, y, z));
     }
 
+    /**
+     * In 1.7.10 {@code updateTick} answered the scheduled tick and the random tick alike ({@code BlockFire} called
+     * {@code setTickRandomly(true)}); in 1.21.1 the two are separate and the default {@code randomTick} does nothing, so
+     * the random tick runs the same code. A fire of age 15 schedules nothing but is still ticked here, so it burns out
+     * when its fuel is gone (and rain puts it out).
+     */
+    @Override
+    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        tick(state, level, pos, random);
+    }
+
     @Override
     protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource rand) {
         if (!(world.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK) && ConfigHandler.enableFire

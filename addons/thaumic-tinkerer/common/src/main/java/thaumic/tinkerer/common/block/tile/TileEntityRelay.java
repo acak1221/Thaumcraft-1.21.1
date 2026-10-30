@@ -46,7 +46,23 @@ public class TileEntityRelay extends BlockEntity {
         return level.getBlockEntity(pos) instanceof TileEntityRelay relay ? relay : null;
     }
 
+    /**
+     * True when a partner at this offset can be one that {@link #checkForPartner} found: the search runs along the two
+     * lines through the relay, from -32 to +31 blocks, so no partner is further away than that.
+     */
+    public static boolean partnerInRange(int dx, int dz) {
+        return dx >= -32 && dx <= 31 && dz >= -32 && dz <= 31;
+    }
+
     public void verifyPartner() {
+        // A partner beyond the search range is stale data (a relay copied far away with /clone or a structure keeps the
+        // coordinates of its old partner). 1.7.10 loaded the partner's chunk, found no relay and ended the link; here an
+        // unloaded chunk is not asked, and the beam loops of tick() walk the whole rectangle between the two relays, which
+        // for a partner thousands of blocks away never ends (a hung server thread). The link ends instead.
+        if (hasPartner && !partnerInRange(partnerX - worldPosition.getX(), partnerZ - worldPosition.getZ())) {
+            hasPartner = false;
+            return;
+        }
         BlockPos partnerPos = new BlockPos(partnerX, worldPosition.getY(), partnerZ);
         if (level == null || !level.isLoaded(partnerPos)) return;
         TileEntityRelay te = relayAt(partnerX, partnerZ);

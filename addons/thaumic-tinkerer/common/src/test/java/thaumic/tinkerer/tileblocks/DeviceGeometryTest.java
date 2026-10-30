@@ -83,6 +83,19 @@ class DeviceGeometryTest {
     }
 
     @Test
+    void aRelayPartnerBeyondTheSearchRangeIsStale() {
+        // checkForPartner looks from -32 to +31 along the two lines; anything else is stale data that must not make the
+        // beam loops walk the rectangle to it.
+        assertEquals(true, TileEntityRelay.partnerInRange(-32, 0));
+        assertEquals(true, TileEntityRelay.partnerInRange(0, 31));
+        assertEquals(true, TileEntityRelay.partnerInRange(31, 0));
+        assertEquals(false, TileEntityRelay.partnerInRange(32, 0));
+        assertEquals(false, TileEntityRelay.partnerInRange(-33, 0));
+        assertEquals(false, TileEntityRelay.partnerInRange(0, 32));
+        assertEquals(false, TileEntityRelay.partnerInRange(-944_868, 6_350_562));
+    }
+
+    @Test
     void theRelayLoopsAdvanceBeyondTwoToThe24() {
         // The original added the float of copySign to the int counter, which stops advancing at +-16,777,216, so a linked
         // pair out there hung the server thread. The integer step ends the walk after the 32 blocks between the relays.

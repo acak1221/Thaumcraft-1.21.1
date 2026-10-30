@@ -7,8 +7,10 @@ package thaumic.tinkerer.testing;
 
 import com.mojang.brigadier.CommandDispatcher;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -313,13 +315,37 @@ public final class SimpleBlocksRuntimeChecks {
 
     // ---- gases -----------------------------------------------------------------------------------------------------
 
+    /**
+     * The cloud of a released phial (level 4) is a diamond of radius four: every cell that can be reached in four steps
+     * through air or gas ends as gas of level zero, and nothing else is gas. The test structure is only 8 cells wide, and
+     * the framework puts barrier blocks around it and the check puts a stone floor into it, so the source stands at
+     * (3, 4, 3) and the tips of the diamond that fall into the barrier (x = -1, z = -1) and the floor (y = 0) are cut off;
+     * the cells that are free are found by a plain flood fill over the cells that are air (or gas) before anything spreads,
+     * an independent model of the rule, and there must be at least 125 of the 129 cells of a free diamond.
+     */
     public static void aGasCloudSpreadsInDiamondsAndSettles(GameTestHelper test) {
         floor(test);
         ServerLevel level = test.getLevel();
         Block gas = SimpleBlocks.GASEOUS_LIGHT.get();
-        BlockPos rel = new BlockPos(3, 5, 3);
+        BlockPos rel = new BlockPos(3, 4, 3);
         BlockPos origin = test.absolutePos(rel);
         test.setBlock(rel, gas.defaultBlockState().setValue(BlockGas.LEVEL, BlockGas.RELEASE_LEVEL));
+
+        // the model: the cells within four steps of the source through cells that are air or gas
+        Set<BlockPos> expected = new HashSet<>();
+        expected.add(origin);
+        List<BlockPos> frontier = List.of(origin);
+        for (int step = 0; step < BlockGas.RELEASE_LEVEL; step++) {
+            List<BlockPos> next = new ArrayList<>();
+            for (BlockPos cell : frontier) {
+                for (Direction direction : Direction.values()) {
+                    BlockPos neighbour = cell.relative(direction);
+                    if (BlockGas.isAirLike(level.getBlockState(neighbour)) && expected.add(neighbour)) next.add(neighbour);
+                }
+            }
+            frontier = next;
+        }
+        test.assertTrue(expected.size() >= 125 && expected.size() <= 129, "the cage cuts at most four tips off the 129 cells: " + expected.size());
 
         tickBlock(level, origin);
         test.assertTrue(isGas(level.getBlockState(origin), gas, 0), "the source settles at level 0");
@@ -327,29 +353,39 @@ public final class SimpleBlocksRuntimeChecks {
             test.assertTrue(isGas(level.getBlockState(origin.relative(direction)), gas, BlockGas.RELEASE_LEVEL - 1), "level 3 to the " + direction);
         }
 
-        // keep ticking whatever still has a level: a level n cell makes level n-1 cells, level 1 makes the last, level 0, ones
-        for (int round = 0; round < 6; round++) {
+        // every cell the spreading created has its own scheduled tick (ten ticks later, 1.7.10 scheduleBlockUpdate)
+        for (Direction direction : Direction.values()) {
+            test.assertTrue(level.getBlockTicks().hasScheduledTick(origin.relative(direction), gas), "a scheduled tick for the cell to the " + direction);
+        }
+
+        // The scheduled ticks of a cloud run wave by wave: all the cells created together are ticked ten ticks later, in the
+        // order of their creation, and what they create waits for the next wave. Doing the same by hand, a wave at a time (a
+        // sweep through the area in coordinate order would tick a cell created a moment ago in the same sweep, and a cell
+        // reached by a longer way first would settle with a lower level and stop the cloud short): level 3, then 2, then 1.
+        for (int wave = BlockGas.RELEASE_LEVEL - 1; wave >= 1; wave--) {
+            List<BlockPos> due = new ArrayList<>();
             for (BlockPos cell : BlockPos.betweenClosed(origin.offset(-5, -5, -5), origin.offset(5, 5, 5))) {
                 BlockState state = level.getBlockState(cell);
-                if (state.is(gas) && state.getValue(BlockGas.LEVEL) > 0) tickBlock(level, cell.immutable());
+                if (state.is(gas) && state.getValue(BlockGas.LEVEL) == wave) due.add(cell.immutable());
             }
+            test.assertTrue(!due.isEmpty(), "cells of level " + wave);
+            for (BlockPos cell : due) tickBlock(level, cell);
         }
+
         int cells = 0;
         for (BlockPos cell : BlockPos.betweenClosed(origin.offset(-6, -6, -6), origin.offset(6, 6, 6))) {
             BlockState state = level.getBlockState(cell);
             int distance = Math.abs(cell.getX() - origin.getX()) + Math.abs(cell.getY() - origin.getY()) + Math.abs(cell.getZ() - origin.getZ());
-            if (distance <= RELEASE_RANGE) {
+            if (expected.contains(cell)) {
                 test.assertTrue(isGas(state, gas, 0), "gas at distance " + distance + " from the source, found " + state);
                 cells++;
             } else {
-                test.assertTrue(!state.is(gas), "no gas at distance " + distance + ", found " + state);
+                test.assertTrue(!state.is(gas), "no gas at distance " + distance + " or behind a barrier, found " + state);
             }
         }
-        test.assertTrue(cells == 129, "129 cells within four steps, found " + cells);
+        test.assertTrue(cells == expected.size(), "the cloud is the model's: " + cells + " of " + expected.size());
         test.succeed();
     }
-
-    private static final int RELEASE_RANGE = BlockGas.RELEASE_LEVEL;
 
     public static void gasSpreadsIntoAirAndOtherGasButNotIntoSolidBlocksOrItself(GameTestHelper test) {
         floor(test);
@@ -917,25 +953,34 @@ public final class SimpleBlocksRuntimeChecks {
         test.succeed();
     }
 
+    /**
+     * The crop has a real ticker (the block entity), which keeps running while the check waits for the light: with fifty
+     * points of aqua its chance of a step is 1 in 60 per tick, so ten ticks of waiting grow it in one run out of six. The
+     * random ticks are therefore driven in one go inside a single server tick (the ticker cannot run in between) and compared
+     * with the age found just before them, and the tendencies are added only afterwards.
+     */
     public static void aCropGrowsInItsTileAndNotByRandomTicks(GameTestHelper test) {
         floor(test);
         ServerLevel level = test.getLevel();
         BlockPos cropRel = plantRipeCrop(test, Aspect.WATER, 0);
         BlockPos crop = test.absolutePos(cropRel);
         TileInfusedGrain tile = tile(test, cropRel, TileInfusedGrain.class);
-        // fifty points of aqua make the chance of a step 1 in 60 per tick instead of 1 in 15060
-        tile.primalTendencies.add(Aspect.WATER, 50);
         // light: a glowstone two cells away, and the light engine needs a few ticks
         test.setBlock(new BlockPos(5, 1, 3), Blocks.GLOWSTONE);
 
         test.runAfterDelay(10, () -> {
+            // (a vanilla crop grows by random ticks in light of 9 and more: the check means nothing in the dark)
+            test.assertTrue(level.getRawBrightness(crop, 0) >= 9, "the crop is lit: " + level.getRawBrightness(crop, 0));
+            int before = level.getBlockState(crop).getValue(CropBlock.AGE);
             for (int i = 0; i < 2000; i++) {
                 BlockState state = level.getBlockState(crop);
                 test.assertTrue(state.is(SimpleBlocks.INFUSED_GRAIN.get()), "the crop is still there");
                 state.randomTick(level, crop, level.random);
             }
-            test.assertTrue(level.getBlockState(crop).getValue(CropBlock.AGE) == 0, "random ticks do not grow the crop");
+            test.assertTrue(level.getBlockState(crop).getValue(CropBlock.AGE) == before, "random ticks do not grow the crop");
 
+            // fifty points of aqua make the chance of a step 1 in 60 per tick instead of 1 in 15060
+            tile.primalTendencies.add(Aspect.WATER, 50);
             int ticks = 0;
             while (ticks < 40000 && level.getBlockState(crop).getValue(CropBlock.AGE) < 7) {
                 TileInfusedGrain.serverTick(level, crop, level.getBlockState(crop), tile);
@@ -1200,6 +1245,12 @@ public final class SimpleBlocksRuntimeChecks {
         });
     }
 
+    /**
+     * The handler hooks the tick of the player ({@code TickEvent.PLAYER_POST}). The mock player of the GameTest framework
+     * is put into the player list but its connection is not in the server's list of connections, so nothing ticks it
+     * ({@code ServerPlayer.doTick}, which runs {@code Player.tick}, is called by the packet listener's tick): the check
+     * ticks the player itself, as the listener of a real connection would, once per iteration.
+     */
     public static void aWaterImbuedPlayerTurnsNearbyLavaIntoObsidian(GameTestHelper test) {
         floor(test);
         ServerPlayer player = mockPlayer(test, 3.5, 3.5);
@@ -1208,11 +1259,16 @@ public final class SimpleBlocksRuntimeChecks {
         BlockPos far = new BlockPos(7, 1, 7);
         test.setBlock(near, Blocks.LAVA);
         test.setBlock(far, Blocks.LAVA);
-        test.runAfterDelay(6, () -> {
-            test.assertTrue(stateAt(test, near).is(Blocks.OBSIDIAN), "lava two cells away is obsidian: " + stateAt(test, near));
-            test.assertTrue(stateAt(test, far).is(Blocks.LAVA), "lava far away is lava");
-            finish(test, player);
-        });
+        test.assertTrue(player.hasEffect(ModPotions.water()), "the player is water imbued");
+        player.doTick();
+        test.assertTrue(stateAt(test, near).is(Blocks.OBSIDIAN), "lava two cells away is obsidian: " + stateAt(test, near));
+        test.assertTrue(stateAt(test, far).is(Blocks.LAVA), "lava far away is lava");
+        // the effect is the condition: without it the handler leaves lava alone
+        player.removeEffect(ModPotions.water());
+        test.setBlock(near, Blocks.LAVA);
+        player.doTick();
+        test.assertTrue(stateAt(test, near).is(Blocks.LAVA), "a player without the effect leaves the lava alone: " + stateAt(test, near));
+        finish(test, player);
     }
 
     // ---- the elemental fires ---------------------------------------------------------------------------------------

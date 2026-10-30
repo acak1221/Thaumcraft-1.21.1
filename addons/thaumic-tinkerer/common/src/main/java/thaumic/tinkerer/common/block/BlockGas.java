@@ -130,6 +130,16 @@ public abstract class BlockGas extends Block implements ITTinkererRegisterable {
         }
     }
 
+    /**
+     * 1.7.10 {@code updateTick} answered the scheduled tick and the random tick alike ({@code setTickRandomly(true)});
+     * in 1.21.1 the default {@code randomTick} does nothing, so the random tick runs the same code (a settled gas, level
+     * zero, does nothing; the Nitor Gas checks for its carrier).
+     */
+    @Override
+    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        tick(state, level, pos, random);
+    }
+
     /** 1.7.10 {@code placeParticle}: the visual cue of a gas that appears or is dissipated. */
     public void placeParticle(Level level, BlockPos pos) {
         // NO-OP, override

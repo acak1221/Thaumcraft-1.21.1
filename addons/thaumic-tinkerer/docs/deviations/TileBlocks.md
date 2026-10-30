@@ -149,6 +149,21 @@ may overrule it). Nothing here was run in a game; see the end for what is unveri
 * **Chunk handling (decision).** 1.7.10 asked `getTileEntity`/`getBlock`, which loaded chunks. The port consults only loaded
   chunks (`Level.isLoaded`) for the relay search, the relay check, the bounce and the move, and does nothing when the chunk is
   not loaded. A track across a chunk border that is not loaded stops until it is.
+* **A partner out of reach ends the link (fix).** `TileEntityRelay.verifyPartner` ends the link of a relay whose partner is
+  outside what `checkForPartner` can find (offsets -32 to +31 on each axis; `TileEntityRelay.partnerInRange`). 1.7.10 loaded
+  the partner's chunk, found no relay there and ended the link; the port does not ask an unloaded chunk (see above), so a
+  relay that carries the coordinates of a far-away partner (copied with `/clone` or a structure, edited data) kept its link
+  forever, and the beam loops of `tick()` walk the whole rectangle between the two relays: for a partner thousands of
+  blocks away that never ends and the server thread hangs. Seen in a real GameTest run: the made-up partner (77, -88) of the
+  persistence check, in a run where the test area lay at x = -944,791, z = -6,350,655, stopped the server thread in
+  `TileEntityRelay.tick` for good. Every partner a search can set is within the range, so real links are unaffected.
+  `DeviceGeometryTest` pins the range, the GameTest `relayDropsAStalePartner` the tick.
+* **The partner search keeps the last relay it finds (kept).** `checkForPartner` has no `break`: along the z line and the x
+  line, offsets -32 to +31, every relay found becomes the partner and replaces the previous one, so with three relays in a
+  line the farthest wins and the nearer one keeps a stale partner that does not point back, which its next check ends. The
+  GameTest `relayKeepsTheLastRelayItFinds` pins it. Consequence for tests: the areas of a GameTest run lie side by side
+  13 blocks apart, so relays of different checks at the same height find each other; every check of the group that
+  places relays uses a height of its own.
 * **The move condition (decision).** The original condition `isAirBlock(target) || target.isAir && (...)` reduces to "the
   target is air" by operator precedence; the port tests exactly that. The passenger rules are kept: moved when the space
   above the locomotive is empty or the passenger can be placed above the target; bedrock stays; a piston head is not
@@ -335,17 +350,18 @@ may overrule it). Nothing here was run in a game; see the end for what is unveri
 
 ## 4. Unverified
 
-The group compiles (`tools/compile.sh`, also with `-g` for the GameTest sources, and with `-Xlint:all`: no deprecation or
-lossy-conversion warning is left in the group's files, only the harmless `this-escape` ones). The JUnit tests (36, in
-`common/src/test/java/thaumic/tinkerer/tileblocks`) were compiled with javac and run on the real JUnit Jupiter 5.11.4
-launcher from the Gradle cache, outside Gradle, and all passed. The GameTests (`TileBlocksRuntimeChecks`, 31 checks, and
-`interfaceForwardsFluids` of the Fabric wrapper, 32 in all) compile and have **not been run**; several of them were added
-or changed in the review round (the slot of the placer's screen, the packets of the two screens, the placer's wand, the
-fake player's advancements, the fluids) and rest on reading the 1.21.1 bytecode and sources, not on a run. The Fabric glue
-`TileBlocksFabric` and the camouflage renderer (`renderBatched`) have never run. No dedicated-server smoke, no client, no
-multiplayer, no survival play. Every behaviour above that says "as the original" is by reading the original code, not by
-running both; the claims about 1.7.10 engine code (the break-speed rule, Forge's call order of `onItemUseFirst`) are from
-memory of that code, whose engine source is not on disk here.
+Run on a Fabric dedicated server (`:fabric:runTinkererGameTest`, filter `tileblocksgametests.*`): the 34 GameTests of the
+group (the 33 checks of `TileBlocksRuntimeChecks` and `interfaceForwardsFluids` of the Fabric wrapper) pass, in two runs whose
+test areas lay at different random positions. The add-on's JUnit suite (`:fabric:tinkererTest`, 296 tests, 37 of them in the
+group's `tileblocks` package) passes. What the first real run showed, and was
+fixed: the relay fix above (a stale partner hung the server thread), and six checks whose set-up was wrong, not the code
+(the Interface was bound to a stone block, which has no block entity to stand in for and so ends the binding at once;
+`GameTestHelper.relativePos` of 1.21.1 is not the inverse of `absolutePos`; `GameTestHelper.destroyBlock` drops nothing;
+the relays of neighbouring checks found each other, see "keeps the last relay it finds"). **Still not run:** the Fabric glue
+`TileBlocksFabric` is only exercised through `interfaceForwardsFluids`; the camouflage renderer (`renderBatched`) and all
+rendering, the screens, the client, multiplayer and survival play have never run. Every behaviour above that says "as the
+original" is by reading the original code, not by running both; the claims about 1.7.10 engine code (the break-speed rule,
+Forge's call order of `onItemUseFirst`) are from memory of that code, whose engine source is not on disk here.
 
 
 ## Research cell of the Remote Placer (lead decision)

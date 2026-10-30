@@ -10,8 +10,13 @@ How this was checked (honestly): the research entries (key, aspects, column, row
 recipes (instability, aspects) were compared with the 1.7.10 source by script, the ingredient lists of a dozen recipes by hand;
 the add-on compiles with `tools/compile.sh` (also with `-g`, which adds the GameTest sources); the pure logic and the data files are
 covered by 31 JUnit tests (KamiGear's 30 and `TinkererApiOnlyTest`) that were run with the real JUnit Jupiter launcher from the
-Gradle cache, without Gradle; the GameTests compile but **were not run** (no Gradle and no game in the porting session). Nothing
-here has been seen in a running client, and no GameTest of the review round has been run.
+Gradle cache, without Gradle. The 30 GameTests (`KamiGearRuntimeChecks`) were first run on a real Fabric dedicated server in the
+integration round (`-PtinkererGameTestFilter='kamigeargametests.*'`): 23 passed, 7 failed, and all 7 were wrong expectations or
+set-ups of the checks, not defects of the implementation (the mock player of `GameTestHelper.makeMockServerPlayerInLevel` is in
+Creative mode, so the checks now set Survival; `GameTestHelper.relativePos` is not the inverse of `absolutePos` for an unrotated
+test; a pouch menu is opened for the *selected* hotbar slot; the target of a piglin is its `ATTACK_TARGET` brain memory, which
+`AbstractPiglin.getTarget` reads, not the field that `Mob.setTarget` writes). After the corrections all 30 pass. Nothing
+here has been seen in a running client.
 
 ## 1. Identity: registry paths, components, models
 

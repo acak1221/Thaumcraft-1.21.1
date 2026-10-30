@@ -106,7 +106,8 @@ now `dark_quartz_0..5`, `pave_travel_slab`, `pave_travel_stairs`, `pave_ward_sla
   air.
 * **Light (forced).** `setLightOpacity(215)` of the Gaseous Tenebrae is `getLightBlock` 15 (the scale has 16 steps). The
   Nitor Gas: light 12, or 15 for level 1; the Gaseous Illuminae 12. `getLightValue()` of the base class (15) is not needed.
-* **Spreading (forced).** `updateTick` is `tick` (scheduled and random). The order is the original's: -x, +x, -y, +y,
+* **Spreading (forced).** `updateTick` is `tick` (scheduled), and `randomTick` (the 1.7.10 random update) calls `tick`, because the
+  default `randomTick` of 1.21.1 does nothing (found by the first GameTest run of the fires; the gases had the same gap). The order is the original's: -x, +x, -y, +y,
   -z, +z; a cell that already holds the same gas is not overwritten, a cell with another gas is (every gas was an air block
   in 1.7.10, so one gas spread over another). The random tick of a settled gas does nothing;
   a scheduled tick (ten ticks) is queued for every cell a spreading creates, as in 1.7.10 (`scheduleBlockUpdate`).
@@ -280,8 +281,9 @@ now `dark_quartz_0..5`, `pave_travel_slab`, `pave_travel_stairs`, `pave_ward_sla
   `data/minecraft/tags/block/fire.json`.
 * **Light, sound, random ticks.** The fires have light 0 and the default step sound, because the 1.7.10 fires never set
   either: the light level 1 and the wood sound belonged to `Blocks.fire` (set when vanilla registered it), not to the
-  constructor of `BlockFire`. They are ticked at random (`randomTicks()`), as `BlockFire` called `setTickRandomly(true)`: a
-  fire of age 15 schedules nothing but is still ticked at random, so it burns out when no fuel is left and rain puts it out.
+  constructor of `BlockFire`. They are ticked at random (`randomTicks()`), as `BlockFire` called `setTickRandomly(true)`, and
+  `randomTick` calls `tick` (the default `randomTick` of 1.21.1 is empty and the vanilla fire is never ticked at random):
+  a fire of age 15 schedules nothing but is still ticked at random, so it burns out when no fuel is left and rain puts it out.
 * **The tables (forced).** A rule is a predicate over the block state and a result block (`FireRules`), because one 1.7.10 id
   stands for a family of 1.21.1 blocks. The families are block tags: logs are `minecraft:overworld_natural_logs` (the
   stripped logs and wood are not natural logs and so not transmuted; decision), leaves `minecraft:leaves`, planks
@@ -345,7 +347,7 @@ now `dark_quartz_0..5`, `pave_travel_slab`, `pave_travel_stairs`, `pave_ward_sla
 
 ## 4. Not verified
 
-Written without being able to run Gradle or the game. What was done (second pass, after the review):
+Written without being able to run Gradle or the game; the GameTests were run later (see the last bullet). What was done (second pass, after the review):
 
 * `tools/compile.sh` and `tools/compile.sh -g` (javac with the Gradle-exported class path): 0 errors for the whole add-on,
   the GameTest sources and the Fabric wrappers included. With `-Xlint:deprecation,removal,cast,unchecked,rawtypes` the
@@ -362,9 +364,23 @@ Written without being able to run Gradle or the game. What was done (second pass
   blocking, not a redstone conductor, does not occlude and is replaceable; the fire has light 0, the stone sound, takes
   random ticks and is replaceable; the four potions glint and have the description ids of their names; the command
   node `setCropTendency <aspect> <count>` exists. That checks the block properties only, not the behaviour in a level.
-* The 48 GameTest checks (`SimpleBlocksRuntimeChecks`, wrapped by `SimpleBlocksGameTests`; four are new in the second
-  pass: the wall over the drinker's own cell, the renewal of the walking effects, the fire of age 15 at a random tick,
-  `/setCropTendency`) were compiled and never executed.
+* The 48 GameTest checks (`SimpleBlocksRuntimeChecks`, wrapped by `SimpleBlocksGameTests`) were first run on a Fabric
+  dedicated server (`:fabric:runTinkererGameTest`, filter `simpleblocksgametests.*`) after the lead's integration. Three
+  failed. One was a defect of the implementation: the imbued fires and the gases are `randomTicks()` blocks but 1.21.1's
+  default `randomTick` is empty (1.7.10 `updateTick` served both kinds of tick), so a fire of age 15 never burned out;
+  `BlockFireBase` and `BlockGas` now override `randomTick` to call `tick` (section 2.3 and 2.9). The other two were wrong
+  checks: the water-imbued check waited for a mock player that nobody ticks (the framework's mock `ServerPlayer` is in
+  the player list but its connection is not in the server's connection list, and `Player.tick` is only run by
+  `ServerPlayer.doTick` from the packet listener), so the check calls `doTick` itself; and the gas-cloud check swept the
+  area in coordinate order, which ticks a cell created a moment ago in the same sweep and makes the levels depend on the
+  order, whereas scheduled ticks run wave by wave (a Python model of both orders gave 117 cells for the sweep and 125 for
+  the waves), and it assumed room for a radius of four in the framework's 8-cell cage (the barrier stands at x = -1 and
+  z = -1 and the floor at y = 0, the top is open): it now ticks wave by wave and compares the cloud with a flood fill of
+  the free cells. A fourth check (`aCropGrowsInItsTileAndNotByRandomTicks`) failed in the first whole-group run because
+  the crop's real ticker grew it during the ten ticks of waiting for the light (chance 1 in 6): it compares the age before
+  and after the 2000 random ticks inside one server tick.
+  Result of the last run of the whole group: 48 of 48 passed (`:fabric:runTinkererGameTest`,
+  `-PtinkererGameTestFilter='simpleblocksgametests.*'`).
 
 Not seen in a running game: the look of every model, the crop colours (the tint of the generic crop reads the block entity,
 which must have reached the client before the chunk section is meshed), the camouflage renderer, the particles (the
@@ -372,7 +388,7 @@ Thaumcraft sparkles, wisps, runes and bursts of the facade have not been looked 
 stand-ins), the spreading of the gases against the light engine, the Nether tick rates, the speed of the crops, the
 behaviour of the fires over time (the checks drive the tick by hand, so the real rate of the random ticks is unseen), the
 flung victims of the Air potion, the hoe handler, the unloaded-chunk guards, the two sides of the platform's collision on
-a dedicated server, the mock player of the GameTests (they assume it is ticked, that its abilities can be set and that
-`useBlock` reaches `useItemOn`), the day and night rule of the crop growth, and the first creation of the group on NeoForge
+a dedicated server, a player who is ticked by a real connection (the mock player of the GameTests is not ticked by anybody; the water check
+calls `doTick` itself), the day and night rule of the crop growth, and the first creation of the group on NeoForge
 (not attempted: Fabric first). The `config` switches `enableCake`, `enableFire` and `enableKami` were read from the defaults
 only.

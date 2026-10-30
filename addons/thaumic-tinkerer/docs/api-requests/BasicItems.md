@@ -76,8 +76,9 @@ group) and `thaumictinkerer:blood_sword` (the Machines group's `IRepairable` ite
   blood sword), `data/minecraft/tags/item/enchantable/head_armor.json` (helm) and `data/minecraft/tags/item/enchantable/durability.json`
   (helm, Talisman of Remedium). The Kami helmets are in `data/minecraft/tags/item/head_armor.json` (KamiGear) and need nothing
   more.
-- **Constants.** `LibResources.MODEL_REVEALING_HELM` (`textures/models/revealing.png`) is no longer used by anything: the worn layer
-  of the helmet is `textures/models/armor/revealing_layer_1.png`.
+- **Constants.** `LibResources.MODEL_REVEALING_HELM` points at the worn layer of the helmet,
+  `textures/models/armor/revealing_layer_1.png` (the lead changed it; nothing reads the constant, the armour material names the
+  layer by its id). The converted `textures/models/revealing.png` is the same picture and is kept as the converted base.
 - **Recipe serializers.** `BasicItems.RECIPE_SERIALIZERS` is a `DeferredRegister` of this group (called from
   `BasicItems.register()`); `TTRegistry` needs no change. If the lead prefers one place for all registries, move the field and the
   `register()` call.

@@ -202,6 +202,53 @@ public final class KamiWorldRuntimeChecks {
 
     // ---- the Bedrock dimension -------------------------------------------------------------------------------------
 
+    /**
+     * The dimension of a normal world and the level of the test world are the same dimension.
+     *
+     * <p>A normal (dedicated or integrated) server gets the level stems of the data packs through {@code WorldDimensions.bake}, so
+     * {@code data/thaumictinkerer/dimension/bedrock.json} is all a world needs. The vanilla {@code GameTestServer} does not: it
+     * bakes the dimensions of the flat world preset against an <b>empty</b> level stem registry, so a data-pack dimension has no
+     * level in the test world unless the preset names it. That is why the test resources override
+     * {@code data/minecraft/worldgen/world_preset/flat.json} with the three vanilla dimensions plus a copy of the Bedrock
+     * dimension (the mod's own GameTests do the same for the Outer Lands). This check decodes the real file with the server's
+     * registries (the codec path of the data pack loader), compares it to the copy in the preset, and to the running level.</p>
+     */
+    public static void bedrockDimensionFileDecodesAndIsTheLevelOfTheTestWorld(GameTestHelper test) {
+        MinecraftServer server = test.getLevel().getServer();
+        com.google.gson.JsonElement file = json(test, server, LibMisc.id("dimension/bedrock.json"));
+        var ops = net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, server.registryAccess());
+        net.minecraft.world.level.dimension.LevelStem stem = net.minecraft.world.level.dimension.LevelStem.CODEC.parse(ops, file)
+                .getOrThrow(message -> new AssertionError("the dimension file does not decode: " + message));
+        test.assertTrue(stem.type().is(LibMisc.id("bedrock")), "the dimension type of the file: " + stem.type());
+        test.assertTrue(stem.generator() instanceof ChunkGeneratorBedrock, "the generator of the file: " + stem.generator());
+        var biomes = stem.generator().getBiomeSource().possibleBiomes();
+        test.assertTrue(biomes.size() == 1 && biomes.iterator().next().is(LibMisc.id("bedrock")), "one biome, the Bedrock biome: " + biomes);
+
+        // The copy of the test world's preset is the same JSON (the preset is read from the active data packs, the test pack on top).
+        com.google.gson.JsonElement preset = json(test, server, ResourceLocation.withDefaultNamespace("worldgen/world_preset/flat.json"));
+        com.google.gson.JsonElement copy = preset.getAsJsonObject().getAsJsonObject("dimensions").get(WorldProviderBedrock.KEY.location().toString());
+        test.assertTrue(file.equals(copy), "the preset of the test resources holds the dimension file as it is: " + copy);
+
+        // And the running level is that dimension.
+        ServerLevel level = bedrock(test);
+        test.assertTrue(level.dimension() == WorldProviderBedrock.KEY, "the level key");
+        test.assertTrue(level.dimensionTypeRegistration().is(LibMisc.id("bedrock")), "the level's dimension type");
+        test.assertTrue(level.getChunkSource().getGenerator() instanceof ChunkGeneratorBedrock, "the level's generator");
+        test.assertTrue(level.getChunkSource().getGenerator().getBiomeSource().possibleBiomes().stream().allMatch(b -> b.is(LibMisc.id("bedrock"))),
+                "the level's biome");
+        test.succeed();
+    }
+
+    private static com.google.gson.JsonElement json(GameTestHelper test, MinecraftServer server, ResourceLocation id) {
+        var resource = server.getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath()));
+        test.assertTrue(resource.isPresent(), "the data pack holds " + id);
+        try (java.io.Reader reader = resource.get().openAsReader()) {
+            return com.google.gson.JsonParser.parseReader(reader);
+        } catch (java.io.IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+
     /** Every block of the new chunks is bedrock or one of the valid ores, and there is ore. */
     public static void bedrockDimensionIsSolidBedrockWithOreVeins(GameTestHelper test) {
         ServerLevel level = bedrock(test);
@@ -497,6 +544,21 @@ public final class KamiWorldRuntimeChecks {
 
     // ---- the Soul Hearts -------------------------------------------------------------------------------------------
 
+    /**
+     * The pool is filled by the sword's hook and spent before health when the player is hurt.
+     *
+     * <p>Set-up. A new {@code ServerPlayer} refuses every hit for 60 ticks ({@code spawnInvulnerableTime}, counted down by
+     * {@code ServerPlayer.tick}, which the level calls for a mock player as for any), long before the damage event is posted:
+     * a hit in the tick of the set-up changes neither health nor the pool. The hits therefore come after that time.</p>
+     *
+     * <p>What it asserts is the part that the Architectury fallback ({@link SoulHeartHandler#onLivingHurt}, which runs until a
+     * loader hook calls {@link SoulHeartHandler#modifyIncomingDamage} and sets {@link SoulHeartHandler#exactDamageHook}) and the
+     * exact hook share: a hit the pool covers costs the pool and no health, a hit it does not cover costs the pool and then
+     * the rest of the whole points. It does <b>not</b> assert what the fallback gets wrong (the knockback and the
+     * invulnerability frames of a covered hit are lost, a hit is a whole number of points only for a player that has hearts):
+     * the exact rule, with its fraction cut for everybody, is checked on its seam by
+     * {@link #soulHeartsExactRuleCutsTheFractionOfEveryHit}; the last hit of this check says which of the two rules is running.</p>
+     */
     public static void soulHeartsAbsorbDamageBeforeHealth(GameTestHelper test) {
         floor(test);
         ServerPlayer player = player(test, 2.5, 1, 2.5);
@@ -513,24 +575,61 @@ public final class KamiWorldRuntimeChecks {
         test.assertTrue(SoulHeartHandler.getHP(player) == SoulHeartHandler.MAX_HP, "twenty points at most");
         test.assertTrue(!SoulHeartHandler.addHP(player, 1), "a full pool takes no more");
 
-        // A hit the pool covers costs no health.
-        SoulHeartHandler.setHP(player, 5);
-        DamageSource generic = test.getLevel().damageSources().generic();
-        player.hurt(generic, 3F);
-        test.assertTrue(player.getHealth() == 20F, "a hit of 3 against 5 soul hearts costs no health: " + player.getHealth());
-        test.assertTrue(SoulHeartHandler.getHP(player) == 2, "it costs 3 soul hearts: " + SoulHeartHandler.getHP(player));
+        // Spawn protection first (see above): 60 ticks, the other checks of the add-on wait 65.
+        test.runAfterDelay(65, () -> {
+            try {
+                player.setHealth(20F);
+                // A hit the pool covers costs no health.
+                SoulHeartHandler.setHP(player, 5);
+                DamageSource generic = test.getLevel().damageSources().generic();
+                player.invulnerableTime = 0;
+                player.hurt(generic, 3F);
+                test.assertTrue(player.getHealth() == 20F, "a hit of 3 against 5 soul hearts costs no health: " + player.getHealth());
+                test.assertTrue(SoulHeartHandler.getHP(player) == 2, "it costs 3 soul hearts: " + SoulHeartHandler.getHP(player));
 
-        // A hit it does not cover costs the rest.
-        player.invulnerableTime = 0;
-        player.hurt(generic, 4F);
-        test.assertTrue(SoulHeartHandler.getHP(player) == 0, "the pool is empty: " + SoulHeartHandler.getHP(player));
-        test.assertTrue(player.getHealth() == 18F, "2 points of the hit of 4 went on: " + player.getHealth());
+                // A hit it does not cover costs the rest.
+                player.invulnerableTime = 0;
+                player.hurt(generic, 4F);
+                test.assertTrue(SoulHeartHandler.getHP(player) == 0, "the pool is empty: " + SoulHeartHandler.getHP(player));
+                test.assertTrue(player.getHealth() == 18F, "2 points of the hit of 4 went on: " + player.getHealth());
 
-        // Without soul hearts the game is not changed.
-        player.invulnerableTime = 0;
-        player.hurt(generic, 1.5F);
-        test.assertTrue(player.getHealth() == 16.5F, "no hearts, no change: " + player.getHealth());
-        SoulHeartHandler.setHP(player, 0);
+                // No hearts: the fallback leaves the player alone (the full 1.5), the exact rule cuts the fraction like 1.7.10 (1).
+                player.invulnerableTime = 0;
+                player.hurt(generic, 1.5F);
+                float expected = SoulHeartHandler.exactDamageHook ? 17F : 16.5F;
+                test.assertTrue(player.getHealth() == expected, (SoulHeartHandler.exactDamageHook ? "exact rule: the fraction of the hit is cut: "
+                        : "fallback: no hearts, no change: ") + player.getHealth());
+            } finally {
+                SoulHeartHandler.setHP(player, 0);
+            }
+            finish(test, player);
+        });
+    }
+
+    /**
+     * The rule of the original on its seam ({@link SoulHeartHandler#modifyIncomingDamage}, what the loader hook calls for every
+     * hit of a server player): the whole points of the hit come off the pool, the rest is a whole number, a hit below one point
+     * is swallowed even with no hearts, and the pool is saved. A hit that is not positive is not touched.
+     */
+    public static void soulHeartsExactRuleCutsTheFractionOfEveryHit(GameTestHelper test) {
+        ServerPlayer player = player(test, 2.5, 1, 2.5);
+        try {
+            SoulHeartHandler.setHP(player, 5);
+            test.assertTrue(SoulHeartHandler.modifyIncomingDamage(player, 3.9F) == 0F, "3.9 against 5 hearts: nothing goes on");
+            test.assertTrue(SoulHeartHandler.getHP(player) == 2, "it takes the 3 whole points: " + SoulHeartHandler.getHP(player));
+            test.assertTrue(SoulHeartHandler.modifyIncomingDamage(player, 4.9F) == 2F, "4.9 against 2 hearts: 4 points, 2 go on, a whole number");
+            test.assertTrue(SoulHeartHandler.getHP(player) == 0, "the pool is empty");
+            test.assertTrue(SoulHeartHandler.modifyIncomingDamage(player, 1.5F) == 1F, "no hearts: the fraction of the hit is cut (1.7.10 int amount)");
+            test.assertTrue(SoulHeartHandler.modifyIncomingDamage(player, 0.5F) == 0F, "and a hit below one point is gone");
+            test.assertTrue(SoulHeartHandler.getHP(player) == 0, "the pool does not go below 0");
+            test.assertTrue(SoulHeartHandler.modifyIncomingDamage(player, 0F) == 0F && SoulHeartHandler.modifyIncomingDamage(player, -2F) == -2F,
+                    "a hit that is not positive is returned as it is");
+            SoulHeartHandler.setHP(player, 20);
+            test.assertTrue(SoulHeartHandler.modifyIncomingDamage(player, 100F) == 80F, "a big hit: 20 points absorbed, 80 go on");
+            test.assertTrue(SoulHeartHandler.getHP(player) == 0, "the whole pool is gone");
+        } finally {
+            SoulHeartHandler.setHP(player, 0);
+        }
         finish(test, player);
     }
 

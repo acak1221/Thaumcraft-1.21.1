@@ -230,4 +230,14 @@ public final class TileBlocksGameTests implements FabricGameTest {
     public void relaysFindEachOther(GameTestHelper h) {
         TileBlocksRuntimeChecks.relaysFindEachOther(h);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void relayKeepsTheLastRelayItFinds(GameTestHelper h) {
+        TileBlocksRuntimeChecks.relayKeepsTheLastRelayItFinds(h);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void relayDropsAStalePartner(GameTestHelper h) {
+        TileBlocksRuntimeChecks.relayDropsAStalePartner(h);
+    }
 }

@@ -19,8 +19,14 @@ Consequences, because the licence is ShareAlike and NonCommercial:
   except the build scripts named below) is licensed under **CC BY-NC-SA 3.0**, not under the MIT licence of the rest of
   this repository. It must not be sold or used commercially, and further adaptations must carry the same licence.
 - The MIT licence of the repository root covers the files outside this directory and the build files that wire the
-  add-on into the build: `fabric.gradle` and `tools/`. They contain no Thaumic Tinkerer code. (There is no NeoForge build file of
-  the add-on yet; one that wires the add-on into the build would be covered by the same sentence.)
+  add-on into the build: `fabric.gradle` and `tools/`, and in `standalone/` (the template of the standalone repository) `settings.gradle`,
+  `build.gradle`, `gradle.properties`, `.gitignore`, `.github/`, `LICENSE-MIT`, `tools/` and `scripts/porting/README.md`. They contain no
+  Thaumic Tinkerer code. (There is no NeoForge build file of the add-on yet; one that wires the add-on into the build would be covered by the
+  same sentence.) `standalone/README.md`, `standalone/README.ru.md` and `standalone/NOTICE.md` describe the add-on and are under CC BY-NC-SA 3.0
+  like the files they replace in the export; so is `docs/EXPORT.md`, like everything in `docs/`. The Python tools the export copies from
+  `scripts/porting` are MIT files of the repository root. The Gradle wrapper that the export copies (`gradlew`, `gradlew.bat`, `gradle/wrapper/`)
+  is Gradle's own work under the Apache License 2.0, copied unchanged. The scripts and Gradle files named here carry an
+  `SPDX-License-Identifier: MIT` line.
 - The add-on jar is a separate download; the Thaumcraft jar contains none of it.
 - Publishing the port does not establish rights in Thaumcraft 4 (Azanor), which Thaumic Tinkerer is a derivative work
   of, nor in Minecraft.

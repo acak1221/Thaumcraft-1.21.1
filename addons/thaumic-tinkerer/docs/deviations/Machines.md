@@ -2,7 +2,7 @@
 
 Group Machines: Aspectalyzer, Thaumic Restorer, Essentia Funnel, Kinetic Attractor, Corporeal Attractor, Tablet of
 Necromancy, soul mould, soul aspects, mob display, Cursed Spirit's Blade. Specification: the 1.7.10 sources in
-`/home/user/gtnewhorizons/thaumictinkerer` (commit in `NOTICE.md`). Everything not listed here is ported as it was:
+GTNewHorizons/ThaumicTinkerer (commit in `NOTICE.md`). Everything not listed here is ported as it was:
 research keys, coordinates, aspects, recipes, hardness and resistance, ranges, intervals, messages. Numbers that were
 checked against the original on purpose are in section 9. Requests to the API and to the lead are in
 `docs/api-requests/Machines.md`.

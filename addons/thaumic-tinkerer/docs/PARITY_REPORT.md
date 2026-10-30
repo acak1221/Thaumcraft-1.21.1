@@ -1,6 +1,6 @@
 # Parity of the add-on with Thaumic Tinkerer 1.7.10: research tree, recipes and object tags
 
-Date of the runs: 2026-10-30. Specification: the 1.7.10 source in `/home/user/gtnewhorizons/thaumictinkerer`, commit
+Date of the runs: 2026-10-30. Specification: the 1.7.10 source (a checkout of <https://github.com/GTNewHorizons/ThaumicTinkerer>, `<1.7.10 checkout>` below), commit
 `28f4def938e80d7a0b6f433c2b84300dfb7c35ce` (see `NOTICE.md`). Everything below says what ran and what it showed; nothing is
 claimed that did not run. This is the second version of the report: section 8 lists what two reviewers found in the first
 version of the comparison and what was done about each finding.
@@ -20,13 +20,16 @@ section 5 says how that was counted twice.
 
 ## 2. What ran
 
+The Gradle commands are those of the monorepo (`:fabric:` prefix; in the standalone repository drop it, `README.md`). The two runs below were started through a wrapper script
+of the development machine around `./gradlew` (it serialises Gradle runs and retries failed downloads; it changes nothing else); the commands are listed without it.
+
 | What | Command | Result |
 |---|---|---|
 | Extraction | `python3 -I scripts/porting/tt_oracle.py` (writes `common/src/gameTest/resources/tt_oracle/{research,recipes,provenance}.json`) | 334 source files, 194 construction sites (79 research, 98 recipe, 1 object tag), 81 research entries for 78 keys, 130 recipes (28 arcane shaped, 55 infusion, 15 crucible, 30 crafting-table shaped, 1 shapeless, 1 custom recipe class), 17 object tags, 0 item expressions unresolved, 0 stacks given to a helper that writes unmodelled NBT |
 | Is the checked-in oracle current | `python3 -I scripts/porting/tt_oracle.py --check` | "the checked-in oracle is current" |
 | Extractor tests | `python3 -I -m unittest discover -s scripts/porting -p "test_tt_oracle.py"` | 93 tests, OK (synthetic checkouts for the reader, the interpreter, the fail-loudly cases, the stack data, bare blocks, ore names, object tags, the config defaults and `--check`; the real-checkout class replays the extraction against the pinned commit, cross-counts the constructions with an independent regex count and compares the research keys with the keys written in the source) |
-| JUnit of the comparison logic | `/root/bin/gradle-mirror-loop.sh <log> :fabric:tinkererTest --tests 'thaumic.tinkerer.parity.*'` | BUILD SUCCESSFUL: `ParityComparatorTest` 41 tests, `KnownDifferencesTest` 8 tests, 0 failures (`fabric/build/test-results/tinkererTest/`); `TinkererApiOnlyTest` (1) and `thaumic.tinkerer.kamigear.*` (30) also passed in a second run |
-| GameTest on a running server | `/root/bin/gradle-mirror-loop.sh <log> :common:compileJava :fabric:runTinkererGameTest -PtinkererGameTestFilter='paritygametests.*'` | exit 0, "All 7 required tests passed"; the full report is `fabric/run-tinkerer-gametest/tinkerer-parity-report.txt`. The results file `fabric/build/tinkerer-gametest-results.xml` named in the assignment was **not** written by this focused run (it does not exist after the run); the evidence is the log line and the parity report |
+| JUnit of the comparison logic | `./gradlew :fabric:tinkererTest --tests 'thaumic.tinkerer.parity.*'` | BUILD SUCCESSFUL: `ParityComparatorTest` 41 tests, `KnownDifferencesTest` 8 tests, 0 failures (`fabric/build/test-results/tinkererTest/`); `TinkererApiOnlyTest` (1) and `thaumic.tinkerer.kamigear.*` (30) also passed in a second run |
+| GameTest on a running server | `./gradlew :common:compileJava :fabric:runTinkererGameTest -PtinkererGameTestFilter='paritygametests.*'` | exit 0, "All 7 required tests passed"; the full report is `fabric/run-tinkerer-gametest/tinkerer-parity-report.txt`. The results file `fabric/build/tinkerer-gametest-results.xml` named in the assignment was **not** written by this focused run (it does not exist after the run); the evidence is the log line and the parity report |
 | Compilation with the GameTest sources | `addons/thaumic-tinkerer/tools/compile.sh -g` | compiled, no error |
 | Behaviour of the custom recipe class (not part of the oracle, see section 6) | same command, `-PtinkererGameTestFilter='basicitemsgametests.spellcloth*'` | exit 0, "All 3 required tests passed" |
 
@@ -45,7 +48,7 @@ object tags added (7 tests), passed; the third is the final state of the files. 
 ## 3. The differences (all documented, none a defect)
 
 `subject` is the research key or the recipe name; the recipe subject carries the resolved output when the name is not unique.
-"Original" lines are in `/home/user/gtnewhorizons/thaumictinkerer/src/main/java/thaumic/tinkerer/common/`, "port" lines in
+"Original" lines are in `<1.7.10 checkout>/src/main/java/thaumic/tinkerer/common/`, "port" lines in
 `addons/thaumic-tinkerer/common/src/main/java/thaumic/tinkerer/common/` (data recipes in `.../resources/data/thaumictinkerer/recipe/`).
 Every row is an entry of `common/src/gameTest/resources/tt_oracle/known_differences.json`, and each entry is consumed by the one
 difference it matches (a second identical difference would be a failure).
@@ -176,8 +179,8 @@ registries in `aChangedOracleValueFailsAgainstTheLiveRegistries`):
 ```bash
 python3 -I scripts/porting/tt_oracle.py --check                       # is the oracle current (needs the pinned checkout)
 python3 -I -m unittest discover -s scripts/porting -p "test_tt_oracle.py"
-cd /home/user/Thaumcraft-1.21.1 && /root/bin/gradle-mirror-loop.sh <log> :common:compileJava :fabric:runTinkererGameTest -PtinkererGameTestFilter='paritygametests.*'
-cd /home/user/Thaumcraft-1.21.1 && /root/bin/gradle-mirror-loop.sh <log> :fabric:tinkererTest --tests 'thaumic.tinkerer.parity.*'
+./gradlew :common:compileJava :fabric:runTinkererGameTest -PtinkererGameTestFilter='paritygametests.*'     # monorepo root; standalone: ./gradlew runTinkererGameTest -PtinkererGameTestFilter=...
+./gradlew :fabric:tinkererTest --tests 'thaumic.tinkerer.parity.*'                                         # standalone: ./gradlew tinkererTest --tests ...
 ```
 
 Files: `scripts/porting/tt_oracle.py`, `scripts/porting/test_tt_oracle.py`; `common/src/gameTest/resources/tt_oracle/{research,recipes,provenance,known_differences}.json`;

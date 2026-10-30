@@ -1,0 +1,104 @@
+# SPDX-License-Identifier: MIT
+# CI of the standalone repository of Thaumic Tinkerer (Fabric, Minecraft 1.21.1).
+#
+# The add-on needs Thaumcraft 4 Reload from https://github.com/acak1221/Thaumcraft-1.21.1 (it needs extensions of thaumcraft.api that exist
+# only on the branch claude/hopeful-hamilton-v8m5pi), so the job checks that repository out next to the add-on at the commit thaumcraft_ref
+# of gradle.properties (a commit, not the branch: the build does not change when the branch moves; move it together with thaumcraft_version),
+# installs Thaumcraft into the local Maven repository of the runner (the add-on build reads it from there) and then builds the add-on:
+# compilation of the main, GameTest and client-smoke source sets and the JUnit tests (`check`), GameTests on a Fabric dedicated server, the
+# release jar. The client smoke (Xvfb + software rendering) is not run here.
+# The versions of the actions are the ones that the CI of the Thaumcraft repository uses.
+#
+# Manual run: Actions > CI > Run workflow, with another branch, tag or commit of the Thaumcraft repository in `thaumcraft_ref`.
+# If the Thaumcraft repository is private, add a repository secret THAUMCRAFT_CHECKOUT_TOKEN (read access to it).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      thaumcraft_ref:
+        description: Branch, tag or commit of acak1221/Thaumcraft-1.21.1 to build the add-on against (empty - thaumcraft_ref of gradle.properties)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  THAUMCRAFT_REPOSITORY: acak1221/Thaumcraft-1.21.1
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out the add-on
+        uses: actions/checkout@v7
+        with:
+          path: thaumic-tinkerer
+
+      - name: Read the Thaumcraft commit
+        id: pin
+        env:
+          INPUT_REF: ${{ inputs.thaumcraft_ref }}
+        run: |
+          ref="${INPUT_REF:-$(sed -n 's/^thaumcraft_ref=//p' thaumic-tinkerer/gradle.properties | head -n1 | tr -d '\r')}"
+          test -n "$ref" || { echo "thaumcraft_ref is missing in gradle.properties" >&2; exit 1; }
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "Thaumcraft ref: $ref"
+
+      - name: Check out Thaumcraft 4 Reload
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.THAUMCRAFT_REPOSITORY }}
+          ref: ${{ steps.pin.outputs.ref }}
+          token: ${{ secrets.THAUMCRAFT_CHECKOUT_TOKEN || github.token }}
+          persist-credentials: false
+          path: thaumcraft
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      - name: Install Thaumcraft 4 Reload into the local Maven repository
+        working-directory: thaumcraft
+        run: ./gradlew --no-daemon --console=plain :fabric:publishToMavenLocal
+
+      - name: Compile all source sets and JUnit (check), GameTests, release jar
+        working-directory: thaumic-tinkerer
+        run: ./gradlew --no-daemon --console=plain --continue check runTinkererGameTest remapThaumicTinkererJar
+
+      - name: Upload the add-on jar
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ThaumicTinkerer-fabric-jar
+          path: thaumic-tinkerer/build/libs/ThaumicTinkerer-fabric-*.jar
+          if-no-files-found: error
+
+      - name: Upload the test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            thaumic-tinkerer/build/reports/tests/tinkererTest
+            thaumic-tinkerer/build/test-results/tinkererTest
+            thaumic-tinkerer/build/tinkerer-gametest-results.xml
+            thaumic-tinkerer/run-tinkerer-gametest/logs
+            thaumic-tinkerer/run-tinkerer-gametest/tinkerer-parity-report.txt
+          if-no-files-found: warn

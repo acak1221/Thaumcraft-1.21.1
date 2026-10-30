@@ -1,6 +1,6 @@
 # Porting rules for the Thaumic Tinkerer add-on
 
-The behaviour specification is the 1.7.10 source at `/home/user/gtnewhorizons/thaumictinkerer` (commit
+The behaviour specification is the 1.7.10 source (commit
 `28f4def9...`, see `NOTICE.md`; clone <https://github.com/GTNewHorizons/ThaumicTinkerer> to read it). Port values,
 research keys, recipes, aspects, messages and quirks as they are. A deviation is allowed only for something that 1.21.1
 cannot do, or a reproducible crash/exploit, and is written down in `docs/deviations/<group>.md` (one file per group).

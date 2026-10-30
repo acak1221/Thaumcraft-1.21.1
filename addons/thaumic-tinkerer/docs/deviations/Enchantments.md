@@ -4,7 +4,7 @@ Group Enchantments: the fourteen enchantments (Ascent Boost, Flaming Touch, Disi
 Focused Strikes, Pounce, Quick Draw, Shatter, Shockwave, Slow Fall, Tunnel, Valiance, Vampirism), `ModEnchantmentHandler`,
 the Enchanter's table of costs and rules (`EnchantmentManager`), the Osmotic Enchanter (block, block entity, menu, the two
 packets, screen, renderer) and the fourteen research entries of the enchantments. Specification: the 1.7.10 sources in
-`/home/user/gtnewhorizons/thaumictinkerer` (commit in `NOTICE.md`). Everything not listed here is ported as it was:
+GTNewHorizons/ThaumicTinkerer (commit in `NOTICE.md`). Everything not listed here is ported as it was:
 research keys, coordinates, aspects and parents, the costs of all 40 table rows, the formulas and their quirks (section 11),
 the pillar rules, the recipe and the hardness of the Enchanter. Requests to the API and to the lead are in
 `docs/api-requests/Enchantments.md`.

@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: MIT
+// Thaumic Tinkerer for Thaumcraft 4 Reload (Fabric, Minecraft 1.21.1): the build of the standalone repository.
+// A build file of Thaumcraft 4 Reload (MIT, see LICENSE-MIT and NOTICE.md); the add-on sources are CC BY-NC-SA 3.0 (LICENSE).
+//
+// One Gradle project, the root project is the Fabric add-on. fabric.gradle (the very file that the Thaumcraft monorepo applies
+// from its fabric/build.gradle) declares the source sets, the runs and the tasks: tinkererTest, runTinkererGameTest,
+// runTinkererClientSmoke, runTinkererClient, remapThaumicTinkererJar, exportTinkererClasspath. Here sourceSets.main is empty
+// and its compile classpath carries Thaumcraft 4 Reload (the jar from mavenLocal), Minecraft, Fabric Loader, Fabric API and
+// Architectury, which is what fabric.gradle expects of it. The plugin architectury-plugin is for multi-module builds
+// (common + loaders) and is not used here.
+plugins {
+ id 'java'
+ id 'dev.architectury.loom' version '1.11.458'
+}
+
+group = maven_group
+version = mod_version
+base { archivesName = archives_name }
+
+repositories {
+ // Thaumcraft 4 Reload comes from the local Maven repository only: the commit named in gradle.properties (thaumcraft_ref), built and
+ // installed by tools/publish-thaumcraft.sh (README.md). No other repository is asked for the group `thaumcraft`.
+ exclusiveContent {
+  forRepository { mavenLocal() }
+  filter { includeGroup 'thaumcraft' }
+ }
+ mavenCentral()
+ maven { url = 'https://maven.architectury.dev/' }
+ maven { url = 'https://maven.fabricmc.net/' }
+}
+
+// Without Thaumcraft in the local Maven repository Gradle (and Loom) fail with a bare "Could not resolve thaumcraft:Thaumcraft-fabric",
+// also for `tasks` and for an IDE import. Look first and say what to do. (Resolves through the same repositories, so -Dmaven.repo.local, a
+// ~/.m2/settings.xml and an init-script repository count.)
+def thaumcraftProbe = configurations.detachedConfiguration(dependencies.create("thaumcraft:Thaumcraft-fabric:$thaumcraft_version"))
+thaumcraftProbe.transitive = false
+if (!thaumcraftProbe.resolvedConfiguration.lenientConfiguration.unresolvedModuleDependencies.isEmpty()) {
+ throw new GradleException("Thaumcraft 4 Reload (thaumcraft:Thaumcraft-fabric:$thaumcraft_version) is not installed in the local Maven repository.\n" +
+   "Install it first: run tools/publish-thaumcraft.sh (it builds the commit thaumcraft_ref of gradle.properties from " +
+   "https://github.com/acak1221/Thaumcraft-1.21.1 and installs it with `./gradlew :fabric:publishToMavenLocal`), see README.md, \"Build and test\".\n" +
+   "If the Thaumcraft that you built has another version, set thaumcraft_version in gradle.properties to it.")
+}
+
+dependencies {
+ minecraft "com.mojang:minecraft:$minecraft_version"
+ mappings loom.officialMojangMappings()
+ modImplementation "net.fabricmc:fabric-loader:$fabric_loader_version"
+ modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_api_version"
+ modImplementation "dev.architectury:architectury-fabric:$architectury_api_version"
+ modImplementation "thaumcraft:Thaumcraft-fabric:$thaumcraft_version"
+}
+
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+
+apply from: 'fabric.gradle'
+
+// The main source set is empty (the add-on is the thaumicTinkerer source set): there is no jar of it, and the release jar of the
+// add-on, build/libs/ThaumicTinkerer-fabric-<version>.jar, is what `assemble` builds.
+tasks.named('jar') { enabled = false }
+tasks.named('remapJar') { enabled = false }
+tasks.named('assemble') { dependsOn 'remapThaumicTinkererJar' }
+// In the monorepo `check` compiles the add-on's three source sets (fabric.gradle); here the JUnit tests of the add-on belong to it as well.
+// The GameTests (runTinkererGameTest) and the client smoke (runTinkererClientSmoke) are started by name.
+tasks.named('check') { dependsOn 'tinkererTest' }

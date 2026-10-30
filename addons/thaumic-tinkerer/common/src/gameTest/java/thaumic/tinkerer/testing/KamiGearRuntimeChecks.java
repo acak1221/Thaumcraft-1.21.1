@@ -1170,7 +1170,7 @@ public final class KamiGearRuntimeChecks {
         ItemStack diamondChest = new ItemStack(Items.DIAMOND_CHESTPLATE);
         ServerPlayer toughMixed = fresh.get();
         wear(toughMixed, empty, diamondChest, TTRegistry.stack(LibItemNames.ICHOR_LEGS), empty);
-        Zombie zombie = test.spawn(EntityType.ZOMBIE, new Vec3(2.5, 1, 2.5));
+        Zombie zombie = PlainMobs.spawn(test, EntityType.ZOMBIE, new Vec3(2.5, 1, 2.5));
         zombie.setNoAi(true);
         zombie.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
         zombie.setHealth(1000F);
@@ -1370,7 +1370,7 @@ public final class KamiGearRuntimeChecks {
         floor(test);
         for (int x = 0; x <= 7; x++) for (int y = 1; y <= 7; y++) test.setBlock(new BlockPos(x, y, 7), Blocks.STONE);
         ServerPlayer player = player(test, 3.5, 1, 1.5, 0, 0);
-        Zombie zombie = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 4));
+        Zombie zombie = PlainMobs.spawnWithNoFreeWill(test, EntityType.ZOMBIE, new BlockPos(3, 1, 4));
         float health = zombie.getHealth();
 
         List<Vec3> path = ShadowBeam.fire(player, 0, 2);
@@ -1510,8 +1510,8 @@ public final class KamiGearRuntimeChecks {
 
         Creeper creeper = test.spawnWithNoFreeWill(EntityType.CREEPER, new BlockPos(5, 1, 3));
         Sheep sheep = test.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(1, 1, 3));
-        Zombie hunter = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 6));
-        Zombie avenger = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 1));
+        Zombie hunter = PlainMobs.spawnWithNoFreeWill(test, EntityType.ZOMBIE, new BlockPos(3, 1, 6));
+        Zombie avenger = PlainMobs.spawnWithNoFreeWill(test, EntityType.ZOMBIE, new BlockPos(3, 1, 1));
         Piglin piglin = test.spawnWithNoFreeWill(EntityType.PIGLIN, new BlockPos(6, 1, 6));
         creeper.setTarget(player);
         hunter.setTarget(player);

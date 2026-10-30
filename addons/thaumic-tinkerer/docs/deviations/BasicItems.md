@@ -3,7 +3,7 @@
 Group BasicItems: Spellbinding Cloth, Talisman of Remedium, Talisman of Withhold, Tome of Knowledge Sharing, Infused
 Scribing Tools, Helmet of Revealing, the helpers `ExperienceHelper`, `ItemNBTHelper` and `MiscHelper`, and the client
 handler `ClientTickHandler` (the other one of the two, `HUDHandler`, is the Foci group's `DislocationHUDHandler`, see section 8).
-Specification: the 1.7.10 sources in `/home/user/gtnewhorizons/thaumictinkerer`
+Specification: the 1.7.10 sources of GTNewHorizons/ThaumicTinkerer
 (commit in `NOTICE.md`). Everything not listed here is ported as it was: numbers (35 uses of the cloth, 100 points of the
 talisman, ten for the warp effects, range 3, 1500 points, cost 10, 800 ink, 500 durability, 5% discount), research keys,
 coordinates, aspects, recipes, tooltips, sounds and messages. Requests to the API and to the lead are in

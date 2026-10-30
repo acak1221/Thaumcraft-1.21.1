@@ -12,18 +12,23 @@ acceptance by a person looking at the game on a GPU; the list of what it cannot 
 ## Running it
 
 ```bash
-addons/thaumic-tinkerer/tools/client-smoke.sh                        # whole run, about 2 minutes after the first compile
+# Gradle is started as ./gradlew in the project root; GRADLE_CMD replaces that command (below)
+addons/thaumic-tinkerer/tools/client-smoke.sh                        # whole run, about 2 minutes after the first compile (standalone repository: tools/client-smoke.sh)
 addons/thaumic-tinkerer/tools/client-smoke.sh -l /path/gradle.log    # where the Gradle output goes (default $TMPDIR/tt-client-smoke-gradle.log)
 addons/thaumic-tinkerer/tools/client-smoke.sh -t 600                 # watchdog limit in seconds (default 1500)
 ```
 
-The script runs `:fabric:runTinkererClientSmoke` through `/root/bin/gradle-mirror-loop.sh` (which takes the shared Gradle lock
-itself: do not wrap the script in `flock`, and expect it to hold the lock for the whole run) inside
-`xvfb-run -a -s "-screen 0 1280x720x24"` with `LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe`. It needs the Minecraft assets in the
-Loom cache (`:fabric:downloadAssets`), `xvfb-run` and the Mesa software drivers; there is no GPU, no window manager and no audio device
+The script runs `runTinkererClientSmoke` (monorepo: `:fabric:runTinkererClientSmoke`; the script finds out which by the `settings.gradle` next to `tools/`)
+with `./gradlew`, inside `xvfb-run -a -s "-screen 0 1280x720x24"` with `LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe`. The environment variable
+`GRADLE_CMD` replaces `./gradlew`: a command line that is given the Gradle arguments last; its output is tee'd to the log, unless it contains the word
+`{LOG}`, which is replaced by the log path (for a wrapper that writes the log itself). In the machine the harness was written in, Gradle builds are serialized by a
+wrapper script that takes a shared lock itself and retries failed downloads (it is not part of this repository; do not wrap the script in `flock`, and expect it
+to hold the lock for the whole run). The runs recorded in this document were started that way, `GRADLE_CMD='<that wrapper> {LOG}' tools/client-smoke.sh`
+(a wrapper that has to be told the project directory is given it in the same string). It needs the Minecraft assets in the
+Loom cache (`downloadAssets`, run by the task), `xvfb-run` and the Mesa software drivers; there is no GPU, no window manager and no audio device
 in the environment it was written for.
 
-The run directory is `fabric/run-tinkerer-clientsmoke/` (git-ignored; its `options.txt` is rewritten every run: English, GUI scale 2,
+The run directory is `fabric/run-tinkerer-clientsmoke/` (standalone repository: `run-tinkerer-clientsmoke/`; git-ignored; its `options.txt` is rewritten every run: English, GUI scale 2,
 view distance 8, no sound). The world is made by the harness itself and deleted first: nothing depends on a prepared save.
 
 **Exit code.** The script exits 0 only when the harness itself reached its last phase (`harness.status` is `COMPLETED` in `report.json`; the Gradle task checks it
@@ -33,7 +38,7 @@ and fails otherwise). What the checks found is in `report.json`, never in the ex
 
 ## Output
 
-Everything is in `fabric/build/tinkerer-client-smoke/` (deleted at the start of every run):
+Everything is in `fabric/build/tinkerer-client-smoke/` (standalone repository: `build/tinkerer-client-smoke/`; deleted at the start of every run):
 
 | File | What it is |
 |---|---|

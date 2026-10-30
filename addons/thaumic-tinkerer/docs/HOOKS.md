@@ -503,6 +503,9 @@ the config held nine mixins (before `LivingEntityArmorMixin`); no later inspecti
   `LIVING_ARMOR_ABSORB`, and it lists `gemBootsAndAscentBoostLeggingsComposeTheirJumps`. The console log of that run was not read, and a results file does not
   say which tree it ran: when this was written the only sources of the add-on's `main`, `test` and `gameTest` trees that were newer than it were
   `ItemGemBoots.java` (a comment) and the build script `fabric.gradle`. That is a statement about file time stamps, not a record of the run.
+  *A later record.* The same task wrote the file again in later runs of the tree on 2026-10-30 (in the monorepo, and in an export of it outside the monorepo;
+  their Gradle logs end in `All 299 required tests passed :)` and `BUILD SUCCESSFUL`; the logs are in the scratch directory of the development machine, not
+  committed): 299 cases and no `failure`, `error` or `skipped` element, the groups as above except tileblocks 35 (one more than at 10:29).
 * *GameTests, the groups' documents.* `deviations/KamiWorld.md` records that its GameTests passed together with the 12 `hooksgametests.*` of its hooks round (31 of 31) and, with its
   20 checks, the 13 of its review round (33 of 33); the mutation checks below were made by hand on the checks that existed then. No document
   records a run of the two `LIVING_ARMOR_ABSORB` GameTests; the results file above is their only trace.

@@ -501,7 +501,7 @@ public final class TileBlocksRuntimeChecks {
         net.minecraft.advancements.AdvancementHolder holder = test.getLevel().getServer().getAdvancements()
                 .get(ResourceLocation.withDefaultNamespace("adventure/kill_a_mob"));
         test.assertTrue(holder != null, "the vanilla advancement is loaded");
-        net.minecraft.world.entity.monster.Zombie zombie = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
+        net.minecraft.world.entity.monster.Zombie zombie = PlainMobs.spawnWithNoFreeWill(test, EntityType.ZOMBIE, new BlockPos(1, 1, 1));
         net.minecraft.advancements.CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(fake, zombie, test.getLevel().damageSources().generic());
         test.assertTrue(!fake.getAdvancements().getOrStartProgress(holder).isDone(), "the fake player did not earn Monster Hunter");
         test.succeed();

@@ -2,7 +2,7 @@
 
 Read-only analysis of what the 1.7.10 add-on (GTNewHorizons fork, `28f4def938e80d7a0b6f433c2b84300dfb7c35ce`, 334 files)
 needs from Thaumcraft, against the public API of Thaumcraft 4 Reload (`common/src/main/java/thaumcraft/api`, 97 files,
-guides in `docs/api`). Claims about the mod were checked in its code unless a document is cited; paths are relative to the repository root and
+guides in `docs/api`). Claims about the mod were checked in its code unless a document is cited; paths are relative to the root of the Thaumcraft 4 Reload repository (<https://github.com/acak1221/Thaumcraft-1.21.1>; the standalone add-on repository has none of `common/src/main/java/thaumcraft`, `docs/api` and `AGENTS.md`) and
 `API/` means `common/src/main/java/thaumcraft/api`, `INT/` means `common/src/main/java/thaumcraft/common`.
 Nothing was compiled or run (no Gradle, no game); runtime behaviour and rendering are **not verified**.
 

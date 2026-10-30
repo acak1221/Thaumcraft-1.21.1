@@ -8,7 +8,10 @@ a source file imports anything else of Thaumcraft.
 Русская версия: [README.ru.md](README.ru.md).
 
 > **Licence: CC BY-NC-SA 3.0** (see `LICENSE` and `NOTICE.md`). Non-commercial, share-alike. The rest of this repository is MIT; this
-> directory is not, except `fabric.gradle` and `tools/`.
+> directory is not, except `fabric.gradle`, `tools/` and the build files in `standalone/` (`NOTICE.md` lists them).
+
+The add-on is also built from its own repository, <https://github.com/acak1221/Thaumic-Tinkerer-1.21.1> (Fabric only), which
+`tools/export-standalone.sh` writes from this directory; until that repository takes over, development stays here. See `docs/EXPORT.md`.
 
 ## Status
 
@@ -16,7 +19,7 @@ Fabric first (as for the whole project); NeoForge is **not** built for the add-o
 
 | Part | State |
 |---|---|
-| Eight feature groups (simple blocks, tile blocks, machines, basic items, foci, enchantments, Kami gear, Kami world) | ported, reviewed; GameTests exist for every group. What is **recorded as run** is uneven: the documents of Kami world, Foci and (first round only) Kami gear record runs with numbers; the Machines and Basic items documents record no result of a run; the Enchantments document says that its tests ran, without a result. The one record that covers all eight is a GameTest results file, `fabric/build/tinkerer-gametest-results.xml` (2026-10-30 10:29): 298 cases and no failure, error or skipped entry. It is not tied to a console log, and to the current tree only by file time stamps (`docs/HOOKS.md` section 12, "What ran") |
+| Eight feature groups (simple blocks, tile blocks, machines, basic items, foci, enchantments, Kami gear, Kami world) | ported, reviewed; GameTests exist for every group. What is **recorded as run** is uneven: the documents of Kami world, Foci and (first round only) Kami gear record runs with numbers; the Machines and Basic items documents record no result of a run; the Enchantments document says that its tests ran, without a result. The one record that covers all eight is a GameTest results file, `fabric/build/tinkerer-gametest-results.xml`. The file of 2026-10-30 10:29 had 298 cases and no failure, error or skipped entry and was not tied to a console log. Later runs of the tree (2026-10-30, Gradle logs with the line "All 299 required tests passed"; the logs are not committed) wrote 299 cases, again without a failure, error or skipped entry (Tile blocks: 34 then, 35 now) (`docs/HOOKS.md` section 12, "What ran") |
 | Loader hooks (`LIVING_DAMAGE`, `LIVING_ARMOR_ABSORB`, `BREAK_SPEED`, jump, fall, item-use tick, drops, floating ticks, item renderers) | written for Fabric (Mixin); checks exist (JUnit and GameTests, `docs/HOOKS.md` section 12). The results file above lists the 14 hook GameTests, the two of `LIVING_ARMOR_ABSORB` among them, without a failure; no document records a run of the hook JUnit tests; **no NeoForge poster is written** |
 | The groups that needed the hooks (Enchantments, Kami world, Kami gear, Machines, Foci) | **rewired** to them on Fabric, their workarounds deleted (`docs/HOOKS.md` section 10). Runs recorded in the group documents: Kami world 20 GameTests (together with the hook GameTests of its review round, 33 of 33) and 38 JUnit checks; Foci 36 GameTests; Kami gear a pass for its first round only (30 JUnit tests of the group plus `TinkererApiOnlyTest`, and 30 GameTests; the group has 34 JUnit tests and 36 GameTests now); Machines no result; Enchantments "ran" without a result. No totals are added up here |
 | Research tree and recipes | registered through the Thaumcraft API; compared with the 1.7.10 source by script and by a GameTest (next row) |
@@ -35,8 +38,11 @@ common/src/test      JUnit tests (no world)
 common/src/gameTest  runtime checks used by the GameTests
 fabric/src/main      Fabric entry points, Mixins, Fabric item-renderer backend
 fabric/src/gameTest  GameTest wrappers and the Fabric GameTest mod
-fabric.gradle        wires the add-on into the :fabric Gradle project (source sets, runs, jar tasks)
+fabric.gradle        wires the add-on into the :fabric Gradle project (source sets, runs, jar tasks); the standalone repository applies the same file
 tools/compile.sh     fast javac compile outside Gradle
+tools/client-smoke.sh   the client smoke under Xvfb (docs/CLIENT_VERIFICATION.md)
+tools/export-standalone.sh   writes the standalone repository from this tree (docs/EXPORT.md)
+standalone/          the files that exist only in the standalone repository (settings.gradle, build.gradle, CI workflow, READMEs, ...)
 docs/                porting rules, deviations, API requests and gaps, hooks, parity report
 lang-extra/          language fragments merged into the language files
 ```
@@ -58,6 +64,12 @@ From the repository root (Java 21, Gradle wrapper):
 
 `runTinkererGameTest` writes `fabric/build/tinkerer-gametest-results.xml`. The generated world lives in
 `fabric/run-tinkerer-gametest/` and is git-ignored.
+
+A good run (0.1.0-alpha.7, 2026-10-30; the counts move when tests are added, a failure is what matters): `:fabric:tinkererTest` ends in `BUILD SUCCESSFUL` with
+364 tests, 0 failures, 0 errors, 0 skipped (`fabric/build/test-results/tinkererTest/`); `:fabric:runTinkererGameTest` logs `All 299 required tests passed :)`
+(299 `testcase` elements in the results file, no `failure` or `error`); `tools/client-smoke.sh` (needs `xvfb-run`, Mesa software rendering and `python3`) ends in
+`harness COMPLETED` with FAIL 0, HARNESS_ERROR 0, NOT_RUN 1 and a PASS count of 725 to 727. The GameTest server and the client each start a JVM with `-Xmx3G`
+next to the 3 GB Gradle daemon: plan for about 6 GB of free memory. The standalone repository has the same commands without `:fabric:` (`docs/EXPORT.md`).
 
 ## Where to read next
 

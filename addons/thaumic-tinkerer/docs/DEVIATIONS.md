@@ -73,8 +73,8 @@ from the Thaumcraft API), [HOOKS](HOOKS.md) (loader events), [lang-key-families]
   (`Enchantments.ready()`, through `ModEnchantments.initJump()`), as the original's `preInit` and `init` did: `(0.42 + 0.3) × factor`, 1.08 for Ascent Boost I and
   1.80 for III, pinned by `gemBootsAndAscentBoostLeggingsComposeTheirJumps` (the first wiring had it reversed, 0.93 and 1.35). Shockwave's `LOW` priority of 1.7.10 is
   **not** reproduced against the listeners of other groups; it has no live effect, because the boot tags of Slow Fall and Shockwave exclude the Gem Boots.
-* **Licence split.** The port is CC BY-NC-SA 3.0 and lives in its own directory with its own licence file (`NOTICE.md`); the Thaumcraft
-  mod stays MIT. The add-on's public-API additions in the mod (for example `IBauble.equipsOnUse`, `IFocusPouch`, `BaublesApi.getWorn`,
+* **Licence split.** The port is CC BY-NC-SA 3.0 (`LICENSE`; `NOTICE.md` says which files are under which licence). It lives in its own directory of
+  the monorepo (`addons/thaumic-tinkerer`) and is the root of the standalone repository; the Thaumcraft mod stays MIT. The add-on's public-API additions in the mod (for example `IBauble.equipsOnUse`, `IFocusPouch`, `BaublesApi.getWorn`,
   `ThaumcraftApiHelper` scan and discovery helpers, `WarpEffects`) contain no Thaumic Tinkerer code.
 
 ## 3. Behaviour that depends on loader events
@@ -133,15 +133,17 @@ about Forge's and Minecraft 1.7.10's own behaviour in this section is **recalled
 
 ## 5. Verification status and what is not verified
 
-What was run, with the numbers of the last run (2026-10-30, Fabric only; each line is what a log or a result file recorded, nothing else is claimed):
+What was run, with the numbers of the last run (2026-10-30, Fabric only; each line is what a log or a result file recorded, nothing else is claimed).
+Commands and paths are those of the monorepo (the standalone repository drops `:fabric:` and `fabric/`, `README.md`); the two rows marked **monorepo run**
+were runs of Thaumcraft's own suites and cannot be reproduced from the standalone repository, which has the add-on's suites only:
 
 | What | Result | Where it is recorded |
 |---|---|---|
 | Add-on JUnit (`:fabric:tinkererTest`) | 364 tests, 0 failures, 0 skipped. Since 2026-10-30 16:28 the documents, language fragments and source trees the tests read are inputs of the task (before, Gradle could restore a result from its cache after a document was edited) | `fabric/build/test-results/tinkererTest/*.xml` |
 | Add-on GameTests on a Fabric dedicated server (`:fabric:runTinkererGameTest`) | "All 299 required tests passed" | Gradle log of the run |
 | Parity with the 1.7.10 source (research, recipes, object tags) | 74 research entries and 127 recipes compared field by field; 11 documented differences, 0 undocumented | `PARITY_REPORT.md`, `ParityGameTests` |
-| Mod regression after the add-on's changes (`:common:test :fabric:runGameTest`) | JUnit 2761 tests, 5 skipped, 0 failures (the results of 2026-10-29, Gradle found the inputs unchanged); GameTests: "All 515 required tests passed" (2026-10-30 16:26, new world). Two earlier runs the same afternoon on the world that a previous run had left behind failed `mazeAuditGeneratesRealRegionAndReloadsMap` (the test opens, and so removes, the boss lock it generated; the next run finds no lock). Not caused by the add-on; `fabric/build.gradle` now deletes `run-gametest/world` before every run, and `fabric.gradle` does the same for the add-on's run | Gradle logs, `fabric/build/gametest-results.xml` |
-| Python porting scripts (`scripts/porting`) | 296 tests OK | run output |
+| **Monorepo run:** Mod regression after the add-on's changes (`:common:test :fabric:runGameTest`) | JUnit 2761 tests, 5 skipped, 0 failures (the results of 2026-10-29, Gradle found the inputs unchanged); GameTests: "All 515 required tests passed" (2026-10-30 16:26, new world). Two earlier runs the same afternoon on the world that a previous run had left behind failed `mazeAuditGeneratesRealRegionAndReloadsMap` (the test opens, and so removes, the boss lock it generated; the next run finds no lock). Not caused by the add-on; `fabric/build.gradle` now deletes `run-gametest/world` before every run, and `fabric.gradle` does the same for the add-on's run | Gradle logs, `fabric/build/gametest-results.xml` |
+| **Monorepo run:** Python porting scripts (`scripts/porting`, all tools of the monorepo) | 296 tests OK. The standalone repository carries the add-on's two tools with their tests: `tools/porting.sh test` ran 153 tests OK in an export (2026-10-30) | run output |
 | Client, Fabric dev client under Xvfb + Mesa llvmpipe (`tools/client-smoke.sh`) | 726 checks PASS, 0 FAIL, 0 harness errors, 1 NOT_RUN (tool-mode tooltip needs a key press), 80 pictures (read by the engineers in the run before the last, which had 721 PASS); the first run had 3 FAIL and a number of defects seen only in pictures (all fixed, see `CLIENT_VERIFICATION.md`). The last run added a check that the six infused seeds have six different models; with the old model file it fails (5 `override_collapsed`), with the fixed one it passes | `CLIENT_VERIFICATION.md`, `fabric/build/tinkerer-client-smoke/report.json` (not committed) |
 | NeoForge | **nothing written, nothing run** | `HOOKS.md` sections 9, 10, 14 |
 

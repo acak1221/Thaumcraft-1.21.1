@@ -912,7 +912,7 @@ public final class MachinesRuntimeChecks {
         ServerPlayer player = reaper(test);
 
         // control: killed without the blade, the zombie drops the helmet it wears (a drop chance above 1 always drops)
-        Zombie control = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+        Zombie control = PlainMobs.spawnWithNoFreeWill(test, EntityType.ZOMBIE, new BlockPos(3, 1, 3));
         control.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
         control.setDropChance(EquipmentSlot.HEAD, 2.0F);
         control.hurt(level.damageSources().generic(), 100F);
@@ -921,7 +921,7 @@ public final class MachinesRuntimeChecks {
                 "control: the helmet is dropped: " + items);
         items.forEach(ItemEntity::discard);
 
-        Zombie zombie = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+        Zombie zombie = PlainMobs.spawnWithNoFreeWill(test, EntityType.ZOMBIE, new BlockPos(3, 1, 3));
         zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
         zombie.setDropChance(EquipmentSlot.HEAD, 2.0F);
         zombie.hurt(level.damageSources().playerAttack(player), 100F);

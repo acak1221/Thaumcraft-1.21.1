@@ -1,18 +1,30 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Runs the Thaumic Tinkerer client smoke: a real Minecraft 1.21.1 client with Thaumcraft and the add-on, under Xvfb with Mesa
-# software rendering, driven by the harness in addons/thaumic-tinkerer/fabric/src/clientSmoke (docs/CLIENT_VERIFICATION.md).
+# software rendering, driven by the harness in fabric/src/clientSmoke of the add-on (docs/CLIENT_VERIFICATION.md).
 #
-#   addons/thaumic-tinkerer/tools/client-smoke.sh [-l GRADLE_LOG] [-t TIMEOUT_SECONDS] [-- EXTRA_GRADLE_ARGS...]
+#   tools/client-smoke.sh [-l GRADLE_LOG] [-t TIMEOUT_SECONDS] [-- EXTRA_GRADLE_ARGS...]
 #
-# Results go to fabric/build/tinkerer-client-smoke/: report.json, screenshots/*.png, client-log-excerpt.txt, plus gradle.log and
-# client-latest.log (copies). The exit code is 0 only when the harness itself completed; what the checks found is in report.json.
-# Gradle runs through the shared wrapper /root/bin/gradle-mirror-loop.sh, which takes the shared lock itself: do not wrap this
-# script in flock. Never run it next to another Gradle build you care about: it holds the lock for the whole run (some minutes).
+# Works in the standalone repository (the add-on is the Gradle root project, task runTinkererClientSmoke) and in the Thaumcraft
+# monorepo (addons/thaumic-tinkerer, task :fabric:runTinkererClientSmoke); it finds out which by the settings.gradle next to tools/.
+# Results go to build/tinkerer-client-smoke/ (monorepo: fabric/build/tinkerer-client-smoke/): report.json, screenshots/*.png,
+# client-log-excerpt.txt, plus gradle.log and client-latest.log (copies). The exit code is 0 only when the harness itself completed;
+# what the checks found is in report.json.
+#
+# Gradle is run as `./gradlew` in the project root. GRADLE_CMD replaces it: a command line (split at blanks) that is given the Gradle
+# arguments last and whose output is tee'd to the log. If it contains the word {LOG}, that is replaced by the log path and nothing is
+# tee'd (for a wrapper that writes the log itself: one that serializes Gradle builds, retries downloads, and so on), e.g.
+#   GRADLE_CMD='my-gradle-wrapper.sh /path/to/project {LOG}' tools/client-smoke.sh
+# Do not wrap the script in flock when the wrapper takes a lock itself; it holds it for the whole run (some minutes).
 set -uo pipefail
 ADDON="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ROOT="$(cd "$ADDON/../.." && pwd)"
-OUT="$ROOT/fabric/build/tinkerer-client-smoke"
-RUN="$ROOT/fabric/run-tinkerer-clientsmoke"
+if [ -f "$ADDON/settings.gradle" ]; then      # standalone repository
+  ROOT="$ADDON"; PROJECT=""; BUILD="$ROOT/build"
+else                                          # monorepo: the add-on is wired into the :fabric project
+  ROOT="$(cd "$ADDON/../.." && pwd)"; PROJECT=":fabric:"; BUILD="$ROOT/fabric/build"
+fi
+OUT="$BUILD/tinkerer-client-smoke"
+RUN="$(dirname "$BUILD")/run-tinkerer-clientsmoke"
 LOG="${TMPDIR:-/tmp}/tt-client-smoke-gradle.log"
 TIMEOUT=1500
 while getopts "l:t:" opt; do
@@ -21,7 +33,13 @@ done
 shift $((OPTIND-1))
 [ "${1:-}" = "--" ] && shift
 
-for tool in xvfb-run /root/bin/gradle-mirror-loop.sh; do
+GRADLE_CMD="${GRADLE_CMD:-./gradlew}"
+TEE=1
+case "$GRADLE_CMD" in *'{LOG}'*) GRADLE_CMD="${GRADLE_CMD//\{LOG\}/$LOG}"; TEE=0;; esac
+read -r -a GRADLE <<< "$GRADLE_CMD"
+[ "$TEE" = 1 ] && GRADLE+=(--console=plain)
+for tool in xvfb-run "${GRADLE[0]}"; do
+  case "$tool" in ./*) [ -x "$ROOT/$tool" ] && continue;; esac
   command -v "$tool" >/dev/null 2>&1 || [ -x "$tool" ] || { echo "client-smoke: $tool not found" >&2; exit 2; }
 done
 
@@ -32,9 +50,15 @@ export LP_NUM_THREADS="${LP_NUM_THREADS:-$(nproc)}"
 
 echo "client-smoke: gradle log $LOG, results $OUT" >&2
 cd "$ROOT" || exit 2
-xvfb-run -a -s "-screen 0 1280x720x24 -nolisten tcp" \
-  /root/bin/gradle-mirror-loop.sh "$LOG" :fabric:runTinkererClientSmoke -PtinkererClientSmokeTimeout="$TIMEOUT" "$@"
-status=$?
+if [ "$TEE" = 1 ]; then
+  xvfb-run -a -s "-screen 0 1280x720x24 -nolisten tcp" \
+    "${GRADLE[@]}" "${PROJECT}runTinkererClientSmoke" -PtinkererClientSmokeTimeout="$TIMEOUT" "$@" 2>&1 | tee "$LOG"
+  status=${PIPESTATUS[0]}
+else
+  xvfb-run -a -s "-screen 0 1280x720x24 -nolisten tcp" \
+    "${GRADLE[@]}" "${PROJECT}runTinkererClientSmoke" -PtinkererClientSmokeTimeout="$TIMEOUT" "$@"
+  status=$?
+fi
 
 # The Gradle task deletes $OUT first; keep the evidence next to the results.
 mkdir -p "$OUT/screenshots"

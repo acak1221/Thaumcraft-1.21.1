@@ -107,7 +107,7 @@ public final class HooksRuntimeChecks {
 
     /** A mob that does not wander and cannot die of a few blows. */
     private static <T extends Mob> T tough(GameTestHelper test, EntityType<T> type, double x, double y, double z) {
-        T mob = test.spawn(type, new Vec3(x, y, z));
+        T mob = PlainMobs.spawn(test, type, new Vec3(x, y, z));
         mob.setNoAi(true);
         mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
         mob.setHealth(1000F);
@@ -116,7 +116,7 @@ public final class HooksRuntimeChecks {
 
     /** A zombie that can attack (it has a helmet, so the sun does not burn it while a check waits). */
     private static Zombie zombie(GameTestHelper test, double x, double y, double z) {
-        Zombie zombie = test.spawn(EntityType.ZOMBIE, new Vec3(x, y, z));
+        Zombie zombie = PlainMobs.spawn(test, EntityType.ZOMBIE, new Vec3(x, y, z));
         zombie.setNoAi(true);
         zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
         return zombie;

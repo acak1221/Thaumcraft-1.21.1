@@ -550,7 +550,7 @@ public final class EnchantmentsRuntimeChecks {
 
     /** A zombie with an item in its main hand, floating (no AI) with a helmet on, so that the sun does not burn it. */
     private static Zombie armedZombie(GameTestHelper test, Vec3 at, ItemStack mainHand) {
-        Zombie zombie = test.spawn(EntityType.ZOMBIE, new BlockPos((int) at.x, (int) at.y, (int) at.z));
+        Zombie zombie = PlainMobs.spawn(test, EntityType.ZOMBIE, new BlockPos((int) at.x, (int) at.y, (int) at.z));
         zombie.setNoAi(true);
         zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
         zombie.setItemSlot(EquipmentSlot.MAINHAND, mainHand);

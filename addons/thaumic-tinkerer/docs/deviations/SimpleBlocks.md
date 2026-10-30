@@ -10,7 +10,8 @@ Everything listed here is a place where the port does something other than the o
 not listed (a research position, an aspect, a recipe, a hardness, a tick interval, a range, a probability, a loot weight)
 is the original's. Each entry says whether it is **forced** (1.21.1 or the loader-neutral rule cannot do it), a **fix** (a
 reproducible defect of the original, with the evidence) or a **decision** (the port chose between two readings and the
-lead may overrule it). Nothing here was run in a game; the end of the file says what is unverified.
+lead may overrule it). Nothing here was run in a game when this file was written; the client smoke and the GameTests came later, and the end of
+the file says what they covered and what is unverified.
 
 ## 1. Mappings that every entry below relies on (forced)
 
@@ -216,7 +217,12 @@ now `dark_quartz_0..5`, `pave_travel_slab`, `pave_travel_stairs`, `pave_ward_sla
 * **The picture of the crop (forced).** `RenderInfusedCrops` (an ISBRH) is a blockstate file (56 variants: 7 texture groups
   by 8 ages), the cutout render layer and a block colour handler that tints the generic group with the colour of the aspect
   (`SimpleBlocksClient`). The seeds' icon (`RenderGenericSeeds`) is the item property `thaumictinkerer:aspect_texture` with
-  seven overrides. The crop model is the vanilla `crop` (four crossed planes), not the 1.7.10 cross with the same
+  seven overrides. Its value is the texture group divided by eight (0, 0.125, 0.25 ... 0.75; `SimpleBlocksClient.aspectTextureValue`),
+  not the group number: Architectury registers the function as a vanilla `ClampedItemPropertyFunction`, whose `call` clamps
+  every value to 0..1, so in the first version the groups 2 to 6 all arrived as 1 and the seeds of aqua, terra, ordo, perditio and of
+  every compound aspect were drawn as ignis seeds (seen in the client smoke picture of 2026-10-30, fixed afterwards). Eight is a power of two: the
+  values and the thresholds in `models/item/infused_seeds.json` are exact floats, which a division by six would not give.
+  The crop model is the vanilla `crop` (four crossed planes), not the 1.7.10 cross with the same
   textures.
 
 ### 2.7 Aspect crop loot
@@ -382,7 +388,21 @@ Written without being able to run Gradle or the game; the GameTests were run lat
   Result of the last run of the whole group: 48 of 48 passed (`:fabric:runTinkererGameTest`,
   `-PtinkererGameTestFilter='simpleblocksgametests.*'`).
 
-Not seen in a running game: the look of every model, the crop colours (the tint of the generic crop reads the block entity,
+* **Client smoke, 2026-10-30** (`docs/CLIENT_VERIFICATION.md`: a real 1.21.1 client under Xvfb and Mesa software rendering, one flat
+  world, English and then Russian). Its report had no failing check for the group's blocks and items. The engineer looked at one
+  picture of the group, the item grid page `items-simpleblocks-01.png` and its `-ru_ru` twin, because of a defect found there: the
+  six creative-tab stacks of the Infused Seeds drew one aer icon and five identical ignis icons (the item property was clamped to
+  0..1, section 2.6). After the fix (`SimpleBlocksClient.aspectTextureValue`, thresholds in `models/item/infused_seeds.json`) the
+  same page, drawn again by a new run of the harness, shows six different icons in both languages (aer yellow, terra green, ignis
+  orange, aqua blue, ordo pink, perditio purple: the creative-tab order of `Aspect.getPrimalAspects()`); a colour measure of the
+  six cells matches the mean colours of `seed_*.png`. The new JUnit check `everyTextureGroupOfTheSeedsSurvivesTheClampOfTheItemPropertyAndPicksItsOwnModel`
+  feeds the value of each group through vanilla's `ClampedItemPropertyFunction.call` and the override rule of `ItemOverrides`; with the
+  old function and the old model file it fails at group 2. `SimpleBlocksResourcesTest` has 18 tests now. Runs of 2026-10-30: add-on JUnit
+  (`:fabric:tinkererTest --rerun`) 364 tests, 0 failures; the 48 GameTests of the group (`simpleblocksgametests.*`) all passed. These
+  pictures show what a software renderer drew; they are not an acceptance on a GPU, and the other pictures of the group
+  (block rows, the crop at every age, the tint of the generic crop, the camouflage) were not judged in that pass.
+
+Not seen in a running game by the engineer of the group (apart from the seed icons above): the look of every model, the crop colours (the tint of the generic crop reads the block entity,
 which must have reached the client before the chunk section is meshed), the camouflage renderer, the particles (the
 Thaumcraft sparkles, wisps, runes and bursts of the facade have not been looked at on a frame, nor have the vanilla
 stand-ins), the spreading of the gases against the light engine, the Nether tick rates, the speed of the crops, the

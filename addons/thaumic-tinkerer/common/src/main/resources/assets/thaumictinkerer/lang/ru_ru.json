@@ -125,6 +125,7 @@
   "item.thaumictinkerer.spell_cloth": "Ткань поглощения заклинаний",
   "item.thaumictinkerer.xp_talisman": "Талисман удержания",
   "itemGroup.ThaumicTinkerer": "Thaumic Tinkerer",
+  "itemGroup.thaumictinkerer": "Thaumic Tinkerer",
   "tc.research_category.TT_CATEGORY": "Таум-инженерия",
   "tc.research_category.TT_ENCHANTING": "Зачарование",
   "tc.research_name.ANIMATION_TABLET": "Динамическая дощечка",

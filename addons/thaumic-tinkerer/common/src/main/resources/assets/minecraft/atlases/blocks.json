@@ -19,6 +19,13 @@
     {
       "type": "minecraft:single",
       "resource": "thaumictinkerer:models/mob_magnet_s"
+    },
+    {
+      "type": "minecraft:filter",
+      "pattern": {
+        "namespace": "thaumictinkerer",
+        "path": "item/.*_depth"
+      }
     }
   ]
 }

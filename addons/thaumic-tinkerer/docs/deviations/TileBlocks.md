@@ -306,7 +306,31 @@ may overrule it). Nothing here was run in a game; see the end for what is unveri
   does). That lights the camouflage from its neighbours (an earlier revision used `renderSingleBlock` with the packed light
   of the device's own cell, which is dark for the opaque Golem Connector), with ambient occlusion, the tint of the position
   and the culling of faces against opaque neighbours. Still different from 1.7.10: the chunk mesh's batching, and the
-  chunk-rendering features of other mods do not see the device as the imitated block. Not looked at in a game.
+  chunk-rendering features of other mods do not see the device as the imitated block. **Seen once**, in the client smoke
+  harness (`docs/CLIENT_VERIFICATION.md`, run of 2026-10-30, Mesa software renderer, one frame): with oak planks set as the
+  camouflage, the close-ups `renderer-interface.png`, `renderer-dislocator.png`, `renderer-remote_placer.png` and
+  `renderer-golem_connector.png` each show an oak-planks cube at the device's place, shaded like the floor around it; a
+  one-off variant with glass on the Golem Connector shows a glass cube with the floor visible through it. **Not seen:** on a
+  GPU, in play, other camouflage blocks, the camouflage next to other camouflaged devices or lit by torches. (The first
+  harness run drew nothing for these four close-ups, because the harness set the camouflage only on the Ethereal Platform's
+  block entity: that was a harness fault, fixed in `RendererPhase`, not a defect of the renderer.)
+* **A camouflaged device occludes nothing (fix, found by the first client run).** While `camo=true` the device block is
+  `RenderShape.INVISIBLE`: its own model is not drawn and the camouflage is drawn by the block entity renderer. The Golem
+  Connector is opaque (`isOpaqueCube() == true`, kept), and its full-cube occlusion shape made the chunk renderer cull the
+  face of the floor under it, so a connector in the state `camo=true` was a hole to the sky (`blocks-tileblocks-03.png`,
+  first cell; the hole had exactly the colour of the sky, 179/207/255). The Interface, Dislocator and Remote Placer have
+  `noOcclusion()` and never did. `CamoDeviceBlock.getOcclusionShape` now returns the empty shape while `camo=true` (the game
+  caches the occlusion shape per block state, so it may depend on the state), so no device culls the faces of its neighbours
+  while it is drawn by the renderer, and a camouflage that is not a solid cube (glass, ice, leaves) shows what is behind it.
+  In its own look the Golem Connector still hides them. It also keeps **blocking light in both states**
+  (`BlockGolemConnector.getLightBlock` is the maximum, the one opacity that `isOpaqueCube` gave it in 1.7.10): the default
+  would have been derived from the (now empty) occlusion shape and let light through a camouflaged connector. After the fix
+  the same picture shows the floor where the connector stands, as for the three other devices. In 1.7.10 the opaque
+  connector also culled its neighbours' faces whatever it imitated, so a connector imitating glass probably showed the same
+  hole there; that was not checked (no 1.7.10 run is possible here). The state `camo=true` with no camouflage block is not
+  reachable by a click (`setCamo` sets both); a saved camouflage whose block no longer exists reads as air, which leaves the
+  property true and the device drawn as nothing until an empty hand clears it (read from `readCustomData`, not tried). The
+  GameTest `camouflagedDevicesLeaveTheFacesOfTheirNeighbours` pins the rule with the game's own `Block.shouldRenderFace`.
 * **What can be imitated (forced).** The original accepted render types 0 (plain block), 31 (log) and 39 (quartz pillar),
   which the device drew as a cube with the imitated block's textures. The port accepts a block whose `RenderShape` is
   `MODEL` **and** whose collision shape is the full cube: stairs, slabs, fences, panes, doors, torches, plants, carpets,
@@ -346,9 +370,18 @@ may overrule it). Nothing here was run in a game; see the end for what is unveri
 * The multiblock diagram page of the Locomotive research (N1).
 * The Tablet's "xN" text of the GregTech accelerator is absent (2.1).
 * AE2 handling of the Locomotive's passenger (2.3).
-* No look at any of the rendering (the Tablet's item and overlays, the camouflage, the screens) in a game.
+* The rendering of the group was seen only in the client smoke harness (software renderer, one frame, no input; 2.8 for the
+  camouflage): not on a GPU, not in play, no click on a screen. The Tablet's item and overlays and the screens are not
+  described in this document from those pictures.
 
 ## 4. Unverified
+
+Round of 2026-10-30 (the first client run, 2.8): the add-on's JUnit suite (`:fabric:tinkererTest`, 364 tests of all groups, 37 of
+them in the `tileblocks` package) and the 35 GameTests of the group (`-PtinkererGameTestFilter=tileblocksgametests.*`: the 34
+below and the new `camouflagedDevicesLeaveTheFacesOfTheirNeighbours`) ran with no failure, error or skipped entry. The new
+check was also run once with the occlusion override of `CamoDeviceBlock` taken out: it failed at its first assertion
+("interface camouflaged occludes nothing"), so it does see the missing override; the assertions about the Golem Connector's
+floor face were not reached in that run.
 
 Run on a Fabric dedicated server (`:fabric:runTinkererGameTest`, filter `tileblocksgametests.*`): the 34 GameTests of the
 group (the 33 checks of `TileBlocksRuntimeChecks` and `interfaceForwardsFluids` of the Fabric wrapper) pass, in two runs whose
@@ -358,8 +391,9 @@ fixed: the relay fix above (a stale partner hung the server thread), and six che
 (the Interface was bound to a stone block, which has no block entity to stand in for and so ends the binding at once;
 `GameTestHelper.relativePos` of 1.21.1 is not the inverse of `absolutePos`; `GameTestHelper.destroyBlock` drops nothing;
 the relays of neighbouring checks found each other, see "keeps the last relay it finds"). **Still not run:** the Fabric glue
-`TileBlocksFabric` is only exercised through `interfaceForwardsFluids`; the camouflage renderer (`renderBatched`) and all
-rendering, the screens, the client, multiplayer and survival play have never run. Every behaviour above that says "as the
+`TileBlocksFabric` is only exercised through `interfaceForwardsFluids`; the client ran only in the smoke harness (2.8: the
+camouflage renderer, `renderBatched`, drew in it on a software renderer); multiplayer, survival play and any run on a GPU
+have never happened. Every behaviour above that says "as the
 original" is by reading the original code, not by running both; the claims about 1.7.10 engine code (the break-speed rule,
 Forge's call order of `onItemUseFirst`) are from memory of that code, whose engine source is not on disk here.
 

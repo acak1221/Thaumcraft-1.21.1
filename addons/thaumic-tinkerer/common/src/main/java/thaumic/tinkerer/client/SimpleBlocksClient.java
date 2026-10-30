@@ -28,13 +28,33 @@ import thaumic.tinkerer.common.lib.LibMisc;
  * generic) at the age of the metadata, tinted with the colour of the aspect when it was not primal: that is the
  * blockstate file of the crop, the cutout render layer and the colour handler below. {@code RenderGenericSeeds}
  * picked the icon of the seeds by their aspect: that is the {@code thaumictinkerer:aspect_texture} item property and
- * the overrides of the model of the seeds. The camouflage of the platform is {@link RenderTileCamo}.</p>
+ * the overrides of the model of the seeds ({@link #aspectTextureValue}). The camouflage of the platform is
+ * {@link RenderTileCamo}.</p>
  */
 public final class SimpleBlocksClient {
-    /** The item property of the infused seeds: the texture group of their aspect (0..6, 6 for any other). */
+    /** The item property of the infused seeds: the texture group of their aspect (0..6, 6 for any other), see {@link #aspectTextureValue}. */
     public static final String ASPECT_TEXTURE_PROPERTY = "aspect_texture";
 
+    /**
+     * The divisor of the property value. The property is registered through Architectury, which takes a vanilla
+     * {@code ClampedItemPropertyFunction}: its {@code call} clamps whatever the function returns to 0..1 before the
+     * overrides of the model compare it, so the raw group number 0..6 would arrive as 0 for aer and as 1 for every other
+     * group, and every seed but the aer ones would be drawn as ignis. A power of two keeps every value and every threshold of the model file
+     * exactly representable as a float, so the {@code >=} comparison of the overrides cannot round a group down to the
+     * previous one (n / 6 would not be exact).
+     */
+    public static final float ASPECT_TEXTURE_DIVISOR = 8.0F;
+
     private SimpleBlocksClient() {}
+
+    /**
+     * The value of {@code thaumictinkerer:aspect_texture} for a texture group (0 aer, 1 ignis, 2 aqua, 3 terra, 4 ordo, 5 perditio, 6
+     * generic): {@code group / 8}, 0 to 0.75, inside the 0..1 range that vanilla lets an item property have. The
+     * override of the group in {@code models/item/infused_seeds.json} has exactly this value as its threshold.
+     */
+    public static float aspectTextureValue(int group) {
+        return group / ASPECT_TEXTURE_DIVISOR;
+    }
 
     public static void register() {
         // translucent pixels of the crop and the fire models
@@ -50,11 +70,11 @@ public final class SimpleBlocksClient {
         };
         ColorHandlerRegistry.registerBlockColors(grainColor, (Block) SimpleBlocks.INFUSED_GRAIN.get());
 
-        // RenderGenericSeeds: the icon of the seeds follows their aspect
+        // RenderGenericSeeds: the icon of the seeds follows their aspect (no aspect: the first icon, as in 1.7.10)
         ItemPropertiesRegistry.register(SimpleBlocks.INFUSED_SEEDS.get(), LibMisc.id(ASPECT_TEXTURE_PROPERTY),
                 (stack, level, entity, seed) -> {
                     Aspect aspect = ItemInfusedSeeds.getAspect(stack);
-                    return aspect == null ? 0 : BlockInfusedGrain.getNumberFromAspectForTexture(aspect);
+                    return aspectTextureValue(aspect == null ? 0 : BlockInfusedGrain.getNumberFromAspectForTexture(aspect));
                 });
 
         // the camouflage of the Ethereal Platform

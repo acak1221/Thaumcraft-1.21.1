@@ -3,7 +3,8 @@
 // sees its Loom setup, exactly like the exampleAddon source set of that file.
 //
 // The sources of the add-on are the loader-neutral tree addons/thaumic-tinkerer/common and the Fabric entrypoints in
-// addons/thaumic-tinkerer/fabric. NeoForge compiles the same common tree (neoforge.gradle).
+// addons/thaumic-tinkerer/fabric. There is no NeoForge build of the add-on yet (no neoforge.gradle; nothing in
+// neoforge/build.gradle names the add-on); a NeoForge build is meant to compile the same common tree.
 //
 // This build script is part of the build of Thaumcraft 4 Reload (MIT); the add-on sources it compiles are under
 // CC BY-NC-SA 3.0 (addons/thaumic-tinkerer/LICENSE).
@@ -22,6 +23,15 @@ sourceSets {
   java.srcDirs = [new File(ttDir, 'common/src/gameTest/java'), new File(ttDir, 'fabric/src/gameTest/java')]
   // fabric/...: the harness mod (fabric.mod.json, mixins); common/...: the parity oracle (tt_oracle/*.json) extracted from the 1.7.10 source
   resources.srcDirs = [new File(ttDir, 'fabric/src/gameTest/resources'), new File(ttDir, 'common/src/gameTest/resources')]
+  compileClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.compileClasspath
+  runtimeClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.runtimeClasspath
+ }
+ // The client smoke harness of the add-on (addons/thaumic-tinkerer/docs/CLIENT_VERIFICATION.md): runs a real client under
+ // Xvfb and looks at the models, textures, translations, screens and renderers. Compiled by check, loaded only by the
+ // tinkererClientSmoke run; no jar task includes its output.
+ thaumicTinkererClientSmoke {
+  java.srcDirs = [new File(ttDir, 'fabric/src/clientSmoke/java')]
+  resources.srcDirs = [new File(ttDir, 'fabric/src/clientSmoke/resources')]
   compileClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.compileClasspath
   runtimeClasspath += sourceSets.thaumicTinkerer.output + sourceSets.thaumicTinkerer.runtimeClasspath
  }
@@ -50,7 +60,7 @@ tasks.named('processThaumicTinkererResources') {
  // The licence travels with every artifact of the add-on.
  from(ttDir) { include 'LICENSE'; into 'META-INF' }
 }
-tasks.named('check') { dependsOn 'compileThaumicTinkererJava', 'compileThaumicTinkererGameTestJava' }
+tasks.named('check') { dependsOn 'compileThaumicTinkererJava', 'compileThaumicTinkererGameTestJava', 'compileThaumicTinkererClientSmokeJava' }
 
 // Mixin refmap of the add-on (the mixins are in addons/thaumic-tinkerer/fabric/src/main/java/thaumic/tinkerer/fabric/mixin,
 // the config is fabric/src/main/resources/thaumictinkerer.mixins.json, listed under "mixins" of its fabric.mod.json).
@@ -84,6 +94,11 @@ def tinkererModRoots = files(sourceSets.thaumicTinkerer.output)
 // Fabric Loader reads one mod per classpath group: groups are separated by a doubled path separator.
 def tinkererGameTestGroups = tinkererModRoots.asPath + File.pathSeparator + File.pathSeparator + files(sourceSets.thaumicTinkererGameTest.output).asPath
 def tinkererGameTestFilter = providers.gradleProperty('tinkererGameTestFilter').getOrElse('')
+// The client smoke: the add-on is one mod, the harness another (a second classpath group), exactly like the GameTest harness.
+def tinkererClientSmokeGroups = tinkererModRoots.asPath + File.pathSeparator + File.pathSeparator + files(sourceSets.thaumicTinkererClientSmoke.output).asPath
+def tinkererClientSmokeOut = layout.buildDirectory.dir('tinkerer-client-smoke').get().asFile
+// The harness stops itself after this many seconds with a partial report and a non-zero exit (the watchdog).
+def tinkererClientSmokeTimeout = providers.gradleProperty('tinkererClientSmokeTimeout').getOrElse('1500')
 
 loom.runs {
  // The development client with Thaumic Tinkerer loaded next to Thaumcraft.
@@ -93,6 +108,21 @@ loom.runs {
   name 'Thaumic Tinkerer client'
   runDir 'run-tinkerer'
   vmArg "-Dfabric.classPathGroups=${tinkererModRoots.asPath}"
+ }
+ // The client smoke harness (docs/CLIENT_VERIFICATION.md): a real client with a 1280x720 window, started by
+ // tools/client-smoke.sh under Xvfb. Its run directory is git-ignored; the results go to build/tinkerer-client-smoke.
+ tinkererClientSmoke {
+  client()
+  vmArg '-Xmx3G'
+  source sourceSets.thaumicTinkererClientSmoke
+  name 'Thaumic Tinkerer client smoke'
+  runDir 'run-tinkerer-clientsmoke'
+  vmArg "-Dfabric.classPathGroups=${tinkererClientSmokeGroups}"
+  vmArg '-Dthaumictinkerer.clientSmoke=true'
+  vmArg "-Dthaumictinkerer.clientSmoke.outDir=${tinkererClientSmokeOut.absolutePath}"
+  vmArg "-Dthaumictinkerer.clientSmoke.sourceRoot=${ttDir.absolutePath}"
+  vmArg "-Dthaumictinkerer.clientSmoke.timeoutSeconds=${tinkererClientSmokeTimeout}"
+  programArgs '--width', '1280', '--height', '720'
  }
  // Server-side runtime assertions of the add-on. The Thaumcraft suites are not loaded.
  tinkererGameTest {
@@ -108,6 +138,34 @@ loom.runs {
  }
 }
 tasks.named('runTinkererGameTest') { dependsOn tasks.named('thaumicTinkererGameTestClasses') }
+
+// The owned run directory of the client smoke: fixed options (English, GUI scale 2, no sound, small view distance),
+// a clean output directory. The singleplayer world is made by the harness itself and is deleted first.
+tasks.register('prepareTinkererClientSmoke') {
+ group = 'verification'
+ description = 'Resets run-tinkerer-clientsmoke/options.txt and the result directory of the Thaumic Tinkerer client smoke.'
+ doLast {
+  def runDir = file('run-tinkerer-clientsmoke')
+  runDir.mkdirs()
+  new File(runDir, 'options.txt').setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\n' +
+    'renderDistance:8\nsimulationDistance:6\nmaxFps:60\nenableVsync:false\ntutorialStep:none\nnarrator:0\n' +
+    'soundCategory_master:0.0\nskipMultiplayerWarning:true\nhideBundleTutorial:true\n', 'UTF-8')
+  delete new File(runDir, 'saves')
+  delete tinkererClientSmokeOut
+  tinkererClientSmokeOut.mkdirs()
+ }
+}
+tasks.named('runTinkererClientSmoke') {
+ dependsOn tasks.named('thaumicTinkererClientSmokeClasses'), tasks.named('prepareTinkererClientSmoke')
+ // The exit code says whether the harness itself completed; what the checks found is in report.json, not here.
+ doLast {
+  def report = new File(tinkererClientSmokeOut, 'report.json')
+  if (!report.isFile()) throw new GradleException("The client smoke wrote no report: ${report}")
+  def status = new groovy.json.JsonSlurper().parse(report, 'UTF-8').harness?.status
+  if (status != 'COMPLETED') throw new GradleException("The client smoke harness did not complete (status ${status}); see ${report}")
+  logger.lifecycle("Thaumic Tinkerer client smoke: harness completed, results in ${report}")
+ }
+}
 
 tasks.register('tinkererTest', Test) {
  group = 'verification'

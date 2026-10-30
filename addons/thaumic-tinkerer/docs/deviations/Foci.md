@@ -28,9 +28,15 @@ that existed then except the three that assert "no registration failures" (a Kam
 checks added in the review round were not in it. After the Uprising was moved to the loader hook (section 2) the Foci GameTests were
 run again through Gradle (`runTinkererGameTest`, filter `focigametests.*` together with the Machines group): 36 checks, all passed
 (the 35 above, with the kick-counter check rewritten to read the counter through `FloatingTicks`, and one new check, section 2). The
-interplay with the other groups (the Magnet that pulls with the Telekinesis focus) was not run. Nothing here has been seen in a running **client**: every particle (now Thaumcraft's own, drawn through
-`ThaumcraftClientFX`, which a server test cannot exercise), sound, HUD pixel, the model of a focus on the wand and the feel of a held
-cast is unverified.
+interplay with the other groups (the Magnet that pulls with the Telekinesis focus) was not run. **Client:** the client smoke
+harness (`docs/CLIENT_VERIFICATION.md`, a Minecraft 1.21.1 client under Xvfb with Mesa software rendering, run of 2026-10-30) loaded the
+seven item models and textures without a missing model, texture or translation, and the pictures `items-foci-01.png` (and the `ru_ru`
+one) and `hud-dislocation.png` (the Dislocation readout beside the dial, with a Dislocation focus on a staff in the hand) were looked at by
+the engineer of the group: the seven icons are drawn, the English and the Russian names are there (the longest, Ender Rift, runs past the
+bottom of its grid cell: the harness's cell size, not the item), the readout is drawn. That is a software renderer and
+one default state, not a person on a GPU. Still **not seen**: a particle over time (every one is now Thaumcraft's own, drawn through
+`ThaumcraftClientFX`, which a server test cannot exercise), a sound (the harness has no audio device), the Mending and Ender Rift
+depth layers on a wand (no picture draws those two foci on a wand; see the note on the atlas below) and the feel of a held cast.
 
 ## 1. Identity
 
@@ -38,7 +44,7 @@ cast is unverified.
 |---|---|
 | items `focusDeflect`, `focusDislocation`, `focusEnderChest`, `focusFlight`, `focusHeal`, `focusSmelt`, `focusTelekinesis` | `focus_deflect`, `focus_dislocation`, `focus_ender_chest`, `focus_flight`, `focus_heal`, `focus_smelt`, `focus_telekinesis` (`LibItemNames`), registered in the 1.7.10 order |
 | `ItemModFocus extends ItemFocusBasic` | the same, over `thaumcraft.api.wands.ItemFocusBasic` (stack size one and rare rarity come from the API's constructor; `EnumRarity.rare` of `ItemModFocus.getRarity` is therefore kept) |
-| `IIcon` ornament and depth layer, registered by `IconHelper.forItem(..., "Orn"/"Depth")` | `getOrnament`/`getFocusDepthLayerIcon` answer `thaumictinkerer:textures/item/<path>_orn.png` / `_depth.png` (the converted textures; the depth layer of Mending is the animated strip with its `.png.mcmeta`) |
+| `IIcon` ornament and depth layer, registered by `IconHelper.forItem(..., "Orn"/"Depth")` | `getOrnament`/`getFocusDepthLayerIcon` answer `thaumictinkerer:textures/item/<path>_orn.png` / `_depth.png` (the converted textures; the depth layer of Mending is the animated strip with its `.png.mcmeta`). **Not in the block atlas:** the depth layers (8x8, Mending 8x72) are no item or block model's texture; Thaumcraft's wand renderer (`PrimalWandFocusRenderer`) reads them from the file as standalone sheets, but the vanilla atlas source takes every file of `textures/item`, and an 8x8 sprite lowered the maximum mip level of the whole block atlas from 4 to 3 (the client logged `Texture thaumictinkerer:item/focus_recall_depth with size 8x8 limits mip level from 4 to 3`, the first one of the Kami Recall focus, which has the same kind of layer). `assets/minecraft/atlases/blocks.json` (the Machines group's file, see its section 10) therefore carries one `minecraft:filter` source, namespace `thaumictinkerer`, path `item/.*_depth`, as Thaumcraft does for its own depth icons. The files stay where they are (the wand renderer needs them). A 1.7.10 difference only in the sense that 1.7.10 stitched them into its item sheet without a limit |
 | item icons | flat item models `models/item/<path>.json` (`minecraft:item/generated`, `layer0`); the 1.7.10 icons already carry the focus colour, so no tint |
 | `focus.onFocusRightClick(stack, world, player, MovingObjectPosition)` | `onFocusRightClick(wandStack, level, player, hand)`: the API passes no hit, so a focus that needs a block asks `ItemModFocus.trace(player, range, fluids, collidable)` |
 | `wand.consumeAllVis`, `getFocusPotency/Enlarge` on the wand item | `WandHelper` of the API; the cost of a focus is read from `getVisCost(WandHelper.getFocusItem(wand))` |

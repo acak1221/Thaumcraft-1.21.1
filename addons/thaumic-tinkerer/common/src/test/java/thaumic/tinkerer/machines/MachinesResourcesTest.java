@@ -90,7 +90,10 @@ class MachinesResourcesTest {
     void theTexturesOfTheEntityStyleModelsAreStitchedIntoTheBlockAtlas() {
         JsonArray sources = json("/assets/minecraft/atlases/blocks.json").getAsJsonArray("sources");
         List<String> stitched = new ArrayList<>();
-        for (JsonElement source : sources) stitched.add(source.getAsJsonObject().get("resource").getAsString());
+        // Only the "single" sources name a texture; the file also carries a "filter" source (the wand depth layers, Foci group).
+        for (JsonElement source : sources) {
+            if (source.getAsJsonObject().has("resource")) stitched.add(source.getAsJsonObject().get("resource").getAsString());
+        }
         for (String texture : List.of("repairer", "magnet_n", "magnet_s", "mob_magnet_n", "mob_magnet_s")) {
             assertTrue(stitched.contains(NS + ":models/" + texture), texture);
             assertTrue(exists("/assets/" + NS + "/textures/models/" + texture + ".png"), texture);

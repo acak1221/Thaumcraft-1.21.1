@@ -34,6 +34,7 @@ import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.block.BlockAnimationTablet;
 import thaumic.tinkerer.common.block.BlockRPlacer;
 import thaumic.tinkerer.common.block.camo.CamoDeviceBlock;
+import thaumic.tinkerer.common.block.camo.CamoDeviceBlockEntity;
 import thaumic.tinkerer.common.block.camo.PulseDeviceBlock;
 import thaumic.tinkerer.common.block.tile.TileEntityMobilizer;
 import thaumic.tinkerer.common.block.tile.TileEntityRelay;
@@ -814,6 +815,55 @@ public final class TileBlocksRuntimeChecks {
         giveItem(player, ItemStack.EMPTY);
         test.useBlock(pos, player);
         test.assertTrue(iface.getCamo() == null && !test.getBlockState(pos).getValue(CamoDeviceBlock.CAMO), "the empty hand clears it");
+        test.succeed();
+    }
+
+    /**
+     * The face culling that the chunk renderer does around a camouflaged device. While a camouflage is set the device's own
+     * model is not drawn (the block entity renderer draws the camouflage), so the device must not hide the faces of its
+     * neighbours: the floor under a camouflaged Golem Connector was culled and left a hole to the sky in the first client
+     * run (docs/deviations/TileBlocks.md, 2.8). In its own look the connector is an opaque cube and does hide them. The
+     * connector blocks light in both states, as {@code isOpaqueCube() == true} did in 1.7.10. Uses the same
+     * {@code Block.shouldRenderFace} as the chunk renderer, on the real floor; what is not tested here is the drawing itself.
+     */
+    public static void camouflagedDevicesLeaveTheFacesOfTheirNeighbours(GameTestHelper test) {
+        floor(test);
+        BlockPos pos = new BlockPos(3, 1, 3);
+        BlockPos below = pos.below();
+        BlockPos abs = test.absolutePos(pos);
+        BlockState stone = Blocks.STONE.defaultBlockState();
+        Block[] devices = { TileBlocks.interfaceBlock(), TileBlocks.dislocatorBlock(), TileBlocks.remotePlacerBlock(), TileBlocks.golemConnectorBlock() };
+        for (Block device : devices) {
+            String name = BuiltInRegistries.BLOCK.getKey(device).getPath();
+            boolean opaqueLook = device == TileBlocks.golemConnectorBlock();
+            test.setBlock(pos, device);
+            CamoDeviceBlockEntity tile = tile(test, pos, CamoDeviceBlockEntity.class);
+            BlockState own = test.getBlockState(pos);
+            test.assertTrue(!own.getValue(CamoDeviceBlock.CAMO), name + " starts in its own look");
+            test.assertTrue(Block.shouldRenderFace(stone, test.getLevel(), test.absolutePos(below), Direction.UP, abs) != opaqueLook,
+                    name + " in its own look " + (opaqueLook ? "hides the face of the floor under it (an opaque cube)" : "leaves the face of the floor under it (it is not opaque)"));
+            if (opaqueLook) test.assertTrue(own.getLightBlock(test.getLevel(), abs) == 15, name + " own look blocks light: " + own.getLightBlock(test.getLevel(), abs));
+
+            tile.setCamo(Blocks.GLASS.defaultBlockState());
+            BlockState camouflaged = test.getBlockState(pos);
+            test.assertTrue(camouflaged.getValue(CamoDeviceBlock.CAMO), name + " is camouflaged");
+            test.assertTrue(camouflaged.getRenderShape() == net.minecraft.world.level.block.RenderShape.INVISIBLE, name + ": the model is hidden");
+            test.assertTrue(camouflaged.getOcclusionShape(test.getLevel(), abs).isEmpty(), name + " camouflaged occludes nothing: it draws nothing itself");
+            test.assertTrue(!camouflaged.isSolidRender(test.getLevel(), abs), name + " camouflaged is no solid render");
+            for (Direction face : Direction.values()) {
+                test.assertTrue(camouflaged.getFaceOcclusionShape(test.getLevel(), abs, face).isEmpty(), name + " camouflaged: nothing to cull against on " + face);
+            }
+            test.assertTrue(Block.shouldRenderFace(stone, test.getLevel(), test.absolutePos(below), Direction.UP, abs),
+                    name + " camouflaged as glass shows the floor under it, not the void");
+            if (opaqueLook) test.assertTrue(camouflaged.getLightBlock(test.getLevel(), abs) == 15,
+                    name + " camouflaged still blocks light, as the opaque 1.7.10 block did: " + camouflaged.getLightBlock(test.getLevel(), abs));
+
+            tile.setCamo(null);
+            test.assertTrue(test.getBlockState(pos) == own, name + " is itself again");
+            test.assertTrue(Block.shouldRenderFace(stone, test.getLevel(), test.absolutePos(below), Direction.UP, abs) != opaqueLook,
+                    name + " culls the floor the same way again when the camouflage is off");
+            test.setBlock(pos, Blocks.AIR);
+        }
         test.succeed();
     }
 

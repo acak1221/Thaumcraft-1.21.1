@@ -17,6 +17,7 @@ import java.util.EnumMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -57,16 +58,28 @@ public final class RenderMobDisplay {
         }
 
         float scale = aspect.getScale();
+        EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        // 1.7.10 called the entity renderer's doRender, which draws the mob only; the dispatcher also draws the shadow
+        // (on the blocks of the level around the cached mob's own position, the world origin) and, with F3+B, the hitbox.
+        // The shadow switch has no getter: it is on, unless something else turned it off, and the game itself restores it to on.
+        boolean hitBoxes = dispatcher.shouldRenderHitBoxes();
+        dispatcher.setRenderShadow(false);
+        dispatcher.setRenderHitBoxes(false);
         pose.pushPose();
         try {
-            // a builtin model is drawn with the corner of its cell at the origin: the mob stands in the middle
+            // A builtin model is drawn with the corner of its cell at the origin: the mob stands in the middle. In a slot the
+            // pose has already been through the "gui" display transform of models/item/mob_display.json (30 degrees about X,
+            // 45 about Y, 0.625 of a block per pixel unit: what the 1.7.10 ItemRendererHelper.INVENTORY_BLOCK set-up did before
+            // calling the renderer), so the -30 degrees below are the 1.7.10 renderer's own.
             pose.translate(0.5, 0.5, 0.5);
             pose.mulPose(Axis.XP.rotationDegrees(-30.0F));
             pose.scale(scale, scale, scale);
             pose.translate(0, (-entity.getBbHeight() / 2) + aspect.getVerticalOffset(), 0);
-            Minecraft.getInstance().getEntityRenderDispatcher().render(entity, 0, 0, 0, 0, 0, pose, buffers, light);
+            dispatcher.render(entity, 0, 0, 0, 0, 0, pose, buffers, light);
         } finally {
             pose.popPose();
+            dispatcher.setRenderShadow(true);
+            dispatcher.setRenderHitBoxes(hitBoxes);
         }
     }
 }

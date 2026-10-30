@@ -207,6 +207,11 @@ public final class TileBlocksGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void camouflagedDevicesLeaveTheFacesOfTheirNeighbours(GameTestHelper h) {
+        TileBlocksRuntimeChecks.camouflagedDevicesLeaveTheFacesOfTheirNeighbours(h);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void wandTurnsTheFacingDevices(GameTestHelper h) {
         TileBlocksRuntimeChecks.wandTurnsTheFacingDevices(h);
     }

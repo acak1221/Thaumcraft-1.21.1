@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import thaumic.tinkerer.common.lib.LibItemNames;
 import thaumic.tinkerer.common.lib.LibResearch;
@@ -87,6 +89,40 @@ class FociResourcesTest {
         // The depth layer of the Mending focus is an animation: a strip of nine frames and its metadata.
         assertTrue(exists(texture(LibItemNames.FOCUS_HEAL + "_depth") + ".mcmeta"), "the animation of the Mending depth layer");
         json(texture(LibItemNames.FOCUS_HEAL + "_depth") + ".mcmeta");
+    }
+
+    /**
+     * The depth layers are 8x8 (the strip of Mending 8x72, nine frames) and are drawn by Thaumcraft's wand renderer from the
+     * texture file, as standalone sheets. If the block atlas stitched them, the 8x8 size would lower the maximum mip level of
+     * the whole atlas (the client logged "limits mip level from 4 to 3"), so the atlas file filters them out; no model may name
+     * one, or the filter would turn that model's texture into the missing texture.
+     */
+    @Test
+    void theDepthLayersAreKeptOutOfTheBlockAtlasAndNoModelNamesThem() {
+        List<Pattern> filtered = new ArrayList<>();
+        for (JsonElement source : json("/assets/minecraft/atlases/blocks.json").getAsJsonArray("sources")) {
+            JsonObject object = source.getAsJsonObject();
+            if (!"minecraft:filter".equals(object.get("type").getAsString())) continue;
+            JsonObject pattern = object.getAsJsonObject("pattern");
+            if (!NS.equals(pattern.get("namespace").getAsString())) continue;
+            filtered.add(Pattern.compile(pattern.get("path").getAsString()));
+        }
+        assertFalse(filtered.isEmpty(), "the atlas file has a filter for the namespace of the add-on");
+        // The Foci with a depth layer, and the Kami focus that has one too (the same pattern covers all of them).
+        for (String focus : List.of(LibItemNames.FOCUS_HEAL, LibItemNames.FOCUS_ENDER_CHEST, LibItemNames.FOCUS_RECALL)) {
+            String sprite = "item/" + focus + "_depth";
+            assertTrue(exists(texture(focus + "_depth")), sprite + ": the texture file stays (the wand renderer reads it)");
+            assertTrue(filtered.stream().anyMatch(p -> p.matcher(sprite).matches()), sprite + " is filtered out of the atlas");
+        }
+        // The filter must not swallow what the models use: the 16x16 icons and ornaments stay stitched.
+        for (String focus : FOCI) {
+            assertTrue(filtered.stream().noneMatch(p -> p.matcher("item/" + focus).matches()), focus + " icon stays in the atlas");
+            assertTrue(filtered.stream().noneMatch(p -> p.matcher("item/" + focus + "_orn").matches()), focus + " ornament stays");
+        }
+        for (String focus : FOCI) {
+            String model = json("/assets/" + NS + "/models/item/" + focus + ".json").toString();
+            assertFalse(model.contains("_depth"), focus + ": the model does not name a depth layer");
+        }
     }
 
     @Test

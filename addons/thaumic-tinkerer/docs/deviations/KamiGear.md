@@ -280,6 +280,13 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
 - It is an `IFocusPouch` (request A2, now API) and a belt `IBauble`, so the wand's focus selector offers the foci in it. The selector
   lists at most the first 128 cells (the pouch has 117).
 - The screen title key `container.thaumictinkerer.ichor_pouch` is new (the screen draws no title, as in 1.7.10).
+- The screen is the original's: `GuiIchorPouch` draws the 256 x 256 texture `ichor_pouch.png` (byte-identical to the 1.7.10 `ichorPouch.png`, SHA-256
+  `557cd495...`) once at the top left of the screen, and the slots are at the 1.7.10 coordinates (pouch 12 + 18x, 8 + 18y; player 48, 177). The
+  player-inventory panel is part of that texture and lies over the lower rim of the leather bag (about 32 GUI pixels, 65 px at GUI scale 2);
+  that is how the original looks, not a defect of the port. Seen: the client smoke harness (2026-10-30, software renderer) opened the screen
+  and its picture `menu-ichor_pouch.png` was compared pixel by pixel with the texture at twice the size (99.25 % of the opaque pixels equal;
+  the rest is the hovered slot and the pouch icon); the panel cells lie exactly under the 27 + 9 player slots and the dimples under the 117
+  pouch slots (`KamiGearResourcesTest`). Not seen: the original screen in 1.7.10 itself (no Forge 1.7.10 client here); it is read from the source.
 
 ## 8. Feline Amulet
 

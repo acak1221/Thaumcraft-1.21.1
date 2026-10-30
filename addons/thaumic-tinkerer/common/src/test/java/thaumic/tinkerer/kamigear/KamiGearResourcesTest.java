@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import thaumic.tinkerer.common.block.tile.container.kami.ContainerIchorPouch;
+import thaumic.tinkerer.common.item.kami.ItemIchorPouch;
 import thaumic.tinkerer.common.lib.LibItemNames;
 
 /**
@@ -160,6 +162,59 @@ class KamiGearResourcesTest {
             byte[] converted = read("/assets/" + NS + "/textures/models/" + pair[1] + ".png");
             assertTrue(java.util.Arrays.equals(layer, converted), pair[0] + " is a copy of " + pair[1]);
         }
+    }
+
+    /**
+     * The pouch screen draws the 256 x 256 texture as it is (1.7.10 {@code GuiIchorPouch}): the player-inventory panel is part of
+     * the texture and lies over the lower rim of the leather pouch, as in the original (the client smoke run of 2026-10-30 looked
+     * like a defect, "the panel is drawn over the pouch"; the texture is byte-identical to {@code ichorPouch.png} and this is how
+     * it is drawn). What must hold is that the panel's cells sit exactly under the menu's player slots and the leather's dimples
+     * under the 13 x 9 pouch slots; a screen that "fixed" the overlap by moving the panel would break that.
+     */
+    @Test
+    void thePouchTextureHasThePlayerPanelUnderThePlayerSlotsAndTheLeatherUnderThePouchSlots() throws IOException {
+        java.awt.image.BufferedImage image;
+        try (InputStream in = KamiGearResourcesTest.class
+                .getResourceAsStream("/assets/" + NS + "/textures/gui/ichor_pouch.png")) {
+            assertNotNull(in);
+            image = javax.imageio.ImageIO.read(in);
+        }
+        assertEquals(256, image.getWidth());
+        assertEquals(256, image.getHeight());
+        int slot = 16;
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 9; x++) {
+                assertPanelCell(image, ContainerIchorPouch.PLAYER_X + x * 18, ContainerIchorPouch.PLAYER_Y + y * 18);
+            }
+        }
+        for (int x = 0; x < 9; x++) {
+            assertPanelCell(image, ContainerIchorPouch.PLAYER_X + x * 18, ContainerIchorPouch.PLAYER_Y + 58);
+        }
+        for (int y = 0; y < ItemIchorPouch.ROWS; y++) {
+            for (int x = 0; x < ItemIchorPouch.COLUMNS; x++) {
+                for (int dx = 0; dx < slot; dx++) {
+                    for (int dy = 0; dy < slot; dy++) {
+                        int argb = image.getRGB(12 + x * 18 + dx, 8 + y * 18 + dy);
+                        int r = argb >> 16 & 255, g = argb >> 8 & 255, b = argb & 255;
+                        assertEquals(255, argb >>> 24, "pouch cell " + x + "," + y + " is opaque");
+                        assertTrue(!(r == g && g == b) || r < 20, "pouch cell " + x + "," + y + " is leather, not panel grey");
+                    }
+                }
+            }
+        }
+        // The overlap itself, as in the original: the leather rim is opaque brown at the left of the panel and the panel's frame is
+        // neutral (white) at the same height (a pixel row below the pouch cells, y = 200).
+        int rim = image.getRGB(20, 200);
+        int panel = image.getRGB(100, 200);
+        assertTrue((rim >> 16 & 255) > (rim & 255) && (rim >>> 24) == 255, "leather rim at (20, 200)");
+        assertEquals(panel >> 16 & 255, panel & 255, "panel frame at (100, 200) is neutral");
+        assertEquals(255, panel >>> 24);
+    }
+
+    private static void assertPanelCell(java.awt.image.BufferedImage image, int x, int y) {
+        // The centre of a panel cell is the flat slot grey #8b8b8b of the vanilla slot texture.
+        int argb = image.getRGB(x + 8, y + 8);
+        assertEquals(0xFF8B8B8B, argb, "panel cell at " + x + "," + y);
     }
 
     private static byte[] read(String path) throws IOException {

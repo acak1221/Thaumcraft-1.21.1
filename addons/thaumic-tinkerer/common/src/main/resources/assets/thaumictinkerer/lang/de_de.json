@@ -110,6 +110,7 @@
   "item.thaumictinkerer.spell_cloth": "Entzauberungstuch",
   "item.thaumictinkerer.xp_talisman": "Talisman des Einbehaltens",
   "itemGroup.ThaumicTinkerer": "Thaumic Tinkerer",
+  "itemGroup.thaumictinkerer": "Thaumic Tinkerer",
   "tc.research_category.TT_CATEGORY": "Thaumische Bastelei",
   "tc.research_category.TT_ENCHANTING": "Verzaubern",
   "tc.research_name.ANIMATION_TABLET": "Dynamiktablett",

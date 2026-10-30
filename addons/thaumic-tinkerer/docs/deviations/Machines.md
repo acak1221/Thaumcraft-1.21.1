@@ -111,7 +111,10 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
 - **AE2 `IMovableTile` is not ported.**
 - **Model and renderer.** JSON model `funnel` (from `ModelFunnel`), plus `RenderTileFunnel` for the jar standing on the
   funnel. 1.7.10 called Thaumcraft's `BlockJarRenderer` / `ItemJarFilledRenderer`; the port draws the jar item with
-  `ItemRenderer.renderStatic`, which uses whatever renderer Thaumcraft registers for it.
+  `ItemRenderer.renderStatic`, which uses whatever renderer Thaumcraft registers for it. **Seen** in the client harness
+  (`renderer-funnel.png`): a Thaumcraft jar with five points of ignis, the glass shell with its cork lid and the essentia at the
+  bottom, standing on the funnel frame (the harness put a gold ingot there in its first run, which the funnel never accepts and
+  which only showed the generic item model).
 
 ## 6. Attractors
 
@@ -193,8 +196,29 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   `TTRegistry.item("mob_display")` first, once; no other Fabric class uses `BuiltinItemRendererRegistry`); the Fabric backend
   was read (`FabricItemRenderers.install()` forwards `renderer::render` to `BuiltinItemRendererRegistry.register(item,
   DynamicItemRenderer)` of fabric-rendering-v1 5.2.1, whose signature is the same six arguments). A GameTest server cannot do
-  more (it cannot load `PoseStack`). **Not seen**: no client was started, so that the mob is drawn in a slot, in the hand, on the
-  ground or in a recipe viewer is unverified. NEI/JEI-style "necromancy recipes" for recipe viewers are not provided.
+  more (it cannot load `PoseStack`). NEI/JEI-style "necromancy recipes" for recipe viewers are not provided.
+  - **Slot pose (fix of the first client run).** The 1.7.10 renderer declared `shouldUseRenderHelper(INVENTORY_BLOCK)` for every type,
+    so Forge drew the mob the way it draws a block icon: 10 pixels per unit, `rotate(210, X)`, `rotate(45, Y)` and a flipped Z on a
+    Y-down screen, and only then the renderer's own `rotate(-30, X)`. Written in the Y-up frame that 1.21.1 hands to a builtin
+    model that is a 30 degree tilt about X and a 45 degree turn about Y at 0.625 of the 16 pixel unit. The first port skipped that
+    set-up (no `display` in the model, so 16 pixels per unit and no turn): the mobs were 1.6 times as large as the original,
+    overran their neighbours, and the four-legged ones stood in a head-on view that looked upright. `models/item/mob_display.json`
+    now carries `display.gui = {rotation [30, 45, 0], scale 0.625}`, and `RenderMobDisplay` keeps its own -30 degrees and the
+    `EnumMobAspect` scales unchanged. Derived from the 1.7.10 GL calls by hand, **not compared with a picture of the original**; the
+    mobs are still tall for a slot (the Horse's head is above the cell in the harness picture), as the unchanged scale values
+    say they were in 1.7.10 too (not verified against it).
+  - **No shadow, no hitbox (choice).** `EntityRenderDispatcher.render` draws a shadow (on the blocks of the level around the
+    cached mob's own position, the world origin) and, with F3+B, a hitbox; 1.7.10 called `doRender`, which draws neither.
+    `RenderMobDisplay` switches both off around the call and restores them. Defensive: the harness world is a flat one whose ground is
+    far below the origin (read from the set-up, not measured), so a stray shadow was **not seen** before or after.
+  - **Particle icon (choice).** 1.7.10 gave the item no texture (`IconHelper.forItem` named `ttinkerer:mobDisplay`, which does not
+    exist), so its break and eat particles were the missing texture there too. The model now names the Soul Mould texture
+    (`textures.particle`); the harness's `missing_texture` failure of the item is gone.
+  - **A Mob Display without a mob** (a stack without the `type` key, shown as "Unknown Mob") draws nothing, as 1.7.10 did (`aspect ==
+    null` returns); the item is not in the creative tab. Kept.
+  - **Seen:** in a slot, on a software renderer, by the client harness (`items-machines-02.png`, 30 mobs, English and Russian
+    names). **Not seen:** in the hand, on the ground, in an item frame (the model has a `display` for the slot only, so those
+    use the builtin default: the mob at the size of a block) and in a recipe viewer.
 - **Tooltip of a soul aspect** shows the aspect name as the game spells it (`Aspect.getName()`); the infused ones glow.
 
 ## 8. Cursed Spirit's Blade
@@ -292,4 +316,4 @@ crucible (beast 4, mind 8, senses 8) on an ender pearl under the key `MAGNETS`.
 | Hook | Used by | Fabric | NeoForge |
 |---|---|---|---|
 | `TinkererEvents.LIVING_DROPS` (`docs/HOOKS.md` section 8) | `ItemBloodSword.onLivingDrops` (the Cursed Spirit's Blade) | posted by `LivingEntityDropsMixin` and the capture mixins; run by the GameTests of the blade | **needs its poster** (`LivingDropsEvent` handler calling `TinkererEvents.postLivingDrops`); not written |
-| `ItemRenderers` (`docs/HOOKS.md` section 9) | `MachinesClient.register()` (the Mob Display) | `FabricItemRenderers`; read, never run on a client | **needs its backend** (`RegisterClientExtensionsEvent`); not written |
+| `ItemRenderers` (`docs/HOOKS.md` section 9) | `MachinesClient.register()` (the Mob Display) | `FabricItemRenderers`; run in the client harness (the mobs are drawn in a slot) | **needs its backend** (`RegisterClientExtensionsEvent`); not written |

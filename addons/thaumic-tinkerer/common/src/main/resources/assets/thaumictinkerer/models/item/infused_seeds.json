@@ -12,37 +12,37 @@
     },
     {
       "predicate": {
-        "thaumictinkerer:aspect_texture": 1.0
+        "thaumictinkerer:aspect_texture": 0.125
       },
       "model": "thaumictinkerer:item/infused_seeds_ignis"
     },
     {
       "predicate": {
-        "thaumictinkerer:aspect_texture": 2.0
+        "thaumictinkerer:aspect_texture": 0.25
       },
       "model": "thaumictinkerer:item/infused_seeds_aqua"
     },
     {
       "predicate": {
-        "thaumictinkerer:aspect_texture": 3.0
+        "thaumictinkerer:aspect_texture": 0.375
       },
       "model": "thaumictinkerer:item/infused_seeds_terra"
     },
     {
       "predicate": {
-        "thaumictinkerer:aspect_texture": 4.0
+        "thaumictinkerer:aspect_texture": 0.5
       },
       "model": "thaumictinkerer:item/infused_seeds_ordo"
     },
     {
       "predicate": {
-        "thaumictinkerer:aspect_texture": 5.0
+        "thaumictinkerer:aspect_texture": 0.625
       },
       "model": "thaumictinkerer:item/infused_seeds_perditio"
     },
     {
       "predicate": {
-        "thaumictinkerer:aspect_texture": 6.0
+        "thaumictinkerer:aspect_texture": 0.75
       },
       "model": "thaumictinkerer:item/infused_seeds_generic"
     }

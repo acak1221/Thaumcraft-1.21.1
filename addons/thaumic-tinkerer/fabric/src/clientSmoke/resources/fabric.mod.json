@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "thaumictinkerer_clientsmoke",
+  "version": "1.0.0",
+  "name": "Thaumic Tinkerer client smoke harness",
+  "description": "Development-only harness of the Thaumic Tinkerer add-on: a real client under Xvfb looks at models, textures, translations, screens and renderers. Never part of a release jar.",
+  "license": "CC-BY-NC-SA-3.0",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "thaumic.tinkerer.fabric.clientsmoke.TinkererClientSmoke"
+    ]
+  },
+  "depends": {
+    "thaumictinkerer": "*",
+    "thaumcraft": "*",
+    "fabricloader": ">=0.16.14",
+    "fabric-api": "*",
+    "architectury": ">=13.0.11",
+    "minecraft": "1.21.1",
+    "java": ">=21"
+  }
+}

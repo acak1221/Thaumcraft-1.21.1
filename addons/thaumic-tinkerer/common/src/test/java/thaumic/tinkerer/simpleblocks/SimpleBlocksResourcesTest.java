@@ -24,7 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import org.junit.jupiter.api.Test;
+import thaumic.tinkerer.client.SimpleBlocksClient;
 
 /**
  * Test-only code of the port (no 1.7.10 counterpart), CC BY-NC-SA 3.0 like the add-on.
@@ -224,9 +226,39 @@ class SimpleBlocksResourcesTest {
         assertEquals(7, overrides.size());
         for (int i = 0; i < 7; i++) {
             JsonObject override = overrides.get(i).getAsJsonObject();
-            assertEquals((double) i, override.getAsJsonObject("predicate").get(NS + ":aspect_texture").getAsDouble());
+            // the threshold of the group is the value the item property sends for it, to the last bit (no rounding)
+            assertEquals(SimpleBlocksClient.aspectTextureValue(i), override.getAsJsonObject("predicate").get(NS + ":aspect_texture").getAsFloat(), 0.0F,
+                    "threshold of group " + i);
             assertEquals(NS + ":item/infused_seeds_" + GROUPS.get(i), override.get("model").getAsString());
         }
+    }
+
+    /**
+     * What the game does with the seeds of a texture group, step by step (client smoke 2026-10-30: every group but aer was drawn as
+     * ignis): Architectury hands the function to vanilla as a {@link ClampedItemPropertyFunction}, whose {@code call} clamps the
+     * value to 0..1; {@code ItemOverrides} keeps the overrides of the model in reverse order and the first one whose threshold is not
+     * above the value gives the model. The value of a group must survive the clamp and select the model of that group.
+     */
+    @Test
+    void everyTextureGroupOfTheSeedsSurvivesTheClampOfTheItemPropertyAndPicksItsOwnModel() throws IOException {
+        JsonArray overrides = json("assets/" + NS + "/models/item/infused_seeds.json").getAsJsonArray("overrides");
+        Set<String> picked = new HashSet<>();
+        for (int group = 0; group < 7; group++) {
+            float sent = SimpleBlocksClient.aspectTextureValue(group);
+            ClampedItemPropertyFunction property = (stack, level, entity, seed) -> sent;
+            float arrived = property.call(null, null, null, 0);
+            assertEquals(sent, arrived, 0.0F, "group " + group + " is changed by the clamp of vanilla");
+            String model = null;
+            for (int i = overrides.size() - 1; i >= 0 && model == null; i--) {
+                JsonObject override = overrides.get(i).getAsJsonObject();
+                if (arrived >= override.getAsJsonObject("predicate").get(NS + ":aspect_texture").getAsFloat()) {
+                    model = override.get("model").getAsString();
+                }
+            }
+            assertEquals(NS + ":item/infused_seeds_" + GROUPS.get(group), model, "model picked for group " + group);
+            picked.add(model);
+        }
+        assertEquals(7, picked.size(), "seven groups, seven different models");
     }
 
     @Test

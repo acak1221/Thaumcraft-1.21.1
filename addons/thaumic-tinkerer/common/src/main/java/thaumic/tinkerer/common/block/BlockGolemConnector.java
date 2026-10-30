@@ -21,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -48,6 +49,11 @@ import thaumic.tinkerer.common.research.TTResearchItem;
 /**
  * The Golem Connector: a wooden cube (opaque, unlike the other camouflageable devices) that is bound to a golem. See
  * {@link TileGolemConnector} for what of the 1.7.10 block works here.
+ *
+ * <p>Opaque means two things here. The cube hides the faces of its neighbours while it is drawn as itself; while it is
+ * camouflaged it does not ({@link CamoDeviceBlock#getOcclusionShape}), because it is then drawn by the block entity
+ * renderer and may look like glass. And it blocks light in both states, as {@code isOpaqueCube() == true} did
+ * ({@link #getLightBlock}).</p>
  */
 public class BlockGolemConnector extends CamoDeviceBlock implements ITTinkererRegisterable {
     public static final MapCodec<BlockGolemConnector> CODEC = simpleCodec(BlockGolemConnector::new);
@@ -68,6 +74,16 @@ public class BlockGolemConnector extends CamoDeviceBlock implements ITTinkererRe
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileGolemConnector(pos, state);
+    }
+
+    /**
+     * Full opacity for light, camouflaged or not. The default derives it from the occlusion shape, which is empty while
+     * the connector is camouflaged ({@link CamoDeviceBlock#getOcclusionShape}), and a camouflaged connector would then let
+     * the light through; 1.7.10 gave the block one opacity (255, from {@code isOpaqueCube}) whatever it imitated.
+     */
+    @Override
+    protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
+        return level.getMaxLightLevel();
     }
 
     /**

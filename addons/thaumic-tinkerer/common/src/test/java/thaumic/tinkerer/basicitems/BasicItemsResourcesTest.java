@@ -183,15 +183,19 @@ class BasicItemsResourcesTest {
         for (String path : List.of("/data/thaumcraft/tags/item/enchantable/repair.json",
                 "/data/minecraft/tags/item/enchantable/head_armor.json",
                 "/data/minecraft/tags/item/enchantable/durability.json")) {
-            for (String id : tagValues(path)) assertTrue(registered.contains(id), path + " names " + id);
+            // The tag files are shared with the other groups, which add their own items (and the Thaumcraft blades that carry
+            // the Blood Sword's enchantability): only an add-on item of another group's list would be an error here.
+            for (String id : tagValues(path)) {
+                assertTrue(registered.contains(id) || !id.startsWith(NS + ":"), path + " names " + id);
+            }
         }
         assertTrue(tagValues("/data/thaumcraft/tags/item/enchantable/repair.json")
                 .contains(NS + ":" + LibItemNames.REVEALING_HELM), "the helmet takes the Repair enchantment (IRepairable)");
         assertEquals(List.of(NS + ":" + LibItemNames.REVEALING_HELM),
                 tagValues("/data/minecraft/tags/item/enchantable/head_armor.json"), "armour enchantments for the helmet");
         // vanilla's durability tag lists #minecraft:head_armor, not the enchantable one, so the helmet is added here too
-        assertEquals(List.of(NS + ":" + LibItemNames.REVEALING_HELM, NS + ":" + LibItemNames.CLEANSING_TALISMAN),
-                tagValues("/data/minecraft/tags/item/enchantable/durability.json"),
+        assertTrue(tagValues("/data/minecraft/tags/item/enchantable/durability.json")
+                .containsAll(List.of(NS + ":" + LibItemNames.REVEALING_HELM, NS + ":" + LibItemNames.CLEANSING_TALISMAN)),
                 "Unbreaking for the helmet and for the talisman (enchantability 10)");
     }
 

@@ -21,10 +21,20 @@ about what happens in the game below is a reading of the code, not an observatio
 | 1.7.10 | 1.21.1 |
 |---|---|
 | `Enchantment` subclasses with numeric ids from the config (220 to 225 and 166 to 173) | one JSON file per enchantment, `data/thaumictinkerer/enchantment/<name>.json`; identity is the registry key `thaumictinkerer:<name>`. `LibEnchantIDs` keeps the 1.7.10 field names but holds `ResourceKey<Enchantment>`; the ids of the config are gone |
-| `EnchantmentMod(id, maxLevel, type)`, weight 0, `canApplyAtEnchantingTable = false` | `max_level` of the file (Ascent Boost 4, Slow Fall 3, Flaming Touch 1, Disintegrate 1, Quick Draw 2, Vampirism 2, the other seven 5), weight 1 and `effects: {}`; the enchantments are in none of `in_enchanting_table`, `tradeable`, `on_random_loot` (so, as in 1.7.10, only the Enchanter gives them), and they are in `minecraft:treasure` |
-| `EnumEnchantmentType` (weapon, digger, bow, armor_legs, armor_feet) and `canApply` overrides | the item tags `data/thaumictinkerer/tags/item/enchantable/<name>.json`: `#minecraft:swords` (Vampirism, Final Strike, Valiance, Focused and Dispersed Strikes), `#minecraft:pickaxes/shovels/axes` (Shatter, Tunnel, Disintegrate), `#minecraft:leg_armor` (Ascent Boost, Pounce), `#minecraft:enchantable/bow` (Quick Draw), explicit boot lists (Slow Fall, Shockwave), explicit axes plus `#minecraft:pickaxes/shovels` (Flaming Touch). Items of Thaumcraft and of this add-on are listed with `required: false` |
+| `EnchantmentMod(id, maxLevel, type)`, weight 0, `canApplyAtEnchantingTable = false` | `max_level` of the file (Ascent Boost 4, Slow Fall 3, Flaming Touch 1, Disintegrate 1, Quick Draw 2, Vampirism 2, the other seven 5), weight 1 (the data cannot say 0; the weight only matters for the random picks the enchantments are out of), **`anvil_cost` 0** (see below) and `effects: {}`; the enchantments are in none of `in_enchanting_table`, `tradeable`, `on_random_loot` (so, as in 1.7.10, only the Enchanter gives them), and they are in `minecraft:treasure` |
+| `EnumEnchantmentType` (weapon, digger, bow, armor_legs, armor_feet) and `canApply` overrides | the item tags `data/thaumictinkerer/tags/item/enchantable/<name>.json`: `#minecraft:swords` (Vampirism, Final Strike, Valiance, Focused and Dispersed Strikes), `#minecraft:pickaxes/shovels/axes` (Shatter, Tunnel, Disintegrate), `#minecraft:leg_armor` (Ascent Boost, Pounce), `#minecraft:enchantable/bow` (Quick Draw), explicit boot lists (Slow Fall, Shockwave), explicit axes plus `#minecraft:pickaxes/shovels` (Flaming Touch). Items of Thaumcraft and of this add-on are listed with `required: false`, among them the items the 1.7.10 types accepted and no tag of the base mod lists: the Crimson Blade (`thaumcraft:crimson_sword`, a sword) in the five sword tags, the Primal Crusher (`thaumcraft:primal_crusher`, a tool) in the four digger tags, the leggings of the Crimson Cult in Ascent Boost and Pounce, the boots of the Crimson Cult in Slow Fall and Shockwave |
 | `canApplyTogether` of each enchantment | `exclusive_set` of the file, and the rules of `EnchantmentManager` (section 5); both are asked by the Enchanter, only the exclusive sets by an anvil |
 | `canApply` excluding the Elemental Axe (Flaming Touch), the Cursed Spirit's Blade (Vampirism), the gem boots (Slow Fall, Shockwave) | the tags simply do not list them (the gem boots are in `#minecraft:foot_armor`, so the boot tags are explicit lists); `EnchantmentManager.allowsItem` repeats the exclusion in code, for a data pack that adds them |
+
+**The anvil (choice).** `EnchantmentMod` called `super(id, 0, type)`: weight 0. The 1.7.10 anvil turns the weight into a cost per
+level with a `switch` (as recalled, not re-read: 1 gives 8, 2 gives 4, 5 gives 2, 10 gives 1, anything else 0) and halves it for an
+enchanted book with a minimum of 1, so the fourteen cost nothing per level when they come from a tool and 1 per level when they
+come from a book.
+`anvil_cost` 0 gives the same numbers in 1.21.1 (`max(1, 0 / 2)` for a book). The vanilla anvil of 1.21.1 returns no result when
+the sum of the enchantment costs is 0 (read in the decompiled `AnvilMenu.createResult`; the 1.7.10 `ContainerRepair` is not at
+hand here, and the review recalls the same rule), so two tools cannot be merged to move one of the fourteen, a book can. The
+JUnit test `EnchantmentResourcesTest` asserts the 0 with the real codec, and the GameTest
+`theAnvilChargesOnePerLevelForABookAndNothingForAToolOfTheEnchantmentsOfTheAddOn` asks a real `AnvilMenu` (not run).
 
 The names are the lang keys `enchantment.thaumictinkerer.<name>` of the converted 1.7.10 lang files (checked by
 `EnchantmentResourcesTest` for en_us and ru_ru). No new lang key was needed, so there is no `lang-extra/enchantments.*.json`.
@@ -53,7 +63,10 @@ removed by the `LIVING_HURT` event of the victim, and at the latest by the next 
 - **Not for attacks that do not go through `Player.attack`.** Arrows, thorns and the like were boosted by the original when
   the shooter's held item had the enchantments; they are not. The Animation Tablet's fake player calls `attack` without the
   network event: `AttackBoost.beforeAttack(player, target)` and `afterAttack(player)` have to be called around its attack
-  (request to the lead in `docs/api-requests/Enchantments.md`, section 5). Until then a tablet does not get the factor.
+  (shared-file request to the lead in `docs/api-requests/Enchantments.md`, section 5, with the exact patch). **Until then a
+  tablet does not get the factor**: a Valiance, Final Strike, Focused or Dispersed Strikes sword in a tablet hits for the base
+  damage. (In 1.7.10 the tablet's `attackTargetEntityWithCurrentItem` posted `LivingHurtEvent`, so they applied.) The GameTest
+  `aFakePlayerAttackGetsTheEnchantmentsOfItsSword` fails until the patch is in; its wrapper is `required = false` for that reason.
 - **The counter moves when the attack starts**, not when the damage lands, so a blow that the victim's invulnerability frames
   swallow still advances the counter of Focused and Dispersed Strikes.
 - **A critical hit** multiplies the boosted damage like any other (the attribute is solved against the formula with the
@@ -109,6 +122,19 @@ per aspect, and their research. The research of the TT enchantments from Focused
 `TTENCH_VAMPIRISM` in the original, not the entry of their own name; this was kept (it is a copy-and-paste habit of 1.7.10).
 Lure's and Luck of the Sea's `BEAST` cost is never charged because the Enchanter only collects the six primals, as before.
 
+**Which items (choice, fidelity).** 1.7.10 asked `enchant.canApply(stack) && enchant.type.canEnchantItem(item)`: the narrow type
+decided, not the wider overrides that let an anvil put Sharpness on an axe, Efficiency on shears or Thorns on any armor. The
+Enchanter asks `Enchantment.isPrimaryItem` (the `primary_items` of the vanilla data: swords for Sharpness, Smite, Bane of
+Arthropods and Fire Aspect, chest armor for Thorns; for the others, and for the fourteen, which have no primary items, the
+supported items), and `EnchantmentManager.allowsItem` additionally keeps Efficiency, Fortune and Silk Touch off hoes and shears
+(`ItemHoe` and `ItemShears` were no `ItemTool`; the 1.21.1 tags of these three list them). An anvil still follows the plain
+`supported_items` of the data, as the 1.7.10 anvil followed the wider overrides. The vanilla enchantments reach the Cursed
+Spirit's Blade (an `ItemSword` of 1.7.10 with Thaumium enchantability, it took every weapon enchantment but Vampirism), the
+Crimson Blade and the Primal Crusher through `data/minecraft/tags/item/enchantable/{sword,sharp_weapon,fire_aspect,mining,mining_loot,durability}.json`
+(optional entries; the blade stays out of `#minecraft:swords`, which the tag of Vampirism holds). The armor of the Crimson Cult
+is in none of the vanilla armor tags of the base mod, so the vanilla armor enchantments do not go on it; that is a gap in
+Thaumcraft's tags, not in this group's (the fourteen are listed explicitly, see section 1).
+
 **Button order (choice).** The original listed the buttons in the iteration order of a `HashMap<Integer, ...>` keyed by the
 enchantment ids, which for the small ids of 1.7.10 was close to ascending id. The port lists them in the order of the table
 (vanilla armor, sword, tool and bow enchantments, Lure, Luck of the Sea, Haste, Repair, then the fourteen). At most sixteen are
@@ -144,8 +170,10 @@ shown, in one or two rows of eight, as before.
 - **Pillars.** Within 4 blocks horizontally, at the height of the table: two to twelve Obsidian Totems then a Nitor; the
   first six found in the order x then z. A field of fewer than six stops the work and loses the vis paid so far (the
   vis taken from the wand stays taken).
-- **Effects (A8).** The essentia trail is `ThaumcraftFX.essentiaTrail` from the table to the pillar; the two magic runes of
-  `Thaumcraft.proxy.blockRunes` are vanilla `ENCHANT` particles around the pillar's top and above the table (`docs/api-requests/Enchantments.md` section 7); the
+- **Effects (A8).** The essentia trail is `ThaumcraftFX.essentiaTrail` from the pillar to the table; the two magic runes of
+  `Thaumcraft.proxy.blockRunes` are `ThaumcraftFX.blockRunes` (the server twin of the client call that 1.7.10 made, since the work runs
+  on the server) at the same points (`pillar x, top - 0.75, pillar z` and `table x, y + 0.25, table z`) with the same purple
+  (`0.3 + rand * 0.7` red and blue, no green), duration 15 and gravity `rand / 8`; the
   sounds are `thaumcraft:egidle` (one in five of the effects, at the pillar) and `thaumcraft:wand` when the job is done.
 - **Packets (fix / hardening).** The payloads carry the block position and the enchantment's registry id. The server
   resolves the block entity only if the sender has the menu of exactly that enchanter open (the original trusted any
@@ -168,7 +196,8 @@ the right of the screen, the level buttons, the six aspect bars drawn with the a
   every tick. The list of offered enchantments depends on the player's research, which is read on the client.
 - **Icons** are the 1.7.10 textures `textures/enchant/*.png`, 32 by 32 (35 files) or 512 by 512 (8 files, the ones of this
   add-on); the original drew either onto 16 by 16 with the texture coordinates 0 to 1. `EnchantIcons` reads the width from the
-  PNG header once and does the same.
+  PNG header and does the same; the sizes are forgotten when the resources reload (F3+T, a resource pack with icons of another
+  size), by a reload listener that `EnchantmentsClient` registers.
 - **Names and tooltips** use the description component of the data (`enchantment.thaumictinkerer.<name>`; the vanilla and
   Thaumcraft enchantments their own) and the 1.7.10 keys `ttmisc.startEnchant`, `ttmisc.baseCost`, `ttmisc.clickToRemove`.
   The level numeral is `enchantment.level.<n>`, which exists up to 10 in the vanilla lang files.
@@ -189,6 +218,13 @@ attribute is synchronised to the client like every attribute, so the client's pr
 decision use the same speed.
 
 - **One tick of lag** after the crosshair moves to another kind of block (the modifier is from the previous tick).
+- **The Animation Tablet digs too** (`TileAnimationTablet.startBreaking` and `updateBlockRemoving` use
+  `state.getDestroyProgress(player, ...)`, where 1.7.10 fired `BreakSpeed`), but its fake player is never ticked, so nothing
+  updates the modifier for it. `BreakSpeedControl.updateFor(player, target)` does it for a given block (no crosshair, no lag);
+  the tablet has to call it before each `getDestroyProgress` (shared-file request, `docs/api-requests/Enchantments.md`,
+  section 5). **Until then** a tablet with a Disintegrate, Flaming Touch, Shatter or Tunnel tool digs at the plain speed of the
+  tool; the `BlockEvent.BREAK` veto already applies to it, so it cannot break what the tool refuses, but it breaks the soft
+  blocks slowly instead of at once.
 - **Factors** are the original's: Shatter `x3L` on blocks of hardness above 20 and `x.8` on the others; Tunnel `x(1 + .2 L)`
   when the player's yaw is within 50 degrees of the yaw remembered on the tool at the last break and `x.3` when it is not
   (nothing without a remembered yaw); Disintegrate on blocks of hardness 1.5 or less, and Flaming Touch on "wood", make
@@ -245,7 +281,7 @@ own entry comes with its block (section 6). The `PERIPHERALS` entry of the same 
   show a wrong assumption of a test as well as a defect), not the screen, the renderer, the particles and sounds, the attribute
   mechanisms (damage, dig speed), the client jump hook, nor the multiplayer behaviour of the packets.
 - The JUnit tests (`EnchantmentFormulasTest`, `EnchantmentManagerTest`, `EnchantmentResourcesTest`,
-  `EnchanterPacketsAndIconsTest`; 52 tests) were compiled with `javac` and run with the JUnit launcher from the Gradle cache
+  `EnchanterPacketsAndIconsTest`; 55 tests) were compiled with `javac` and run with the JUnit launcher from the Gradle cache
   (all passed), not through Gradle. `EnchantmentResourcesTest` parses the fourteen JSON files with the real
   `Enchantment.DIRECT_CODEC` and the tag files with `TagFile.CODEC`.
 - The attack arithmetic assumes the 1.21.1 `Player.attack` formula as read from the decompiled classes; a change of the formula

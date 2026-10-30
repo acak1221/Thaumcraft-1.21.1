@@ -109,6 +109,15 @@ class KamiWorldResourcesTest {
     }
 
     @Test
+    void thePortalHasAnItemModelThatShowsTheBlockLikeAnyBlockItem() {
+        // 1.7.10 registered the default item block for the portal (getItemBlock() returned null) and listed it in the tab.
+        JsonObject item = json("/assets/" + NS + "/models/item/" + LibBlockNames.PORTAL + ".json");
+        assertEquals(NS + ":block/bedrock_portal", item.get("parent").getAsString());
+        // The block model inherits minecraft:block/block so that the item gets the display transforms of a block.
+        assertEquals("minecraft:block/block", json("/assets/" + NS + "/models/block/bedrock_portal.json").get("parent").getAsString());
+    }
+
+    @Test
     void theGateDropsItselfAndTheTagsKnowTheBlocks() {
         JsonObject loot = json("/data/" + NS + "/loot_table/blocks/" + LibBlockNames.WARP_GATE + ".json");
         assertEquals("minecraft:block", loot.get("type").getAsString());

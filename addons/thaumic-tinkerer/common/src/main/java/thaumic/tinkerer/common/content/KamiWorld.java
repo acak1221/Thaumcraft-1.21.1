@@ -13,9 +13,11 @@ package thaumic.tinkerer.common.content;
 
 import com.mojang.serialization.MapCodec;
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import dev.architectury.utils.Env;
 import java.util.List;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -84,13 +86,19 @@ public final class KamiWorld implements ContentGroup {
                 () -> BlockEntityType.Builder.of(TileWarpGate::new, warpGate.get()).build(null));
         warpGateMenu = TTRegistry.MENUS.register(LibBlockNames.WARP_GATE,
                 () -> MenuRegistry.ofExtended(ContainerWarpGate::fromNetwork));
-        // The portal has no item: the pickaxe makes it from bedrock.
-        portal = TTRegistry.blockWithoutItem(LibBlockNames.PORTAL, BlockBedrockPortal::new);
+        // 1.7.10 returned null from getItemBlock(), which made GameRegistry register the default item block, and the block
+        // was in the creative tab: a creative player can take the portal and place it. The pickaxe also makes it from bedrock.
+        portal = TTRegistry.block(LibBlockNames.PORTAL, BlockBedrockPortal::new);
 
         PacketWarpGateButton.register();
         PacketWarpGateTeleport.register();
-        // The payload the server sends is known on both sides; the client's receiver is registered by registerClient().
-        NetworkManager.registerS2CPayloadType(PacketSoulHearts.TYPE, PacketSoulHearts.CODEC);
+        // The payload the server sends. Architectury registers the type of an S2C payload together with its client receiver
+        // (KamiWorldClient), so only a dedicated server registers it here; on a client both calls end in Fabric's
+        // PayloadTypeRegistry, which throws "Packet type ... is already registered!" for the second one (the integrated
+        // server shares the client's registry).
+        if (Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerS2CPayloadType(PacketSoulHearts.TYPE, PacketSoulHearts.CODEC);
+        }
 
         SoulHeartHandler.register();
         DimensionalShardDropHandler.register();

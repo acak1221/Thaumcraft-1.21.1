@@ -1,16 +1,17 @@
 # Enchantments: requests to the Thaumcraft API and to the loader modules
 
 Group Enchantments: the fourteen enchantments, their event handler, the Enchanter's table of costs and rules and the Osmotic
-Enchanter. The numbers `A7` and `A8` are those of `docs/API_GAPS.md` section 2. Nothing below was done by reaching into
+Enchanter. Nothing below was done by reaching into
 `thaumcraft.common.*`: every item is either a workaround with the loss written down (the behaviour of the group today is in
 `docs/deviations/Enchantments.md`) or a request to the lead. Priorities are the group's own opinion (P1 changes what the
 player gets, P3 only hardens something that works today).
 
 The Thaumcraft API itself was enough for this group: `WandHelper` (`isWand`, `isStaff`, `getCap`, `getAllVis`,
 `consumeAllVisCrafting`), `ThaumcraftApiHelper.isResearchComplete(Player, key)`, `ThaumcraftApi.ENCHANTMENT_HASTE` and
-`ENCHANTMENT_REPAIR`, `BlocksTC.state(field, meta)`, `ItemApi`, `ThaumcraftFX.essentiaTrail` and `ThaumcraftSoundIds` are
-used as they are. The requests are for the loaders: the group needs five hooks that Architectury does not offer (sections 1
-to 4 and 6) and works around each of them, and one change in another group's file (section 5).
+`ENCHANTMENT_REPAIR`, `BlocksTC.state(field, meta)`, `ItemApi`, `ThaumcraftFX.essentiaTrail` and `ThaumcraftFX.blockRunes` (the
+rune effect of the Enchanter) and `ThaumcraftSoundIds` are used as they are. The requests are for the loaders: the group needs
+five hooks that Architectury does not offer (sections 1 to 4 and 6) and works around each of them, and two changes in other
+groups' files (section 5).
 
 ## 1. A damage event whose amount can be changed (loader event, P1)
 
@@ -65,17 +66,47 @@ react to a fall that another mod handles by setting the distance to zero in the 
 **Proposed.** `EntityEvent.LIVING_FALL { EventResult onFall(LivingEntity entity, float distance, float damageMultiplier) }`,
 NeoForge `LivingFallEvent`, Fabric a mixin at the head of `LivingEntity.causeFallDamage`.
 
-## 5. The Animation Tablet's fake player and the attack factor (to the lead, P2)
+## 5. The Animation Tablet's fake player: attack and dig (shared files, to the lead, P1)
 
-**Need.** The Animation Tablet attacks with a fake player. Enchantments of damage (section 1) are armed by
-`PlayerEvent.ATTACK_ENTITY`, which the fake player's `attack` does not post.
+**Need.** The Animation Tablet attacks and digs with a fake player that is never ticked. In 1.7.10 both went through events the
+enchantments hook: `attackTargetEntityWithCurrentItem` posted `LivingHurtEvent` (Valiance, Final Strike, Focused and Dispersed
+Strikes) and `ItemInWorldManager`'s dig progress posted `PlayerEvent.BreakSpeed` (Shatter, Tunnel, Disintegrate, Flaming Touch).
+In the port neither is posted for the fake player: `PlayerEvent.ATTACK_ENTITY` is a network event and the per-tick
+`BreakSpeedControl.update` is a player tick, so a tablet with such a weapon hits at the base damage and a tablet with such a tool
+digs at the plain speed of the tool (the veto of `BlockEvent.BREAK` already applies to it). Nothing outside the enchantment
+package calls `AttackBoost` or `BreakSpeedControl` today.
 
-**What exists.** `thaumic.tinkerer.common.enchantment.AttackBoost.beforeAttack(Player attacker, Entity target)` and
-`AttackBoost.afterAttack(Player attacker)`. Wrap the tablet's `fakePlayer.attack(target)` as
-`AttackBoost.beforeAttack(fakePlayer, target); try { fakePlayer.attack(target); } finally { AttackBoost.afterAttack(fakePlayer); }`.
-Both are safe to call for a player without enchantments. This is a change in the Machines or TileBlocks group's file, so it
-is a request, not something this group did. Without it a tablet's attacks run at the base damage (no Valiance, Pounce, Final,
-Focused or Dispersed Strikes, as if the sword had none of them).
+**What exists.** `AttackBoost.beforeAttack(Player, Entity)` / `afterAttack(Player)` (safe for a player without enchantments)
+and `BreakSpeedControl.updateFor(ServerPlayer, BlockPos target)` (fits the dig speed to the block at the position, with no
+crosshair and no lag; safe without enchantments).
+
+**Patch 1: `common/core/fakeplayer/TinkererFakePlayer.java`, `attackEntity`** (after the attack strength is set, so the factor is
+worked out for a charged swing):
+
+```java
+public void attackEntity(Entity target) {
+    refreshHeldItemModifiers();
+    this.attackStrengthTicker = CHARGED;
+    AttackBoost.beforeAttack(this, target);
+    try {
+        this.attack(target);
+    } finally {
+        AttackBoost.afterAttack(this);
+    }
+}
+```
+(import `thaumic.tinkerer.common.enchantment.AttackBoost`).
+
+**Patch 2: `common/block/tile/tablet/TileAnimationTablet.java`**, the line `BreakSpeedControl.updateFor(player, pos);` right before each
+`state.getDestroyProgress(player, level, pos)`: in `startBreaking` (before the `if`) and in `updateBlockRemoving` (before
+`float progress = ...`); import `thaumic.tinkerer.common.enchantment.BreakSpeedControl`. (The Remote Placer does not dig or
+attack, so `TileRPlacer` needs nothing.)
+
+**Checks.** `EnchantmentsRuntimeChecks.aFakePlayerAttackGetsTheEnchantmentsOfItsSword` fails until patch 1 is in (its Fabric
+wrapper is `required = false`; make it required afterwards). `aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor`
+covers `updateFor` itself and passes without the patches; a test that lets a real tablet dig with a Disintegrate shovel (the
+dirt in front gone within a few ticks of the first hit) belongs to the group that owns the tablet once patch 2 is in. Neither
+patch was applied or run by this group: they touch another group's files.
 
 ## 6. A bow draw clock (loader event, P3)
 
@@ -90,18 +121,7 @@ arrow, because the game decides that before the arrow exists.
 the new count (NeoForge `LivingEntityUseItemEvent.Tick#setDuration`, Fabric a mixin at the end of
 `LivingEntity.updateUsingItem`). Only `getTicksUsingItem` reads it back, so the bow pose follows.
 
-## 7. Client sparkles and runes (A8, P3)
-
-**Need.** The Enchanter draws two runes (`Thaumcraft.proxy.blockRunes`) at the pillar's top and above the table for every vis it
-takes.
-
-**Workaround.** Vanilla `ENCHANT` particles sent by the server (`ServerLevel.sendParticles`) around the same two points, and
-`ThaumcraftFX.essentiaTrail` for the stream from the table to the pillar. The glyphs of Thaumcraft's rune effect are not shown.
-
-**Proposed.** `thaumcraft.api.client.ThaumcraftClientFX.blockRunes(Level, double x, double y, double z, float r, float g, float b,
-int life, float gravity)` as in A8, with a server-side sender in `ThaumcraftFX` (the Enchanter works on the server only).
-
-## 8. Typed access to the Enchanter's pillar blocks (P3)
+## 7. Typed access to the Enchanter's pillar blocks (P3)
 
 **Need.** The Enchanter looks for columns of two to twelve Obsidian Totems under a Nitor.
 
@@ -112,7 +132,7 @@ block. This breaks if the table loses those two rows, with no compile-time warni
 **Proposed.** `BlocksTC.obsidianTotem()` returning the block state and `BlocksTC.nitor()` returning the block, or the block tags
 `thaumcraft:obsidian_totem` and `thaumcraft:nitor` (tags would also let a resource pack add pillar blocks).
 
-## 9. Not requested, for the record
+## 8. Not requested, for the record
 
 - **Applied Energistics 2 `IMovableTile`** of the Enchanter (`prepareToMove` / `doneMoving`) is not ported (no AE2 in the 1.21.1
   build).

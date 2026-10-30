@@ -35,7 +35,9 @@ import thaumic.tinkerer.common.dim.WorldProviderBedrock;
 
 /**
  * The Bedrock portal: an unbreakable, collision-free block that sends whoever stands in it between the surface and the
- * Bedrock dimension (made from bedrock by the Awakened Ichorium Pickaxe, see the KamiGear group). It has no item.
+ * Bedrock dimension (made from bedrock by the Awakened Ichorium Pickaxe, see the KamiGear group). It has a plain item and a
+ * creative tab entry: 1.7.10 returned null from {@code getItemBlock()}, which made {@code GameRegistry} register the default
+ * item block, and the block set the creative tab.
  *
  * <p>1.7.10 did this twice over: the block moved <i>players</i> from {@code onEntityCollidedWithBlock} (with the
  * {@code TeleporterBedrock} that placed nothing, and the cavity work of {@link TeleporterBedrock}), and its tile entity

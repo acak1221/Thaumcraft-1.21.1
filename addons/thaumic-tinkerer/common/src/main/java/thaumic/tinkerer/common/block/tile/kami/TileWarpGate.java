@@ -60,6 +60,8 @@ import thaumic.tinkerer.common.item.kami.KamiHooks;
 public class TileWarpGate extends BlockEntity implements Container, ExtendedMenuProvider {
     private static final String TAG_LOCKED = "locked";
     public static final int SLOTS = 10;
+    /** 1.7.10: twenty white sparkles before the jump of the Focus of Celestial Recall and twenty after it. */
+    private static final int SPARKLES = 20;
 
     /** True when this gate refuses teleports to it (the button of its screen; the label reads "Allow incoming teleports"). */
     public boolean locked = false;
@@ -81,20 +83,32 @@ public class TileWarpGate extends BlockEntity implements Container, ExtendedMenu
 
     /**
      * 1.7.10 {@code teleportPlayer(player, coords)}: to the gateway at {@code coords} in the player's own dimension.
-     * This is what the Focus of Celestial Recall asks for.
+     * This is what the Focus of Celestial Recall asks for ({@code KamiHooks.warpGateTeleporter}), and the original ran it on
+     * the client as well, which drew 20 white sparkles before and 20 after the jump: here the server sends them
+     * ({@link KamiHooks#sparklesAround}).
      */
     public static boolean teleportPlayer(ServerPlayer player, BlockPos coords) {
-        return teleportPlayer(player, player.level().dimension(), coords);
+        return teleportPlayer(player, player.level().dimension(), coords, true);
     }
 
-    /** The gateway at {@code coords} of {@code dimension}; false (and a message to the player) when there is none or it refuses. */
+    /**
+     * The gateway at {@code coords} of {@code dimension}; false (and a message to the player) when there is none or it
+     * refuses. No sparkles: the packet of the destinations screen and the gateway's own menu reached the original's method
+     * on the server only, where its sparkles never ran.
+     */
     public static boolean teleportPlayer(ServerPlayer player, ResourceKey<Level> dimension, BlockPos coords) {
+        return teleportPlayer(player, dimension, coords, false);
+    }
+
+    private static boolean teleportPlayer(ServerPlayer player, ResourceKey<Level> dimension, BlockPos coords,
+            boolean sparkles) {
         ServerLevel destination = player.server.getLevel(dimension);
         BlockEntity tile = destination == null ? null : destination.getBlockEntity(coords);
         if (tile instanceof TileWarpGate destGate) {
             if (!destGate.locked) {
-                Level origin = player.level();
+                ServerLevel origin = player.serverLevel();
                 playWand(origin, player.getX(), player.getY(), player.getZ(), 1F);
+                if (sparkles) KamiHooks.sparklesAround(origin, player, SPARKLES);
                 player.stopRiding();
                 Vec3 target = new Vec3(coords.getX() + 0.5, coords.getY() + 1.6, coords.getZ() + 0.5);
                 if (destination == origin) {
@@ -103,6 +117,7 @@ public class TileWarpGate extends BlockEntity implements Container, ExtendedMenu
                     player.changeDimension(new DimensionTransition(destination, target, Vec3.ZERO, player.getYRot(),
                             player.getXRot(), DimensionTransition.DO_NOTHING));
                 }
+                if (sparkles) KamiHooks.sparklesAround(destination, player, SPARKLES);
                 playWand(destination, player.getX(), player.getY(), player.getZ(), 0.1F);
                 return true;
             } else {

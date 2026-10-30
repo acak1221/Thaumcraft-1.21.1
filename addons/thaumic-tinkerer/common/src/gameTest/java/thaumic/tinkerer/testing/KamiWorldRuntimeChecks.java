@@ -159,7 +159,8 @@ public final class KamiWorldRuntimeChecks {
         test.assertTrue(BuiltInRegistries.BLOCK.containsKey(gate), "the gateway block is registered");
         test.assertTrue(BuiltInRegistries.BLOCK.containsKey(portal), "the portal block is registered");
         test.assertTrue(BuiltInRegistries.ITEM.containsKey(gate), "the gateway has an item");
-        test.assertFalse(BuiltInRegistries.ITEM.containsKey(portal), "the portal has no item");
+        test.assertTrue(BuiltInRegistries.ITEM.containsKey(portal),
+                "the portal has the default item block (1.7.10 getItemBlock() null registered one) and is in the creative tab");
         test.assertTrue(BuiltInRegistries.BLOCK_ENTITY_TYPE.containsKey(gate), "the gateway's block entity type is registered");
         test.assertTrue(BuiltInRegistries.MENU.containsKey(gate), "the gateway's menu type is registered");
         test.assertTrue(BuiltInRegistries.CHUNK_GENERATOR.containsKey(LibMisc.id("bedrock")), "the generator type is registered");

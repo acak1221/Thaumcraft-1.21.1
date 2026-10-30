@@ -10,10 +10,13 @@ the sounds and the config switches are ported as they are.
 
 How this was checked (honestly): every focus compiles with `tools/compile.sh` (also with `-g` for the GameTests). 23 JUnit tests cover
 the plain rules (costs, flags, the formulas of Mending, Efreet's Flame, Uprising and Distortion, the shield's box and shift, the
-blacklist of the config, the cost of taking a block and what may never be taken, the reach of the flight-kick counter, the codecs of
-the Dislocation's load) and the resources (models, ornaments, depth layers, language keys, the blacklist tag); they were **run
-outside Gradle** with a hand-built JUnit launcher (the `junit-platform-launcher` jars of the Gradle cache, the Minecraft jar
-bootstrapped, no world) and passed, as did `TinkererApiOnlyTest`. 35 GameTests (`FociRuntimeChecks`) cast the foci with a real wand and
+blacklist of the config, the cost of taking a block and what may never be taken, the installation of the flight-kick reset, the codecs of
+the Dislocation's load) and the resources (models, ornaments, depth layers, language keys, the blacklist tag). Twenty-two of them,
+all but the flight-kick installation test, were first **run outside Gradle** with a hand-built JUnit launcher (the
+`junit-platform-launcher` jars of the Gradle cache, the Minecraft jar bootstrapped, no world) and passed, as did `TinkererApiOnlyTest`.
+`FociLogicTest.theFlightKickResetIsWhatIsInstalledAndNullRemovesIt`, which replaced the test of the reflective accessors when the
+Uprising moved to the loader hook, was written later and has only run under Gradle, with the whole add-on suite (`:fabric:tinkererTest`,
+which includes `FociLogicTest` and `FociResourcesTest`). 35 GameTests (`FociRuntimeChecks`) cast the foci with a real wand and
 mock players in a running server: they were **run outside Gradle** in a scratch Fabric GameTest server (Fabric Loader's `KnotServer`
 with the classpath of the Gradle run configuration `runGameTest`, the Thaumcraft mod as built in `fabric/build`, and a copy of the
 add-on whose `ContentGroups` lists only `Foci`) and all 35 passed in the last run (the first run of the review round had one failure,
@@ -22,8 +25,10 @@ first round the Mending threshold, the removal of a block entity before its bloc
 round the missing flight-kick reset, the missing two-part refusal and the missing flowing-water refusal (one check each). The
 whole-add-on Gradle run of the lead (`runTinkererGameTest`, `fabric/build/tinkerer-gametest-results.xml`, 17:44) passed every Foci check
 that existed then except the three that assert "no registration failures" (a KamiGear resource-location error, not a Foci one); the
-checks added in the review round were not in it. The interplay with the other groups (the Magnet that pulls with the Telekinesis
-focus) was not run. Nothing here has been seen in a running **client**: every particle (now Thaumcraft's own, drawn through
+checks added in the review round were not in it. After the Uprising was moved to the loader hook (section 2) the Foci GameTests were
+run again through Gradle (`runTinkererGameTest`, filter `focigametests.*` together with the Machines group): 36 checks, all passed
+(the 35 above, with the kick-counter check rewritten to read the counter through `FloatingTicks`, and one new check, section 2). The
+interplay with the other groups (the Magnet that pulls with the Telekinesis focus) was not run. Nothing here has been seen in a running **client**: every particle (now Thaumcraft's own, drawn through
 `ThaumcraftClientFX`, which a server test cannot exercise), sound, HUD pixel, the model of a focus on the wand and the feel of a held
 cast is unverified.
 
@@ -53,16 +58,21 @@ is **not** overridden to `true` as `ItemModFocus` did (see `docs/API_GAPS.md` 3b
   launch is `1 / 1.5` blocks per tick, exactly what 1.7.10 did. The runic bonus of the primal staff, which `WandHelper.getFocusPotency`
   would add, is not used either (1.7.10 did not read it here).
 - **Fly-kick.** 1.7.10 reset `playerNetServerHandler.floatingTickCount` on every cast. The 1.21.1 counter
-  (`ServerGamePacketListenerImpl.aboveGroundTickCount`, an int; the server disconnects a floating player above 80) is private, and
-  the add-on may neither import the mod's accessor mixin nor ship a mixin of its own (the test `TinkererApiOnlyTest`; no mixin
-  config exists in the add-on). `FociHooks.floatingTickReset` therefore defaults to writing the field **by reflection**, under its
-  official name `aboveGroundTickCount` (NeoForge and the development environment) or its intermediary name `field_14138` (Fabric in
-  production; read from the layered mappings of the Loom cache). A GameTest sets the counter of a mock player's real connection
-  to 79, casts, and finds 0; with the default undone it finds 79. If neither name can be reached (a different Minecraft
-  version) the first cast logs one warning and the cast goes on. `FociHooks.setFloatingTickReset` lets the loader or the API
-  take the reset over (`docs/api-requests/Foci.md` section 3 asks for `ThaumcraftApiHelper.resetFlightKick`, which would remove
-  the reflection). As in 1.7.10 a cast that does nothing (config off, no vis) does not reset the counter. On a single-player
-  world and on a server that allows flight there is no difference.
+  (`ServerGamePacketListenerImpl.aboveGroundTickCount`, an int; the server disconnects a floating player above 80) is private.
+  The group's first version wrote it by reflection (two field names, a warning when neither was found); that stop-gap is
+  **deleted**. The loader layer now owns the access: `thaumic.tinkerer.common.hooks.FloatingTicks` (`docs/HOOKS.md` section 9) reads
+  and writes the field through an accessor mixin of the Fabric module, no reflection. `Foci.register()` installs
+  `FociHooks.setFloatingTickReset(FloatingTicks.RESET)` once, and every cast of the focus on the server calls
+  `FociHooks.resetFloatingTicks(player)`, which runs whatever is installed; nothing is installed by default, so the start-up
+  call is what makes the cast reset the counter (a GameTest pins it). The rule is the 1.7.10 one: only a cast that does something
+  (config on, vis paid) resets, only the caster's counter, and a player without a connection (a fake player) has nothing to reset.
+  What the hook does not give: a platform whose module has no mixin (NeoForge today) gives `isAvailable == false`, and then the
+  reset silently does nothing. **The group needs the NeoForge poster of `FloatingTicks`** (the same interface on the same class by a
+  mixin, `docs/HOOKS.md` section 9): until the NeoForge module has it a player who keeps launching himself with the Uprising on a
+  server without `allow-flight` can be kicked after four seconds of climbing. On a single-player world and on a server that allows
+  flight there is no difference. Checked by GameTests on the real connection of a mock player: a cast through the wand's own
+  `use` puts 79 back to 0 for the caster and leaves another player's counter, and a cast of another focus, alone; no vis, the
+  config switch off, and no installed reset leave the counter as it was.
 - The velocity is set on both sides (the client's own player does the flying; the server's copy is not sent as a velocity packet).
   `fallDistance = 0` is `resetFallDistance()`.
 - The smoke spiral is Thaumcraft's own: `ThaumcraftClientFX.smokeSpiral(level, x, y - motionY, z, 2F, random 0..359, (int) y, 0x09E2FF)`

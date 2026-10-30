@@ -19,8 +19,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -51,6 +53,7 @@ import thaumic.tinkerer.common.block.tile.container.ContainerAspectAnalyzer;
 import thaumic.tinkerer.common.block.tile.container.ContainerMobMagnet;
 import thaumic.tinkerer.common.content.Machines;
 import thaumic.tinkerer.common.core.helper.EnumMobAspect;
+import thaumic.tinkerer.common.hooks.TinkererEvents;
 import thaumic.tinkerer.common.item.ItemBloodSword;
 import thaumic.tinkerer.common.item.ItemMobAspect;
 import thaumic.tinkerer.common.item.ItemSoulMould;
@@ -744,30 +747,69 @@ public final class MachinesRuntimeChecks {
         });
     }
 
-    public static void anActivatedBladeReapsTheSoulAspectsOfTheMobItKills(GameTestHelper test) {
-        floor(test);
+    /** A mock player holding a freshly activated blade (the shift-right click of the original). */
+    private static ServerPlayer reaper(GameTestHelper test) {
         ServerPlayer player = mockPlayer(test);
         ItemStack blade = freshBlade();
         player.setShiftKeyDown(true);
         player.setItemInHand(InteractionHand.MAIN_HAND, blade);
         blade.getItem().use(test.getLevel(), player, InteractionHand.MAIN_HAND);
         player.stopUsingItem();
+        player.setShiftKeyDown(false);
         test.assertTrue(ItemBloodSword.isActivated(blade), "activated");
+        return player;
+    }
+
+    private static List<ItemEntity> itemsInTheArea(GameTestHelper test) {
+        return test.getLevel().getEntitiesOfClass(ItemEntity.class, test.getBounds().inflate(6));
+    }
+
+    private static boolean hasItem(List<ItemEntity> items, Item item) {
+        return items.stream().anyMatch(e -> e.getItem().is(item));
+    }
+
+    private static long soulAspects(List<ItemEntity> items) {
+        return items.stream().filter(e -> e.getItem().getItem() instanceof ItemMobAspect).count();
+    }
+
+    /**
+     * {@code LivingDropsEvent} of the original, through {@code TinkererEvents.LIVING_DROPS}: the soul aspects are in the
+     * world as soon as the blow that kills returns (not a tick later), at the victim's position, with the pick-up delay of ten
+     * ticks, and the loot table's pork is gone; experience is not an item and stays.
+     */
+    public static void anActivatedBladeReapsTheSoulAspectsOfTheMobItKills(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = reaper(test);
+        test.assertTrue(TinkererEvents.hasLivingDropsListeners(), "the blade's listener of LIVING_DROPS is registered at start-up");
 
         Pig pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
         ServerLevel level = test.getLevel();
         pig.hurt(level.damageSources().playerAttack(player), 100F);
+        test.assertTrue(pig.isDeadOrDying(), "the blow killed the pig");
+
+        // no waiting: the event edits the drops in the call of the death
+        List<ItemEntity> items = itemsInTheArea(test);
+        test.assertTrue(soulAspects(items) == 3, "three soul aspects at once, found " + soulAspects(items) + " in " + items);
+        test.assertTrue(items.size() == 3, "and nothing else: " + items);
+        test.assertTrue(!hasItem(items, Items.PORKCHOP), "no pork: the vanilla drops are replaced");
+        // the pig is beast, earth, travel
+        for (Aspect aspect : List.of(Aspect.BEAST, Aspect.EARTH, Aspect.TRAVEL)) {
+            Item soul = TTRegistry.item(ItemMobAspect.path(aspect, ItemMobAspect.Form.BASIC));
+            test.assertTrue(items.stream().anyMatch(e -> e.getItem().is(soul) && e.getItem().getCount() == 1),
+                    "one " + aspect.getTag() + " soul aspect");
+        }
+        for (ItemEntity soul : items) {
+            test.assertTrue(soul.position().distanceTo(pig.position()) < 1.0E-6, "dropped where the pig died: " + soul.position());
+            test.assertTrue(soul.saveWithoutId(new CompoundTag()).getShort("PickupDelay") == 10, "pick-up delay of ten ticks");
+        }
+        test.assertTrue(!level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, test.getBounds().inflate(6)).isEmpty(),
+                "experience is not an item drop and still comes");
+
         test.runAfterDelay(3, () -> {
-            // the pig is beast, earth, travel
-            int souls = 0;
-            for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, test.getBounds().inflate(6))) {
-                if (entity.getItem().getItem() instanceof ItemMobAspect) souls++;
-                test.assertTrue(!entity.getItem().is(Items.PORKCHOP), "no pork: the vanilla drops are replaced");
-            }
-            test.assertTrue(souls == 3, "three soul aspects, found " + souls);
-            test.assertItemEntityPresent(TTRegistry.item(ItemMobAspect.path(Aspect.BEAST, ItemMobAspect.Form.BASIC)));
-            test.assertItemEntityPresent(TTRegistry.item(ItemMobAspect.path(Aspect.EARTH, ItemMobAspect.Form.BASIC)));
-            test.assertItemEntityPresent(TTRegistry.item(ItemMobAspect.path(Aspect.TRAVEL, ItemMobAspect.Form.BASIC)));
+            List<ItemEntity> later = itemsInTheArea(test);
+            test.assertTrue(soulAspects(later) == 3 && later.size() == 3 && !hasItem(later, Items.PORKCHOP),
+                    "nothing is added or taken a moment later: " + later);
+            later.forEach(ItemEntity::discard);
             finish(test, player);
         });
     }
@@ -779,12 +821,245 @@ public final class MachinesRuntimeChecks {
         Pig pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
         ServerLevel level = test.getLevel();
         pig.hurt(level.damageSources().playerAttack(player), 100F);
+        List<ItemEntity> items = itemsInTheArea(test);
+        test.assertTrue(hasItem(items, Items.PORKCHOP), "the pork is dropped: " + items);
+        test.assertTrue(soulAspects(items) == 0, "no soul aspects");
         test.runAfterDelay(3, () -> {
-            for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, test.getBounds().inflate(6))) {
-                test.assertTrue(!(entity.getItem().getItem() instanceof ItemMobAspect), "no soul aspects");
-            }
+            List<ItemEntity> later = itemsInTheArea(test);
+            test.assertTrue(soulAspects(later) == 0, "no soul aspects a moment later either");
+            later.forEach(ItemEntity::discard);
             finish(test, player);
         });
+    }
+
+    /**
+     * The listener is global and answers only for a melee kill by the player who holds the activated blade in the main hand,
+     * of a mob that has a row in the table: every other death keeps its loot.
+     */
+    public static void theBladeLeavesTheDeathsThatAreNotItsKillsAlone(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        ServerPlayer armed = reaper(test);
+        ServerPlayer plain = mockPlayer(test);
+        ServerPlayer offHand = mockPlayer(test);
+        ItemStack spare = freshBlade();
+        offHand.setItemInHand(InteractionHand.MAIN_HAND, spare);
+        offHand.setShiftKeyDown(true);
+        spare.getItem().use(level, offHand, InteractionHand.MAIN_HAND);
+        offHand.stopUsingItem();
+        offHand.setShiftKeyDown(false);
+        offHand.setItemInHand(InteractionHand.OFF_HAND, spare);
+        offHand.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
+        test.assertTrue(ItemBloodSword.isActivated(offHand.getOffhandItem()) && !(offHand.getMainHandItem().getItem() instanceof ItemBloodSword),
+                "an activated blade in the off hand, a stick in the main hand");
+
+        // 1. the activated blade is in the off hand of the killer: the original asked the main hand
+        Pig pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+        pig.hurt(level.damageSources().playerAttack(offHand), 100F);
+        List<ItemEntity> items = itemsInTheArea(test);
+        test.assertTrue(pig.isDeadOrDying() && hasItem(items, Items.PORKCHOP) && soulAspects(items) == 0, "off hand: the loot stays: " + items);
+        items.forEach(ItemEntity::discard);
+
+        // 2. another player (not the killer) holds the activated blade
+        pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+        pig.hurt(level.damageSources().playerAttack(plain), 100F);
+        items = itemsInTheArea(test);
+        test.assertTrue(pig.isDeadOrDying() && hasItem(items, Items.PORKCHOP) && soulAspects(items) == 0,
+                "the blade of a bystander: the loot stays: " + items);
+        items.forEach(ItemEntity::discard);
+
+        // 3. the killer holds the activated blade but the death is not a melee blow (the 1.7.10 damage type "player")
+        pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+        pig.hurt(level.damageSources().indirectMagic(null, armed), 100F);
+        items = itemsInTheArea(test);
+        test.assertTrue(pig.isDeadOrDying() && hasItem(items, Items.PORKCHOP) && soulAspects(items) == 0,
+                "a kill by magic of the wielder is not a blow: the loot stays: " + items);
+        items.forEach(ItemEntity::discard);
+
+        // 4. nobody killed it
+        pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+        pig.hurt(level.damageSources().generic(), 100F);
+        items = itemsInTheArea(test);
+        test.assertTrue(pig.isDeadOrDying() && hasItem(items, Items.PORKCHOP) && soulAspects(items) == 0, "no killer: the loot stays: " + items);
+        items.forEach(ItemEntity::discard);
+
+        // 5. a mob without a row in the table keeps everything it drops (a rabbit that carries a sword it always drops)
+        Rabbit rabbit = test.spawnWithNoFreeWill(EntityType.RABBIT, new BlockPos(3, 1, 3));
+        test.assertTrue(EnumMobAspect.getAspectsForEntity(rabbit) == null, "the rabbit has no row");
+        rabbit.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+        rabbit.setDropChance(EquipmentSlot.MAINHAND, 2.0F);
+        rabbit.hurt(level.damageSources().playerAttack(armed), 100F);
+        items = itemsInTheArea(test);
+        test.assertTrue(rabbit.isDeadOrDying() && hasItem(items, Items.IRON_SWORD) && soulAspects(items) == 0,
+                "a mob outside the table: its drops stay: " + items);
+        items.forEach(ItemEntity::discard);
+
+        // 6. control: the same pig, killed by the player with the activated blade in the main hand, gives the souls
+        pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+        pig.hurt(level.damageSources().playerAttack(armed), 100F);
+        items = itemsInTheArea(test);
+        test.assertTrue(soulAspects(items) == 3 && !hasItem(items, Items.PORKCHOP), "control: the souls come for the wielder: " + items);
+        items.forEach(ItemEntity::discard);
+        armed.discard();
+        plain.discard();
+        finish(test, offHand);
+    }
+
+    /** {@code event.drops.clear()}: the equipment a mob drops goes with the loot table when the blade reaps it. */
+    public static void anActivatedBladeClearsTheEquipmentToo(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        ServerPlayer player = reaper(test);
+
+        // control: killed without the blade, the zombie drops the helmet it wears (a drop chance above 1 always drops)
+        Zombie control = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+        control.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+        control.setDropChance(EquipmentSlot.HEAD, 2.0F);
+        control.hurt(level.damageSources().generic(), 100F);
+        List<ItemEntity> items = itemsInTheArea(test);
+        test.assertTrue(control.isDeadOrDying() && hasItem(items, Items.GOLDEN_HELMET) && soulAspects(items) == 0,
+                "control: the helmet is dropped: " + items);
+        items.forEach(ItemEntity::discard);
+
+        Zombie zombie = test.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+        zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+        zombie.setDropChance(EquipmentSlot.HEAD, 2.0F);
+        zombie.hurt(level.damageSources().playerAttack(player), 100F);
+        items = itemsInTheArea(test);
+        // the zombie is flesh, flesh, undead
+        test.assertTrue(zombie.isDeadOrDying() && items.size() == 3 && soulAspects(items) == 3 && !hasItem(items, Items.GOLDEN_HELMET)
+                && !hasItem(items, Items.ROTTEN_FLESH), "the helmet and the flesh are gone, three soul aspects: " + items);
+        items.forEach(ItemEntity::discard);
+        finish(test, player);
+    }
+
+    /**
+     * The production path of the kill: a real {@code ServerPlayer.attack(target)} of a Survival player, not a damage source made
+     * by hand. {@code Player.attack} builds the {@code player_attack} source itself and calls {@code hurt}, which posts the blade's
+     * own {@code LIVING_HURT} handler (the 2 points of magic damage to the wielder) in the middle of the blow; the kill's drops
+     * must come out as in the hand-made cases and the nested damage must not disturb them. The target has a hundredth of a
+     * heart, because the mock player is not ticked (its attack strength and attribute modifiers are those of a fresh player).
+     */
+    public static void aRealSwingOfTheActivatedBladeReapsAndHurtsItsWielder(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = reaper(test);
+        // the test world is creative, and a new player is untouchable for 60 ticks
+        player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        test.runAfterDelay(70, () -> {
+            try {
+                test.assertTrue(ItemBloodSword.isActivated(player.getMainHandItem()), "the blade is still activated in the main hand");
+                Pig pig = test.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+                pig.setHealth(0.01F);
+                float before = player.getHealth();
+
+                player.attack(pig);
+
+                test.assertTrue(pig.isDeadOrDying(), "the swing killed the pig");
+                List<ItemEntity> items = itemsInTheArea(test);
+                test.assertTrue(soulAspects(items) == 3 && items.size() == 3, "three soul aspects and nothing else, found " + items);
+                test.assertTrue(!hasItem(items, Items.PORKCHOP), "no pork: the vanilla drops are replaced");
+                for (Aspect aspect : List.of(Aspect.BEAST, Aspect.EARTH, Aspect.TRAVEL)) {
+                    Item soul = TTRegistry.item(ItemMobAspect.path(aspect, ItemMobAspect.Form.BASIC));
+                    test.assertTrue(items.stream().anyMatch(e -> e.getItem().is(soul)), "one " + aspect.getTag() + " soul aspect");
+                }
+                for (ItemEntity soul : items) {
+                    test.assertTrue(soul.position().distanceTo(pig.position()) < 1.0E-6, "dropped where the pig died: " + soul.position());
+                    test.assertTrue(soul.saveWithoutId(new CompoundTag()).getShort("PickupDelay") == 10, "pick-up delay of ten ticks");
+                }
+                test.assertTrue(player.getHealth() == before - 2F,
+                        "and the nested LIVING_HURT handler hurt the wielder by 2: " + before + " -> " + player.getHealth());
+                items.forEach(ItemEntity::discard);
+            } finally {
+                player.discard();
+            }
+            test.succeed();
+        });
+    }
+
+    /** The drops of a death as the listeners left them; the check's own listener, the last one, cancels them, so nothing reaches the level. */
+    private static List<ItemEntity> theDropsOfTheDeath(net.minecraft.world.entity.Mob mob, net.minecraft.world.damagesource.DamageSource source) {
+        List<ItemEntity> seen = new java.util.ArrayList<>();
+        TinkererEvents.LivingDrops probe = (who, by, drops, looting, recentlyHit) -> {
+            if (who != mob) return EventResult.pass();
+            seen.addAll(drops);
+            return EventResult.interruptFalse();
+        };
+        TinkererEvents.LIVING_DROPS.register(probe);
+        try {
+            mob.die(source);
+        } finally {
+            TinkererEvents.LIVING_DROPS.unregister(probe);
+        }
+        return seen;
+    }
+
+    /**
+     * The order of two groups' listeners: {@code Machines} registers the blade's before {@code KamiWorld} registers the
+     * dimensional shard's ({@code ContentGroups.ALL}, both in {@code register()}), so a reaped Enderman in the End or Zombified
+     * Piglin in the Nether still rolls its shard, which lands in the list after the soul aspects. Were the order the other way
+     * round, the blade's {@code drops.clear()} would delete the shard and nothing else would notice. The deaths are real
+     * ({@code Mob.die}), the dice are made certain, and the drops are read after both listeners from a listener of the check that
+     * cancels them, so the End and the Nether stay empty.
+     */
+    public static void aReapedEndermanAndZombifiedPiglinStillRollTheirDimensionalShard(GameTestHelper test) {
+        net.minecraft.server.MinecraftServer server = test.getLevel().getServer();
+        ServerLevel end = server.getLevel(net.minecraft.world.level.Level.END);
+        ServerLevel nether = server.getLevel(net.minecraft.world.level.Level.NETHER);
+        test.assertTrue(end != null && nether != null, "the End and the Nether exist");
+        test.assertTrue(TinkererEvents.hasLivingDropsListeners(), "the listeners of LIVING_DROPS are registered at start-up");
+        ServerPlayer armed = reaper(test);
+        ServerPlayer plain = mockPlayer(test);
+        plain.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
+        Item enderShard = TTRegistry.item(LibItemNames.KAMI_RESOURCE_NAMES[7]);
+        Item netherShard = TTRegistry.item(LibItemNames.KAMI_RESOURCE_NAMES[6]);
+        java.util.function.DoubleSupplier realDice = thaumic.tinkerer.common.core.handler.kami.DimensionalShardDropHandler.dice;
+        try {
+            thaumic.tinkerer.common.core.handler.kami.DimensionalShardDropHandler.dice = () -> 0D; // every roll succeeds
+
+            // an Enderman in the End: eldritch, eldritch, man; a golden helmet it always drops stands for the loot
+            net.minecraft.world.entity.monster.EnderMan control = EntityType.ENDERMAN.create(end);
+            control.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+            control.setDropChance(EquipmentSlot.HEAD, 2.0F);
+            List<ItemEntity> without = theDropsOfTheDeath(control, end.damageSources().playerAttack(plain));
+            test.assertTrue(hasItem(without, Items.GOLDEN_HELMET) && hasItem(without, enderShard),
+                    "control, a player without the blade: the helmet and the Ender Shard: " + without);
+
+            net.minecraft.world.entity.monster.EnderMan enderman = EntityType.ENDERMAN.create(end);
+            enderman.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+            enderman.setDropChance(EquipmentSlot.HEAD, 2.0F);
+            List<ItemEntity> reaped = theDropsOfTheDeath(enderman, end.damageSources().playerAttack(armed));
+            assertSoulsThenShard(test, reaped, List.of(Aspect.ELDRITCH, Aspect.ELDRITCH, Aspect.MAN), enderShard, "an Enderman in the End");
+
+            // a Zombified Piglin in the Nether: undead, flesh, fire; a golden sword it always drops
+            net.minecraft.world.entity.monster.ZombifiedPiglin piglinControl = EntityType.ZOMBIFIED_PIGLIN.create(nether);
+            piglinControl.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
+            piglinControl.setDropChance(EquipmentSlot.MAINHAND, 2.0F);
+            List<ItemEntity> piglinWithout = theDropsOfTheDeath(piglinControl, nether.damageSources().playerAttack(plain));
+            test.assertTrue(hasItem(piglinWithout, Items.GOLDEN_SWORD) && hasItem(piglinWithout, netherShard),
+                    "control, a player without the blade: the sword and the Nether Shard: " + piglinWithout);
+
+            net.minecraft.world.entity.monster.ZombifiedPiglin piglin = EntityType.ZOMBIFIED_PIGLIN.create(nether);
+            piglin.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
+            piglin.setDropChance(EquipmentSlot.MAINHAND, 2.0F);
+            List<ItemEntity> piglinReaped = theDropsOfTheDeath(piglin, nether.damageSources().playerAttack(armed));
+            assertSoulsThenShard(test, piglinReaped, List.of(Aspect.UNDEAD, Aspect.FLESH, Aspect.FIRE), netherShard, "a Zombified Piglin in the Nether");
+        } finally {
+            thaumic.tinkerer.common.core.handler.kami.DimensionalShardDropHandler.dice = realDice;
+            armed.discard();
+            plain.discard();
+        }
+        test.succeed();
+    }
+
+    /** Exactly the three soul aspects of the row, in the order of the row, then the one shard, and nothing else. */
+    private static void assertSoulsThenShard(GameTestHelper test, List<ItemEntity> drops, List<Aspect> row, Item shard, String what) {
+        test.assertTrue(drops.size() == 4, what + ": three soul aspects and one shard, nothing of the loot table or the equipment: " + drops);
+        for (int i = 0; i < 3; i++) {
+            Item soul = TTRegistry.item(ItemMobAspect.path(row.get(i), ItemMobAspect.Form.BASIC));
+            test.assertTrue(drops.get(i).getItem().is(soul), what + ": soul aspect " + i + " is " + row.get(i).getTag() + ": " + drops);
+        }
+        test.assertTrue(drops.get(3).getItem().is(shard) && drops.get(3).getItem().getCount() == 1,
+                what + ": the shard comes after the soul aspects, as the second listener adds it: " + drops);
     }
 
     /**

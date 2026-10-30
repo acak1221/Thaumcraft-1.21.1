@@ -1,125 +1,123 @@
 # Enchantments: requests to the Thaumcraft API and to the loader modules
 
 Group Enchantments: the fourteen enchantments, their event handler, the Enchanter's table of costs and rules and the Osmotic
-Enchanter. Nothing below was done by reaching into
-`thaumcraft.common.*`: every item is either a workaround with the loss written down (the behaviour of the group today is in
-`docs/deviations/Enchantments.md`) or a request to the lead. Priorities are the group's own opinion (P1 changes what the
-player gets, P3 only hardens something that works today).
+Enchanter. Nothing below was done by reaching into `thaumcraft.common.*`.
 
 The Thaumcraft API itself was enough for this group: `WandHelper` (`isWand`, `isStaff`, `getCap`, `getAllVis`,
 `consumeAllVisCrafting`), `ThaumcraftApiHelper.isResearchComplete(Player, key)`, `ThaumcraftApi.ENCHANTMENT_HASTE` and
 `ENCHANTMENT_REPAIR`, `BlocksTC.state(field, meta)`, `ItemApi`, `ThaumcraftFX.essentiaTrail` and `ThaumcraftFX.blockRunes` (the
-rune effect of the Enchanter) and `ThaumcraftSoundIds` are used as they are. The requests are for the loaders: the group needs
-five hooks that Architectury does not offer (sections 1 to 4 and 6) and works around each of them, and two changes in other
-groups' files (section 5).
+rune effect of the Enchanter) and `ThaumcraftSoundIds` are used as they are.
 
-## 1. A damage event whose amount can be changed (loader event, P1)
+The group needed five hooks that Architectury does not offer (sections 1 to 4 and 6) and two changes in other groups' files
+(section 5). **The lead has written the loader layer** (`thaumic.tinkerer.common.hooks.TinkererEvents`, `docs/HOOKS.md`) and the
+group is wired to it: every request below is **answered**, with what the event gives and what it does not. The workarounds that
+the requests described are deleted (`AttackBoost`, `BreakSpeedControl`, `EnchantmentClientHandler`, the airborne tracking, the arrow
+speed through `EntityEvent.ADD`); the behaviour of the group is in `docs/deviations/Enchantments.md`.
+
+**What the NeoForge module has to post** (not written yet; `docs/HOOKS.md` sections 3 to 7 give the NeoForge counterpart of each):
+`LIVING_DAMAGE`, `BREAK_SPEED`, `LIVING_JUMP`, `LIVING_FALL` and `USE_ITEM_TICK`. Without the poster of an event on NeoForge the
+enchantments that listen to it do nothing there: no damage factors and Vampirism (`LIVING_DAMAGE`), no Shatter, Tunnel, Disintegrate
+and Flaming Touch speed (`BREAK_SPEED`), no Ascent Boost, no Slow Fall landing nor Shockwave, no Quick Draw. The group needs nothing
+else from the loaders.
+
+## 1. A damage event whose amount can be changed (loader event) - ANSWERED: `LIVING_DAMAGE`
 
 **Need.** Pounce, Final Strike, Valiance, Focused Strikes and Dispersed Strikes change `LivingHurtEvent.ammount` of 1.7.10,
-for any living attacker and any damage that carries an attacker (melee, arrows, thorns).
+for any living attacker and any damage that carries an attacker (melee, arrows, thorns); Vampirism is in the same handler.
 
-**Workaround.** `EntityEvent.LIVING_HURT` can only veto, so `AttackBoost` solves the attack formula of `Player.attack` and puts
-a transient modifier on `ATTACK_DAMAGE` just before the attack (from `PlayerEvent.ATTACK_ENTITY`). It works for the blows of
-players that go through the network event and for the code that calls `AttackBoost.beforeAttack` itself; it does not work for
-mobs, arrows or thorns, and it depends on the shape of the 1.21.1 attack formula.
+**What `LIVING_DAMAGE` gives.** `float onLivingDamage(victim, source, amount)` on the server, for every living entity and whatever dealt
+the damage, with the new amount as the result. The group's listener (`ModEnchantmentHandler.onEntityDamaged`) is the sixteen lines
+of the original: it works for the blows of players, of the Animation Tablet's fake player, of mobs, for arrows and thorns, which
+the workaround (`AttackBoost`, an attribute modifier armed from `PlayerEvent.ATTACK_ENTITY`) could not do, and it does not depend on the
+shape of the attack formula.
 
-**Proposed.** A common event `LivingDamage { float onDamage(LivingEntity victim, DamageSource source, float amount) }` returning
-the new amount (a cancel is an amount of zero), posted after the invulnerability test and before armor, with the backends
-`LivingDamageEvent.Pre` (NeoForge, `setNewDamage`) and a `@ModifyVariable` on the amount of `LivingEntity.actuallyHurt`
-(Fabric; Fabric API's `ServerLivingEntityEvents.ALLOW_DAMAGE` can only veto). With it `AttackBoost` is replaced by the
-sixteen lines of the original.
+**What it does not give (written down in `deviations/Enchantments.md` section 2).** The amount is the one *before* the shield,
+the helmet, the invulnerability frames and the armour; 1.7.10's event came after the frames had subtracted the last hit, so the
+factors multiply the whole amount of a stronger hit that arrives inside the frames and vanilla subtracts afterwards (the same
+damage for a constant factor, a different one with Final Strike's dice). A hit that a shield blocks or a helmet reduces is posted
+with its full amount. A hit that the frames refuse by its raw amount is not posted (as in 1.7.10 it did not reach the event). But the
+frames compare the *listener's result* with the next hit, where 1.7.10 compared the raw amounts, so a second blow inside the frames has a
+**band** in which the two differ: with a factor above one, a blow above the first raw blow but not above its boosted amount is refused
+here and was dealt there; with a factor below one, a blow that 1.7.10 refused before its event is posted here (the counter moves,
+Vampirism heals) and then refused by vanilla, so it deals nothing (`deviations/Enchantments.md` section 2, pinned by a GameTest).
+**A sweep of a sword** (no 1.7.10 counterpart) hurts every swept entity with the same damage source as the blow, so the event is posted
+once for each of them, and the listener, which cannot tell a swept entity from the target (the event carries nothing for that), heals
+Vampirism, rolls Final Strike and steps the strike counter for each (`deviations/Enchantments.md` section 2, pinned by a GameTest).
+Armour stands are not covered (their `hurt` does not reach `LivingEntity.hurt`); nothing of the group depends on that.
 
-## 2. A break-speed event (loader event, P1)
+## 2. A break-speed event (loader event) - ANSWERED: `BREAK_SPEED`
 
 **Need.** Shatter, Tunnel, Disintegrate and Flaming Touch change `PlayerEvent.BreakSpeed.newSpeed` and cancel it (1.7.10).
 
-**Workaround.** `BreakSpeedControl` keeps a transient modifier on the `BLOCK_BREAK_SPEED` attribute of the player that fits
-the block under the crosshair, updated once per tick, and vetoes the break in `BlockEvent.BREAK`. The costs: one tick of lag
-when the crosshair changes the kind of block, a fixed factor of 1024 for "at once", and the speed of every other mod's
-modifier multiplies with ours.
+**What `BREAK_SPEED` gives.** `float onBreakSpeed(player, state, pos, speed)` on both sides, inside `BlockState.getDestroyProgress`, a result of
+zero or less being "cannot dig". Right place, right moment: no crosshair, no tick of the player, no lag. The workaround
+(`BreakSpeedControl`, a transient modifier on `BLOCK_BREAK_SPEED`, one tick behind, a fixed 1024 for "at once", multiplying with every
+other mod's modifiers) is deleted; "at once" is `Float.MAX_VALUE` as in the original.
 
-**Proposed.** `PlayerEvent.BREAK_SPEED { EventResult onBreakSpeed(Player player, BlockState state, @Nullable BlockPos pos,
-FloatRef speed) }` (cancel = the block cannot be dug); NeoForge `PlayerEvent.BreakSpeed`, Fabric a mixin at the end of
-`Player.getDestroySpeed(BlockState)` (no position there; `Player.getDestroySpeed` is called from `BlockState.getDestroyProgress`,
-which has it, so the mixin belongs one level up if the position is wanted).
+**What it does not give.** The cancel is a progress of exactly zero, not 1.7.10's negative one (no difference to the player). Not posted
+for creative mode's instant break (the original did not ask either), for unbreakable blocks, and for the bamboo cut by a sword
+(`HOOKS.md` section 13, not a tool of the group). The wear of the tool (`damageItem(1)` on every event in 1.7.10) is the group's own
+rule, once per block at `BlockEvent.BREAK` (`deviations/Enchantments.md` section 9): the event is also asked by the client and by
+everything that wants a dig time.
 
-## 3. Jump event (loader event, P2)
+## 3. Jump event (loader event) - ANSWERED: `LIVING_JUMP`
 
 **Need.** Ascent Boost multiplies the vertical motion of a jump (`LivingJumpEvent`, on both sides).
 
-**Workaround.** `EnchantmentClientHandler` detects a jump on the client (a tick that starts on the ground with the jump key
-held and ends in the air moving up) and adds the rest of the multiplied jump afterwards. It sees only the key jumps of the local
-player; a jump made some other way (from a mount, by a command) is not boosted, and nothing happens for other players' clients.
+**What `LIVING_JUMP` gives.** `void onLivingJump(entity)` on both sides at the end of `jumpFromGround`, with the motion of the jump
+already applied. The group's listener multiplies it (players only, the highest level on the armor, not while sneaking). The
+client handler that detected the jump from the tick of the local player (`EnchantmentClientHandler`) is deleted; other players'
+jumps and the jumps from a mount or a command are no longer missed.
 
-**Proposed.** `EntityEvent.LIVING_JUMP { void onJump(LivingEntity entity) }`, NeoForge `LivingEvent.LivingJumpEvent`, Fabric a
-mixin at the end of `LivingEntity.jumpFromGround`.
+**What it does not give.** It is the server's jump too, which a real server player makes from the movement packet, so the event also
+fires for other upward take-offs that the client reports (`HOOKS.md` section 5); the rule is the same on both sides, so the server's
+expected motion agrees with the client's.
 
-## 4. Fall event (loader event, P2)
+## 4. Fall event (loader event) - ANSWERED: `LIVING_FALL`
 
-**Need.** Shockwave reacts to `LivingFallEvent` (distance greater than 3 blocks); Slow Fall could also use it to reduce the
-distance.
+**Need.** Shockwave reacts to `LivingFallEvent` (distance greater than 3 blocks); Slow Fall could also use it to reduce the distance.
 
-**Workaround.** `ModEnchantmentHandler.onPlayerPost` remembers the fall distance of the last tick in the air of every server
-player and treats the first tick on the ground as the landing. It is exact for walking and jumping falls, and it does not
-react to a fall that another mod handles by setting the distance to zero in the same tick.
+**What `LIVING_FALL` gives.** `onLivingFall(entity, FallData)` on both sides at the head of `causeFallDamage`, with the distance and the
+damage multiplier changeable and a cancel. Shockwave uses the distance (server only; it tests `isClientSide` itself), Slow Fall changes
+it (both sides, the same rule). The tick-by-tick tracking of airborne players (`ModEnchantmentHandler.onPlayerPost`) is deleted.
 
-**Proposed.** `EntityEvent.LIVING_FALL { EventResult onFall(LivingEntity entity, float distance, float damageMultiplier) }`,
-NeoForge `LivingFallEvent`, Fabric a mixin at the head of `LivingEntity.causeFallDamage`.
+**What it does not give.** Not posted for horses, donkeys, mules, skeleton and zombie horses and llamas, nor for their riders
+(`HOOKS.md` section 6, 13): no Shockwave and no Slow Fall for a rider. It comes **once, at the landing**, while Slow Fall's original
+acted every tick of the fall (and divided the motion): the motion and the cloud stay a per-tick client listener, and the distance is
+the end result of the ticks, 2.9 (`deviations/Enchantments.md` section 4). Listeners of one event run in the order of registration and
+the event has no priority, so Shockwave's `LOW` priority of 1.7.10 (after every other handler) is not reproduced against other groups:
+this group registers Slow Fall, then Shockwave, and KamiGear registers the Gem Boots' listener (distance 0) after both
+(`ContentGroups.ALL`; `deviations/KamiGear.md` says the same). No live effect, since Shockwave cannot be put on the Gem Boots; an ordered
+registration (a priority argument, or the order of the groups) would close it.
 
-## 5. The Animation Tablet's fake player: attack and dig (shared files, to the lead, P1)
+## 5. The Animation Tablet's fake player: attack and dig - NOT NEEDED any more (the events are posted for it)
 
 **Need.** The Animation Tablet attacks and digs with a fake player that is never ticked. In 1.7.10 both went through events the
-enchantments hook: `attackTargetEntityWithCurrentItem` posted `LivingHurtEvent` (Valiance, Final Strike, Focused and Dispersed
-Strikes) and `ItemInWorldManager`'s dig progress posted `PlayerEvent.BreakSpeed` (Shatter, Tunnel, Disintegrate, Flaming Touch).
-In the port neither is posted for the fake player: `PlayerEvent.ATTACK_ENTITY` is a network event and the per-tick
-`BreakSpeedControl.update` is a player tick, so a tablet with such a weapon hits at the base damage and a tablet with such a tool
-digs at the plain speed of the tool (the veto of `BlockEvent.BREAK` already applies to it). Nothing outside the enchantment
-package calls `AttackBoost` or `BreakSpeedControl` today.
+enchantments hook: `attackTargetEntityWithCurrentItem` posted `LivingHurtEvent` and `ItemInWorldManager`'s dig progress posted
+`PlayerEvent.BreakSpeed`. The group asked for two patches in other groups' files: patch 1 in
+`TinkererFakePlayer.attackEntity` (bracket the attack with `AttackBoost.beforeAttack/afterAttack`) and patch 2 in
+`TileAnimationTablet` (call `BreakSpeedControl.updateFor(player, pos)` before each `getDestroyProgress`).
 
-**What exists.** `AttackBoost.beforeAttack(Player, Entity)` / `afterAttack(Player)` (safe for a player without enchantments)
-and `BreakSpeedControl.updateFor(ServerPlayer, BlockPos target)` (fits the dig speed to the block at the position, with no
-crosshair and no lag; safe without enchantments).
+**Answer.** Both patches are **moot**: `LIVING_DAMAGE` is posted from `LivingEntity.hurt`, which the fake player's `Player.attack` reaches, and
+`BREAK_SPEED` is posted from `BlockState.getDestroyProgress`, which the Tablet already calls for its fake player (never ticked, never in the
+level; the event is posted with the real position, `HOOKS.md` section 4). `AttackBoost` and `BreakSpeedControl` do not exist any more, so
+neither patch could be applied; no file of another group was touched. The checks are now real and required:
+`aFakePlayerAttackGetsTheEnchantmentsOfItsSword` (was `required = false`), `aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantments` (was
+"after `updateFor`") and the cross-check `theTabletsFakePlayerDigsAndHitsWithTheEnchantments`, which lets a `TinkererFakePlayer` dig with Shatter
+and Tunnel and hit with Pounce. The fake player's health is fixed, so Valiance cannot be tried with it; the tests use Focused Strikes and Pounce.
 
-**Patch 1: `common/core/fakeplayer/TinkererFakePlayer.java`, `attackEntity`** (after the attack strength is set, so the factor is
-worked out for a charged swing):
-
-```java
-public void attackEntity(Entity target) {
-    refreshHeldItemModifiers();
-    this.attackStrengthTicker = CHARGED;
-    AttackBoost.beforeAttack(this, target);
-    try {
-        this.attack(target);
-    } finally {
-        AttackBoost.afterAttack(this);
-    }
-}
-```
-(import `thaumic.tinkerer.common.enchantment.AttackBoost`).
-
-**Patch 2: `common/block/tile/tablet/TileAnimationTablet.java`**, the line `BreakSpeedControl.updateFor(player, pos);` right before each
-`state.getDestroyProgress(player, level, pos)`: in `startBreaking` (before the `if`) and in `updateBlockRemoving` (before
-`float progress = ...`); import `thaumic.tinkerer.common.enchantment.BreakSpeedControl`. (The Remote Placer does not dig or
-attack, so `TileRPlacer` needs nothing.)
-
-**Checks.** `EnchantmentsRuntimeChecks.aFakePlayerAttackGetsTheEnchantmentsOfItsSword` fails until patch 1 is in (its Fabric
-wrapper is `required = false`; make it required afterwards). `aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor`
-covers `updateFor` itself and passes without the patches; a test that lets a real tablet dig with a Disintegrate shovel (the
-dirt in front gone within a few ticks of the first hit) belongs to the group that owns the tablet once patch 2 is in. Neither
-patch was applied or run by this group: they touch another group's files.
-
-## 6. A bow draw clock (loader event, P3)
+## 6. A bow draw clock (loader event) - ANSWERED: `USE_ITEM_TICK`
 
 **Need.** Quick Draw takes extra ticks off `itemInUseCount` while a bow is drawn, so the draw is faster and the bow looks drawn
 sooner.
 
-**Workaround.** The arrow gets the speed of the longer draw when it is created (`EntityEvent.ADD`), computed with the original
-per-tick simulation. The bow does not look drawn any faster, and a draw shorter than the game's minimum power (0.1) releases no
-arrow, because the game decides that before the arrow exists.
+**What `USE_ITEM_TICK` gives.** `int onUseItemTick(entity, stack, remaining)` on both sides at the start of every tick of the use, the result being the
+entity's own count, which the bow's pose, the HUD and the arrow's power (`releaseUsing`) read. The arrow-speed workaround through `EntityEvent.ADD` and
+its two limits (the bow did not look drawn faster; a draw under the game's minimum power released no arrow) are deleted.
 
-**Proposed.** `LivingEntityEvents.USE_ITEM_TICK { int onTick(LivingEntity entity, ItemStack stack, int remainingTicks) }` returning
-the new count (NeoForge `LivingEntityUseItemEvent.Tick#setDuration`, Fabric a mixin at the end of
-`LivingEntity.updateUsingItem`). Only `getTicksUsingItem` reads it back, so the bow pose follows.
+**What it does not give.** The event comes before the decrement of the tick, 1.7.10's handler ran after it: the listener applies the rule to
+`remaining - 1` and adds the one back, so the clock goes through the original's values (`deviations/Enchantments.md` section 4). The
+`Math.max(2, ...)` floor is the listener's.
 
 ## 7. Typed access to the Enchanter's pillar blocks (P3)
 

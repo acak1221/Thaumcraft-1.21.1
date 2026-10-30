@@ -13,14 +13,9 @@ package thaumic.tinkerer.common.item;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.EntityEvent;
-import dev.architectury.event.events.common.TickEvent;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
@@ -54,6 +49,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.core.helper.EnumMobAspect;
+import thaumic.tinkerer.common.hooks.TinkererEvents;
 import thaumic.tinkerer.common.lib.LibMisc;
 import thaumic.tinkerer.common.lib.LibResearch;
 import thaumic.tinkerer.common.registry.ITTinkererRegisterable;
@@ -69,9 +65,9 @@ import thaumic.tinkerer.common.research.TTResearchItem;
  * activated with a shift-right click, makes the mobs it kills drop soul aspects instead of their loot.
  *
  * <p>1.7.10 listened to the Forge events {@code LivingAttackEvent} and {@code LivingDropsEvent}. Here the first is the
- * Architectury event {@code EntityEvent.LIVING_HURT}; there is no common event for the second, so the drops of a
- * reaped mob are replaced with the events {@code LIVING_DEATH}, {@code ADD} and the end of the level tick (see
- * {@link Harvest}).</p>
+ * Architectury event {@code EntityEvent.LIVING_HURT}, the second the loader hook {@link TinkererEvents#LIVING_DROPS}
+ * (see {@code docs/HOOKS.md} section 8): the handler edits the list of drops before they enter the world, as the
+ * original edited {@code event.drops}.</p>
  */
 public class ItemBloodSword extends SwordItem implements IRepairable, ITTinkererRegisterable {
 
@@ -195,7 +191,7 @@ public class ItemBloodSword extends SwordItem implements IRepairable, ITTinkerer
     /** Registers the events of the blade (once, from the registrar of the group). */
     public static void registerEvents() {
         EntityEvent.LIVING_HURT.register(ItemBloodSword::onDamageTaken);
-        Harvest.register();
+        TinkererEvents.LIVING_DROPS.register(ItemBloodSword::onLivingDrops);
     }
 
     /**
@@ -231,78 +227,34 @@ public class ItemBloodSword extends SwordItem implements IRepairable, ITTinkerer
     }
 
     /**
-     * {@code LivingDropsEvent}: a mob killed in melee by a player whose cursed blade is activated drops the soul
-     * aspects of the mob (one item per aspect of its row in {@link EnumMobAspect}, picked up after half a second) and
-     * nothing else. The death event only notes the victim; the items that the death itself spawns at the victim are
-     * refused when they are added, and the aspects are dropped when the tick of the level ends, if the victim did die.
+     * {@code LivingDropsEvent} of 1.7.10: a mob killed in melee ({@code damageType "player"}, here the damage type
+     * {@code player_attack}) by a player whose cursed blade is in the main hand and activated drops the soul aspects of
+     * the mob (one item per aspect of its row in {@link EnumMobAspect}, picked up after half a second) and nothing else:
+     * the list of drops is cleared, as {@code event.drops.clear()} did, and the soul aspects are added at the victim's
+     * position. A mob without a row in the table keeps its loot. The event is server only and posted once per death, so
+     * the handler needs no side test; it answers only for a mob killed by the blade and leaves every other death alone.
+     * It never cancels: whatever a listener after it sees is the list with the soul aspects.
      */
-    static final class Harvest {
-        /** A victim noted by the death event; only values, no entity or level is kept. */
-        private record Victim(ResourceKey<Level> dimension, UUID id, double x, double y, double z, double height) {}
-
-        private static final List<Victim> PENDING = new ArrayList<>();
-        private static boolean spawningAspects;
-
-        private Harvest() {}
-
-        static void register() {
-            EntityEvent.LIVING_DEATH.register(Harvest::onDeath);
-            EntityEvent.ADD.register(Harvest::onItemAdded);
-            TickEvent.SERVER_LEVEL_POST.register(Harvest::onLevelTickEnd);
-        }
-
-        private static EventResult onDeath(LivingEntity entity, DamageSource source) {
-            if (entity.level().isClientSide || !(entity instanceof Mob mob)) return EventResult.pass();
-            if (!source.is(DamageTypes.PLAYER_ATTACK) || !(source.getEntity() instanceof Player player)) {
-                return EventResult.pass();
-            }
-
-            ItemStack stack = player.getMainHandItem();
-            if (!(stack.getItem() instanceof ItemBloodSword) || !isActivated(stack)) return EventResult.pass();
-
-            if (EnumMobAspect.getAspectsForEntity(mob) != null) {
-                PENDING.add(new Victim(mob.level().dimension(), mob.getUUID(), mob.getX(), mob.getY(), mob.getZ(),
-                        mob.getBbHeight()));
-            }
+    public static EventResult onLivingDrops(LivingEntity victim, DamageSource source, List<ItemEntity> drops, int lootingLevel,
+            boolean recentlyHit) {
+        if (!source.is(DamageTypes.PLAYER_ATTACK) || !(victim instanceof Mob mob)
+                || !(source.getEntity() instanceof Player player)) {
             return EventResult.pass();
         }
 
-        /** Refuses the items that the death of a noted victim spawns at the victim. */
-        private static EventResult onItemAdded(Entity entity, Level level) {
-            if (spawningAspects || PENDING.isEmpty() || !(entity instanceof ItemEntity item)) return EventResult.pass();
-            for (Victim victim : PENDING) {
-                if (victim.dimension().equals(level.dimension()) && Math.abs(item.getX() - victim.x()) < 1.0E-3
-                        && Math.abs(item.getZ() - victim.z()) < 1.0E-3 && item.getY() >= victim.y() - 1.0E-3
-                        && item.getY() <= victim.y() + victim.height() + 1.0) {
-                    return EventResult.interruptFalse();
-                }
-            }
-            return EventResult.pass();
-        }
+        ItemStack stack = player.getMainHandItem();
+        if (!(stack.getItem() instanceof ItemBloodSword) || !isActivated(stack)) return EventResult.pass();
 
-        private static void onLevelTickEnd(ServerLevel level) {
-            if (PENDING.isEmpty()) return;
-            List<Victim> mine = new ArrayList<>();
-            for (Victim victim : PENDING) if (victim.dimension().equals(level.dimension())) mine.add(victim);
-            PENDING.removeAll(mine);
+        Aspect[] aspects = EnumMobAspect.getAspectsForEntity(mob);
+        if (aspects == null) return EventResult.pass();
 
-            for (Victim victim : mine) {
-                Entity entity = level.getEntity(victim.id());
-                if (!(entity instanceof LivingEntity living) || !living.isDeadOrDying()) continue;
-                Aspect[] aspects = EnumMobAspect.getAspectsForEntity(living);
-                if (aspects == null) continue;
-                spawningAspects = true;
-                try {
-                    for (Aspect aspect : aspects) {
-                        ItemEntity drop = new ItemEntity(level, victim.x(), victim.y(), victim.z(),
-                                ItemMobAspect.getStackFromAspect(aspect));
-                        drop.setPickUpDelay(10);
-                        level.addFreshEntity(drop);
-                    }
-                } finally {
-                    spawningAspects = false;
-                }
-            }
+        drops.clear();
+        for (Aspect aspect : aspects) {
+            ItemEntity drop = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(),
+                    ItemMobAspect.getStackFromAspect(aspect));
+            drop.setPickUpDelay(10);
+            drops.add(drop);
         }
+        return EventResult.pass();
     }
 }

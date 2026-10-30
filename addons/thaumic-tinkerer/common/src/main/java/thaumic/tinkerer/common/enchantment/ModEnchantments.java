@@ -57,6 +57,7 @@ public final class ModEnchantments {
             EquipmentSlot.HEAD };
 
     private static boolean handlerRegistered;
+    private static boolean jumpRegistered;
 
     private ModEnchantments() {}
 
@@ -65,6 +66,16 @@ public final class ModEnchantments {
         if (handlerRegistered) return;
         handlerRegistered = true;
         ModEnchantmentHandler.register();
+    }
+
+    /**
+     * Registers Ascent Boost's jump listener (once). Called from the ready phase of the group, after the Gem Boots' listener
+     * of KamiGear: 1.7.10 registered the boots' handler first (see {@link ModEnchantmentHandler#registerJump()}).
+     */
+    public static synchronized void initJump() {
+        if (jumpRegistered) return;
+        jumpRegistered = true;
+        ModEnchantmentHandler.registerJump();
     }
 
     /**

@@ -32,6 +32,16 @@ public final class HooksGameTests implements FabricGameTest {
         HooksRuntimeChecks.livingDamageSeesAnArrow(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void livingArmorAbsorbIsPostedFromTheArmourStepAndReplacesWhatArmourTakesOff(GameTestHelper test) {
+        HooksRuntimeChecks.livingArmorAbsorbIsPostedFromTheArmourStepAndReplacesWhatArmourTakesOff(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void livingArmorAbsorbHandsBackTheGamesOwnFloatAndSurvivesAnInfiniteBlow(GameTestHelper test) {
+        HooksRuntimeChecks.livingArmorAbsorbHandsBackTheGamesOwnFloatAndSurvivesAnInfiniteBlow(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void breakSpeedIsPostedForAServerPlayerAndAFakePlayer(GameTestHelper test) {
         HooksRuntimeChecks.breakSpeedIsPostedForAServerPlayerAndAFakePlayer(test);

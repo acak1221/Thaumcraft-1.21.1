@@ -7,6 +7,7 @@
     "BlockBehaviourBreakSpeedMixin",
     "EntityDropCaptureMixin",
     "FoxDropCaptureMixin",
+    "LivingEntityArmorMixin",
     "LivingEntityDropsMixin",
     "LivingEntityHurtMixin",
     "LivingEntityMotionMixin",

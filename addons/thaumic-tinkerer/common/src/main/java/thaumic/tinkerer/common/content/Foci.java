@@ -14,7 +14,9 @@ package thaumic.tinkerer.common.content;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.world.item.Item;
 import thaumic.tinkerer.client.FociClient;
+import thaumic.tinkerer.common.hooks.FloatingTicks;
 import thaumic.tinkerer.common.item.foci.FociComponents;
+import thaumic.tinkerer.common.item.foci.FociHooks;
 import thaumic.tinkerer.common.item.foci.ItemFocusDeflect;
 import thaumic.tinkerer.common.item.foci.ItemFocusDislocation;
 import thaumic.tinkerer.common.item.foci.ItemFocusEnderChest;
@@ -57,6 +59,10 @@ public final class Foci implements ContentGroup {
             ItemFocusHeal.forget(player.getUUID());
             ItemFocusSmelt.forget(player.getUUID());
         });
+
+        // 1.7.10 ItemFocusFlight: playerNetServerHandler.floatingTickCount = 0 on every cast (the loader layer's accessor
+        // of the connection's flying-kick counter, docs/HOOKS.md section 9).
+        FociHooks.setFloatingTickReset(FloatingTicks.RESET);
     }
 
     @Override

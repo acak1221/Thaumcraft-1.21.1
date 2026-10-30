@@ -16,26 +16,32 @@ sees, P3 only hardens something that works today).
 | A2 `IFocusPouch { getInventory, setInventory }` | `thaumcraft.api.wands.IFocusPouch` (128 cells at most) | `ItemIchorPouch implements IFocusPouch` (117 cells, `ItemContainerContents` component); `SlotNoPouches.isPouch` tests `instanceof IFocusPouch`, so Thaumcraft's own pouch is refused as in 1.7.10 |
 | A5 `isMirrorsAllowed()` | `ThaumcraftApi.isMirrorsAllowed()` | `KamiGear.ready()` queues the research of the Focus of Celestial Recall only while it is on (1.7.10 `getResearchItem` returned null otherwise) |
 | A6 `isWoodLog` / `breakFurthestBlock` | `ThaumcraftApiHelper.isWoodLog(Level, BlockPos)`, `breakFurthestBlock(Level, BlockPos, Block, Player)` | `ToolHandler.fellTree`, the tree mode of the Awakened Ichorium Axe, is the 1.7.10 loop over these two |
+| K1 armour absorption (`ISpecialArmor`) | not the API: the add-on's loader event `TinkererEvents.LIVING_ARMOR_ABSORB` (section 1) | `IchorAbsorption`, registered by `KamiArmorHandler.register()` |
 
 Consequences of the API's own rules, kept as they are: `isWoodLog` is false for the plain oak log (the original's rule, so tree
 mode does not fell oak trees), `breakFurthestBlock` wears no tool and asks neither protection nor loader break events (see
 `docs/deviations/KamiGear.md` section 5).
 
-## 1. Armour absorption (K1, new, P3)
+## 1. Armour absorption (K1, answered by a loader event of the add-on)
 
 **Need.** 1.7.10 `ItemIchorclothArmor implements ISpecialArmor`: every piece absorbs `0.0425 x armour points` of every blow
 (ratio 0, maximum absorption unlimited), the four pieces 85% together, and `damageArmor` is a no-op (the pieces never wear).
 
-**What the add-on does today.** The armour materials give 3/8/6/3 armour points and a toughness of 5 per piece (20 for the
-set, the largest value the attribute takes); the pieces have no durability. That is strong, but the 1.21.1 formula cannot reach
-85% flat: against a blow of 10 the set absorbs about 74%, against a blow of 40 about 57%.
+**Answer.** Not an API interface of Thaumcraft but a loader event of the add-on, `TinkererEvents.LIVING_ARMOR_ABSORB`
+(`thaumic.tinkerer.common.hooks`), posted from `LivingEntity.getDamageAfterArmorAbsorb` (Fabric: `LivingEntityArmorMixin`). The first proposal
+of this request (an `IArmorAbsorption` interface that the mod would apply in one place) is therefore **not needed**; the Thaumcraft mod itself was not touched.
+The full description of the event is in `docs/deviations/KamiGear.md` section 13 (text for `docs/HOOKS.md`).
 
-**Proposed.** `thaumcraft.api.armor.ISpecialArmor`-like interface, for example
-`interface IArmorAbsorption { double getAbsorptionRatio(LivingEntity wearer, ItemStack armor, EquipmentSlot slot, DamageSource source, float amount); }`,
-applied by the mod in one place before the vanilla armour formula (a hook on `LivingEntity.getDamageAfterArmorAbsorb`), with
-the original rule that damage which ignores armour (`DamageTypeTags.BYPASSES_ARMOR`) is not reduced. Architectury has no
-event that changes a damage amount (`EntityEvent.LIVING_HURT` can only cancel), so this cannot be done from the add-on in
-common code.
+*What the event gives*: the listener is called for every armour step of every living entity (a source of the tag `bypasses_armor` excepted), with the damage
+that comes to the step and the amount vanilla's formula takes off, and **replaces that amount** (held between 0 and the blow). That is the power of
+`ArmorProperties.ApplyArmor` for a priority-0 piece: `IchorAbsorption` returns `damage x (0.0425 x points of the worn pieces)` plus the formula's share of the
+armour that is not Ichorcloth, so the full set takes 85% flat and a mixed set keeps the other armour's worth. Wear costs nothing because the pieces have no durability.
+The armour points of the materials (3/8/6/3, the original's `getArmorDisplay`) stay as the display of the HUD and the tooltip and do not stack with it; the stand-in toughness is removed.
+
+*What the event does not give*: it is not `ISpecialArmor`. There is no per-piece `getProperties`/`damageArmor` call, no priority levels of its own (the one Thaumcraft pass of
+priority 1, the wards, runs before the event by the order of the two mixins), no `AbsorbMax`, and no hook on the wear of other armour. The mixed-set share is the 1.21.1 formula's, not
+the original's 4% a point. A hit that bypasses armour is not posted (the original's `getProperties` had no such look; whether Forge applied it to those hits could not be checked).
+On NeoForge the equivalent is `LivingIncomingDamageEvent#addReductionModifier(Reduction.ARMOR, ...)`; the poster is still to be written (`docs/deviations/KamiGear.md` section 13).
 
 ## 2. Stable keys for Thaumcraft's sounds (K2 = A7, P3)
 
@@ -94,6 +100,18 @@ KamiGear does not reference the KamiWorld classes; it reaches them like this (al
 
 ## 6. Requests to the lead and to other groups (shared files; nothing here was edited by the KamiGear group)
 
+- **`LIVING_JUMP` order: Gem Boots run after Ascent Boost (the reverse of 1.7.10).** Both listeners register in the `register()` phase and `ContentGroups.ALL`
+  has Enchantments before KamiGear, so a Gem Boots wearer with Ascent Boost leggings jumps `0.42 x factor + 0.3` (0.93 for Ascent Boost I, 1.35 for III) where 1.7.10
+  gave `(0.42 + 0.3) x factor` (1.08, 1.80): the boots' handler was registered in `preInit`, `ModEnchantmentHandler` in `init`, both at normal priority.
+  The cheapest fix matches the original's phases: `Enchantments.register()` calls `ModEnchantments.initEnchantments()` (it only registers the event handler)
+  from `Enchantments.ready()` instead. Alternatives: KamiGear before Enchantments in `ContentGroups.ALL`, or a priority on the `TinkererEvents` listeners. The GameTest
+  `KamiGearRuntimeChecks.gemBootsAndAscentBoostLeggingsComposeTheirJumps` pins today's 0.93 / 1.35 and says in its comment what to change (the two numbers) after the fix.
+  Details: `docs/deviations/KamiGear.md` section 3.
+- **Documents of the lead that this group's `LIVING_ARMOR_ABSORB` makes false** (not edited here): `docs/DEVIATIONS.md` section 4, the bullet "Armour absorption of Kami
+  armour (`ISpecialArmor`): needs a hook on `getDamageAfterArmorAbsorb`; not written"; `docs/API_GAPS.md` line 82 ("`ISpecialArmor` has no counterpart (3a)") and line 239
+  ("`ISpecialArmor` ... becomes `UNBREAKABLE` + attribute modifiers or a hurt event"); `docs/HOOKS.md` section 3, the sentence "It still needs a hook on
+  `getDamageAfterArmorAbsorb`. Not written." (lines 92-93) and the sentence of section 10 "The armour absorption K1 needs a hook of its own" (line 282). The text for the new
+  row of the section 1 table and for the NeoForge notes is in `docs/deviations/KamiGear.md` section 13.
 - **KamiWorld, `common/content/KamiWorld.java` line 93: the same S2C registration blocker.** `NetworkManager.registerS2CPayloadType(PacketSoulHearts.TYPE, ...)`
   runs on the client as well, and `KamiWorldClient` registers the receiver for the same type, which makes Fabric's
   `PayloadTypeRegistry.playS2C()` throw `IllegalArgumentException: Packet type ... is already registered!` on every client start. Fix as in

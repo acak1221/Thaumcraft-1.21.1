@@ -27,6 +27,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
+import thaumic.tinkerer.common.hooks.TinkererEvents;
+import thaumic.tinkerer.common.item.kami.armor.IchorAbsorption;
 import thaumic.tinkerer.common.item.kami.armor.ItemGemBoots;
 import thaumic.tinkerer.common.item.kami.armor.ItemGemChest;
 import thaumic.tinkerer.common.item.kami.armor.ItemGemHelm;
@@ -81,11 +83,20 @@ public final class KamiArmorHandler {
         return stack.getItem() instanceof thaumic.tinkerer.common.item.kami.armor.ItemIchorclothArmorAdv;
     }
 
-    /** Registers the events of the armour: the tick of the players and the login synchronisation of the flag. */
+    /**
+     * Registers the events of the armour: the tick of the players, the login synchronisation of the flag, and the loader
+     * events that stand in for 1.7.10's Forge events ({@code docs/HOOKS.md}): the Gem Boots' jump and fall
+     * ({@code LivingJumpEvent}, {@code LivingFallEvent}) and the Ichorcloth absorption ({@code ISpecialArmor}).
+     */
     public static void register() {
         dev.architectury.event.events.common.TickEvent.PLAYER_POST.register(KamiArmorHandler::onPlayerTick);
         PlayerEvent.PLAYER_JOIN.register(KamiArmorHandler::sync);
         PlayerEvent.PLAYER_QUIT.register(player -> ItemGemChest.forget(player));
+        // The listeners of one event run in the order of registration. As in 1.7.10 (the boots in preInit, Ascent Boost in init) the
+        // boots' jump comes first: the Enchantments group registers Ascent Boost's in its ready phase (ModEnchantments.initJump).
+        TinkererEvents.LIVING_JUMP.register(ItemGemBoots::onLivingJump);
+        TinkererEvents.LIVING_FALL.register(ItemGemBoots::onLivingFall);
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(IchorAbsorption::onLivingArmorAbsorb);
     }
 
     /** 1.7.10 {@code PlayerTracker}: a joining player is told whether its armour is on. */

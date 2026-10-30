@@ -12,8 +12,7 @@
  */
 package thaumic.tinkerer.common.core.handler.kami;
 
-import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.EntityEvent;
+import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
 import java.util.HashMap;
@@ -28,11 +27,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.SavedData;
+import thaumic.tinkerer.common.hooks.TinkererEvents;
 import thaumic.tinkerer.common.lib.LibMisc;
 import thaumic.tinkerer.common.network.packet.kami.PacketSoulHearts;
 
@@ -46,26 +45,33 @@ import thaumic.tinkerer.common.network.packet.kami.PacketSoulHearts;
  * when a player is re-created by a respawn), and sent to the player's client ({@link PacketSoulHearts}) on every change and on
  * login.</p>
  *
- * <p><b>The damage hook.</b> Architectury's {@code LIVING_HURT} can cancel a hit but not change its amount. A hit is
- * therefore swallowed (the damage animation and sound still play) when the pool covers it, and when the pool runs out
- * the hit is cancelled and the rest is dealt as a new hit of the same source (see {@link #onLivingHurt}). Exact 1.7.10
- * behaviour wants a hook that sets the amount; this is the closest the shared events allow, and it only acts for a player
- * that has soul hearts (docs/deviations/KamiWorld.md, docs/api-requests/KamiWorld.md).</p>
+ * <p><b>The damage hook.</b> {@link TinkererEvents#LIVING_DAMAGE} is the {@code LivingHurtEvent} of the original: it is
+ * posted before armour and may set the amount, so {@link #onLivingDamage} applies the exact 1.7.10 rule ({@link
+ * #modifyIncomingDamage}) to every hit of every server player. What the event does not give is the original's
+ * invulnerability frames for a hit it cancels: in 1.7.10 {@code hurtResistantTime} was set <i>before</i> the event, so a hit
+ * the pool swallowed still started the frames and a source that hits every tick (lava, fire, cactus) cost the pool once
+ * per ten ticks; here a cancelled hit starts none (docs/HOOKS.md section 3), the same hit would be posted again on the next
+ * tick and the pool would be gone ten times faster. The handler therefore keeps the frames of the original itself, per
+ * player ({@link Frames}), for every hit it handles (docs/deviations/KamiWorld.md section 5). The NeoForge poster of the
+ * event does not exist yet: until it does the Soul Hearts do not act there.</p>
  */
 public final class SoulHeartHandler {
     private static final String DATA_NAME = LibMisc.MOD_ID + "_soul_hearts";
     /** 1.7.10 {@code MAX_HP}: twenty points, ten hearts. */
     public static final int MAX_HP = 20;
 
-    /** True while this handler deals the rest of a hit itself, so that hit is not taken apart again. Server thread only. */
-    private static boolean reissuing;
-
     /**
-     * Set by a loader hook that calls {@link #modifyIncomingDamage} from an event that can change the amount of a hit
-     * (NeoForge {@code LivingIncomingDamageEvent}, a mixin on Fabric): the Architectury fallback of {@link #onLivingHurt}
-     * then stands aside. False until the lead wires such a hook (docs/api-requests/KamiWorld.md).
+     * How long the invulnerability frames of a hit last, in game ticks: 1.7.10 refused a weaker hit while
+     * {@code hurtResistantTime > maxHurtResistantTime / 2} (20 / 2 = 10), counting down from 20 at the hit, so the hit that
+     * comes ten ticks after the first is a new one.
      */
-    public static volatile boolean exactDamageHook;
+    public static final int FRAME_TICKS = 10;
+
+    /** The game's own frames run while {@code invulnerableTime} is above this ({@code LivingEntity.hurt}: {@code invulnerableTime > 10.0F}). */
+    private static final int GAME_FRAMES_ABOVE = 10;
+
+    /** The frames of the last hit that the pool saw, by player. Server thread only (the event and the player events are). */
+    private static final Map<UUID, Frames> FRAMES = new HashMap<>();
 
     private SoulHeartHandler() {}
 
@@ -136,19 +142,6 @@ public final class SoulHeartHandler {
     }
 
     /**
-     * The amount to pass to {@code Player.hurt} so that, after the player's difficulty scaling, the damage is
-     * {@code scaled}: the inverse of Easy ({@code min(x / 2 + 1, x)}) and Hard ({@code x * 3 / 2}); Normal does not scale.
-     */
-    public static float beforeDifficultyScaling(float scaled, boolean scalesWithDifficulty, Difficulty difficulty) {
-        if (!scalesWithDifficulty) return scaled;
-        return switch (difficulty) {
-            case EASY -> scaled >= 2F ? 2F * (scaled - 1F) : scaled;
-            case HARD -> scaled * 2F / 3F;
-            default -> scaled;
-        };
-    }
-
-    /**
      * 1.7.10 {@code onPlayerDamage} exactly, for a hook that can set the amount of the hit: the whole points of {@code amount}
      * are taken off the pool (always, whether the player has hearts or not) and the new amount is what is left, an int.
      * The pool is saved and the player's client told. Call it once per hit, before armour.
@@ -164,37 +157,103 @@ public final class SoulHeartHandler {
 
     /** Registers the events (once, from the registrar). */
     public static void register() {
-        EntityEvent.LIVING_HURT.register(SoulHeartHandler::onLivingHurt);
+        TinkererEvents.LIVING_DAMAGE.register(SoulHeartHandler::onLivingDamage);
         PlayerEvent.PLAYER_JOIN.register(SoulHeartHandler::updateClient);
-        PlayerEvent.PLAYER_CLONE.register((oldPlayer, newPlayer, wonGame) -> setHP(newPlayer, 0));
+        PlayerEvent.PLAYER_CLONE.register((oldPlayer, newPlayer, wonGame) -> {
+            setHP(newPlayer, 0);
+            FRAMES.remove(newPlayer.getUUID());
+        });
         PlayerEvent.PLAYER_RESPAWN.register((newPlayer, conqueredEnd, reason) -> updateClient(newPlayer));
+        PlayerEvent.PLAYER_QUIT.register(player -> FRAMES.remove(player.getUUID()));
+        LifecycleEvent.SERVER_STOPPED.register(server -> FRAMES.clear());
     }
 
     /**
-     * 1.7.10 {@code onPlayerDamage} ({@code LivingHurtEvent}, before armour): a player that has soul hearts spends them
-     * on the hit. A hit the pool covers is swallowed; one it does not cover is cancelled and dealt again with what is left.
-     * Hits during the invulnerability frames after a hit are left to the game (it would ignore most of them), and so are
-     * players without soul hearts.
+     * The invulnerability frames of the original, as far as the pool needs them. {@code hurtResistantTime} was set to 20
+     * <i>before</i> {@code LivingHurtEvent}; while it was above 10 a hit that was not stronger than {@code lastDamage} was
+     * refused before the event (no event, no pool), and a stronger one reached the event as {@code amount - lastDamage}.
+     * The game's own frames (which {@link TinkererEvents#LIVING_DAMAGE} is posted inside of) do not cover a hit that
+     * is cancelled, and compare the next hit with what the listener returned instead of with the raw amount, so this
+     * keeps the original's numbers: when the hit began them and the strongest raw amount so far, and, apart from the frames, what
+     * the game's own {@code lastHurt} holds because of the amounts handed back to it ({@link #handed}). One record per player,
+     * kept for as long as the player is on the server: {@link #handed} outlives the pool's frames, which can end before the
+     * game's own.
      */
-    public static EventResult onLivingHurt(LivingEntity entity, DamageSource source, float amount) {
-        if (exactDamageHook || reissuing || !(entity instanceof ServerPlayer player) || amount <= 0F) return EventResult.pass();
-        if (player.invulnerableTime > 10 && !source.is(DamageTypeTags.BYPASSES_COOLDOWN)) return EventResult.pass();
-        if (getHP(player) <= 0) return EventResult.pass();
+    private static final class Frames {
+        /** The game tick of the hit that began the pool's current frames. Meaningful only after {@link #begin}. */
+        long start;
+        /** 1.7.10 {@code lastDamage}: the raw amount of the strongest hit of the pool's current frames. */
+        float raw;
+        /**
+         * What the game's {@code lastHurt} holds as far as the pool knows: the last amount it handed back (the game sets {@code lastHurt} to
+         * the amount it is handed, in its frames and out of them). The game's frames and the pool's begin at different times (a covered
+         * hit begins the pool's and not the game's), so the two can be running or over independently; the game is asked
+         * ({@code invulnerableTime}) when this value matters.
+         */
+        float handed;
+        private boolean begun;
 
-        int rest = removeHP(player, (int) amount);
-        updateClient(player);
-        if (rest <= 0) {
-            // The hit is absorbed: no damage, but the player is seen and heard to be hit.
-            if (player.level() instanceof ServerLevel level) level.broadcastDamageEvent(player, source);
-            return EventResult.interruptFalse();
+        void begin(long now, float amount) {
+            this.start = now;
+            this.raw = amount;
+            this.begun = true;
         }
-        reissuing = true;
-        try {
-            player.hurt(source, beforeDifficultyScaling(rest, source.scalesWithDifficulty(), player.level().getDifficulty()));
-        } finally {
-            reissuing = false;
+
+        boolean running(long now) {
+            return begun && now >= start && now - start < FRAME_TICKS;
         }
-        return EventResult.interruptFalse();
+    }
+
+    /**
+     * 1.7.10 {@code onPlayerDamage} ({@code LivingHurtEvent}, before armour) as a listener of {@link TinkererEvents#LIVING_DAMAGE}:
+     * the pool takes the whole points of the hit and the rest is the damage that goes on, for every server player (the
+     * original did not ask whether the player had hearts). Answers only for server players; anything else gets its amount back.
+     *
+     * <p>The frames of the original are kept here ({@link Frames}). Inside them a hit that is not stronger than the strongest
+     * so far is the one the original refused before the event: it is cancelled and the pool is not charged. A stronger one is
+     * charged for the difference only ({@code amount - lastDamage}). Outside the frames the hit is charged whole and begins
+     * new frames. A hit the pool covers entirely is cancelled: the game starts no frames of its own and the hit is silent (no
+     * knockback, no hurt sound or animation, {@code hurt} returns {@code false}: HOOKS.md section 3). Only a covered hit that
+     * <i>began</i> the frames is announced to the clients with the damage event, so the player sees and hears the hit as in
+     * 1.7.10, where the covered hit still showed. A hit with something left is dealt, and the game's frames start with the
+     * returned amount as {@code lastHurt}.</p>
+     *
+     * <p><b>What the game is handed.</b> The game turns the returned amount into damage by its own rule: while its frames run
+     * ({@code invulnerableTime > 10}, the source not in {@code bypasses_cooldown}) it deals {@code returned - lastHurt} and sets
+     * {@code lastHurt = returned}; otherwise it deals {@code returned} and starts its frames with {@code lastHurt = returned}. The
+     * pool wants the game to deal exactly {@code rest}, so it hands back {@code handed + rest} while the game's frames run (the game
+     * subtracts what it has {@code handed} already) and {@code rest} alone when they do not. Which of the two it is depends on the
+     * game's frames, not on the pool's: they start at different times (a hit the pool covers starts the pool's and not the game's)
+     * and so also end at different times, in either order. Handing {@code handed + rest} when the game's frames are over would
+     * deal {@code handed} too much, and handing {@code rest} when they run would deal too little or nothing.</p>
+     */
+    public static float onLivingDamage(LivingEntity victim, DamageSource source, float amount) {
+        if (!(victim instanceof ServerPlayer player)) return amount;
+        long now = player.level().getGameTime();
+        boolean bypassesCooldown = source.is(DamageTypeTags.BYPASSES_COOLDOWN);
+        Frames frames = FRAMES.get(player.getUUID());
+        boolean inFrames = frames != null && frames.running(now) && !bypassesCooldown;
+        float event;
+        if (inFrames) {
+            if (amount <= frames.raw) return 0F; // the original refused it before the event
+            event = amount - frames.raw;
+            frames.raw = amount;
+        } else {
+            event = amount;
+            if (frames == null) {
+                frames = new Frames();
+                FRAMES.put(player.getUUID(), frames);
+            }
+            frames.begin(now, amount);
+        }
+        float rest = modifyIncomingDamage(player, event);
+        if (!(rest > 0F)) {
+            if (!inFrames && player.level() instanceof ServerLevel level) level.broadcastDamageEvent(player, source);
+            return 0F;
+        }
+        boolean gameInFrames = player.invulnerableTime > GAME_FRAMES_ABOVE && !bypassesCooldown;
+        frames.handed = gameInFrames ? frames.handed + rest : rest;
+        return frames.handed;
     }
 
     // ---- the saved numbers ---------------------------------------------------------------------------------------

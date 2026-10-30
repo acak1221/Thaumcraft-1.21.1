@@ -11,11 +11,14 @@
  */
 package thaumic.tinkerer.common.item.kami.armor;
 
+import dev.architectury.event.EventResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -31,6 +34,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
+import thaumic.tinkerer.common.hooks.TinkererEvents;
 import thaumic.tinkerer.common.item.kami.ItemKamiResource;
 import thaumic.tinkerer.common.item.kami.KamiResearch;
 import thaumic.tinkerer.common.lib.LibItemNames;
@@ -47,17 +51,21 @@ import thaumic.tinkerer.common.research.TTResearchItem;
  * half, Haste II, dirt turning into grass underfoot, and no fall damage.
  *
  * <p>1.7.10 set {@code stepHeight} and {@code motionY} directly, in an {@code onArmorTick} that did not look at the switch
- * and a {@code LivingUpdateEvent} that did. Here step height and jump strength are attribute modifiers that the server sets
- * (the game sends them), and the walking boost, which the 1.21.1 server cannot give to a client-driven player, is added to
- * the local player's motion on the client. The fall check of the original ({@code LivingFallEvent}: no fall distance for
- * every wearer, switched off or not) is the zero fall distance of every tick.</p>
+ * and a {@code LivingUpdateEvent} that did. Here the step height is an attribute modifier that the server sets (the game sends
+ * it), and the walking boost, which the 1.21.1 server cannot give to a client-driven player, is added to the local player's
+ * motion on the client. The two handlers of the original's {@code EventHandler} are listeners of the loader events
+ * ({@code docs/HOOKS.md}): {@link #onLivingJump} is {@code onPlayerJump} ({@code motionY += 0.3} for a wearer whose boots are
+ * switched on, after the jump), {@link #onLivingFall} is {@code onFall} (no fall distance for every wearer, switched off or
+ * not). Both run on both sides and change a result that both sides compute; neither touches the world.</p>
  */
 public class ItemGemBoots extends ItemIchorclothArmorAdv {
     /** 1.7.10 {@code speedBonus}. */
     public static final float SPEED_BONUS = 0.075F;
 
+    /** 1.7.10 {@code onPlayerJump}: {@code player.motionY += 0.3 * getJumpModifier(boots)}; the modifier (Thaumic Boots) is 1. */
+    public static final double JUMP_BONUS = 0.3;
+
     private static final ResourceLocation STEP_ID = LibMisc.id("kami_boots_step");
-    private static final ResourceLocation JUMP_ID = LibMisc.id("kami_boots_jump");
 
     public ItemGemBoots(Item.Properties properties) {
         super(ArmorItem.Type.BOOTS, properties);
@@ -70,9 +78,9 @@ public class ItemGemBoots extends ItemIchorclothArmorAdv {
         if (!level.isClientSide) updateAttributes(player, boots, worn);
         if (!worn) return;
 
-        // LivingFallEvent: event.distance = 0 for everyone who wears the boots.
-        player.fallDistance = 0F;
         boolean active = isActive(player, boots);
+        // 1.7.10 tickPlayer, while the boots are on: player.fallDistance = 0 (the wearer of switched-off boots is spared by onLivingFall)
+        if (active) player.fallDistance = 0F;
 
         if (!level.isClientSide && active) {
             haste(player);
@@ -86,7 +94,7 @@ public class ItemGemBoots extends ItemIchorclothArmorAdv {
         if (level.isClientSide && player.isLocalPlayer()) moveLocalPlayer(player, active);
     }
 
-    /** The server's part: step height and jump strength. */
+    /** The server's part: the step height. (The jump is {@link #onLivingJump}; it used to be an attribute modifier as well.) */
     private static void updateAttributes(Player player, ItemStack boots, boolean worn) {
         boolean active = worn && isActive(player, boots);
         boolean moving = player.xxa != 0F || player.zza != 0F;
@@ -94,7 +102,6 @@ public class ItemGemBoots extends ItemIchorclothArmorAdv {
         if (active) step = player.isShiftKeyDown() ? -0.1 : 0.4;
         else if (worn && moving && !player.isShiftKeyDown()) step = 0.4;
         setModifier(player.getAttribute(Attributes.STEP_HEIGHT), STEP_ID, step);
-        setModifier(player.getAttribute(Attributes.JUMP_STRENGTH), JUMP_ID, active ? 0.3 : 0);
     }
 
     private static void setModifier(AttributeInstance attribute, ResourceLocation id, double amount) {
@@ -106,6 +113,41 @@ public class ItemGemBoots extends ItemIchorclothArmorAdv {
             attribute.removeModifier(id);
             attribute.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_VALUE));
         }
+    }
+
+    /** The boots on the feet of {@code entity}, or {@link ItemStack#EMPTY} when it is not a player or wears other boots. */
+    private static ItemStack bootsOf(LivingEntity entity) {
+        if (!(entity instanceof Player player)) return ItemStack.EMPTY;
+        ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
+        return boots.getItem() instanceof ItemGemBoots ? boots : ItemStack.EMPTY;
+    }
+
+    /**
+     * Listener of {@code TinkererEvents.LIVING_JUMP} (1.7.10 {@code EventHandler.onPlayerJump}): a player whose Gem Boots are
+     * worn, with the master switch and this piece switched on, rises {@link #JUMP_BONUS} higher than the jump alone. It adds
+     * to the vertical motion that {@code jumpFromGround} has applied, as {@code motionY += 0.3} did, so the block's jump
+     * factor (honey) and Jump Boost act on the jump only. Runs on both sides: the client's own jump and the server's
+     * ({@code KamiArmorHandler.getArmorStatus} answers with the side's own copy of the flag, synchronised by the packets).
+     *
+     * <p>Ascent Boost's listener runs <i>before</i> this one (the Enchantments group registers first), so the 0.3 is added after its factor;
+     * 1.7.10 ran the boots first and the factor multiplied the sum (docs/deviations/KamiGear.md section 3).</p>
+     */
+    public static void onLivingJump(LivingEntity entity) {
+        ItemStack boots = bootsOf(entity);
+        if (boots.isEmpty() || !isActive((Player) entity, boots)) return;
+        Vec3 motion = entity.getDeltaMovement();
+        entity.setDeltaMovement(motion.x, motion.y + JUMP_BONUS, motion.z);
+    }
+
+    /**
+     * Listener of {@code TinkererEvents.LIVING_FALL} (1.7.10 {@code EventHandler.onFall}): a player who wears the Gem Boots
+     * lands with a fall distance of 0, whatever the switches say ({@code getCurrentArmor(0).getItem() == ItemGemBoots.this},
+     * no look at the damage value or the master flag). With no distance there is no damage and no thud. Runs on both sides,
+     * changes only the distance and nothing in the world.
+     */
+    public static EventResult onLivingFall(LivingEntity entity, TinkererEvents.FallData fall) {
+        if (!bootsOf(entity).isEmpty()) fall.setDistance(0F);
+        return EventResult.pass();
     }
 
     /** The client's part: the push of 1.7.10's {@code moveFlying} calls and the larger air control of {@code jumpMovementFactor}. */

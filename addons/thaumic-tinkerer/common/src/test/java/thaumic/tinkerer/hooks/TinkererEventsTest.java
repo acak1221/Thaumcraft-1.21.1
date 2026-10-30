@@ -10,6 +10,11 @@ import dev.architectury.event.EventResult;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -111,6 +116,183 @@ class TinkererEventsTest {
             assertEquals(0, calls[0], "a snowball's zero damage reaches nobody");
         } finally {
             TinkererEvents.LIVING_DAMAGE.unregister(listener);
+        }
+    }
+
+    // ---- LIVING_ARMOR_ABSORB ---------------------------------------------------------------------------------------
+
+    /** A damage source that answers the one tag test the poster makes (the registries of a data pack are not loaded in a unit test). */
+    private static DamageSource source(boolean bypassesArmor) {
+        return new DamageSource(Holder.direct(new DamageType("test", 0.0F))) {
+            @Override
+            public boolean is(TagKey<DamageType> tag) {
+                return bypassesArmor && tag == DamageTypeTags.BYPASSES_ARMOR;
+            }
+        };
+    }
+
+    @Test
+    void armorAbsorbWithoutListenersIsTheSameValue() {
+        float absorbed = 5.8F;
+        float result = TinkererEvents.postLivingArmorAbsorb(null, source(false), 10F, absorbed);
+        assertEquals(Float.floatToRawIntBits(absorbed), Float.floatToRawIntBits(result), "nothing listens: the game's own value, bit for bit");
+    }
+
+    @Test
+    void armorAbsorbChainsAndEachListenerSeesWhatTheLastReturned() {
+        List<Float> seen = new ArrayList<>();
+        TinkererEvents.LivingArmorAbsorb replace = (victim, source, damage, absorbed) -> {
+            seen.add(damage);
+            seen.add(absorbed);
+            return damage * 0.85F;
+        };
+        TinkererEvents.LivingArmorAbsorb addOne = (victim, source, damage, absorbed) -> {
+            seen.add(absorbed);
+            return absorbed + 1F;
+        };
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(replace);
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(addOne);
+        try {
+            assertEquals(9.5F, TinkererEvents.postLivingArmorAbsorb(null, source(false), 10F, 4F), EPSILON, "8.5 replaced the 4, then +1");
+            assertEquals(List.of(10F, 4F, 8.5F), seen, "the damage, the vanilla amount, then what the first returned");
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(replace);
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(addOne);
+        }
+        seen.clear();
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(addOne);
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(replace);
+        try {
+            assertEquals(8.5F, TinkererEvents.postLivingArmorAbsorb(null, source(false), 10F, 4F), EPSILON, "the last to replace wins");
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(addOne);
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(replace);
+        }
+        assertEquals(4F, TinkererEvents.postLivingArmorAbsorb(null, source(false), 10F, 4F), EPSILON, "unregistered: back to the game's value");
+    }
+
+    @Test
+    void armorAbsorbIsHeldBetweenNothingAndTheWholeBlowAndNaNIsIgnored() {
+        // a lone listener is its own invoker, so the poster has to do the clamping too
+        float[] answers = { -3F, 0F, 10F, 12F, Float.POSITIVE_INFINITY, Float.NaN };
+        float[] expected = { 0F, 0F, 10F, 10F, 10F, 4F };
+        for (int i = 0; i < answers.length; i++) {
+            float answer = answers[i];
+            TinkererEvents.LivingArmorAbsorb listener = (victim, source, damage, absorbed) -> answer;
+            TinkererEvents.LIVING_ARMOR_ABSORB.register(listener);
+            try {
+                assertEquals(expected[i], TinkererEvents.postLivingArmorAbsorb(null, source(false), 10F, 4F), 0F, "answer " + answer);
+            } finally {
+                TinkererEvents.LIVING_ARMOR_ABSORB.unregister(listener);
+            }
+        }
+        // in a chain the NaN of one listener is skipped and the next one still sees a number in range
+        List<Float> seen = new ArrayList<>();
+        TinkererEvents.LivingArmorAbsorb nan = (victim, source, damage, absorbed) -> Float.NaN;
+        TinkererEvents.LivingArmorAbsorb after = (victim, source, damage, absorbed) -> {
+            seen.add(absorbed);
+            return absorbed;
+        };
+        TinkererEvents.LivingArmorAbsorb big = (victim, source, damage, absorbed) -> 99F;
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(big);
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(nan);
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(after);
+        try {
+            assertEquals(10F, TinkererEvents.postLivingArmorAbsorb(null, source(false), 10F, 4F), 0F);
+            assertEquals(List.of(10F), seen, "the listener after the 99 saw 10 (held to the blow), not NaN");
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(big);
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(nan);
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(after);
+        }
+    }
+
+    @Test
+    void armorAbsorbIsNotPostedForArmourBypassingSourcesOrBlowsOfNoDamage() {
+        int[] calls = { 0 };
+        TinkererEvents.LivingArmorAbsorb everything = (victim, source, damage, absorbed) -> {
+            calls[0]++;
+            return damage;
+        };
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(everything);
+        try {
+            assertEquals(0F, TinkererEvents.postLivingArmorAbsorb(null, source(true), 10F, 0F), 0F, "starvation, magic, the void: armour does not reduce them");
+            assertEquals(0F, TinkererEvents.postLivingArmorAbsorb(null, source(false), 0F, 0F), 0F, "no damage");
+            assertEquals(0F, TinkererEvents.postLivingArmorAbsorb(null, source(false), -2F, 0F), 0F, "negative damage");
+            assertEquals(0F, TinkererEvents.postLivingArmorAbsorb(null, source(false), Float.NaN, 0F), 0F, "NaN damage");
+            assertEquals(0F, TinkererEvents.postLivingArmorAbsorb(null, source(false), Float.POSITIVE_INFINITY, 0F), 0F, "infinite damage");
+            assertEquals(0, calls[0], "none of them reached the listener");
+            assertEquals(10F, TinkererEvents.postLivingArmorAbsorb(null, source(false), 10F, 0F), 0F, "a plain blow does");
+            assertEquals(1, calls[0]);
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(everything);
+        }
+    }
+
+    @Test
+    void armorStepGivesBackTheGamesOwnFloatUnlessAListenerChangedTheAmount() {
+        // a blow for which damage - (damage - vanilla) is not vanilla's float: handing the round trip back would change the damage
+        // in the last place when nobody has anything to say
+        float damage = Float.NaN;
+        float vanilla = 0F;
+        for (int i = 1; i < 5000 && Float.isNaN(damage); i++) {
+            float candidate = 2F + i * 0.0137F;
+            float left = candidate * 0.2F; // the armour takes most of it (below half the blow, where damage - left is not exact)
+            if (candidate - (candidate - left) != left) {
+                damage = candidate;
+                vanilla = left;
+            }
+        }
+        assertFalse(Float.isNaN(damage), "there are blows whose round trip is not the same float");
+        assertTrue(damage - (damage - vanilla) != vanilla, "control: the round trip of " + damage + " is not " + vanilla);
+        int expected = Float.floatToRawIntBits(vanilla);
+        assertEquals(expected, Float.floatToRawIntBits(TinkererEvents.damageAfterArmorAbsorb(null, source(false), damage, vanilla)),
+                "nobody listens: the game's own float");
+
+        TinkererEvents.LivingArmorAbsorb leaveAlone = (victim, source, blow, absorbed) -> absorbed;
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(leaveAlone);
+        try {
+            assertEquals(expected, Float.floatToRawIntBits(TinkererEvents.damageAfterArmorAbsorb(null, source(false), damage, vanilla)),
+                    "a listener that returns what it was given changes nothing");
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(leaveAlone);
+        }
+
+        TinkererEvents.LivingArmorAbsorb replace = (victim, source, blow, absorbed) -> blow * 0.85F;
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(replace);
+        try {
+            assertEquals(Float.floatToRawIntBits(damage - damage * 0.85F),
+                    Float.floatToRawIntBits(TinkererEvents.damageAfterArmorAbsorb(null, source(false), damage, vanilla)),
+                    "a listener that replaced the amount: damage - result");
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(replace);
+        }
+    }
+
+    @Test
+    void armorStepOfABlowThatIsNotFiniteIsTheGamesOwnValueNotNaN() {
+        // vanilla's formula returns infinity for an infinite blow, so "what the armour took" is Infinity - Infinity = NaN, which is
+        // never == to itself: the step must still hand the game its own infinity (a NaN would be NaN health)
+        int[] calls = { 0 };
+        TinkererEvents.LivingArmorAbsorb everything = (victim, source, blow, absorbed) -> {
+            calls[0]++;
+            return blow;
+        };
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(everything);
+        try {
+            assertEquals(Float.POSITIVE_INFINITY,
+                    TinkererEvents.damageAfterArmorAbsorb(null, source(false), Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY), 0F,
+                    "an infinite blow stays infinite");
+            assertTrue(Float.isNaN(TinkererEvents.damageAfterArmorAbsorb(null, source(false), Float.NaN, Float.NaN)),
+                    "a NaN blow is the game's own NaN");
+            assertEquals(10F, TinkererEvents.damageAfterArmorAbsorb(null, source(true), 10F, 10F), 0F,
+                    "a source that bypasses armour: the game's value");
+            assertEquals(0F, TinkererEvents.damageAfterArmorAbsorb(null, source(false), 0F, 0F), 0F, "no damage");
+            assertEquals(0, calls[0], "none of them was posted");
+            assertEquals(0F, TinkererEvents.damageAfterArmorAbsorb(null, source(false), 10F, 4F), 0F, "a plain blow is (the listener takes it all)");
+            assertEquals(1, calls[0]);
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(everything);
         }
     }
 

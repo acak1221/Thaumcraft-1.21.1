@@ -3,7 +3,7 @@ package thaumic.tinkerer.foci;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -224,16 +224,21 @@ class FociLogicTest {
     }
 
     @Test
-    void theFlightKickCounterCanBeReachedAndTheDefaultResetComesBackWithNull() {
-        assertTrue(FociHooks.canReachCounter(), "ServerGamePacketListenerImpl.aboveGroundTickCount (official name) is found by reflection");
+    void theFlightKickResetIsWhatIsInstalledAndNullRemovesIt() {
         java.util.function.Consumer<net.minecraft.server.level.ServerPlayer> original = FociHooks.floatingTickReset;
+        assertNull(original, "nothing is installed until the group's start-up (Foci.register) installs the loader layer's reset");
         try {
-            FociHooks.setFloatingTickReset(player -> {});
-            assertNotSame(original, FociHooks.floatingTickReset);
             FociHooks.setFloatingTickReset(null);
-            assertSame(original, FociHooks.floatingTickReset, "null puts the default back, as the javadoc says");
+            assertNull(FociHooks.floatingTickReset);
+            FociHooks.resetFloatingTicks(null); // with none installed a cast resets nothing, and does not throw
+
+            java.util.function.Consumer<net.minecraft.server.level.ServerPlayer> mine = player -> {};
+            FociHooks.setFloatingTickReset(mine);
+            assertSame(mine, FociHooks.floatingTickReset);
+            FociHooks.setFloatingTickReset(null);
+            assertNull(FociHooks.floatingTickReset, "null removes it, as the javadoc says");
         } finally {
-            FociHooks.setFloatingTickReset(null);
+            FociHooks.setFloatingTickReset(original);
         }
     }
 

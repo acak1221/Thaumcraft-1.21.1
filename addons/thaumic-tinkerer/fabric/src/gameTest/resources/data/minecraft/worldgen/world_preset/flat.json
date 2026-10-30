@@ -33,6 +33,21 @@
         "settings": "minecraft:nether"
       }
     },
+    "thaumcraft:outer_lands": {
+      "type": "thaumcraft:outer_lands",
+      "generator": {
+        "type": "minecraft:flat",
+        "settings": {
+          "biome": "thaumcraft:eldritch_lands",
+          "features": true,
+          "lakes": false,
+          "layers": [
+            {"block": "minecraft:air", "height": 1}
+          ],
+          "structure_overrides": []
+        }
+      }
+    },
     "thaumictinkerer:bedrock": {
       "type": "thaumictinkerer:bedrock",
       "generator": {

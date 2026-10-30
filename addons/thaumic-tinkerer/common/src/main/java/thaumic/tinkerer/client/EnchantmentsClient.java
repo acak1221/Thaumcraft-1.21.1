@@ -13,7 +13,6 @@ import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import thaumic.tinkerer.client.core.handler.EnchantmentClientHandler;
 import thaumic.tinkerer.client.gui.EnchantIcons;
 import thaumic.tinkerer.client.gui.GuiEnchanting;
 import thaumic.tinkerer.client.render.tile.RenderTileEnchanter;
@@ -21,9 +20,10 @@ import thaumic.tinkerer.common.content.Enchantments;
 import thaumic.tinkerer.common.lib.LibMisc;
 
 /**
- * Client registration of the Enchantments group: the screen and the block entity renderer of the Osmotic Enchanter, the
- * jump hook of Ascent Boost, and the reload listener that makes the icons of the screen read their size again after a
- * resource reload (F3+T, a change of resource pack).
+ * Client registration of the Enchantments group: the screen and the block entity renderer of the Osmotic Enchanter and the
+ * reload listener that makes the icons of the screen read their size again after a resource reload (F3+T, a change of
+ * resource pack). (Ascent Boost, Slow Fall and Quick Draw need nothing of their own on the client: they are listeners of the
+ * loader events, registered by {@code ModEnchantments.initEnchantments()} on both sides.)
  */
 public final class EnchantmentsClient {
     private EnchantmentsClient() {}
@@ -31,7 +31,6 @@ public final class EnchantmentsClient {
     public static void register() {
         MenuRegistry.registerScreenFactory(Enchantments.enchanterMenu(), GuiEnchanting::new);
         BlockEntityRendererRegistry.register(Enchantments.enchanterType(), RenderTileEnchanter::new);
-        EnchantmentClientHandler.register();
         ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, (ResourceManagerReloadListener) manager -> EnchantIcons.clear(),
                 LibMisc.id("enchant_icons"));
     }

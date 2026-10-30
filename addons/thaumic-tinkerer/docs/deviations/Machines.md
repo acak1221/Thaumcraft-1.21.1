@@ -178,11 +178,23 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
   registration (`CROP`, tag `messis`) won the key, `summon1.json` is the messis recipe. Names are lowercase because
   resource locations must be. The infusion recipe per aspect (8 condensed around 1 condensed, instability 4,
   10 of the aspect) and the object tag of the basic form (8 of the aspect) are registered as before.
-- **Mob display.** `RenderMobDisplay.render` draws the mob in place of the item (model `minecraft:builtin/entity`). The
-  built-in item renderer needs a loader hook: on Fabric `thaumic.tinkerer.fabric.client.MachinesFabricClient` registers it
-  (reached by name from `MachinesClient`); on NeoForge the hook is still missing (request 2 of the API requests), and until
-  it exists the item is invisible there. It was not inspected on a rendered frame. NEI/JEI-style "necromancy recipes"
-  for recipe viewers are not provided.
+- **Mob display.** `RenderMobDisplay.render` draws the mob in place of the item (model `minecraft:builtin/entity`; 1.7.10
+  `MinecraftForgeClient.registerItemRenderer`). Architectury has no registry for a built-in item renderer, so the group uses
+  the loader layer's `ItemRenderers` (`docs/HOOKS.md` section 9): `MachinesClient.register()` calls, as its first statement,
+  `ItemRenderers.register(TTRegistry.item("mob_display"), RenderMobDisplay::render)` (through the helper
+  `MachinesClient.registerItemRenderers(Item)`). On Fabric `FabricItemRenderers` (the backend, installed before the groups
+  register their client side) hands it to Fabric API's `BuiltinItemRendererRegistry`; the group's own glue of the first version
+  (`MachinesFabricClient`, reached by name from common code, with a second registration of the same item) and the reflection
+  that called it are gone, since two registrations of one item are an error. **The group needs the NeoForge backend of
+  `ItemRenderers`** (a `RegisterClientExtensionsEvent` handler that collects the queue, `docs/HOOKS.md` section 9): until the
+  NeoForge module has it the item is invisible there. What was checked: the code compiles; a JUnit test
+  (`MachinesClientWiringTest`) runs the helper with an item of its own and reads the queue (`ItemRenderers.get`: queued for that
+  item and no other, a second registration refused) and reads the source of the registrar (`register()` queues
+  `TTRegistry.item("mob_display")` first, once; no other Fabric class uses `BuiltinItemRendererRegistry`); the Fabric backend
+  was read (`FabricItemRenderers.install()` forwards `renderer::render` to `BuiltinItemRendererRegistry.register(item,
+  DynamicItemRenderer)` of fabric-rendering-v1 5.2.1, whose signature is the same six arguments). A GameTest server cannot do
+  more (it cannot load `PoseStack`). **Not seen**: no client was started, so that the mob is drawn in a slot, in the hand, on the
+  ground or in a recipe viewer is unverified. NEI/JEI-style "necromancy recipes" for recipe viewers are not provided.
 - **Tooltip of a soul aspect** shows the aspect name as the game spells it (`Aspect.getName()`); the infused ones glow.
 
 ## 8. Cursed Spirit's Blade
@@ -194,13 +206,45 @@ Neither the stacks nor the worlds of 1.7.10 are migrated (fresh worlds only).
 - **Blocking (forced).** `itemInUse` / `EnumAction.block` become `UseAnim.BLOCK` with a long use duration; every right
   click raises the blade, as in 1.7.10. A player that uses the blade when a blow comes takes 3 magic damage and the blow is
   cancelled; whoever strikes with the blade takes 2 magic damage.
-- **Events (forced).** `LivingAttackEvent` is `EntityEvent.LIVING_HURT` (Architectury). 1.7.10 stopped its own nested
-  damage by skipping the next three events of the whole world (`handleNext = 3`), which also swallowed unrelated
-  damage; the port skips exactly the damage the handler itself deals (a flag held while it hurts the wielder).
-- **Drop replacement (forced, workaround).** `LivingDropsEvent` has no Architectury equivalent. The drops of a mob killed
-  by a player attack with an activated blade are replaced by the soul aspects of the mob (one per aspect of its row, a
-  pick-up delay of 10 ticks) using the death, add-entity and end-of-level-tick events (request 3). The soul aspects appear a moment
-  after the death, at the end of the level tick, not in the same call as in 1.7.10.
+- **Events.** `LivingAttackEvent` is `EntityEvent.LIVING_HURT` (Architectury; forced: it is the nearest event). 1.7.10
+  stopped its own nested damage by skipping the next three events of the whole world (`handleNext = 3`), which also swallowed
+  unrelated damage; the port skips exactly the damage the handler itself deals (a flag held while it hurts the wielder).
+- **Drop replacement (loader hook `LIVING_DROPS`).** `LivingDropsEvent` is `TinkererEvents.LIVING_DROPS` (`docs/HOOKS.md`
+  section 8); `ItemBloodSword.onLivingDrops` is registered once by `Machines.register()` (through
+  `ItemBloodSword.registerEvents()`) and is the 1.7.10 handler: a mob (`Mob`, 1.7.10 `EntityLiving`) killed by the damage type
+  `player_attack` (1.7.10 `damageType.equals("player")`: the melee blow of a player, not an arrow or magic) whose killer holds
+  an activated blade in the **main hand** (`getCurrentEquippedItem`) and that has a row in `EnumMobAspect` loses every drop
+  (`event.drops.clear()`: the loot table **and the equipment** it drops) and drops one soul aspect per aspect of its row at its own
+  position with a pick-up delay of 10 ticks. A mob without a row, another kind of death, a bystander's blade, a blade in the off
+  hand and a blade that is not activated leave the loot alone (GameTests). `lootingLevel` and `recentlyHit` are ignored, as the
+  1.7.10 handler ignored its event's Looting. Differences forced by the event contract, all written down:
+  - **When.** The soul aspects are in the world in the call of the death, as in 1.7.10 (the GameTest reads them right after the
+    killing blow); the first version dropped them at the end of the level tick. The death event, the note of the victim, the
+    add-entity filter and the end-of-tick pass are deleted.
+  - **What is replaced.** The list holds the item entities that the victim itself spawns while its death loot is worked out
+    (`spawnAtLocation`: loot table, equipment) and nothing else (`docs/HOOKS.md` section 8); experience orbs are not item entities
+    and stay, as in 1.7.10. An item that another mod spawns somewhere else with `addFreshEntity` is not in the list and stays. The
+    workaround refused every item entity that appeared at the victim's position, whoever spawned it.
+  - **More kills count than in 1.7.10.** `Player.attack` builds its damage source once (`damageSources().playerAttack`) and hurts
+    the other mobs of a sweeping attack of a sword with it as well (read in the 1.21.1 bytecode, **not run**: no GameTest drives a
+    sweeping attack), so a mob killed by the sweep of the blade reaps too (1.7.10 had no sweeping attack). What a GameTest does
+    drive is the plain swing: `aRealSwingOfTheActivatedBladeReapsAndHurtsItsWielder` calls `ServerPlayer.attack(pig)` of a Survival
+    player (not a damage source made by hand), so the `player_attack` source is the one `Player.attack` builds, and the blade's own
+    `LIVING_HURT` handler hurts the wielder by 2 in the middle of the blow without disturbing the three soul aspects.
+  - **Order.** Listeners run in the order of registration: the blade's runs before `DimensionalShardDropHandler` (KamiWorld;
+    `Machines` is before `KamiWorld` in `ContentGroups.ALL`, and both register in `register()`), so an Enderman or Zombified
+    Piglin reaped in the End or the Nether still rolls its dimensional shard, which is added to the list after the soul aspects.
+    The blade never cancels the drops. This is pinned by `aReapedEndermanAndZombifiedPiglinStillRollTheirDimensionalShard`: real
+    deaths (`Mob.die`) of an Enderman in the End and of a Zombified Piglin in the Nether, the dice of the shard made certain, the
+    killer a player with the activated blade; a listener of the check, registered after both, reads the list and cancels it (the
+    End and the Nether stay empty). It requires exactly three soul aspects of the row and then the shard (the helmet or the sword
+    that the mob always drops is gone), and, with a player without the blade as control, the equipment and the shard both there.
+    Were the blade registered after the shard handler, `drops.clear()` would delete the shard; moving `registerEvents()` into
+    `ready()` (after every group's `register()`) made exactly this check fail ("three soul aspects and one shard ...: [three soul
+    aspects]").
+  - **Sides.** The event is server only, so the handler needs no side test; the soul aspects are made by the server.
+  **The group needs the NeoForge poster of `LIVING_DROPS`** (`docs/HOOKS.md` section 8: a handler of `LivingDropsEvent`): until the
+  NeoForge module posts it the blade does not reap there, and a mob it kills drops its loot.
 - **Model.** `blood_sword_0` / `blood_sword_active` with the override described in section 2.
 - **Enchanting (open, shared files).** The blade is not in `#minecraft:swords`, so the vanilla sword enchantments (Sharpness,
   Smite, Bane of Arthropods, Looting, Knockback, Fire Aspect, Sweeping Edge, Unbreaking, Mending) cannot be put on it, while
@@ -238,7 +282,14 @@ crucible (beast 4, mind 8, senses 8) on an ender pearl under the key `MAGNETS`.
 
 - ComputerCraft and OpenComputers peripherals (Aspectalyzer, Attractors), AE2 `IMovableTile`, Tinkers' Construct
   tool repair, NEI integration, Waila providers (not this group's job in the new build).
-- The NeoForge hook for the mob display renderer, and the enchantability of the blade (shared tag files): the requests
-  above. (The scan check, the sparkles, the aspect tag drawing and the Thaumcraft entity keys use the API since the
-  review.)
+- The NeoForge side of the two loader hooks the group uses (the poster of `LIVING_DROPS`, the backend of `ItemRenderers`;
+  section 12), and the enchantability of the blade (shared tag files): the requests in `docs/api-requests/Machines.md`. (The scan
+  check, the sparkles, the aspect tag drawing and the Thaumcraft entity keys use the API since the review.)
 - Recipe-viewer pages for the necromancy recipes.
+
+## 12. What the group needs from the loader modules
+
+| Hook | Used by | Fabric | NeoForge |
+|---|---|---|---|
+| `TinkererEvents.LIVING_DROPS` (`docs/HOOKS.md` section 8) | `ItemBloodSword.onLivingDrops` (the Cursed Spirit's Blade) | posted by `LivingEntityDropsMixin` and the capture mixins; run by the GameTests of the blade | **needs its poster** (`LivingDropsEvent` handler calling `TinkererEvents.postLivingDrops`); not written |
+| `ItemRenderers` (`docs/HOOKS.md` section 9) | `MachinesClient.register()` (the Mob Display) | `FabricItemRenderers`; read, never run on a client | **needs its backend** (`RegisterClientExtensionsEvent`); not written |

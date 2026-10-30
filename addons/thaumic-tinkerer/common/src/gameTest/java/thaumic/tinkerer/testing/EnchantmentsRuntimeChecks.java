@@ -1,14 +1,11 @@
 package thaumic.tinkerer.testing;
 
 import com.mojang.authlib.GameProfile;
-import dev.architectury.event.events.common.BlockEvent;
-import dev.architectury.event.events.common.EntityEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.registry.menu.MenuRegistry;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -16,17 +13,22 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.BowItem;
@@ -55,9 +57,9 @@ import thaumic.tinkerer.common.block.tile.TileEnchanter;
 import thaumic.tinkerer.common.block.tile.container.ContainerEnchanter;
 import thaumic.tinkerer.common.content.Enchantments;
 import thaumic.tinkerer.common.core.fakeplayer.TinkererFakePlayer;
-import thaumic.tinkerer.common.enchantment.AttackBoost;
-import thaumic.tinkerer.common.enchantment.BreakSpeedControl;
+import thaumic.tinkerer.common.core.helper.ItemNBTHelper;
 import thaumic.tinkerer.common.enchantment.EnchantmentFormulas;
+import thaumic.tinkerer.common.enchantment.ModEnchantmentHandler;
 import thaumic.tinkerer.common.enchantment.ModEnchantments;
 import thaumic.tinkerer.common.enchantment.core.EnchantmentManager;
 import thaumic.tinkerer.common.lib.LibBlockNames;
@@ -75,10 +77,10 @@ import thaumic.tinkerer.common.registry.TTRegistry;
  *
  * <p>Runtime checks of the Enchantments group in a running server: the data pack records and what the world made of them,
  * the research entries, the Osmotic Enchanter (persistence, a whole enchanting from a full wand between six pillars, the
- * refusal without pillars, the locked slots), and the effect of each family of enchantments (the multiplied attack, the
- * dig speed and the refused blocks, Vampirism, Slow Fall, Shockwave, Quick Draw, Tunnel). They were written without being
- * able to run them (no Gradle in the porting session): the first run may show a wrong assumption of a check as well as a
- * defect.</p>
+ * refusal without pillars, the locked slots), and the effect of each family of enchantments through the loader events of
+ * {@code TinkererEvents} (the damage of a blow, an arrow or thorns and the strike counter, the dig speed and the refused blocks,
+ * Vampirism, Ascent Boost, Slow Fall, Shockwave, Quick Draw, Tunnel), with real entities, and the negative case of each: an item,
+ * an entity or a player that is not the enchantment's is left alone. The fake player of the Animation Tablet is the cross-check.</p>
  */
 public final class EnchantmentsRuntimeChecks {
     private EnchantmentsRuntimeChecks() {}
@@ -536,7 +538,7 @@ public final class EnchantmentsRuntimeChecks {
         });
     }
 
-    // ---- the attacks -----------------------------------------------------------------------------------------------
+    // ---- the attacks (LIVING_DAMAGE) --------------------------------------------------------------------------------
 
     private static Pig toughPig(GameTestHelper test, Vec3 at) {
         Pig pig = test.spawn(EntityType.PIG, new BlockPos((int) at.x, (int) at.y, (int) at.z));
@@ -544,6 +546,34 @@ public final class EnchantmentsRuntimeChecks {
         pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
         pig.setHealth(1000F);
         return pig;
+    }
+
+    /** A zombie with an item in its main hand, floating (no AI) with a helmet on, so that the sun does not burn it. */
+    private static Zombie armedZombie(GameTestHelper test, Vec3 at, ItemStack mainHand) {
+        Zombie zombie = test.spawn(EntityType.ZOMBIE, new BlockPos((int) at.x, (int) at.y, (int) at.z));
+        zombie.setNoAi(true);
+        zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+        zombie.setItemSlot(EquipmentSlot.MAINHAND, mainHand);
+        return zombie;
+    }
+
+    private static void near(GameTestHelper test, float actual, float expected, String what) {
+        test.assertTrue(Math.abs(actual - expected) < 1.0E-3F, what + ": " + actual + " (expected " + expected + ")");
+    }
+
+    /**
+     * The health the victim loses to one hit of this size from this source, its invulnerability frames cleared first. The
+     * pigs have no armour and nothing else reduces a hit, so this is the amount that the listeners of LIVING_DAMAGE left.
+     */
+    private static float lost(LivingEntity victim, DamageSource source, float amount) {
+        victim.invulnerableTime = 0;
+        float before = victim.getHealth();
+        victim.hurt(source, amount);
+        return before - victim.getHealth();
+    }
+
+    private static CompoundTag customData(ItemStack stack) {
+        return stack.get(DataComponents.CUSTOM_DATA).copyTag();
     }
 
     public static void vampirismHealsTheAttacker(GameTestHelper test) {
@@ -556,10 +586,34 @@ public final class EnchantmentsRuntimeChecks {
             player.attack(pig);
             test.assertTrue(pig.getHealth() < 1000F, "the blow hurt the pig");
             test.assertTrue(player.getHealth() == 12F, "the attacker heals by the level: " + player.getHealth());
-            // the next blow inside the invulnerability frames of the pig deals nothing and heals nothing
+            // the next blow inside the invulnerability frames of the pig is refused by the game before the event: no healing
             player.setHealth(10F);
             player.attack(pig);
             test.assertTrue(player.getHealth() == 10F, "no healing for a blow that does nothing: " + player.getHealth());
+
+            // any living attacker, as in 1.7.10: a zombie with the sword heals itself
+            Zombie zombie = armedZombie(test, new Vec3(5, 1, 5), enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.vampirism, 1));
+            zombie.setHealth(10F);
+            lost(pig, zombie.damageSources().mobAttack(zombie), 3F);
+            test.assertTrue(zombie.getHealth() == 11F, "a zombie heals by the level too: " + zombie.getHealth());
+
+            // the item has to be in the hand: in the inventory, or in the off hand, it does nothing
+            ItemStack vampire = enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.vampirism, 2);
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+            player.getInventory().setItem(5, vampire);
+            player.setItemInHand(InteractionHand.OFF_HAND, vampire.copy());
+            player.setHealth(10F);
+            lost(pig, player.damageSources().playerAttack(player), 3F);
+            test.assertTrue(player.getHealth() == 10F, "an enchanted sword that is not in the main hand heals nothing: " + player.getHealth());
+
+            // the attacker is the one who heals, not the victim that holds the sword
+            Pig holder = toughPig(test, new Vec3(1, 1, 1));
+            holder.setItemSlot(EquipmentSlot.MAINHAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.vampirism, 2));
+            holder.setHealth(10F);
+            lost(holder, player.damageSources().playerAttack(player), 3F);
+            test.assertTrue(holder.getHealth() == 7F && player.getHealth() == 10F, "the holder of the sword is only hit: " + holder.getHealth());
+            zombie.discard();
+            holder.discard();
             finish(test, player);
         });
     }
@@ -570,74 +624,126 @@ public final class EnchantmentsRuntimeChecks {
         player.setItemInHand(InteractionHand.MAIN_HAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
         Pig pig = toughPig(test, new Vec3(3, 1, 6));
         test.runAfterDelay(3, () -> {
-            // (A mock player is not ticked, so the attack damage of the sword in the hand may not be in the attribute yet:
-            // the checks go by the value the attribute has, whatever it is.)
+            DamageSource blow = player.damageSources().playerAttack(player);
+            // Valiance V is 1 + .5 below half of the maximum health, and only below it
+            player.setHealth(20F);
+            near(test, lost(pig, blow, 10F), 10F, "healthy: the blow is as it was");
+            player.setHealth(10F);
+            near(test, lost(pig, blow, 10F), 10F, "exactly half is not below half");
+            player.setHealth(9F);
+            near(test, lost(pig, blow, 10F), 15F, "hurt: the whole blow is multiplied by 1.5");
+            near(test, lost(pig, blow, 4F), 6F, "whatever the size of the blow");
+
+            // the whole melee path of Player.attack: (base * (0.2 + 0.8 * strength^2)) * 1.5
             double base = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
             test.assertTrue(base > 0D, "the attack damage is positive: " + base);
-
-            // healthy: the factor is 1 and nothing is armed
-            player.setHealth(20F);
-            AttackBoost.beforeAttack(player, pig);
-            test.assertTrue(!player.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "nothing armed at full health");
-
-            // hurt: Valiance V gives 1.5
-            player.setHealth(5F);
+            pig.invulnerableTime = 0;
             float strength = player.getAttackStrengthScale(0.5F);
-            AttackBoost.beforeAttack(player, pig);
-            test.assertTrue(player.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "armed");
-            test.assertTrue(Math.abs(player.getAttributeValue(Attributes.ATTACK_DAMAGE) - base * 1.5D) < 1.0E-3,
-                    "Valiance V multiplies the attack by 1.5: " + base + " -> " + player.getAttributeValue(Attributes.ATTACK_DAMAGE));
             float before = pig.getHealth();
             player.attack(pig);
-            float dealt = before - pig.getHealth();
-            float expected = (float) (base * 1.5D * (0.2F + strength * strength * 0.8F));
-            test.assertTrue(Math.abs(dealt - expected) < 0.01F, "the pig took " + dealt + ", expected " + expected);
-            test.assertTrue(!player.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "disarmed once the blow arrived");
-            test.assertTrue(Math.abs(player.getAttributeValue(Attributes.ATTACK_DAMAGE) - base) < 1.0E-6, "the attack is back to " + base);
+            float expected = (float) (base * (0.2F + strength * strength * 0.8F)) * 1.5F;
+            test.assertTrue(Math.abs((before - pig.getHealth()) - expected) < 0.01F,
+                    "a melee blow of the hurt player: the pig took " + (before - pig.getHealth()) + ", expected " + expected);
+
+            // a sword without the enchantment, or Valiance in the off hand, is not multiplied
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+            near(test, lost(pig, blow, 10F), 10F, "a plain sword at low health");
+            player.setItemInHand(InteractionHand.OFF_HAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+            near(test, lost(pig, blow, 10F), 10F, "Valiance in the off hand");
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            near(test, lost(pig, blow, 10F), 10F, "an empty hand");
             finish(test, player);
         });
     }
 
-    public static void theAttackEventArmsTheAttackOfAPlayer(GameTestHelper test) {
+    /**
+     * The 1.7.10 handler answered for any living attacker (the entity that caused the damage) and its main hand: a mob that
+     * hits, the shooter of an arrow, the wearer of thorns. And only for the attacker: a victim that holds the sword is not
+     * boosted, a hit without an attacker is left alone.
+     */
+    public static void theEnchantmentsAnswerForAnyLivingAttackerAndItsMainHandOnly(GameTestHelper test) {
         floor(test);
-        ServerPlayer player = player(test);
-        player.setItemInHand(InteractionHand.MAIN_HAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+        ServerLevel level = test.getLevel();
         Pig pig = toughPig(test, new Vec3(3, 1, 6));
-        test.runAfterDelay(3, () -> {
-            player.setHealth(5F);
-            PlayerEvent.ATTACK_ENTITY.invoker().attack(player, player.level(), pig, InteractionHand.MAIN_HAND, null);
-            test.assertTrue(player.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "the event armed the attack");
-            // a hurt event of the victim ends it
-            EntityEvent.LIVING_HURT.invoker().hurt(pig, player.damageSources().playerAttack(player), 1F);
-            test.assertTrue(!player.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "the event of the hurt disarmed it");
-            // and so does the next tick of the player, if the blow never arrives
-            PlayerEvent.ATTACK_ENTITY.invoker().attack(player, player.level(), pig, InteractionHand.MAIN_HAND, null);
-            TickEvent.PLAYER_PRE.invoker().tick(player);
-            test.assertTrue(!player.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "and so did the tick");
-            finish(test, player);
-        });
+        Zombie zombie = armedZombie(test, new Vec3(5, 1, 5), enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+        zombie.setHealth(5F); // a quarter of 20
+        Arrow arrow = new Arrow(level, zombie, new ItemStack(Items.ARROW), new ItemStack(Items.BOW));
+        try {
+            near(test, lost(pig, level.damageSources().mobAttack(zombie), 10F), 15F, "a mob's blow is multiplied by its sword");
+            near(test, lost(pig, level.damageSources().arrow(arrow, zombie), 10F), 15F, "an arrow takes the sword of its shooter");
+            near(test, lost(pig, level.damageSources().thorns(zombie), 10F), 15F, "thorns take the sword of the one who wears them");
+
+            zombie.setHealth(20F);
+            near(test, lost(pig, level.damageSources().mobAttack(zombie), 10F), 10F, "a healthy zombie is not boosted");
+            zombie.setHealth(5F);
+
+            near(test, lost(pig, level.damageSources().fall(), 10F), 10F, "damage with no attacker is left alone");
+            Zombie other = armedZombie(test, new Vec3(1, 1, 1), new ItemStack(Items.DIAMOND_SWORD));
+            other.setHealth(5F);
+            near(test, lost(pig, level.damageSources().mobAttack(other), 10F), 10F, "a zombie with a plain sword is left alone");
+            zombie.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+            zombie.setItemSlot(EquipmentSlot.OFFHAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+            near(test, lost(pig, level.damageSources().mobAttack(zombie), 10F), 10F, "the off hand does not count");
+            zombie.setItemSlot(EquipmentSlot.MAINHAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+
+            // the victim that holds the sword (at low health) is only hit
+            Pig holder = toughPig(test, new Vec3(1, 1, 5));
+            holder.setItemSlot(EquipmentSlot.MAINHAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+            holder.setHealth(100F);
+            near(test, lost(holder, level.damageSources().mobAttack(other), 3F), 3F, "the holder of the sword as the victim");
+            other.discard();
+            holder.discard();
+        } finally {
+            zombie.discard();
+            arrow.discard();
+        }
+        test.succeed();
     }
 
+    /**
+     * Focused Strikes (deterministic): 10 / 2 = 5, then 5 + .5 * max(counter, 5) * 5 * level. The counter is kept on the weapon:
+     * 0 for a new target, then 5 on the second blow and one more for each blow after it. A blow that the frames of the victim
+     * refuse never reaches the event, so it does not move the counter (1.7.10: the event came after the frames as well).
+     */
     public static void theStrikeCounterIsKeptOnTheWeapon(GameTestHelper test) {
         floor(test);
         ServerPlayer player = player(test);
-        ItemStack sword = enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.dispersedStrikes, 1);
+        ItemStack sword = enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.focusedStrike, 1);
         player.setItemInHand(InteractionHand.MAIN_HAND, sword);
         Pig first = toughPig(test, new Vec3(3, 1, 6));
         Pig second = toughPig(test, new Vec3(5, 1, 5));
         test.runAfterDelay(3, () -> {
             ItemStack held = player.getMainHandItem();
-            AttackBoost.beforeAttack(player, first);
-            CompoundTag data = held.get(DataComponents.CUSTOM_DATA).copyTag();
-            test.assertTrue(data.getInt(AttackBoost.NBT_SUCCESSIVE_STRIKE) == 0, "the first hit on a target: 0");
-            test.assertTrue(data.getLong(AttackBoost.NBT_LAST_TARGET) == first.getUUID().getMostSignificantBits(), "the target is remembered");
-            AttackBoost.beforeAttack(player, first);
-            test.assertTrue(held.get(DataComponents.CUSTOM_DATA).copyTag().getInt(AttackBoost.NBT_SUCCESSIVE_STRIKE) == 5, "the second: 5");
-            AttackBoost.beforeAttack(player, first);
-            test.assertTrue(held.get(DataComponents.CUSTOM_DATA).copyTag().getInt(AttackBoost.NBT_SUCCESSIVE_STRIKE) == 6, "the third: 6");
-            AttackBoost.beforeAttack(player, second);
-            test.assertTrue(held.get(DataComponents.CUSTOM_DATA).copyTag().getInt(AttackBoost.NBT_SUCCESSIVE_STRIKE) == 0, "another target: 0");
-            AttackBoost.afterAttack(player);
+            DamageSource blow = player.damageSources().playerAttack(player);
+            near(test, lost(first, blow, 10F), 17.5F, "the first blow on a target: 5 + .5 * 5 * 5");
+            test.assertTrue(customData(held).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 0, "the counter: 0");
+            test.assertTrue(customData(held).getLong(ModEnchantmentHandler.NBT_LAST_TARGET) == first.getUUID().getMostSignificantBits()
+                    && customData(held).getLong(ModEnchantmentHandler.NBT_LAST_TARGET_2) == first.getUUID().getLeastSignificantBits(),
+                    "the target is remembered");
+            near(test, lost(first, blow, 10F), 17.5F, "the second blow on it");
+            test.assertTrue(customData(held).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 5, "the counter jumps to 5 (max where min was meant)");
+            near(test, lost(first, blow, 10F), 20F, "the third: 5 + .5 * 6 * 5");
+            test.assertTrue(customData(held).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 6, "and goes on: 6");
+
+            // a blow in the frames of the victim that is not stronger than the last is refused by the game: the event is not posted
+            float before = first.getHealth();
+            test.assertTrue(!first.hurt(blow, 10F) && first.getHealth() == before, "refused by the frames");
+            test.assertTrue(customData(held).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 6, "and the counter did not move");
+
+            near(test, lost(second, blow, 10F), 17.5F, "another target starts again");
+            test.assertTrue(customData(held).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 0
+                    && customData(held).getLong(ModEnchantmentHandler.NBT_LAST_TARGET) == second.getUUID().getMostSignificantBits(), "counter 0, new target");
+
+            // Dispersed Strikes on its own sword: 10 * (1 + .6 + s / 5) / (1 + .25 + 2.5 s)
+            ItemStack dispersed = enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.dispersedStrikes, 1);
+            player.setItemInHand(InteractionHand.MAIN_HAND, dispersed);
+            near(test, lost(first, blow, 10F), 12.8F, "Dispersed Strikes: the first blow");
+            near(test, lost(first, blow, 10F), 10F * (1F + .6F + 1F) / (1F + .25F + 12.5F), "and the second (counter 5)");
+            test.assertTrue(customData(player.getMainHandItem()).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 5, "counter 5");
+            // an item without either enchantment gets no counter
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+            near(test, lost(first, blow, 10F), 10F, "a plain sword");
+            test.assertTrue(player.getMainHandItem().get(DataComponents.CUSTOM_DATA) == null, "and no data on it");
             finish(test, player);
         });
     }
@@ -649,219 +755,643 @@ public final class EnchantmentsRuntimeChecks {
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
         Pig pig = toughPig(test, new Vec3(3, 1, 6));
         test.runAfterDelay(3, () -> {
-            double base = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+            DamageSource blow = player.damageSources().playerAttack(player);
             player.setPos(test.absoluteVec(new Vec3(5.5, 1.0, 5.5))); // standing on the floor
-            AttackBoost.beforeAttack(player, pig);
-            test.assertTrue(!player.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "on the ground: nothing");
+            near(test, lost(pig, blow, 10F), 10F, "on the ground: nothing");
             player.setPos(test.absoluteVec(new Vec3(5.5, 3.0, 5.5))); // in the air
-            AttackBoost.beforeAttack(player, pig);
-            test.assertTrue(Math.abs(player.getAttributeValue(Attributes.ATTACK_DAMAGE) - base * 2D) < 1.0E-3,
-                    "in the air the attack is multiplied by 1 + .25 * 4 = 2: " + base + " -> " + player.getAttributeValue(Attributes.ATTACK_DAMAGE));
-            AttackBoost.afterAttack(player);
+            near(test, lost(pig, blow, 10F), 20F, "in the air a blow is multiplied by 1 + .25 * 4 = 2");
+
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            near(test, lost(pig, blow, 10F), 10F, "with nothing in the hand, as in the original");
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+
+            // only the leggings count, and only a player's
+            player.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
+            player.setItemSlot(EquipmentSlot.CHEST, enchanted(test, new ItemStack(Items.DIAMOND_CHESTPLATE), ModEnchantments.pounce, 4));
+            near(test, lost(pig, blow, 10F), 10F, "Pounce on the chest is nothing");
+
+            Zombie zombie = armedZombie(test, new Vec3(5, 3, 5), new ItemStack(Items.DIAMOND_SWORD));
+            zombie.setItemSlot(EquipmentSlot.LEGS, enchanted(test, new ItemStack(Items.DIAMOND_LEGGINGS), ModEnchantments.pounce, 4));
+            near(test, lost(pig, zombie.damageSources().mobAttack(zombie), 10F), 10F, "a mob with the leggings is not a player");
+            zombie.discard();
             finish(test, player);
         });
     }
 
-    // ---- digging -----------------------------------------------------------------------------------------------------
-
-    /** The player stands on the floor above a block and looks straight down at it. */
-    private static ServerPlayer minerLookingDown(GameTestHelper test, BlockPos target, ItemStack tool) {
+    /**
+     * Final Strike triples the blow when {@code level > nextInt(19)}: 5 of 19 at level V, 1 of 19 at level I. The roll is random,
+     * so the check counts 400 blows: each one is the plain blow or three times it, nothing between, level V triples some and
+     * not all, about a quarter, and more of them than level I does; a plain sword never.
+     */
+    public static void finalStrikeTriplesTheBlowOnTheRollOfTheOriginal(GameTestHelper test) {
+        floor(test);
         ServerPlayer player = player(test);
-        Vec3 at = test.absoluteVec(new Vec3(target.getX() + 0.5, target.getY() + 1.0, target.getZ() + 0.5));
-        player.moveTo(at.x, at.y, at.z, 0F, 90F);
-        player.setYHeadRot(0F); // the view vector follows the head, which moveTo leaves where it was
+        Pig pig = toughPig(test, new Vec3(3, 1, 6));
+        DamageSource blow = player.damageSources().playerAttack(player);
+        int[] tripled = new int[3];
+        ItemStack[] swords = { enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.finalStrike, 5),
+                enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.finalStrike, 1), new ItemStack(Items.DIAMOND_SWORD) };
+        for (int which = 0; which < swords.length; which++) {
+            player.setItemInHand(InteractionHand.MAIN_HAND, swords[which]);
+            for (int i = 0; i < 400; i++) {
+                pig.setHealth(1000F);
+                float lost = lost(pig, blow, 10F);
+                if (Math.abs(lost - 30F) < 1.0E-3F) tripled[which]++;
+                else test.assertTrue(Math.abs(lost - 10F) < 1.0E-3F, "a blow of 10 is 10 or 30, not " + lost);
+            }
+        }
+        // expected 105 of 400 at level V (5 / 19) and 21 at level I (1 / 19)
+        test.assertTrue(tripled[0] > 50 && tripled[0] < 170, "Final Strike V triples about 5 blows in 19: " + tripled[0] + " of 400");
+        test.assertTrue(tripled[1] >= 1 && tripled[1] < 60, "Final Strike I about 1 in 19: " + tripled[1] + " of 400");
+        test.assertTrue(tripled[0] > tripled[1], "level V triples more often than level I");
+        test.assertTrue(tripled[2] == 0, "a plain sword never: " + tripled[2]);
+        finish(test, player);
+    }
+
+    /** Ticks of the player until the sword is at full strength again (a sweep needs more than .9 of it); set the health after. */
+    private static void recharge(ServerPlayer player) {
+        for (int i = 0; i < 14; i++) player.doTick();
+        player.setOnGround(true);
+    }
+
+    /**
+     * The sweep of a sword (Minecraft 1.9 and later; 1.7.10 had none) hurts every entity it reaches with the same source as the
+     * blow: the event is posted once for each, and the enchantments answer for each of them. A swing at a pig with another
+     * beside it heals Vampirism twice, a swing at a lone pig once; the strike counter ends on the last pig of the swing; a pig
+     * outside the reach of the sweep is left alone. This pins the behaviour that docs/deviations/Enchantments.md section 2 states.
+     */
+    public static void aSweepOfASwordIsAHitForEachEntityItReaches(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test);
+        player.setPos(test.absoluteVec(new Vec3(3.5, 1.0, 5.5)));
+        ItemStack sword = enchanted(test, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.vampirism, 2),
+                ModEnchantments.focusedStrike, 1);
+        player.setItemInHand(InteractionHand.MAIN_HAND, sword);
+        Pig primary = toughPig(test, new Vec3(3, 1, 3));
+        Pig swept = toughPig(test, new Vec3(4, 1, 3));
+        Pig outside = toughPig(test, new Vec3(0, 1, 3));
+        Pig lone = toughPig(test, new Vec3(7, 1, 0));
+
+        // the control: a swing at a pig with nobody beside it
+        recharge(player);
+        test.assertTrue(player.getAttackStrengthScale(0.5F) > 0.9F && player.onGround(), "the sword is at full strength, on the ground: a sweep is possible");
+        player.setHealth(10F);
+        player.attack(lone);
+        test.assertTrue(lone.getHealth() < 1000F, "the blow hurt the lone pig");
+        test.assertTrue(player.getHealth() == 12F, "one pig, one heal of 2: " + player.getHealth());
+
+        // the swing at a pig with another beside it, a few game ticks later (a different game time than the first swing)
+        test.runAfterDelay(3, () -> {
+            recharge(player);
+            test.assertTrue(player.getAttackStrengthScale(0.5F) > 0.9F && player.onGround(), "full strength again");
+            player.setHealth(10F);
+            player.attack(primary);
+            test.assertTrue(primary.getHealth() < 1000F, "the blow hurt the pig it was aimed at");
+            test.assertTrue(swept.getHealth() < 1000F, "the sweep hurt the pig beside it (without that this check proves nothing): " + swept.getHealth());
+            test.assertTrue(outside.getHealth() == 1000F, "the pig out of the sweep is left alone: " + outside.getHealth());
+            test.assertTrue(player.getHealth() == 14F, "Vampirism heals by its level for each pig the swing hurt: " + player.getHealth());
+            CompoundTag data = customData(player.getMainHandItem());
+            test.assertTrue(data.getLong(ModEnchantmentHandler.NBT_LAST_TARGET) == swept.getUUID().getMostSignificantBits()
+                    && data.getLong(ModEnchantmentHandler.NBT_LAST_TARGET_2) == swept.getUUID().getLeastSignificantBits(),
+                    "the strike counter's target is the last pig of the swing, the swept one, not the one aimed at");
+            test.assertTrue(data.getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 0,
+                    "and its streak starts again: " + data.getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE));
+            for (Pig pig : List.of(primary, swept, outside, lone)) pig.discard();
+            finish(test, player);
+        });
+    }
+
+    /**
+     * The invulnerability frames compare the boosted amounts, not the raw ones (docs/deviations/Enchantments.md section 2). With a
+     * factor above one (Pounce IV, 2): after a blow of 10, dealt as 20, a blow of 15 or 20 inside the frames is refused where
+     * 1.7.10 dealt (15 - 10) * 2 = 10, and a blow of 25 deals what 1.7.10 dealt, (25 - 10) * 2 = 30. With a factor below one
+     * (Dispersed Strikes I at a counter of 6, 2.6 / 16.25): after a blow of 10, dealt as 1.6, the same raw blow inside the
+     * frames is posted (1.7.10 refused it before its event), moves the counter to 7 and then is refused for dealing less.
+     */
+    public static void theFramesCompareTheBoostedAmountsNotTheRawOnes(GameTestHelper test) {
+        floor(test);
+        ServerPlayer player = player(test);
+        player.setPos(test.absoluteVec(new Vec3(5.5, 3.0, 5.5))); // in the air
+        player.setItemSlot(EquipmentSlot.LEGS, enchanted(test, new ItemStack(Items.DIAMOND_LEGGINGS), ModEnchantments.pounce, 4));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+        Pig pig = toughPig(test, new Vec3(3, 1, 3));
+        DamageSource blow = player.damageSources().playerAttack(player);
+
+        near(test, lost(pig, blow, 10F), 20F, "the first blow of 10 is dealt as 20");
+        float afterFirst = pig.getHealth();
+        test.assertTrue(!pig.hurt(blow, 15F) && pig.getHealth() == afterFirst, "15 inside the frames is refused (1.7.10 dealt 10)");
+        test.assertTrue(!pig.hurt(blow, 20F) && pig.getHealth() == afterFirst, "20 as well");
+        pig.hurt(blow, 25F);
+        near(test, afterFirst - pig.getHealth(), 30F, "25 deals 25 * 2 less the 20 of the first, as in 1.7.10: (25 - 10) * 2");
+
+        // a factor below one
+        player.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
+        ItemStack dispersed = enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.dispersedStrikes, 1);
+        ItemNBTHelper.setLong(dispersed, ModEnchantmentHandler.NBT_LAST_TARGET, pig.getUUID().getMostSignificantBits());
+        ItemNBTHelper.setLong(dispersed, ModEnchantmentHandler.NBT_LAST_TARGET_2, pig.getUUID().getLeastSignificantBits());
+        ItemNBTHelper.setInt(dispersed, ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE, 5);
+        player.setItemInHand(InteractionHand.MAIN_HAND, dispersed);
+        pig.setHealth(1000F);
+        near(test, lost(pig, blow, 10F), 10F * (1F + .6F + 1F) / (1F + .25F + 15F), "the first blow, the counter 6: 10 * 2.6 / 16.25");
+        float afterDispersed = pig.getHealth();
+        test.assertTrue(customData(player.getMainHandItem()).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 6, "the counter is 6");
+        test.assertTrue(!pig.hurt(blow, 10F) && pig.getHealth() == afterDispersed, "the same raw blow inside the frames deals nothing");
+        test.assertTrue(customData(player.getMainHandItem()).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 7,
+                "but it was posted (1.7.10 refused it before its event): the counter moved to "
+                        + customData(player.getMainHandItem()).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE));
+        pig.discard();
+        finish(test, player);
+    }
+
+    // ---- digging (BREAK_SPEED) ---------------------------------------------------------------------------------------
+
+    /** The player stands on the floor above a block (in the middle of the structure, on survival rules). */
+    private static ServerPlayer miner(GameTestHelper test, ItemStack tool) {
+        ServerPlayer player = player(test);
         player.setItemInHand(InteractionHand.MAIN_HAND, tool);
         return player;
     }
 
-    public static void desintegrateAndFlamingTouchChangeTheDigSpeedOfTheBlockUnderTheCrosshair(GameTestHelper test) {
+    private static float progress(GameTestHelper test, Player digger, BlockPos target) {
+        BlockPos absolute = test.absolutePos(target);
+        return test.getLevel().getBlockState(absolute).getDestroyProgress(digger, test.getLevel(), absolute);
+    }
+
+    public static void desintegrateAndFlamingTouchChangeTheDigSpeedOfTheBlock(GameTestHelper test) {
         floor(test);
         BlockPos target = new BlockPos(3, 1, 3);
+        ServerPlayer player = miner(test, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.desintegrate, 1));
+        ServerPlayer bystander = miner(test, new ItemStack(Items.DIAMOND_PICKAXE));
         test.setBlock(target, Blocks.DIRT);
-        ServerPlayer player = minerLookingDown(test, target, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.desintegrate, 1));
-        test.runAfterDelay(3, () -> {
-            BreakSpeedControl.update(player);
-            test.assertTrue(player.getAttribute(Attributes.BLOCK_BREAK_SPEED).hasModifier(BreakSpeedControl.MODIFIER), "a modifier on the dig speed");
-            test.assertTrue(player.getDestroySpeed(Blocks.DIRT.defaultBlockState()) >= 100F,
-                    "dirt breaks at once: " + player.getDestroySpeed(Blocks.DIRT.defaultBlockState()));
+        // no crosshair, no tick of the player: the speed is asked from the block and the player, as 1.7.10's event was
+        test.assertTrue(progress(test, player, target) >= 1F, "dirt breaks at once: " + progress(test, player, target));
+        float plain = progress(test, bystander, target);
+        test.assertTrue(plain > 0F && plain < 1F, "a plain diamond pickaxe does not: " + plain);
 
-            // cobblestone (hardness 2) is out of reach for Disintegrate
-            test.setBlock(target, Blocks.COBBLESTONE);
-            BreakSpeedControl.update(player);
-            test.assertTrue(player.getDestroySpeed(Blocks.COBBLESTONE.defaultBlockState()) == 0F, "cobblestone cannot be dug: " + player.getDestroySpeed(Blocks.COBBLESTONE.defaultBlockState()));
+        // stone (hardness 1.5) is still Disintegrate's, cobblestone (2.0) is out of reach
+        test.setBlock(target, Blocks.STONE);
+        test.assertTrue(progress(test, player, target) >= 1F, "stone has a hardness of 1.5 and goes");
+        test.setBlock(target, Blocks.COBBLESTONE);
+        test.assertTrue(progress(test, player, target) == 0F, "cobblestone cannot be dug: " + progress(test, player, target));
+        test.assertTrue(progress(test, bystander, target) > 0F, "but another player digs it");
 
-            // Flaming Touch: wood only
-            player.setItemInHand(InteractionHand.MAIN_HAND, enchanted(test, new ItemStack(Items.DIAMOND_AXE), ModEnchantments.autoSmelt, 1));
-            test.setBlock(target, Blocks.OAK_PLANKS);
-            BreakSpeedControl.update(player);
-            test.assertTrue(player.getDestroySpeed(Blocks.OAK_PLANKS.defaultBlockState()) >= 100F, "planks break at once");
-            test.setBlock(target, Blocks.DIRT);
-            BreakSpeedControl.update(player);
-            test.assertTrue(player.getDestroySpeed(Blocks.DIRT.defaultBlockState()) == 0F, "dirt does not");
+        // Flaming Touch: wood only
+        player.setItemInHand(InteractionHand.MAIN_HAND, enchanted(test, new ItemStack(Items.DIAMOND_AXE), ModEnchantments.autoSmelt, 1));
+        test.setBlock(target, Blocks.OAK_PLANKS);
+        test.assertTrue(progress(test, player, target) >= 1F, "planks break at once");
+        test.setBlock(target, Blocks.OAK_LOG);
+        test.assertTrue(progress(test, player, target) >= 1F, "and logs");
+        test.setBlock(target, Blocks.DIRT);
+        test.assertTrue(progress(test, player, target) == 0F, "dirt does not");
 
-            // another tool, another look: the modifier goes
-            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
-            BreakSpeedControl.update(player);
-            test.assertTrue(!player.getAttribute(Attributes.BLOCK_BREAK_SPEED).hasModifier(BreakSpeedControl.MODIFIER), "no enchantment, no modifier");
-            finish(test, player);
-        });
+        // another tool in the hand: no enchantment, no change
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
+        test.assertTrue(Math.abs(progress(test, player, target) - progress(test, bystander, target)) < 1.0E-6F, "no enchantment, no change");
+        // and the enchantment in the off hand or the inventory is nothing
+        player.setItemInHand(InteractionHand.OFF_HAND, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.desintegrate, 1));
+        player.getInventory().setItem(7, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.desintegrate, 1));
+        test.assertTrue(Math.abs(progress(test, player, target) - progress(test, bystander, target)) < 1.0E-6F, "only the main hand counts");
+        player.discard();
+        finish(test, bystander);
     }
 
     public static void shatterAndTunnelScaleTheDigSpeed(GameTestHelper test) {
         floor(test);
         BlockPos target = new BlockPos(3, 1, 3);
         test.setBlock(target, Blocks.OBSIDIAN);
-        ServerPlayer player = minerLookingDown(test, target, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.shatter, 2));
-        test.runAfterDelay(3, () -> {
-            float plain = player.getDestroySpeed(Blocks.OBSIDIAN.defaultBlockState());
-            BreakSpeedControl.update(player);
-            float shattered = player.getDestroySpeed(Blocks.OBSIDIAN.defaultBlockState());
-            test.assertTrue(Math.abs(shattered / plain - 6F) < 0.01F, "obsidian 6 times faster with Shatter II: " + plain + " -> " + shattered);
+        ItemStack shatter = enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.shatter, 2);
+        ServerPlayer player = miner(test, new ItemStack(Items.DIAMOND_PICKAXE));
+        float plain = progress(test, player, target);
+        player.setItemInHand(InteractionHand.MAIN_HAND, shatter);
+        float shattered = progress(test, player, target);
+        test.assertTrue(plain > 0F && Math.abs(shattered / plain - 6F) < 0.01F, "obsidian 6 times faster with Shatter II: " + plain + " -> " + shattered);
 
+        test.setBlock(target, Blocks.STONE);
+        float stone = progress(test, player, target);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
+        float stonePlain = progress(test, player, target);
+        test.assertTrue(Math.abs(stone / stonePlain - 0.8F) < 0.01F, "stone at 0.8: " + stonePlain + " -> " + stone);
+
+        // Tunnel: nothing remembered, then the same way, then a turn
+        ItemStack tunnel = enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.tunnel, 3);
+        player.setItemInHand(InteractionHand.MAIN_HAND, tunnel);
+        test.assertTrue(Math.abs(progress(test, player, target) / stonePlain - 1F) < 0.01F, "no direction remembered, no change");
+        // a real break remembers the direction (Architectury's BlockEvent.BREAK is posted by ServerPlayerGameMode.destroyBlock)
+        test.assertTrue(player.gameMode.destroyBlock(test.absolutePos(target)), "the stone is broken");
+        float remembered = customData(player.getMainHandItem()).getFloat(ModEnchantmentHandler.NBT_TUNNEL_DIRECTION);
+        test.assertTrue(remembered == player.getYRot(), "the direction is kept on the tool: " + remembered);
+        test.setBlock(target, Blocks.STONE);
+        test.assertTrue(Math.abs(progress(test, player, target) / stonePlain - 1.6F) < 0.01F, "the same way: 1 + .2 * 3");
+        player.setYRot(player.getYRot() + 90F);
+        test.assertTrue(Math.abs(progress(test, player, target) / stonePlain - 0.3F) < 0.01F, "after a turn: 0.3");
+        // the yaw of the server wraps at 180: 179 and -179 are two degrees apart
+        ItemNBTHelper.setFloat(player.getMainHandItem(), ModEnchantmentHandler.NBT_TUNNEL_DIRECTION, 179F);
+        player.setYRot(-179F);
+        test.assertTrue(Math.abs(progress(test, player, target) / stonePlain - 1.6F) < 0.01F, "across the seam of the angle it is the same way");
+
+        // Shatter and Tunnel together multiply, in the hands of the one who holds both
+        // (an item with Shatter in the off hand and Tunnel in the main hand is only Tunnel)
+        player.setYRot(0F);
+        ItemNBTHelper.setFloat(player.getMainHandItem(), ModEnchantmentHandler.NBT_TUNNEL_DIRECTION, 0F);
+        player.setItemInHand(InteractionHand.OFF_HAND, shatter.copy());
+        test.assertTrue(Math.abs(progress(test, player, target) / stonePlain - 1.6F) < 0.01F, "the off hand adds nothing");
+
+        // the direction is remembered by a tool of Tunnel and by no other: a plain pickaxe and a Shatter one break a block and keep
+        // no data at all (the stone is broken for real, through the same call as above)
+        for (ItemStack other : List.of(new ItemStack(Items.DIAMOND_PICKAXE), shatter.copy())) {
             test.setBlock(target, Blocks.STONE);
-            BreakSpeedControl.update(player);
-            float stone = player.getDestroySpeed(Blocks.STONE.defaultBlockState());
-            player.getAttribute(Attributes.BLOCK_BREAK_SPEED).removeModifier(BreakSpeedControl.MODIFIER);
-            float stonePlain = player.getDestroySpeed(Blocks.STONE.defaultBlockState());
-            test.assertTrue(Math.abs(stone / stonePlain - 0.8F) < 0.01F, "stone at 0.8: " + stonePlain + " -> " + stone);
-
-            // Tunnel: nothing remembered, then the same way, then a turn
-            player.setItemInHand(InteractionHand.MAIN_HAND, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.tunnel, 3));
-            BreakSpeedControl.update(player);
-            test.assertTrue(!player.getAttribute(Attributes.BLOCK_BREAK_SPEED).hasModifier(BreakSpeedControl.MODIFIER), "no direction, no change");
-            BlockEvent.BREAK.invoker().breakBlock(player.level(), test.absolutePos(target), Blocks.STONE.defaultBlockState(), player, null);
-            float remembered = player.getMainHandItem().get(DataComponents.CUSTOM_DATA).copyTag().getFloat(BreakSpeedControl.NBT_TUNNEL_DIRECTION);
-            test.assertTrue(remembered == player.getYRot(), "the direction is kept on the tool: " + remembered);
-            float tunnelPlain = player.getDestroySpeed(Blocks.STONE.defaultBlockState());
-            BreakSpeedControl.update(player);
-            test.assertTrue(Math.abs(player.getDestroySpeed(Blocks.STONE.defaultBlockState()) / tunnelPlain - 1.6F) < 0.01F, "the same way: 1 + .2 * 3");
-            player.setYRot(player.getYRot() + 90F);
-            BreakSpeedControl.update(player);
-            test.assertTrue(Math.abs(player.getDestroySpeed(Blocks.STONE.defaultBlockState()) / tunnelPlain - 0.3F) < 0.01F, "after a turn: 0.3");
-            finish(test, player);
-        });
+            player.setItemInHand(InteractionHand.MAIN_HAND, other);
+            player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+            test.assertTrue(player.gameMode.destroyBlock(test.absolutePos(target)), "a tool without Tunnel breaks the stone as well");
+            ItemStack held = player.getMainHandItem();
+            test.assertTrue(held.get(DataComponents.CUSTOM_DATA) == null || !customData(held).contains(ModEnchantmentHandler.NBT_TUNNEL_DIRECTION),
+                    "a tool without Tunnel remembers no direction: " + held.get(DataComponents.CUSTOM_DATA));
+        }
+        player.discard();
+        test.succeed();
     }
 
+    /**
+     * Disintegrate refuses a block that is not its own: no progress on the real dig path (the first click, the ticks of the
+     * game mode, the finishing packet), where the same pickaxe without the enchantment gets the block down. A block that is its
+     * own goes at the first click. The wear of Disintegrate and Flaming Touch is one point for the block, besides the point
+     * that breaking a block costs a pickaxe anyway.
+     */
     public static void aToolOfDisintegrateRefusesTheOtherBlocksAndWearsDoubleOnItsOwn(GameTestHelper test) {
         floor(test);
+        ServerLevel level = test.getLevel();
         BlockPos dirt = new BlockPos(3, 1, 3);
         BlockPos stone = new BlockPos(5, 1, 3);
+        BlockPos stone2 = new BlockPos(5, 1, 5);
         test.setBlock(dirt, Blocks.DIRT);
         test.setBlock(stone, Blocks.COBBLESTONE);
-        ServerPlayer player = minerLookingDown(test, dirt, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.desintegrate, 1));
-        test.runAfterDelay(3, () -> {
-            test.assertTrue(player.gameMode.destroyBlock(test.absolutePos(stone)) == false, "cobblestone is refused");
-            test.assertTrue(test.getLevel().getBlockState(test.absolutePos(stone)).is(Blocks.COBBLESTONE), "and stays");
-            int worn = player.getMainHandItem().getDamageValue();
-            test.assertTrue(player.gameMode.destroyBlock(test.absolutePos(dirt)), "dirt breaks");
-            test.assertTrue(test.getLevel().getBlockState(test.absolutePos(dirt)).isAir(), "and is gone");
-            test.assertTrue(player.getMainHandItem().getDamageValue() - worn >= 1, "the tool wore: " + (player.getMainHandItem().getDamageValue() - worn));
-            finish(test, player);
-        });
+        test.setBlock(stone2, Blocks.COBBLESTONE);
+        ServerPlayer player = miner(test, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.desintegrate, 1));
+        ServerPlayer plainPlayer = miner(test, new ItemStack(Items.DIAMOND_PICKAXE));
+        int sequence = 0;
+
+        // the first click on cobblestone, then a long dig, then the packet that says it is finished, then the ticks of the delayed
+        // destroy that the game mode keeps for a finish that came early
+        player.gameMode.handleBlockBreakAction(test.absolutePos(stone), ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
+                Direction.UP, level.getMaxBuildHeight(), ++sequence);
+        for (int i = 0; i < 100; i++) player.gameMode.tick();
+        player.gameMode.handleBlockBreakAction(test.absolutePos(stone), ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK,
+                Direction.UP, level.getMaxBuildHeight(), ++sequence);
+        for (int i = 0; i < 100; i++) player.gameMode.tick();
+        test.assertTrue(level.getBlockState(test.absolutePos(stone)).is(Blocks.COBBLESTONE), "cobblestone stays under a Disintegrate pickaxe");
+
+        // control: the same dig with the same pickaxe without the enchantment gets it down
+        plainPlayer.gameMode.handleBlockBreakAction(test.absolutePos(stone2), ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
+                Direction.UP, level.getMaxBuildHeight(), ++sequence);
+        for (int i = 0; i < 100; i++) plainPlayer.gameMode.tick();
+        plainPlayer.gameMode.handleBlockBreakAction(test.absolutePos(stone2), ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK,
+                Direction.UP, level.getMaxBuildHeight(), ++sequence);
+        for (int i = 0; i < 100; i++) plainPlayer.gameMode.tick();
+        test.assertTrue(level.getBlockState(test.absolutePos(stone2)).isAir(), "the same dig with a plain pickaxe gets the cobblestone down");
+
+        // the block that is its own: one click; the wear is what the pickaxe has lost over the break
+        int wornBefore = player.getMainHandItem().getDamageValue();
+        player.gameMode.handleBlockBreakAction(test.absolutePos(dirt), ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
+                Direction.UP, level.getMaxBuildHeight(), ++sequence);
+        test.assertTrue(level.getBlockState(test.absolutePos(dirt)).isAir(), "dirt is gone at the first click");
+        int worn = player.getMainHandItem().getDamageValue() - wornBefore;
+        test.assertTrue(worn == 2, "one point for the block and one for Disintegrate: " + worn);
+
+        // control: a plain pickaxe breaking the same kind of block is worn by one point
+        test.setBlock(dirt, Blocks.DIRT);
+        int plainBefore = plainPlayer.getMainHandItem().getDamageValue();
+        test.assertTrue(plainPlayer.gameMode.destroyBlock(test.absolutePos(dirt)), "the plain pickaxe breaks dirt");
+        int plainWorn = plainPlayer.getMainHandItem().getDamageValue() - plainBefore;
+        test.assertTrue(plainWorn == 1, "a plain pickaxe wears one point for it: " + plainWorn);
+
+        // a block that is not Disintegrate's, broken by a direct call (which asks no dig progress, so nothing refuses it): the
+        // wear is the pickaxe's own, one point, not the extra one of the enchantment
+        BlockPos rock = new BlockPos(1, 1, 1);
+        test.setBlock(rock, Blocks.COBBLESTONE);
+        int rockBefore = player.getMainHandItem().getDamageValue();
+        test.assertTrue(player.gameMode.destroyBlock(test.absolutePos(rock)), "a direct call breaks the cobblestone");
+        int rockWorn = player.getMainHandItem().getDamageValue() - rockBefore;
+        test.assertTrue(rockWorn == 1, "cobblestone is not Disintegrate's: a plain point of wear: " + rockWorn);
+
+        // Flaming Touch: an axe on planks wears the same two points
+        BlockPos planks = new BlockPos(1, 1, 5);
+        test.setBlock(planks, Blocks.OAK_PLANKS);
+        player.setItemInHand(InteractionHand.MAIN_HAND, enchanted(test, new ItemStack(Items.DIAMOND_AXE), ModEnchantments.autoSmelt, 1));
+        player.gameMode.handleBlockBreakAction(test.absolutePos(planks), ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
+                Direction.UP, level.getMaxBuildHeight(), ++sequence);
+        test.assertTrue(level.getBlockState(test.absolutePos(planks)).isAir(), "planks are gone at the first click");
+        test.assertTrue(player.getMainHandItem().getDamageValue() == 2, "two points: " + player.getMainHandItem().getDamageValue());
+
+        // and the same axe on a block that is not wood, by a direct call: one point
+        test.setBlock(dirt, Blocks.DIRT);
+        int axeBefore = player.getMainHandItem().getDamageValue();
+        test.assertTrue(player.gameMode.destroyBlock(test.absolutePos(dirt)), "a direct call breaks the dirt");
+        int axeWorn = player.getMainHandItem().getDamageValue() - axeBefore;
+        test.assertTrue(axeWorn == 1, "dirt is not wood: a plain point of wear for Flaming Touch: " + axeWorn);
+        player.discard();
+        finish(test, plainPlayer);
     }
 
-    // ---- movement --------------------------------------------------------------------------------------------------
+    // ---- movement (LIVING_JUMP, LIVING_FALL) --------------------------------------------------------------------------
 
-    public static void slowFallShortensTheFallOnTheServer(GameTestHelper test) {
+    private static void wear(GameTestHelper test, LivingEntity wearer, EquipmentSlot slot, Item item, ResourceKey<Enchantment> key, int level) {
+        wearer.setItemSlot(slot, enchanted(test, new ItemStack(item), key, level));
+    }
+
+    /**
+     * Ascent Boost: the vertical motion of the jump, right after the jump set it, is multiplied by (level + 2) / 2, with the
+     * highest level on the four armor slots, for a player that does not sneak; nobody else.
+     */
+    public static void ascentBoostMultipliesTheJumpOfAPlayer(GameTestHelper test) {
         floor(test);
         ServerPlayer player = player(test);
-        player.setItemSlot(EquipmentSlot.FEET, enchanted(test, new ItemStack(Items.DIAMOND_BOOTS), ModEnchantments.slowFall, 3));
-        test.runAfterDelay(3, () -> {
-            player.setPos(test.absoluteVec(new Vec3(5.5, 6.0, 5.5)));
-            player.setOnGround(false);
-            player.fallDistance = 10F;
-            TickEvent.PLAYER_PRE.invoker().tick(player);
-            test.assertTrue(Math.abs(player.fallDistance - 9F) < 1.0E-4F, "10 - 3 / 3 = 9: " + player.fallDistance);
+        player.jumpFromGround();
+        test.assertTrue(Math.abs(player.getDeltaMovement().y - 0.42D) < 1.0E-4D, "without armor a plain jump: " + player.getDeltaMovement().y);
 
-            player.fallDistance = 3F;
-            TickEvent.PLAYER_PRE.invoker().tick(player);
-            test.assertTrue(Math.abs(player.fallDistance - 2.9F) < 1.0E-4F, "never below 2.9: " + player.fallDistance);
+        wear(test, player, EquipmentSlot.LEGS, Items.DIAMOND_LEGGINGS, ModEnchantments.ascentBoost, 3);
+        wear(test, player, EquipmentSlot.HEAD, Items.DIAMOND_HELMET, ModEnchantments.ascentBoost, 1);
+        player.setDeltaMovement(Vec3.ZERO);
+        player.jumpFromGround();
+        test.assertTrue(Math.abs(player.getDeltaMovement().y - 0.42D * 2.5D) < 1.0E-4D,
+                "the highest level on any slot, 3: 0.42 * 2.5 = 1.05, once: " + player.getDeltaMovement().y);
 
-            player.fallDistance = 2.5F;
-            TickEvent.PLAYER_PRE.invoker().tick(player);
-            test.assertTrue(player.fallDistance == 2.5F, "too short a fall is left alone");
+        player.setShiftKeyDown(true);
+        player.setDeltaMovement(Vec3.ZERO);
+        player.jumpFromGround();
+        test.assertTrue(Math.abs(player.getDeltaMovement().y - 0.42D) < 1.0E-4D, "not while sneaking: " + player.getDeltaMovement().y);
+        player.setShiftKeyDown(false);
 
-            player.fallDistance = 10F;
-            player.setShiftKeyDown(true);
-            TickEvent.PLAYER_PRE.invoker().tick(player);
-            test.assertTrue(player.fallDistance == 10F, "sneaking turns it off");
-            player.setShiftKeyDown(false);
-            player.setOnGround(true);
-            TickEvent.PLAYER_PRE.invoker().tick(player);
-            test.assertTrue(player.fallDistance == 10F, "on the ground there is nothing to slow");
-            finish(test, player);
-        });
+        // a pig in the same leggings is not a player
+        Pig pig = toughPig(test, new Vec3(3, 1, 3));
+        pig.setItemSlot(EquipmentSlot.LEGS, enchanted(test, new ItemStack(Items.DIAMOND_LEGGINGS), ModEnchantments.ascentBoost, 4));
+        pig.jumpFromGround();
+        test.assertTrue(Math.abs(pig.getDeltaMovement().y - 0.42D) < 1.0E-4D, "a mob is not boosted: " + pig.getDeltaMovement().y);
+        pig.discard();
+
+        // the player's own path, the jump key on the ground and one tick (the aiStep path of the client's player): level 2 is twice
+        ServerPlayer walker = player(test);
+        walker.setPos(test.absoluteVec(new Vec3(2.5, 1.0, 2.5)));
+        wear(test, walker, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, ModEnchantments.ascentBoost, 2);
+        double floorY = test.absoluteVec(new Vec3(0, 1, 0)).y;
+        walker.setOnGround(true);
+        walker.setJumping(true);
+        walker.doTick();
+        test.assertTrue(Math.abs(walker.getY() - (floorY + 0.84D)) < 0.02D, "the doubled jump carried the player up: " + (walker.getY() - floorY));
+        test.assertTrue(Math.abs(walker.getDeltaMovement().y - 0.7448D) < 0.01D,
+                "and what is left of it after the tick is (0.84 - 0.08) * 0.98, not the 0.3332 of a plain jump: " + walker.getDeltaMovement().y);
+        walker.discard();
+        finish(test, player);
     }
 
+    /**
+     * A new server player refuses every hit for 60 ticks ({@code ServerPlayer.tick} counts {@code spawnInvulnerableTime} down). The
+     * level does that only for a player in an entity-ticking chunk, which the area of a test may not be yet on a busy server, so the
+     * check counts the protection down itself instead of waiting for it.
+     */
+    private static void endSpawnProtection(ServerPlayer... players) {
+        for (ServerPlayer player : players) {
+            for (int i = 0; i < 61; i++) player.tick();
+        }
+    }
+
+    /** The landing of a server player, as the connection does it from the movement packet of a player that touches the ground. */
+    private static void land(ServerPlayer player, float fallDistance) {
+        player.fallDistance = fallDistance;
+        player.setOnGround(true);
+        player.doCheckFallDamage(0.0D, 0.0D, 0.0D, true);
+    }
+
+    /**
+     * Slow Fall: a landing of 2.9 blocks or more is a landing of 2.9 (no damage), for a player with the enchantment on the armor
+     * and not sneaking; shorter falls, mobs and players without it are left alone.
+     */
+    public static void slowFallMakesALandingAFallOfTwoPointNineBlocks(GameTestHelper test) {
+        floor(test);
+        ServerPlayer slow = player(test);
+        ServerPlayer plain = player(test);
+        ServerPlayer sneaking = player(test);
+        slow.setPos(test.absoluteVec(new Vec3(2.5, 1.0, 2.5)));
+        plain.setPos(test.absoluteVec(new Vec3(4.5, 1.0, 2.5)));
+        sneaking.setPos(test.absoluteVec(new Vec3(2.5, 1.0, 4.5)));
+        wear(test, slow, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, ModEnchantments.slowFall, 1);
+        wear(test, sneaking, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, ModEnchantments.slowFall, 3);
+        sneaking.setShiftKeyDown(true);
+        ServerLevel level = test.getLevel();
+
+        // what the calculation does with the distance (the return value is "some damage was worked out": no spawn protection in it)
+        test.assertTrue(!slow.causeFallDamage(10F, 1F, level.damageSources().fall()), "a fall of 10 with Slow Fall works out no damage");
+        test.assertTrue(plain.causeFallDamage(10F, 1F, level.damageSources().fall()), "and without it some");
+        test.assertTrue(sneaking.causeFallDamage(10F, 1F, level.damageSources().fall()), "sneaking turns Slow Fall off");
+        test.assertTrue(!slow.causeFallDamage(2.5F, 1F, level.damageSources().fall()) && !plain.causeFallDamage(2.5F, 1F, level.damageSources().fall()),
+                "a short fall is a short fall");
+        // the worn level does not change the 2.9: Slow Fall I and III alike
+        sneaking.setShiftKeyDown(false);
+        test.assertTrue(!sneaking.causeFallDamage(10F, 1F, level.damageSources().fall()), "Slow Fall III as well");
+
+        // a mob in the same boots is not a player
+        Zombie zombie = armedZombie(test, new Vec3(6, 1, 2), ItemStack.EMPTY);
+        zombie.setItemSlot(EquipmentSlot.FEET, enchanted(test, new ItemStack(Items.DIAMOND_BOOTS), ModEnchantments.slowFall, 3));
+        test.assertTrue(zombie.causeFallDamage(10F, 1F, level.damageSources().fall()), "a zombie in Slow Fall boots falls as ever");
+        zombie.discard();
+
+        // the real landing of a server player, the path of the movement packet; the damage is the health that is lost once the
+        // spawn protection of the new player is over
+        endSpawnProtection(slow, plain);
+        try {
+            slow.setHealth(20F);
+            plain.setHealth(20F);
+            land(slow, 10F);
+            land(plain, 10F);
+            test.assertTrue(slow.getHealth() == 20F, "the player in Slow Fall boots lands from 10 blocks unhurt: " + slow.getHealth());
+            near(test, plain.getHealth(), 20F - 7F, "the other one takes the 7 of ten blocks");
+            test.assertTrue(slow.fallDistance == 0F, "the landing resets the distance");
+        } finally {
+            slow.discard();
+            plain.discard();
+            sneaking.discard();
+        }
+        test.succeed();
+    }
+
+    /**
+     * Shockwave: a player with the boots lands from more than three blocks, and every other living entity within ten blocks
+     * takes .1 * level * distance of fall damage. Not the faller, not for a short fall, not without the boots; a player that
+     * can fly never gets to the event. (The blast tests {@code isClientSide}; a server cannot run the client's copy of the event.)
+     *
+     * <p>Every refusal is tried on creatures that can be hurt: the invulnerability frames of the pigs are cleared (and their
+     * health refilled) before each landing, and a landing that must blast comes after the refusals, in the same state, so a
+     * wave that did not happen is the rule's doing and not the frames' (a wave of .6 against the last hit of 2.0 would be refused
+     * by the game whatever the listener did). The boots that carry Slow Fall as well blast nothing: the listener of Slow Fall
+     * runs first and Shockwave sees a fall of 2.9 blocks.</p>
+     */
     public static void shockwaveHurtsTheCreaturesAroundALanding(GameTestHelper test) {
         floor(test);
         ServerPlayer player = player(test);
-        player.setItemSlot(EquipmentSlot.FEET, enchanted(test, new ItemStack(Items.DIAMOND_BOOTS), ModEnchantments.shockwave, 2));
+        wear(test, player, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, ModEnchantments.shockwave, 2);
         Pig near = toughPig(test, new Vec3(3, 1, 3));
         Pig far = toughPig(test, new Vec3(0, 1, 0));
-        test.runAfterDelay(3, () -> {
-            player.setPos(test.absoluteVec(new Vec3(5.5, 6.0, 5.5)));
-            player.setOnGround(false);
-            player.fallDistance = 10F;
-            TickEvent.PLAYER_POST.invoker().tick(player); // in the air: the fall is noted
-            test.assertTrue(near.getHealth() == 1000F, "nothing yet");
-
-            player.setPos(test.absoluteVec(new Vec3(5.5, 1.0, 5.5)));
-            player.setOnGround(true);
-            player.fallDistance = 0F; // the game resets it on landing
-            TickEvent.PLAYER_POST.invoker().tick(player);
+        Pig above = toughPig(test, new Vec3(3, 6, 3));  // inside the box of ten blocks
+        Pig outside = toughPig(test, new Vec3(3, 12, 3)); // 11 blocks above the faller: outside
+        List<Pig> pigs = List.of(near, far, above, outside);
+        ServerPlayer bare = player(test);
+        bare.setPos(test.absoluteVec(new Vec3(2.5, 1.0, 5.5)));
+        ServerPlayer both = player(test);
+        both.setPos(test.absoluteVec(new Vec3(5.5, 1.0, 2.5)));
+        wear(test, both, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, ModEnchantments.slowFall, 2);
+        both.getItemBySlot(EquipmentSlot.FEET).enchant(holder(test, ModEnchantments.shockwave), 2);
+        endSpawnProtection(player, bare, both);
+        Runnable fresh = () -> {
+            for (Pig pig : pigs) {
+                pig.setHealth(1000F);
+                pig.invulnerableTime = 0;
+            }
+            player.setHealth(20F);
+            both.setHealth(20F);
+            player.invulnerableTime = 0;
+            both.invulnerableTime = 0;
+        };
+        try {
             float expected = EnchantmentFormulas.shockwaveDamage(2, 10F);
-            test.assertTrue(Math.abs((1000F - near.getHealth()) - expected) < 0.01F, "a pig nearby took " + (1000F - near.getHealth()) + ", expected " + expected);
-            test.assertTrue(Math.abs((1000F - far.getHealth()) - expected) < 0.01F, "so did one ten blocks away (inside the box)");
-            test.assertTrue(player.getHealth() == player.getMaxHealth(), "the faller is not hurt by its own wave");
+            fresh.run();
+            land(player, 10F);
+            near(test, 1000F - near.getHealth(), expected, "a pig nearby took the wave");
+            near(test, 1000F - far.getHealth(), expected, "so did one at the other end of the floor");
+            near(test, 1000F - above.getHealth(), expected, "and one above the faller, inside the box");
+            test.assertTrue(outside.getHealth() == 1000F, "one 11 blocks above is out of reach: " + outside.getHealth());
+            near(test, player.getHealth(), 20F - 7F, "the faller takes its own fall (7) and nothing of its wave");
 
-            // a short fall does nothing
-            near.setHealth(1000F);
-            near.invulnerableTime = 0;
-            player.setOnGround(false);
-            player.fallDistance = 3F;
-            TickEvent.PLAYER_POST.invoker().tick(player);
-            player.setOnGround(true);
-            player.fallDistance = 0F;
-            TickEvent.PLAYER_POST.invoker().tick(player);
-            test.assertTrue(near.getHealth() == 1000F, "a fall of three blocks does not shake the ground");
-            finish(test, player);
-        });
+            // a fall of three blocks, no more, does not shake the ground; the pigs can be hurt (their frames are clear)
+            fresh.run();
+            land(player, 3F);
+            for (Pig pig : pigs) test.assertTrue(pig.getHealth() == 1000F, "a fall of three blocks does not shake the ground: " + pig.getHealth());
+            // and a fall without the boots does not either
+            fresh.run();
+            land(bare, 10F);
+            for (Pig pig : pigs) test.assertTrue(pig.getHealth() == 1000F, "a fall without the boots does not either: " + pig.getHealth());
+            // a player that can fly does not get to the event
+            fresh.run();
+            player.getAbilities().mayfly = true;
+            land(player, 10F);
+            player.getAbilities().mayfly = false;
+            for (Pig pig : pigs) test.assertTrue(pig.getHealth() == 1000F, "a player that can fly lands without a wave: " + pig.getHealth());
+            // the boots of Slow Fall and Shockwave together: Slow Fall's listener runs first, the wave sees 2.9 blocks and is not made
+            fresh.run();
+            land(both, 10F);
+            for (Pig pig : pigs) test.assertTrue(pig.getHealth() == 1000F, "Slow Fall runs before Shockwave: no wave from 10 blocks: " + pig.getHealth());
+            test.assertTrue(both.getHealth() == 20F, "and the wearer lands unhurt: " + both.getHealth());
+
+            // the control, in the same state as the refusals: a little more than three blocks is a wave, of .1 * 2 * 3.5
+            fresh.run();
+            land(player, 3.5F);
+            near(test, 1000F - near.getHealth(), EnchantmentFormulas.shockwaveDamage(2, 3.5F), "a fall of 3.5 blocks is a small wave, so the refusals above were the rule's");
+            test.assertTrue(outside.getHealth() == 1000F, "and still not the pig outside the box");
+        } finally {
+            player.discard();
+            bare.discard();
+            both.discard();
+        }
+        test.succeed();
     }
 
-    public static void quickDrawGivesTheArrowTheSpeedOfALongerDraw(GameTestHelper test) {
-        floor(test);
-        ServerPlayer player = player(test);
-        ItemStack bow = enchanted(test, new ItemStack(Items.BOW), ModEnchantments.quickDraw, 2);
-        player.setItemInHand(InteractionHand.MAIN_HAND, bow);
-        test.runAfterDelay(2, () -> {
-            player.startUsingItem(InteractionHand.MAIN_HAND);
-            // nothing ticks a mock player: do what the connection of a real one does, twelve times
-            for (int i = 0; i < 12; i++) player.doTick();
-            test.assertTrue(player.isUsingItem(), "the bow is drawn");
-            int ticks = player.getTicksUsingItem();
-            test.assertTrue(ticks >= 10, "the draw clock ran: " + ticks);
-            Arrow arrow = new Arrow(player.level(), player, new ItemStack(Items.ARROW), bow);
-            float power = BowItem.getPowerForTime(ticks);
-            arrow.setDeltaMovement(0, 0, power * 3F);
-            int bonus = EnchantmentFormulas.quickDrawBonusTicks(2, ticks);
-            test.assertTrue(bonus > 0, "the draw was long enough for a bonus: " + ticks + " ticks");
-            EntityEvent.ADD.invoker().add(arrow, player.level());
-            float expected = BowItem.getPowerForTime(ticks + bonus) * 3F;
-            test.assertTrue(Math.abs(arrow.getDeltaMovement().length() - expected) < 0.01D,
-                    "the arrow flies as after " + (ticks + bonus) + " ticks: " + arrow.getDeltaMovement().length() + " (expected " + expected + ")");
-            test.assertTrue(arrow.getDeltaMovement().length() > power * 3F, "faster than the real draw gives");
+    // ---- Quick Draw (USE_ITEM_TICK) ---------------------------------------------------------------------------------
 
-            // an arrow of a player without the enchantment is left alone
-            player.stopUsingItem();
-            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
-            player.startUsingItem(InteractionHand.MAIN_HAND);
-            for (int i = 0; i < 12; i++) player.doTick();
-            Arrow plain = new Arrow(player.level(), player, new ItemStack(Items.ARROW), new ItemStack(Items.BOW));
-            plain.setDeltaMovement(0, 0, 1.5);
-            EntityEvent.ADD.invoker().add(plain, player.level());
-            test.assertTrue(Math.abs(plain.getDeltaMovement().length() - 1.5D) < 1.0E-6, "an ordinary bow is not touched");
-            finish(test, player);
+    /** The handler of 1.7.10, line by line: the count it kept, the decrement of the tick and then its own change. */
+    private static int draw1710(int quickDraw, int ticks) {
+        int itemInUseCount = 72000;
+        for (int tick = 0; tick < ticks; tick++) {
+            --itemInUseCount;
+            int speedup = quickDraw / 6;
+            int level = quickDraw % 6;
+            if (itemInUseCount % (6 - level) == 0) speedup++;
+            itemInUseCount = Math.max(2, itemInUseCount - speedup);
+        }
+        return 72000 - itemInUseCount;
+    }
+
+    private static double fastestArrowNear(ServerLevel level, ServerPlayer player) {
+        double fastest = -1D;
+        for (Arrow arrow : level.getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(3D))) {
+            if (arrow.getOwner() == player) fastest = Math.max(fastest, arrow.getDeltaMovement().length());
+        }
+        return fastest;
+    }
+
+    private static ServerPlayer archer(GameTestHelper test, double x, double z, ItemStack bow) {
+        ServerPlayer player = player(test);
+        player.setPos(test.absoluteVec(new Vec3(x, 1.0, z)));
+        player.getInventory().setItem(0, bow);
+        player.getInventory().setItem(1, new ItemStack(Items.ARROW, 8));
+        player.getInventory().selected = 0;
+        return player;
+    }
+
+    /**
+     * Quick Draw: while a player draws a bow with the enchantment, the draw clock (what the bow pose, the HUD and the power of the
+     * arrow read) runs on by the ticks of the 1.7.10 handler, which this check computes line by line on its own. Level I and II,
+     * against a plain bow; the arrow of a released quick bow flies as fast as the longer draw makes it. Food with the
+     * enchantment, and a mob that draws, are left alone.
+     */
+    public static void quickDrawTakesTicksOffTheDrawClockOfABow(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        ServerPlayer plain = archer(test, 2.5, 2.5, new ItemStack(Items.BOW));
+        ServerPlayer quick1 = archer(test, 5.5, 2.5, enchanted(test, new ItemStack(Items.BOW), ModEnchantments.quickDraw, 1));
+        ServerPlayer quick2 = archer(test, 2.5, 5.5, enchanted(test, new ItemStack(Items.BOW), ModEnchantments.quickDraw, 2));
+        ServerPlayer eater = archer(test, 5.5, 5.5, enchanted(test, new ItemStack(Items.APPLE), ModEnchantments.quickDraw, 2));
+        Zombie skeletonLike = armedZombie(test, new Vec3(1, 1, 1), enchanted(test, new ItemStack(Items.BOW), ModEnchantments.quickDraw, 2));
+        List<ServerPlayer> players = List.of(plain, quick1, quick2, eater);
+        test.runAfterDelay(2, () -> {
+            try {
+                for (ServerPlayer player : players) player.startUsingItem(InteractionHand.MAIN_HAND);
+                skeletonLike.startUsingItem(InteractionHand.MAIN_HAND);
+                int full = plain.getUseItemRemainingTicks();
+                test.assertTrue(full == 72000, "a bow is drawn from 72000: " + full);
+                int apple = eater.getUseItemRemainingTicks();
+                // nothing ticks a mock player: do what the connection of a real one does
+                for (int i = 0; i < 12; i++) {
+                    for (ServerPlayer player : players) player.doTick();
+                    skeletonLike.tick();
+                }
+                test.assertTrue(plain.getTicksUsingItem() == 12, "the plain draw clock: " + plain.getTicksUsingItem());
+                test.assertTrue(quick1.getTicksUsingItem() == draw1710(1, 12), "Quick Draw I: " + quick1.getTicksUsingItem() + " against " + draw1710(1, 12));
+                test.assertTrue(quick2.getTicksUsingItem() == draw1710(2, 12), "Quick Draw II: " + quick2.getTicksUsingItem() + " against " + draw1710(2, 12));
+                test.assertTrue(draw1710(2, 12) > 12 && draw1710(1, 12) > 12, "the oracle itself gives more than the plain clock");
+                test.assertTrue(eater.getUseItemRemainingTicks() == apple - 12 && eater.getTicksUsingItem() == 12,
+                        "the enchantment on food does nothing: " + eater.getUseItemRemainingTicks() + " of " + apple);
+                test.assertTrue(skeletonLike.getTicksUsingItem() == 12, "a mob that draws a bow is not a player: " + skeletonLike.getTicksUsingItem());
+                for (int i = 12; i < 40; i++) {
+                    for (ServerPlayer player : List.of(plain, quick1, quick2)) player.doTick();
+                }
+                test.assertTrue(plain.getTicksUsingItem() == 40, "the plain clock, 40 ticks: " + plain.getTicksUsingItem());
+                test.assertTrue(quick1.getTicksUsingItem() == draw1710(1, 40), "Quick Draw I, 40 ticks: " + quick1.getTicksUsingItem() + " against " + draw1710(1, 40));
+                test.assertTrue(quick2.getTicksUsingItem() == draw1710(2, 40), "Quick Draw II, 40 ticks: " + quick2.getTicksUsingItem() + " against " + draw1710(2, 40));
+                test.assertTrue(quick2.getUseItemRemainingTicks() == 72000 - draw1710(2, 40), "the count the entity holds is the changed one");
+            } finally {
+                skeletonLike.discard();
+                eater.discard();
+            }
+            // the arrow: released after the same short draw (restart the draws, 12 ticks, release)
+            try {
+                for (ServerPlayer player : List.of(plain, quick1, quick2)) {
+                    player.stopUsingItem();
+                    player.startUsingItem(InteractionHand.MAIN_HAND);
+                    for (int i = 0; i < 12; i++) player.doTick();
+                }
+                for (ServerPlayer player : List.of(plain, quick1, quick2)) player.releaseUsingItem();
+                double plainSpeed = fastestArrowNear(level, plain);
+                double quick1Speed = fastestArrowNear(level, quick1);
+                double quick2Speed = fastestArrowNear(level, quick2);
+                double plainExpected = BowItem.getPowerForTime(12) * 3D;
+                double quick1Expected = BowItem.getPowerForTime(draw1710(1, 12)) * 3D;
+                double quick2Expected = BowItem.getPowerForTime(draw1710(2, 12)) * 3D;
+                test.assertTrue(Math.abs(plainSpeed - plainExpected) < 0.2D, "the plain arrow of 12 ticks: " + plainSpeed + " (expected " + plainExpected + ")");
+                test.assertTrue(Math.abs(quick1Speed - quick1Expected) < 0.2D, "Quick Draw I: " + quick1Speed + " (expected " + quick1Expected + ")");
+                test.assertTrue(Math.abs(quick2Speed - quick2Expected) < 0.2D, "Quick Draw II: " + quick2Speed + " (expected " + quick2Expected + ")");
+                test.assertTrue(quick2Speed > plainSpeed + 0.3D, "the quick bow is the stronger: " + quick2Speed + " against " + plainSpeed);
+            } finally {
+                for (ServerPlayer player : players) player.discard();
+            }
+            test.succeed();
         });
     }
 
@@ -1016,77 +1546,140 @@ public final class EnchantmentsRuntimeChecks {
 
     // ---- the fake player of the Animation Tablet ----------------------------------------------------------------------
 
-    private static TinkererFakePlayer fakePlayer(GameTestHelper test, ItemStack held) {
+    /** A fake player (never ticked, never in the level) at the given height above the floor, holding {@code held} in its first slot. */
+    private static TinkererFakePlayer fakePlayer(GameTestHelper test, ItemStack held, double height) {
         TinkererFakePlayer fake = new TinkererFakePlayer(test.getLevel(), new GameProfile(UUID.randomUUID(), "[TTEnchantTest]"));
-        Vec3 at = test.absoluteVec(new Vec3(3.5, 1.0, 3.5));
+        Vec3 at = test.absoluteVec(new Vec3(3.5, height, 3.5));
         fake.placeAt(at.x, at.y, at.z, 0F, 0F);
         fake.getInventory().setItem(0, held);
         fake.getInventory().selected = 0;
         return fake;
     }
 
+    private static TinkererFakePlayer fakePlayer(GameTestHelper test, ItemStack held) {
+        return fakePlayer(test, held, 1.0);
+    }
+
+    /** The health the pig loses to one blow of the fake player, the frames of the pig cleared first. */
+    private static float blowOf(TinkererFakePlayer fake, Pig pig) {
+        pig.invulnerableTime = 0;
+        float before = pig.getHealth();
+        fake.attackEntity(pig);
+        return before - pig.getHealth();
+    }
+
     /**
-     * The dig speed of a player that is never ticked: the owner of the fake player (the Animation Tablet) calls
-     * {@code BreakSpeedControl.updateFor(player, target)} before it asks {@code getDestroyProgress}, as the 1.7.10 event
-     * fired inside that call. Dirt goes at once with Disintegrate, cobblestone does not go at all.
+     * The dig speed of a player that is never ticked (the Animation Tablet's fake player): the event is posted inside
+     * {@code getDestroyProgress}, so nobody has to call anything before it, as 1.7.10's event fired inside that very call. Dirt goes
+     * at once with Disintegrate, cobblestone does not go at all, and a fake player with a plain shovel digs at the plain speed.
      */
-    public static void aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor(GameTestHelper test) {
+    public static void aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantments(GameTestHelper test) {
         floor(test);
         BlockPos dirt = new BlockPos(3, 1, 2);
         BlockPos stone = new BlockPos(5, 1, 2);
         test.setBlock(dirt, Blocks.DIRT);
         test.setBlock(stone, Blocks.COBBLESTONE);
         TinkererFakePlayer fake = fakePlayer(test, enchanted(test, new ItemStack(Items.DIAMOND_SHOVEL), ModEnchantments.desintegrate, 1));
-        BlockState dirtState = test.getLevel().getBlockState(test.absolutePos(dirt));
-        BlockState stoneState = test.getLevel().getBlockState(test.absolutePos(stone));
+        TinkererFakePlayer plainFake = fakePlayer(test, new ItemStack(Items.DIAMOND_SHOVEL));
 
-        float plain = dirtState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(dirt));
-        test.assertTrue(plain < 1F, "without the call the shovel digs dirt at its plain speed: " + plain);
-
-        BreakSpeedControl.updateFor(fake, test.absolutePos(dirt));
-        test.assertTrue(dirtState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(dirt)) >= 1F,
-                "with the call the dirt goes in one tick: " + dirtState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(dirt)));
-        BreakSpeedControl.updateFor(fake, test.absolutePos(stone));
-        test.assertTrue(stoneState.getDestroyProgress(fake, test.getLevel(), test.absolutePos(stone)) == 0F, "cobblestone is not for Disintegrate");
+        float plain = progress(test, plainFake, dirt);
+        test.assertTrue(plain > 0F && plain < 1F, "a plain shovel digs dirt at its plain speed: " + plain);
+        test.assertTrue(progress(test, fake, dirt) >= 1F, "with Disintegrate the dirt goes in one tick, nothing called before: " + progress(test, fake, dirt));
+        test.assertTrue(progress(test, fake, stone) == 0F, "cobblestone is not for Disintegrate");
+        test.assertTrue(progress(test, plainFake, stone) > 0F, "and the plain shovel digs it");
         test.succeed();
     }
 
     /**
-     * The attack of a fake player: {@code TinkererFakePlayer.attackEntity} is what the Animation Tablet calls, and in
-     * 1.7.10 the {@code LivingHurtEvent} multiplied its damage like a player's. Valiance V below half health is 1.5 times.
-     *
-     * <p>This check FAILS until the owner of {@code TinkererFakePlayer} brackets its {@code attack} with
-     * {@code AttackBoost.beforeAttack/afterAttack} (docs/api-requests/Enchantments.md, section 5); its wrapper is not
-     * "required" for that reason.</p>
+     * The attack of a fake player: {@code TinkererFakePlayer.attackEntity} is what the Animation Tablet calls, and in 1.7.10 the
+     * {@code LivingHurtEvent} multiplied its damage like a player's. Focused Strikes I (deterministic; the fake player's health is
+     * fixed, so Valiance cannot be tried with it): the blow is 1.75 times the plain one, the second on the same pig too, then the
+     * counter grows. The plain sword of another fake player is left alone.
      */
     public static void aFakePlayerAttackGetsTheEnchantmentsOfItsSword(GameTestHelper test) {
         floor(test);
-        TinkererFakePlayer fake = fakePlayer(test, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.valiance, 5));
+        TinkererFakePlayer fake = fakePlayer(test, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.focusedStrike, 1));
+        TinkererFakePlayer plainFake = fakePlayer(test, new ItemStack(Items.DIAMOND_SWORD));
         Pig pig = toughPig(test, new Vec3(3, 1, 2));
-        fake.setHealth(5F);
         fake.refreshHeldItemModifiers();
         double base = fake.getAttributeValue(Attributes.ATTACK_DAMAGE);
         test.assertTrue(base > 1D, "the sword is in the attack damage of the fake player: " + base);
 
-        float before = pig.getHealth();
-        fake.attackEntity(pig);
-        float dealt = before - pig.getHealth();
-        test.assertTrue(Math.abs(dealt - base * 1.5D) < 0.01D, "Valiance V multiplies the blow of the fake player by 1.5: the pig took "
-                + dealt + " of " + base);
-        test.assertTrue(!fake.getAttribute(Attributes.ATTACK_DAMAGE).hasModifier(AttackBoost.MODIFIER), "and the attack is disarmed again");
+        near(test, blowOf(plainFake, pig), (float) base, "the plain sword of a fake player is the plain blow");
+        near(test, blowOf(fake, pig), (float) (base / 2D + .5D * 5 * base / 2D), "Focused Strikes I on the first blow: 1.75 times");
+        near(test, blowOf(fake, pig), (float) (base / 2D + .5D * 5 * base / 2D), "and on the second, the counter being 5");
+        near(test, blowOf(fake, pig), (float) (base / 2D + .5D * 6 * base / 2D), "and on the third, the counter being 6");
+        test.assertTrue(customData(fake.getMainHandItem()).getInt(ModEnchantmentHandler.NBT_SUCCESSIVE_STRIKE) == 6, "the counter is on the sword of the fake player");
+        near(test, blowOf(plainFake, pig), (float) base, "the plain sword is still the plain blow");
         test.succeed();
     }
 
+    /**
+     * The cross-check of the Animation Tablet: its fake player ({@code TinkererFakePlayer}, the one the Tablet's own is made of)
+     * digs a block with a Shatter and a Tunnel pickaxe and hits a pig with Pounce leggings, and the enchantments arrive through
+     * the real events, with nothing called by the owner of the fake player. A fake player with the same tool without the
+     * enchantment is the control.
+     */
+    public static void theTabletsFakePlayerDigsAndHitsWithTheEnchantments(GameTestHelper test) {
+        floor(test);
+        BlockPos target = new BlockPos(3, 1, 2);
+        test.setBlock(target, Blocks.OBSIDIAN);
+        BlockPos absolute = test.absolutePos(target);
+
+        // Shatter II: obsidian six times faster, stone at .8
+        TinkererFakePlayer plain = fakePlayer(test, new ItemStack(Items.DIAMOND_PICKAXE));
+        TinkererFakePlayer shatter = fakePlayer(test, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.shatter, 2));
+        float plainObsidian = progress(test, plain, target);
+        test.assertTrue(plainObsidian > 0F && Math.abs(progress(test, shatter, target) / plainObsidian - 6F) < 0.01F,
+                "Shatter II digs obsidian six times as fast: " + progress(test, shatter, target) + " against " + plainObsidian);
+        test.setBlock(target, Blocks.STONE);
+        test.assertTrue(Math.abs(progress(test, shatter, target) / progress(test, plain, target) - 0.8F) < 0.01F, "and stone at .8");
+
+        // Tunnel III: the way of the last break is remembered on the tool (a real break by the fake player), and the same way is faster
+        TinkererFakePlayer tunneler = fakePlayer(test, enchanted(test, new ItemStack(Items.DIAMOND_PICKAXE), ModEnchantments.tunnel, 3));
+        float stonePlain = progress(test, plain, target);
+        test.assertTrue(Math.abs(progress(test, tunneler, target) / stonePlain - 1F) < 0.01F, "nothing remembered yet: the plain speed");
+        test.assertTrue(tunneler.gameMode.destroyBlock(absolute), "the fake player breaks the stone");
+        test.setBlock(target, Blocks.STONE);
+        test.assertTrue(customData(tunneler.getMainHandItem()).contains(ModEnchantmentHandler.NBT_TUNNEL_DIRECTION), "and the tool remembers the way");
+        test.assertTrue(Math.abs(progress(test, tunneler, target) / stonePlain - 1.6F) < 0.01F, "the same way: 1 + .2 * 3");
+        tunneler.setYRot(90F);
+        test.assertTrue(Math.abs(progress(test, tunneler, target) / stonePlain - 0.3F) < 0.01F, "after a turn of the tablet: .3");
+
+        // Pounce IV: the blow of the fake player in the air is doubled, on the ground it is not
+        Pig pig = toughPig(test, new Vec3(3, 1, 5));
+        TinkererFakePlayer aloft = fakePlayer(test, new ItemStack(Items.DIAMOND_SWORD), 4.0);
+        TinkererFakePlayer grounded = fakePlayer(test, new ItemStack(Items.DIAMOND_SWORD), 1.0);
+        TinkererFakePlayer unarmoured = fakePlayer(test, new ItemStack(Items.DIAMOND_SWORD), 4.0);
+        for (TinkererFakePlayer fake : List.of(aloft, grounded)) {
+            fake.setItemSlot(EquipmentSlot.LEGS, enchanted(test, new ItemStack(Items.DIAMOND_LEGGINGS), ModEnchantments.pounce, 4));
+            fake.refreshHeldItemModifiers();
+        }
+        unarmoured.refreshHeldItemModifiers();
+        float swordBlow = (float) aloft.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        test.assertTrue(swordBlow > 1F, "the sword is in the attack damage: " + swordBlow);
+        near(test, blowOf(aloft, pig), swordBlow * 2F, "Pounce IV in the air: 1 + .25 * 4");
+        near(test, blowOf(grounded, pig), swordBlow, "on the stone floor it does nothing");
+        near(test, blowOf(unarmoured, pig), swordBlow, "and the same sword in the air without the leggings is the plain blow");
+        test.succeed();
+    }
+
+    /**
+     * The listeners of the group are registered once: one real blow of a player heals by the level of Vampirism, not twice, and one
+     * jump multiplies the jump by its factor, not by its square.
+     */
     public static void everyHandlerIsRegisteredOnce(GameTestHelper test) {
-        // the group's registration ran once, so the add-on's listeners are not doubled: a hurt event heals exactly once
         floor(test);
         ServerPlayer player = player(test);
         player.setItemInHand(InteractionHand.MAIN_HAND, enchanted(test, new ItemStack(Items.DIAMOND_SWORD), ModEnchantments.vampirism, 1));
+        player.setItemSlot(EquipmentSlot.LEGS, enchanted(test, new ItemStack(Items.DIAMOND_LEGGINGS), ModEnchantments.ascentBoost, 2));
         Pig pig = toughPig(test, new Vec3(3, 1, 6));
         player.setHealth(10F);
         test.runAfterDelay(3, () -> {
-            EntityEvent.LIVING_HURT.invoker().hurt(pig, player.damageSources().playerAttack(player), 3F);
+            lost(pig, player.damageSources().playerAttack(player), 3F);
             test.assertTrue(player.getHealth() == 11F, "healed once, by the level: " + player.getHealth());
+            player.jumpFromGround();
+            test.assertTrue(Math.abs(player.getDeltaMovement().y - 0.84D) < 1.0E-4D, "boosted once, by the factor 2: " + player.getDeltaMovement().y);
             finish(test, player);
         });
     }

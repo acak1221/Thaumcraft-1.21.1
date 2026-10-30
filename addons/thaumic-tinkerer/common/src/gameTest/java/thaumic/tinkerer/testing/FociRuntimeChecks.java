@@ -53,6 +53,7 @@ import thaumcraft.api.wands.WandRod;
 import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 import thaumic.tinkerer.common.core.helper.ProjectileHelper;
+import thaumic.tinkerer.common.hooks.FloatingTicks;
 import thaumic.tinkerer.common.item.foci.FociComponents;
 import thaumic.tinkerer.common.item.foci.FociHooks;
 import thaumic.tinkerer.common.item.foci.FociComponents.DislocationData;
@@ -442,38 +443,92 @@ public final class FociRuntimeChecks {
 
     /**
      * The server kicks a player whose "ticks above the ground" counter passes 80 when {@code allow-flight} is off; every cast
-     * of the focus must put the counter of his connection back to zero, as 1.7.10 did with {@code floatingTickCount}.
+     * of the focus must put the counter of his connection back to zero, as 1.7.10 did with {@code floatingTickCount}. The
+     * counter is the loader layer's {@code FloatingTicks} (an accessor mixin on the real connection of the mock player).
      */
     public static void flightPutsTheKickCounterOfTheConnectionBackToZero(GameTestHelper test) {
         floor(test);
         ServerPlayer player = player(test, 3.5, 1, 3.5, 90.0F, -30.0F);
         test.assertTrue(player.connection != null, "the mock player has a connection");
-        test.assertTrue(FociHooks.canReachCounter(), "the counter field of the connection can be reached");
+        test.assertTrue(FloatingTicks.isAvailable(player), "the counter of the connection can be reached through the loader layer");
         ItemStack wand = wand(test, LibItemNames.FOCUS_FLIGHT, true);
         player.setItemInHand(InteractionHand.MAIN_HAND, wand);
         ItemFocusFlight flight = (ItemFocusFlight) TTRegistry.item(LibItemNames.FOCUS_FLIGHT);
 
-        test.assertTrue(FociHooks.setAboveGroundTicks(player, 79), "the counter can be written");
-        test.assertTrue(FociHooks.aboveGroundTicks(player) == 79, "and read back: " + FociHooks.aboveGroundTicks(player));
+        test.assertTrue(FloatingTicks.set(player, 79), "the counter can be written");
+        test.assertTrue(FloatingTicks.get(player) == 79, "and read back: " + FloatingTicks.get(player));
         flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
-        test.assertTrue(FociHooks.aboveGroundTicks(player) == 0, "a cast clears the counter: " + FociHooks.aboveGroundTicks(player));
+        test.assertTrue(FloatingTicks.get(player) == 0, "a cast clears the counter: " + FloatingTicks.get(player));
 
         // A cast that does nothing (the config switch is off, or there is no vis) does not touch it, as in 1.7.10.
-        FociHooks.setAboveGroundTicks(player, 40);
+        FloatingTicks.set(player, 40);
         flight.onFocusRightClick(wand(test, LibItemNames.FOCUS_FLIGHT, false), test.getLevel(), player, InteractionHand.MAIN_HAND);
-        test.assertTrue(FociHooks.aboveGroundTicks(player) == 40, "no vis, no reset: " + FociHooks.aboveGroundTicks(player));
-
-        // A loader or the API can take the reset over, and null gives the default back.
-        int[] calls = { 0 };
-        FociHooks.setFloatingTickReset(who -> calls[0]++);
+        test.assertTrue(FloatingTicks.get(player) == 40, "no vis, no reset: " + FloatingTicks.get(player));
+        boolean enabled = ConfigHandler.enableFlight;
         try {
+            ConfigHandler.enableFlight = false;
             flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
-            test.assertTrue(calls[0] == 1 && FociHooks.aboveGroundTicks(player) == 40, "the installed reset runs instead of the default");
         } finally {
+            ConfigHandler.enableFlight = enabled;
+        }
+        test.assertTrue(FloatingTicks.get(player) == 40, "the config switch off, no reset: " + FloatingTicks.get(player));
+
+        // The cast calls whatever reset is installed (a test replaces the one of the start-up and puts it back), and with none
+        // installed nothing at all resets the counter.
+        java.util.function.Consumer<ServerPlayer> installed = FociHooks.floatingTickReset;
+        int[] calls = { 0 };
+        try {
+            FociHooks.setFloatingTickReset(who -> calls[0]++);
+            flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
+            test.assertTrue(calls[0] == 1 && FloatingTicks.get(player) == 40, "the installed reset runs, the loader's does not");
             FociHooks.setFloatingTickReset(null);
+            flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
+            test.assertTrue(calls[0] == 1 && FloatingTicks.get(player) == 40, "with none installed the cast resets nothing: "
+                    + FloatingTicks.get(player));
+        } finally {
+            FociHooks.setFloatingTickReset(installed);
         }
         flight.onFocusRightClick(wand, test.getLevel(), player, InteractionHand.MAIN_HAND);
-        test.assertTrue(FociHooks.aboveGroundTicks(player) == 0 && calls[0] == 1, "the default is back");
+        test.assertTrue(FloatingTicks.get(player) == 0 && calls[0] == 1, "the start-up reset is back: " + FloatingTicks.get(player));
+        test.succeed();
+    }
+
+    /**
+     * The start-up of the group installs the loader layer's reset ({@code Foci.register()}: {@code FociHooks.setFloatingTickReset(
+     * FloatingTicks.RESET)}) and a click with a real wand, the way a player casts, puts the counter of the real connection of
+     * the caster back to zero through it. Answers only for the caster and the Uprising: the counter of another connected player,
+     * and the counter after a cast of another focus, stay as they were.
+     */
+    public static void flightResetOfTheStartUpClearsTheRealCounterOfTheCaster(GameTestHelper test) {
+        floor(test);
+        test.assertTrue(FociHooks.floatingTickReset == FloatingTicks.RESET,
+                "Foci.register() installed FloatingTicks.RESET: " + FociHooks.floatingTickReset);
+
+        ServerPlayer caster = player(test, 3.5, 1, 3.5, 90.0F, -30.0F);
+        ServerPlayer bystander = player(test, 5.5, 1, 5.5, 0.0F, 0.0F);
+        test.assertTrue(caster.connection != bystander.connection && FloatingTicks.isAvailable(caster) && FloatingTicks.isAvailable(bystander),
+                "two players with a connection of their own that the loader layer reaches");
+
+        ItemStack wand = wand(test, LibItemNames.FOCUS_FLIGHT, true);
+        caster.setItemInHand(InteractionHand.MAIN_HAND, wand);
+        FloatingTicks.set(caster, 79);
+        FloatingTicks.set(bystander, 55);
+        AspectList before = WandHelper.getAllVis(wand);
+        wand.use(test.getLevel(), caster, InteractionHand.MAIN_HAND);
+        assertSpent(test, wand, caster, before, new AspectList().add(Aspect.AIR, 15), 1, "flight through the wand");
+        test.assertTrue(FloatingTicks.get(caster) == 0, "the click of the wand cleared the counter of the caster: " + FloatingTicks.get(caster));
+        test.assertTrue(FloatingTicks.get(bystander) == 55, "and not the one of the other player: " + FloatingTicks.get(bystander));
+
+        // A wand with another focus is not the Uprising: its click leaves the counter alone.
+        for (String other : List.of(LibItemNames.FOCUS_TELEKINESIS, LibItemNames.FOCUS_ENDER_CHEST, LibItemNames.FOCUS_DISLOCATION)) {
+            ServerPlayer holder = player(test, 3.5, 1, 3.5, 90.0F, -30.0F);
+            holder.setItemInHand(InteractionHand.MAIN_HAND, wand(test, other, true));
+            FloatingTicks.set(holder, 33);
+            holder.getMainHandItem().use(test.getLevel(), holder, InteractionHand.MAIN_HAND);
+            test.assertTrue(FloatingTicks.get(holder) == 33, other + " does not reset the counter: " + FloatingTicks.get(holder));
+            if (holder.isUsingItem()) holder.stopUsingItem();
+            holder.closeContainer();
+        }
         test.succeed();
     }
 

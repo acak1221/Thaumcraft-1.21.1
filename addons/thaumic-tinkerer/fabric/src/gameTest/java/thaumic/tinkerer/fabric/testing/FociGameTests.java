@@ -48,6 +48,11 @@ public final class FociGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void flightResetOfTheStartUpClearsTheRealCounterOfTheCaster(GameTestHelper test) {
+        FociRuntimeChecks.flightResetOfTheStartUpClearsTheRealCounterOfTheCaster(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void healMendsOnePointEveryThirtyTicksAndPaysPerHeal(GameTestHelper test) {
         FociRuntimeChecks.healMendsOnePointEveryThirtyTicksAndPaysPerHeal(test);
     }

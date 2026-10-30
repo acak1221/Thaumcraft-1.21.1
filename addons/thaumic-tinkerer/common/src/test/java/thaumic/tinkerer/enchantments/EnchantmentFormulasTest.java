@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import thaumic.tinkerer.common.enchantment.AttackBoost;
 import thaumic.tinkerer.common.enchantment.EnchantmentFormulas;
 import thaumic.tinkerer.common.enchantment.EnchantmentFormulas.Attack;
 
@@ -33,7 +32,6 @@ class EnchantmentFormulasTest {
     @Test
     void anAttackWithoutEnchantmentsIsNotChanged() {
         assertEquals(10F, EnchantmentFormulas.modifyDamage(10F, plain()), EPSILON);
-        assertEquals(1F, EnchantmentFormulas.damageFactor(plain()), EPSILON);
     }
 
     @Test
@@ -90,7 +88,8 @@ class EnchantmentFormulasTest {
         expected = expected / 2;
         expected += .5F * 5 * expected;
         assertEquals(expected, EnchantmentFormulas.modifyDamage(10F, all), 0.001F);
-        assertEquals(EnchantmentFormulas.damageFactor(all) * 4F, EnchantmentFormulas.modifyDamage(4F, all), 0.001F);
+        // the factors only ever multiply: another amount gives the proportional result
+        assertEquals(EnchantmentFormulas.modifyDamage(1F, all) * 4F, EnchantmentFormulas.modifyDamage(4F, all), 0.001F);
     }
 
     @Test
@@ -130,19 +129,28 @@ class EnchantmentFormulasTest {
         assertFalse(EnchantmentFormulas.slowFallActs(1, false, -0.0784000015258789, 3.5F), "not faster than the first tick");
         assertFalse(EnchantmentFormulas.slowFallActs(1, false, falling, 2.5F), "fallen too little");
         assertTrue(EnchantmentFormulas.slowFallActs(1, false, falling, 2.9F), "the clamp value of the distance keeps it on");
-
-        assertTrue(EnchantmentFormulas.slowFallActsOnServer(2, false, false, 3.5F));
-        assertFalse(EnchantmentFormulas.slowFallActsOnServer(2, false, true, 3.5F), "on the ground");
-        assertFalse(EnchantmentFormulas.slowFallActsOnServer(2, true, false, 3.5F));
     }
 
     @Test
-    void slowFallDividesTheMotionAndShortensTheFall() {
+    void slowFallDividesTheMotion() {
         assertEquals(-0.5D / 1.33D, EnchantmentFormulas.slowFallMotion(-0.5, 1), 1e-6);
         assertEquals(-0.5D / 1.99D, EnchantmentFormulas.slowFallMotion(-0.5, 3), 1e-6);
-        assertEquals(9F, EnchantmentFormulas.slowFallDistance(10F, 3), EPSILON);
-        assertEquals(10F - 1F / 3F, EnchantmentFormulas.slowFallDistance(10F, 1), EPSILON);
-        assertEquals(2.9F, EnchantmentFormulas.slowFallDistance(3F, 3), EPSILON, "never below 2.9");
+    }
+
+    @Test
+    void aLandingWithSlowFallIsAFallOfTwoPointNineBlocksNoMatterHowLongItWas() {
+        // the per-tick rule of the original, max(2.9, d - level / 3), applied to a long fall ends at its floor
+        float distance = 40F;
+        for (int tick = 0; tick < 200; tick++) distance = Math.max(2.9F, distance - 2 / 3F);
+        assertEquals(2.9F, distance, EPSILON);
+        assertEquals(distance, EnchantmentFormulas.slowFallLanding(2, false, 40F), EPSILON, "what the event applies at once");
+        assertEquals(2.9F, EnchantmentFormulas.slowFallLanding(1, false, 3.0F), EPSILON);
+        assertEquals(2.9F, EnchantmentFormulas.slowFallLanding(1, false, 2.9F), EPSILON, "the floor itself");
+        assertEquals(2.5F, EnchantmentFormulas.slowFallLanding(3, false, 2.5F), EPSILON, "a shorter fall is left alone");
+        assertEquals(40F, EnchantmentFormulas.slowFallLanding(3, true, 40F), EPSILON, "sneaking turns it off");
+        assertEquals(40F, EnchantmentFormulas.slowFallLanding(0, false, 40F), EPSILON, "no enchantment");
+        // 2.9 does no damage: ceil((2.9 - 3) * 1)
+        assertTrue((int) Math.ceil(EnchantmentFormulas.slowFallLanding(1, false, 40F) - 3F) <= 0);
     }
 
     @Test
@@ -174,39 +182,80 @@ class EnchantmentFormulasTest {
 
     @Test
     void disintegrateAndFlamingTouchBreakTheirBlocksAtOnceAndNoOther() {
-        double instant = EnchantmentFormulas.INSTANT_BREAK_FACTOR;
-        double none = EnchantmentFormulas.NO_BREAK_FACTOR;
+        float instant = Float.MAX_VALUE;
+        float none = 0F;
         // Disintegrate: hardness up to 1.5 (dirt .5, stone 1.5), not cobblestone (2.0)
-        assertEquals(instant, EnchantmentFormulas.breakSpeedFactor(0, 0, 1, 0, 0.5F, false, false, 0F));
-        assertEquals(instant, EnchantmentFormulas.breakSpeedFactor(0, 0, 1, 0, 1.5F, false, false, 0F));
-        assertEquals(none, EnchantmentFormulas.breakSpeedFactor(0, 0, 1, 0, 2.0F, false, false, 0F));
-        assertEquals(none, EnchantmentFormulas.breakSpeedFactor(0, 0, 1, 0, 2.0F, true, false, 0F), "wood is not its block");
+        assertEquals(instant, EnchantmentFormulas.breakSpeed(3F, 0, 0, 1, 0, 0.5F, false, false, 0F));
+        assertEquals(instant, EnchantmentFormulas.breakSpeed(3F, 0, 0, 1, 0, 1.5F, false, false, 0F));
+        assertEquals(none, EnchantmentFormulas.breakSpeed(3F, 0, 0, 1, 0, 2.0F, false, false, 0F));
+        assertEquals(none, EnchantmentFormulas.breakSpeed(3F, 0, 0, 1, 0, 2.0F, true, false, 0F), "wood is not its block");
         // Flaming Touch: wood only
-        assertEquals(instant, EnchantmentFormulas.breakSpeedFactor(0, 0, 0, 1, 2.0F, true, false, 0F));
-        assertEquals(none, EnchantmentFormulas.breakSpeedFactor(0, 0, 0, 1, 1.5F, false, false, 0F));
+        assertEquals(instant, EnchantmentFormulas.breakSpeed(3F, 0, 0, 0, 1, 2.0F, true, false, 0F));
+        assertEquals(none, EnchantmentFormulas.breakSpeed(3F, 0, 0, 0, 1, 1.5F, false, false, 0F));
+        // either one decides over Shatter and Tunnel
+        assertEquals(instant, EnchantmentFormulas.breakSpeed(3F, 2, 3, 1, 0, 0.5F, false, true, 10F));
+        assertEquals(none, EnchantmentFormulas.breakSpeed(3F, 2, 3, 1, 0, 50F, false, true, 10F));
         // no such enchantment: the product of Shatter and Tunnel, or nothing
-        assertEquals(1D, EnchantmentFormulas.breakSpeedFactor(0, 0, 0, 0, 50F, false, false, 0F), 1e-9);
-        assertEquals(6D * 1.6D, EnchantmentFormulas.breakSpeedFactor(2, 3, 0, 0, 50F, false, true, 10F), 1e-9);
+        assertEquals(3F, EnchantmentFormulas.breakSpeed(3F, 0, 0, 0, 0, 50F, false, false, 0F), EPSILON);
+        assertEquals(3F * 6F * 1.6F, EnchantmentFormulas.breakSpeed(3F, 2, 3, 0, 0, 50F, false, true, 10F), EPSILON);
+        assertEquals(3F * .8F * .3F, EnchantmentFormulas.breakSpeed(3F, 1, 1, 0, 0, 1.5F, false, true, 90F), EPSILON);
+        assertEquals(3F * .8F, EnchantmentFormulas.breakSpeed(3F, 1, 0, 0, 0, 1.5F, false, false, 0F), EPSILON, "stone with Shatter");
     }
 
     // ---- Quick Draw --------------------------------------------------------------------------------------------------
+
+    /**
+     * The handler of 1.7.10, line by line, on the count it kept: the decrement of the tick ({@code --itemInUseCount}), then
+     * {@code speedup = quickDraw / 6; quickDraw = quickDraw % 6; if (itemInUseCount % (6 - quickDraw) == 0) speedup++;
+     * itemInUseCount = Math.max(2, itemInUseCount - speedup)}.
+     */
+    private static int originalCountAfter(int level, int ticks) {
+        int count = 72000;
+        for (int tick = 0; tick < ticks; tick++) {
+            count--;
+            int speedup = level / 6;
+            int quickDraw = level % 6;
+            if (count % (6 - quickDraw) == 0) speedup++;
+            count = Math.max(2, count - speedup);
+        }
+        return count;
+    }
+
+    /** The count of the port: the event before the decrement of each tick, then the decrement. */
+    private static int portCountAfter(int level, int ticks) {
+        int count = 72000;
+        for (int tick = 0; tick < ticks; tick++) {
+            count = EnchantmentFormulas.quickDrawRemaining(level, count);
+            count--;
+        }
+        return count;
+    }
+
+    @Test
+    void theDrawClockOfTheEventGoesThroughTheValuesOfTheOriginalHandler() {
+        for (int level = 1; level <= 6; level++) {
+            for (int ticks = 0; ticks <= 400; ticks++) {
+                assertEquals(originalCountAfter(level, ticks), portCountAfter(level, ticks), "level " + level + ", " + ticks + " ticks");
+            }
+        }
+    }
 
     @Test
     void quickDrawTakesOneExtraTickEveryFourthTickAtLevelOneAndEveryThirdAtLevelTwo() {
         // The handler adds one when the clock is a multiple of 6 - level; the first multiple of five below 72000 is reached on
         // the 5th tick, and every 4 ticks after that (the extra tick moves the clock to the next multiple at once).
-        assertEquals(0, EnchantmentFormulas.quickDrawBonusTicks(1, 4));
-        assertEquals(1, EnchantmentFormulas.quickDrawBonusTicks(1, 5));
-        assertEquals(1, EnchantmentFormulas.quickDrawBonusTicks(1, 8));
-        assertEquals(2, EnchantmentFormulas.quickDrawBonusTicks(1, 9));
-        assertEquals(4, EnchantmentFormulas.quickDrawBonusTicks(1, 20));
+        // The ticks drawn are 72000 - count, the bonus is what they are beyond the ticks of the clock.
+        assertEquals(0, 72000 - portCountAfter(1, 4) - 4);
+        assertEquals(1, 72000 - portCountAfter(1, 5) - 5);
+        assertEquals(1, 72000 - portCountAfter(1, 8) - 8);
+        assertEquals(2, 72000 - portCountAfter(1, 9) - 9);
+        assertEquals(4, 72000 - portCountAfter(1, 20) - 20);
         // level two: multiples of four: the 4th tick, then every 3 ticks
-        assertEquals(0, EnchantmentFormulas.quickDrawBonusTicks(2, 3));
-        assertEquals(1, EnchantmentFormulas.quickDrawBonusTicks(2, 4));
-        assertEquals(2, EnchantmentFormulas.quickDrawBonusTicks(2, 7));
-        assertEquals(6, EnchantmentFormulas.quickDrawBonusTicks(2, 20));
-        assertEquals(0, EnchantmentFormulas.quickDrawBonusTicks(0, 20));
-        assertEquals(0, EnchantmentFormulas.quickDrawBonusTicks(2, 0));
+        assertEquals(0, 72000 - portCountAfter(2, 3) - 3);
+        assertEquals(1, 72000 - portCountAfter(2, 4) - 4);
+        assertEquals(2, 72000 - portCountAfter(2, 7) - 7);
+        assertEquals(6, 72000 - portCountAfter(2, 20) - 20);
+        assertEquals(0, 72000 - portCountAfter(2, 0));
     }
 
     @Test
@@ -214,28 +263,18 @@ class EnchantmentFormulasTest {
         for (int level = 1; level <= 2; level++) {
             int previous = 0;
             for (int ticks = 0; ticks <= 100; ticks++) {
-                int bonus = EnchantmentFormulas.quickDrawBonusTicks(level, ticks);
+                int bonus = 72000 - portCountAfter(level, ticks) - ticks;
                 assertTrue(bonus >= previous, "level " + level + " ticks " + ticks);
                 previous = bonus;
             }
         }
     }
 
-    // ---- the damage solver of the attack ---------------------------------------------------------------------------
-
     @Test
-    void theAttackBaseIsSolvedSoThatTheWholeDamageIsMultiplied() {
-        // damage(a) = .8 a + 2 (the part of the enchantment that does not grow with the base): base 7 gives 7.6
-        double solved = AttackBoost.solveBase(7D, 3D, a -> .8D * a + 2D);
-        assertEquals(26D, solved, 1e-9);
-        assertEquals(3D * (.8D * 7D + 2D), .8D * solved + 2D, 1e-9);
-        // a factor below one lowers the base; a factor that would need a negative base stops at zero
-        assertEquals(2.25D, AttackBoost.solveBase(7D, .5D, a -> .8D * a + 2D), 1e-9);
-        assertEquals(0D, AttackBoost.solveBase(7D, .1D, a -> .2D * a + 5D), 1e-9);
-    }
-
-    @Test
-    void aFlatDamageLineFallsBackToScalingTheBase() {
-        assertEquals(21D, AttackBoost.solveBase(7D, 3D, a -> 5D), 1e-9);
+    void theFloorOfTwoHoldsAtTheEndOfTheClock() {
+        // the floor of the original: a count near the end is held at 2 (after the decrement), not run into zero
+        assertEquals(3, EnchantmentFormulas.quickDrawRemaining(2, 3), "2 after this tick's decrement");
+        assertEquals(3, EnchantmentFormulas.quickDrawRemaining(6, 2));
+        assertTrue(EnchantmentFormulas.quickDrawRemaining(5, 72000) <= 72000);
     }
 }

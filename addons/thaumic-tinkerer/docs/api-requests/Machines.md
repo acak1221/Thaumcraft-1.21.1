@@ -3,8 +3,8 @@
 Group Machines: Aspectalyzer, Thaumic Restorer, Essentia Funnel, Kinetic and Corporeal Attractors, Necromancy Tablet,
 soul mould, soul aspects, mob display, Cursed Spirit's Blade. The numbers `A3`, `A7`, `A8`, `A9` (closed, see the end) are those of
 `docs/API_GAPS.md` section 2. Nothing below was done by reaching into `thaumcraft.common.*`: every item is either a named
-stub or a workaround with the loss written down. Priorities are the group's own opinion (P1 changes what the player
-sees, P3 only hardens something that works today).
+stub or answered by the API or the loader layer (`docs/HOOKS.md`), with what the answer does and does not give written down.
+Priorities are the group's own opinion (P1 changes what the player sees, P3 only hardens something that works today).
 
 ## 1. Jar identification (P3)
 
@@ -20,37 +20,44 @@ block entity as `IAspectContainer`; (c) contents through `IEssentiaContainerItem
 **Proposed.** `BlocksTC.isJarItem(ItemStack)`, `BlocksTC.isVoidJar(ItemStack | BlockState)`,
 `@Nullable Aspect BlocksTC.getJarLabel(ItemStack)` (backed by `ItemJar.isJar/isVoid/getFilter`).
 
-## 2. Loader hook: built-in item renderer for `mob_display` (NeoForge, to the lead, P1 for the recipe viewers)
+## 2. Loader hook: built-in item renderer for `mob_display` (answered; NeoForge backend still to write)
 
 **Need.** `mob_display` stands for a mob (the output of a necromancy recipe, shown in recipe viewers). 1.7.10 drew the
 mob in place of the item with an `IItemRenderer`. In 1.21.1 that is a built-in item renderer, which has no Architectury
 registry. The item model is `minecraft:builtin/entity`, so **without a hook the item is invisible**.
 
-**Done on Fabric.** `thaumic.tinkerer.fabric.client.MachinesFabricClient.register()` registers
-`RenderMobDisplay.render` with `BuiltinItemRendererRegistry`; `MachinesClient.register()` reaches it by name (the same
-way as `KamiGearFabricClient`), so nothing has to be listed in `fabric.mod.json`. It was written without a rendered
-client run: the drawing of the mob in a GUI slot and in the hand is unverified.
+**Answered by the lead's `ItemRenderers`** (`thaumic.tinkerer.client.hooks.ItemRenderers`, `docs/HOOKS.md` section 9).
+`MachinesClient.register()` now calls `ItemRenderers.register(TTRegistry.item("mob_display"), RenderMobDisplay::render)` as
+its first statement (through `MachinesClient.registerItemRenderers(Item)`), and the group's own Fabric glue
+(`MachinesFabricClient`, reached by name from common code) is deleted, because both registering the same item is an error.
+*What the hook gives:* one registration point for both loaders with the six-argument signature of a built-in renderer
+(`ItemRenderers.Renderer`, the same as Fabric's `DynamicItemRenderer` and NeoForge's `renderByItem`); a queue that waits for the
+backend; a duplicate for one item is an `IllegalStateException`. On Fabric the backend is `FabricItemRenderers`, which forwards to
+`BuiltinItemRendererRegistry` (read in fabric-rendering-v1 5.2.1: it registers the same `(stack, display context, pose, buffers, light,
+overlay)` and throws on a second renderer for an item). *What it does not give:* anything on NeoForge, where **the backend is
+still to be written** (`RegisterClientExtensionsEvent` → `IClientItemExtensions#getCustomRenderer` → a
+`BlockEntityWithoutLevelRenderer` calling the renderer, for every queued item); until then the Mob Display is invisible there.
+Verified: compile; a JUnit test of the helper and the queue (`ItemRenderers.get`) and of the wiring in the source; the Fabric
+backend read. **Not verified: the drawing** (no client was run; a GameTest server cannot load the client classes).
+`RenderMobDisplay.clearCache()` is still called by `MachinesClient` when the client leaves a world.
 
-**Still needed for NeoForge.** `RegisterClientExtensionsEvent.registerItem(IClientItemExtensions { getCustomRenderer() ... },
-item)` with a `BlockEntityWithoutLevelRenderer` whose `renderByItem(stack, ctx, pose, buffers, light, overlay)` calls
-`thaumic.tinkerer.client.render.item.RenderMobDisplay.render(stack, ctx, pose, buffers, light, overlay)`, for
-`TTRegistry.item("mob_display")`. `RenderMobDisplay.clearCache()` is already called by `MachinesClient` when the client
-leaves a world.
-
-## 3. Drops of a killed mob (loader event, P2)
+## 3. Drops of a killed mob (loader event; answered, NeoForge poster still to write)
 
 **Need.** The Cursed Spirit's Blade replaces the drops of the mob it kills with soul aspects (`LivingDropsEvent` in
 1.7.10: `event.drops.clear()` and add).
 
-**Workaround.** Architectury has no event that can edit the drops. The add-on notes the victim in
-`EntityEvent.LIVING_DEATH`, refuses the item entities that appear at the victim's position in `EntityEvent.ADD` while the
-note exists, and spawns the soul aspects at the end of the level tick (`TickEvent.SERVER_LEVEL_POST`). It works for every
-item that the death spawns *at the victim*; a drop that another mod spawns elsewhere is not refused. Experience orbs are
-not item entities and stay, as in 1.7.10 (`event.drops` held only items).
-
-**Proposed.** A common event `LivingDrops { EventResult onDrops(LivingEntity victim, DamageSource source,
-Collection<ItemEntity> drops) }` with the loader backends `LivingDropsEvent` (NeoForge) and a mixin into
-`LivingEntity.dropAllDeathLoot` (Fabric); the Blade would then clear the collection and add its items.
+**Answered by the lead's `TinkererEvents.LIVING_DROPS`** (`docs/HOOKS.md` section 8), which is the proposed event of this
+request (the victim, the source, a mutable list of item entities, Looting level, "recently hit", a cancel) with a Fabric poster.
+The group's note-and-refuse workaround (`LIVING_DEATH` note, `ADD` filter, end-of-level-tick spawn) is deleted;
+`ItemBloodSword.onLivingDrops` clears the list and adds the soul aspects.
+*What the event gives:* the loot table's items, the equipment and (for a player) the inventory as item entities of the victim, before
+they enter the world, so the soul aspects appear in the call of the death, as in 1.7.10; experience orbs are not in the list (as in
+1.7.10). *What it does not give:* an item that another mod spawns somewhere else with `addFreshEntity` (it is not captured, so it is
+neither editable nor refused: the old workaround refused any item that appeared at the victim's position), and the items of a mob
+of another mod that spawns them before it calls `super.dropAllDeathLoot` (`docs/HOOKS.md` section 13 item 2; in vanilla 1.21.1 only the
+fox is such a mob, it is handled and has no row in the table). **NeoForge needs
+its poster** (a handler of `LivingDropsEvent` calling `TinkererEvents.postLivingDrops`); not written, so the blade does not reap there
+until it is.
 
 ## 4. Not requested, for the record
 
@@ -75,7 +82,7 @@ These need a file that this group does not own; nothing was edited there.
      would then include the blade, while the original `EnchantmentVampirism.canApply` refused `ItemBloodSword`. Replace the
      `#minecraft:swords` entry by a dedicated tag `thaumictinkerer:swords_without_blood_sword` (the same sword list without
      the blade) or by an explicit list of the swords. The four strike enchantments list `blood_sword` explicitly already.
-2. **NeoForge hook of `mob_display`:** section 2 above.
+2. **NeoForge backend of `ItemRenderers` for `mob_display`:** section 2 above (the Fabric one exists).
 3. **`assets/minecraft/atlases/blocks.json`** carries the five entity-style textures of this group's JSON models (`models/repairer`,
    `magnet_n`, `magnet_s`, `mob_magnet_n`, `mob_magnet_s`). Two groups must not both create that file in the same jar: if
    another group needs sources in the block atlas, merge them into this one file.
@@ -90,4 +97,6 @@ These need a file that this group does not own; nothing was edited there.
 | A7 keys of Thaumcraft's entities and the key sound | `ThaumcraftEntities.WISP / FIREBAT / BRAINY_ZOMBIE / GIANT_BRAINY_ZOMBIE` in `EnumMobAspect`, `ThaumcraftSoundIds.KEY` in `BlockMagnet` |
 | A8 client sparkles | `ThaumcraftClientFX.sparkle(level, x, y, z, type)` in `TileRepairer` (type 0) and `TileMagnet` (2 pulling, 4 pushing) |
 | A9 drawing an aspect tag with its amount | `AspectRenderer.draw(graphics, aspect, x, y, amount, 0)` in `GuiAspectAnalyzer` |
+| Section 2: built-in item renderer of the Mob Display | `ItemRenderers.register(...)` from `MachinesClient.register()`; Fabric backend `FabricItemRenderers` (NeoForge backend still open) |
+| Section 3: drops of a killed mob | `TinkererEvents.LIVING_DROPS` in `ItemBloodSword.onLivingDrops` (Fabric poster done, NeoForge poster still open) |
 

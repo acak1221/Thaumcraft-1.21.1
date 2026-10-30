@@ -6,8 +6,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import thaumic.tinkerer.testing.EnchantmentsRuntimeChecks;
 
 /**
- * Fabric wrappers of {@link EnchantmentsRuntimeChecks}: one per check. Test-only, not distributed. The checks could not be run
- * when they were written (no Gradle in the porting session).
+ * Fabric wrappers of {@link EnchantmentsRuntimeChecks}: one per check. Test-only, not distributed. Every check of the group
+ * is required; the ones that wait for ticks (a landing after the spawn protection of a mock player, a bow drawn) have a longer
+ * timeout.
  */
 public final class EnchantmentsGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -76,11 +77,6 @@ public final class EnchantmentsGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-    public void theAttackEventArmsTheAttackOfAPlayer(GameTestHelper test) {
-        EnchantmentsRuntimeChecks.theAttackEventArmsTheAttackOfAPlayer(test);
-    }
-
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void theStrikeCounterIsKeptOnTheWeapon(GameTestHelper test) {
         EnchantmentsRuntimeChecks.theStrikeCounterIsKeptOnTheWeapon(test);
     }
@@ -88,11 +84,6 @@ public final class EnchantmentsGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void pounceDependsOnTheBlockUnderTheFeet(GameTestHelper test) {
         EnchantmentsRuntimeChecks.pounceDependsOnTheBlockUnderTheFeet(test);
-    }
-
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-    public void desintegrateAndFlamingTouchChangeTheDigSpeedOfTheBlockUnderTheCrosshair(GameTestHelper test) {
-        EnchantmentsRuntimeChecks.desintegrateAndFlamingTouchChangeTheDigSpeedOfTheBlockUnderTheCrosshair(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -106,18 +97,63 @@ public final class EnchantmentsGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-    public void slowFallShortensTheFallOnTheServer(GameTestHelper test) {
-        EnchantmentsRuntimeChecks.slowFallShortensTheFallOnTheServer(test);
+    public void theEnchantmentsAnswerForAnyLivingAttackerAndItsMainHandOnly(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.theEnchantmentsAnswerForAnyLivingAttackerAndItsMainHandOnly(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void finalStrikeTriplesTheBlowOnTheRollOfTheOriginal(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.finalStrikeTriplesTheBlowOnTheRollOfTheOriginal(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void aSweepOfASwordIsAHitForEachEntityItReaches(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.aSweepOfASwordIsAHitForEachEntityItReaches(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void theFramesCompareTheBoostedAmountsNotTheRawOnes(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.theFramesCompareTheBoostedAmountsNotTheRawOnes(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void desintegrateAndFlamingTouchChangeTheDigSpeedOfTheBlock(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.desintegrateAndFlamingTouchChangeTheDigSpeedOfTheBlock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void ascentBoostMultipliesTheJumpOfAPlayer(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.ascentBoostMultipliesTheJumpOfAPlayer(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void slowFallMakesALandingAFallOfTwoPointNineBlocks(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.slowFallMakesALandingAFallOfTwoPointNineBlocks(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void shockwaveHurtsTheCreaturesAroundALanding(GameTestHelper test) {
         EnchantmentsRuntimeChecks.shockwaveHurtsTheCreaturesAroundALanding(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void quickDrawTakesTicksOffTheDrawClockOfABow(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.quickDrawTakesTicksOffTheDrawClockOfABow(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-    public void quickDrawGivesTheArrowTheSpeedOfALongerDraw(GameTestHelper test) {
-        EnchantmentsRuntimeChecks.quickDrawGivesTheArrowTheSpeedOfALongerDraw(test);
+    public void aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantments(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantments(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void aFakePlayerAttackGetsTheEnchantmentsOfItsSword(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.aFakePlayerAttackGetsTheEnchantmentsOfItsSword(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void theTabletsFakePlayerDigsAndHitsWithTheEnchantments(GameTestHelper test) {
+        EnchantmentsRuntimeChecks.theTabletsFakePlayerDigsAndHitsWithTheEnchantments(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -145,14 +181,4 @@ public final class EnchantmentsGameTests implements FabricGameTest {
         EnchantmentsRuntimeChecks.breakingTheEnchanterDropsTheBlockTheToolAndTheWand(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-    public void aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor(GameTestHelper test) {
-        EnchantmentsRuntimeChecks.aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantmentsAfterUpdateFor(test);
-    }
-
-    /** Fails until TinkererFakePlayer brackets its attack with AttackBoost (docs/api-requests/Enchantments.md, section 5): not required. */
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, required = false)
-    public void aFakePlayerAttackGetsTheEnchantmentsOfItsSword(GameTestHelper test) {
-        EnchantmentsRuntimeChecks.aFakePlayerAttackGetsTheEnchantmentsOfItsSword(test);
-    }
 }

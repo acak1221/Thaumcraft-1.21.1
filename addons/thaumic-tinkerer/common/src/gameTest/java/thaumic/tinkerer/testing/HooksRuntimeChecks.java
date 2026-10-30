@@ -10,9 +10,11 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -455,6 +457,251 @@ public final class HooksRuntimeChecks {
             }
         });
         cleanup.run();
+        test.succeed();
+    }
+
+    // ---- LIVING_ARMOR_ABSORB ---------------------------------------------------------------------------------------
+
+    /** Health the victim loses to one hit (the frames are cleared first, so the hit is never refused by them). */
+    private static float lost(LivingEntity victim, DamageSource source, float amount) {
+        victim.invulnerableTime = 0;
+        float before = victim.getHealth();
+        victim.hurt(source, amount);
+        return before - victim.getHealth();
+    }
+
+    /**
+     * The armour step of a hit on an armoured pig and on a player: the listener sees the damage that comes to the armour (after
+     * {@code LIVING_DAMAGE}) and the amount vanilla's formula takes off, may leave it alone (vanilla's own value comes out), replace
+     * it, push it past the blow or below nothing (held between 0 and the blow) or answer NaN (ignored); two listeners chain; a
+     * source that bypasses armour (starvation, magic) is not posted and not reduced; a bystander that the listener ignores is
+     * armoured as before.
+     */
+    public static void livingArmorAbsorbIsPostedFromTheArmourStepAndReplacesWhatArmourTakesOff(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        Zombie zombie = zombie(test, 1.5, 1, 3.5);
+        Pig pig = tough(test, EntityType.PIG, 3.5, 1, 3.5);
+        Pig bystander = tough(test, EntityType.PIG, 5.5, 1, 3.5);
+        pig.getAttribute(Attributes.ARMOR).setBaseValue(20D);
+        bystander.getAttribute(Attributes.ARMOR).setBaseValue(20D);
+        DamageSource blow = level.damageSources().mobAttack(zombie);
+        float left10 = afterArmour(pig, blow, 10F);
+        float left5 = afterArmour(pig, blow, 5F);
+        test.assertTrue(left10 > 3F && left10 < 5F, "control of the formula: 20 armour points leave about 4 of a blow of 10: " + left10);
+        near(test, lost(pig, blow, 10F), left10, "control: with no listener of this check the armour works as vanilla");
+
+        List<Object[]> seen = new ArrayList<>(); // victim, damage, absorbed, attacker
+        int[] mode = { 0 }; // 0 leave alone, 1 half the blow, 2 far more than the blow, 3 below nothing, 4 NaN
+        TinkererEvents.LivingArmorAbsorb listener = (victim, source, damage, absorbed) -> {
+            if (victim != pig && victim != bystander) return absorbed;
+            seen.add(new Object[] { victim, damage, absorbed, source.getEntity() });
+            if (victim != pig) return absorbed; // answers only for its own entity
+            return switch (mode[0]) {
+                case 1 -> damage * 0.5F;
+                case 2 -> damage * 10F;
+                case 3 -> -5F;
+                case 4 -> Float.NaN;
+                default -> absorbed;
+            };
+        };
+        List<Float> secondSaw = new ArrayList<>();
+        TinkererEvents.LivingArmorAbsorb addOne = (victim, source, damage, absorbed) -> {
+            if (victim != pig) return absorbed;
+            secondSaw.add(absorbed);
+            return absorbed + 1F;
+        };
+        TinkererEvents.LivingDamage halve = (victim, source, amount) -> victim == pig ? amount * 0.5F : amount;
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(listener);
+        try {
+            // leaving the value alone gives exactly vanilla's, and the listener saw the blow, what vanilla takes, the attacker
+            mode[0] = 0;
+            near(test, lost(pig, blow, 10F), left10, "a listener that changes nothing changes nothing");
+            test.assertTrue(seen.size() == 1 && seen.get(0)[0] == pig, "the pig's armour step posted the event once: " + seen.size());
+            near(test, (Float) seen.get(0)[1], 10F, "the listener saw the whole blow");
+            near(test, (Float) seen.get(0)[2], 10F - left10, "and what vanilla's formula takes of it");
+            test.assertTrue(seen.get(0)[3] == zombie, "with the source's attacker");
+
+            // the listener is global: the bystander is posted too, and left as vanilla has it
+            seen.clear();
+            near(test, lost(bystander, blow, 10F), left10, "the bystander's armour is vanilla's");
+            test.assertTrue(seen.size() == 1 && seen.get(0)[0] == bystander, "although the listener saw it");
+
+            mode[0] = 1;
+            near(test, lost(pig, blow, 10F), 5F, "a listener that says 'half the blow' replaces the formula's share");
+            mode[0] = 2;
+            test.assertTrue(lost(pig, blow, 10F) == 0F, "more than the blow is held to the whole blow: nothing goes through");
+            mode[0] = 3;
+            near(test, lost(pig, blow, 10F), 10F, "less than nothing is held to nothing: the whole blow goes through");
+            mode[0] = 4;
+            near(test, lost(pig, blow, 10F), left10, "NaN is ignored");
+
+            // a source that bypasses armour is not posted, and not reduced even by a listener that would take half
+            mode[0] = 1;
+            seen.clear();
+            near(test, lost(pig, level.damageSources().starve(), 10F), 10F, "starvation is not reduced by armour");
+            near(test, lost(pig, level.damageSources().magic(), 10F), 10F, "nor is magic");
+            test.assertTrue(seen.isEmpty(), "and the listener was not asked: " + seen.size());
+
+            // after LIVING_DAMAGE: the armour step gets what the first event left
+            mode[0] = 0;
+            seen.clear();
+            TinkererEvents.LIVING_DAMAGE.register(halve);
+            try {
+                near(test, lost(pig, blow, 10F), left5, "LIVING_DAMAGE halved the blow, the armour works on the half");
+                near(test, (Float) seen.get(0)[1], 5F, "and that half is the damage the armour event sees");
+            } finally {
+                TinkererEvents.LIVING_DAMAGE.unregister(halve);
+            }
+
+            // two listeners: the second sees what the first returned
+            mode[0] = 1;
+            TinkererEvents.LIVING_ARMOR_ABSORB.register(addOne);
+            try {
+                near(test, lost(pig, blow, 10F), 4F, "half the blow (5) from the first, one more (6) from the second");
+                test.assertTrue(secondSaw.equals(List.of(5F)), "the second saw 5: " + secondSaw);
+            } finally {
+                TinkererEvents.LIVING_ARMOR_ABSORB.unregister(addOne);
+            }
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(listener);
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(addOne);
+            TinkererEvents.LIVING_DAMAGE.unregister(halve);
+        }
+        near(test, lost(pig, blow, 10F), left10, "unregistered: vanilla again");
+
+        // Thaumcraft's own ward pass (the priority-1 pieces of the original's ISpecialArmor, thaumcraft.common.lib.MagicWard) runs before
+        // this event, as priority 1 ran before priority 0 in Forge's ApplyArmor: a pig in a Fortress chestplate (7 armour points, 7/20 of
+        // an explosion) is posted with 10 - 3.5 = 6.5, and the armour step then works on that
+        net.minecraft.world.item.Item fortress = BuiltInRegistries.ITEM.get(ResourceLocation.parse("thaumcraft:fortress_chestplate"));
+        test.assertTrue(fortress != Items.AIR, "Thaumcraft's Fortress chestplate is registered");
+        Pig warded = tough(test, EntityType.PIG, 4.5, 1, 5.5);
+        warded.setItemSlot(EquipmentSlot.CHEST, new ItemStack(fortress));
+        List<Float> wardedSaw = new ArrayList<>();
+        TinkererEvents.LivingArmorAbsorb wardSpy = (victim, source, damage, absorbed) -> {
+            if (victim == warded) wardedSaw.add(damage);
+            return victim == warded ? damage * 0.5F : absorbed;
+        };
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(wardSpy);
+        try {
+            near(test, lost(warded, level.damageSources().explosion(null, null), 10F), 3.25F, "half of what the ward pass left");
+            test.assertTrue(wardedSaw.size() == 1 && Math.abs(wardedSaw.get(0) - 6.5F) < EPSILON,
+                    "the event saw the damage after Thaumcraft's ward pass, not before it: " + wardedSaw);
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(wardSpy);
+        }
+        warded.discard();
+        zombie.discard();
+        pig.discard();
+        bystander.discard();
+
+        // a player reaches the same method through Player.actuallyHurt (a new player refuses hits for 60 ticks, and the Soul Hearts keep
+        // the 1.7.10 invulnerability frames of each server player by game tick, so every player is hit once)
+        ServerPlayer unchanged = player(test, 5.5, 1, 6.5);
+        ServerPlayer replaced = player(test, 6.5, 1, 6.5);
+        ServerPlayer bypassed = player(test, 7.5, 1, 6.5);
+        for (ServerPlayer victim : List.of(unchanged, replaced, bypassed)) {
+            victim.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
+            victim.setHealth(1000F);
+            victim.getAttribute(Attributes.ARMOR).setBaseValue(20D);
+        }
+        List<Object> playerSaw = new ArrayList<>();
+        TinkererEvents.LivingArmorAbsorb forPlayers = (who, source, damage, absorbed) -> {
+            if (who != unchanged && who != replaced && who != bypassed) return absorbed;
+            playerSaw.add(who);
+            return who == unchanged ? absorbed : damage * 0.5F;
+        };
+        test.runAfterDelay(65, () -> {
+            TinkererEvents.LIVING_ARMOR_ABSORB.register(forPlayers);
+            try {
+                DamageSource cactus = level.damageSources().cactus(); // no attacker, so the difficulty does not scale it
+                float left = afterArmour(unchanged, cactus, 10F);
+                test.assertTrue(left > 3F && left < 5F, "20 armour points leave about 4 of 10: " + left);
+                near(test, lost(unchanged, cactus, 10F), left, "the armour of a player works as vanilla when the listener changes nothing");
+                test.assertTrue(playerSaw.equals(List.of(unchanged)), "and the event was posted for it: " + playerSaw);
+                near(test, lost(replaced, cactus, 10F), 5F, "the listener replaces the share the player's armour takes");
+                test.assertTrue(playerSaw.equals(List.of(unchanged, replaced)), "posted for that player too: " + playerSaw);
+                near(test, lost(bypassed, level.damageSources().starve(), 10F), 10F, "starvation passes through a player's armour");
+                test.assertTrue(playerSaw.size() == 2, "without being posted: " + playerSaw);
+            } finally {
+                TinkererEvents.LIVING_ARMOR_ABSORB.unregister(forPlayers);
+            }
+            finish(test, unchanged, replaced, bypassed);
+        });
+    }
+
+    /**
+     * What the mixin hands the game when nobody changed the amount is the game's own float, bit for bit (not
+     * {@code damage - (damage - vanilla)}, which differs from it in the last place for some blows), also with a listener that returns
+     * what it was given; and an infinite blow (whose "amount the armour took" is {@code Infinity - Infinity}, NaN) still kills instead of
+     * leaving a NaN health. Both go through a real {@code hurt} of a real pig.
+     */
+    public static void livingArmorAbsorbHandsBackTheGamesOwnFloatAndSurvivesAnInfiniteBlow(GameTestHelper test) {
+        floor(test);
+        ServerLevel level = test.getLevel();
+        DamageSource cactus = level.damageSources().cactus(); // no attacker: the difficulty does not scale it
+        Pig pig = tough(test, EntityType.PIG, 2.5, 1, 2.5);
+        pig.getAttribute(Attributes.ARMOR).setBaseValue(20D);
+        // a blow whose round trip (damage - (damage - vanilla)) is not vanilla's float, and whose health after it shows the difference
+        final float health = 20F;
+        float blow = Float.NaN;
+        float vanilla = 0F;
+        float roundTrip = 0F;
+        for (int i = 1; i < 1300 && Float.isNaN(blow); i++) {
+            float candidate = 2F + i * 0.0137F;
+            float left = afterArmour(pig, cactus, candidate);
+            float trip = candidate - (candidate - left);
+            if (trip != left && health - trip != health - left) {
+                blow = candidate;
+                vanilla = left;
+                roundTrip = trip;
+            }
+        }
+        test.assertTrue(!Float.isNaN(blow), "there is a blow whose round trip through the float arithmetic shows in the health");
+
+        pig.setHealth(health);
+        pig.invulnerableTime = 0;
+        pig.hurt(cactus, blow);
+        test.assertTrue(pig.getHealth() == health - vanilla,
+                "no listener: the health is exactly what vanilla's own float leaves: " + pig.getHealth() + " (expected " + (health - vanilla) + ")");
+        test.assertTrue(pig.getHealth() != health - roundTrip, "and not what the round trip would leave: " + (health - roundTrip));
+
+        List<Float> seen = new ArrayList<>();
+        TinkererEvents.LivingArmorAbsorb leaveAlone = (victim, source, damage, absorbed) -> {
+            if (victim == pig) seen.add(absorbed);
+            return absorbed;
+        };
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(leaveAlone);
+        try {
+            pig.setHealth(health);
+            pig.invulnerableTime = 0;
+            pig.hurt(cactus, blow);
+            test.assertTrue(seen.size() == 1, "the listener was asked: " + seen);
+            test.assertTrue(pig.getHealth() == health - vanilla,
+                    "a listener that returns what it was given changes nothing, not even in the last place: " + pig.getHealth());
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(leaveAlone);
+        }
+
+        // an infinite blow: the armour formula gives infinity, the amount "taken" is NaN; the pig has to die, not keep a NaN health
+        List<Float> asked = new ArrayList<>();
+        Pig doomed = tough(test, EntityType.PIG, 4.5, 1, 2.5);
+        doomed.getAttribute(Attributes.ARMOR).setBaseValue(20D);
+        TinkererEvents.LivingArmorAbsorb everything = (victim, source, damage, absorbed) -> {
+            if (victim == doomed) asked.add(damage);
+            return damage;
+        };
+        TinkererEvents.LIVING_ARMOR_ABSORB.register(everything);
+        try {
+            doomed.hurt(cactus, Float.POSITIVE_INFINITY);
+            test.assertTrue(!Float.isNaN(doomed.getHealth()), "an infinite blow does not leave a NaN health");
+            test.assertTrue(doomed.getHealth() == 0F && doomed.isDeadOrDying(), "it kills: " + doomed.getHealth());
+            test.assertTrue(asked.isEmpty(), "and is not posted (the damage is not finite): " + asked);
+        } finally {
+            TinkererEvents.LIVING_ARMOR_ABSORB.unregister(everything);
+        }
+        pig.discard();
+        doomed.discard();
         test.succeed();
     }
 

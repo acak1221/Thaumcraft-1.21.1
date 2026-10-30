@@ -12,24 +12,20 @@
  */
 package thaumic.tinkerer.common.core.handler.kami;
 
-import dev.architectury.event.events.common.LootEvent;
-import net.minecraft.advancements.critereon.DamageSourcePredicate;
-import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.advancements.critereon.LocationPredicate;
-import net.minecraft.core.registries.Registries;
+import dev.architectury.event.EventResult;
+import java.util.List;
+import java.util.function.DoubleSupplier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
-import net.minecraft.world.level.storage.loot.predicates.LocationCheck;
-import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import thaumic.tinkerer.common.ThaumicTinkerer;
+import thaumic.tinkerer.common.hooks.TinkererEvents;
 import thaumic.tinkerer.common.lib.LibItemNames;
 import thaumic.tinkerer.common.registry.TTRegistry;
 
@@ -37,52 +33,58 @@ import thaumic.tinkerer.common.registry.TTRegistry;
  * The dimensional shards: an Enderman killed by a player in the End drops an Ender Shard once in 32 kills, a Zombified
  * Piglin killed by a player in the Nether a Nether Shard once in 16 (1.7.10 {@code LivingDropsEvent}).
  *
- * <p>Architectury has no event for the drops of a living entity, so the drop is a loot pool added to the two entity loot
- * tables ({@code LootEvent.MODIFY_LOOT_TABLE}), with the three conditions of the original: the damage came from a player
- * ({@code event.source.getEntity() instanceof EntityPlayer}: the attacker of the killing blow, an arrow's shooter
- * included, not "hurt by a player lately"), the entity is in the right dimension, and a random chance. A data pack that
- * replaces the loot table of the Enderman or the Piglin is modified as well.</p>
+ * <p>A listener of {@link TinkererEvents#LIVING_DROPS}, the {@code LivingDropsEvent} of the original, with its three
+ * conditions: the damage came from a player ({@code event.source.getEntity() instanceof EntityPlayer}: the attacker of the
+ * killing blow, an arrow's shooter included, not "hurt by a player lately"), the entity is of the right kind in the right
+ * dimension ({@code instanceof}, so a subclass of the two mobs counts as it did), and a random chance. The shard is added to
+ * the list of drops as a separate item entity at the mob's position, as the original added an {@code EntityItem}; what
+ * the other listeners and the loot table dropped is left alone and Looting does not change the chance. The NeoForge poster of
+ * the event does not exist yet: until it does no shard drops there.</p>
  */
 public final class DimensionalShardDropHandler {
     /** 1.7.10: {@code Math.random() <= 1D / 32D}. */
-    public static final float ENDER_SHARD_CHANCE = 1F / 32F;
+    public static final double ENDER_SHARD_CHANCE = 1D / 32D;
     /** 1.7.10: {@code Math.random() <= 1D / 16D}. */
-    public static final float NETHER_SHARD_CHANCE = 1F / 16F;
+    public static final double NETHER_SHARD_CHANCE = 1D / 16D;
 
-    public static final ResourceKey<LootTable> ENDERMAN = ResourceKey.create(Registries.LOOT_TABLE,
-            ResourceLocation.withDefaultNamespace("entities/enderman"));
-    public static final ResourceKey<LootTable> ZOMBIFIED_PIGLIN = ResourceKey.create(Registries.LOOT_TABLE,
-            ResourceLocation.withDefaultNamespace("entities/zombified_piglin"));
+    /** The dice of the chance rolls ({@code Math.random()} in the original). Tests replace it to make a roll certain; nothing else does. */
+    public static volatile DoubleSupplier dice = Math::random;
+
+    private static boolean warnedMissingShard;
 
     private DimensionalShardDropHandler() {}
 
-    /** Registers the loot table hook (once, from the registrar). */
+    /** Registers the listener (once, from the registrar). */
     public static void register() {
-        LootEvent.MODIFY_LOOT_TABLE.register((id, context, builtin) -> {
-            if (id.equals(ENDERMAN)) {
-                addPool(context, LibItemNames.KAMI_RESOURCE_NAMES[7], Level.END, ENDER_SHARD_CHANCE);
-            } else if (id.equals(ZOMBIFIED_PIGLIN)) {
-                addPool(context, LibItemNames.KAMI_RESOURCE_NAMES[6], Level.NETHER, NETHER_SHARD_CHANCE);
-            }
-        });
+        TinkererEvents.LIVING_DROPS.register(DimensionalShardDropHandler::onLivingDrops);
     }
 
-    /** Adds the pool; a shard that is not registered (the Kami gear failed to load) must not break the reload of the data packs. */
-    private static void addPool(LootEvent.LootTableModificationContext context, String shardPath, ResourceKey<Level> dimension,
-            float chance) {
+    /** 1.7.10 {@code onEntityLivingDrops}: a player's kill of an Enderman in the End or a Zombified Piglin in the Nether may add a shard. */
+    public static EventResult onLivingDrops(LivingEntity victim, DamageSource source, List<ItemEntity> drops, int lootingLevel,
+            boolean recentlyHit) {
+        if (!(source.getEntity() instanceof Player)) return EventResult.pass();
+        if (victim instanceof EnderMan && inDimension(victim, Level.END) && dice.getAsDouble() <= ENDER_SHARD_CHANCE) {
+            addShard(drops, victim, LibItemNames.KAMI_RESOURCE_NAMES[7]);
+        }
+        if (victim instanceof ZombifiedPiglin && inDimension(victim, Level.NETHER) && dice.getAsDouble() <= NETHER_SHARD_CHANCE) {
+            addShard(drops, victim, LibItemNames.KAMI_RESOURCE_NAMES[6]);
+        }
+        return EventResult.pass();
+    }
+
+    private static boolean inDimension(LivingEntity victim, ResourceKey<Level> dimension) {
+        return victim.level().dimension() == dimension;
+    }
+
+    /** One shard at the victim's position; a shard that is not registered (the Kami gear failed to load) must not break a mob's death. */
+    private static void addShard(List<ItemEntity> drops, LivingEntity victim, String shardPath) {
         if (!TTRegistry.hasItem(shardPath)) {
-            ThaumicTinkerer.LOG.warn("Kami: the item {} is not registered; its drop is not added to the loot tables", shardPath);
+            if (!warnedMissingShard) {
+                warnedMissingShard = true;
+                ThaumicTinkerer.LOG.warn("Kami: the item {} is not registered; its drop is not added to the drops", shardPath);
+            }
             return;
         }
-        context.addPool(pool(TTRegistry.item(shardPath), dimension, chance));
-    }
-
-    /** One roll: the shard, when a player's blow killed the mob in that dimension, with the given chance. */
-    public static LootPool.Builder pool(Item shard, ResourceKey<Level> dimension, float chance) {
-        return LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
-                .when(DamageSourceCondition.hasDamageSource(DamageSourcePredicate.Builder.damageType()
-                        .source(EntityPredicate.Builder.entity().of(EntityType.PLAYER))))
-                .when(LocationCheck.checkLocation(LocationPredicate.Builder.inDimension(dimension)))
-                .when(LootItemRandomChanceCondition.randomChance(chance)).add(LootItem.lootTableItem(shard));
+        drops.add(new ItemEntity(victim.level(), victim.getX(), victim.getY(), victim.getZ(), new ItemStack(TTRegistry.item(shardPath))));
     }
 }

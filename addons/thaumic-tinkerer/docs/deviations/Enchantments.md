@@ -12,9 +12,11 @@ the pillar rules, the recipe and the hardness of the Enchanter. Requests to the 
 Reading key: **forced** means 1.21.1 cannot do it the old way; **fix** means the original crashed, lost data or was
 exploitable; **choice** means a free decision of the port; **limit** means something the port cannot reproduce exactly.
 
-None of this has been seen running: the group was written and compiled (`tools/compile.sh`, with and without `-g`) and its
-JUnit tests were run by hand with a JUnit launcher, but no game, no Gradle build and no GameTest was run. Every statement
-about what happens in the game below is a reading of the code, not an observation. Section 12 lists what is unverified.
+Status: the group was written and compiled (`tools/compile.sh`, with and without `-g`); its GameTests (`EnchantmentsGameTests`,
+Fabric, headless server with mock players and the fake player of the Animation Tablet) and its JUnit tests have since been run
+(the exact runs are in the report that came with this revision). The effects of the damage, dig, jump, fall and bow enchantments
+now go through the loader events of `docs/HOOKS.md` (sections 2, 3, 4, 9 and 13 here); the part that only a client can show is
+not seen. Section 12 lists what is unverified.
 
 ## 1. The enchantments are data (forced)
 
@@ -43,67 +45,149 @@ Consequences kept in mind: Mending, Sweeping Edge, Depth Strider, Soul Speed and
 are not in the table (the table is the 1.7.10 one, section 4), so the Enchanter does not offer them. The numeric ids of
 1.7.10 are not migrated; neither are 1.7.10 items or worlds.
 
-## 2. Damage: Pounce, Final Strike, Valiance, Focused and Dispersed Strikes (forced, workaround)
+## 2. Damage: Pounce, Final Strike, Valiance, Focused and Dispersed Strikes (loader event `LIVING_DAMAGE`)
 
-1.7.10 changed `event.ammount` in `LivingHurtEvent`. Architectury's `EntityEvent.LIVING_HURT` can only veto a hit (and a veto
-makes `Player.attack` treat the blow as a miss), so the amount cannot be changed there. `AttackBoost` instead arms the
-attack just before it runs: from `PlayerEvent.ATTACK_ENTITY` (and from `AttackBoost.beforeAttack`, for attacks that do not
-come from the network) it works out the factor of the enchantments, solves the attack formula of 1.21.1 for the base damage
-that gives that factor and puts a transient `ADD_MULTIPLIED_TOTAL` modifier on the player's `ATTACK_DAMAGE`. The modifier is
-removed by the `LIVING_HURT` event of the victim, and at the latest by the next tick of the player.
+1.7.10 changed `event.ammount` in `LivingHurtEvent`. Architectury has no such event, so the group first armed the attack of a
+player through an attribute modifier (`AttackBoost`). That workaround is gone: `ModEnchantmentHandler.onEntityDamaged` is a
+listener of `TinkererEvents.LIVING_DAMAGE` (`docs/HOOKS.md` section 3), which hands the amount to the listener and takes the new
+one back. It runs for **every** damage that has a living attacker (`source.getEntity()`, the entity that caused the damage:
+the shooter of an arrow, the wearer of thorns), as the original did: the blow of a player, of the Animation Tablet's fake player
+(`TinkererFakePlayer.attackEntity`), of a mob with an enchanted item in its hand, an arrow, thorns, a potion. The attacker's
+**main hand** is read (the original had no other hand), and an empty hand ends the handler, Pounce included, as in the original.
 
-- **The numbers are the original's**: Pounce `x(1 + .25 L)` when the block under the feet is air, Final Strike `x3` when
-  `L > nextInt(19)`, Valiance `x(1 + .1 L)` below half health, Focused Strikes `/2` then `+= .5 * max(s, 5) * amount * L`,
+- **The numbers are the original's**: Pounce `x(1 + .25 L)` when the block under the feet is air (a player's leggings only, as
+  in the original; the server's `posY` of 1.7.10 was the height of the feet), Final Strike `x3` when `L > nextInt(19)`,
+  Valiance `x(1 + .1 L)` below half health of the attacker, Focused Strikes `/2` then `+= .5 * max(s, 5) * amount * L`,
   Dispersed Strikes `x(1 + .6 L + s/5)` then `/(1 + .25 L + 2.5 s)` (integer division in `s/5`), in this order, with the
-  counter `s` of the original (section 11). The factor multiplies the damage that reaches the victim, before armor, as
-  `LivingHurtEvent` did.
-- **Players only (limit).** The original applied the factor to any living attacker with an enchanted item in the hand;
-  the port only to players. A zombie with an enchanted sword (only possible with commands or other mods) is not boosted.
-  Vampirism is not affected: it works for any living attacker.
-- **Not for attacks that do not go through `Player.attack`.** Arrows, thorns and the like were boosted by the original when
-  the shooter's held item had the enchantments; they are not. The Animation Tablet's fake player calls `attack` without the
-  network event: `AttackBoost.beforeAttack(player, target)` and `afterAttack(player)` have to be called around its attack
-  (shared-file request to the lead in `docs/api-requests/Enchantments.md`, section 5, with the exact patch). **Until then a
-  tablet does not get the factor**: a Valiance, Final Strike, Focused or Dispersed Strikes sword in a tablet hits for the base
-  damage. (In 1.7.10 the tablet's `attackTargetEntityWithCurrentItem` posted `LivingHurtEvent`, so they applied.) The GameTest
-  `aFakePlayerAttackGetsTheEnchantmentsOfItsSword` fails until the patch is in; its wrapper is `required = false` for that reason.
-- **The counter moves when the attack starts**, not when the damage lands, so a blow that the victim's invulnerability frames
-  swallow still advances the counter of Focused and Dispersed Strikes.
-- **A critical hit** multiplies the boosted damage like any other (the attribute is solved against the formula with the
-  critical factor in it).
+  counter `s` of the original (section 11), all in `EnchantmentFormulas.modifyDamage` with the narrowing to `float` after each
+  step that the compound assignments of Java did. Final Strike's roll comes from the attacker's own random source instead of a
+  fresh `new Random()`; the distribution is the same.
+- **Where the event stands, and what that changes** (`docs/HOOKS.md` section 3). 1.7.10 posted `LivingHurtEvent` in
+  `damageEntity`, after the invulnerability frames had taken the last hit off (`damageEntity(source, amount - lastDamage)`) and
+  before the armour. The new event comes before the frames compare the hit with the last one, before the shield, the helmet,
+  the armour, Protection, Resistance and Absorption. So:
+  - a blow inside the frames of the victim arrives with its **whole amount**, the factors multiply that, and vanilla then
+    compares the **listener's result** with the last hit (which vanilla stored as the boosted amount, `f a1` for a first raw
+    blow `a1`) and deals the difference. 1.7.10 compared the **raw** amounts (`lastDamage = a1`) and handed its event the
+    difference `a2 - a1`. For a factor `f` that is the same on both blows (Pounce, Valiance, Focused Strikes, whose counter is
+    floored at 5) the two agree when the second raw blow `a2` is above both bars (`a2 > max(a1, f a1)`: both deal
+    `f (a2 - a1)`) and when it is below both; **in between they differ, in a band**:
+    - `f > 1` and `a1 < a2 <= f a1`: 1.7.10 dealt `f (a2 - a1)`, here the blow is **refused** (it is not posted: it is not above
+      the last hit as vanilla stored it). Pounce IV (`f = 2`): a blow of 10 is dealt as 20; a blow of 15 inside the frames
+      dealt 10 more in 1.7.10 and deals nothing here; a blow of 25 deals 30 in both.
+    - `f < 1` (Dispersed Strikes I at a counter of 5 or more: 0.19 of the blow, and less as the counter grows) and `f a1 < a2 <= a1`: 1.7.10 refused
+      the blow before its event, here it is **posted** (vanilla's test compares it with the boosted `f a1`), so the listener
+      runs: **the strike counter moves and Vampirism heals** for a blow that then deals nothing, because its result `f a2` is
+      not above `f a1` and vanilla refuses it. A counter step and a heal without damage, in that band only.
 
-## 3. Vampirism (choice)
+    With the random Final Strike and with Dispersed Strikes, whose factor moves with the counter, there is no constant `f`: a
+    tripled hit raises the bar to `3 a1`, and the plain hits that follow inside its frames are refused where 1.7.10 would have
+    let a plain difference through. Both bands are pinned by the GameTest `theFramesCompareTheBoostedAmountsNotTheRawOnes`
+    (Pounce IV; Dispersed Strikes I at a counter of 6).
+  - a hit that the frames refuse **by its raw amount** (`amount <= lastHurt` inside the frames, `lastHurt` being what vanilla
+    stored: the listener's result for the hit before) is **not posted** (the poster applies vanilla's test first), so it does not
+    move the counter of Focused and Dispersed Strikes and does not heal with Vampirism. That is what 1.7.10 did too, except in
+    the band above for a factor below one. A hit that a shield blocks or a helmet reduces is posted with its full amount and may
+    be refused afterwards; the counter and the heal have happened then. (1.7.10 had no shields and no helmet rule; `docs/HOOKS.md` section 3 puts its event after the
+    blocking, which for a player victim that blocked with a sword was `(1 + amount) / 2` before the factors, and now it is not
+    applied at all. A player victim that holds a sword up is the one case in which the factors of the enchantments meet a
+    different amount than in 1.7.10.)
+  - the listener never cancels, so no frames are lost; other listeners (Soul Hearts of the KamiWorld group) chain in the order
+    of registration, each seeing the amount the one before returned.
+- **What the workaround could not do and the event does** (all of them were limits written down here before): the factors
+  apply to mobs, arrows, thorns and the Animation Tablet's fake player; there is no dependence on the shape of the 1.21.1 attack
+  formula; a critical hit is multiplied like anything else because the event comes after `Player.attack` has worked it out; the
+  counter moves when the damage is about to land, not when the attack starts.
+- **A sweep is a hit for each entity it reaches** (new in Minecraft 1.9, so no 1.7.10 counterpart; read in the bytecode of
+  `Player.attack`, pinned by the GameTest `aSweepOfASwordIsAHitForEachEntityItReaches`). A full-strength swing of a sword by a
+  player on the ground (not a critical hit, not a sprint knock-back) hurts the target, then calls `LivingEntity.hurt` with the
+  **same `playerAttack` source** once for every other living entity in the target's box grown by a block to each side that is
+  within three blocks of the attacker (allies of the attacker and marker armour stands are skipped), and the event is posted for
+  each of them. The listener cannot tell a swept entity from the target (the source is the
+  same and the event carries nothing else), so it answers for each as for a blow of its own:
+  - **Vampirism heals by its level once for each entity hurt** and plays the zap at each (a swing that hurts two pigs heals
+    twice, a swing at a lone pig once, as in 1.7.10);
+  - the factors multiply the sweep damage of each swept entity (that damage is 1 plus the Sweeping Edge share of the blow, times
+    the strength of the swing), **Final Strike rolls its dice separately for each**;
+  - **the strike counter follows the last entity of the swing**: the remembered target becomes the last swept entity and the
+    counter starts again at 0, so a streak of Focused or Dispersed Strikes on one target of a crowd is broken by every sweep that
+    reaches somebody else (1.7.10 had one target, one heal and one counter step for each swing).
+  This was kept as it is (**choice**): a filter would need the target of the swing, which neither the damage source nor the event
+  carries, and a swept entity is hurt by the sword like the target is.
+- **The fake player's health is fixed** (`TinkererFakePlayer.setHealth` does nothing), so Valiance never sees a hurt fake
+  player; every other factor works for it (the GameTests use Focused Strikes and Pounce).
+- The listener changes the weapon (the counter on its data component) in the server's call. The event is posted on the server
+  only, so nothing needs a side test.
 
-Heals the attacker by the level (any living attacker, as in 1.7.10) and plays `thaumcraft:zap` at the victim, from
-`EntityEvent.LIVING_HURT`. That event is posted at the start of `LivingEntity.hurt`, before the game decides whether the blow
-deals damage; 1.7.10's `LivingHurtEvent` came after. To stay close to "healed when damage was dealt" the port does not heal
-when the amount is zero or less, when the victim is dying or invulnerable to the source, or when the victim is inside its
-invulnerability frames (`invulnerableTime > 10`), where a blow normally deals nothing. A blow that is stronger than the one
-that started the frames and would deal the difference is not counted either.
+## 3. Vampirism (now in the damage listener)
 
-## 4. Movement and shooting enchantments (forced, workarounds)
+Heals the attacker by the level (any living attacker, as in 1.7.10) and plays `thaumcraft:zap` at the victim, in the same
+listener of `LIVING_DAMAGE` as the factors of section 2 and after them, as `onEntityDamaged` of the original did. Once for each
+entity the hit reaches: the entities swept by a sword each heal as well (section 2, "A sweep is a hit for each entity it reaches"). The workaround
+(`EntityEvent.LIVING_HURT`, posted at the start of `LivingEntity.hurt`, with a list of conditions that guessed whether the blow
+would deal damage: not dying, not invulnerable, not inside the frames) is gone: the new event is posted for a hit that the game
+goes on to deal, and not for the ones it ignores (dead or invulnerable victim) or refuses by their raw amount (the frames), as
+1.7.10's event was (with the band of section 2, where a factor below one posts a blow that 1.7.10 refused: it heals there). A hit that a later listener cancels, or that a shield blocks, still heals (all the handlers of 1.7.10 ran as well).
 
-- **Ascent Boost.** There is no jump event. The client looks at the tick of its own player: a tick that began on the ground,
-  with the jump key held, and ended in the air moving up is a jump; the rest of the multiplied jump (`(L + 2) / 2`, not while
-  sneaking) is added to the motion that is left, and the first tick's rise is moved at once, so the path is the one of the
-  multiplied jump (`EnchantmentClientHandler`). The server does not simulate a player's jump (it checks the positions the
-  client sends); a server that is stricter than vanilla about jump height would refuse it. Not seen in play.
-- **Slow Fall.** On the client (which simulates the fall of its player) the vertical motion is divided by `1 + .33 L` and
-  the fall distance reduced by `L/3` to at least 2.9, exactly as the original, with the cloud particle. The server
-  does not simulate the fall: it counts the fall distance from the client's reports, has no motion to look at, and so reduces
-  the fall distance alone when it is 2.9 or more, the player is not sneaking and not on the ground (`PLAYER_PRE`). Remote
-  players do not show the cloud particles. Highest level on the four armor slots, as before.
-- **Shockwave.** There is no fall event. At the end of the tick of a server player (`PLAYER_POST`) the fall distance of the last
-  tick in the air is remembered; the first tick on the ground is the landing. A fall of more than 3 blocks hurts every
-  other living entity in the box of 10 blocks to every side by `.1 L d` fall damage, as before. Players that can fly
-  (`mayfly`) do not trigger it, as `EntityPlayer.fall` did not run for them in 1.7.10. A fall that ends in water or by a teleport has
-  its fall distance reset and is not a landing (as far as the code of 1.7.10 shows, its fall event did not fire either).
-- **Quick Draw.** 1.7.10 lowered `itemInUseCount` while a bow was drawn; the draw clock of 1.21.1 cannot be written. When the
-  arrow enters the world (`EntityEvent.ADD`) its speed is scaled to what the longer draw would have given, using the same
-  simulation of the original's per-tick loop (`EnchantmentFormulas.quickDrawBonusTicks`); a full draw also makes it a
-  critical arrow. **Limits:** the bow does not look drawn any faster (the pose and the sound come from the real clock), and a
-  draw so short that the game's own minimum power (0.1) is not reached releases no arrow at all, because the game decides that
-  before the arrow exists.
+## 4. Movement and shooting enchantments (loader events `LIVING_JUMP`, `LIVING_FALL`, `USE_ITEM_TICK`)
+
+All four are listeners of `TinkererEvents` (`docs/HOOKS.md` sections 5 to 7), registered once by `ModEnchantments.initEnchantments()`
+on both sides. The events that run on both sides run their listener on both, so the rule of every listener that changes a
+number both sides compute is the same on both; the one with an effect on the world (Shockwave) acts on the server only.
+
+- **Ascent Boost** (`LIVING_JUMP`). The motion of the jump, set just before the event, is multiplied by `(L + 2) / 2` (the
+  highest level on the four armor slots, not while sneaking, players only), as `onPlayerJump` did. The client handler that
+  guessed the jump from the tick of the local player (`EnchantmentClientHandler`) is deleted; the server's player gets the
+  boost too, from the same event (a real server player jumps from the movement packet, `HOOKS.md` section 5), so the server does
+  not expect a lower jump than the client makes. As HOOKS.md says, the server also posts it for any other upward take-off of a player
+  that the client reports as leaving the ground.
+- **Slow Fall** has two parts, as `onEntityUpdate` had one block. (1) *The motion and the cloud*: on the client that simulates
+  the fall of its own player, `TickEvent.PLAYER_PRE` divides the vertical motion by `1 + .33 L` (the float literal of the
+  original) and spawns the cloud while the player falls faster than `-0.0784`, for 2.9 blocks or more, not sneaking, with the
+  highest level on the armor; this is the `LivingUpdateEvent` of 1.7.10 on a real per-tick event, not a workaround. (2) *The fall
+  distance*, on both sides, in `LIVING_FALL`: the original lowered it **every tick** of the fall
+  (`fallDistance = Math.max(2.9F, fallDistance - L / 3F)`), which ends, however long the fall, at the floor of 2.9, a fall that
+  does no damage. The event comes **once, at the landing**, so the listener applies that end result at once: a landing of 2.9
+  blocks or more, for a player with Slow Fall on the armor who does not sneak at the landing, is a landing of 2.9
+  (`EnchantmentFormulas.slowFallLanding`). The single step `max(2.9, d - L/3)` would leave a fall of 100 blocks at 99 and kill
+  the wearer, which is why it was not taken. The old server-side tick rule (`PLAYER_PRE`, fall distance only) and the client's
+  own per-tick reduction of the distance are gone; the event is the one place that touches the distance. **Differences** (by a
+  reading of the formulas, section 12): a fall of 3 to 4 blocks, which the original may have left at 3.0 to 3.5 because the player
+  landed before the rule had run for many ticks, does no damage here; the level of the enchantment no longer matters for the distance (it did only in how fast the floor was
+  reached); sneaking matters at the moment of the landing; the unreduced distance still goes to `Block.fallOn` (the chance of
+  trampling farmland) as it is the argument of that call, the event only lowers what `causeFallDamage` works the damage out
+  from. As for every `LIVING_FALL` listener, a rider of a horse, donkey, mule or llama is not served (`HOOKS.md` section 6).
+- **Shockwave** (`LIVING_FALL`, server only). A player whose **boots** carry it, landing from more than three blocks (the
+  distance the event carries, after Slow Fall's listener, which is registered first because its effect in the original had been
+  done tick by tick before the landing), hurts every other living entity in the box of 10 blocks to every side by `.1 L d` fall damage. The
+  listener tests `level.isClientSide` and does nothing on the client (the event is posted there too). A player that can fly
+  never reaches the event (`Player.causeFallDamage` refuses first), as `EntityPlayer.fall` did not run for it in 1.7.10. The
+  tracking of the last airborne tick of every server player and the guess about water and teleports are gone: a landing in
+  water or by a teleport is not posted by the game in the first place. The passenger of a vehicle that lands is posted with the
+  vehicle's distance, as in 1.7.10.
+  - **Order against the listeners of other groups (limit, read, not run).** The chain of an event runs in the order of
+    registration. Inside this group it is Slow Fall, then Shockwave (so the wave sees a fall of 2.9 blocks, never more, on boots
+    that carry both: the GameTest `shockwaveHurtsTheCreaturesAroundALanding` puts both on one pair of boots, a combination that
+    the Enchanter and the exclusive sets forbid, and sees no wave from ten blocks). Shockwave's `LOW` priority of 1.7.10 (after
+    the handlers of every other mod) is **not reproduced against other groups**: `ContentGroups.ALL` runs Enchantments before
+    KamiGear, so the Gem Boots' `LIVING_FALL` listener (it sets the distance to 0) is registered after both of ours and Shockwave
+    sees the distance before the boots zero it. `docs/deviations/KamiGear.md` describes the same order. There is no live effect
+    through the Enchanter or an anvil, because the boot tags of Slow Fall and Shockwave do not list the Gem Boots (section 1); a
+    stack with both, made by a command or another mod, would blast. Closing it is the order of the groups in `ContentGroups`,
+    which is the lead's.
+- **Quick Draw** (`USE_ITEM_TICK`). The draw clock is the entity's own `useItemRemaining`, which the bow pose, the HUD and
+  the power of the arrow (`releaseUsing`) read, so the rule of the original changes the real thing: per tick
+  `speedup = L / 6`, plus one when the clock is a multiple of `6 - L % 6`, and the clock becomes `Math.max(2, clock - speedup)`.
+  The arrow-speed workaround (`EntityEvent.ADD`) and its two limits (the bow did not look drawn faster; a draw shorter than
+  the minimum power released no arrow) are gone. **Where in the tick**: 1.7.10 ran this after the decrement of the tick, the
+  event comes before it, so the rule is applied to `remaining - 1`, the count the decrement is about to leave, and one is added
+  back (`EnchantmentFormulas.quickDrawRemaining`); the clock then goes through the same values as the original's (a JUnit test
+  compares 400 ticks of both, the GameTest compares a real draw with a literal copy of the original handler). The level is that
+  of the bow in use (in 1.7.10 the item in the hand, which was the item in use, so a bow drawn from the off hand is one more
+  case that the original could not have); only bows (`BowItem`, which Thaumcraft's Bone Bow is too: it reads the same clock to
+  release itself, so the shortened draw reaches its auto release as `itemInUseCount` did in 1.7.10; read in `ItemBowBone`, not
+  tried), only players. A client runs the rule for its own copy of the player: it only reads the enchantments of the stack in
+  use, which both sides have.
 
 ## 5. Rules of the Enchanter (choice)
 
@@ -209,45 +293,51 @@ at 0.7 scale, the wand tilted and floating with `cos(time/1000)` and `cos(time/5
 each item; 1.7.10 extruded the flat icon of the item with `ItemRenderer.renderItemIn2D`. The offsets were carried over by
 arithmetic, not by looking at the result: they may need a correction when the first screenshot exists.
 
-## 9. Mining: Shatter, Tunnel, Disintegrate, Flaming Touch (forced, workaround)
+## 9. Mining: Shatter, Tunnel, Disintegrate, Flaming Touch (loader event `BREAK_SPEED`)
 
-1.7.10 changed `event.newSpeed` in `PlayerEvent.BreakSpeed` and cancelled it for blocks the tool must not break. There is no
-such event in Architectury. `BreakSpeedControl` keeps a transient modifier on the player's `BLOCK_BREAK_SPEED` attribute that
-fits the block under the crosshair: once per tick, on the server, from the tool in the main hand and `player.pick(...)`. The
-attribute is synchronised to the client like every attribute, so the client's prediction of the break and the server's
-decision use the same speed.
+1.7.10 changed `event.newSpeed` in `PlayerEvent.BreakSpeed` and cancelled it for blocks the tool must not break. The group first
+kept a transient modifier on the player's `BLOCK_BREAK_SPEED` attribute that fitted the block under the crosshair
+(`BreakSpeedControl`, once per tick, with a one-tick lag and a `updateFor` call that the Animation Tablet had to make). That is
+gone: `ModEnchantmentHandler.onGetHarvestSpeed` is a listener of `TinkererEvents.BREAK_SPEED` (`docs/HOOKS.md` section 4), which the
+game posts inside `BlockState.getDestroyProgress(player, level, pos)` with the speed `Player.getDestroySpeed` worked out, on **both
+sides** (the server's decision and the client's prediction use the same rule and the same numbers: the tool in the main hand, the
+block's hardness, the direction on the tool and the player's yaw) and for a player that is never ticked, so **the Animation
+Tablet's fake player digs with the enchantments with nothing called by the Tablet** (`docs/api-requests/Enchantments.md` section 5,
+patches 1 and 2, are not needed). No crosshair, no lag, no attribute, nothing of other mods' modifiers multiplied in.
 
-- **One tick of lag** after the crosshair moves to another kind of block (the modifier is from the previous tick).
-- **The Animation Tablet digs too** (`TileAnimationTablet.startBreaking` and `updateBlockRemoving` use
-  `state.getDestroyProgress(player, ...)`, where 1.7.10 fired `BreakSpeed`), but its fake player is never ticked, so nothing
-  updates the modifier for it. `BreakSpeedControl.updateFor(player, target)` does it for a given block (no crosshair, no lag);
-  the tablet has to call it before each `getDestroyProgress` (shared-file request, `docs/api-requests/Enchantments.md`,
-  section 5). **Until then** a tablet with a Disintegrate, Flaming Touch, Shatter or Tunnel tool digs at the plain speed of the
-  tool; the `BlockEvent.BREAK` veto already applies to it, so it cannot break what the tool refuses, but it breaks the soft
-  blocks slowly instead of at once.
-- **Factors** are the original's: Shatter `x3L` on blocks of hardness above 20 and `x.8` on the others; Tunnel `x(1 + .2 L)`
-  when the player's yaw is within 50 degrees of the yaw remembered on the tool at the last break and `x.3` when it is not
-  (nothing without a remembered yaw); Disintegrate on blocks of hardness 1.5 or less, and Flaming Touch on "wood", make
-  the block break at once, any other block cannot be broken with the tool.
-- **"Break at once"** is a factor of 1024 (the largest value the attribute allows; 1.7.10 used `Float.MAX_VALUE`). Together with
-  the speed of the tool it is enough for every block of hardness up to 3 even in the air; harder wooden blocks (doors are 3)
-  with a tool that does not match may take two ticks.
-- **"Cannot be broken"** is a factor of 0 (no progress) plus a veto in `BlockEvent.BREAK` for a survival-mode player, so that
-  a fake player (the tablet) or a client that claims to have finished is refused too. Creative players are never refused, as
-  in 1.7.10 where creative did not ask for the speed.
-- **Wear.** 1.7.10 called `damageItem(1)` every time the speed event fired, that is every tick of the dig; with a speed of
-  `MAX_VALUE` that is once or twice per block. The port takes one more point of wear per block broken with Disintegrate or
-  Flaming Touch.
-- **Hardness** is read at the block's own position; the original asked `getBlockHardness(world, 0, 0, 0)` for Shatter, which
-  for almost every block is the same number.
+- **Factors** are the original's, in its order: Shatter `x3L` on blocks of hardness above 20 and `x.8` on the others; Tunnel
+  `x(1 + .2 L)` when the player's yaw is within 50 degrees of the yaw remembered on the tool at the last break and `x.3` when it
+  is not (nothing without a remembered yaw); Disintegrate on blocks of hardness 1.5 or less, and Flaming Touch on "wood", make
+  the speed `Float.MAX_VALUE` (the block breaks at once, any block of them, any tool; the factor 1024 of the workaround is gone),
+  and any other block cannot be dug with that tool: `EnchantmentFormulas.breakSpeed`, with the narrowing to `float` after each step.
+- **"Cannot be broken"** is the cancelled event of the original. The contract of the event makes it a speed of zero, so the
+  progress is **exactly zero** (1.7.10's `-1` speed gave a negative progress): the block never breaks and the crack does not grow,
+  on both sides, in the server's dig ticks, on the finishing packet, and for the Animation Tablet, which breaks a block only when
+  the progress reaches 1. The veto the workaround had in `BlockEvent.BREAK` (to refuse a break whose progress the modifier had
+  not caught, and a client that claims to have finished) is **removed**: the vanilla server checks the finishing packet against
+  the progress, which now says zero. What is not refused any more is a break that does not ask for the progress at all: a direct
+  call of `ServerPlayerGameMode.destroyBlock` by some other mod, which the original did not refuse either. Creative players never
+  ask the progress, so they are never refused, as in 1.7.10. Not posted for the bamboo cut by a sword (`HOOKS.md` section 13),
+  which is not a tool of this group.
+- **Wear.** 1.7.10 called `damageItem(1)` every time the speed event fired for a block that was theirs, that is every tick of the
+  dig, which with a speed of `MAX_VALUE` is once or twice per block. The new event is posted on the client too, for the crack, for
+  a dig-time display, for anything that asks, and wear there would be wrong, so the group keeps its own rule: **one more point of
+  wear per block broken** with Disintegrate or Flaming Touch, taken in `BlockEvent.BREAK` (server), besides the point that breaking
+  a block costs a pickaxe anyway. The GameTest `aToolOfDisintegrateRefusesTheOtherBlocksAndWearsDoubleOnItsOwn` measures two points
+  for a Disintegrate pickaxe and one for a plain one, through the real first click (`handleBlockBreakAction`).
+- **Tunnel's direction** is remembered at the break (`BlockEvent.BREAK`, the same event as in 1.7.10), in the custom data of the
+  tool; it reaches the client with the item, so the client's prediction has it.
+- **Hardness** is read at the block's own position (the original asked `getBlockHardness(world, 0, 0, 0)` for Shatter, which for
+  almost every block is the same number; a poster that does not know the position gives `BlockPos.ZERO`, as the original did).
 - **"Wood"** (`Material.wood`) is a block with a wooden sound type (wood, nether wood, cherry wood, bamboo wood, stem) or one of
   the vanilla tags for logs, planks, wooden fences, doors, trapdoors, slabs, stairs and signs. 1.7.10's wood also held the
   bookshelf, chests, the crafting table and jukebox (all have the wooden sound).
 - **Tunnel's yaw difference is wrapped** to 0..180 degrees. 1.7.10's `rotationYaw` was unbounded and the original compared the
   raw numbers; the 1.21.1 server stores the player's yaw wrapped to [-180, 180], where a raw difference would call two nearly
   equal yaws on either side of the seam 360 degrees apart (fix).
-- The modifier is on the player's attribute for the tools of this group only; other mods that add their own
-  `BLOCK_BREAK_SPEED` modifiers multiply with it.
+- **A listener of the dig speed on both sides** reads the yaw of the player, which the server has from the rotation packets and the
+  client from its camera: they can differ by the last unsent turn, so near the 50 degrees of Tunnel the client's crack and the
+  server's decision may disagree for a tick. Not seen.
 
 ## 10. Research entries
 
@@ -264,25 +354,71 @@ own entry comes with its block (section 6). The `PERIPHERALS` entry of the same 
   of the UUID), `TTEnchantSuccessiveStrike` on the weapon, in its custom data.
 - Focused Strikes divides by two *before* adding; the added term uses `max(counter, 5)`.
 - Final Strike's roll is `nextInt(19)`; level 5 wins 5 of 19.
-- Slow Fall: threshold `2.9` as a `double` comparison (`fallDistance >= 2.9`), reduced fall distance `max(2.9, d - L/3)`, the
-  motion limit `-0.0784000015258789`, the divisor `1 + L * 0.33` (the float literal of the original).
+- Slow Fall: threshold `2.9` as a `double` comparison (`fallDistance >= 2.9`) in the landing rule and in the client's per-tick
+  condition, the floor `2.9F` that the original's per-tick `max(2.9F, d - L/3F)` ends at (the landing result), the motion limit
+  `-0.0784000015258789`, the divisor `1 + L * 0.33` (the float literal of the original).
 - Shockwave: `d > 3`, box of 10 to each side, damage `.1 L d`, the faller excluded.
 - Ascent Boost: `(L + 2) / 2`, not while sneaking.
-- Quick Draw: `speedup = L / 6`, plus one when the clock is a multiple of `6 - L % 6`, never below 2; the simulation runs from
-  72000.
-- Disintegrate: hardness `<= 1.5`; Flaming Touch: wood only; Tunnel: 50 degrees, `1 + .2 L` and `.3`; Shatter: hardness
-  above 20 gives `3 L`, otherwise `.8`.
+- Quick Draw: `speedup = L / 6`, plus one when the clock is a multiple of `6 - L % 6`, never below 2, on the count that is left
+  after the decrement of the tick (the event comes before it: `remaining - 1`, one added back); the clock starts at 72000.
+- Disintegrate: hardness `<= 1.5`; Flaming Touch: wood only; both make the speed `Float.MAX_VALUE`, and any other block a speed
+  of zero; Tunnel: 50 degrees, `1 + .2 L` and `.3`; Shatter: hardness above 20 gives `3 L`, otherwise `.8`.
 - Costs: `i * (1 + i * 0.2)` times the level-1 aspects; the amounts are cut to integers per aspect.
 - The Enchanter's blast resistance and hardness: 5.0 and 1200 (2000 in 1.7.10).
 
 ## 12. What is not verified
 
-- Nothing of this group was run in the game: not the GameTests in `EnchantmentsGameTests` (they compile; their first run may
-  show a wrong assumption of a test as well as a defect), not the screen, the renderer, the particles and sounds, the attribute
-  mechanisms (damage, dig speed), the client jump hook, nor the multiplayer behaviour of the packets.
-- The JUnit tests (`EnchantmentFormulasTest`, `EnchantmentManagerTest`, `EnchantmentResourcesTest`,
-  `EnchanterPacketsAndIconsTest`; 55 tests) were compiled with `javac` and run with the JUnit launcher from the Gradle cache
-  (all passed), not through Gradle. `EnchantmentResourcesTest` parses the fourteen JSON files with the real
-  `Enchantment.DIRECT_CODEC` and the tag files with `TagFile.CODEC`.
-- The attack arithmetic assumes the 1.21.1 `Player.attack` formula as read from the decompiled classes; a change of the formula
-  in another Minecraft version breaks the factor silently (the unit test only covers the solver).
+- The GameTests of the group and the JUnit tests of `EnchantmentFormulasTest` (and the others) ran on Fabric; they show the
+  **server side** of every event. **Not run, because a server cannot:** the client's copy of the events this group listens to,
+  which `docs/HOOKS.md` section 12 lists for all of them: the client's prediction of the dig with Shatter, Tunnel, Disintegrate
+  and Flaming Touch, the client's own jump with Ascent Boost, the motion and the cloud of Slow Fall on the local player (the
+  `PLAYER_PRE` listener, which is client-only and so has no check at all) and the thud of a landing, the pose and HUD of a bow
+  under Quick Draw, and the `isClientSide` branch of Shockwave. The listeners are plain code on shared events, with the same rule
+  on both sides; a run of a real client with the enchantments would show it.
+- The per-tick Slow Fall of 1.7.10 against the landing rule of section 4 was compared by reading the formulas, not by running
+  the original (its jar is not run here): the claim that a long fall ends at 2.9 there is arithmetic, and the claim that a short
+  fall of 3 to 3.5 blocks may keep some of its damage there is too.
+- The 1.7.10 side of the two bands of the invulnerability frames (section 2: `EntityLivingBase.attackEntityFrom` compares the raw
+  amounts and passes the difference to `damageEntity`) is taken from `docs/HOOKS.md` section 3 and recalled from that method (the
+  Minecraft 1.7.10 sources are not at hand here), and the one-target swing of 1.7.10 is a fact of its version (no sweep); neither was
+  run. The 1.21.1 side of both is run by `theFramesCompareTheBoostedAmountsNotTheRawOnes` and `aSweepOfASwordIsAHitForEachEntityItReaches`. A sweep with a Sweeping Edge
+  sword (the share of the blow in the sweep damage), with Final Strike, and the heal of a swing at three or more entities were not tried.
+- Nothing about the screen, the renderer, the particles and sounds, and the multiplayer behaviour of the packets has been seen.
+- **Checks that changed with the wiring** (`EnchantmentsRuntimeChecks`), all of them because they drove the deleted workaround: the
+  arming of the attack by `PlayerEvent.ATTACK_ENTITY` is gone with its subject, and its job (a blow of a player arrives multiplied) is
+  in `valianceMultipliesTheWholeAttackAtLowHealth`, `theStrikeCounterIsKeptOnTheWeapon` and `pounceDependsOnTheBlockUnderTheFeet`,
+  which now hit with real `hurt` and `attack` calls; the dig checks no longer set a crosshair or call `update`/`updateFor`
+  (`desintegrateAndFlamingTouchChangeTheDigSpeedOfTheBlock`, `aPlayerThatIsNeverTickedDigsAtTheSpeedOfItsEnchantments`); the
+  Slow Fall and Quick Draw checks land and draw for real (`slowFallMakesALandingAFallOfTwoPointNineBlocks`,
+  `quickDrawTakesTicksOffTheDrawClockOfABow`); `aToolOfDisintegrateRefusesTheOtherBlocksAndWearsDoubleOnItsOwn` proves the refusal on
+  the real dig path (first click, ticks, finishing packet) with a plain pickaxe as the control, because a direct `destroyBlock` is no
+  longer refused (section 9). `aFakePlayerAttackGetsTheEnchantmentsOfItsSword` is required now. The checks of the Enchanter, the data
+  and the table are unchanged.
+- **Checks added or tightened in the review round.** `aSweepOfASwordIsAHitForEachEntityItReaches` and
+  `theFramesCompareTheBoostedAmountsNotTheRawOnes` pin what section 2 says about the sweep and about the two bands of the
+  invulnerability frames (both run the real `Player.attack` / `LivingEntity.hurt` paths; the bytecode of `Player.attack` was read,
+  the original was not run). `shockwaveHurtsTheCreaturesAroundALanding` clears the frames and the health of the pigs before every
+  landing and ends with a positive control in the same state (before, the pigs of the refusals still had the frames of the first
+  wave, and the game refused the small wave whatever the listener did: the check passed with the distance ignored), and puts Slow
+  Fall and Shockwave on one pair of boots (the order of registration). `shatterAndTunnelScaleTheDigSpeed` breaks a block with a plain
+  pickaxe and with a Shatter one and looks for a remembered direction. `aToolOfDisintegrateRefusesTheOtherBlocksAndWearsDoubleOnItsOwn`
+  breaks cobblestone with a Disintegrate pickaxe and dirt with a Flaming Touch axe by a direct call and measures the plain point of
+  wear (the extra point only for the blocks that are theirs).
+- The JUnit tests of the other enchantment classes (`EnchantmentManagerTest`, `EnchantmentResourcesTest`,
+  `EnchanterPacketsAndIconsTest`) test the table, the data and the packets.
+
+## 13. What the group needs from the loaders
+
+Fabric posts all five events (the mixins of `docs/HOOKS.md`). **NeoForge has no poster yet**, so on NeoForge the group needs the
+poster of each event it uses, as `docs/HOOKS.md` sections 3 to 7 describe them, or its enchantments do nothing there:
+
+| Event | What the group does with it | Without the poster |
+|---|---|---|
+| `LIVING_DAMAGE` | Pounce, Final Strike, Valiance, Focused and Dispersed Strikes, Vampirism | no damage factors, no heal |
+| `BREAK_SPEED` | Shatter, Tunnel, Disintegrate, Flaming Touch | the tools dig at their plain speed and break anything |
+| `LIVING_JUMP` | Ascent Boost | no boost |
+| `LIVING_FALL` | Slow Fall (distance), Shockwave (blast, server only) | no Slow Fall landing, no wave |
+| `USE_ITEM_TICK` | Quick Draw | the bow draws at its plain speed |
+
+The group also keeps three Architectury listeners that exist on both loaders: `BlockEvent.BREAK` (Tunnel's remembered direction,
+the wear of Disintegrate and Flaming Touch) and `TickEvent.PLAYER_PRE` (the motion and cloud of Slow Fall on the local client).

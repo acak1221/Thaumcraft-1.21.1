@@ -26,8 +26,6 @@ public final class EnchantmentFormulas {
     public static final float SHOCKWAVE_MIN_DISTANCE = 3F;
     /** Half of the box (blocks) around the faller in which Shockwave hurts. */
     public static final double SHOCKWAVE_RADIUS = 10D;
-    /** The draw time of a bow in 1.7.10 ({@code ItemBow.getMaxItemUseDuration}); the clock the quick draw handler ran on. */
-    public static final int BOW_USE_DURATION = 72000;
     /** Hardness above which Shatter works at full strength. */
     public static final float SHATTER_HARD_BLOCK = 20F;
     /** The hardest block Disintegrate mines. */
@@ -48,7 +46,7 @@ public final class EnchantmentFormulas {
         return !lastTarget.equals(target) ? 0 : Math.max(successiveStrikes + 1, 5);
     }
 
-    // ---- the damage of an attack (LivingHurtEvent) ---------------------------------------------------------------
+    // ---- the damage of an attack (LivingHurtEvent, TinkererEvents.LIVING_DAMAGE) ------------------------------------
 
     /**
      * Everything {@code onEntityDamaged} reads: the levels on the leggings (Pounce) and on the held item, the dice, the health
@@ -98,11 +96,6 @@ public final class EnchantmentFormulas {
         return amount;
     }
 
-    /** What {@link #modifyDamage} does to one point of damage; the enchantments only ever multiply, so this is the factor. */
-    public static float damageFactor(Attack attack) {
-        return modifyDamage(1F, attack);
-    }
-
     /** {@code attacker.heal(vampirism)}: Vampirism heals the attacker by its level, in health points. */
     public static float vampirismHeal(int level) {
         return level;
@@ -116,20 +109,13 @@ public final class EnchantmentFormulas {
     }
 
     /**
-     * Whether Slow Fall acts in this tick on a client (which simulates the fall): the original condition. {@code level} is
-     * the highest Slow Fall level on the armor.
+     * Whether Slow Fall acts in this tick on the client that simulates the fall of its own player: the original condition
+     * ({@code slowfall > 0 && !isSneaking() && motionY < min && fallDistance >= 2.9}). {@code level} is the highest Slow Fall
+     * level on the armor. Only the motion and the particle of the original's block are decided by this: the fall distance
+     * is the landing's ({@link #slowFallLanding}).
      */
     public static boolean slowFallActs(int level, boolean sneaking, double motionY, float fallDistance) {
         return level > 0 && !sneaking && motionY < SLOW_FALL_MIN_MOTION && fallDistance >= 2.9;
-    }
-
-    /**
-     * Whether Slow Fall acts in this tick on the server. A server does not simulate the fall of a player (the client
-     * moves and reports), so there is no vertical motion to look at; a player in the air whose fall distance counts is
-     * falling.
-     */
-    public static boolean slowFallActsOnServer(int level, boolean sneaking, boolean onGround, float fallDistance) {
-        return level > 0 && !sneaking && !onGround && fallDistance >= 2.9;
     }
 
     /** {@code motionY /= 1 + slowfall * 0.33F}. */
@@ -137,9 +123,16 @@ public final class EnchantmentFormulas {
         return motionY / (1 + level * 0.33F);
     }
 
-    /** {@code fallDistance = Math.max(2.9F, fallDistance - slowfall / 3F)}. */
-    public static float slowFallDistance(float fallDistance, int level) {
-        return Math.max(SLOW_FALL_MIN_DISTANCE, fallDistance - level / 3F);
+    /**
+     * The fall distance of a landing (the {@code LIVING_FALL} event, both sides) of a player with Slow Fall on the armor.
+     * The original ran {@code fallDistance = Math.max(2.9F, fallDistance - slowfall / 3F)} <i>every tick</i> of a fall of 2.9
+     * blocks or more, while it also divided the motion; the fall distance a landing found was therefore that floor, 2.9
+     * (a fall of 2.9 does no damage), however long the fall had been. The event comes once, at the landing, so the result of the
+     * ticks is applied at once: a fall of 2.9 or more ends as a fall of {@link #SLOW_FALL_MIN_DISTANCE}. Sneaking turns it off, as
+     * it did in the tick; a shorter fall is left alone.
+     */
+    public static float slowFallLanding(int level, boolean sneaking, float distance) {
+        return level > 0 && !sneaking && distance >= 2.9 ? SLOW_FALL_MIN_DISTANCE : distance;
     }
 
     /** The damage Shockwave deals to every creature in the box around a faller: {@code .1F * shockwave * distance}. */
@@ -179,50 +172,45 @@ public final class EnchantmentFormulas {
         return level > 0 && woodenBlock;
     }
 
-    /** The dig-speed factor that stands for 1.7.10's {@code Float.MAX_VALUE}: the block breaks at once (the attribute tops out at 1024). */
-    public static final double INSTANT_BREAK_FACTOR = 1024D;
-    /** The factor of a block the tool cannot mine at all (1.7.10 cancelled the break-speed event). */
-    public static final double NO_BREAK_FACTOR = 0D;
-
     /**
-     * The factor of the dig speed of a tool with these enchantments on a block, in the order of {@code onGetHarvestSpeed}:
-     * Shatter, Tunnel, then Disintegrate and Flaming Touch, which either make the block break at once ({@link
-     * #INSTANT_BREAK_FACTOR}) or, when the block is not theirs, make it unbreakable ({@link #NO_BREAK_FACTOR}).
+     * The dig speed after the handler of the original ({@code onGetHarvestSpeed}, {@code PlayerEvent.BreakSpeed} with
+     * {@code newSpeed}), in its order: Shatter, Tunnel, then Disintegrate and Flaming Touch, which make the speed
+     * {@link Float#MAX_VALUE} (the block breaks at once) for a block that is theirs and cancel the event, here a speed of
+     * zero ("cannot dig"), for any other block. The compound assignments of the original ({@code newSpeed *= ...}) narrow to
+     * {@code float} after every step, and so does this.
+     *
+     * @param speed the speed so far, as {@code Player.getDestroySpeed} worked it out
+     * @return the new speed; {@code 0} means the player cannot dig the block with this tool
      */
-    public static double breakSpeedFactor(int shatter, int tunnel, int desintegrate, int autoSmelt, float hardness,
+    public static float breakSpeed(float speed, int shatter, int tunnel, int desintegrate, int autoSmelt, float hardness,
             boolean woodenBlock, boolean hasTunnelDirection, float tunnelAngleDifference) {
-        double factor = 1;
-        if (shatter > 0) factor *= shatterFactor(shatter, hardness);
-        if (tunnel > 0) factor *= tunnelFactor(tunnel, hasTunnelDirection, tunnelAngleDifference);
+        if (shatter > 0) speed = (float) (speed * shatterFactor(shatter, hardness));
+        if (tunnel > 0) speed = (float) (speed * tunnelFactor(tunnel, hasTunnelDirection, tunnelAngleDifference));
 
-        boolean desintegrateApplies = desintegrateApplies(desintegrate, hardness);
-        boolean autoSmeltApplies = autoSmeltApplies(autoSmelt, woodenBlock);
-        if (desintegrateApplies || autoSmeltApplies) return INSTANT_BREAK_FACTOR;
-        if (desintegrate > 0 || autoSmelt > 0) return NO_BREAK_FACTOR;
-        return factor;
+        if (desintegrateApplies(desintegrate, hardness) || autoSmeltApplies(autoSmelt, woodenBlock)) return Float.MAX_VALUE;
+        if (desintegrate > 0 || autoSmelt > 0) return 0F;
+        return speed;
     }
 
     // ---- Quick Draw -----------------------------------------------------------------------------------------------
 
     /**
-     * How many ticks the quick draw handler of 1.7.10 took off the draw clock in addition to the one tick that vanilla takes,
-     * after {@code ticks} ticks of drawing a bow: per tick {@code speedup = level / 6}, plus one when the clock
-     * ({@code itemInUseCount}, counting down from 72000) was a multiple of {@code 6 - level % 6}. The simulation is the
-     * handler itself, run after the vanilla decrement of each tick.
+     * The remaining ticks of a bow draw after the Quick Draw handler of the original ({@code onEntityUpdate}): per tick
+     * {@code speedup = level / 6}, plus one when the clock ({@code itemInUseCount}, counting down from 72000) is a multiple
+     * of {@code 6 - level % 6}, and {@code itemInUseCount = Math.max(2, itemInUseCount - speedup)}.
+     *
+     * <p>1.7.10 ran that after the decrement of the tick ({@code --itemInUseCount} in {@code EntityPlayer.onUpdate}, then the
+     * {@code LivingUpdateEvent}); {@code USE_ITEM_TICK} comes before it, with the count of the tick before. So the rule is
+     * applied to the count the decrement is about to leave ({@code remaining - 1}), and one is added back, which the game takes
+     * off after the event: the clock then goes through the same values as the original's.</p>
+     *
+     * @param remaining the use ticks that remain, as the event gives them (before this tick's decrement)
      */
-    public static int quickDrawBonusTicks(int level, int ticks) {
-        if (level <= 0 || ticks <= 0) return 0;
-        int bonus = 0;
-        int count = BOW_USE_DURATION;
-        for (int tick = 0; tick < ticks; tick++) {
-            count--; // vanilla
-            int speedup = level / 6;
-            int remainder = level % 6;
-            if (count % (6 - remainder) == 0) speedup++;
-            int next = Math.max(2, count - speedup);
-            bonus += count - next;
-            count = next;
-        }
-        return bonus;
+    public static int quickDrawRemaining(int level, int remaining) {
+        int count = remaining - 1;
+        int speedup = level / 6;
+        int remainder = level % 6;
+        if (count % (6 - remainder) == 0) speedup++;
+        return Math.max(2, count - speedup) + 1;
     }
 }

@@ -25,10 +25,9 @@ import thaumic.tinkerer.common.item.ItemMobDisplay;
 
 /**
  * Draws the mob of a {@code mob_display} item in place of the item (the 1.7.10 {@code IItemRenderer}). It has the
- * signature of a builtin item renderer of both loaders ({@code BuiltinItemRendererRegistry} of Fabric,
- * {@code IClientItemExtensions#getCustomRenderer} of NeoForge). The common code has no registry for it: Fabric's is
- * registered by {@code thaumic.tinkerer.fabric.client.MachinesFabricClient}, NeoForge's is a request to the lead (see
- * docs/api-requests/Machines.md section 2).
+ * signature of {@link thaumic.tinkerer.client.hooks.ItemRenderers.Renderer}, the loader layer's built-in item renderer
+ * (Fabric's {@code BuiltinItemRendererRegistry}, NeoForge's {@code IClientItemExtensions#getCustomRenderer}), and
+ * {@code MachinesClient.register()} registers it there.
  */
 public final class RenderMobDisplay {
 

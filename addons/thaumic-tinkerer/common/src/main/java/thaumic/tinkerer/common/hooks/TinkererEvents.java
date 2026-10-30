@@ -17,6 +17,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -30,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * The events that Architectury has no equivalent for, which the 1.7.10 mod used through Forge events
  * ({@code LivingHurtEvent}, {@code PlayerEvent.BreakSpeed}, {@code LivingJumpEvent}, {@code LivingFallEvent},
- * {@code LivingDropsEvent} and the {@code itemInUseCount} of the bow). They are plain Architectury {@link Event}s: a
+ * {@code LivingDropsEvent}, the {@code itemInUseCount} of the bow and the armour of {@code ISpecialArmor}). They are plain Architectury {@link Event}s: a
  * listener is registered with {@code TinkererEvents.X.register(listener)} and removed with {@code unregister(listener)}.
  * Loader modules post them: on Fabric the mixins in {@code thaumic.tinkerer.fabric.mixin}, on NeoForge (not written yet) the
  * handlers of the matching NeoForge events (see {@code docs/HOOKS.md}). Common code never posts them itself.
@@ -144,6 +145,97 @@ public final class TinkererEvents {
         if (!((float) victim.invulnerableTime > 10.0F) || source.is(DamageTypeTags.BYPASSES_COOLDOWN)) return false;
         if (source.is(DamageTypeTags.IS_FREEZING) && victim.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)) return false;
         return amount <= lastHurt;
+    }
+
+    // ---- LIVING_ARMOR_ABSORB ---------------------------------------------------------------------------------------
+
+    /** A listener of {@link #LIVING_ARMOR_ABSORB}. */
+    @FunctionalInterface
+    public interface LivingArmorAbsorb {
+        /**
+         * @param victim   the entity whose armour works (a player or a mob, whoever wears it)
+         * @param source   the damage source; never one that bypasses armour ({@link DamageTypeTags#BYPASSES_ARMOR}: starvation,
+         *                 drowning, magic, falling, the void), which the armour does not reduce and which is not posted
+         * @param damage   the damage that comes to the armour step: the hit as it is after {@link #LIVING_DAMAGE}, the shield
+         *                 and the invulnerability frames, before Resistance, the Protection enchantments and Absorption; always
+         *                 positive and finite
+         * @param absorbed the amount the armour takes off so far: what vanilla's armour formula takes
+         *                 ({@code damage - CombatRules.getDamageAfterAbsorb(...)}), or what the listeners before this one returned;
+         *                 always between 0 and {@code damage}
+         * @return the amount the armour takes off. Return {@code absorbed} to leave it alone. The damage that goes on is
+         *         {@code damage - result}; a result below 0 is read as 0 and one above {@code damage} as {@code damage}, and a
+         *         NaN is ignored (the value stays what it was).
+         */
+        float onLivingArmorAbsorb(LivingEntity victim, DamageSource source, float damage, float absorbed);
+    }
+
+    private static final LivingArmorAbsorb NO_ARMOR_LISTENERS = (victim, source, damage, absorbed) -> absorbed;
+
+    /**
+     * Posted on the <b>server</b> from {@code LivingEntity.getDamageAfterArmorAbsorb}, the armour step of
+     * {@code actuallyHurt}, after the game has worked out how much the armour takes off ({@code CombatRules.getDamageAfterAbsorb}
+     * of the armour value and the toughness) and worn the pieces, and before the magic step (Resistance, the Protection
+     * enchantments) and Absorption. It is the position where 1.7.10 Forge asked an {@code ISpecialArmor} piece for its
+     * {@code ArmorProperties} (its {@code ApplyArmor} replaced the vanilla armour formula for a player), and the listener has the same
+     * power: it <b>replaces the amount the armour absorbs</b>, so a flat share of the blow (Ichorcloth's 0.0425 per armour point,
+     * 85% for the set) can stand in for the formula, or add to it, or shorten it.
+     *
+     * <p><b>Not posted</b> for a source of the tag {@code bypasses_armor}: the game does not reduce such a hit by armour
+     * (the poster tests it, the one rule for both loaders), nor for a hit of no damage. A hit that the armour step does not
+     * reach (cancelled by {@link #LIVING_DAMAGE}, refused by the invulnerability frames, an invulnerable entity) is not posted
+     * either. Posted for every living entity, player or mob, so a listener answers only for the entities it means (the pieces
+     * its item classes wear). It has no world effect and needs no side test: the armour step runs on the server only.</p>
+     *
+     * <p>Listeners run in the order they were registered and each sees what the one before returned in {@code absorbed}; a
+     * listener that <i>replaces</i> the value (the Ichorcloth rule) overrides the ones before it, one that <i>adjusts</i> it
+     * (a bonus on top) composes. The wear of the armour pieces ({@code hurtArmor}) has already happened by the time this is
+     * posted and is not a listener's to change; a piece without durability simply does not wear.</p>
+     */
+    public static final Event<LivingArmorAbsorb> LIVING_ARMOR_ABSORB = EventFactory.of(listeners -> {
+        if (listeners.isEmpty()) return NO_ARMOR_LISTENERS;
+        LivingArmorAbsorb[] chain = listeners.toArray(new LivingArmorAbsorb[0]);
+        return (victim, source, damage, absorbed) -> {
+            float current = absorbed;
+            for (LivingArmorAbsorb listener : chain) {
+                float next = listener.onLivingArmorAbsorb(victim, source, damage, current);
+                if (!Float.isNaN(next)) current = Mth.clamp(next, 0.0F, damage);
+            }
+            return current;
+        };
+    });
+
+    /**
+     * Runs the listeners of {@link #LIVING_ARMOR_ABSORB} (the loader modules call this).
+     *
+     * @param damage   the damage that comes to the armour step
+     * @param absorbed what vanilla's formula takes off it
+     * @return the amount the armour takes off: {@code absorbed} itself (the very same value) when nobody changed it, when the
+     *         source bypasses armour, or when {@code damage} is not a positive finite number; otherwise the listeners' result,
+     *         held between 0 and {@code damage}. A poster that wraps the armour step of the game uses
+     *         {@link #damageAfterArmorAbsorb} instead, which turns this into the damage that goes on.
+     */
+    public static float postLivingArmorAbsorb(LivingEntity victim, DamageSource source, float damage, float absorbed) {
+        if (!(damage > 0.0F) || damage == Float.POSITIVE_INFINITY || source.is(DamageTypeTags.BYPASSES_ARMOR)) return absorbed;
+        float result = LIVING_ARMOR_ABSORB.invoker().onLivingArmorAbsorb(victim, source, damage, absorbed);
+        if (Float.isNaN(result)) return absorbed;
+        return Mth.clamp(result, 0.0F, damage);
+    }
+
+    /**
+     * The armour step as a poster that wraps {@code getDamageAfterArmorAbsorb} hands it back (the Fabric mixin; one rule, so it can
+     * be tested without a game): posts {@link #LIVING_ARMOR_ABSORB} with what the game's own step took off ({@code damage - vanilla})
+     * and returns the damage that goes on. When nobody changed the amount that is {@code vanilla} <i>itself</i>, the game's own float,
+     * not {@code damage - (damage - vanilla)} (which can differ from it in the last place) and not NaN for a blow that is not
+     * finite ({@code Infinity - Infinity}): the amount is compared bit for bit, because a NaN is never {@code ==} to itself. When a
+     * listener changed it, the damage that goes on is {@code damage - result}.
+     *
+     * @param damage  the damage that came to the armour step
+     * @param vanilla what the game's own step returned for it (the damage after its armour formula, and the wear of the pieces done)
+     */
+    public static float damageAfterArmorAbsorb(LivingEntity victim, DamageSource source, float damage, float vanilla) {
+        float absorbed = damage - vanilla;
+        float result = postLivingArmorAbsorb(victim, source, damage, absorbed);
+        return Float.floatToRawIntBits(result) == Float.floatToRawIntBits(absorbed) ? vanilla : damage - result;
     }
 
     // ---- BREAK_SPEED -----------------------------------------------------------------------------------------------

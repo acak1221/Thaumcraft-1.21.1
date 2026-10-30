@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import net.minecraft.world.Difficulty;
 import org.junit.jupiter.api.Test;
 import thaumic.tinkerer.common.core.handler.kami.SoulHeartHandler;
 import thaumic.tinkerer.common.dim.EnumOreFrequency;
@@ -328,19 +327,6 @@ class KamiWorldLogicTest {
         assertEquals(1, SoulHeartHandler.damageAfterPool(3, 4.9F), "4 points off a pool of 3: one goes on");
         assertEquals(0, SoulHeartHandler.damageAfterPool(0, 0.9F), "a hit below one point is swallowed even with no hearts");
         assertEquals(6, SoulHeartHandler.damageAfterPool(0, 6.99F));
-    }
-
-    @Test
-    void theHitThatIsDealtAgainIsUnscaledByTheDifficulty() {
-        for (int rest = 1; rest <= 40; rest++) {
-            // Easy: min(x / 2 + 1, x); Hard: x * 3 / 2; Normal: x. After the player's own scaling the rest must come back.
-            float easy = SoulHeartHandler.beforeDifficultyScaling(rest, true, Difficulty.EASY);
-            assertEquals(rest, Math.min(easy / 2F + 1F, easy), 1e-4F);
-            float hard = SoulHeartHandler.beforeDifficultyScaling(rest, true, Difficulty.HARD);
-            assertEquals(rest, hard * 3F / 2F, 1e-4F);
-            assertEquals(rest, SoulHeartHandler.beforeDifficultyScaling(rest, true, Difficulty.NORMAL), 0F);
-            assertEquals(rest, SoulHeartHandler.beforeDifficultyScaling(rest, false, Difficulty.HARD), 0F, "a hit that does not scale");
-        }
     }
 
     // ---- where the portal leads ----------------------------------------------------------------------------------

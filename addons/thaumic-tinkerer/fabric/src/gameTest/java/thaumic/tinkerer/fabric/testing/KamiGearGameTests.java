@@ -160,4 +160,34 @@ public final class KamiGearGameTests implements FabricGameTest {
     public void awakenedShovelColumnModeTakesOnlyTheSameBlockAlongTheColumn(GameTestHelper test) {
         KamiGearRuntimeChecks.awakenedShovelColumnModeTakesOnlyTheSameBlockAlongTheColumn(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void gemBootsRaiseTheJumpOnlyWhileWornAndSwitchedOn(GameTestHelper test) {
+        KamiGearRuntimeChecks.gemBootsRaiseTheJumpOnlyWhileWornAndSwitchedOn(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void gemBootsAndAscentBoostLeggingsComposeTheirJumps(GameTestHelper test) {
+        KamiGearRuntimeChecks.gemBootsAndAscentBoostLeggingsComposeTheirJumps(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void gemBootsLandWithoutFallDamageWhateverTheSwitchesSay(GameTestHelper test) {
+        KamiGearRuntimeChecks.gemBootsLandWithoutFallDamageWhateverTheSwitchesSay(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void ichorclothSetTakesEightyFivePercentOfBlowsAndLeavesBypassingDamageAlone(GameTestHelper test) {
+        KamiGearRuntimeChecks.ichorclothSetTakesEightyFivePercentOfBlowsAndLeavesBypassingDamageAlone(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void ichorclothPartialAndMixedSetsKeepTheOtherArmourAndLeaveOtherWearersAlone(GameTestHelper test) {
+        KamiGearRuntimeChecks.ichorclothPartialAndMixedSetsKeepTheOtherArmourAndLeaveOtherWearersAlone(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void ichorclothPiecesShowTheOriginalArmourAndNeverWear(GameTestHelper test) {
+        KamiGearRuntimeChecks.ichorclothPiecesShowTheOriginalArmourAndNeverWear(test);
+    }
 }

@@ -36,25 +36,25 @@ dial to the bottom finds the readout above the hotbar corner where nothing else 
 
 **Proposed.** `ThaumcraftApi.isWandDialAtBottom()` (client side, `false` on a server), backed by `thaumcraft.common.config.Config.dialBottom`.
 
-## 3. The server's "flying is not enabled" check (F3, P2 for servers: works today, the request removes a reflection)
+## 3. The server's "flying is not enabled" check (F3, answered by the loader layer; NeoForge mixin still to write)
 
 **Need.** The Focus of Uprising launches the player along his sight on every cast, and 1.7.10 reset
 `playerNetServerHandler.floatingTickCount` on each cast so that the server never counted the player as floating. In 1.21.1 the counter is
 the private int `ServerGamePacketListenerImpl.aboveGroundTickCount` (and `clientIsFloating` decides whether it counts); a player who keeps
 climbing for more than four seconds on a server with `allow-flight=false` is disconnected ("Flying is not enabled on this server").
 
-**What the add-on does today.** `FociHooks.resetFloatingTicks` writes the field by reflection on the connection of the player, under its
-official name `aboveGroundTickCount` (NeoForge, development) or its intermediary name `field_14138` (Fabric in production), once per cast on the
-server. A GameTest shows it clears the counter of a real connection; if neither name exists (another Minecraft version) the first cast logs a
-warning. This is a stop-gap: it works in the add-on alone, without a mixin (the add-on has no mixin config, and `TinkererApiOnlyTest`
-forbids importing the mod's accessor) and without the lead.
-
-**Proposed (to the lead).** The mod already has the accessor mixin `thaumcraft.common.mixin.ServerGamePacketListenerFloatAccess`
-(`thaumcraft$setAboveGroundTickCount`, registered in `thaumcraft-common.mixins.json`; the Boots of the Traveller and the Elemental Sword use it).
-Expose it as `ThaumcraftApiHelper.resetFlightKick(ServerPlayer)` (a no-op for a fake player without a connection) for every add-on that
-moves players by impulse, then `ItemFocusFlight` calls it and `FociHooks` goes (or `ThaumicTinkererFabric.onInitialize` calls
-`FociHooks.setFloatingTickReset(ThaumcraftApiHelper::resetFlightKick)` in the meantime). Heads-up, not a request of this group:
-`thaumcraft.common.lib.utils.Utils.resetFloatCounter` writes the handler's `tickCount`, not `aboveGroundTickCount`, so it must not be used for this.
+**Answered by the lead's `FloatingTicks`** (`thaumic.tinkerer.common.hooks.FloatingTicks`, `docs/HOOKS.md` section 9), not by the
+proposed `ThaumcraftApiHelper.resetFlightKick`. `Foci.register()` installs `FociHooks.setFloatingTickReset(FloatingTicks.RESET)`; the
+reflection stop-gap of the first version (`FociHooks` with the two field names, `canReachCounter`, `aboveGroundTicks`,
+`setAboveGroundTicks`) is deleted, so there is one path. *What it gives:* `get`, `set`, `reset`, `isAvailable` on the connection of a
+`ServerPlayer` through an interface that the Fabric mixin `ServerGamePacketListenerFloatingMixin` adds to the connection class (no reflection,
+no dependence on the mod's own accessor); a player without a connection (a player just created, or a fake player without one) gives `-1`/`false` and
+`reset` does nothing. *What it does not give:* anything on NeoForge, where **the same mixin is still to be written**; until then the
+reset silently does nothing there (no warning: the old warning for an unreachable field went with the reflection). The heads-up about
+`thaumcraft.common.lib.utils.Utils.resetFloatCounter` (it writes `tickCount`, not `aboveGroundTickCount`) still holds for anyone who
+thinks of using it. Verified by GameTests on the real connection of a mock player (`flightPutsTheKickCounterOfTheConnectionBackToZero`,
+`flightResetOfTheStartUpClearsTheRealCounterOfTheCaster`); the kick itself (80 ticks of a floating player on a server without
+`allow-flight`) was not run.
 
 ## 4. What the wand's ray hit (F4, P3, documentation)
 

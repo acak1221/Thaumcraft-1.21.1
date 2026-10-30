@@ -75,6 +75,7 @@ public final class Enchantments implements ContentGroup {
     /** The costs and rules of the Enchanter need the aspects of Thaumcraft, the research entries its research tab. */
     @Override
     public void ready() {
+        ModEnchantments.initJump();
         EnchantmentManager.initEnchantmentData();
         registerResearch();
     }

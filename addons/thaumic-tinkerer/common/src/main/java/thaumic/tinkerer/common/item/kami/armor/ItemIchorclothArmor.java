@@ -44,6 +44,10 @@ import thaumic.tinkerer.common.research.TTResearchItem;
  * The Ichorcloth armour: the armour of a diamond set that never wears out, with a vis discount of 6%, warp 3 per piece.
  * Item names: {@link LibItemNames#ICHOR_HELM}, {@link LibItemNames#ICHOR_CHEST}, {@link LibItemNames#ICHOR_LEGS},
  * {@link LibItemNames#ICHOR_BOOTS}.
+ *
+ * <p>The armour points of the material (3/8/6/3) are what 1.7.10's {@code ISpecialArmor.getArmorDisplay} showed; what the pieces absorb
+ * (0.0425 of a blow per point, 85% for the set, {@code ISpecialArmor.getProperties}) is {@link IchorAbsorption}, a listener of
+ * {@code TinkererEvents.LIVING_ARMOR_ABSORB}. The pieces have no durability, which is {@code damageArmor} being a no-op.</p>
  */
 public class ItemIchorclothArmor extends ArmorItem
         implements IVisDiscountGear, ITTinkererRegisterable, IWarpingGear, IRunicArmor {

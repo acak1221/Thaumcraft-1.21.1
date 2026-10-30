@@ -67,6 +67,24 @@ public final class KamiWorldGameTests implements FabricGameTest {
         KamiWorldRuntimeChecks.soulHeartsAbsorbDamageBeforeHealth(test);
     }
 
+    /** Hits 11 ticks apart behind the 65 ticks of spawn protection, with the invulnerability frames of the original in between. */
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void soulHeartsKeepTheFramesOfTheOriginal(GameTestHelper test) {
+        KamiWorldRuntimeChecks.soulHeartsKeepTheFramesOfTheOriginal(test);
+    }
+
+    /** Hits at b, b+3, b+10, b+14 behind the 65 ticks of spawn protection: the game's frames and the pool's begin and end at different times. */
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void soulHeartsAgreeWithTheOriginalWhenTheGamesFramesBeginLater(GameTestHelper test) {
+        KamiWorldRuntimeChecks.soulHeartsAgreeWithTheOriginalWhenTheGamesFramesBeginLater(test);
+    }
+
+    /** Two mock players in pits of lava, ticked every tick, for about 100 ticks. */
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void soulHeartsAreChargedOncePerTenTicksByLava(GameTestHelper test) {
+        KamiWorldRuntimeChecks.soulHeartsAreChargedOncePerTenTicksByLava(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void soulHeartsExactRuleCutsTheFractionOfEveryHit(GameTestHelper test) {
         KamiWorldRuntimeChecks.soulHeartsExactRuleCutsTheFractionOfEveryHit(test);
@@ -77,14 +95,15 @@ public final class KamiWorldGameTests implements FabricGameTest {
         KamiWorldRuntimeChecks.soulHeartsAreSavedPerPlayerAndNotShared(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-    public void shardDropPoolHasItsThreeConditions(GameTestHelper test) {
-        KamiWorldRuntimeChecks.shardDropPoolHasItsThreeConditions(test);
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    public void shardDropsFollowTheConditionsOfTheOriginal(GameTestHelper test) {
+        KamiWorldRuntimeChecks.shardDropsFollowTheConditionsOfTheOriginal(test);
     }
 
+    /** About 12,800 real deaths of Endermen and Piglins in one tick. */
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
-    public void shardDropsAreAddedToTheEntityLootTables(GameTestHelper test) {
-        KamiWorldRuntimeChecks.shardDropsAreAddedToTheEntityLootTables(test);
+    public void shardDropsComeFromRealDeathsWithTheChanceOfTheOriginal(GameTestHelper test) {
+        KamiWorldRuntimeChecks.shardDropsComeFromRealDeathsWithTheChanceOfTheOriginal(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

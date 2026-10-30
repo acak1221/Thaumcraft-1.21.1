@@ -33,6 +33,7 @@ import thaumic.tinkerer.common.item.kami.ItemKamiResource;
 import thaumic.tinkerer.common.item.kami.ItemPlacementMirror;
 import thaumic.tinkerer.common.item.kami.KamiComponents.PearlTarget;
 import thaumic.tinkerer.common.item.kami.KamiComponents.TalismanStore;
+import thaumic.tinkerer.common.item.kami.armor.IchorAbsorption;
 import thaumic.tinkerer.common.item.kami.foci.ItemFocusXPDrain;
 import thaumic.tinkerer.common.item.kami.foci.ShadowBeam;
 import thaumic.tinkerer.common.item.kami.tool.IchorTier;
@@ -177,6 +178,44 @@ class KamiGearLogicTest {
         assertEquals(6.0, weaponModifier(IchorTier.shovelAttributes()), 1.0E-9);
         assertEquals(8.0, weaponModifier(IchorTier.axeAttributes()), 1.0E-9);
         assertEquals(9.0, weaponModifier(IchorTier.swordAttributes()), 1.0E-9);
+    }
+
+    // ---- the Ichorcloth absorption ------------------------------------------------------------------------------
+
+    @Test
+    void everyIchorclothPieceTakesFourAndAQuarterPercentOfTheBlowPerArmourPoint() {
+        assertEquals(0.0425, IchorAbsorption.RATIO_PER_POINT, 0.0);
+        assertEquals(0.1275, IchorAbsorption.ratio(3), 1.0E-12, "helmet and boots, 3 points");
+        assertEquals(0.34, IchorAbsorption.ratio(8), 1.0E-12, "chestplate, 8 points");
+        assertEquals(0.255, IchorAbsorption.ratio(6), 1.0E-12, "leggings, 6 points");
+        double set = IchorAbsorption.ratio(3) + IchorAbsorption.ratio(8) + IchorAbsorption.ratio(6) + IchorAbsorption.ratio(3);
+        assertEquals(0.85, set, 1.0E-12, "the four pieces take 85% together");
+        assertEquals(0.0, IchorAbsorption.ratio(0), 0.0);
+    }
+
+    @Test
+    void theFullSetTakesEightyFivePercentOfAnyBlowAndNothingMore() {
+        double set = IchorAbsorption.ratio(3) + IchorAbsorption.ratio(8) + IchorAbsorption.ratio(6) + IchorAbsorption.ratio(3);
+        for (float blow : new float[] { 1F, 4F, 10F, 40F, 500F }) {
+            float absorbed = IchorAbsorption.absorbed(blow, set, 0F);
+            assertEquals(blow * 0.85F, absorbed, blow * 1.0E-6F, "85% of a blow of " + blow + ", flat: the 1.21.1 formula would take less of a large one");
+            assertEquals(blow * 0.15F, blow - absorbed, blow * 1.0E-6F, "and 15% goes through");
+        }
+    }
+
+    @Test
+    void aPartialSetTakesTheSumOfItsPieces() {
+        assertEquals(1.275F, IchorAbsorption.absorbed(10F, IchorAbsorption.ratio(3), 0F), 1.0E-5F, "a helmet alone");
+        assertEquals(5.95F, IchorAbsorption.absorbed(10F, IchorAbsorption.ratio(8) + IchorAbsorption.ratio(6), 0F), 1.0E-5F, "chestplate and leggings");
+        assertEquals(0F, IchorAbsorption.absorbed(10F, 0.0, 0F), 0F, "no piece, no absorption");
+    }
+
+    @Test
+    void otherArmourAddsItsOwnShareAndTheSumNeverExceedsTheBlow() {
+        // 1.7.10 ApplyArmor added the ratios of every piece of one priority
+        assertEquals(3.4F + 1.6F, IchorAbsorption.absorbed(10F, IchorAbsorption.ratio(8), 1.6F), 1.0E-5F, "an Ichorcloth chestplate and iron armour that takes 1.6");
+        assertEquals(10F, IchorAbsorption.absorbed(10F, 0.85, 3F), 0F, "85% and 30% is not 115% of the blow");
+        assertEquals(1.6F, IchorAbsorption.absorbed(10F, 0.0, 1.6F), 0F, "without Ichorcloth the other armour's amount is returned as it is");
     }
 
     // ---- the Shadowbeam -------------------------------------------------------------------------------------------

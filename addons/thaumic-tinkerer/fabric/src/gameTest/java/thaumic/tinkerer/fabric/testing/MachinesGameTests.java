@@ -182,6 +182,26 @@ public final class MachinesGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void theBladeLeavesTheDeathsThatAreNotItsKillsAlone(GameTestHelper test) {
+        MachinesRuntimeChecks.theBladeLeavesTheDeathsThatAreNotItsKillsAlone(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void anActivatedBladeClearsTheEquipmentToo(GameTestHelper test) {
+        MachinesRuntimeChecks.anActivatedBladeClearsTheEquipmentToo(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void aRealSwingOfTheActivatedBladeReapsAndHurtsItsWielder(GameTestHelper test) {
+        MachinesRuntimeChecks.aRealSwingOfTheActivatedBladeReapsAndHurtsItsWielder(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void aReapedEndermanAndZombifiedPiglinStillRollTheirDimensionalShard(GameTestHelper test) {
+        MachinesRuntimeChecks.aReapedEndermanAndZombifiedPiglinStillRollTheirDimensionalShard(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void everyMobOfTheTableHasAnEntityType(GameTestHelper test) {
         MachinesRuntimeChecks.everyMobOfTheTableHasAnEntityType(test);
     }

@@ -496,7 +496,8 @@
     },
     "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java": {
       "research": 0,
-      "recipes": 2
+      "recipes": 2,
+      "objectTags": 1
     },
     "src/main/java/thaumic/tinkerer/common/item/ItemRevealingHelm.java": {
       "research": 1,
@@ -651,6 +652,8 @@
     "source_files": 334,
     "research_sites": 79,
     "recipe_sites": 98,
+    "object_tag_sites": 1,
+    "object_tags": 17,
     "research_entries": 81,
     "research_keys": 78,
     "recipes": 130,
@@ -670,5 +673,20 @@
     "SUMMON1"
   ],
   "page_references_without_recipe": [],
-  "unresolved_items": []
+  "unresolved_items": [],
+  "unmodelled_stack_data": [],
+  "config_defaults": {
+    "values": {
+      "Config.allowMirrors": true,
+      "ConfigHandler.enableFire": true,
+      "ConfigHandler.enableKami": true,
+      "ConfigHandler.enableSurvivalShareTome": true
+    },
+    "evidence": {
+      "Config.allowMirrors": "Thaumcraft 4 Config.allowMirrors; the mod's Config.Defaults.ALLOW_MIRRORS (common/src/main/java/thaumcraft/common/config/Config.java:63)",
+      "ConfigHandler.enableFire": "src/main/java/thaumic/tinkerer/common/core/handler/ConfigHandler.java:119",
+      "ConfigHandler.enableKami": "src/main/java/thaumic/tinkerer/common/core/handler/ConfigHandler.java:87",
+      "ConfigHandler.enableSurvivalShareTome": "src/main/java/thaumic/tinkerer/common/core/handler/ConfigHandler.java:95"
+    }
+  }
 }

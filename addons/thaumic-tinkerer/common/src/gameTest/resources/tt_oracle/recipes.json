@@ -7,6 +7,331 @@
   },
   "provenance_digest": "2368a285efc347aef6d71dc843019e79f03e76d5872a56d85d740c5e39ed0950",
   "count": 130,
+  "objectTags": [
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 0,
+        "resolved": "thaumictinkerer:mob_aspect_aqua",
+        "unresolved": null
+      },
+      "metas": [
+        0
+      ],
+      "aspects": {
+        "aqua": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 1,
+        "resolved": "thaumictinkerer:mob_aspect_humanus",
+        "unresolved": null
+      },
+      "metas": [
+        1
+      ],
+      "aspects": {
+        "humanus": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 2,
+        "resolved": "thaumictinkerer:mob_aspect_aer",
+        "unresolved": null
+      },
+      "metas": [
+        2
+      ],
+      "aspects": {
+        "aer": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 3,
+        "resolved": "thaumictinkerer:mob_aspect_volatus",
+        "unresolved": null
+      },
+      "metas": [
+        3
+      ],
+      "aspects": {
+        "volatus": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 4,
+        "resolved": "thaumictinkerer:mob_aspect_ignis",
+        "unresolved": null
+      },
+      "metas": [
+        4
+      ],
+      "aspects": {
+        "ignis": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 5,
+        "resolved": "thaumictinkerer:mob_aspect_praecantatio",
+        "unresolved": null
+      },
+      "metas": [
+        5
+      ],
+      "aspects": {
+        "praecantatio": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 6,
+        "resolved": "thaumictinkerer:mob_aspect_exanimis",
+        "unresolved": null
+      },
+      "metas": [
+        6
+      ],
+      "aspects": {
+        "exanimis": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 7,
+        "resolved": "thaumictinkerer:mob_aspect_corpus",
+        "unresolved": null
+      },
+      "metas": [
+        7
+      ],
+      "aspects": {
+        "corpus": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 8,
+        "resolved": "thaumictinkerer:mob_aspect_bestia",
+        "unresolved": null
+      },
+      "metas": [
+        8
+      ],
+      "aspects": {
+        "bestia": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 9,
+        "resolved": "thaumictinkerer:mob_aspect_venenum",
+        "unresolved": null
+      },
+      "metas": [
+        9
+      ],
+      "aspects": {
+        "venenum": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 10,
+        "resolved": "thaumictinkerer:mob_aspect_terra",
+        "unresolved": null
+      },
+      "metas": [
+        10
+      ],
+      "aspects": {
+        "terra": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 11,
+        "resolved": "thaumictinkerer:mob_aspect_alienis",
+        "unresolved": null
+      },
+      "metas": [
+        11
+      ],
+      "aspects": {
+        "alienis": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 12,
+        "resolved": "thaumictinkerer:mob_aspect_iter",
+        "unresolved": null
+      },
+      "metas": [
+        12
+      ],
+      "aspects": {
+        "iter": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 13,
+        "resolved": "thaumictinkerer:mob_aspect_metallum",
+        "unresolved": null
+      },
+      "metas": [
+        13
+      ],
+      "aspects": {
+        "metallum": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 14,
+        "resolved": "thaumictinkerer:mob_aspect_limus",
+        "unresolved": null
+      },
+      "metas": [
+        14
+      ],
+      "aspects": {
+        "limus": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 15,
+        "resolved": "thaumictinkerer:mob_aspect_pannus",
+        "unresolved": null
+      },
+      "metas": [
+        15
+      ],
+      "aspects": {
+        "pannus": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    },
+    {
+      "item": {
+        "text": "new ItemStack(this, 1, i)",
+        "kind": "tt_item",
+        "ref": "ItemMobAspect",
+        "count": 1,
+        "meta": 16,
+        "resolved": "thaumictinkerer:mob_aspect_messis",
+        "unresolved": null
+      },
+      "metas": [
+        16
+      ],
+      "aspects": {
+        "messis": 8
+      },
+      "owner": "ItemMobAspect",
+      "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"
+    }
+  ],
   "entries": [
     {
       "name": "FOCUS_DEFLECT",
@@ -77,6 +402,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemFocusDeflect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDeflect.java:176",
       "order": 0
@@ -188,6 +514,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemFocusDislocation",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDislocation.java:308",
       "order": 1
@@ -254,6 +581,7 @@
         }
       ],
       "owner": "ItemFocusEnderChest",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusEnderChest.java:140",
       "order": 2
@@ -354,6 +682,7 @@
       "ingredientCount": 7,
       "when": [],
       "owner": "ItemFocusFlight",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusFlight.java:134",
       "order": 3
@@ -427,6 +756,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemFocusHeal",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusHeal.java:158",
       "order": 4
@@ -486,6 +816,7 @@
       },
       "when": [],
       "owner": "ItemFocusSmelt",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusSmelt.java:59",
       "order": 5
@@ -587,6 +918,7 @@
       "ingredientCount": 7,
       "when": [],
       "owner": "ItemFocusTelekinesis",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusTelekinesis.java:138",
       "order": 6
@@ -679,6 +1011,7 @@
       "ingredientCount": 6,
       "when": [],
       "owner": "ItemBloodSword",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemBloodSword.java:169",
       "order": 7
@@ -713,6 +1046,7 @@
       },
       "when": [],
       "owner": "ItemBrightNitor",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemBrightNitor.java:73",
       "order": 8
@@ -805,6 +1139,7 @@
       "ingredientCount": 6,
       "when": [],
       "owner": "ItemCleansingTalisman",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemCleansingTalisman.java:119",
       "order": 9
@@ -864,6 +1199,7 @@
       },
       "when": [],
       "owner": "ItemConnector",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemConnector.java:97",
       "order": 10
@@ -897,6 +1233,7 @@
       },
       "when": [],
       "owner": "ItemGas#0",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemGas.java:98",
       "order": 11
@@ -930,6 +1267,7 @@
       },
       "when": [],
       "owner": "ItemGas#1",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemGas.java:91",
       "order": 12
@@ -999,6 +1337,7 @@
       },
       "when": [],
       "owner": "ItemGasRemover",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemGasRemover.java:70",
       "order": 13
@@ -1042,11 +1381,15 @@
           "meta": 32767,
           "resolved": "thaumictinkerer:infused_inkwell",
           "unresolved": null,
-          "wildcard": true
+          "wildcard": true,
+          "variants": [
+            "thaumictinkerer:infused_inkwell"
+          ]
         }
       },
       "when": [],
       "owner": "ItemInfusedInkwell",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedInkwell.java:47",
       "order": 14
@@ -1110,6 +1453,7 @@
       "ingredientCount": 3,
       "when": [],
       "owner": "ItemInfusedInkwell",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedInkwell.java:57",
       "order": 15
@@ -1142,6 +1486,7 @@
       },
       "when": [],
       "owner": "ItemInfusedPotion",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java:187",
       "order": 16
@@ -1174,6 +1519,7 @@
       },
       "when": [],
       "owner": "ItemInfusedPotion",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java:192",
       "order": 17
@@ -1206,6 +1552,7 @@
       },
       "when": [],
       "owner": "ItemInfusedPotion",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java:197",
       "order": 18
@@ -1238,6 +1585,7 @@
       },
       "when": [],
       "owner": "ItemInfusedPotion",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java:202",
       "order": 19
@@ -1253,7 +1601,8 @@
         "count": 1,
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
-        "unresolved": null
+        "unresolved": null,
+        "aspect": "aer"
       },
       "aspects": {
         "messis": 32,
@@ -1310,6 +1659,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemInfusedSeeds",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java:168",
       "order": 20
@@ -1325,7 +1675,8 @@
         "count": 1,
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
-        "unresolved": null
+        "unresolved": null,
+        "aspect": "ignis"
       },
       "aspects": {
         "messis": 32,
@@ -1382,6 +1733,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemInfusedSeeds",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java:179",
       "order": 21
@@ -1397,7 +1749,8 @@
         "count": 1,
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
-        "unresolved": null
+        "unresolved": null,
+        "aspect": "terra"
       },
       "aspects": {
         "messis": 32,
@@ -1454,6 +1807,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemInfusedSeeds",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java:190",
       "order": 22
@@ -1469,7 +1823,8 @@
         "count": 1,
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
-        "unresolved": null
+        "unresolved": null,
+        "aspect": "aqua"
       },
       "aspects": {
         "messis": 32,
@@ -1526,6 +1881,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemInfusedSeeds",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java:201",
       "order": 23
@@ -1541,7 +1897,8 @@
         "count": 1,
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
-        "unresolved": null
+        "unresolved": null,
+        "aspect": "ordo"
       },
       "aspects": {
         "messis": 32,
@@ -1598,6 +1955,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemInfusedSeeds",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java:212",
       "order": 24
@@ -1613,7 +1971,8 @@
         "count": 1,
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
-        "unresolved": null
+        "unresolved": null,
+        "aspect": "perditio"
       },
       "aspects": {
         "messis": 32,
@@ -1670,6 +2029,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemInfusedSeeds",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedSeeds.java:223",
       "order": 25
@@ -1708,6 +2068,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 26
@@ -1815,6 +2176,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 27
@@ -1853,6 +2215,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 28
@@ -1960,6 +2323,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 29
@@ -1998,6 +2362,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 30
@@ -2105,6 +2470,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 31
@@ -2143,6 +2509,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 32
@@ -2250,6 +2617,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 33
@@ -2288,6 +2656,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 34
@@ -2395,6 +2764,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 35
@@ -2433,6 +2803,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 36
@@ -2540,6 +2911,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 37
@@ -2578,6 +2950,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 38
@@ -2685,6 +3058,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 39
@@ -2723,6 +3097,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 40
@@ -2830,6 +3205,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 41
@@ -2868,6 +3244,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 42
@@ -2975,6 +3352,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 43
@@ -3013,6 +3391,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 44
@@ -3120,6 +3499,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 45
@@ -3158,6 +3538,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 46
@@ -3265,6 +3646,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 47
@@ -3303,6 +3685,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 48
@@ -3410,6 +3793,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 49
@@ -3448,6 +3832,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 50
@@ -3555,6 +3940,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 51
@@ -3593,6 +3979,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 52
@@ -3700,6 +4087,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 53
@@ -3738,6 +4126,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 54
@@ -3845,6 +4234,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 55
@@ -3883,6 +4273,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 56
@@ -3990,6 +4381,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 57
@@ -4028,6 +4420,7 @@
       },
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:132",
       "order": 58
@@ -4135,6 +4528,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "ItemMobAspect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:143",
       "order": 59
@@ -4188,6 +4582,7 @@
       },
       "when": [],
       "owner": "ItemRevealingHelm",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemRevealingHelm.java:146",
       "order": 60
@@ -4250,6 +4645,7 @@
         }
       ],
       "owner": "ItemShareBook",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemShareBook.java:73",
       "order": 61
@@ -4283,6 +4679,7 @@
       },
       "when": [],
       "owner": "ItemSoulMould",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemSoulMould.java:68",
       "order": 62
@@ -4316,6 +4713,7 @@
       },
       "when": [],
       "owner": "ItemSpellCloth",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemSpellCloth.java:76",
       "order": 63
@@ -4390,6 +4788,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "ItemXPTalisman",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemXPTalisman.java:154",
       "order": 64
@@ -4545,6 +4944,7 @@
         }
       ],
       "owner": "ItemGemBoots",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemBoots.java:111",
       "order": 65
@@ -4700,6 +5100,7 @@
         }
       ],
       "owner": "ItemGemChest",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemChest.java:109",
       "order": 66
@@ -4855,6 +5256,7 @@
         }
       ],
       "owner": "ItemGemHelm",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemHelm.java:104",
       "order": 67
@@ -5010,6 +5412,7 @@
         }
       ],
       "owner": "ItemGemLegs",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemLegs.java:116",
       "order": 68
@@ -5056,6 +5459,7 @@
         }
       ],
       "owner": "ItemIchorclothArmor#0",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmor.java:177",
       "order": 69
@@ -5103,6 +5507,7 @@
         }
       ],
       "owner": "ItemIchorclothArmor#1",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmor.java:187",
       "order": 70
@@ -5150,6 +5555,7 @@
         }
       ],
       "owner": "ItemIchorclothArmor#2",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmor.java:198",
       "order": 71
@@ -5196,6 +5602,7 @@
         }
       ],
       "owner": "ItemIchorclothArmor#3",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmor.java:209",
       "order": 72
@@ -5293,6 +5700,7 @@
         }
       ],
       "owner": "ItemFocusRecall",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusRecall.java:148",
       "order": 73
@@ -5391,6 +5799,7 @@
         }
       ],
       "owner": "ItemFocusShadowbeam",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusShadowbeam.java:134",
       "order": 74
@@ -5489,6 +5898,7 @@
         }
       ],
       "owner": "ItemFocusXPDrain",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusXPDrain.java:148",
       "order": 75
@@ -5587,6 +5997,7 @@
         }
       ],
       "owner": "ItemBlockTalisman",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemBlockTalisman.java:333",
       "order": 76
@@ -5684,6 +6095,7 @@
         }
       ],
       "owner": "ItemCatAmulet",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemCatAmulet.java:156",
       "order": 77
@@ -5783,6 +6195,7 @@
         }
       ],
       "owner": "ItemIchorPouch",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemIchorPouch.java:177",
       "order": 78
@@ -5853,6 +6266,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:169",
       "order": 79
@@ -5923,6 +6337,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:184",
       "order": 80
@@ -5993,6 +6408,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:199",
       "order": 81
@@ -6072,6 +6488,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:214",
       "order": 82
@@ -6169,6 +6586,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:224",
       "order": 83
@@ -6206,6 +6624,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:167",
       "order": 84
@@ -6304,6 +6723,7 @@
         }
       ],
       "owner": "ItemPlacementMirror",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemPlacementMirror.java:283",
       "order": 85
@@ -6382,6 +6802,7 @@
         }
       ],
       "owner": "ItemProtoclay",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemProtoclay.java:81",
       "order": 86
@@ -6462,6 +6883,7 @@
         }
       ],
       "owner": "ItemSkyPearl",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemSkyPearl.java:167",
       "order": 87
@@ -6518,6 +6940,7 @@
         }
       ],
       "owner": "ItemIchorAxe",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorAxe.java:83",
       "order": 88
@@ -6673,6 +7096,7 @@
         }
       ],
       "owner": "ItemIchorAxeAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorAxeAdv.java:179",
       "order": 89
@@ -6729,6 +7153,7 @@
         }
       ],
       "owner": "ItemIchorPick",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPick.java:100",
       "order": 90
@@ -6884,6 +7309,7 @@
         }
       ],
       "owner": "ItemIchorPickAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPickAdv.java:212",
       "order": 91
@@ -6940,6 +7366,7 @@
         }
       ],
       "owner": "ItemIchorShovel",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorShovel.java:83",
       "order": 92
@@ -7094,6 +7521,7 @@
         }
       ],
       "owner": "ItemIchorShovelAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorShovelAdv.java:169",
       "order": 93
@@ -7150,6 +7578,7 @@
         }
       ],
       "owner": "ItemIchorSword",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorSword.java:82",
       "order": 94
@@ -7305,6 +7734,7 @@
         }
       ],
       "owner": "ItemIchorSwordAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorSwordAdv.java:150",
       "order": 95
@@ -7352,6 +7782,7 @@
       },
       "when": [],
       "owner": "ItemDarkQuartz",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/quartz/ItemDarkQuartz.java:54",
       "order": 96
@@ -7399,6 +7830,7 @@
       },
       "when": [],
       "owner": "ItemDarkQuartz",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/quartz/ItemDarkQuartz.java:64",
       "order": 97
@@ -7459,6 +7891,7 @@
       },
       "when": [],
       "owner": "BlockAnimationTablet",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockAnimationTablet.java:251",
       "order": 98
@@ -7525,6 +7958,7 @@
         }
       ],
       "owner": "BlockAspectAnalyzer",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockAspectAnalyzer.java:178",
       "order": 99
@@ -7636,6 +8070,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "BlockEnchanter",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockEnchanter.java:198",
       "order": 100
@@ -7685,6 +8120,7 @@
       },
       "when": [],
       "owner": "BlockFunnel",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockFunnel.java:222",
       "order": 101
@@ -7761,6 +8197,7 @@
         }
       ],
       "owner": "BlockGolemConnector",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockGolemConnector.java:94",
       "order": 102
@@ -7841,6 +8278,7 @@
       },
       "when": [],
       "owner": "BlockMagnet",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockMagnet.java:239",
       "order": 103
@@ -7887,7 +8325,10 @@
             "unresolved": null
           },
           "resolved": "minecraft:gold_ingot",
-          "unresolved": null
+          "unresolved": null,
+          "oreIds": [
+            "minecraft:copper_ingot"
+          ]
         },
         "s": {
           "text": "new ItemStack(ConfigItems.itemShard, 1, 3)",
@@ -7928,6 +8369,7 @@
       },
       "when": [],
       "owner": "BlockMagnet",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockMagnet.java:258",
       "order": 104
@@ -7978,6 +8420,7 @@
       },
       "when": [],
       "owner": "BlockPlatform",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockPlatform.java:107",
       "order": 105
@@ -8088,6 +8531,7 @@
       "ingredientCount": 8,
       "when": [],
       "owner": "BlockRepairer",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockRepairer.java:224",
       "order": 106
@@ -8125,9 +8569,23 @@
           "kind": "tc_block",
           "ref": "ConfigBlocks.blockStoneDevice",
           "count": 1,
-          "meta": 0,
+          "meta": 32767,
           "resolved": "thaumcraft:alchemy_furnace",
-          "unresolved": null
+          "unresolved": null,
+          "wildcard": true,
+          "variants": [
+            "thaumcraft:alchemy_furnace",
+            "thaumcraft:arcane_pedestal",
+            "thaumcraft:infusion_matrix",
+            "thaumcraft:wand_pedestal",
+            "thaumcraft:wand_pedestal_focus",
+            "thaumcraft:node_stabilizer",
+            "thaumcraft:advanced_node_stabilizer",
+            "thaumcraft:node_transducer",
+            "thaumcraft:arcane_spa",
+            "thaumcraft:focal_manipulator",
+            "thaumcraft:flux_scrubber"
+          ]
         },
         "e": {
           "text": "Items.ender_pearl",
@@ -8143,13 +8601,18 @@
           "kind": "vanilla_block",
           "ref": "Blocks.dispenser",
           "count": 1,
-          "meta": 0,
+          "meta": 32767,
           "resolved": "minecraft:dispenser",
-          "unresolved": null
+          "unresolved": null,
+          "wildcard": true,
+          "variants": [
+            "minecraft:dispenser"
+          ]
         }
       },
       "when": [],
       "owner": "BlockRPlacer",
+      "ownerKind": "block",
       "registered": false,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockRPlacer.java:116",
       "order": 107
@@ -8200,6 +8663,7 @@
       },
       "when": [],
       "owner": "BlockSummon",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockSummon.java:140",
       "order": 108
@@ -8236,6 +8700,7 @@
       },
       "when": [],
       "owner": "BlockTravelSlab#0",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockTravelSlab.java:123",
       "order": 109
@@ -8274,6 +8739,7 @@
       },
       "when": [],
       "owner": "BlockTravelStairs",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockTravelStairs.java:66",
       "order": 110
@@ -8310,6 +8776,7 @@
       },
       "when": [],
       "owner": "BlockWardSlab#0",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockWardSlab.java:135",
       "order": 111
@@ -8349,6 +8816,7 @@
         }
       ],
       "owner": "BlockFireAir",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireAir.java:49",
       "order": 112
@@ -8388,6 +8856,7 @@
         }
       ],
       "owner": "BlockFireChaos",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireChaos.java:54",
       "order": 113
@@ -8427,6 +8896,7 @@
         }
       ],
       "owner": "BlockFireEarth",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireEarth.java:53",
       "order": 114
@@ -8465,6 +8935,7 @@
         }
       ],
       "owner": "BlockFireIgnis",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireIgnis.java:49",
       "order": 115
@@ -8504,6 +8975,7 @@
         }
       ],
       "owner": "BlockFireOrder",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireOrder.java:58",
       "order": 116
@@ -8543,6 +9015,7 @@
         }
       ],
       "owner": "BlockFireWater",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireWater.java:53",
       "order": 117
@@ -8645,6 +9118,7 @@
         }
       ],
       "owner": "BlockWarpGate",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/kami/BlockWarpGate.java:204",
       "order": 118
@@ -8718,6 +9192,7 @@
       "ingredientCount": 4,
       "when": [],
       "owner": "BlockMobilizer",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/mobilizer/BlockMobilizer.java:114",
       "order": 119
@@ -8797,6 +9272,7 @@
       },
       "when": [],
       "owner": "BlockMobilizerRelay",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/mobilizer/BlockMobilizerRelay.java:91",
       "order": 120
@@ -8834,6 +9310,7 @@
       },
       "when": [],
       "owner": "BlockDarkQuartz",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartz.java:165",
       "order": 121
@@ -8864,13 +9341,20 @@
           "kind": "tt_block",
           "ref": "BlockDarkQuartz",
           "count": 1,
-          "meta": 0,
+          "meta": 32767,
           "resolved": "thaumictinkerer:dark_quartz",
-          "unresolved": null
+          "unresolved": null,
+          "wildcard": true,
+          "variants": [
+            "thaumictinkerer:dark_quartz",
+            "thaumictinkerer:dark_quartz_chiseled",
+            "thaumictinkerer:dark_quartz_pillar"
+          ]
         }
       },
       "when": [],
       "owner": "BlockDarkQuartz",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartz.java:172",
       "order": 122
@@ -8901,13 +9385,18 @@
           "kind": "tt_block",
           "ref": "BlockDarkQuartzSlab#0",
           "count": 1,
-          "meta": 0,
+          "meta": 32767,
           "resolved": "thaumictinkerer:dark_quartz_slab",
-          "unresolved": null
+          "unresolved": null,
+          "wildcard": true,
+          "variants": [
+            "thaumictinkerer:dark_quartz_slab"
+          ]
         }
       },
       "when": [],
       "owner": "BlockDarkQuartz",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartz.java:179",
       "order": 123
@@ -8937,13 +9426,20 @@
           "kind": "tt_block",
           "ref": "BlockDarkQuartz",
           "count": 1,
-          "meta": 0,
+          "meta": 32767,
           "resolved": "thaumictinkerer:dark_quartz",
-          "unresolved": null
+          "unresolved": null,
+          "wildcard": true,
+          "variants": [
+            "thaumictinkerer:dark_quartz",
+            "thaumictinkerer:dark_quartz_chiseled",
+            "thaumictinkerer:dark_quartz_pillar"
+          ]
         }
       },
       "when": [],
       "owner": "BlockDarkQuartzSlab#0",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartzSlab.java:125",
       "order": 124
@@ -8975,13 +9471,20 @@
           "kind": "tt_block",
           "ref": "BlockDarkQuartz",
           "count": 1,
-          "meta": 0,
+          "meta": 32767,
           "resolved": "thaumictinkerer:dark_quartz",
-          "unresolved": null
+          "unresolved": null,
+          "wildcard": true,
+          "variants": [
+            "thaumictinkerer:dark_quartz",
+            "thaumictinkerer:dark_quartz_chiseled",
+            "thaumictinkerer:dark_quartz_pillar"
+          ]
         }
       },
       "when": [],
       "owner": "BlockDarkQuartzStairs",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartzStairs.java:69",
       "order": 125
@@ -9013,13 +9516,20 @@
           "kind": "tt_block",
           "ref": "BlockDarkQuartz",
           "count": 1,
-          "meta": 0,
+          "meta": 32767,
           "resolved": "thaumictinkerer:dark_quartz",
-          "unresolved": null
+          "unresolved": null,
+          "wildcard": true,
+          "variants": [
+            "thaumictinkerer:dark_quartz",
+            "thaumictinkerer:dark_quartz_chiseled",
+            "thaumictinkerer:dark_quartz_pillar"
+          ]
         }
       },
       "when": [],
       "owner": "BlockDarkQuartzStairs",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/quartz/BlockDarkQuartzStairs.java:77",
       "order": 126
@@ -9086,6 +9596,7 @@
         }
       ],
       "owner": "BlockTransvectorDislocator",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorDislocator.java:183",
       "order": 127
@@ -9155,6 +9666,7 @@
       },
       "when": [],
       "owner": "BlockTransvectorInterface",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorInterface.java:94",
       "order": 128
@@ -9167,6 +9679,7 @@
       "output": null,
       "when": [],
       "owner": "ItemSpellCloth",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemSpellCloth.java:46",
       "order": 129

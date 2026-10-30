@@ -44,7 +44,12 @@ public final class LibBlockNames {
 """
 LEGACY = {"rows": [{"kind": "item", "field": "itemShard", "meta": 3, "id": "thaumcraft:earth_shard"},
                    {"kind": "block", "field": "blockMagicalLog", "meta": 0, "id": "thaumcraft:greatwood_log",
-                    "item": "thaumcraft:greatwood_log"}]}
+                    "item": "thaumcraft:greatwood_log"},
+                   {"kind": "block", "field": "blockMagicalLog", "meta": 1, "id": "thaumcraft:silverwood_log",
+                    "item": "thaumcraft:silverwood_log"},
+                   {"kind": "block", "field": "blockMagicalLog", "meta": 2, "id": "thaumcraft:pillar", "item": None},
+                   {"kind": "block", "field": "blockMagicalLog", "meta": 32767, "id": None,
+                    "ids": ["thaumcraft:greatwood_log", "thaumcraft:silverwood_log"]}]}
 
 LIB_RESEARCH = """package t;
 public final class LibResearch {
@@ -124,6 +129,11 @@ public class BlockLamp extends BlockSlab implements ITTinkererBlock {
 """
 ITEM_WAND = """package t;
 public class ItemWand extends Item implements ITTinkererItem {
+    public ItemWand() {
+        setMaxStackSize(1);
+        IRecipe recipe = new WandRecipe(this);
+        CraftingManager.getInstance().getRecipeList().add(recipe);
+    }
     public String getItemName() { return LibItemNames.WAND; }
     public boolean shouldRegister() { return ConfigHandler.enableKami; }
     public IRegisterableResearch getResearchItem() {
@@ -156,7 +166,20 @@ public class ItemGems extends Item implements ITTinkererItem {
     public ThaumicTinkererRecipe getRecipeItem() { return null; }
 }
 """
+WAND_RECIPE = """package t;
+public class WandRecipe implements IRecipe { public WandRecipe(Item item) {} }
+"""
+CONFIG_HANDLER = """package t;
+public class ConfigHandler {
+    public static boolean enableKami;
+    public static void loadConfig(Configuration config) {
+        enableKami = config.getBoolean("kami.forceenabled", "general", true, "Set to true to enable all KAMI stuff");
+    }
+}
+"""
 GAME_FILES = {
+    "thaumic/tinkerer/common/core/handler/ConfigHandler.java": CONFIG_HANDLER,
+    "t/WandRecipe.java": WAND_RECIPE,
     "t/LibResearch.java": LIB_RESEARCH, "t/LibItemNames.java": LIB_ITEM_NAMES_SRC, "t/LibBlockNames.java": LIB_BLOCK_NAMES_SRC,
     "t/TTRegistry.java": REGISTRY, "t/ResearchHelper.java": HELPER, "t/BlockBox.java": BLOCK_BOX,
     "t/BlockLamp.java": BLOCK_LAMP, "t/ItemWand.java": ITEM_WAND, "t/ItemGems.java": ITEM_GEMS,
@@ -598,6 +621,22 @@ class ExtractionTest(TempCase):
         self.assertEqual(shapeless["when"], [{"expr": "ConfigHandler.enableKami", "kind": "config", "value": True}])
         self.assertEqual(prov["recipe_names_registered_more_than_once"], [])
 
+    def test_a_custom_recipe_class_added_to_the_crafting_manager_is_recorded(self):
+        _, recipes, prov = self.docs(self.plan())
+        custom = [e for e in recipes["entries"] if e["kind"] == "crafting_custom"]
+        self.assertEqual(len(custom), 1)
+        self.assertEqual((custom[0]["recipeClass"], custom[0]["output"], custom[0]["owner"], custom[0]["name"]),
+                         ("WandRecipe", None, "ItemWand", None))
+        self.assertEqual(custom[0]["when"], [{"expr": "ConfigHandler.enableKami", "kind": "config", "value": True}])
+        self.assertEqual(prov["constructions"]["src/main/java/t/ItemWand.java"], {"research": 1, "recipes": 3})
+
+    def test_the_category_is_read_from_the_source(self):
+        research, _, _ = self.docs(self.plan())
+        self.assertEqual({e["category"] for e in research["entries"]}, {"THAUMICTINKERER"})
+        plan = self.plan(t__LibResearch=LIB_RESEARCH.replace('"THAUMICTINKERER"', '"TT_OTHER"'))
+        research, _, _ = self.docs(plan)
+        self.assertEqual({e["category"] for e in research["entries"]}, {"TT_OTHER"})
+
     def test_meta_instances_are_separate_registrations(self):
         interp_plan = self.plan()
         _, recipes, _ = self.docs(interp_plan)
@@ -652,6 +691,164 @@ class ExtractionTest(TempCase):
         plan = self.plan(t__ResearchHelper=helper)
         research, _, _ = self.docs(plan)
         self.assertNotIn("GEMS", [e["key"] for e in research["entries"]])      # created but never registered: not in the oracle
+
+
+class StackDataAndWildcardTest(TempCase):
+    """What identifies a stack beyond its item (NBT the port keeps as a data component) and what a bare Block means."""
+
+    LIB_ITEMS_PORT = LIB_ITEM_NAMES.rstrip().rstrip("}") + '    public static final String SEEDS = "port_seeds";\n}\n'
+    LIB_ITEMS_SRC = LIB_ITEM_NAMES_SRC.rstrip().rstrip("}") + ' public static final String SEEDS = "seeds"; }\n'
+    REGISTRY_SEEDS = REGISTRY.replace("loadSimpleItem(new ItemGems());", "loadSimpleItem(new ItemGems());\n        loadSimpleItem(new ItemInfusedSeeds());")
+    SEEDS = """package t;
+public class ItemInfusedSeeds extends Item implements ITTinkererItem {
+    public static void setAspect(ItemStack stack, Aspect aspect) {
+        if (stack.stackTagCompound == null) {
+            stack.setTagCompound(new NBTTagCompound());
+        }
+        stack.stackTagCompound.setString("mainAspect", aspect.getTag());
+    }
+    public static ItemStack getStackFromAspect(Aspect a) {
+        ItemStack stack = new ItemStack(ThaumicTinkerer.registry.getFirstItemFromClass(ItemInfusedSeeds.class));
+        setAspect(stack, a);
+        return stack;
+    }
+    public String getItemName() { return LibItemNames.SEEDS; }
+    public boolean shouldRegister() { return true; }
+    public IRegisterableResearch getResearchItem() {
+        return new TTResearchItem("SEEDS", new AspectList(), 2, 2, 1, ItemInfusedSeeds.getStackFromAspect(Aspect.FIRE));
+    }
+    public ThaumicTinkererRecipe getRecipeItem() {
+        return new ThaumicTinkererRecipeMulti(
+                new ThaumicTinkererInfusionRecipe("SEEDS0", "SEEDS", getStackFromAspect(Aspect.AIR), 5, new AspectList(),
+                        new ItemStack(Items.diamond), new ItemStack(Items.diamond)),
+                new ThaumicTinkererInfusionRecipe("SEEDS1", "SEEDS", getStackFromAspect(Aspect.FIRE), 5, new AspectList(),
+                        new ItemStack(Items.diamond), new ItemStack(Items.diamond)));
+    }
+}
+"""
+
+    def seeds_plan(self, seeds=None):
+        write(self.root / oracle.PORT_LIB / "LibItemNames.java", self.LIB_ITEMS_PORT)
+        return self.plan(t__ItemInfusedSeeds=seeds or self.SEEDS, t__TTRegistry=self.REGISTRY_SEEDS, t__LibItemNames=self.LIB_ITEMS_SRC)
+
+    def test_the_aspect_a_helper_stores_in_the_nbt_of_a_stack_tells_two_recipes_of_one_item_apart(self):
+        plan = self.seeds_plan()
+        self.assertEqual(plan.errors, [])
+        research, recipes, prov = self.docs(plan)
+        by_name = {e["name"]: e for e in recipes["entries"] if e["name"] and e["name"].startswith("SEEDS")}
+        outputs = [by_name[n]["output"] for n in ("SEEDS0", "SEEDS1")]
+        self.assertEqual([o["aspect"] for o in outputs], ["airx", "firex"])
+        self.assertEqual({o["resolved"] for o in outputs}, {"thaumictinkerer:port_seeds"})
+        self.assertEqual(len({json.dumps(o, sort_keys=True) for o in outputs}), 2, "the two outputs are not identical")
+        self.assertEqual(prov["unmodelled_stack_data"], [])
+
+    def test_the_aspect_of_a_research_icon_made_by_the_helper_of_another_class_is_kept(self):
+        research, _, _ = self.docs(self.seeds_plan())
+        icon = [e for e in research["entries"] if e["key"] == "SEEDS"][0]["icon"]
+        self.assertEqual(icon["aspect"], "firex")
+
+    def test_a_helper_that_writes_nbt_into_a_stack_the_oracle_does_not_model_is_listed(self):
+        seeds = self.SEEDS.replace("getStackFromAspect(Aspect.AIR), 5,", "tagged(new ItemStack(this)), 5,").replace(
+            "    public String getItemName()", """    public static ItemStack tagged(ItemStack stack) {
+        stack.setTagCompound(new NBTTagCompound());
+        return stack;
+    }
+    public String getItemName()""")
+        _, _, prov = self.docs(self.seeds_plan(seeds))
+        self.assertEqual(len(prov["unmodelled_stack_data"]), 1)
+        self.assertEqual(prov["unmodelled_stack_data"][0]["helper"], "ItemInfusedSeeds.tagged")
+        self.assertIn("SEEDS0", prov["unmodelled_stack_data"][0]["where"])
+
+    def test_a_bare_block_is_every_metadata_and_a_bare_item_is_damage_zero(self):
+        box = BLOCK_BOX.replace("LibResearch.KEY_BOX, new ItemStack(this, 2),", "LibResearch.KEY_BOX, new ItemStack(this, 2),", 1).replace(
+            "'D', Items.diamond));", """'D', Items.diamond),
+                new ThaumicTinkererArcaneRecipe("BOXB", LibResearch.KEY_BOX, new ItemStack(this), new AspectList(),
+                        "LCD", 'L', ConfigBlocks.blockMagicalLog, 'C', Items.coal, 'D', Blocks.dispenser),
+                new ThaumicTinkererArcaneRecipe("BOXC", LibResearch.KEY_BOX, new ItemStack(this), new AspectList(),
+                        "LMW", 'L', new ItemStack(ConfigBlocks.blockMagicalLog), 'M', new ItemStack(ConfigBlocks.blockMagicalLog, 1, 1),
+                        'W', new ItemStack(this, 1, 32767)));""", 1)
+        _, recipes, _ = self.docs(self.plan(t__BlockBox=box))
+        by_name = {e["name"]: e for e in recipes["entries"]}
+        key = by_name["BOXB"]["key"]
+        self.assertEqual((key["L"]["meta"], key["L"].get("wildcard")), (oracle.WILDCARD, True))
+        self.assertEqual(key["L"]["variants"], ["thaumcraft:greatwood_log", "thaumcraft:silverwood_log"])   # the row without an item is not one
+        self.assertEqual((key["D"]["meta"], key["D"].get("wildcard"), key["D"]["variants"]),
+                         (oracle.WILDCARD, True, ["minecraft:dispenser"]))
+        self.assertEqual((key["C"]["meta"], key["C"].get("wildcard"), key["C"].get("variants")), (0, None, None))
+        self.assertEqual(key["C"]["resolved"], "minecraft:coal")
+        # an ItemStack of a Block is the damage value it says, exactly
+        stacks = by_name["BOXC"]["key"]
+        self.assertEqual((stacks["L"]["meta"], stacks["L"].get("wildcard")), (0, None))
+        self.assertEqual((stacks["M"]["meta"], stacks["M"]["resolved"]), (1, "thaumcraft:silverwood_log"))
+        w = stacks["W"]                                  # new ItemStack(this, 1, 32767) is the wildcard too
+        self.assertEqual((w["wildcard"], w["variants"]), (True, ["thaumictinkerer:port_box"]))
+
+    def test_an_ore_name_carries_the_items_it_stands_for_and_an_unknown_one_is_listed(self):
+        box = BLOCK_BOX.replace("'D', Items.diamond));", """'D', Items.diamond),
+                new ThaumicTinkererArcaneRecipe("BOXO", LibResearch.KEY_BOX, new ItemStack(this), new AspectList(),
+                        "GD", 'G', RecipeHelper.oreDictOrStack(new ItemStack(Items.gold_ingot), "ingotCopper"), 'D', "plateMystery"));""", 1)
+        _, recipes, prov = self.docs(self.plan(t__BlockBox=box))
+        key = {e["name"]: e for e in recipes["entries"]}["BOXO"]["key"]
+        self.assertEqual(key["G"]["oreIds"], ["minecraft:copper_ingot"])
+        self.assertEqual(key["G"]["resolved"], "minecraft:gold_ingot")                 # the fallback stack stays recorded
+        self.assertNotIn("oreIds", key["D"])
+        self.assertTrue(any("plateMystery" in u["reason"] for u in prov["unresolved_items"]))
+
+    def test_object_tags_of_the_add_on_are_extracted_once_per_distinct_call(self):
+        wand = ITEM_WAND.replace("        GameRegistry.addShapelessRecipe(new ItemStack(this, 9), new ItemStack(this));",
+                                 "        GameRegistry.addShapelessRecipe(new ItemStack(this, 9), new ItemStack(this));\n"
+                                 "        for (int t = 0; t < 2; t++) {\n"
+                                 "            ThaumcraftApi.registerObjectTag(new ItemStack(this, 1, t), new int[] { t },\n"
+                                 "                    new AspectList().add(Aspect.AIR, 8 + t));\n"
+                                 "        }\n"
+                                 "        ThaumcraftApi.registerObjectTag(new ItemStack(this), new AspectList().add(Aspect.FIRE, 3));")
+        self.assertNotEqual(wand, ITEM_WAND)
+        plan = self.plan(t__ItemWand=wand)
+        self.assertEqual(plan.errors, [])
+        _, recipes, prov = self.docs(plan)
+        tags = recipes["objectTags"]
+        self.assertEqual([(t["metas"], t["aspects"], t["item"]["meta"]) for t in tags],
+                         [([0], {"airx": 8}, 0), ([1], {"airx": 9}, 1), (None, {"firex": 3}, 0)])
+        self.assertEqual({t["owner"] for t in tags}, {"ItemWand"})
+        self.assertEqual(prov["totals"]["object_tag_sites"], 2)
+        self.assertEqual(prov["constructions"]["src/main/java/t/ItemWand.java"]["objectTags"], 2)
+
+    def test_an_object_tag_call_the_oracle_cannot_read_is_an_error_not_a_gap(self):
+        wand = ITEM_WAND.replace("        GameRegistry.addShapelessRecipe(new ItemStack(this, 9), new ItemStack(this));",
+                                 "        GameRegistry.addShapelessRecipe(new ItemStack(this, 9), new ItemStack(this));\n"
+                                 '        ThaumcraftApi.registerObjectTag("ingotX", new AspectList().add(Aspect.FIRE, 3));')
+        plan = self.plan(t__ItemWand=wand)
+        self.assertTrue(any("registerObjectTag" in error for error in plan.errors), plan.errors)
+        self.assertEqual(plan.files, {})
+
+    def test_without_object_tags_the_list_is_empty(self):
+        _, recipes, _ = self.docs(self.plan())
+        self.assertEqual(recipes["objectTags"], [])
+
+    def test_the_owner_of_an_entry_is_an_item_a_block_or_the_helper(self):
+        research, recipes, _ = self.docs(self.plan())
+        kinds = {e["key"]: e["ownerKind"] for e in research["entries"]}
+        self.assertEqual((kinds["BOX"], kinds["WAND"], kinds["GEMS"]), ("block", "item", "helper"))
+        self.assertEqual({e["name"]: e["ownerKind"] for e in recipes["entries"]}["BOX"], "block")
+
+    def test_the_default_of_a_flag_an_entry_depends_on_is_read_from_the_config_of_the_original(self):
+        research, _, prov = self.docs(self.plan())
+        self.assertEqual(research["configDefaults"], {"ConfigHandler.enableKami": True})
+        self.assertIn("ConfigHandler.java", prov["config_defaults"]["evidence"]["ConfigHandler.enableKami"])
+        off = CONFIG_HANDLER.replace('"general", true', '"general", false')
+        research, _, _ = self.docs(self.plan(thaumic__tinkerer__common__core__handler__ConfigHandler=off))
+        self.assertEqual(research["configDefaults"], {"ConfigHandler.enableKami": False})
+
+    def test_a_flag_without_a_default_in_the_config_is_an_error(self):
+        broken = CONFIG_HANDLER.replace("enableKami = config.getBoolean", "enableKami = config.something")
+        with self.assertRaises(oracle.OracleError):
+            self.plan(thaumic__tinkerer__common__core__handler__ConfigHandler=broken)
+
+    def test_a_pattern_with_rows_of_different_length_is_refused(self):
+        box = BLOCK_BOX.replace('"SS", " D", \'S\'', '"SS", " ", \'S\'')
+        self.assertNotEqual(box, BLOCK_BOX)
+        with self.assertRaisesRegex(oracle.Unsupported, "rows of different lengths"):
+            self.plan(t__BlockBox=box)
 
 
 class CliTest(TempCase):
@@ -809,6 +1006,68 @@ class RealCheckoutTest(unittest.TestCase):
 
     def test_nothing_is_left_unresolved(self):
         self.assertEqual(self.prov["unresolved_items"], [])
+        self.assertEqual(self.prov["unmodelled_stack_data"], [])
+
+    def test_the_six_infused_seed_recipes_make_six_different_seeds(self):
+        seeds = [e for e in self.recipes["entries"] if e["name"] and re.fullmatch(r"INFUSED_POTIONS\d", e["name"])]
+        self.assertEqual(len(seeds), 6)
+        self.assertEqual([e["output"]["aspect"] for e in seeds], ["aer", "ignis", "terra", "aqua", "ordo", "perditio"])
+        self.assertEqual(len({json.dumps(e["output"], sort_keys=True) for e in seeds}), 6)
+        icons = [e["icon"] for e in self.research["entries"] if e["key"] == "INFUSED_POTIONS"]
+        self.assertEqual({i["aspect"] for i in icons}, {"ignis"})
+
+    def test_a_bare_block_of_the_original_is_every_metadata_and_a_bare_item_is_not(self):
+        wildcards = {}
+        for e in self.recipes["entries"]:
+            for ch, item in (e.get("key") or {}).items():
+                if item.get("wildcard"):
+                    wildcards[(e["name"], e["source"].rsplit("/", 1)[1], ch)] = item
+        names = {(n, c) for (n, _, c) in wildcards}
+        self.assertEqual(names, {("INFUSED_INKWELL0", "C"), ("REMOTE_PLACER", "s"), ("REMOTE_PLACER", "d"), ("DARK_QUARTZ2", "Q"),
+                                 ("DARK_QUARTZ3", "Q"), ("DARK_QUARTZ4", "Q"), ("DARK_QUARTZ5", "Q"), (None, "Q")})
+        quartz = wildcards[("DARK_QUARTZ3", "BlockDarkQuartz.java:172", "Q")]
+        self.assertEqual(quartz["variants"], ["thaumictinkerer:dark_quartz", "thaumictinkerer:dark_quartz_chiseled",
+                                              "thaumictinkerer:dark_quartz_pillar"])
+        placer = wildcards[("REMOTE_PLACER", "BlockRPlacer.java:116", "s")]
+        self.assertIn("thaumcraft:flux_scrubber", placer["variants"])
+        self.assertNotIn("thaumcraft:infusion_pillar", placer["variants"])            # that block has no item
+        # the bare Items of the original and every ItemStack are exact
+        coal = [e for e in self.recipes["entries"] if e["name"] == "DARK_QUARTZ0"]
+        self.assertEqual([e["key"]["C"].get("wildcard") for e in coal], [None, None])
+        self.assertEqual([e["key"]["C"]["resolved"] for e in coal], ["minecraft:coal", "minecraft:charcoal"])
+
+    def test_the_mob_essences_register_one_object_tag_each(self):
+        tags = self.recipes["objectTags"]
+        self.assertEqual(len(tags), 17)
+        self.assertEqual({t["source"] for t in tags}, {"src/main/java/thaumic/tinkerer/common/item/ItemMobAspect.java:127"})
+        self.assertTrue(all(len(t["aspects"]) == 1 and set(t["aspects"].values()) == {8} for t in tags))
+        self.assertTrue(all(t["item"]["resolved"] == "thaumictinkerer:mob_aspect_" + next(iter(t["aspects"])) for t in tags))
+        self.assertEqual(self.prov["totals"]["object_tag_sites"], 1)
+
+    def test_ore_names_carry_the_items_they_stand_for(self):
+        mob = [e for e in self.recipes["entries"] if e["name"] == "MOB_MAGNET"][0]
+        self.assertEqual(mob["key"]["G"]["oreIds"], ["minecraft:copper_ingot"])
+        self.assertEqual(mob["key"]["G"]["resolved"], "minecraft:gold_ingot")
+
+    def test_the_defaults_of_the_flags_come_from_the_config_of_the_original(self):
+        self.assertEqual(self.research["configDefaults"], {"Config.allowMirrors": True, "ConfigHandler.enableFire": True,
+                                                           "ConfigHandler.enableKami": True,
+                                                           "ConfigHandler.enableSurvivalShareTome": True})
+        conditions = {w["expr"] for e in self.research["entries"] + self.recipes["entries"] for w in e["when"] if w["kind"] == "config"}
+        self.assertEqual(conditions, set(self.research["configDefaults"]))
+
+    def test_owner_kinds_tell_item_owned_from_block_owned_entries(self):
+        kinds = {}
+        for e in self.research["entries"]:
+            kinds.setdefault(e["ownerKind"], set()).add(e["key"])
+        self.assertIn("WARP_GATE", kinds["block"])
+        self.assertIn("ENCHANTER", kinds["block"])
+        self.assertIn("ICHOR", kinds["item"])
+        self.assertIn("TTENCH_FINAL", kinds["helper"])
+        kami = [e for e in self.research["entries"] if e["kami"]]
+        self.assertEqual({e["key"] for e in kami if e["ownerKind"] == "block"}, {"WARP_GATE"})
+        auto = [e for e in kami if e["parentsHiddenAuto"]]
+        self.assertEqual((len(kami), len(auto), sum(1 for e in auto if e["ownerKind"] == "item")), (25, 24, 23))
 
     def test_no_page_refers_to_a_missing_recipe(self):
         self.assertEqual(self.prov["page_references_without_recipe"], [])

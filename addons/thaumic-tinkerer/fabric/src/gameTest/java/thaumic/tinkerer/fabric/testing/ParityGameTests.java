@@ -23,6 +23,11 @@ public final class ParityGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void objectTagsMatchTheOriginal(GameTestHelper test) {
+        ParityRuntimeChecks.objectTagsMatchTheOriginal(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void theAddOnRegistersNothingTheOriginalDidNot(GameTestHelper test) {
         ParityRuntimeChecks.theAddOnRegistersNothingTheOriginalDidNot(test);
     }

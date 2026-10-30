@@ -8,6 +8,12 @@
   "provenance_digest": "2368a285efc347aef6d71dc843019e79f03e76d5872a56d85d740c5e39ed0950",
   "count": 81,
   "keys": 78,
+  "configDefaults": {
+    "Config.allowMirrors": true,
+    "ConfigHandler.enableFire": true,
+    "ConfigHandler.enableKami": true,
+    "ConfigHandler.enableSurvivalShareTome": true
+  },
   "entries": [
     {
       "key": "ANIMATION_TABLET",
@@ -67,6 +73,7 @@
       "textPages": 1,
       "when": [],
       "owner": "BlockAnimationTablet",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockAnimationTablet.java:237"
     },
@@ -136,6 +143,7 @@
         }
       ],
       "owner": "BlockAspectAnalyzer",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockAspectAnalyzer.java:164"
     },
@@ -204,6 +212,7 @@
         }
       ],
       "owner": "ItemBlockTalisman",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemBlockTalisman.java:320"
     },
@@ -272,6 +281,7 @@
       "textPages": 2,
       "when": [],
       "owner": "ItemBloodSword",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemBloodSword.java:152"
     },
@@ -333,6 +343,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemBrightNitor",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemBrightNitor.java:57"
     },
@@ -400,6 +411,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:141"
     },
@@ -467,6 +479,7 @@
         }
       ],
       "owner": "ItemCatAmulet",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemCatAmulet.java:144"
     },
@@ -529,6 +542,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemCleansingTalisman",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemCleansingTalisman.java:106"
     },
@@ -613,6 +627,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemDarkQuartz",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/quartz/ItemDarkQuartz.java:32"
     },
@@ -667,6 +682,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:97"
     },
@@ -735,6 +751,7 @@
         }
       ],
       "owner": "BlockTransvectorDislocator",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorDislocator.java:167"
     },
@@ -809,6 +826,7 @@
       "textPages": 3,
       "when": [],
       "owner": "BlockEnchanter",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockEnchanter.java:182"
     },
@@ -874,6 +892,7 @@
         }
       ],
       "owner": "BlockFireAir",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireAir.java:35"
     },
@@ -939,6 +958,7 @@
         }
       ],
       "owner": "BlockFireWater",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireWater.java:39"
     },
@@ -1003,6 +1023,7 @@
         }
       ],
       "owner": "BlockFireIgnis",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireIgnis.java:35"
     },
@@ -1068,6 +1089,7 @@
         }
       ],
       "owner": "BlockFireOrder",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireOrder.java:44"
     },
@@ -1133,6 +1155,7 @@
         }
       ],
       "owner": "BlockFireChaos",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireChaos.java:37"
     },
@@ -1198,6 +1221,7 @@
         }
       ],
       "owner": "BlockFireEarth",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/fire/BlockFireEarth.java:39"
     },
@@ -1267,6 +1291,7 @@
         }
       ],
       "owner": "ItemFocusDeflect",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDeflect.java:163"
     },
@@ -1340,6 +1365,7 @@
         }
       ],
       "owner": "ItemFocusDislocation",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusDislocation.java:294"
     },
@@ -1411,6 +1437,7 @@
         }
       ],
       "owner": "ItemFocusEnderChest",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusEnderChest.java:118"
     },
@@ -1482,6 +1509,7 @@
         }
       ],
       "owner": "ItemFocusEnderChest",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusEnderChest.java:118"
     },
@@ -1544,6 +1572,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemFocusFlight",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusFlight.java:122"
     },
@@ -1612,6 +1641,7 @@
         }
       ],
       "owner": "ItemFocusHeal",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusHeal.java:145"
     },
@@ -1686,6 +1716,7 @@
         }
       ],
       "owner": "ItemFocusRecall",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusRecall.java:134"
     },
@@ -1753,6 +1784,7 @@
         }
       ],
       "owner": "ItemFocusShadowbeam",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusShadowbeam.java:121"
     },
@@ -1813,6 +1845,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemFocusSmelt",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusSmelt.java:47"
     },
@@ -1875,6 +1908,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemFocusTelekinesis",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/foci/ItemFocusTelekinesis.java:125"
     },
@@ -1942,6 +1976,7 @@
         }
       ],
       "owner": "ItemFocusXPDrain",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/foci/ItemFocusXPDrain.java:136"
     },
@@ -2003,6 +2038,7 @@
       "textPages": 1,
       "when": [],
       "owner": "BlockFunnel",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockFunnel.java:208"
     },
@@ -2062,6 +2098,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemGas#1",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemGas.java:74"
     },
@@ -2122,6 +2159,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemGas#0",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemGas.java:62"
     },
@@ -2181,6 +2219,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemGasRemover",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemGasRemover.java:55"
     },
@@ -2270,6 +2309,7 @@
         }
       ],
       "owner": "BlockGolemConnector",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockGolemConnector.java:76"
     },
@@ -2335,6 +2375,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:108"
     },
@@ -2420,6 +2461,7 @@
         }
       ],
       "owner": "ItemIchorclothArmor#0",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemIchorclothArmor.java:158"
     },
@@ -2487,6 +2529,7 @@
         }
       ],
       "owner": "ItemGemBoots",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemBoots.java:98"
     },
@@ -2554,6 +2597,7 @@
         }
       ],
       "owner": "ItemGemChest",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemChest.java:96"
     },
@@ -2621,6 +2665,7 @@
         }
       ],
       "owner": "ItemGemHelm",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemHelm.java:91"
     },
@@ -2693,6 +2738,7 @@
         }
       ],
       "owner": "ItemGemLegs",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/armor/ItemGemLegs.java:102"
     },
@@ -2762,6 +2808,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:130"
     },
@@ -2829,6 +2876,7 @@
         }
       ],
       "owner": "ItemIchorAxeAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorAxeAdv.java:167"
     },
@@ -2896,6 +2944,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:120"
     },
@@ -2968,6 +3017,7 @@
         }
       ],
       "owner": "ItemIchorPickAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPickAdv.java:198"
     },
@@ -3035,6 +3085,7 @@
         }
       ],
       "owner": "ItemIchorPouch",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemIchorPouch.java:165"
     },
@@ -3101,6 +3152,7 @@
         }
       ],
       "owner": "ItemIchorShovelAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorShovelAdv.java:157"
     },
@@ -3173,6 +3225,7 @@
         }
       ],
       "owner": "ItemIchorSwordAdv",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorSwordAdv.java:136"
     },
@@ -3260,6 +3313,7 @@
         }
       ],
       "owner": "ItemIchorPick",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/tool/ItemIchorPick.java:83"
     },
@@ -3284,6 +3338,7 @@
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
         "unresolved": null,
+        "aspect": "ignis",
         "via": "ItemInfusedSeeds.getStackFromAspect(Aspect.FIRE)"
       },
       "parents": [],
@@ -3379,6 +3434,7 @@
         }
       ],
       "owner": "ItemInfusedPotion",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java:138"
     },
@@ -3403,6 +3459,7 @@
         "meta": 0,
         "resolved": "thaumictinkerer:infused_seeds",
         "unresolved": null,
+        "aspect": "ignis",
         "via": "ItemInfusedSeeds.getStackFromAspect(Aspect.FIRE)"
       },
       "parents": [
@@ -3505,6 +3562,7 @@
         }
       ],
       "owner": "ItemInfusedPotion",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemInfusedPotion.java:156"
     },
@@ -3580,6 +3638,7 @@
       "textPages": 3,
       "when": [],
       "owner": "BlockTransvectorInterface",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/transvector/BlockTransvectorInterface.java:77"
     },
@@ -3647,6 +3706,7 @@
       "textPages": 1,
       "when": [],
       "owner": "BlockMobilizer",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/mobilizer/BlockMobilizer.java:97"
     },
@@ -3726,6 +3786,7 @@
       "textPages": 2,
       "when": [],
       "owner": "BlockMagnet",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockMagnet.java:220"
     },
@@ -3780,6 +3841,7 @@
         }
       ],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:178"
     },
@@ -3847,6 +3909,7 @@
         }
       ],
       "owner": "ItemPlacementMirror",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemPlacementMirror.java:270"
     },
@@ -3907,6 +3970,7 @@
       "textPages": 1,
       "when": [],
       "owner": "BlockPlatform",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockPlatform.java:94"
     },
@@ -3976,6 +4040,7 @@
         }
       ],
       "owner": "ItemProtoclay",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemProtoclay.java:68"
     },
@@ -4041,6 +4106,7 @@
       "textPages": 2,
       "when": [],
       "owner": "BlockRPlacer",
+      "ownerKind": "block",
       "registered": false,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockRPlacer.java:102"
     },
@@ -4106,6 +4172,7 @@
       "textPages": 1,
       "when": [],
       "owner": "BlockRepairer",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockRepairer.java:211"
     },
@@ -4167,6 +4234,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemRevealingHelm",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemRevealingHelm.java:132"
     },
@@ -4236,6 +4304,7 @@
         }
       ],
       "owner": "ItemKamiResource",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/kami/ItemKamiResource.java:151"
     },
@@ -4290,6 +4359,7 @@
         }
       ],
       "owner": "ItemShareBook",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemShareBook.java:57"
     },
@@ -4350,6 +4420,7 @@
         }
       ],
       "owner": "ItemShareBook",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemShareBook.java:57"
     },
@@ -4409,6 +4480,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemSpellCloth",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemSpellCloth.java:62"
     },
@@ -4488,6 +4560,7 @@
       "textPages": 2,
       "when": [],
       "owner": "BlockSummon",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/BlockSummon.java:123"
     },
@@ -4536,6 +4609,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:48"
     },
@@ -4584,6 +4658,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:66"
     },
@@ -4632,6 +4707,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:75"
     },
@@ -4680,6 +4756,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:112"
     },
@@ -4730,6 +4807,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:122"
     },
@@ -4778,6 +4856,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:102"
     },
@@ -4827,6 +4906,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:132"
     },
@@ -4875,6 +4955,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:84"
     },
@@ -4924,6 +5005,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:141"
     },
@@ -4973,6 +5055,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:150"
     },
@@ -5021,6 +5104,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:57"
     },
@@ -5070,6 +5154,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:159"
     },
@@ -5118,6 +5203,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:168"
     },
@@ -5166,6 +5252,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ResearchHelper.initResearch",
+      "ownerKind": "helper",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/research/ResearchHelper.java:93"
     },
@@ -5251,6 +5338,7 @@
         }
       ],
       "owner": "BlockWarpGate",
+      "ownerKind": "block",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/block/kami/BlockWarpGate.java:184"
     },
@@ -5314,6 +5402,7 @@
       "textPages": 1,
       "when": [],
       "owner": "ItemXPTalisman",
+      "ownerKind": "item",
       "registered": true,
       "source": "src/main/java/thaumic/tinkerer/common/item/ItemXPTalisman.java:141"
     }

@@ -40,6 +40,7 @@ import thaumcraft.api.research.ResearchItem;
 import thaumcraft.api.research.ResearchPage;
 import thaumic.tinkerer.common.ThaumicTinkerer;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
+import thaumic.tinkerer.common.item.ItemInfusedSeeds;
 import thaumic.tinkerer.common.lib.LibMisc;
 import thaumic.tinkerer.common.lib.LibResearch;
 import thaumic.tinkerer.common.registry.TTRecipes;
@@ -100,8 +101,15 @@ public final class ParityRuntimeChecks {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
     }
 
+    /** The aspect datum that tells the infused seeds apart (the data component thaumictinkerer:infused_aspect), else null. */
+    private static String aspectOf(ItemStack stack) {
+        if (stack == null || !(stack.getItem() == ItemInfusedSeeds.item())) return null;
+        Aspect aspect = ItemInfusedSeeds.getAspect(stack);
+        return aspect == null ? "none" : aspect.getTag();
+    }
+
     private static String shown(ItemStack stack) {
-        return stack == null ? "null" : id(stack) + " x" + stack.getCount();
+        return stack == null ? "null" : ParityComparator.stackText(id(stack), aspectOf(stack), stack.getCount());
     }
 
     private static Map<String, Integer> aspects(AspectList list) {
@@ -128,8 +136,7 @@ public final class ParityRuntimeChecks {
         } else if (ingredient != null) {
             ids.add("?" + ingredient);
         }
-        if (ids.isEmpty()) ids.add("none");
-        return ids;
+        return ids;                                  // nothing is an empty slot (or a tag with no member, which is no recipe either)
     }
 
     @SuppressWarnings("unchecked")
@@ -244,10 +251,23 @@ public final class ParityRuntimeChecks {
                 if (r.getPages() != null) for (ResearchPage p : r.getPages()) pages.add(page(r.key, p, server));
                 research.put(r.key, new PortResearch(r.key, r.category, aspects(r.tags), r.displayColumn, r.displayRow,
                         r.getComplexity(), strings(r.parents), strings(r.parentsHidden), strings(r.siblings), flags,
-                        ThaumcraftApi.getWarp(r.key), pages, r.icon_item == null ? null : id(r.icon_item)));
+                        ThaumcraftApi.getWarp(r.key), pages, r.icon_item == null ? null : id(r.icon_item), aspectOf(r.icon_item)));
             }
         }
-        return new PortSnapshot(research, pool, recipes(server));
+        return new PortSnapshot(research, pool, recipes(server), objectTags());
+    }
+
+    /** The aspects registered with {@code ThaumcraftApi.registerObjectTag} for an item of the add-on, by item id (and metadata when it is not 0). */
+    private static Map<String, Map<String, Integer>> objectTags() {
+        Map<String, Map<String, Integer>> tags = new java.util.TreeMap<>();
+        for (Map.Entry<List<?>, AspectList> e : ThaumcraftApi.objectTags.entrySet()) {
+            if (e.getKey().size() < 2 || !(e.getKey().get(0) instanceof net.minecraft.world.item.Item item)) continue;
+            ResourceLocation rl = BuiltInRegistries.ITEM.getKey(item);
+            if (!rl.getNamespace().equals(LibMisc.MOD_ID)) continue;
+            Object meta = e.getKey().get(1);
+            tags.put(rl.toString() + (meta instanceof Integer m && m != 0 ? "#" + m : ""), aspects(e.getValue()));
+        }
+        return tags;
     }
 
     private static List<PortRecipe> recipes(MinecraftServer server) {
@@ -260,23 +280,26 @@ public final class ParityRuntimeChecks {
             String at = "programmatic#" + (n++);
             if (o instanceof ShapedArcaneRecipe r) {
                 List<List<String>> cells = new ArrayList<>();
-                for (Object cell : r.getInput()) if (cell != null) cells.add(candidates(cell));
+                for (Object cell : r.getInput()) cells.add(cell == null ? List.of() : candidates(cell));
+                if (cells.size() != r.width * r.height) {
+                    throw new IllegalStateException(name + ": " + cells.size() + " slots for a " + r.width + "x" + r.height + " pattern");
+                }
                 out.add(new PortRecipe(at, name, "arcane_shaped", r.getResearch(), id(r.getRecipeOutput()), r.getRecipeOutput().getCount(),
-                        aspects(r.getAspects()), null, r.width, r.height, cells, List.of()));
+                        aspects(r.getAspects()), null, r.width, r.height, cells, List.of(), aspectOf(r.getRecipeOutput())));
             } else if (o instanceof ShapelessArcaneRecipe r) {
                 List<List<String>> components = new ArrayList<>();
                 for (Object cell : r.getInput()) components.add(candidates(cell));
                 out.add(new PortRecipe(at, name, "arcane_shapeless", r.getResearch(), id(r.getRecipeOutput()), r.getRecipeOutput().getCount(),
-                        aspects(r.getAspects()), null, 0, 0, List.of(), components));
+                        aspects(r.getAspects()), null, 0, 0, List.of(), components, aspectOf(r.getRecipeOutput())));
             } else if (o instanceof InfusionRecipe r) {
                 ItemStack result = r.getRecipeOutput() instanceof ItemStack s ? s : r.getRecipeInput();
                 List<List<String>> components = new ArrayList<>();
                 for (ItemStack c : r.getComponents()) components.add(candidates(c));
                 out.add(new PortRecipe(at, name, "infusion", r.getResearch(), id(result), result.getCount(), aspects(r.getAspects()),
-                        r.getInstability(), 0, 0, List.of(candidates(r.getRecipeInput())), components));
+                        r.getInstability(), 0, 0, List.of(candidates(r.getRecipeInput())), components, aspectOf(result)));
             } else if (o instanceof CrucibleRecipe r) {
                 out.add(new PortRecipe(at, name, "crucible", r.key, id(r.getRecipeOutput()), r.getRecipeOutput().getCount(),
-                        aspects(r.aspects), null, 0, 0, List.of(candidates(r.catalyst)), List.of()));
+                        aspects(r.aspects), null, 0, 0, List.of(candidates(r.catalyst)), List.of(), aspectOf(r.getRecipeOutput())));
             } else if (o instanceof InfusionEnchantmentRecipe) {
                 out.add(new PortRecipe(at, name, "infusion_enchantment", null, "?", 0, Map.of(), null, 0, 0, List.of(), List.of()));
             } else {
@@ -287,31 +310,58 @@ public final class ParityRuntimeChecks {
             if (!holder.id().getNamespace().equals(LibMisc.MOD_ID)) continue;
             CraftingRecipe r = holder.value();
             ItemStack result = r.getResultItem(server.registryAccess());
+            if (r instanceof ShapedRecipe s) {
+                // the full grid, an empty ingredient being an empty slot: where the gaps are is part of the shape
+                List<List<String>> grid = new ArrayList<>();
+                for (Ingredient i : r.getIngredients()) grid.add(i.isEmpty() ? List.of() : candidates(i));
+                if (grid.size() != s.getWidth() * s.getHeight()) {
+                    throw new IllegalStateException(holder.id() + ": " + grid.size() + " slots for a " + s.getWidth() + "x" + s.getHeight() + " pattern");
+                }
+                out.add(new PortRecipe(holder.id().toString(), holder.id().getPath(), "crafting_shaped", null, id(result), result.getCount(),
+                        null, null, s.getWidth(), s.getHeight(), grid, List.of(), aspectOf(result)));
+                continue;
+            }
             List<List<String>> slots = new ArrayList<>();
             for (Ingredient i : r.getIngredients()) if (!i.isEmpty()) slots.add(candidates(i));
-            if (r instanceof ShapedRecipe s) {
-                out.add(new PortRecipe(holder.id().toString(), holder.id().getPath(), "crafting_shaped", null, id(result), result.getCount(),
-                        null, null, s.getWidth(), s.getHeight(), slots, List.of()));
-            } else if (r instanceof ShapelessRecipe) {
+            if (r instanceof ShapelessRecipe) {
                 out.add(new PortRecipe(holder.id().toString(), holder.id().getPath(), "crafting_shapeless", null, id(result), result.getCount(),
-                        null, null, 0, 0, List.of(), slots));
+                        null, null, 0, 0, List.of(), slots, aspectOf(result)));
             } else {
-                out.add(new PortRecipe(holder.id().toString(), holder.id().getPath(), "?" + r.getClass().getSimpleName(), null, id(result),
-                        result.getCount(), null, null, 0, 0, List.of(), slots));
+                out.add(new PortRecipe(holder.id().toString(), holder.id().getPath(), "crafting_custom:" + r.getClass().getSimpleName(), null,
+                        id(result), result.getCount(), null, null, 0, 0, List.of(), slots, aspectOf(result)));
             }
+        }
+        // recipes of other types in the add-on's namespace (smelting, stonecutting, ...): the original had none, so each is an extra
+        for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
+            if (!holder.id().getNamespace().equals(LibMisc.MOD_ID) || holder.value().getType() == RecipeType.CRAFTING) continue;
+            ItemStack result = holder.value().getResultItem(server.registryAccess());
+            out.add(new PortRecipe(holder.id().toString(), holder.id().getPath(), "other:" + BuiltInRegistries.RECIPE_TYPE.getKey(holder.value().getType()),
+                    null, id(result), result.getCount(), null, null, 0, 0, List.of(), List.of(), aspectOf(result)));
         }
         return out;
     }
 
     // ------------------------------------------------------------------------------------------ the comparison
 
+    /** What the last run of the comparison found, exactly; a change of these is a change of the oracle or of the port to look at. */
+    static final int RESEARCH_COMPARED = 74;
+    static final int RECIPES_COMPARED = 127;
+    static final int DOCUMENTED_DIFFERENCES = 11;
+    static final int OBJECT_TAGS_COMPARED = 17;
+
+    private static void assertOriginalDefaults(GameTestHelper test, OracleData oracle) {
+        List<String> problems = ParityComparator.configProblems(oracle, ParityRuntimeChecks::condition);
+        test.assertTrue(problems.isEmpty(), "the comparison expects the original's defaults: " + problems);
+    }
+
     /** Compared once per server run; the individual checks assert on parts of this result. */
     public static synchronized Result result(GameTestHelper test) {
         if (cached == null) {
             test.assertTrue(ThaumicTinkerer.isReady(), "the Thaumcraft ready hook of the add-on ran");
+            OracleData oracle = OracleData.fromClasspath();
+            assertOriginalDefaults(test, oracle);
             MinecraftServer server = test.getLevel().getServer();
-            cached = ParityComparator.compare(OracleData.fromClasspath(), snapshot(server), ParityRuntimeChecks::condition,
-                    KnownDifference.fromClasspath());
+            cached = ParityComparator.compare(oracle, snapshot(server), ParityRuntimeChecks::condition, KnownDifference.fromClasspath());
             writeReport(cached);
         }
         return cached;
@@ -322,6 +372,8 @@ public final class ParityRuntimeChecks {
         sb.append(result.counts).append('\n').append(result.describe());
         sb.append("documented differences (known_differences.json):\n");
         for (Difference d : result.allowed) sb.append("  ALLOWED ").append(d).append('\n');
+        sb.append("accepted without being a difference:\n");
+        for (String note : result.notes) sb.append("  NOTE ").append(note).append('\n');
         try {
             Files.writeString(Path.of(REPORT), sb.toString(), StandardCharsets.UTF_8);
         } catch (IOException error) {
@@ -329,8 +381,13 @@ public final class ParityRuntimeChecks {
         }
     }
 
+    private static boolean isMissing(Difference d) {
+        return d.port().startsWith("missing") || d.port().startsWith("merged into");
+    }
+
+    /** A registration of the port that the original does not have. */
     private static boolean isExtra(Difference d) {
-        return d.field().equals("presence") && !d.port().equals("missing");
+        return d.field().equals("presence") && !isMissing(d);
     }
 
     private static void assertNone(GameTestHelper test, List<Difference> failures, String what) {
@@ -347,7 +404,9 @@ public final class ParityRuntimeChecks {
         test.assertTrue("28f4def938e80d7a0b6f433c2b84300dfb7c35ce".equals(oracle.commit()), "the oracle is of commit " + oracle.commit());
         long keys = oracle.research().stream().map(OracleData.Research::key).distinct().count();
         test.assertTrue(keys == 78, "the original registers 78 research keys, the oracle has " + keys);
-        test.assertTrue(oracle.recipes().size() == 129, "the original registers 129 recipes, the oracle has " + oracle.recipes().size());
+        test.assertTrue(oracle.recipes().size() == 130, "the original registers 130 recipes, the oracle has " + oracle.recipes().size());
+        test.assertTrue(oracle.objectTags().size() == OBJECT_TAGS_COMPARED, "the original registers 17 object tags, the oracle has " + oracle.objectTags().size());
+        test.assertTrue(oracle.configDefaults().size() == 4, "the oracle records the defaults of four flags: " + oracle.configDefaults());
         test.succeed();
     }
 
@@ -355,7 +414,7 @@ public final class ParityRuntimeChecks {
         Result result = result(test);
         assertNone(test, result.failures.stream().filter(d -> d.kind().equals("research") && !isExtra(d)).toList(),
                 "research entries differ from the original");
-        test.assertTrue(result.counts.get("research compared") >= 70, "research compared: " + result.counts);
+        test.assertTrue(result.counts.get("research compared") == RESEARCH_COMPARED, "research compared: " + result.counts);
         test.succeed();
     }
 
@@ -363,7 +422,15 @@ public final class ParityRuntimeChecks {
         Result result = result(test);
         assertNone(test, result.failures.stream().filter(d -> d.kind().equals("recipe") && !isExtra(d)).toList(),
                 "recipes differ from the original");
-        test.assertTrue(result.counts.get("recipes compared") >= 120, "recipes compared: " + result.counts);
+        test.assertTrue(result.counts.get("recipes compared") == RECIPES_COMPARED, "recipes compared: " + result.counts);
+        test.succeed();
+    }
+
+    /** The aspects the add-on registers for its own items (the mob essences) are those of the original, and there are no others. */
+    public static void objectTagsMatchTheOriginal(GameTestHelper test) {
+        Result result = result(test);
+        assertNone(test, result.failures.stream().filter(d -> d.kind().equals("objectTag")).toList(), "object tags differ from the original");
+        test.assertTrue(result.counts.get("object tags compared") == OBJECT_TAGS_COMPARED, "object tags compared: " + result.counts);
         test.succeed();
     }
 
@@ -379,10 +446,16 @@ public final class ParityRuntimeChecks {
     public static void everyKnownDifferenceStillMatches(GameTestHelper test) {
         Result result = result(test);
         if (!result.unusedKnown.isEmpty()) {
-            StringBuilder sb = new StringBuilder(result.unusedKnown.size() + " known_differences.json entries match no difference:\n");
-            for (KnownDifference k : result.unusedKnown) sb.append("  ").append(k).append('\n');
+            StringBuilder sb = new StringBuilder(result.unusedKnown.size() + " known_differences.json entries match fewer differences than they allow:\n");
+            for (int i = 0; i < result.unusedKnown.size(); i++) {
+                sb.append("  ").append(result.unusedKnown.get(i).describe()).append(" matched ").append(result.unusedMatched.get(i)).append('\n');
+            }
             test.fail(sb.toString());
         }
+        int allowedByTheList = KnownDifference.fromClasspath().stream().mapToInt(KnownDifference::occurrences).sum();
+        test.assertTrue(result.allowed.size() == allowedByTheList, result.allowed.size() + " differences were allowed, the list allows " + allowedByTheList);
+        test.assertTrue(allowedByTheList == DOCUMENTED_DIFFERENCES, "known_differences.json allows " + allowedByTheList + " differences, the figure of the last review is "
+                + DOCUMENTED_DIFFERENCES + ": a new entry must be a reviewed one");
         test.succeed();
     }
 
@@ -420,6 +493,50 @@ public final class ParityRuntimeChecks {
             test.assertTrue(result.failures.stream().anyMatch(d -> d.subject().equals("ENCHANTER") && d.field().equals(field)),
                     "changing " + mutation + " of ENCHANTER in the oracle must fail the comparison, got " + result.failures.size() + " differences");
         }
+        // recipes: the position of a gap, which of the six infused seeds a recipe makes, and what a bare Block ingredient stands for
+        for (String mutation : List.of("gap", "seed", "variant")) {
+            JsonObject recipes = OracleData.readResource(OracleData.RECIPES_RESOURCE).deepCopy();
+            JsonObject target = null;
+            for (var e : recipes.getAsJsonArray("entries")) {
+                JsonObject o = e.getAsJsonObject();
+                String name = o.get("name").isJsonNull() ? "" : o.get("name").getAsString();
+                String wanted = switch (mutation) {
+                    case "gap" -> "ICHORCLOTH_HELM";
+                    case "seed" -> "INFUSED_POTIONS2";
+                    default -> "DARK_QUARTZ3";
+                };
+                if (name.equals(wanted) && o.get("registered").getAsBoolean()) target = o;
+            }
+            test.assertTrue(target != null, "the recipe of the mutation " + mutation + " is in the oracle");
+            String subject = target.get("name").getAsString();
+            switch (mutation) {
+                case "gap" -> {
+                    JsonArray pattern = target.getAsJsonArray("pattern");
+                    String last = pattern.get(pattern.size() - 1).getAsString();
+                    test.assertTrue(last.charAt(1) == ' ' && last.charAt(0) != ' ', "ICHORCLOTH_HELM keeps its gap in the middle: \"" + last + "\"");
+                    JsonArray moved = new JsonArray();
+                    for (int i = 0; i < pattern.size() - 1; i++) moved.add(pattern.get(i));
+                    moved.add(last.charAt(0) + "" + last.charAt(2) + " ");
+                    target.add("pattern", moved);
+                }
+                case "seed" -> target.getAsJsonObject("output").addProperty("aspect", "ignis");
+                default -> target.getAsJsonObject("key").getAsJsonObject("Q").getAsJsonArray("variants").add("minecraft:stone");
+            }
+            OracleData changed = OracleData.parse(OracleData.readResource(OracleData.RESEARCH_RESOURCE), recipes);
+            Result result = ParityComparator.compare(changed, port, ParityRuntimeChecks::condition, none);
+            test.assertTrue(result.failures.stream().anyMatch(d -> d.kind().equals("recipe") && d.subject().startsWith(subject)),
+                    "the mutation \"" + mutation + "\" of " + subject + " in the oracle must fail the comparison, got " + result.failures.size() + " differences");
+        }
+        // object tags: the amount of an aspect of a mob essence
+        JsonObject recipes = OracleData.readResource(OracleData.RECIPES_RESOURCE).deepCopy();
+        JsonObject tag = recipes.getAsJsonArray("objectTags").get(0).getAsJsonObject();
+        JsonObject tagAspects = tag.getAsJsonObject("aspects");
+        String tagAspect = tagAspects.keySet().iterator().next();
+        tagAspects.addProperty(tagAspect, tagAspects.get(tagAspect).getAsInt() + 1);
+        Result tags = ParityComparator.compare(OracleData.parse(OracleData.readResource(OracleData.RESEARCH_RESOURCE), recipes), port,
+                ParityRuntimeChecks::condition, none);
+        test.assertTrue(tags.failures.stream().anyMatch(d -> d.kind().equals("objectTag") && d.field().equals("aspects")),
+                "changing the amount of an object tag in the oracle must fail the comparison, got " + tags.failures.size() + " differences");
         test.succeed();
     }
 }

@@ -34,25 +34,48 @@ public final class OracleData {
         }
     }
 
-    /** An item expression of the original: its source text and, where it is mechanical, the 1.21.1 id. */
+    /**
+     * An item expression of the original: its source text and, where it is mechanical, the 1.21.1 id. {@code aspect} is
+     * the main aspect a helper stored in the stack's NBT (the six infused seeds); {@code wildcard} marks "any damage
+     * value" (a bare {@code Block} ingredient, {@code new ItemStack(x, 1, 32767)}) and {@code variants} lists every
+     * 1.21.1 id that stands for; {@code oreIds} the items an ore dictionary name stands for.
+     */
     public record Item(String text, String kind, String ref, String resolved, int count, int meta, String ore,
-            String unresolved) {
+            String unresolved, String aspect, boolean wildcard, List<String> variants, List<String> oreIds) {
         public boolean isOreName() {
             return "oredict".equals(kind) || "oredict_or_stack".equals(kind);
+        }
+
+        /**
+         * The ids a slot of the port has to accept for this ingredient: the items of the ore name, every variant of a
+         * wildcard, else the resolved id. Empty when the oracle cannot say (nothing is guessed).
+         */
+        public List<String> expected() {
+            if (isOreName()) return oreIds;
+            if (wildcard && !variants.isEmpty()) return variants;
+            return resolved == null ? List.of() : List.of(resolved);
         }
     }
 
     public record Page(String kind, String key, List<String> recipes, String source) {}
 
-    public record Research(String key, String category, boolean kami, Map<String, Integer> aspects, int column, int row,
-            int complexity, int complexitySource, String iconResolved, String iconResource, List<String> parents,
-            List<String> parentsHidden, boolean parentsHiddenAuto, List<String> siblings, Map<String, Boolean> flags,
-            int warp, List<Page> pages, List<Condition> when, boolean registered, String owner, String source) {}
+    /** An aspect list the add-on registers for one of its items ({@code ThaumcraftApi.registerObjectTag}). */
+    public record ObjectTag(Item item, Map<String, Integer> aspects, String owner, String source) {}
 
-    public record Recipe(int order, String name, String kind, String research, Item output, Map<String, Integer> aspects,
+    public record Research(String key, String category, boolean kami, Map<String, Integer> aspects, int column, int row,
+            int complexity, int complexitySource, String iconResolved, String iconAspect, String iconResource, List<String> parents,
+            List<String> parentsHidden, boolean parentsHiddenAuto, List<String> siblings, Map<String, Boolean> flags,
+            int warp, List<Page> pages, List<Condition> when, boolean registered, String owner, String ownerKind, String source) {}
+
+    public record Recipe(int order, String name, String kind, String recipeClass, String research, Item output, Map<String, Integer> aspects,
             Integer instability, List<String> pattern, int width, int height, int ingredientCount, List<Item> cells,
             List<Item> components, Item input, Item catalyst, List<Condition> when, boolean registered, String owner,
-            String source) {
+            String ownerKind, String source) {
+
+        /** The kind including the recipe class of a custom recipe ({@code crafting_custom:SpellClothRecipe}). */
+        public String kindKey() {
+            return recipeClass == null ? kind : kind + ":" + recipeClass;
+        }
 
         /** The ingredients in the order the port lists them: the cells of the pattern, or input + components, or the catalyst. */
         public List<Item> ingredients() {
@@ -68,11 +91,26 @@ public final class OracleData {
     private final List<Research> research;
     private final List<Recipe> recipes;
     private final String commit;
+    private final Map<String, Boolean> configDefaults;
+    private final List<ObjectTag> objectTags;
 
-    private OracleData(List<Research> research, List<Recipe> recipes, String commit) {
+    private OracleData(List<Research> research, List<Recipe> recipes, String commit, Map<String, Boolean> configDefaults,
+            List<ObjectTag> objectTags) {
         this.research = Collections.unmodifiableList(research);
         this.recipes = Collections.unmodifiableList(recipes);
         this.commit = commit;
+        this.configDefaults = Collections.unmodifiableMap(configDefaults);
+        this.objectTags = Collections.unmodifiableList(objectTags);
+    }
+
+    /** The object tags the original registers for its own items. */
+    public List<ObjectTag> objectTags() {
+        return objectTags;
+    }
+
+    /** The default of every configuration flag an entry of the original depends on (read from its ConfigHandler). */
+    public Map<String, Boolean> configDefaults() {
+        return configDefaults;
     }
 
     public List<Research> research() {
@@ -111,7 +149,16 @@ public final class OracleData {
         List<Recipe> recipes = new ArrayList<>();
         for (JsonElement e : recipesDocument.getAsJsonArray("entries")) recipes.add(parseRecipe(e.getAsJsonObject()));
         String commit = researchDocument.getAsJsonObject("source").get("commit").getAsString();
-        return new OracleData(research, recipes, commit);
+        Map<String, Boolean> defaults = new LinkedHashMap<>();
+        for (Map.Entry<String, JsonElement> e : researchDocument.getAsJsonObject("configDefaults").entrySet()) {
+            defaults.put(e.getKey(), e.getValue().getAsBoolean());
+        }
+        List<ObjectTag> tags = new ArrayList<>();
+        for (JsonElement e : recipesDocument.getAsJsonArray("objectTags")) {
+            JsonObject o = e.getAsJsonObject();
+            tags.add(new ObjectTag(item(o.getAsJsonObject("item")), aspects(o.getAsJsonObject("aspects")), string(o, "owner"), string(o, "source")));
+        }
+        return new OracleData(research, recipes, commit, defaults, tags);
     }
 
     private static Research parseResearch(JsonObject o) {
@@ -126,39 +173,41 @@ public final class OracleData {
         return new Research(o.get("key").getAsString(), o.get("category").getAsString(), o.get("kami").getAsBoolean(),
                 aspects(o.getAsJsonObject("aspects")), o.get("column").getAsInt(), o.get("row").getAsInt(),
                 o.get("complexity").getAsInt(), o.get("complexitySource").getAsInt(), string(icon, "resolved"),
-                string(icon, "resource"), strings(o, "parents"), strings(o, "parentsHidden"),
+                string(icon, "aspect"), string(icon, "resource"), strings(o, "parents"), strings(o, "parentsHidden"),
                 o.get("parentsHiddenAuto").getAsBoolean(), strings(o, "siblings"), flags, o.get("warp").getAsInt(), pages,
-                conditions(o), o.get("registered").getAsBoolean(), string(o, "owner"), string(o, "source"));
+                conditions(o), o.get("registered").getAsBoolean(), string(o, "owner"), string(o, "ownerKind"), string(o, "source"));
     }
 
     private static Recipe parseRecipe(JsonObject o) {
+        // the full grid of a shaped recipe, row by row, a gap being null: where the gaps are is part of the shape
         List<Item> cells = new ArrayList<>();
         List<String> pattern = o.has("pattern") ? strings(o, "pattern") : List.of();
         if (o.has("key")) {
             JsonObject key = o.getAsJsonObject("key");
+            int width = o.get("width").getAsInt();
             for (String row : pattern) {
-                for (char c : row.toCharArray()) {
-                    if (c != ' ') cells.add(item(key.getAsJsonObject(String.valueOf(c))));
-                }
+                if (row.length() != width) throw new IllegalStateException("the pattern row \"" + row + "\" is not " + width + " wide");
+                for (char c : row.toCharArray()) cells.add(c == ' ' ? null : item(key.getAsJsonObject(String.valueOf(c))));
             }
         }
         List<Item> components = new ArrayList<>();
         if (o.has("components")) for (JsonElement e : o.getAsJsonArray("components")) components.add(item(e.getAsJsonObject()));
         if (o.has("ingredients")) for (JsonElement e : o.getAsJsonArray("ingredients")) components.add(item(e.getAsJsonObject()));
-        return new Recipe(o.get("order").getAsInt(), string(o, "name"), o.get("kind").getAsString(), string(o, "research"),
-                item(o.getAsJsonObject("output")), o.has("aspects") ? aspects(o.getAsJsonObject("aspects")) : null,
+        return new Recipe(o.get("order").getAsInt(), string(o, "name"), o.get("kind").getAsString(), string(o, "recipeClass"),
+                string(o, "research"), o.get("output").isJsonNull() ? null : item(o.getAsJsonObject("output")), o.has("aspects") ? aspects(o.getAsJsonObject("aspects")) : null,
                 o.has("instability") ? o.get("instability").getAsInt() : null, pattern,
                 o.has("width") ? o.get("width").getAsInt() : 0, o.has("height") ? o.get("height").getAsInt() : 0,
                 o.has("ingredientCount") ? o.get("ingredientCount").getAsInt() : 0, cells, components,
                 o.has("input") ? item(o.getAsJsonObject("input")) : null,
                 o.has("catalyst") ? item(o.getAsJsonObject("catalyst")) : null, conditions(o),
-                o.get("registered").getAsBoolean(), string(o, "owner"), string(o, "source"));
+                o.get("registered").getAsBoolean(), string(o, "owner"), string(o, "ownerKind"), string(o, "source"));
     }
 
     private static Item item(JsonObject o) {
         return new Item(o.get("text").getAsString(), o.get("kind").getAsString(), string(o, "ref"), string(o, "resolved"),
                 o.has("count") ? o.get("count").getAsInt() : 1, o.has("meta") ? o.get("meta").getAsInt() : 0, string(o, "ore"),
-                string(o, "unresolved"));
+                string(o, "unresolved"), string(o, "aspect"), o.has("wildcard") && o.get("wildcard").getAsBoolean(),
+                strings(o, "variants"), strings(o, "oreIds"));
     }
 
     private static List<Condition> conditions(JsonObject o) {

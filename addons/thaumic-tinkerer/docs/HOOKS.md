@@ -338,8 +338,9 @@ fits. Registrations wait for the backend and are handed to it by `setBackend`; a
 `BuiltinItemRendererRegistry.INSTANCE.register(item, DynamicItemRenderer)` (`fabric-rendering-v1` 5.2.1 in the Gradle cache). The Machines group
 uses it: `MachinesClient.register()` calls `ItemRenderers.register(TTRegistry.item("mob_display"), RenderMobDisplay::render)` as its first statement,
 and the group's own Fabric glue `MachinesFabricClient` is deleted (two registrations of one item are an error). A JUnit check exists,
-`MachinesClientWiringTest` (the helper, the queue and the wiring in the source; no document records a run of it); the Fabric backend was read and never run on a client, so that
-the Mob Display is drawn is **unverified** (`deviations/Machines.md` section 7).
+`MachinesClientWiringTest` (the helper, the queue and the wiring in the source; no document records a run of it); the Fabric backend was run once on a client: the client harness
+(`CLIENT_VERIFICATION.md`, 2026-10-30) drew a Mob Display for every mob in the item grid through it, English and Russian (its first picture showed the mobs too big and pitched 90 degrees;
+fixed in `RenderMobDisplay`, see `deviations/Machines.md` section 7). Not seen: the item in a hand, on the ground, in an item frame, its break particles, a GPU.
 NeoForge (**not written**): the backend collects the items and renderers, and a `RegisterClientExtensionsEvent` handler on the mod bus does
 `event.registerItem(new IClientItemExtensions() { getCustomRenderer() → a BlockEntityWithoutLevelRenderer whose renderByItem(stack, ctx, pose,
 buffers, light, overlay) calls the Renderer }, item)` for each entry. Without it the Mob Display is invisible there.

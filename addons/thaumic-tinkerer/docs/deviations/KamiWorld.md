@@ -17,9 +17,11 @@ run there as well. The GameTests (`KamiWorldRuntimeChecks`, 20 checks) run on a 
 that round changed in the tests and why), 19 of 19 after the hooks round (the groups moved from their workarounds to the real events of
 `docs/HOOKS.md`: the hooks-round bullet of section 10; run with the 12 `hooksgametests.*` of that day, 31 of 31) and 20 of 20 after the review round
 (the review-round bullet of section 10; run with the 13 `hooksgametests.*` that existed then, 33 of 33; `HooksGameTests` has 14 methods now, one more than in that run). The JUnit tests of the group
-(`KamiWorldLogicTest` 24, `KamiWorldResourcesTest` 14) pass under the real JUnit Jupiter (`:fabric:tinkererTest --tests 'thaumic.tinkerer.kamiworld.*'`). Nothing here has been seen in a running client:
-the screens, the HUD, the model of the gateway and the renderer are untested visually, and a hit taken in the survival of a real
-client was never seen either.
+(`KamiWorldLogicTest` 24, `KamiWorldResourcesTest` 14) pass under the real JUnit Jupiter (`:fabric:tinkererTest --tests 'thaumic.tinkerer.kamiworld.*'`). The client side was looked at once in a Fabric dev client under software
+rendering (`docs/CLIENT_VERIFICATION.md`, 2026-10-30): the gateway block and item, its renderer close-up, the two gateway screens (the menu and the destinations
+screen, also in ru_ru) and the Soul Hearts row (a value written directly in survival mode) were drawn without an exception and the pictures were read. **Not seen:** clicks and
+keys on the gateway screens, a hit taken in the survival of a real client (the HUD row was fed a value, not damage), the Bedrock dimension itself (sky, light, the portal in use),
+a GPU, multiplayer.
 
 ## 1. Identity: registry paths, data
 

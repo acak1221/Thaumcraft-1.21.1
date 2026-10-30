@@ -137,7 +137,11 @@ loom.runs {
   runDir 'run-tinkerer-gametest'
  }
 }
-tasks.named('runTinkererGameTest') { dependsOn tasks.named('thaumicTinkererGameTestClasses') }
+tasks.named('runTinkererGameTest') {
+ dependsOn tasks.named('thaumicTinkererGameTestClasses')
+ // Every run starts on a new world, so that no result depends on what an earlier run left in it.
+ doFirst { delete file('run-tinkerer-gametest/world') }
+}
 
 // The owned run directory of the client smoke: fixed options (English, GUI scale 2, no sound, small view distance),
 // a clean output directory. The singleplayer world is made by the harness itself and is deleted first.
@@ -174,6 +178,9 @@ tasks.register('tinkererTest', Test) {
  classpath = sourceSets.thaumicTinkererTest.runtimeClasspath
  useJUnitPlatform()
  workingDir = ttDir
+ // Tests read the documents (KnownDifferencesTest), the language fragments and the source trees from the working directory. They are
+ // inputs of the task, else Gradle takes a run for up to date (or restores it from the build cache) after a document was edited.
+ inputs.files(fileTree(ttDir) { exclude '.tmp/**', '**/build/**', '**/run*/**' }).withPropertyName('addonTree').withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 // The release jar: the add-on's own classes and resources, remapped like the Thaumcraft jar. Thaumcraft itself is

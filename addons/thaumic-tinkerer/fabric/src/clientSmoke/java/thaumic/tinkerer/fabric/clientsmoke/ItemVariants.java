@@ -5,7 +5,9 @@ import java.util.List;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomModelData;
+import thaumcraft.api.aspects.Aspect;
 import thaumic.tinkerer.common.item.ItemCleansingTalisman;
+import thaumic.tinkerer.common.item.ItemInfusedSeeds;
 import thaumic.tinkerer.common.item.ItemXPTalisman;
 import thaumic.tinkerer.common.item.kami.KamiComponents;
 import thaumic.tinkerer.common.item.kami.tool.ToolHandler;
@@ -23,6 +25,9 @@ import thaumic.tinkerer.common.registry.TTRegistry;
 final class ItemVariants {
     /** A stack in a non-default state, the path of its item, and the words for its label. */
     record Variant(String path, String note, ItemStack stack) {}
+
+    /** The note of the seed variants: {@link OverridesCheck} also requires their models to differ from each other. */
+    static final String SEEDS_NOTE_PREFIX = "seeds of ";
 
     private ItemVariants() {}
 
@@ -47,6 +52,9 @@ final class ItemVariants {
         ItemStack blade = TTRegistry.stack(LibItemNames.BLOOD_SWORD);
         blade.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(1));
         variants.add(new Variant(LibItemNames.BLOOD_SWORD, "activated", blade));
+        for (Aspect primal : Aspect.getPrimalAspects()) {
+            variants.add(new Variant(LibItemNames.INFUSED_SEEDS, SEEDS_NOTE_PREFIX + primal.getTag(), ItemInfusedSeeds.creativeStack(primal)));
+        }
         return variants;
     }
 }

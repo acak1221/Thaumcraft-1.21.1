@@ -16,8 +16,10 @@ integration round (`-PtinkererGameTestFilter='kamigeargametests.*'`): 23 passed,
 set-ups of the checks, not defects of the implementation (the mock player of `GameTestHelper.makeMockServerPlayerInLevel` is in
 Creative mode, so the checks now set Survival; `GameTestHelper.relativePos` is not the inverse of `absolutePos` for an unrotated
 test; a pouch menu is opened for the *selected* hotbar slot; the target of a piglin is its `ATTACK_TARGET` brain memory, which
-`AbstractPiglin.getTarget` reads, not the field that `Mob.setTarget` writes). After the corrections all 30 pass. Nothing
-here has been seen in a running client.
+`AbstractPiglin.getTarget` reads, not the field that `Mob.setTarget` writes). After the corrections all 30 pass. The client
+side was looked at once in a Fabric dev client under software rendering (`docs/CLIENT_VERIFICATION.md`, 2026-10-30): every Kami item and the Ichor Pouch screen (also in
+ru_ru) were drawn without an exception and the pictures were read. The Ghost blocks, the wings layer, the tool-mode tooltip (needs a key press) and anything that needs input
+were **not seen**.
 
 ## 1. Identity: registry paths, components, models
 
@@ -266,7 +268,7 @@ Shadowbeam and the Experience Drain keep the Kami name colour through `ItemModKa
   item* whose shape is the full cube, or a slab or a layer of snow. That keeps out everything the original kept out, but
   also the flat render-type-0 blocks that are not slabs or snow (carpets, plates, buttons, trapdoors, cake), which 1.7.10 took.
 - **Ghost blocks.** The translucent blocks are drawn from the loader's after-world hook (`PlacementMirrorPredictionRenderer.render`, alpha 0.6, only
-  while the player holds the mirror and has the blocks; config `showPlacementMirrorBlocks`). Not seen in a running client.
+  while the player holds the mirror and has the blocks; config `showPlacementMirrorBlocks`). Not seen in a running client (the client harness does not use the item).
 
 ## 7. Bottomless Pouch
 

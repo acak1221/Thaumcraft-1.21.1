@@ -2,6 +2,8 @@ package thaumic.tinkerer.fabric.clientsmoke;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Optional;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.BakedModel;
@@ -45,6 +47,9 @@ final class OverridesCheck implements SmokeCheck {
                 }
             }
         }
+        // The seeds are compared with each other, not with the default stack: a seed without an aspect reads the property as 0, which is the first
+        // primal's value, so its model is the model of Aer.
+        Map<BakedModel, String> seedModels = new IdentityHashMap<>();
         for (Variant variant : ItemVariants.all()) {
             String group = run.content().groups().groupOf(variant.path());
             String target = "item:" + variant.path() + " (" + variant.note() + ")";
@@ -53,10 +58,17 @@ final class OverridesCheck implements SmokeCheck {
                 BakedModel changed = run.client().getItemRenderer().getModel(variant.stack(), null, null, 0);
                 if (changed == run.client().getModelManager().getMissingModel()) {
                     run.report().fail(PHASE, "missing_model", group, target, "in this state the item renderer returns the missing model");
-                } else if (changed == plain) {
+                } else if (changed == plain && !variant.note().startsWith(ItemVariants.SEEDS_NOTE_PREFIX)) {
                     run.report().fail(PHASE, "override_not_applied", group, target, "the item renderer picks the same model as for the default stack: the state does not switch the model");
                 } else {
-                    run.report().pass(PHASE, "override_applied", group, target, "the state switches the model");
+                    boolean seed = variant.note().startsWith(ItemVariants.SEEDS_NOTE_PREFIX);
+                    run.report().pass(PHASE, "override_applied", group, target, seed ? "the seed has a model" : "the state switches the model");
+                    if (seed) {
+                        String same = seedModels.put(changed, variant.note());
+                        if (same != null) {
+                            run.report().fail(PHASE, "override_collapsed", group, target, "the item renderer picks the same model as for '" + same + "': the six primal seeds must look different");
+                        }
+                    }
                 }
             } catch (RuntimeException e) {
                 run.report().fail(PHASE, "item_model_exception", group, target, "ItemRenderer.getModel threw " + e);

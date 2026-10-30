@@ -390,6 +390,9 @@ loom.runs {
 }
 tasks.named('runGameTest') {
  dependsOn tasks.named('gameTestClasses'), project(':common').tasks.named('gameTestClasses')
+ // Every run starts on a new world. The GameTests change the world they run in (the maze audit opens, and so removes, the boss
+ // lock it generated), so a run on the world that the previous run left behind fails mazeAuditGeneratesRealRegionAndReloadsMap.
+ doFirst { delete file('run-gametest/world') }
  // Diagnostic selection only: -PgameTestFilter=<test name> runs a single case.
  // The default run still requires every authored case.
  if (project.hasProperty('gameTestFilter')) {

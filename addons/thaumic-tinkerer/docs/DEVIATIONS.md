@@ -131,13 +131,38 @@ about Forge's and Minecraft 1.7.10's own behaviour in this section is **recalled
   forwarding is written for neither loader), the flammability hook of the elemental fires (neither loader) and the special effects of the Bedrock dimension (neither loader).
   The add-on is not built for NeoForge yet (`README.md`), so none of this was run there: these are consequences read from the code, not observations.
 
-## 5. Not verified
+## 5. Verification status and what is not verified
 
-These parts compile and are covered by unit or resource tests, but **have not been seen working in a running game client**: models,
-item and block rendering (camouflage, Mob Display, the Tablet's overlays), screens, particles, sounds, HUD (Dislocation overlay), and the
-network behaviour of the packets in multiplayer. GameTests run on a dedicated server and cannot show these. The per-group documents say what was checked, but they record
-runs in different amounts (KamiWorld, Foci and the first round of KamiGear with numbers; Machines and BasicItems none; Enchantments a statement without a result):
-`README.md` and `HOOKS.md` section 12 say what is recorded.
+What was run, with the numbers of the last run (2026-10-30, Fabric only; each line is what a log or a result file recorded, nothing else is claimed):
+
+| What | Result | Where it is recorded |
+|---|---|---|
+| Add-on JUnit (`:fabric:tinkererTest`) | 364 tests, 0 failures, 0 skipped. Since 2026-10-30 16:28 the documents, language fragments and source trees the tests read are inputs of the task (before, Gradle could restore a result from its cache after a document was edited) | `fabric/build/test-results/tinkererTest/*.xml` |
+| Add-on GameTests on a Fabric dedicated server (`:fabric:runTinkererGameTest`) | "All 299 required tests passed" | Gradle log of the run |
+| Parity with the 1.7.10 source (research, recipes, object tags) | 74 research entries and 127 recipes compared field by field; 11 documented differences, 0 undocumented | `PARITY_REPORT.md`, `ParityGameTests` |
+| Mod regression after the add-on's changes (`:common:test :fabric:runGameTest`) | JUnit 2761 tests, 5 skipped, 0 failures (the results of 2026-10-29, Gradle found the inputs unchanged); GameTests: "All 515 required tests passed" (2026-10-30 16:26, new world). Two earlier runs the same afternoon on the world that a previous run had left behind failed `mazeAuditGeneratesRealRegionAndReloadsMap` (the test opens, and so removes, the boss lock it generated; the next run finds no lock). Not caused by the add-on; `fabric/build.gradle` now deletes `run-gametest/world` before every run, and `fabric.gradle` does the same for the add-on's run | Gradle logs, `fabric/build/gametest-results.xml` |
+| Python porting scripts (`scripts/porting`) | 296 tests OK | run output |
+| Client, Fabric dev client under Xvfb + Mesa llvmpipe (`tools/client-smoke.sh`) | 726 checks PASS, 0 FAIL, 0 harness errors, 1 NOT_RUN (tool-mode tooltip needs a key press), 80 pictures (read by the engineers in the run before the last, which had 721 PASS); the first run had 3 FAIL and a number of defects seen only in pictures (all fixed, see `CLIENT_VERIFICATION.md`). The last run added a check that the six infused seeds have six different models; with the old model file it fails (5 `override_collapsed`), with the fixed one it passes | `CLIENT_VERIFICATION.md`, `fabric/build/tinkerer-client-smoke/report.json` (not committed) |
+| NeoForge | **nothing written, nothing run** | `HOOKS.md` sections 9, 10, 14 |
+
+**Not verified** (a `PASS` of the client harness says a lookup answered and nothing threw; it is not a person looking at the game on a GPU):
+
+* The client on a **real GPU**, with **sound** (the add-on has no sounds of its own; the sound device fails to start on the test machine), with **input** (clicks on the screens,
+  keys, drag, scroll are never sent), in **multiplayer** (a dedicated server, a second client), with **other mods** (EMI, JEI, Jade), and in languages other than English and Russian
+  (the de, fr, ko and zh files are compared as files only).
+* The screens were drawn, not used: the Enchanter, the Tablet of Necromancy, the Aspectalyzer, the Mob Magnet, the Remote Placer, the Ichor Pouch and the Celestial Gateway were not judged
+  against the 1.7.10 layouts (the Ichor Pouch was compared with the original code and texture: same hash, same slot coordinates).
+* Particles over time, the Bedrock dimension in use (sky, light, the portal), the Placement Mirror's ghost blocks, the wings layer, the Mending and Ender Rift focus layers on a wand
+  (their `_depth` sprites are now filtered out of the block atlas; that the wand renderer still loads them is argued from the code, not seen), break particles of the Mob Display,
+  a Mob Display in a hand, on the ground or in an item frame, the camouflage devices with a camouflage block set (the block rows set none).
+* **Mob Display scale:** the Horse's head, the Witch's hat and the Mooshroom's mushrooms still overflow a 16x16 slot by up to about 2 slot pixels. The scale values are the original's;
+  changing them is a decision for the owner.
+* The network behaviour of the packets between a real client and a real server.
+* The client's copy of the events the groups listen to (`Enchantments.md` section 12): a server cannot show it, and the client harness does not exercise them.
+* Everything on **NeoForge**.
+
+The per-group documents say what each group's own checks were; they record runs in different amounts (KamiWorld, Foci and the first round of KamiGear with numbers; Machines and BasicItems
+record no result of their own server-side tests; Enchantments a statement without a result): `README.md` and `HOOKS.md` section 12 say what is recorded.
 
 ## 6. Open points (need the owner or a source that is not on this machine)
 

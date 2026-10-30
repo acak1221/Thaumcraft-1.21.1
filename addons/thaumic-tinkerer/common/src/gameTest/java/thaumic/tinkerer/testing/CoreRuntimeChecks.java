@@ -22,6 +22,22 @@ public final class CoreRuntimeChecks {
         test.succeed();
     }
 
+    /** /maxresearch: +99 to every aspect of the player, who also learns each aspect (1.7.10 ResearchManager.completeAspect). */
+    public static void maxResearchAddsNinetyNineToEveryAspect(GameTestHelper test) {
+        var player = test.makeMockServerPlayerInLevel();
+        java.util.Map<thaumcraft.api.aspects.Aspect, Integer> before = new java.util.HashMap<>();
+        for (var aspect : thaumcraft.api.aspects.Aspect.aspects.values()) {
+            before.put(aspect, thaumcraft.api.ThaumcraftApiHelper.getAspectPool(player, aspect));
+        }
+        thaumic.tinkerer.common.core.commands.MaxResearchCommand.apply(player);
+        for (var aspect : thaumcraft.api.aspects.Aspect.aspects.values()) {
+            test.assertTrue(thaumcraft.api.ThaumcraftApiHelper.getAspectPool(player, aspect) == before.get(aspect) + 99,
+                    aspect.getTag() + " gained 99 points");
+            test.assertTrue(thaumcraft.api.ThaumcraftApiHelper.hasDiscoveredAspect(player, aspect), aspect.getTag() + " is known");
+        }
+        test.succeed();
+    }
+
     public static void tabAndCategoryExist(GameTestHelper test) {
         test.assertTrue(BuiltInRegistries.CREATIVE_MODE_TAB.containsKey(LibMisc.id("main")), "the creative tab is registered");
         test.assertTrue(ResearchCategories.getResearchList(LibResearch.CATEGORY_THAUMICTINKERER) != null,

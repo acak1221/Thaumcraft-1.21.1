@@ -67,7 +67,7 @@ public final class LibBlockNames {
 
     public static final String INFUSED_GRAIN_BASE = "infused_grain";
 
-    public static final String INFUSED_GRAIN_BLOCK = INFUSED_GRAIN_BASE + "Block";
+    public static final String INFUSED_GRAIN_BLOCK = INFUSED_GRAIN_BASE + "_block";
 
     public static final String FORCEFIELD = "forcefield";
 }

@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import thaumic.tinkerer.common.content.ContentGroup;
 import thaumic.tinkerer.common.content.ContentGroups;
+import thaumic.tinkerer.common.core.commands.MaxResearchCommand;
 import thaumic.tinkerer.common.core.handler.ConfigHandler;
 import thaumic.tinkerer.common.registry.ITTinkererRegisterable;
 import thaumic.tinkerer.common.registry.TTRegistry;
@@ -44,6 +45,7 @@ public final class ThaumicTinkerer {
         if (initialised) return;
         initialised = true;
         ConfigHandler.loadConfig();
+        MaxResearchCommand.register();
         for (ContentGroup group : ContentGroups.ALL) {
             guard(group.getClass().getSimpleName() + ".register", group::register);
         }
@@ -58,6 +60,7 @@ public final class ThaumicTinkerer {
         if (ready) return;
         ready = true;
         guard("research category", ResearchHelper::registerCategory);
+        guard("peripherals research root", ResearchHelper::registerPeripheralsRoot);
         for (ITTinkererRegisterable registerable : TTRegistry.registerables()) {
             guard("recipe of " + registerable.getClass().getSimpleName(), () -> {
                 ThaumicTinkererRecipe recipe = registerable.getRecipeItem();
@@ -88,6 +91,12 @@ public final class ThaumicTinkerer {
     /** What went wrong during the phases (each entry names the unit); empty when everything registered. */
     public static synchronized List<String> failures() {
         return Collections.unmodifiableList(new ArrayList<>(FAILURES));
+    }
+
+    /** Records a failure found by the registration helpers themselves (for example a research entry Thaumcraft dropped). */
+    public static synchronized void fail(String unit) {
+        FAILURES.add(unit);
+        LOG.error("Thaumic Tinkerer: {}", unit);
     }
 
     /**

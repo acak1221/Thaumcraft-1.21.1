@@ -13,6 +13,11 @@ public final class CoreGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void maxResearchAddsNinetyNineToEveryAspect(GameTestHelper test) {
+        CoreRuntimeChecks.maxResearchAddsNinetyNineToEveryAspect(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void tabAndCategoryExist(GameTestHelper test) {
         CoreRuntimeChecks.tabAndCategoryExist(test);
     }

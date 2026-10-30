@@ -113,7 +113,9 @@ public class BlockRPlacer extends PulseDeviceBlock implements IWandable, ITTinke
         return (IRegisterableResearch) new TTResearchItem(
                 LibResearch.KEY_REMOTE_PLACER,
                 new AspectList().add(Aspect.MECHANISM, 2).add(Aspect.MOTION, 1).add(Aspect.SENSES, 1),
-                -6,
+                // 1.7.10 put it at (-6, 3), the cell of Magnets: the pinned fork never registered the block, so the clash
+                // never showed. It sits below its parent, the Animation Tablet at (-8, 2), instead (docs/deviations/TileBlocks.md).
+                -8,
                 3,
                 3,
                 new ItemStack(this)).setParents(LibResearch.KEY_ANIMATION_TABLET).setConcealed().setPages(

@@ -346,3 +346,11 @@ fake player's advancements, the fluids) and rest on reading the 1.21.1 bytecode 
 multiplayer, no survival play. Every behaviour above that says "as the original" is by reading the original code, not by
 running both; the claims about 1.7.10 engine code (the break-speed rule, Forge's call order of `onItemUseFirst`) are from
 memory of that code, whose engine source is not on disk here.
+
+
+## Research cell of the Remote Placer (lead decision)
+
+The Remote Placer is registered although the pinned fork disabled it (`shouldRegister() == false`). Its research sat at
+(-6, 3) in 1.7.10, the cell of Magnets, which only worked because the block was never registered. It is at (-8, 3) now, below
+its parent the Animation Tablet. The registration reports a research that Thaumcraft drops because its cell is taken
+(`ThaumicTinkerer.failures()`), so such a clash can not go unnoticed again.

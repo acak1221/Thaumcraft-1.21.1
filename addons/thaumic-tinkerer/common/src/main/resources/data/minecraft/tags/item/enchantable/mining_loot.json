@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    {
-      "id": "thaumcraft:primal_crusher",
-      "required": false
-    }
-  ]
-}

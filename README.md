@@ -158,7 +158,8 @@ project and the state of every part of the port.
 
 **Do I need Baubles, Thaumic Tinkerer or other addons?** No. The bauble slots are built in. Old
 1.7.10 addons do not run on 1.21.1, but their authors can port them: see
-[For add-on developers](#for-add-on-developers).
+[For add-on developers](#for-add-on-developers). A port of Thaumic Tinkerer for this mod is developed separately, in
+<https://github.com/acak1221/Thaumic-Tinkerer-1.21.1>.
 
 **Why Thaumcraft 4 and not 6?** Thaumcraft 4 is the version many players remember best and the one
 the original addons and packs were built around. This port keeps its rules rather than mixing in

@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "thaumictinkerer:item/placement_mirror_1",
-    "layer1": "thaumictinkerer:item/placement_mirror_0"
-  }
-}

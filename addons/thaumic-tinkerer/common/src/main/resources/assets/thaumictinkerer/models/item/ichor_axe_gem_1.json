@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "thaumictinkerer:item/ichor_axe_gem_1"
-  }
-}

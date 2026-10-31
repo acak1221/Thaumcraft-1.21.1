@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/crop",
-  "textures": {
-    "crop": "thaumictinkerer:block/crop_aqua_2"
-  }
-}

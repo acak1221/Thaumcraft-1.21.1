@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "bottom": "thaumictinkerer:block/levitational_locomotive_relay_0",
-    "top": "thaumictinkerer:block/levitational_locomotive_relay_1",
-    "side": "thaumictinkerer:block/levitational_locomotive_relay_2"
-  }
-}

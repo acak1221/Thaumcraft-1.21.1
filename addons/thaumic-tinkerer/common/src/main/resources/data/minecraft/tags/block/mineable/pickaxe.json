@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "#thaumictinkerer:mineable/simple_blocks/pickaxe",
-    "#thaumictinkerer:mineable/tile_blocks/pickaxe",
-    "#thaumictinkerer:mineable/machines/pickaxe",
-    "#thaumictinkerer:mineable/kami/pickaxe"
-  ]
-}

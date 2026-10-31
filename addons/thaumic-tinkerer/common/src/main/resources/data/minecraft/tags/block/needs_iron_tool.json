@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "#thaumictinkerer:needs/simple_blocks/iron_tool",
-    "#thaumictinkerer:needs/tile_blocks/iron_tool",
-    "#thaumictinkerer:needs/machines/iron_tool",
-    "#thaumictinkerer:needs/kami/iron_tool"
-  ]
-}

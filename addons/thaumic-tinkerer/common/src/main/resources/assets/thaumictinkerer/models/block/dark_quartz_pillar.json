@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "side": "thaumictinkerer:block/pillar_dark_quartz_0",
-    "end": "thaumictinkerer:block/pillar_dark_quartz_1"
-  }
-}

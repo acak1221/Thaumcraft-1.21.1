@@ -1,7 +1,0 @@
-{
-  "required": true,
-  "package": "thaumic.tinkerer.fabric.testing.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "mixins": ["TinkererGameTestSelectionMixin"],
-  "injectors": {"defaultRequire": 1}
-}

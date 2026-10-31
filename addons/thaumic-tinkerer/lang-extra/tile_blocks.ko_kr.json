@@ -1,5 +1,0 @@
-{
-  "ttresearch.page.INTERFACE.0": "\"이제 문제는 말야, 한 블럭에는 면이 6개밖에 없다는 거야\" - Direwolf20<BR><BR>Myth = Busted!<BR><BR>이 새로운 블럭의 면에는 다른 블럭의 면을 동기화시킬 수 있습니다. 다른 블럭과 동기화가 되면 이 블럭의 동기화된 면은 동기화된 블럭의 면과 같은 면처럼 행동합니다. 이 블럭은 Essentia, 아이템, 액체를 받아들일 수 있으며 아이템과 액체의 출력 또한 가능합니다. 이 버전에서는 에너지는 통과하지 않습니다.",
-  "ttresearch.page.GOLEM_CONNECTOR.0": "By exploring what you can do with motion, tools, and a little bit of order, you have discovered how to make those golems just a tiny bit more obedient! You discover a block that can be bound to a golem nearby. It is meant to let a computer placed by it read the mind of the golem and 'convince' it to do as the computer asks, but the computer link is not part of this version: for now the block only remembers its golem.",
-  "ttresearch.page.GOLEM_CONNECTOR.3": "<BR><BR>The method documentation for this block described the computer link, which is not part of this version yet. There is nothing to look up for now."
-}

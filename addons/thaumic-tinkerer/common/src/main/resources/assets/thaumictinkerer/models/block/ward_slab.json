@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "thaumcraft:blocks/paving_stone_warding",
-    "side": "thaumcraft:blocks/paving_stone_warding",
-    "top": "thaumcraft:blocks/paving_stone_warding"
-  }
-}

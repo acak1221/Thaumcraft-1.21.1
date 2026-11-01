@@ -122,6 +122,25 @@ class ThaumometerFramingTest {
         assertTrue(left.last().pose().determinant3x3() > 0);
     }
 
+    @Test void droppedInstrumentRotatesAboutItsNativeEntityCentre() throws Exception {
+        ItemTransform ground = display(ItemDisplayContext.GROUND);
+        for (float bob : new float[]{0, .15F}) for (float rotation : new float[]{0, 90, 180, 270}) {
+            var pose = new PoseStack();
+            // Actual ItemEntityRenderer: bob + .25*ground.scale.y, then entity spin;
+            // actual ItemRenderer: authored ground ItemTransform, then builtin T(-.5).
+            pose.translate(0, bob + .25F * ground.scale.y(), 0);
+            pose.mulPose(Axis.YP.rotationDegrees(rotation));
+            ground.apply(false, pose);
+            pose.translate(-.5F, -.5F, -.5F);
+            ItemThaumometerRenderer.staticPose(pose, ItemDisplayContext.GROUND);
+            Vector3f face = pose.last().pose().transformPosition(new Vector3f(0, .11F, 0));
+            assertEquals(0F, face.x, 1e-6F, "the dropped face stays over the entity instead of orbiting it");
+            assertEquals(0F, face.z, 1e-6F, "the centred OBJ must not inherit the builtin model corner");
+            assertEquals(bob + .25F * ground.scale.y() + ground.translation.y() + .11F * .5F * ground.scale.y(),
+                    face.y, 1e-6F, "the authored display height, native bob and existing scanner scale are preserved");
+        }
+    }
+
     private static Matrix4f firstPerson(boolean left) throws Exception {
         var context = left ? ItemDisplayContext.FIRST_PERSON_LEFT_HAND : ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
         var pose = new PoseStack();

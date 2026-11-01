@@ -1,1 +1,27 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"thaumcraft:items/golem_iron"},"overrides":[{"predicate":{"thaumcraft:has_core":1},"model":"thaumcraft:item/golem_iron_core"}]}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "thaumcraft:items/golem_iron"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "thaumcraft:has_core": 1
+      },
+      "model": "thaumcraft:item/golem_iron_core"
+    },
+    {
+      "predicate": {
+        "thaumcraft:advanced": 1
+      },
+      "model": "thaumcraft:item/golem_iron_advanced"
+    },
+    {
+      "predicate": {
+        "thaumcraft:advanced": 1,
+        "thaumcraft:has_core": 1
+      },
+      "model": "thaumcraft:item/golem_iron_advanced_core"
+    }
+  ]
+}

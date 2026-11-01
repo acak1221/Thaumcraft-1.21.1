@@ -315,3 +315,37 @@ unrestorable owned resources enter saved item custody. This corrects inherited l
 and permission defects. It does not provide atomic multi-chunk disk checkpoints during power loss.
 
 Implementation and verification limits: [node jar completion](../analysis/2026-11-01-node-jar.md).
+
+## 13. Thaumometer and complete bundled book audit (2026-11-01)
+
+The owner requested a live texture check and then every recipe and icon in the Thaumonomicon.
+The source comparison covers all201 research entries,591 source descriptors and308 original named
+recipe keys; default live coverage is192 nonvirtual enabled research entries and576 source
+descriptors (303 text,273 recipe). Seven optional Silver/Lead/Tin entries and their15 source pages
+remain disabled without native items. Two virtual icons and the disabled CAP_silver are intentionally
+empty; they are classified rather than replaced with invented content.
+
+The eight corrected recipe definitions restore original ingredients, quantities and aspects.
+Original wildcard armour wear and BottleTaint's NBT-agnostic catalyst matcher are preserved.
+Potion contents, original banner colours and item prototype components were checked independently.
+
+Original item sprites, layers and major inventory model parts now render through native models and
+shared static BER parts. Modern display transforms explicitly replace the old Forge inventory helper;
+no fake block entities/worlds are used. The existing three modern layer-plan construct displays remain;
+six formerly omitted original construct diagrams are restored. This is presentation adaptation, not
+a new way to craft completed multiblocks.
+
+Native styled-component spans fix the 1.21.1 split/reorder reset disagreement without rewriting
+translations. The scanner's lit additive shader is reused through its existing reload registration.
+The original main-hand node-sight rule remains; this audit does not extend offhand node sight.
+
+Actual Fabric EN/RU client passes render every default book descriptor and recipe variant, all
+research/aspect icons, item prototypes and new world meshes, before and after resource reload.
+The supplied knowledge/items and copied1.21.1 save are declared fixtures. NeoForge client, multiplayer
+and survival acquisition are not replayed. Add-on-only ASPECTS/IMAGE/compound page limitations in
+section9 are unchanged; this checkpoint covers the bundled book. No fresh direct comparison with
+the absent original JAR is claimed; the canonical Java oracle, retained assets and locked hashes
+provide the source evidence.
+
+Exact coverage, fixes and selected native frames: [full audit](../analysis/2026-11-01-thaumometer-book-review.md).
+Machine-readable complete recipe/icon records: [audit manifest](../porting/thaumonomicon-visual-audit.json).

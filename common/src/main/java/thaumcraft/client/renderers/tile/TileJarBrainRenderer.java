@@ -6,6 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
@@ -43,38 +45,52 @@ public final class TileJarBrainRenderer implements BlockEntityRenderer<TileJarBr
     public static final float BRAIN_HEIGHT = -.8F;
     /** The original offset of the whole jar content above the block floor. */
     public static final float CONTENT_OFFSET = .01F;
-    private final ModelBrain brain = new ModelBrain();
-    private final ModelJar jar = new ModelJar();
+    private static final ModelBrain BRAIN_MODEL = new ModelBrain();
+    private static final ModelJar JAR_MODEL = new ModelJar();
 
     public TileJarBrainRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override public void render(TileJarBrain tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        var player = Minecraft.getInstance().player;
+        renderContents(player == null ? 0 : player.tickCount, turn(tile.rota, tile.rotb, partialTick), pose, buffers, overlay);
+        renderShell(tile.getBlockState(), pose, buffers, light, overlay);
+    }
+
+    /** Original parts shared by the placed jar and its inventory item, without a fabricated tile. */
+    public static void renderContents(int ticks, float rotation, PoseStack pose, MultiBufferSource buffers, int overlay) {
         pose.pushPose();
         try {
-            // Original TileJarRenderer:62-63 - the content frame of the jar: the block centre and
-            // one hundredth of a block above the block floor.
-            pose.translate(.5F, CONTENT_OFFSET, .5F);
-            pose.mulPose(Axis.XP.rotationDegrees(180));
-            renderBrain(tile, partialTick, pose, buffers, overlay);
-            // Original TileJarRenderer:173-174 - the brine of the jar, in the content frame.
-            jar.renderBrine(pose, buffers.getBuffer(RenderType.entityTranslucent(BRINE)), LightTexture.FULL_BRIGHT, overlay);
+            contentPose(pose);
+            pose.pushPose();
+            try {
+                brainPose(pose, ticks, rotation);
+                BRAIN_MODEL.render(pose, buffers.getBuffer(RenderType.entityTranslucent(BRAIN)), LightTexture.FULL_BRIGHT, overlay);
+            } finally {
+                pose.popPose();
+            }
+            JAR_MODEL.renderBrine(pose, buffers.getBuffer(RenderType.entityTranslucent(BRINE)), LightTexture.FULL_BRIGHT, overlay);
         } finally {
             pose.popPose();
         }
     }
 
-    /** The original {@code renderBrain}: the bob, the turn and the scale of the brain. */
-    private void renderBrain(TileJarBrain tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int overlay) {
-        float bob = bob(Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount);
-        pose.pushPose();
-        try {
-            pose.translate(0, BRAIN_HEIGHT + bob, 0);
-            applyTurn(pose, turn(tile.rota, tile.rotb, partialTick));
-            pose.scale(BRAIN_SCALE, BRAIN_SCALE, BRAIN_SCALE);
-            brain.render(pose, buffers.getBuffer(RenderType.entityTranslucent(BRAIN)), LightTexture.FULL_BRIGHT, overlay);
-        } finally {
-            pose.popPose();
-        }
+    /** BlockJarRenderer draws the two original glass bounds after the contents. */
+    public static void renderShell(BlockState state, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        var blocks = Minecraft.getInstance().getBlockRenderer();
+        blocks.getModelRenderer().renderModel(pose.last(),
+                buffers.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)),
+                state, blocks.getBlockModel(state), 1, 1, 1, light, overlay);
+    }
+
+    static void contentPose(PoseStack pose) {
+        pose.translate(.5F, CONTENT_OFFSET, .5F);
+        pose.mulPose(Axis.XP.rotationDegrees(180));
+    }
+
+    static void brainPose(PoseStack pose, int ticks, float rotation) {
+        pose.translate(0, BRAIN_HEIGHT + bob(ticks), 0);
+        applyTurn(pose, rotation);
+        pose.scale(BRAIN_SCALE, BRAIN_SCALE, BRAIN_SCALE);
     }
 
     /**

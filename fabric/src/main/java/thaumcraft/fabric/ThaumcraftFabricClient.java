@@ -107,6 +107,18 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         // dimensional scanner of the original, not a flat sprite.
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftContent.THAUMOMETER.get(),
                 thaumcraft.client.renderers.item.ItemThaumometerRenderer::render);
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftDeconstruction.ITEM.get(),
+                thaumcraft.client.renderers.item.DeconstructionTableItemRenderer::render);
+        BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftContent.RESEARCH_TABLE_ITEM.get(),
+                thaumcraft.client.renderers.item.ResearchTableItemRenderer::render);
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_BRAIN_ITEM.get(),
+                thaumcraft.client.renderers.item.JarBrainItemRenderer::render);
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftEldritchBlocks.FLUX_SCRUBBER_ITEM.get(),
+                thaumcraft.client.renderers.item.FluxScrubberItemRenderer::render);
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftTubes.ESSENTIA_RESERVOIR_ITEM.get(),
+                thaumcraft.client.renderers.item.EssentiaReservoirItemRenderer::render);
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftAlembics.ALEMBIC_ITEM.get(),
+                thaumcraft.client.renderers.item.AlembicItemRenderer::render);
         // Original ItemBannerRenderer: the banner item carries its colour and its
         // aspect and is drawn with the banner model instead of a plain cube.
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftEldritchBlocks.BANNER_ITEM.get(),

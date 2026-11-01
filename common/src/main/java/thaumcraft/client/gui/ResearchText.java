@@ -3,6 +3,9 @@ package thaumcraft.client.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 /** Original TC4 text tokens. Layout is separate so translations remain untouched. */
 public final class ResearchText {
@@ -12,6 +15,26 @@ public final class ResearchText {
     public record Text(String value) implements Part {}
     public record Image(String texture, int u, int v, int width, int height, float scale) implements Part {}
     public record Rule() implements Part {}
+
+    /**
+     * Resolve legacy formatting before wrapping. Native line splitting carries a continuation
+     * style, so leaving raw §r in a continued line makes the later visual-order pass reset to
+     * that carried style rather than the text's original default.
+     */
+    public static Component formatted(String original) {
+        var result = Component.empty();
+        Style style = Style.EMPTY;
+        int start = 0;
+        for (int index = 0; index < original.length(); index++) {
+            if (original.charAt(index) != '§' || index + 1 >= original.length()) continue;
+            if (start < index) result.append(Component.literal(original.substring(start, index)).setStyle(style));
+            ChatFormatting format = ChatFormatting.getByCode(original.charAt(++index));
+            if (format != null) style = format == ChatFormatting.RESET ? Style.EMPTY : style.applyLegacyFormat(format);
+            start = index + 1;
+        }
+        if (start < original.length()) result.append(Component.literal(original.substring(start)).setStyle(style));
+        return result;
+    }
 
     public static List<Part> parse(String original) {
         List<Part> parts = new ArrayList<>();

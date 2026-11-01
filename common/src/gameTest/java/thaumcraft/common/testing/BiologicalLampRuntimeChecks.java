@@ -166,7 +166,7 @@ public final class BiologicalLampRuntimeChecks {
         for(boolean growth:new boolean[]{true,false}) {
             String path=growth?"growth_lamp":"fertility_lamp";var recipe=(InfusionStackRecipe)f.level.getRecipeManager().byKey(id("infusion/"+path)).orElseThrow().value();
             var expected=growth?List.of(Items.GOLD_INGOT,Items.BONE_MEAL,ThaumcraftContent.SHARDS.get("terra").get(),Items.GOLD_INGOT,Items.BONE_MEAL,ThaumcraftContent.SHARDS.get("terra").get())
-                    :List.of(Items.GOLD_INGOT,Items.WHEAT,ThaumcraftContent.SHARDS.get("ignis").get(),Items.GOLD_INGOT,Items.GOLDEN_CARROT,ThaumcraftContent.SHARDS.get("ignis").get());
+                    :List.of(Items.GOLD_INGOT,Items.WHEAT,ThaumcraftContent.SHARDS.get("ignis").get(),Items.GOLD_INGOT,Items.CARROT,ThaumcraftContent.SHARDS.get("ignis").get());
             f.check(recipe.research().equals(growth?"LAMPGROWTH":"LAMPFERTILITY") && recipe.instability()==4
                             && recipe.aspects().equals(growth?Map.of("herba",16,"lux",8,"victus",16):Map.of("bestia",16,"victus",16,"lux",8))
                             && recipe.components().size()==6 && recipe.result().is(growth?ThaumcraftBiologicalLamps.GROWTH_LAMP_ITEM.get():ThaumcraftBiologicalLamps.FERTILITY_LAMP_ITEM.get()),"original native infusion research/result/instability4/aspects: "+path);

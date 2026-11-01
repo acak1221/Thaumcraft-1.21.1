@@ -1,1 +1,27 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"thaumcraft:items/golem_clay"},"overrides":[{"predicate":{"thaumcraft:has_core":1},"model":"thaumcraft:item/golem_clay_core"}]}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "thaumcraft:items/golem_clay"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "thaumcraft:has_core": 1
+      },
+      "model": "thaumcraft:item/golem_clay_core"
+    },
+    {
+      "predicate": {
+        "thaumcraft:advanced": 1
+      },
+      "model": "thaumcraft:item/golem_clay_advanced"
+    },
+    {
+      "predicate": {
+        "thaumcraft:advanced": 1,
+        "thaumcraft:has_core": 1
+      },
+      "model": "thaumcraft:item/golem_clay_advanced_core"
+    }
+  ]
+}

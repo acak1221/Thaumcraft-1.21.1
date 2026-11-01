@@ -30,6 +30,7 @@ import thaumcraft.common.items.golems.ItemGolemPlacer;
 /** Client-only bindings; root owns common registration and the bootstrap call. */
 public final class ThaumcraftGolemClient {
     public static final ResourceLocation HAS_CORE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "has_core");
+    public static final ResourceLocation ADVANCED = ResourceLocation.fromNamespaceAndPath("thaumcraft", "advanced");
     private static boolean initialized;
     private ThaumcraftGolemClient() {}
 
@@ -38,8 +39,12 @@ public final class ThaumcraftGolemClient {
         initialized = true;
         MenuRegistry.registerScreenFactory(ThaumcraftGolems.GOLEM_MENU.get(), GuiGolem::new);
         MenuRegistry.registerScreenFactory(ThaumcraftGolems.TRUNK_MENU.get(), GuiTravelingTrunk::new);
-        for (var placer : ThaumcraftGolems.placerItems()) ItemPropertiesRegistry.register(placer, HAS_CORE,
-                (stack, level, entity, seed) -> stack.getOrDefault(ThaumcraftGolems.GOLEM_DATA.get(), GolemData.EMPTY).core() >= 0 ? 1F : 0F);
+        for (var placer : ThaumcraftGolems.placerItems()) {
+            ItemPropertiesRegistry.register(placer, HAS_CORE,
+                    (stack, level, entity, seed) -> stack.getOrDefault(ThaumcraftGolems.GOLEM_DATA.get(), GolemData.EMPTY).core() >= 0 ? 1F : 0F);
+            ItemPropertiesRegistry.register(placer, ADVANCED,
+                    (stack, level, entity, seed) -> stack.getOrDefault(ThaumcraftGolems.GOLEM_DATA.get(), GolemData.EMPTY).advanced() ? 1F : 0F);
+        }
     }
 
     /**

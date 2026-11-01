@@ -87,7 +87,7 @@ class GapRecipesAssetsTest {
                     List.of("minecraft:gold_ingot", "minecraft:gold_ingot", "minecraft:gold_ingot", "minecraft:ender_pearl"),
                     Map.of("iter", 8, "tenebrae", 8, "permutatio", 8), 1, "thaumcraft:mirror", 1),
             new Infusion("MirrorEssentia", "infusion/mirror_essentia", "MIRRORESSENTIA", "thaumcraft:mirrored_glass",
-                    List.of("minecraft:diamond", "minecraft:diamond", "minecraft:diamond", "minecraft:ender_pearl"),
+                    List.of("minecraft:iron_ingot", "minecraft:iron_ingot", "minecraft:iron_ingot", "minecraft:ender_pearl"),
                     Map.of("iter", 8, "aqua", 8, "permutatio", 8), 2, "thaumcraft:mirror_essentia", 1),
             new Infusion("MirrorHand", "infusion/hand_mirror", "MIRRORHAND", "thaumcraft:mirror",
                     List.of("minecraft:stick", "minecraft:compass", "minecraft:map"),

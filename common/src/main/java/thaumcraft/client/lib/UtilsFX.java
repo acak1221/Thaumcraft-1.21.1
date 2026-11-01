@@ -10,6 +10,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -66,10 +67,7 @@ public final class UtilsFX {
 
     private static final Map<Object, Integer> TEXTURE_SIZE_CACHE = new HashMap<>();
 
-    private static ItemStack equippedStack;
-    private static int equippedSlot = -1;
-    private static float equippedProgress;
-    private static float prevEquippedProgress;
+    private static final EquippedHands EQUIPPED_HANDS = new EquippedHands();
     private static Object equippedLevel;
 
     private UtilsFX() {}
@@ -166,34 +164,63 @@ public final class UtilsFX {
      * @return the interpolated progress, between zero and one
      */
     public static float getEquippedProgress(float partialTick) {
-        return prevEquippedProgress + (equippedProgress - prevEquippedProgress) * partialTick;
+        return getEquippedProgress(partialTick, InteractionHand.MAIN_HAND);
+    }
+
+    /** The original curve belongs to the hand holding the instrument, including the modern offhand. */
+    public static float getEquippedProgress(float partialTick, InteractionHand hand) {
+        return EQUIPPED_HANDS.progress(partialTick, hand);
     }
 
     /** Vanilla 1.7.10 bly.a:518-544 (MCP ItemRenderer.updateEquippedItem).
      * Run even when the thaumometer is NOT rendered, including third-person and open menus. */
     public static void tick(Minecraft client) {
         if (client.player == null || equippedLevel != client.level) {
-            equippedStack = null;
-            equippedSlot = -1;
-            prevEquippedProgress = equippedProgress = 0;
+            EQUIPPED_HANDS.reset();
             equippedLevel = client.level;
         }
         if (client.player == null) return;
         if (client.isPaused()) return;
-        ItemStack current = client.player.getMainHandItem();
-        ItemStack held = current.isEmpty() ? null : current;
-        int slot = client.player.getInventory().selected;
-        prevEquippedProgress = equippedProgress;
-        boolean same = equippedSlot == slot && held == equippedStack;
-        if (equippedStack == null && held == null) same = true;
-        if (held != null && equippedStack != null && held != equippedStack
-                && held.getItem() == equippedStack.getItem()
-                && held.getDamageValue() == equippedStack.getDamageValue()) {
-            equippedStack = held;
-            same = true;
+        EQUIPPED_HANDS.tick(client.player.getMainHandItem(), client.player.getOffhandItem(), client.player.getInventory().selected);
+    }
+
+    /** Native stack identity and the original replacement threshold, independently for each logical hand. */
+    static final class EquippedHands {
+        private final EquippedHand main = new EquippedHand(), off = new EquippedHand();
+
+        void tick(ItemStack mainStack, ItemStack offStack, int selectedSlot) {
+            main.tick(mainStack, selectedSlot);
+            off.tick(offStack, 0); // Hotbar selection cannot change the offhand's slot.
         }
-        equippedProgress = equipStep(equippedProgress, same);
-        if (equippedProgress < EQUIP_RESET) { equippedStack = held; equippedSlot = slot; }
+
+        float progress(float partialTick, InteractionHand hand) {
+            EquippedHand state = hand == InteractionHand.MAIN_HAND ? main : off;
+            return state.previous + (state.progress - state.previous) * partialTick;
+        }
+
+        void reset() { main.reset(); off.reset(); }
+    }
+
+    private static final class EquippedHand {
+        ItemStack stack;
+        int slot = -1;
+        float progress, previous;
+
+        void tick(ItemStack current, int currentSlot) {
+            ItemStack held = current.isEmpty() ? null : current;
+            previous = progress;
+            boolean same = slot == currentSlot && held == stack;
+            if (stack == null && held == null) same = true;
+            if (held != null && stack != null && held != stack
+                    && held.getItem() == stack.getItem() && held.getDamageValue() == stack.getDamageValue()) {
+                stack = held;
+                same = true;
+            }
+            progress = equipStep(progress, same);
+            if (progress < EQUIP_RESET) { stack = held; slot = currentSlot; }
+        }
+
+        void reset() { stack = null; slot = -1; progress = previous = 0; }
     }
 
     public static float equipStep(float progress, boolean same) {

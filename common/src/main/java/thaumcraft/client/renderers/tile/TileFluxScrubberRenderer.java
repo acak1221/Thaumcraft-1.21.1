@@ -1,6 +1,8 @@
 package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -24,7 +26,8 @@ public final class TileFluxScrubberRenderer implements BlockEntityRenderer<TileF
     /** The original texture of the flux scrubber. */
     public static final ResourceLocation SCRUBBER = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/fluxscrubber.png");
 
-    private final ModelEldritchCap model = new ModelEldritchCap();
+    private static final ModelEldritchCap MODEL = new ModelEldritchCap();
+    private static final RenderType TRIANGLES = new ScrubberType();
 
     public TileFluxScrubberRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -33,19 +36,47 @@ public final class TileFluxScrubberRenderer implements BlockEntityRenderer<TileF
         // Original TileFluxScrubberRenderer:38-39 - the phase of the bob is the
         // age of the player, the partial tick and the counter of the scrubber.
         float time = (player == null ? 0.0F : player.tickCount + partialTick) + tile.getCount();
-        float bob = bobFor(time);
-        var out = buffers.getBuffer(RenderType.entityCutoutNoCull(SCRUBBER));
+        renderParts(tile.getFacing(), time, pose, buffers, light, overlay);
+    }
+
+    /** Original cap and tip, shared by the world tile and its default DOWN-facing inventory sample. */
+    public static void renderParts(net.minecraft.core.Direction facing, float phase, PoseStack pose,
+                                   MultiBufferSource buffers, int light, int overlay) {
+        var out = buffers.getBuffer(TRIANGLES);
         pose.pushPose();
         try {
-            pose.translate(.5F, .5F, .5F);
-            orientation(pose, tile.getFacing());
-            pose.translate(0.0F, 0.0F, -.5F);
-            model.renderCapGroup(pose, out, light, overlay, 0xffffffff);
-            // The original lifts the tip of the scrubber while it works.
-            pose.translate(0.0F, 0.0F, -bob);
-            model.renderTipGroup(pose, out, light, overlay, 0xffffffff);
+            basePose(pose, facing);
+            MODEL.renderCapGroup(pose, out, light, overlay, 0xffffffff);
+            pose.translate(0.0F, 0.0F, -bobFor(phase));
+            MODEL.renderTipGroup(pose, out, light, overlay, 0xffffffff);
         } finally {
             pose.popPose();
+        }
+    }
+
+    static void basePose(PoseStack pose, net.minecraft.core.Direction facing) {
+        pose.translate(.5F, .5F, .5F);
+        orientation(pose, facing);
+        pose.translate(0.0F, 0.0F, -.5F);
+    }
+
+    static RenderType geometryType() { return TRIANGLES; }
+
+    /** The OBJ contains triangles. Entity quad buffers regroup them into unrelated faces. */
+    private static final class ScrubberType extends RenderType {
+        private static final TextureStateShard TEXTURE = new TextureStateShard(SCRUBBER, false, false);
+        private ScrubberType() {
+            super("thaumcraft_flux_scrubber", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES,
+                    4096, false, false, ScrubberType::begin, ScrubberType::end);
+        }
+        private static void begin() {
+            RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER.setupRenderState();
+            TEXTURE.setupRenderState(); NO_TRANSPARENCY.setupRenderState(); NO_CULL.setupRenderState();
+            LIGHTMAP.setupRenderState(); OVERLAY.setupRenderState(); LEQUAL_DEPTH_TEST.setupRenderState(); COLOR_DEPTH_WRITE.setupRenderState();
+        }
+        private static void end() {
+            COLOR_DEPTH_WRITE.clearRenderState(); LEQUAL_DEPTH_TEST.clearRenderState(); OVERLAY.clearRenderState(); LIGHTMAP.clearRenderState();
+            NO_CULL.clearRenderState(); NO_TRANSPARENCY.clearRenderState(); TEXTURE.clearRenderState(); RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER.clearRenderState();
         }
     }
 

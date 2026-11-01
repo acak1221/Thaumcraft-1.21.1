@@ -1,1 +1,7 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"thaumcraft:items/focus_trade"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "thaumcraft:items/focus_trade_orn",
+    "layer1": "thaumcraft:items/focus_trade"
+  }
+}

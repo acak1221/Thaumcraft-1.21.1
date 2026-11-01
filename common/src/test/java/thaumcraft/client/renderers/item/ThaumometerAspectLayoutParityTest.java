@@ -3,8 +3,17 @@ package thaumcraft.client.renderers.item;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import org.junit.jupiter.api.Test;
+import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
 
 class ThaumometerAspectLayoutParityTest {
+    @Test void changingAspectAmountsDoesNotReorderTheReadout() {
+        var aspects = new AspectList().add(Aspect.FIRE, 10).add(Aspect.AIR, 1);
+        assertArrayEquals(new Aspect[]{Aspect.AIR, Aspect.FIRE}, ThaumometerReadout.orderedAspects(aspects));
+        aspects.add(Aspect.AIR, 20);
+        assertArrayEquals(new Aspect[]{Aspect.AIR, Aspect.FIRE}, ThaumometerReadout.orderedAspects(aspects));
+    }
+
     @Test void firstRowAndSingleAspectUseTheOriginalOffsets() {
         assertArrayEquals(new int[][]{{-8, -8}}, positions(1));
         assertArrayEquals(new int[][]{{-40, -8}, {-24, -8}, {-8, -8}, {8, -8}, {24, -8}}, positions(5));

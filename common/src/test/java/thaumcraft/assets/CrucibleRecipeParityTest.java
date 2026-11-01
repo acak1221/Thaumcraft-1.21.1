@@ -129,7 +129,7 @@ class CrucibleRecipeParityTest {
                     aspects("humanus", "4", "motus", "4", "spiritus", "4"), 165),
             new Recipe("golem_tallow", 166, "GOLEMTALLOW", List.of("thaumcraft:tallow_block"), "thaumcraft:golem_tallow", 1,
                     aspects("humanus", "8", "motus", "8", "spiritus", "8"), 166),
-            new Recipe("golem_clay", 167, "GOLEMCLAY", List.of("minecraft:clay"), "thaumcraft:golem_clay", 1,
+            new Recipe("golem_clay", 167, "GOLEMCLAY", List.of("minecraft:bricks"), "thaumcraft:golem_clay", 1,
                     aspects("humanus", "4", "motus", "4", "spiritus", "4"), 167),
             new Recipe("golem_flesh", 168, "GOLEMFLESH", List.of("thaumcraft:flesh_block"), "thaumcraft:golem_flesh", 1,
                     aspects("humanus", "8", "motus", "8", "spiritus", "8"), 168),

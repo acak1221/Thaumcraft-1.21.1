@@ -22,11 +22,31 @@ public final class TileAlembicRenderer implements BlockEntityRenderer<TileAlembi
     private static final ResourceLocation LABEL = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/label.png");
     private static final RenderType TRIANGLES = new AlembicRenderType();
     private final ModelAlembic model;
+    private static ModelAlembic itemModel;
 
     public TileAlembicRenderer(BlockEntityRendererProvider.Context context) {
         // The dispatcher recreates this renderer on resource reload, so the
         // model respects resource packs without a global parser/reload cache.
         model = new ModelAlembic(Minecraft.getInstance().getResourceManager());
+        itemModel = model;
+    }
+
+    /** Original no-world inventory branch: legs, pot and panel, lowered 0.4 in the Z-up OBJ. */
+    public static void renderInventory(PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        renderInventoryModel(java.util.Objects.requireNonNull(itemModel, "Alembic renderer not registered"), pose,
+                buffers.getBuffer(TRIANGLES), light, overlay);
+    }
+
+    static void renderInventoryModel(ModelAlembic model, PoseStack pose, VertexConsumer buffer, int light, int overlay) {
+        pose.pushPose();
+        try {
+            pose.translate(.5, 0, .5);
+            pose.mulPose(Axis.XP.rotationDegrees(-90));
+            pose.translate(0, 0, -.4F);
+            model.render("Legs", pose, buffer, light, overlay);
+            model.render("Pot", pose, buffer, light, overlay);
+            model.render("Panel", pose, buffer, light, overlay);
+        } finally { pose.popPose(); }
     }
 
     @Override public void render(TileAlembic tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {

@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.items.relics.ItemThaumometer;
@@ -92,6 +91,9 @@ public final class ThaumometerReadout {
         return Math.max(0, Math.min(perRow, remaining));
     }
 
+    /** Original ItemThaumometerRenderer:226: tag order, independent of the stored amounts. */
+    static Aspect[] orderedAspects(AspectList aspects) { return aspects.getAspectsSorted(); }
+
     /**
      * The whole readout of the original.
      *
@@ -104,24 +106,26 @@ public final class ThaumometerReadout {
                               boolean scanned, int light) {
         if (target == null) return;
         var font = Minecraft.getInstance().font;
+        var textBuffers = ThaumometerRenderTypes.textBuffers(buffers);
         pose.pushPose();
         try {
             // Original ItemThaumometerRenderer:164.
             pose.translate(0.0F, 0.0F, READOUT_Z);
-            if (scanned && target.aspects() != null && target.aspects().size() > 0) {
-                icons(pose, buffers, font, target.aspects(), light);
-            }
             if (target.node() != null && !target.node().isEmpty()) {
                 // Original ItemThaumometerRenderer:191-203: the type of the node.
                 pose.pushPose();
                 try {
                     int width = font.width(target.node());
                     pose.scale(NODE_SCALE, NODE_SCALE, NODE_SCALE);
-                    font.drawInBatch(target.node(), -width / 2, -40, NODE_COLOUR, false, pose.last().pose(), buffers,
+                    font.drawInBatch(target.node(), -width / 2, -40, NODE_COLOUR, false, pose.last().pose(), textBuffers,
                             Font.DisplayMode.NORMAL, 0, light);
                 } finally {
                     pose.popPose();
                 }
+            }
+            int nameLight = light;
+            if (scanned && target.aspects() != null && target.aspects().size() > 0) {
+                nameLight = icons(pose, buffers, textBuffers, font, target.aspects(), light);
             }
             String name = target.name();
             if (name == null || name.isEmpty()) name = "?";
@@ -132,8 +136,8 @@ public final class ThaumometerReadout {
                 pose.translate(0.0F, NAME_OFFSET_Y, 0.0F);
                 float scale = nameScale(width);
                 pose.scale(scale, scale, scale);
-                font.drawInBatch(name, -width / 2, 0, 0xFFFFFFFF, false, pose.last().pose(), buffers,
-                        Font.DisplayMode.NORMAL, 0, light);
+                font.drawInBatch(name, -width / 2, 0, 0xFFFFFFFF, false, pose.last().pose(), textBuffers,
+                        Font.DisplayMode.NORMAL, 0, nameLight);
             } finally {
                 pose.popPose();
             }
@@ -149,46 +153,55 @@ public final class ThaumometerReadout {
      * aspect with the colour of the aspect, the additive blend and the amount of the aspect
      * below, initially five per row and then one fewer in each successive row.</p>
      */
-    private static void icons(PoseStack pose, MultiBufferSource buffers, Font font, AspectList aspects, int light) {
+    private static int icons(PoseStack pose, MultiBufferSource buffers, MultiBufferSource textBuffers,
+                             Font font, AspectList aspects, int light) {
         AspectLayout layout = new AspectLayout(aspects.size());
-        for (Aspect aspect : aspects.getAspectsSortedAmount()) {
+        var player = Minecraft.getInstance().player;
+        int lastLight = light;
+        for (Aspect aspect : orderedAspects(aspects)) {
+            // Original ItemThaumometerRenderer:229-232 rerolls the pulse for each column.
+            int glyphLight = player == null ? light : iconLight(player.tickCount, layout.column,
+                    player.level() == null ? 0 : player.level().getRandom().nextInt(2));
+            lastLight = glyphLight;
             pose.pushPose();
             try {
                 pose.scale(ICON_SCALE, ICON_SCALE, ICON_SCALE);
                 int colour = aspect.getColor();
                 // Original UtilsFX.drawTag:548-582 draws the glyph of the aspect with the colour
-                // of the aspect and the blend (GL_SRC_ALPHA, GL_ONE). The alpha of the glyph is
-                // one, so the additive transparency of the vanilla RenderType.eyes is the very
-                // blend of the original.
-                VertexConsumer out = buffers.getBuffer(RenderType.eyes(aspect.getImage()));
+                // of the aspect, its partial alpha, the pulse lightmap and SRC_ALPHA/ONE.
+                VertexConsumer out = buffers.getBuffer(ThaumometerRenderTypes.icon(aspect.getImage()));
                 float r = (colour >> 16 & 255) / 255.0F, g = (colour >> 8 & 255) / 255.0F, b = (colour & 255) / 255.0F;
                 float[] points = {0.0F, 16.0F, 0.01F, 16.0F, 16.0F, 0.01F, 16.0F, 0.0F, 0.01F, 0.0F, 0.0F, 0.01F};
                 float[] uv = {0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F};
                 for (int index = 0; index < 4; index++) {
                     out.addVertex(pose.last(), points[index * 3] + layout.x(), points[index * 3 + 1] + layout.y(), points[index * 3 + 2])
                             .setColor(r, g, b, 1.0F)
-                            .setUv(uv[index * 2], uv[index * 2 + 1]).setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
-                            .setLight(light)
-                            .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
+                            .setUv(uv[index * 2], uv[index * 2 + 1]).setLight(glyphLight);
                 }
                 // Original UtilsFX.drawTag: the amount of the aspect in white at half the size, at the
                 // lower right corner of ITS glyph; the thaumometer passes the blend 1, which draws no
                 // black outline.
-                String amount = Integer.toString(aspects.getAmount(aspect));
-                pose.pushPose();
-                try {
-                    pose.scale(0.5F, 0.5F, 0.5F);
-                    font.drawInBatch(amount, amountX(font.width(amount), layout.x()), amountY(font.lineHeight, layout.y()),
-                            0xFFFFFFFF, false, pose.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, light);
-                } finally {
-                    pose.popPose();
+                if (aspects.getAmount(aspect) > 0) {
+                    String amount = Integer.toString(aspects.getAmount(aspect));
+                    pose.pushPose();
+                    try {
+                        pose.scale(0.5F, 0.5F, 0.5F);
+                        font.drawInBatch(amount, amountX(font.width(amount), layout.x()), amountY(font.lineHeight, layout.y()),
+                                0xFFFFFFFF, false, pose.last().pose(), textBuffers, Font.DisplayMode.NORMAL, 0, glyphLight);
+                    } finally {
+                        pose.popPose();
+                    }
                 }
             } finally {
                 pose.popPose();
             }
             layout.next();
         }
+        return lastLight;
     }
+
+    /** Original ItemThaumometerRenderer:229: the phase restarts at each row's first column. */
+    static int iconLight(int ticks, int column, int jitter) { return packedLight(ticks + column, jitter); }
 
     /**
      * The x of an amount, in the half size space of the text: original {@code UtilsFX.drawTag}

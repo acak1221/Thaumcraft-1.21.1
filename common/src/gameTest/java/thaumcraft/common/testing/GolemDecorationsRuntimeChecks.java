@@ -160,8 +160,8 @@ public final class GolemDecorationsRuntimeChecks {
                     new Row("glasses", "TINYGLASSES", List.of("GIG"), Map.of("G", "minecraft:glass", "I", "minecraft:iron_ingot"), Map.of("aer", 4, "aqua", 4)),
                     new Row("bowtie", "TINYBOWTIE", List.of("CSC", "C C"), Map.of("C", "minecraft:black_wool", "S", "minecraft:string"), Map.of("aer", 4, "ordo", 4)),
                     new Row("fez", "TINYFEZ", List.of("CCS", "CCS", "  S"), Map.of("C", "minecraft:red_wool", "S", "minecraft:string"), Map.of("aqua", 4, "terra", 4)),
-                    new Row("visor", "TINYVISOR", List.of("IHI"), Map.of("I", "minecraft:iron_ingot", "H", "minecraft:leather_helmet"), Map.of("terra", 4, "aqua", 4)),
-                    new Row("armor", "TINYARMOR", List.of("I I", "IAI"), Map.of("I", "minecraft:iron_ingot", "A", "minecraft:leather_chestplate"), Map.of("terra", 8)),
+                    new Row("visor", "TINYVISOR", List.of("IHI"), Map.of("I", "minecraft:iron_ingot", "H", "minecraft:iron_helmet"), Map.of("terra", 4, "aqua", 4)),
+                    new Row("armor", "TINYARMOR", List.of("I I", "IAI"), Map.of("I", "minecraft:iron_ingot", "A", "minecraft:iron_chestplate"), Map.of("terra", 8)),
                     new Row("mace", "TINYHAMMER", List.of("III", "III", " I "), Map.of("I", "minecraft:iron_ingot"), Map.of("terra", 4, "ignis", 4)))) {
                 var holder = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/golem_decoration_" + row.name()));
                 test.assertTrue(holder.isPresent() && holder.get().value() instanceof ArcaneShapedRecipe, row.name() + " arcane recipe is loaded");
@@ -173,12 +173,12 @@ public final class GolemDecorationsRuntimeChecks {
                 row.key().forEach((symbol, id) -> test.assertTrue(recipe.key().get(symbol).test(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)))),
                         row.name() + ": " + symbol + " accepts " + id));
             }
-            // Leather armour of any wear is accepted, an iron one is not.
+            // Original ConfigRecipes:276 names an iron helmet with wildcard durability.
             var visor = (ArcaneShapedRecipe) level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/golem_decoration_visor")).orElseThrow().value();
-            var worn = new ItemStack(net.minecraft.world.item.Items.LEATHER_HELMET);
+            var worn = new ItemStack(net.minecraft.world.item.Items.IRON_HELMET);
             worn.setDamageValue(30);
-            test.assertTrue(visor.key().get("H").test(worn) && !visor.key().get("H").test(new ItemStack(net.minecraft.world.item.Items.IRON_HELMET)),
-                    "a worn leather helmet is accepted, an iron helmet is not");
+            test.assertTrue(visor.key().get("H").test(worn) && !visor.key().get("H").test(new ItemStack(net.minecraft.world.item.Items.LEATHER_HELMET)),
+                    "a worn iron helmet is accepted, a leather helmet is not");
             // The launcher's own recipe and item are checked with the launcher itself (GolemDartRuntimeChecks).
         }
 

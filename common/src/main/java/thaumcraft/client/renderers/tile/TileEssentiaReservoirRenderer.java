@@ -1,6 +1,11 @@
 package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Axis;
+import net.minecraft.core.Direction;
+import thaumcraft.client.renderers.models.ModelEssentiaReservoir;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -18,7 +23,7 @@ import thaumcraft.common.tiles.TileEssentiaReservoir;
  * Original TileEssentiaReservoirRenderer:61-90: the stored essentia as a coloured volume inside the tank. The box is the inner
  * three sixteenths to thirteen sixteenths of the block and grows ten sixteenths of the block with the fill level units/256; its colour
  * is the aspect the reservoir shows, which the tile fades to over twenty ticks, drawn at 0.9 alpha with the jar's liquid icon and the
- * original's fixed lightmap coordinate 200. The vessel itself is the block model.
+ * original's fixed lightmap coordinate 200. The translucent glass is the block model; the original reservoir OBJ is drawn around it.
  */
 public final class TileEssentiaReservoirRenderer implements BlockEntityRenderer<TileEssentiaReservoir> {
     /** Original BlockJar.iconLiquid: the animated glow the jar and the reservoir draw their contents with. */
@@ -26,9 +31,59 @@ public final class TileEssentiaReservoirRenderer implements BlockEntityRenderer<
     /** Original Tessellator.setColor(cr, cg, cb, 0.9f). */
     private static final int ALPHA = Math.round(0.9F * 255);
 
-    public TileEssentiaReservoirRenderer(BlockEntityRendererProvider.Context context) {}
+    private static final RenderType FRAME = new FrameType();
+    private static ModelEssentiaReservoir itemModel;
+    private final ModelEssentiaReservoir model;
+
+    public TileEssentiaReservoirRenderer(BlockEntityRendererProvider.Context context) {
+        // The dispatcher reconstructs this renderer on reload; the inventory shares that fresh OBJ.
+        model = new ModelEssentiaReservoir(Minecraft.getInstance().getResourceManager());
+        itemModel = model;
+    }
+
+    public static void renderInventoryFrame(PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        renderFrame(java.util.Objects.requireNonNull(itemModel, "Reservoir renderer not registered"), Direction.DOWN, pose, buffers, light, overlay);
+    }
+
+    private static void renderFrame(ModelEssentiaReservoir model, Direction facing, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        pose.pushPose();
+        try {
+            framePose(pose, facing);
+            model.render(pose, buffers.getBuffer(FRAME), light, overlay);
+        } finally { pose.popPose(); }
+    }
+
+    static void framePose(PoseStack pose, Direction facing) {
+        pose.translate(.5, .5, .5);
+        var rotation = TileFluxScrubberRenderer.orientationOf(facing);
+        switch (rotation.axis()) {
+            case X -> pose.mulPose(Axis.XP.rotationDegrees(rotation.degrees()));
+            case Y -> pose.mulPose(Axis.YP.rotationDegrees(rotation.degrees()));
+            case NONE -> { }
+        }
+        pose.translate(0, 0, -.5);
+    }
+
+    private static final class FrameType extends RenderType {
+        private static final TextureStateShard TEXTURE = new TextureStateShard(
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/reservoir.png"), false, false);
+        private FrameType() {
+            super("thaumcraft_reservoir_frame", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES,
+                    16384, false, false, FrameType::begin, FrameType::end);
+        }
+        private static void begin() {
+            RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER.setupRenderState(); TEXTURE.setupRenderState();
+            NO_TRANSPARENCY.setupRenderState(); NO_CULL.setupRenderState(); LIGHTMAP.setupRenderState(); OVERLAY.setupRenderState();
+            LEQUAL_DEPTH_TEST.setupRenderState(); COLOR_DEPTH_WRITE.setupRenderState();
+        }
+        private static void end() {
+            COLOR_DEPTH_WRITE.clearRenderState(); LEQUAL_DEPTH_TEST.clearRenderState(); OVERLAY.clearRenderState(); LIGHTMAP.clearRenderState();
+            NO_CULL.clearRenderState(); NO_TRANSPARENCY.clearRenderState(); TEXTURE.clearRenderState(); RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER.clearRenderState();
+        }
+    }
 
     @Override public void render(TileEssentiaReservoir tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        renderFrame(model, tile.getFacing(), pose, buffers, light, overlay);
         int units = tile.getAmount();
         if (units <= 0 || tile.getDisplayAspect() == null) return;
         float x0 = ReservoirRules.LIQUID_EDGE, x1 = ReservoirRules.LIQUID_FAR;

@@ -48,7 +48,7 @@ public final class WandRodsRuntimeChecks {
             new Rod("quartz", "minecraft:quartz_block", "order_shard", "ordo", "vitreus"),
             new Rod("reed", "minecraft:sugar_cane", "air_shard", "aer", "motus"),
             new Rod("blaze", "minecraft:blaze_rod", "fire_shard", "ignis", "bestia"),
-            new Rod("bone", "minecraft:bone", "entropy_shard", "perditio", "mortuus"));
+            new Rod("bone", "minecraft:bone", "entropy_shard", "perditio", "exanimis"));
 
     private WandRodsRuntimeChecks() {}
 

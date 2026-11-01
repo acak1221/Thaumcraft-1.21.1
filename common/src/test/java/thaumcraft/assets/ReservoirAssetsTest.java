@@ -25,7 +25,10 @@ class ReservoirAssetsTest {
         assertEquals("thaumcraft:block/essentia_reservoir", json("assets/thaumcraft/blockstates/essentia_reservoir.json").getAsJsonObject("variants").getAsJsonObject("").get("model").getAsString());
         assertEquals("thaumcraft:blocks/essentiareservoir", json("assets/thaumcraft/models/block/essentia_reservoir.json").getAsJsonObject("textures").get("all").getAsString());
         assertTrue(getClass().getClassLoader().getResource("assets/thaumcraft/textures/blocks/essentiareservoir.png") != null);
-        assertEquals("thaumcraft:block/essentia_reservoir", json("assets/thaumcraft/models/item/essentia_reservoir.json").get("parent").getAsString());
+        assertEquals("minecraft:builtin/entity", json("assets/thaumcraft/models/item/essentia_reservoir.json").get("parent").getAsString(),
+                "the item renderer combines the original inset glass with reservoir.obj");
+        assertEquals("thaumcraft:blocks/essentiareservoir", json("assets/thaumcraft/models/item/essentia_reservoir.json")
+                .getAsJsonObject("textures").get("particle").getAsString());
         assertEquals("Essentia Reservoir", json("assets/thaumcraft/lang/en_us.json").get("block.thaumcraft.essentia_reservoir").getAsString());
         assertEquals("Резервуар эссенции", json("assets/thaumcraft/lang/ru_ru.json").get("block.thaumcraft.essentia_reservoir").getAsString());
     }

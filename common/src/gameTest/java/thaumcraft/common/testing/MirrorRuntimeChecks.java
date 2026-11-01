@@ -175,7 +175,7 @@ public final class MirrorRuntimeChecks {
         InfusionStackRecipe recipe = level.getRecipeManager().getAllRecipesFor(ThaumcraftInfusion.INFUSION_RECIPE_TYPE.get()).stream()
                 .map(holder -> holder.value()).filter(value -> value.research().equals("MIRRORESSENTIA")).findFirst().orElseThrow();
         var input = new InfusionRecipeInput(new ItemStack(ThaumcraftContent.MATERIALS.get("mirrored_glass").get()),
-                List.of(new ItemStack(Items.DIAMOND), new ItemStack(Items.DIAMOND), new ItemStack(Items.DIAMOND), new ItemStack(Items.ENDER_PEARL)));
+                List.of(new ItemStack(Items.IRON_INGOT), new ItemStack(Items.IRON_INGOT), new ItemStack(Items.IRON_INGOT), new ItemStack(Items.ENDER_PEARL)));
         test.assertTrue(recipe.matches(input, level) && recipe.instability() == 2 && recipe.aspects().equals(Map.of("iter", 8, "aqua", 8, "permutatio", 8)),
                 "the loaded survival infusion recipe retains the original research, components, instability and costs");
         ItemStack result = recipe.assemble(input, level.registryAccess());

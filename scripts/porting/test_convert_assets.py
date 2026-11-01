@@ -227,6 +227,21 @@ class FoundationAssetsTest(unittest.TestCase):
             relative = f"textures/blocks/{name}.png"
             self.assertEqual((converter.SOURCE / relative).read_bytes(), (converter.ASSETS / relative).read_bytes())
 
+    def test_jar_label_blank_and_bound_models_survive_regeneration(self) -> None:
+        current = {name: json.loads((converter.ASSETS / f"models/item/{name}.json").read_text())
+                   for name in ("jar_label", "jar_label_bound")}
+        self.assertEqual({"layer0": "thaumcraft:items/label"}, current["jar_label"]["textures"])
+        self.assertEqual([{"predicate": {"thaumcraft:label_bound": 1}, "model": "thaumcraft:item/jar_label_bound"}],
+                         current["jar_label"]["overrides"])
+        self.assertEqual({"layer0": "thaumcraft:items/label", "layer1": "thaumcraft:items/label_over"},
+                         current["jar_label_bound"]["textures"])
+        self.assertNotIn("overrides", current["jar_label_bound"], "the bound model cannot inherit its own selector")
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                for name, expected in current.items():
+                    self.assertEqual(expected, json.loads((converter.ASSETS / f"models/item/{name}.json").read_text()))
+
     def test_jar_items_declare_component_renderer_and_native_display(self) -> None:
         for name in ("jar", "jar_void"):
             item = json.loads((converter.ASSETS / f"models/item/{name}.json").read_text())
@@ -235,6 +250,160 @@ class FoundationAssetsTest(unittest.TestCase):
             self.assertEqual([30, 225, 0], item["display"]["gui"]["rotation"])
             self.assertEqual([.625] * 3, item["display"]["gui"]["scale"])
             self.assertEqual([.4] * 3, item["display"]["firstperson_righthand"]["scale"])
+
+    def test_arcane_ear_faces_resolve_their_declared_active_and_inactive_sheets(self) -> None:
+        # A valid model and particle sprite can still contain purple missing-texture faces.
+        # The actual item inherits the active model, while placed idle ears use the other one.
+        item = json.loads((converter.ASSETS / "models/item/arcane_ear.json").read_text())
+        self.assertEqual("thaumcraft:block/arcane_ear_on", item["parent"])
+        for name, state in (("arcane_ear", "off"), ("arcane_ear_on", "on")):
+            model = json.loads((converter.ASSETS / f"models/block/{name}.json").read_text())
+            textures = model["textures"]
+            self.assertEqual(f"thaumcraft:blocks/arcaneearside{state}", textures["side"])
+            self.assertEqual(f"thaumcraft:blocks/arcaneeartop{state}", textures["top"])
+            for element in model["elements"]:
+                for direction, face in element["faces"].items():
+                    alias = face["texture"]
+                    self.assertTrue(alias.startswith("#"))
+                    self.assertIn(alias[1:], textures, f"{name}.{direction}: missing face alias {alias}")
+                    resource = textures[alias[1:]].removeprefix("thaumcraft:")
+                    self.assertTrue((converter.ASSETS / f"textures/{resource}.png").is_file())
+
+    def test_mirror_items_and_regeneration_show_the_complete_original_frame_sprites(self) -> None:
+        from PIL import Image
+        current = {}
+        for name, frame, opaque in (("mirror", "mirrorframe", 84), ("mirror_essentia", "mirrorframe2", 68)):
+            current[name] = json.loads((converter.ASSETS / f"models/item/{name}.json").read_text())
+            self.assertEqual("minecraft:item/generated", current[name]["parent"], "the original mirror item is a sprite, not four frame bars")
+            self.assertEqual({"layer0": f"thaumcraft:blocks/{frame}"}, current[name]["textures"])
+            texture = converter.ASSETS / f"textures/blocks/{frame}.png"
+            original = converter.ORIGINAL / f"textures/blocks/{frame}.png"
+            self.assertEqual(original.read_bytes(), texture.read_bytes())
+            with Image.open(texture) as image:
+                self.assertEqual((16, 16), image.size)
+                self.assertEqual(opaque, image.convert("RGBA").getchannel("A").histogram()[255], "the whole original frame has visible pixels")
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                for name, expected in current.items():
+                    self.assertEqual(expected, json.loads((converter.ASSETS / f"models/item/{name}.json").read_text()))
+
+    def test_all_six_plant_items_and_regeneration_keep_original_metadata_sprites(self) -> None:
+        # BlockCustomPlantItem.registerIcons:48-53, getIconFromDamage:59.
+        # Metadata4 is purifier_seed; its placed bloom has a separate world renderer.
+        plants = (("greatwood_sapling", "greatwoodsapling"), ("silverwood_sapling", "silverwoodsapling"),
+                  ("shimmerleaf", "shimmerleaf"), ("cinderpearl", "cinderpearl"),
+                  ("ethereal_bloom", "purifier_seed"), ("vishroom", "manashroom"))
+        current = {}
+        for native_id, sprite in plants:
+            current[native_id] = json.loads((converter.ASSETS / f"models/item/{native_id}.json").read_text())
+            self.assertEqual("minecraft:item/generated", current[native_id]["parent"], native_id)
+            self.assertEqual({"layer0": f"thaumcraft:blocks/{sprite}"}, current[native_id]["textures"], native_id)
+            path = f"textures/blocks/{sprite}.png"
+            self.assertEqual((converter.ORIGINAL / path).read_bytes(), (converter.ASSETS / path).read_bytes(), native_id)
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                for native_id, expected in current.items():
+                    self.assertEqual(expected, json.loads((converter.ASSETS / f"models/item/{native_id}.json").read_text()))
+
+    def test_original_focus_ornaments_precede_the_lenses_in_all_three_item_models(self) -> None:
+        for focus in ("trade", "hellbat", "warding"):
+            item = json.loads((converter.ASSETS / f"models/item/focus_{focus}.json").read_text())
+            self.assertEqual("minecraft:item/generated", item["parent"])
+            self.assertEqual({"layer0": f"thaumcraft:items/focus_{focus}_orn", "layer1": f"thaumcraft:items/focus_{focus}"}, item["textures"])
+            for sprite in item["textures"].values():
+                path = "textures/" + sprite.removeprefix("thaumcraft:") + ".png"
+                self.assertEqual((converter.ORIGINAL / path).read_bytes(), (converter.ASSETS / path).read_bytes())
+
+    def test_every_golem_material_keeps_all_four_original_overlay_states_and_order(self) -> None:
+        for material in ("straw", "wood", "tallow", "clay", "flesh", "stone", "iron", "thaumium"):
+            name = "golem_" + material
+            base = json.loads((converter.ASSETS / f"models/item/{name}.json").read_text())
+            for advanced in (False, True):
+                for core in (False, True):
+                    properties = {"thaumcraft:advanced": int(advanced), "thaumcraft:has_core": int(core)}
+                    selected = base
+                    for override in reversed(base["overrides"]):
+                        if all(properties.get(key, 0) >= threshold for key, threshold in override["predicate"].items()):
+                            path = override["model"].removeprefix("thaumcraft:")
+                            selected = json.loads((converter.ASSETS / f"models/{path}.json").read_text())
+                            break
+                    expected = [f"thaumcraft:items/{name}"]
+                    if advanced: expected.append("thaumcraft:items/golem_over_adv")
+                    if core: expected.append("thaumcraft:items/golem_over_core")
+                    self.assertEqual({f"layer{i}": sprite for i, sprite in enumerate(expected)}, selected["textures"],
+                                     f"{material} advanced={advanced} core={core}")
+
+    def test_grate_inventory_keeps_the_closed_hatch_and_original_lowered_plate_bounds(self) -> None:
+        item = json.loads((converter.ASSETS / "models/item/item_grate.json").read_text())
+        self.assertEqual("minecraft:block/block", item["parent"], "inherit the original ordinary isometric item caller")
+        self.assertEqual(2, len(item["elements"]))
+        for part, alias in zip(item["elements"], ("#grate", "#hatch")):
+            self.assertEqual([0, 8.2, 0], part["from"])
+            self.assertEqual([16, 11.2, 16], part["to"])
+            self.assertEqual({alias}, {face["texture"] for face in part["faces"].values()})
+        self.assertEqual("thaumcraft:blocks/grate_hatch", item["textures"]["hatch"])
+        self.assertEqual((converter.ORIGINAL / "textures/blocks/grate_hatch.png").read_bytes(),
+                         (converter.ASSETS / "textures/blocks/grate_hatch.png").read_bytes())
+
+    def test_regeneration_keeps_original_focus_golem_and_grate_inventory_layers(self) -> None:
+        names = ["focus_" + name for name in ("trade", "hellbat", "warding")] + ["item_grate"]
+        names += ["golem_" + material + suffix for material in ("straw", "wood", "tallow", "clay", "flesh", "stone", "iron", "thaumium")
+                  for suffix in ("", "_core", "_advanced", "_advanced_core")]
+        current = {name: json.loads((converter.ASSETS / f"models/item/{name}.json").read_text()) for name in names}
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                for name, expected in current.items():
+                    self.assertEqual(expected, json.loads((converter.ASSETS / f"models/item/{name}.json").read_text()), name)
+
+    def test_regeneration_keeps_research_table_inventory_fixture_and_display(self) -> None:
+        current = json.loads((converter.ASSETS / "models/item/research_table.json").read_text())
+        self.assertEqual("minecraft:builtin/entity", current["parent"])
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                regenerated = json.loads((converter.ASSETS / "models/item/research_table.json").read_text())
+        self.assertEqual(current, regenerated)
+
+    def test_regeneration_keeps_brain_scrubber_reservoir_and_alembic_original_item_renderers(self) -> None:
+        current = {name: json.loads((converter.ASSETS / f"models/item/{name}.json").read_text())
+                   for name in ("jar_brain", "flux_scrubber", "essentia_reservoir", "alembic")}
+        jar = json.loads((converter.ASSETS / "models/item/jar.json").read_text())
+        for name, item in current.items():
+            self.assertEqual("minecraft:builtin/entity", item["parent"], name)
+            self.assertEqual(jar["display"], item["display"], name)
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                for name, expected in current.items():
+                    self.assertEqual(expected, json.loads((converter.ASSETS / f"models/item/{name}.json").read_text()), name)
+
+    def test_regeneration_keeps_thaumometer_mesh_renderer_and_caller_transforms(self) -> None:
+        current = json.loads((converter.ASSETS / "models/item/thaumometer.json").read_text())
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                regenerated = json.loads((converter.ASSETS / "models/item/thaumometer.json").read_text())
+        self.assertEqual("minecraft:builtin/entity", regenerated["parent"], "the native scanner renderer must remain reachable")
+        self.assertNotIn("layer0", regenerated["textures"], "the scanner UV sheet is not an inventory sprite")
+        self.assertEqual([30, -45, 0], regenerated["display"]["gui"]["rotation"])
+        for hand in ("firstperson_righthand", "firstperson_lefthand"):
+            self.assertEqual([0, 45, 0], regenerated["display"][hand]["rotation"])
+            self.assertEqual([.4] * 3, regenerated["display"][hand]["scale"], "restore the original caller basis before native rendering")
+        self.assertEqual(current, regenerated, "regeneration must retain the model whose transforms are checked against the original renderer")
+
+    def test_regeneration_keeps_the_deconstruction_item_renderer_and_display(self) -> None:
+        current = json.loads((converter.ASSETS / "models/item/deconstruction_table.json").read_text())
+        self.assertEqual("minecraft:builtin/entity", current["parent"], "inventory rendering includes the original persistent thaumometer")
+        workbench = json.loads((converter.ASSETS / "models/item/arcane_workbench.json").read_text())
+        self.assertEqual(workbench["display"], current["display"], "the original tables share their inventory caller basis")
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            with patch.object(converter, "ASSETS", Path(temporary)):
+                converter.create_models()
+                regenerated = json.loads((converter.ASSETS / "models/item/deconstruction_table.json").read_text())
+        self.assertEqual(current, regenerated)
 
     def test_valve_and_resonator_use_original_inputs_and_one_shared_research_gate(self) -> None:
         recipes = converter.RESOURCE_ROOT / "data/thaumcraft/recipe/arcane"

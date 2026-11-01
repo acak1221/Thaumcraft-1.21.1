@@ -123,15 +123,14 @@ class ClientDeviceModelParityTest {
     @Test void theReservoirVesselIsTheOriginalInsetCube() {
         // Original BlockEssentiaReservoirRenderer:28-31 and :36-39 - the world and the
         // inventory render draw the vessel of two to fourteen sixteenths.
-        for (String path : new String[]{"block/essentia_reservoir", "item/essentia_reservoir"}) {
-            JsonObject model = model(path);
-            if (model.getAsJsonArray("elements") == null) continue; // the item model has the block as its parent
-            assertEquals(1, model.getAsJsonArray("elements").size(), "the vessel of the original is one box");
-            assertBox(model.getAsJsonArray("elements").get(0).getAsJsonObject(), 2, 2, 2, 14, 14, 14,
-                    "the vessel of the original is two to fourteen sixteenths");
-        }
-        assertEquals("thaumcraft:block/essentia_reservoir", model("item/essentia_reservoir").get("parent").getAsString(),
-                "the item of the reservoir shows the same vessel of the original");
+        JsonObject vessel = model("block/essentia_reservoir");
+        assertEquals(1, vessel.getAsJsonArray("elements").size(), "the vessel of the original is one box");
+        assertBox(vessel.getAsJsonArray("elements").get(0).getAsJsonObject(), 2, 2, 2, 14, 14, 14,
+                "the vessel of the original is two to fourteen sixteenths");
+        // Original inventory dispatch draws this glass vessel AND the reservoir OBJ.
+        // The builtin item hook retains the block model for the glass and adds the missing frame.
+        assertEquals("minecraft:builtin/entity", model("item/essentia_reservoir").get("parent").getAsString(),
+                "the item must reach the complete original vessel/frame renderer");
     }
 
     // -------------------------------------------------------------- the arcane ear

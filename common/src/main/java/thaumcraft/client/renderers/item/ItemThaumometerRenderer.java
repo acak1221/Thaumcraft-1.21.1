@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import thaumcraft.client.renderers.models.ModelThaumometer;
 import thaumcraft.common.items.relics.ItemThaumometer;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
@@ -105,7 +107,7 @@ public final class ItemThaumometerRenderer {
         firstPersonBase(pose, leftHand,
                 ThaumometerArmPose.lagDegrees(player.getXRot(), player.xBobO, player.xBob, partial),
                 ThaumometerArmPose.lagDegrees(player.getYRot(), player.yBobO, player.yBob, partial),
-                thaumcraft.client.lib.UtilsFX.getEquippedProgress(partial));
+                thaumcraft.client.lib.UtilsFX.getEquippedProgress(partial, logicalHand(leftHand, player.getMainArm())));
         // Original ItemThaumometerRenderer:113-131: the arm of the player, twice.
         pose.pushPose();
         try {
@@ -128,6 +130,11 @@ public final class ItemThaumometerRenderer {
             pose.popPose();
         }
         firstPersonBody(pose, leftHand);
+    }
+
+    /** Display context identifies the physical arm; the player's main arm selects its logical hand. */
+    static InteractionHand logicalHand(boolean physicalLeft, HumanoidArm mainArm) {
+        return physicalLeft == (mainArm == HumanoidArm.LEFT) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
     }
 
     /** Pure pose operations, also exercised with the actual model display and native caller basis. */
@@ -160,9 +167,9 @@ public final class ItemThaumometerRenderer {
 
     static void staticPose(PoseStack pose, ItemDisplayContext context) {
         boolean leftHand = context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
-        if (context == ItemDisplayContext.GUI) {
-            // GuiGraphics already centres the slot. The legacy INVENTORY_BLOCK helper
-            // has no equipped -0.5 translation; its scale and rotations live in the model.
+        if (context == ItemDisplayContext.GUI || context == ItemDisplayContext.GROUND) {
+            // GUI and dropped-item callers centre the model. Neither original helper has
+            // the modern builtin hook's -0.5 corner translation.
             pose.translate(0.5F, 0.5F, 0.5F);
         } else beginHand(pose, leftHand);
         // Original ItemThaumometerRenderer:136-146.
@@ -271,7 +278,7 @@ public final class ItemThaumometerRenderer {
         pose.pushPose();
         try {
             pose.scale(SCREEN_SCALE, SCREEN_SCALE, SCREEN_SCALE);
-            var out = buffers.getBuffer(RenderType.entityTranslucent(ModelThaumometer.SCREEN));
+            var out = buffers.getBuffer(ThaumometerRenderTypes.screen());
             float[] points = {-0.5F, 0.5F, 0.0F, 0.5F, 0.5F, 0.0F, 0.5F, -0.5F, 0.0F, -0.5F, -0.5F, 0.0F};
             float[] uv = {0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F};
             for (int index = 0; index < 4; index++) {

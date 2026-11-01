@@ -303,13 +303,15 @@ public final class ThaumcraftRecipeDisplay {
     private final AddonPage addon;
 
     /** The add-on pages the original drew without a recipe holder of their own. */
-    private sealed interface AddonPage permits Aspects, Smelting, Image {}
+    private sealed interface AddonPage permits Aspects, Smelting, Image, Construct {}
     /** Original GuiResearchRecipe.drawAspectPage: the aspects of the list, sorted, one row each. */
     private record Aspects(thaumcraft.api.aspects.AspectList aspects) implements AddonPage {}
     /** Original GuiResearchRecipe.drawSmeltingPage: the furnace input and its result. */
     private record Smelting(ItemStack input, ItemStack result) implements AddonPage {}
     /** An IMAGE page: the texture over the page width and its caption. */
     private record Image(ResourceLocation texture, String caption) implements AddonPage {}
+    /** Original wand-formed world blueprint, not an executable crafting recipe. */
+    private record Construct(String key) implements AddonPage {}
 
     /**
      * The items this page makes: its synthetic result, the result of every alternative, or the
@@ -587,6 +589,15 @@ public final class ThaumcraftRecipeDisplay {
         if ("api".equals(page.kind())) {
             return page.source() instanceof thaumcraft.api.research.ResearchPage source ? resolveAddon(source, level) : null;
         }
+        // Original ResearchPage(ItemStack) is a furnace page, not a Java expression to evaluate.
+        if ("legacy_expression".equals(page.kind()) && "CRUCIBLE".equals(researchKey)
+                && "new ItemStack(ConfigItems.itemShard, 1, 6)".equals(page.javaExpression())) {
+            ItemStack input = new ItemStack(thaumcraft.common.config.ThaumcraftContent.SHARDS.get("balanced").get());
+            var smelting = level.getRecipeManager().getRecipeFor(RecipeType.SMELTING,
+                    new net.minecraft.world.item.crafting.SingleRecipeInput(input), level).orElse(null);
+            ItemStack result = smelting == null ? ItemStack.EMPTY : smelting.value().getResultItem(level.registryAccess());
+            return result.isEmpty() ? null : new ThaumcraftRecipeDisplay(new Smelting(input, result.copy()));
+        }
         // ConfigResearch:250-254 explicitly constructs this six-recipe array.
         // This is a literal whitelist entry, NOT evaluation of extracted Java.
         if ("legacy_expression".equals(page.kind()) && "cruc.toArray(new CrucibleRecipe[0])".equals(page.javaExpression())) {
@@ -637,6 +648,8 @@ public final class ThaumcraftRecipeDisplay {
                     ? resolve(holder, level) : null;
         }
         if (!"recipe_reference".equals(page.kind()) || page.recipeKey() == null) return null;
+        if (ConstructBlueprintDisplay.supports(page.recipeKey()))
+            return new ThaumcraftRecipeDisplay(new Construct(page.recipeKey()));
         // Original ConfigRecipes:93 is a wand construct, NOT an executable
         // extracted expression or a registered fake crafting recipe. Display
         // only this implemented blueprint, bound to its actual native devices.
@@ -789,6 +802,12 @@ public final class ThaumcraftRecipeDisplay {
 
     private static ThaumcraftRecipeDisplay resolve(RecipeHolder<?> holder, Level level) {
         var nativeRecipe = holder.value();
+        if (nativeRecipe instanceof thaumcraft.common.config.ThaumcraftLabels.ClearRecipe clear) {
+            // Original ConfigRecipes:426-428 shows the water-marked label being cleared.
+            ItemStack input = thaumcraft.common.items.ItemJarLabel.bound("aqua");
+            ItemStack result = clear.assemble(net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(input)), level.registryAccess());
+            return result.isEmpty() ? null : new ThaumcraftRecipeDisplay(result, List.of(input));
+        }
         if (nativeRecipe instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe infusion
                 && nativeRecipe.getType() == thaumcraft.common.config.ThaumcraftRunic.AUGMENT_TYPE.get()) {
             ItemStack sample = infusion.sample(0);
@@ -863,6 +882,8 @@ public final class ThaumcraftRecipeDisplay {
         if (addon instanceof Aspects aspects) return renderAspects(aspects.aspects(), graphics, font, x, y, width, height, mouseX, mouseY);
         if (addon instanceof Smelting smelting) return renderSmelting(smelting, graphics, font, x, y, width, height, mouseX, mouseY);
         if (addon instanceof Image image) return renderImage(image, graphics, font, x, y, width, height);
+        if (addon instanceof Construct construct) return ConstructBlueprintDisplay.render(construct.key(), graphics, font,
+                x, y, width, height, mouseX, mouseY, cycle);
         if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);
         if (sceptreVariants != null) return renderSceptre(graphics, font, level, player,
@@ -928,6 +949,9 @@ public final class ThaumcraftRecipeDisplay {
                     Aspect aspect = Aspect.getAspect(tag);
                     int sx = (112 - (tags.size() * 18 - 2)) / 2 + i * 18;
                     int color = aspect.getColor();
+                    graphics.flush();
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
                     graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
                     graphics.blit(aspect.getImage(), sx, 174, 0, 0, 16, 16, 16, 16);
                     graphics.setColor(1, 1, 1, 1);
@@ -989,6 +1013,9 @@ public final class ThaumcraftRecipeDisplay {
                 Aspect aspect = Aspect.getAspect(tag);
                 int sx = (112 - (tags.size() * 18 - 2)) / 2 + i * 18;
                 int color = aspect.getColor();
+                graphics.flush();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
                 graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
                 graphics.blit(aspect.getImage(), sx, 174, 0, 0, 16, 16, 16, 16);
                 graphics.setColor(1, 1, 1, 1);
@@ -1110,10 +1137,12 @@ public final class ThaumcraftRecipeDisplay {
             graphics.blit(OVERLAY, 0, 20, 112, 34, 0, 6, 112, 34, 512, 512);
             graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
             RenderSystem.disableBlend();
-            ItemStack result = infusion.getResultItem(level.registryAccess()).copy();
+            ItemStack center = infusionCentral(infusion, declaredChoice(infusion.input(), level, cycle));
+            ItemStack result = infusion.resultPatch().isPresent()
+                    ? thaumcraft.common.crafting.InfusionResultPatches.apply(infusion.resultPatch().get(), center)
+                    : infusion.getResultItem(level.registryAccess()).copy();
             drawItem(graphics, font, result, 48, 28);
             if (inside(mx, my, 48, 28, 16, 16)) hover = new Hover(result, List.of());
-            ItemStack center = declaredChoice(infusion.input(), level, cycle);
             drawIngredient(graphics, font, center, 48, 94);
             if (inside(mx, my, 48, 94, 16, 16)) hover = new Hover(center, List.of());
             int count = infusion.components().size();
@@ -1235,6 +1264,13 @@ public final class ThaumcraftRecipeDisplay {
         return enabled.isEmpty() ? ItemStack.EMPTY : enabled.get((int)Math.floorMod(cycle, (long)enabled.size())).copyWithCount(1);
     }
 
+    /** The declared central damage is part of the preview, just like a component predicate. */
+    static ItemStack infusionCentral(InfusionStackRecipe recipe, ItemStack choice) {
+        ItemStack shown = choice.copyWithCount(1);
+        if (!shown.isEmpty()) recipe.inputDamage().ifPresent(shown::setDamageValue);
+        return shown;
+    }
+
     /** Original GuiResearchRecipe:776-877, including the two-layer cauldron diagram. */
     private Hover renderCrucible(CrucibleRecipe crucible, GuiGraphics graphics, Font font, Level level,
                                  int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
@@ -1260,6 +1296,10 @@ public final class ThaumcraftRecipeDisplay {
             ItemStack[] choices = crucible.catalyst().getItems();
             if (choices.length > 0) {
                 ItemStack catalyst = choices[(int) Math.floorMod(cycle, (long) choices.length)].copyWithCount(1);
+                // Original BottleTaint's matcher ignores NBT, but its displayed phial carries eight vitium.
+                if (recipe.id().equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "crucible/bottle_taint"))
+                        && catalyst.is(thaumcraft.common.config.ThaumcraftContent.FILLED_PHIAL.get()))
+                    catalyst = thaumcraft.common.items.ItemEssence.filled("vitium");
                 drawIngredient(graphics, font, catalyst, 26, 72);
                 if (inside(mx, my, 26, 72, 16, 16)) hover = new Hover(catalyst, List.of());
             }
@@ -1414,6 +1454,8 @@ public final class ThaumcraftRecipeDisplay {
             if (tag.showsBonus()) {
                 var player = net.minecraft.client.Minecraft.getInstance().player;
                 graphics.flush();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
                 graphics.blit(PARTICLE_SHEET, AspectRenderer.BONUS_OFFSET, AspectRenderer.BONUS_OFFSET,
                         bonusSheetU(player == null ? 0 : player.tickCount), BONUS_SHEET_V, AspectRenderer.BONUS_SIZE, AspectRenderer.BONUS_SIZE, 256, 256);
                 if (tag.showsBonusNumber()) {

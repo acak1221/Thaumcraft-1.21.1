@@ -351,13 +351,59 @@ def create_crystal_models() -> list[dict[str, Any]]:
     return mappings
 
 
+def create_original_inventory_layers() -> None:
+    """Original item-only passes; these do not replace the placed block/entity models."""
+    # ItemFocusTrade/Hellbat/Warding draw their ornament first, then the lens.
+    for focus in ("trade", "hellbat", "warding"):
+        item_model("focus_" + focus, "items/focus_" + focus + "_orn", "items/focus_" + focus)
+    # ItemGolemPlacer:60-94: base, optional advanced pass, optional core pass.
+    # Overrides are evaluated last first, so the combined state must be last.
+    for material in ("straw", "wood", "tallow", "clay", "flesh", "stone", "iron", "thaumium"):
+        name = "golem_" + material
+        base = "items/" + name
+        model("item/" + name, {
+            "parent": "minecraft:item/generated", "textures": {"layer0": "thaumcraft:" + base},
+            "overrides": [
+                {"predicate": {"thaumcraft:has_core": 1}, "model": "thaumcraft:item/" + name + "_core"},
+                {"predicate": {"thaumcraft:advanced": 1}, "model": "thaumcraft:item/" + name + "_advanced"},
+                {"predicate": {"thaumcraft:advanced": 1, "thaumcraft:has_core": 1}, "model": "thaumcraft:item/" + name + "_advanced_core"},
+            ],
+        })
+        item_model(name + "_core", base, "items/golem_over_core")
+        item_model(name + "_advanced", base, "items/golem_over_adv")
+        item_model(name + "_advanced_core", base, "items/golem_over_adv", "items/golem_over_core")
+    # BlockMetalDeviceRenderer:51-56 draws both grate and closed hatch over the
+    # same inventory bounds, after translating the plate down by0.3 blocks.
+    faces = {
+        "down": {"uv": [0, 0, 16, 16], "texture": "#grate"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "#grate"},
+        **{side: {"uv": [0, 0, 16, 3], "texture": "#grate"} for side in ("north", "south", "west", "east")},
+    }
+    model("item/item_grate", {
+        "parent": "minecraft:block/block", "ambientocclusion": False,
+        "textures": {"particle": "thaumcraft:blocks/grate", "grate": "thaumcraft:blocks/grate", "hatch": "thaumcraft:blocks/grate_hatch"},
+        "elements": [
+            {"from": [0, 8.2, 0], "to": [16, 11.2, 16], "faces": faces},
+            {"from": [0, 8.2, 0], "to": [16, 11.2, 16], "faces": {side: {**face, "texture": "#hatch"} for side, face in faces.items()}},
+        ],
+    })
+
+
 def create_models() -> list[dict[str, Any]]:
     mappings: list[dict[str, Any]] = []
     for metadata, item_id, legacy_name in MATERIALS:
         textures = [f"items/{legacy_name}"]
         if item_id == "jar_label":
             textures.append("items/label_over")
-        item_model(item_id, *textures)
+            item_model("jar_label_bound", *textures)
+            model("item/jar_label", {
+                "parent": "minecraft:item/generated",
+                "textures": {"layer0": "thaumcraft:items/label"},
+                "overrides": [{"predicate": {"thaumcraft:label_bound": 1},
+                               "model": "thaumcraft:item/jar_label_bound"}],
+            })
+        else:
+            item_model(item_id, *textures)
         keys = [f"item.thaumcraft.resource.{legacy_name}.name", f"item.thaumcraft.resource.{metadata}.name"]
         if item_id == "zombie_brain":
             keys.insert(0, "item.thaumcraft.zombie_brain.name")
@@ -373,10 +419,75 @@ def create_models() -> list[dict[str, Any]]:
     item_model("balance_shard", "items/shard_balanced")
     mappings.append(legacy_mapping("itemshard", 6, "balance_shard", ["items/shard_balanced"],
                                    ["item.thaumcraft.shard.6.name"]))
-    item_model("thaumometer", "items/thaumometer")
+    # The item uses the original scanner mesh and screen, including in the inventory.
+    # A generated layer here displays the UV sheet and bypasses the builtin renderer.
+    model("item/thaumometer", {
+        "parent": "minecraft:builtin/entity", "gui_light": "front",
+        "textures": {"particle": "thaumcraft:items/thaumometer"},
+        "display": {
+            "gui": {"rotation": [30, -45, 0], "translation": [0, 0, 0], "scale": [.625, .625, .625]},
+            "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [1, 1, 1]},
+            "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
+            "thirdperson_righthand": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
+            "thirdperson_lefthand": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
+            "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [.4, .4, .4]},
+            "firstperson_lefthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [.4, .4, .4]},
+        },
+    })
     mappings.append(legacy_mapping("itemthaumometer", 0, "thaumometer", ["items/thaumometer"],
                                    ["item.thaumcraft.thaumometer.name"], visual_status="temporary_scanner_atlas_icon"))
+    # Original BlockMirror has render type -1: its item uses the complete frame
+    # sprite, while the placed mirror is drawn by its tile renderer.
+    item_model("mirror", "blocks/mirrorframe")
+    item_model("mirror_essentia", "blocks/mirrorframe2")
+    # Original BlockCustomPlantItem metadata0..5 select these block-atlas item
+    # sprites. In particular the bloom item is its seed, not the placed plant.
+    for plant, sprite in (("greatwood_sapling", "greatwoodsapling"), ("silverwood_sapling", "silverwoodsapling"),
+                          ("shimmerleaf", "shimmerleaf"), ("cinderpearl", "cinderpearl"),
+                          ("ethereal_bloom", "purifier_seed"), ("vishroom", "manashroom")):
+        item_model(plant, "blocks/" + sprite)
+    create_original_inventory_layers()
     item_model("thaumonomicon", "items/thaumonomicon")
+    # BlockTableRenderer used the deconstruction tile, including its persistent
+    # thaumometer, for inventory icons too; a six-box parent loses that device.
+    model("item/deconstruction_table", {
+        "parent": "minecraft:builtin/entity",
+        "textures": {"particle": "thaumcraft:blocks/woodplain"},
+        "display": {
+            "gui": {"rotation": [30, 135, 0], "scale": [.62, .62, .62]},
+            "ground": {"translation": [0, 3, 0], "scale": [.4, .4, .4]},
+            "fixed": {"rotation": [0, 90, 0], "scale": [.6, .6, .6]},
+            "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [.375, .375, .375]},
+            "firstperson_righthand": {"rotation": [0, 45, 0], "scale": [.5, .5, .5]},
+        },
+    })
+    # BlockTableRenderer's inventory fixture includes a quill, six parchment sheets
+    # and default research-note scroll; the seven-box parent only contains the inkwell.
+    model("item/research_table", {
+        "parent": "minecraft:builtin/entity",
+        "textures": {"particle": "thaumcraft:blocks/woodplain"},
+        "display": {
+            "gui": {"rotation": [30, 135, 0], "translation": [-3, 0, 0], "scale": [.43, .43, .43]},
+            "ground": {"translation": [0, 3, 0], "scale": [.4, .4, .4]},
+            "fixed": {"rotation": [0, 90, 0], "scale": [.6, .6, .6]},
+            "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [.375, .375, .375]},
+            "firstperson_righthand": {"rotation": [0, 45, 0], "scale": [.5, .5, .5]},
+        },
+    })
+    # Original inventory renderers dispatch brain/brine/shell and the scrubber OBJ;
+    # a parent block mesh omits the contents or replaces the cap with a pedestal.
+    special_display = {
+        "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [.625, .625, .625]},
+        "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [.25, .25, .25]},
+        "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [.5, .5, .5]},
+        "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [.375, .375, .375]},
+        "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [.4, .4, .4]},
+        "firstperson_lefthand": {"rotation": [0, 225, 0], "translation": [0, 0, 0], "scale": [.4, .4, .4]},
+    }
+    for item, particle in (("jar_brain", "jar_side"), ("flux_scrubber", "pedestal_top"),
+                           ("essentia_reservoir", "essentiareservoir"), ("alembic", "metalbase")):
+        model("item/" + item, {"parent": "minecraft:builtin/entity", "gui_light": "side",
+                              "textures": {"particle": "thaumcraft:blocks/" + particle}, "display": special_display})
     mappings.append(legacy_mapping("itemthaumonomicon", 0, "thaumonomicon", ["items/thaumonomicon"],
                                    ["item.thaumcraft.thaumonomicon.0.name"], visual_status="original_item_sprite"))
     item_model("inkwell", "items/inkwell")

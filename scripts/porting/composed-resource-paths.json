@@ -498,7 +498,7 @@
       "note": ""
     },
     {
-      "site": "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java",
+      "site": "common/src/main/java/thaumcraft/client/renderers/item/ResearchTableItemRenderer.java",
       "kind": "file",
       "paths": [
         "thaumcraft:textures/blocks/tablequill.png",
@@ -1075,6 +1075,7 @@
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
     ],
     "common/src/main/java/thaumcraft/client/gui/ResearchIconDisplay.java": [
+      "ResourceLocation.parse(path)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)"
     ],
     "common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java": [
@@ -1127,9 +1128,6 @@
     ],
     "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeStabilizerRenderer.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+name+\".png\")"
-    ],
-    "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
     ],
     "common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"blocks/\"+name)"
@@ -1420,6 +1418,9 @@
     ],
     "compat/jei/src/main/java/thaumcraft/compat/jei/Categories.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+recipe.aspect().getTag())"
+    ],
+    "common/src/main/java/thaumcraft/client/renderers/item/ResearchTableItemRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
     ]
   },
   "helper_calls": {
@@ -1481,7 +1482,7 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
     "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "428815e78254cd03baf1008438295ad93616201a0f2735de0b01d4d8b10a376d",
     "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "b69e2cd79835f398d5d4c3b76dc21f725bb16aab58e0d97ff08d90ebadd711a3",
-    "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": "7ed2c201abea159fca1baa780c3f7334bb01c6a410fd4b6ce45ecc1c98b500a5",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": "fca6a8063a419ffcc8aebfab68ee39db9488515e7ba057fd24cdf8733e51d071",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
     "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "60439254c7d3163e4418f130f5341b7fcc7ac1927c625059e1142e984f4b9423",
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",
@@ -1493,12 +1494,12 @@
     "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "a70cb05e8fa4861308e6b0eacd1f668e3c588fa2adf9cdeca7b58b7d923e666a",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "8601b6f46761823bf1e1a1d61899fc330e4a727cd38196a94444a8a6ce08e074",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "93d14fa2b44a81fc91ca9db2e1c87a49f631e1f1512f332dc0e48237f7c70c8e",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "29e7f50dcca010bd39eb32f9b447807a192408488ec28108931c1a24c40161b6",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "abe80de143582d8e7002ca3c4f132b008db50575d91d25130ec9989c9621ece3",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "220dafc23bc2d0d320e20a1522f9f01f93b760983213c731e5320b3f5e0f6b10",
     "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "c6eed32d8742c91d9e929c2c092b31dd8e531175419bdf76e972e4fc60e9546f",
-    "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "310799552cea6c938b10a8070cbfd59dbe3c23d2bc376f7f5d760d298a8f8a0d",
+    "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "91a6cb977a6b5843beddd178613b9c757a13ee3d5d38d07db5e0ab08866c51d6",
     "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": "31b8d3d0aaba9681cd58196b93deea847235550776a74fc71ee12d7169d71cde",
-    "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": "4a35fa5d288173a6d968271c88f9c35c9863112b1d2080b055afa0c10c6bf482",
+    "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": "e3f17c7a2dab4dc4833060056504e5d14598df7c1bc27d327b3d980fc22717d6",
     "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java": "c681c1eb91f2ab06bbdafa4c1b00c0b9a05bb2c31590846db073a9a9ea21e517",
     "common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java": "929d264b2b14947d22cf5156cfa6ce0f0c11a021d5d7518eb998aaf0797803eb",
     "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java": "6d7e1d3ff571c8d64181e3ee7f113f7727eb3b2991faef5598a502fc3a060b6f",
@@ -1519,7 +1520,7 @@
     "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeConverterRenderer.java": "9e485cd5554d5d3d1a69ab4a7abb739aa11b6f5827e8c50d3d2b251c025d7515",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeEnergizedRenderer.java": "caada86707b1a2dbc650e8c21b1d9c0329ae46fb9c48ace52e95f63d2cbe905b",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeStabilizerRenderer.java": "05e443989e7c7346b4bd1ab39409f8ce03024459bd4f9e1a89c9d525f9b50a81",
-    "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java": "4bc6f6cd24497701115ae9fd16ee68127f585141e55bf1e4dce00e422c6016cf",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java": "0e26eb68ab895f6825f10ddb2d54cb7c334269e0d3dfa42fa7a120bee46c15ee",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java": "9f7acfc2a6a8c67fd0d5e703e6c35f1064da5edf13df832a3a06caf1170e7338",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java": "1e1626143517d3516e5806ba2d53413add9ecf48811b6611de9050c44b4a4c14",
     "common/src/main/java/thaumcraft/client/renderers/tile/TileWardedGlassRenderer.java": "e027825854cfcac7ad6de1561300b299bee2c8f6b4f8fcae6bb27821a94cc834",
@@ -1532,6 +1533,7 @@
     "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java": "f06cc2c0dbf79a70a14d03ea5c7c00657e38417b72d0201939a82e6214daeaf9",
     "common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java": "2b904622570ec5abe19aec92f515edca39c1f0843780f8afa1343f4b1b532919",
     "common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java": "653d2e42aeb3842b8c917c7a41671ea8f0fe7dbc5328454fd026f7299b6d48ef",
-    "common/src/main/java/thaumcraft/common/lib/world/WardingOverlay.java": "02f4d10b8880c9255b638b507a37dfa1ece81472bce974fae0e35425a62de7cf"
+    "common/src/main/java/thaumcraft/common/lib/world/WardingOverlay.java": "02f4d10b8880c9255b638b507a37dfa1ece81472bce974fae0e35425a62de7cf",
+    "common/src/main/java/thaumcraft/client/renderers/item/ResearchTableItemRenderer.java": "6315d888a032165366e76df6d43f7f5d49b9f641f8d6f183994a782d0adc3771"
   }
 }

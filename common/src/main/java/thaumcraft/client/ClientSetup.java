@@ -210,6 +210,7 @@ public final class ClientSetup {
             var data = ItemEssence.data(stack);
             return tint == 1 && data != null ? opaque(Aspect.getAspect(data.tag()).getColor()) : -1;
         }, ThaumcraftContent.FILLED_PHIAL);
+        ThaumcraftJarLabelClient.init();
         ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(ItemWispEssence.color(stack)) : -1,
                 ThaumcraftEssences.WISP_ESSENCE);
         ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(thaumcraft.common.items.ItemCrystalEssence.color(stack)) : -1,

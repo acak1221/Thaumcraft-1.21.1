@@ -6,7 +6,7 @@
     {"item": "thaumcraft:balance_shard"},
     {"item": "thaumcraft:entropy_shard"}
   ],
-  "aspects": {"perditio": 12, "praecantatio": 6, "mortuus": 6},
+  "aspects": {"perditio": 12, "praecantatio": 6, "exanimis": 6},
   "instability": 3,
   "result": {"id": "thaumcraft:wand_rod_bone", "count": 1}
 }

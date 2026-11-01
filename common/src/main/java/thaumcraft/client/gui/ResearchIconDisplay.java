@@ -2,6 +2,7 @@ package thaumcraft.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,6 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftGolems;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.config.ThaumcraftWandEnchantments;
+import thaumcraft.common.blocks.BannerData;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.wands.WandData;
 
@@ -17,8 +21,8 @@ import thaumcraft.common.items.wands.WandData;
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and numeric metadata are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusPrimal|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemBootsTraveller|itemHoverHarness|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain|itemBathSalts|itemSanitySoap|itemEldritchObject)"
-            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCrystal|blockCustomOre|blockChestHungry|blockTaint|blockTaintFibres|blockEssentiaReservoir|blockLifter|blockMirror))"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusPrimal|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemBootsTraveller|itemHoverHarness|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain|itemBathSalts|itemSanitySoap|itemEldritchObject|itemBowBone|itemBottleTaint|itemBucketDeath|itemHandMirror|itemPrimalCrusher|itemSanityChecker|itemCompassStone|itemArcaneDoor)"
+            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCrystal|blockCustomOre|blockChestHungry|blockTaint|blockTaintFibres|blockEssentiaReservoir|blockLifter|blockMirror)|Items\\.field_151074_bl)"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]{1,3}))?)?\\)");
 
     // Original ItemResource:81-100; native ThaumcraftContent.MATERIALS flattening.
@@ -41,6 +45,13 @@ final class ResearchIconDisplay {
 
     /** False leaves the browser's existing explicit-texture/book fallback intact. */
     static boolean render(GuiGraphics graphics, Font font, String expression, int x, int y) {
+        ResourceLocation texture = textureReference(expression);
+        if (texture != null) {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            graphics.blit(texture, x, y, 16, 16, 0, 0, 16, 16, 16, 16);
+            return true;
+        }
         ItemStack stack = resolve(expression);
         if (stack.isEmpty()) return false;
         // Flush graph lines before the item, and decorations before leaving the
@@ -55,41 +66,62 @@ final class ResearchIconDisplay {
     }
 
     private static ItemStack resolve(String expression) {
-        if (expression == null) return ItemStack.EMPTY;
-        // ConfigResearch:55-57,77: this literal variable is WOOD / IRON, not
-        // a research-key/output guess or a fabricated collection of wand tiers.
-        if (expression.equals("wand")) {
-            ItemStack stack = registered("wand", 1);
-            if (!stack.isEmpty()) stack.set(ThaumcraftContent.WAND_DATA.get(), WandData.EMPTY);
-            return stack;
+        return resolve(expression, System.currentTimeMillis() / 1000L);
+    }
+
+    /** An explicit time makes all original wildcard frames auditable. */
+    static ItemStack resolve(String expression, long cycle) {
+        ItemReference reference = reference(expression, cycle);
+        if (reference == null) return ItemStack.EMPTY;
+        ItemStack stack = registered(reference.path(), reference.count());
+        if (stack.isEmpty()) return stack;
+        // ConfigResearch:55-57,77: the original bare wood/iron wand.
+        if (expression.equals("wand")) stack.set(ThaumcraftContent.WAND_DATA.get(), WandData.EMPTY);
+        // ConfigResearch:138-144: the silverwood/thaumium prototype, explicitly a sceptre.
+        if (expression.equals("sceptre3")) {
+            stack.set(ThaumcraftContent.WAND_DATA.get(), new WandData("silverwood", "thaumium", Map.of()));
+            stack.set(ThaumcraftWandEnchantments.WAND_SCEPTRE.get(), true);
+            // Original metadata: (int)(thaumium cap6 * silverwood rod9 *1.5F).
+            stack.set(thaumcraft.common.config.ThaumcraftWands.WAND_CRAFT_COST.get(), 81);
         }
-        // ConfigResearch:344-345: the ADVANCEDGOLEM icon is the placer wildcard tagged advanced = 1.
-        if (expression.equals("ag")) {
-            ItemStack stack = registered(PLACERS.get((int) (System.currentTimeMillis() / 1000L % PLACERS.size())), 1);
-            if (!stack.isEmpty()) stack.set(ThaumcraftGolems.GOLEM_DATA.get(), GolemData.EMPTY.withAdvanced(true));
-            return stack;
+        // ConfigResearch:344-345: every golem material, all carrying advanced=1.
+        if (expression.equals("ag")) stack.set(ThaumcraftGolems.GOLEM_DATA.get(), GolemData.EMPTY.withAdvanced(true));
+        // ConfigResearch:196-199: the purple banner has the original color byte10.
+        if (expression.equals("is")) stack.set(ThaumcraftEldritchBlocks.BANNER_DATA.get(), new BannerData(10, ""));
+        // ConfigResearch:379-382: the four primal aspects of forty, normal node.
+        if (expression.equals("jarIs") && stack.getItem() instanceof thaumcraft.common.blocks.ItemJarNode item) {
+            item.setAspects(stack, new thaumcraft.api.aspects.AspectList()
+                    .add(thaumcraft.api.aspects.Aspect.AIR, 40)
+                    .add(thaumcraft.api.aspects.Aspect.FIRE, 40)
+                    .add(thaumcraft.api.aspects.Aspect.WATER, 40)
+                    .add(thaumcraft.api.aspects.Aspect.EARTH, 40));
+            item.setNodeAttributes(stack, thaumcraft.api.nodes.NodeType.NORMAL, null, "");
         }
-        // ConfigResearch:374 and InventoryUtils.cycleItemStack:481-488. Only
-        // this literal wildcard is supported; never enumerate future item placeholders.
-        if (expression.equals("new ItemStack(ConfigBlocks.blockCustomOre, 1, Short.MAX_VALUE)")) {
-            return registered(ORES.get((int) (System.currentTimeMillis() / 1000L % ORES.size())), 1);
-        }
-        // ConfigResearch:379-382: the icon of the NODEJAR research is the itemJarNode
-        // item with the four primal aspects of forty units and a normal node type.
-        if (expression.equals("jarIs")) {
-            ItemStack stack = new ItemStack(thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_NODE_ITEM.get());
-            if (stack.getItem() instanceof thaumcraft.common.blocks.ItemJarNode item) {
-                item.setAspects(stack, new thaumcraft.api.aspects.AspectList()
-                        .add(thaumcraft.api.aspects.Aspect.AIR, 40)
-                        .add(thaumcraft.api.aspects.Aspect.FIRE, 40)
-                        .add(thaumcraft.api.aspects.Aspect.WATER, 40)
-                        .add(thaumcraft.api.aspects.Aspect.EARTH, 40));
-                item.setNodeAttributes(stack, thaumcraft.api.nodes.NodeType.NORMAL, null, "");
-            }
-            return stack;
-        }
-        ItemReference reference = itemReference(expression);
-        return reference == null ? ItemStack.EMPTY : registered(reference.path(), reference.count());
+        return stack;
+    }
+
+    /** All literal original variables and wildcard item frames, without touching a registry. */
+    static ItemReference reference(String expression, long cycle) {
+        if (expression == null) return null;
+        return switch (expression) {
+            case "wand", "sceptre3" -> new ItemReference("wand", 1);
+            case "is" -> new ItemReference("banner", 1);
+            case "jarIs" -> new ItemReference("jar_node", 1);
+            case "ag" -> new ItemReference(PLACERS.get((int) Math.floorMod(cycle, (long) PLACERS.size())), 1);
+            case "new ItemStack(ConfigBlocks.blockCustomOre, 1, Short.MAX_VALUE)" ->
+                    new ItemReference(ORES.get((int) Math.floorMod(cycle, (long) ORES.size())), 1);
+            case "new ItemStack(ConfigItems.itemPrimalArrow, 1, Short.MAX_VALUE)" ->
+                    new ItemReference(List.of("primal_arrow_air", "primal_arrow_fire", "primal_arrow_water", "primal_arrow_earth",
+                            "primal_arrow_order", "primal_arrow_entropy").get((int) Math.floorMod(cycle, 6L)), 1);
+            default -> itemReference(expression);
+        };
+    }
+
+    /** Original ItemCompassStone.getIconFromDamage: metadata1 forces the active sprite.
+     * The native item has no such subtype, so only this exact book icon binds the original sprite directly. */
+    static ResourceLocation textureReference(String expression) {
+        return "new ItemStack(ConfigItems.itemCompassStone, 1, 1)".equals(expression)
+                ? ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/sinister_stone_active.png") : null;
     }
 
     /** A literal corpus item icon, resolved before reading the live item registry. */
@@ -107,15 +139,33 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemShard" -> variant(SHARDS, metadata);
             // ItemNugget metadata 16 / 21 / 31 are the native iron / cinnabar / gold clusters (ConfigAspects:360-362); 0 is the other-mod iron nugget.
             case "ConfigItems.itemNugget" -> switch (metadata) {
+                case 0 -> "minecraft:iron_nugget";
+                case 1 -> "copper_nugget";
+                case 2 -> "tin_nugget";
+                case 3 -> "silver_nugget";
+                case 4 -> "lead_nugget";
                 case 6 -> "thaumium_nugget";
                 case 7 -> "void_nugget";
                 case 16 -> "cluster_iron";
+                case 17 -> "cluster_copper";
+                case 18 -> "cluster_tin";
+                case 19 -> "cluster_silver";
+                case 20 -> "cluster_lead";
                 case 21 -> "cluster_cinnabar";
                 case 31 -> "cluster_gold";
                 default -> null;
             };
+            case "Items.field_151074_bl" -> metadata == 0 ? "minecraft:gold_nugget" : null;
+            case "ConfigItems.itemBowBone" -> metadata == 0 ? "bone_bow" : null;
+            case "ConfigItems.itemBottleTaint" -> metadata == 0 ? "bottle_taint" : null;
+            case "ConfigItems.itemBucketDeath" -> metadata == 0 ? "bucket_death" : null;
+            case "ConfigItems.itemHandMirror" -> metadata == 0 ? "hand_mirror" : null;
+            case "ConfigItems.itemPrimalCrusher" -> metadata == 0 ? "primal_crusher" : null;
+            case "ConfigItems.itemSanityChecker" -> metadata == 0 ? "sanity_checker" : null;
+            case "ConfigItems.itemCompassStone" -> metadata == 0 || metadata == 1 ? "compass_stone" : null;
+            case "ConfigItems.itemArcaneDoor" -> metadata == 0 ? "arcane_door" : null;
             case "ConfigItems.itemZombieBrain" -> metadata == 0 ? "zombie_brain" : null;
-            // ConfigResearch:89-97; ConfigItems:292-313 (staff cores are metadata 50-57 and 100). The copper and silver caps (other-mod metals) remain unsupported.
+            // ConfigResearch:89-97; ConfigItems:292-313 (staff cores are metadata 50-57 and 100). Copper is native in1.21.1; a silver cap still has no native item.
             case "ConfigItems.itemWandRod" -> switch (metadata) {
                 case 0 -> "wand_rod_greatwood";
                 case 1 -> "wand_rod_obsidian";
@@ -140,6 +190,7 @@ final class ResearchIconDisplay {
                 case 0 -> "wand_cap_iron";
                 case 1 -> "wand_cap_gold";
                 case 2 -> "wand_cap_thaumium";
+                case 3 -> "wand_cap_copper";
                 case 6 -> "wand_cap_thaumium_inert";
                 case 7 -> "wand_cap_void";
                 case 8 -> "wand_cap_void_inert";
@@ -266,6 +317,8 @@ final class ResearchIconDisplay {
                 default -> null;
             };
             case "ConfigBlocks.blockCosmeticSolid" -> switch (metadata) {
+                case 2 -> "paving_stone_travel";
+                case 3 -> "paving_stone_warding";
                 case 4 -> "thaumium_block";
                 case 5 -> "tallow_block";
                 case 6 -> "arcane_stone";
@@ -277,6 +330,8 @@ final class ResearchIconDisplay {
                 case 0 -> "crucible";
                 case 1 -> "alembic";
                 case 2 -> "vis_charge_relay";
+                case 3 -> "advanced_alchemical_construct";
+                case 5 -> "item_grate";
                 case 7 -> "arcane_lamp";
                 case 8 -> "growth_lamp";
                 case 9 -> "alchemical_construct";
@@ -294,6 +349,9 @@ final class ResearchIconDisplay {
                 case 9 -> "node_stabilizer";
                 case 11 -> "node_transducer";
                 case 13 -> "focal_manipulator";
+                case 14 -> "flux_scrubber";
+                case 5 -> "wand_pedestal";
+                case 8 -> "wand_pedestal_focus";
                 default -> null;
             };
             // ConfigResearch:183 / ConfigBlocks wooden-device variants.
@@ -308,6 +366,7 @@ final class ResearchIconDisplay {
             };
             case "ConfigBlocks.blockJar" -> switch (metadata) {
                 case 0 -> "jar";
+                case 1 -> "jar_brain";
                 case 3 -> "jar_void";
                 default -> null;
             };
@@ -339,6 +398,7 @@ final class ResearchIconDisplay {
                 case 1 -> "silverwood_sapling";
                 case 2 -> "shimmerleaf";
                 case 3 -> "cinderpearl";
+                case 4 -> "ethereal_bloom";
                 case 5 -> "vishroom";
                 default -> null;
             };
@@ -358,7 +418,8 @@ final class ResearchIconDisplay {
     }
 
     private static ItemStack registered(String path, int count) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath("thaumcraft", path);
+        ResourceLocation id = path.indexOf(':') >= 0 ? ResourceLocation.parse(path)
+                : ResourceLocation.fromNamespaceAndPath("thaumcraft", path);
         // Resolve only after bootstrap, through the actual item registry. Static
         // aliases never call deferred item suppliers or turn a missing ID into AIR.
         return BuiltInRegistries.ITEM.containsKey(id) ? new ItemStack(BuiltInRegistries.ITEM.get(id), count) : ItemStack.EMPTY;

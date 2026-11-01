@@ -19,6 +19,13 @@ import org.junit.jupiter.api.Test;
  * <p>No block, item or client is constructed here: the conversion is a pure static function.</p>
  */
 class ThaumometerLightmapParityTest {
+    @Test void neighbouringGlyphsUseTheirOwnOriginalPulsePhase() {
+        // Oracle ItemThaumometerRenderer:229 includes the column in the phase.
+        assertEquals(192, ThaumometerReadout.iconLight(0, 0, 0));
+        assertEquals(208, ThaumometerReadout.iconLight(0, 1, 0));
+        assertEquals(176, ThaumometerReadout.iconLight(0, 0, 1));
+    }
+
     @Test void theBrightnessOfTheOriginalSplitsIntoBlockLightAndNoSkyLight() {
         // The brightness of the original only ever occupies the Block half: 190..210 out of 65536.
         int[][] fixtures = {{190,11,0,176}, {191,11,0,176}, {192,12,0,192},

@@ -125,6 +125,18 @@ public final class ThaumcraftNeoForgeClient {
         // scanner of the original, not a flat sprite.
         event.registerItem(renderer(thaumcraft.client.renderers.item.ItemThaumometerRenderer::render),
                 ThaumcraftContent.THAUMOMETER.get());
+        event.registerItem(renderer(thaumcraft.client.renderers.item.DeconstructionTableItemRenderer::render),
+                thaumcraft.common.config.ThaumcraftDeconstruction.ITEM.get());
+        event.registerItem(renderer(thaumcraft.client.renderers.item.ResearchTableItemRenderer::render),
+                ThaumcraftContent.RESEARCH_TABLE_ITEM.get());
+        event.registerItem(renderer(thaumcraft.client.renderers.item.JarBrainItemRenderer::render),
+                thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_BRAIN_ITEM.get());
+        event.registerItem(renderer(thaumcraft.client.renderers.item.FluxScrubberItemRenderer::render),
+                thaumcraft.common.config.ThaumcraftEldritchBlocks.FLUX_SCRUBBER_ITEM.get());
+        event.registerItem(renderer(thaumcraft.client.renderers.item.EssentiaReservoirItemRenderer::render),
+                ThaumcraftTubes.ESSENTIA_RESERVOIR_ITEM.get());
+        event.registerItem(renderer(thaumcraft.client.renderers.item.AlembicItemRenderer::render),
+                thaumcraft.common.config.ThaumcraftAlembics.ALEMBIC_ITEM.get());
         // Original ItemBannerRenderer: the banner item carries its colour and its
         // aspect and is drawn with the banner model instead of a plain cube.
         event.registerItem(renderer(thaumcraft.client.renderers.item.ItemBannerRenderer::render),

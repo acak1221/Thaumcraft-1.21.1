@@ -26,19 +26,19 @@
           "texture": "#bottom"
         },
         "up": {
-          "texture": "#arcaneeartopoff"
+          "texture": "#top"
         },
         "north": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         },
         "south": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         },
         "west": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         },
         "east": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         }
       }
     },
@@ -58,19 +58,19 @@
           "texture": "#bottom"
         },
         "up": {
-          "texture": "#arcaneeartopoff"
+          "texture": "#top"
         },
         "north": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         },
         "south": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         },
         "west": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         },
         "east": {
-          "texture": "#arcaneearsideoff"
+          "texture": "#side"
         }
       }
     },

@@ -1,3 +1,4 @@
 {
-  "parent": "thaumcraft:block/mirror_essentia"
+  "parent": "minecraft:item/generated",
+  "textures": {"layer0": "thaumcraft:blocks/mirrorframe2"}
 }

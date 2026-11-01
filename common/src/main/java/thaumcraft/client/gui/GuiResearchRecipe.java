@@ -161,7 +161,7 @@ public final class GuiResearchRecipe extends Screen {
             }
             for (var part : ResearchText.parse(Component.translatable(descriptor.textKey()).getString())) {
                 if (part instanceof ResearchText.Text text) {
-                    for (var line : font.split(Component.literal(text.value()), textWidth)) {
+                    for (var line : font.split(ResearchText.formatted(text.value()), textWidth)) {
                         if (y + font.lineHeight > textHeight) { pages.add(new BookPage(List.copyOf(current), null, ordinal)); current.clear(); y = 0; }
                         current.add(new Draw(line, null, y, 0, font.lineHeight)); y += font.lineHeight;
                     }

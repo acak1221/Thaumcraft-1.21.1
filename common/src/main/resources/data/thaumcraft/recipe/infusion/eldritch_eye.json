@@ -3,7 +3,7 @@
   "research": "OCULUS",
   "input": {"item": "minecraft:ender_eye"},
   "components": [
-    {"item": "thaumcraft:void_ingot"},
+    {"item": "thaumcraft:void_seed"},
     {"item": "minecraft:gold_ingot"}
   ],
   "aspects": {"alienis": 64, "vacuos": 16, "tenebrae": 16, "iter": 16},

@@ -303,7 +303,7 @@ public final class ThaumcraftRecipeDisplay {
     private final AddonPage addon;
 
     /** The add-on pages the original drew without a recipe holder of their own. */
-    private sealed interface AddonPage permits Aspects, Smelting, Image, Construct {}
+    private sealed interface AddonPage permits Aspects, Smelting, Image, Construct, AddonConstruct {}
     /** Original GuiResearchRecipe.drawAspectPage: the aspects of the list, sorted, one row each. */
     private record Aspects(thaumcraft.api.aspects.AspectList aspects) implements AddonPage {}
     /** Original GuiResearchRecipe.drawSmeltingPage: the furnace input and its result. */
@@ -312,6 +312,8 @@ public final class ThaumcraftRecipeDisplay {
     private record Image(ResourceLocation texture, String caption) implements AddonPage {}
     /** Original wand-formed world blueprint, not an executable crafting recipe. */
     private record Construct(String key) implements AddonPage {}
+    /** An add-on's original {@code ResearchPage(List)} compound page; {@code list} is the page's own list object. */
+    private record AddonConstruct(Object list, ConstructBlueprintDisplay.Blueprint blueprint) implements AddonPage {}
 
     /**
      * The items this page makes: its synthetic result, the result of every alternative, or the
@@ -496,6 +498,7 @@ public final class ThaumcraftRecipeDisplay {
         if (first instanceof Smelting a && second instanceof Smelting b)
             return ItemStack.matches(a.input(), b.input()) && ItemStack.matches(a.result(), b.result());
         if (first instanceof Aspects a && second instanceof Aspects b) return a.aspects() == b.aspects();
+        if (first instanceof AddonConstruct a && second instanceof AddonConstruct b) return a.list() == b.list();
         return first != null && first.equals(second);
     }
 
@@ -688,8 +691,9 @@ public final class ThaumcraftRecipeDisplay {
      * <p>Original GuiResearchRecipe.drawPage draws the recipe objects of the page; a recipe array is shown one
      * entry per second (oracle :647-655). An API recipe is drawn through its native recipe, a vanilla recipe
      * object or holder through the native diagram of its type, and the recipes of
-     * {@code ResearchPage.recipe(ids)} through the recipe manager of the world. COMPOUND_CRAFTING (the wand
-     * construct diagrams of the original) has no add-on counterpart and is not shown.</p>
+     * {@code ResearchPage.recipe(ids)} through the recipe manager of the world. COMPOUND_CRAFTING, the original
+     * {@code ResearchPage(List)} wand construct diagram, is drawn like the bundled construct pages
+     * ({@link ConstructBlueprintDisplay#addon}); a list of another shape is not shown.</p>
      */
     private static ThaumcraftRecipeDisplay resolveAddon(thaumcraft.api.research.ResearchPage page, Level level) {
         List<ThaumcraftRecipeDisplay> choices = new ArrayList<>();
@@ -716,7 +720,11 @@ public final class ThaumcraftRecipeDisplay {
             case IMAGE -> {
                 return page.image == null ? null : new ThaumcraftRecipeDisplay(new Image(page.image, page.text));
             }
-            case COMPOUND_CRAFTING, TEXT, TEXT_CONCEALED -> {
+            case COMPOUND_CRAFTING -> {
+                var blueprint = ConstructBlueprintDisplay.addon(page.recipe);
+                return blueprint == null ? null : new ThaumcraftRecipeDisplay(new AddonConstruct(page.recipe, blueprint));
+            }
+            case TEXT, TEXT_CONCEALED -> {
                 return null;
             }
             default -> {
@@ -883,6 +891,8 @@ public final class ThaumcraftRecipeDisplay {
         if (addon instanceof Smelting smelting) return renderSmelting(smelting, graphics, font, x, y, width, height, mouseX, mouseY);
         if (addon instanceof Image image) return renderImage(image, graphics, font, x, y, width, height);
         if (addon instanceof Construct construct) return ConstructBlueprintDisplay.render(construct.key(), graphics, font,
+                x, y, width, height, mouseX, mouseY, cycle);
+        if (addon instanceof AddonConstruct construct) return ConstructBlueprintDisplay.render(construct.blueprint(), graphics, font,
                 x, y, width, height, mouseX, mouseY, cycle);
         if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);

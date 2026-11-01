@@ -93,12 +93,18 @@ ThaumcraftApi.addWarpToResearch("EXAMPLE_SECRET", 1);
 | текст, видимый после завершения другой записи | `new ResearchPage("OTHER_KEY", "lang.key")` |
 | магический рецепт, тигель, наполнение или зачарование наполнением из API | `new ResearchPage(recipe)`; массив сменяется раз в секунду |
 | объект ванильного рецепта | `new ResearchPage(Recipe<?>)` (или массив, или список) |
+| схема сборки жезлом (`COMPOUND_CRAFTING`) | `new ResearchPage((List) Arrays.asList(vis, width, height, depth, cells))`, список оригинала (ниже) |
 | рецепт из данных | `ResearchPage.recipe(ResourceLocation... ids)`: любой рецепт менеджера рецептов, включая родные типы Thaumcraft |
 | переплавка | `new ResearchPage(ItemStack input)` |
 | аспекты | `new ResearchPage(AspectList)` |
 | картинка | `new ResearchPage(ResourceLocation image, "caption.key")` |
 
-Страницы `COMPOUND_CRAFTING` (схемы сборки жезлов из оригинала) для записей аддонов не рисуются.
+Страница `COMPOUND_CRAFTING` рисуется так же, как собственные страницы книги со схемами сборки жезлом: все слои сразу, верхний
+первым, каждый изометрическим планом над подложкой, ниже — вис сборки (`vis`, `AspectList`; пустой — без вис). `cells` перечисляет
+`width * height * depth` блоков слой за слоем сверху, в слое ряды от `depth - 1` до 0, в ряду столбцы от `width - 1` до 0 (первый
+блок слоя стоит в правом углу его плана). Клетка — `ItemStack`, предмет или блок, имя словаря руд, тег предметов, `Ingredient` или
+список из них (по одному в секунду); `null` ничего не рисует, пустой стек или воздух — блок «Пустое место» оригинала. Приведение
+к сырому `List` нужно, потому что конструктор 1.21.1 объявлен как `ResearchPage(List<Recipe<?>>)`.
 
 Страница с рецептом также позволяет открыть книгу на этой странице из просмотрщика рецептов или по результату рецепта,
 как в 1.7.10 (`ThaumcraftApi.getCraftingRecipeKey`).

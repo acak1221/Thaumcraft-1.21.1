@@ -11,30 +11,46 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+import thaumcraft.api.OreDictionaryNames;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.config.ThaumcraftContent;
 
-/** The six remaining original compound pages, not recipes that manufacture a formed machine. */
+/**
+ * The six remaining original compound pages, not recipes that manufacture a formed machine, and the
+ * {@code ResearchPage(List)} compound pages of add-ons, drawn with the same original geometry.
+ */
 public final class ConstructBlueprintDisplay {
     private static final ResourceLocation OVERLAY = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/gui_researchbook_overlay.png");
     private static final ResourceLocation EMPTY = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/blocks/empty.png");
     private static final ResourceLocation LAVA = ResourceLocation.withDefaultNamespace("block/lava_still");
 
-    enum Part { NONE, WAND, BOOKSHELF, TABLE, INKWELL, CAULDRON, NETHER_BRICKS, OBSIDIAN, AIR, LAVA, IRON_BARS, WOODEN_SLAB, GLASS, NODE }
+    /** ITEM is a cell of an add-on page: its entry of the page's list is drawn. */
+    enum Part { NONE, WAND, BOOKSHELF, TABLE, INKWELL, CAULDRON, NETHER_BRICKS, OBSIDIAN, AIR, LAVA, IRON_BARS, WOODEN_SLAB, GLASS, NODE, ITEM }
 
-    /** Original ConfigRecipes:83-95 stores cells top down, then decreasing Z and X. */
-    record Blueprint(int width, int height, int depth, List<Part> cells, Map<String, Integer> vis) {
+    /** Original ConfigRecipes:83-95 stores cells top down, then decreasing Z and X; {@code entries} are an add-on page's list cells. */
+    record Blueprint(int width, int height, int depth, List<Part> cells, Map<String, Integer> vis, List<Object> entries) {
+        Blueprint(int width, int height, int depth, List<Part> cells, Map<String, Integer> vis) { this(width, height, depth, cells, vis, List.of()); }
         Blueprint {
             cells = List.copyOf(cells);
             vis = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(vis));
+            entries = java.util.Collections.unmodifiableList(new ArrayList<>(entries));
             if (cells.size() != width * height * depth) throw new IllegalArgumentException("Invalid original construct volume");
         }
-        Part at(int layer, int x, int z) { return cells.get(layer * width * depth + (depth - 1 - z) * width + width - 1 - x); }
+        Part at(int layer, int x, int z) { return cells.get(index(layer, x, z)); }
+        Object entry(int layer, int x, int z) { return entries.isEmpty() ? null : entries.get(index(layer, x, z)); }
+        private int index(int layer, int x, int z) { return layer * width * depth + (depth - 1 - z) * width + width - 1 - x; }
     }
 
     private static final Map<String, Blueprint> BLUEPRINTS = blueprints();
@@ -42,6 +58,35 @@ public final class ConstructBlueprintDisplay {
 
     public static boolean supports(String key) { return key != null && BLUEPRINTS.containsKey(key); }
     static Blueprint blueprint(String key) { return BLUEPRINTS.get(key); }
+
+    /**
+     * An add-on's {@code ResearchPage(List)}: original GuiResearchRecipe.drawCompoundCraftingPage reads
+     * {@code [AspectList vis, Integer width, Integer height, Integer depth, List cells]}, the cells in the order of
+     * {@link Blueprint}. A null cell draws nothing, an empty stack or air is the original's "Empty Space" block
+     * ({@code blockHole} metadata 15); a missing cell is null. Null for a list of another shape.
+     */
+    static Blueprint addon(Object recipe) {
+        if (!(recipe instanceof List<?> list) || list.size() < 5 || !(list.get(4) instanceof List<?> entries)) return null;
+        if (list.get(0) != null && !(list.get(0) instanceof AspectList)) return null;
+        if (!(list.get(1) instanceof Integer width) || !(list.get(2) instanceof Integer height) || !(list.get(3) instanceof Integer depth)) return null;
+        if (width < 1 || height < 1 || depth < 1 || width > 32 || height > 32 || depth > 32 || width * height * depth > 4096) return null;
+        var vis = new LinkedHashMap<String, Integer>();
+        if (list.get(0) instanceof AspectList aspects)
+            for (Aspect aspect : aspects.getAspects()) if (aspect != null && aspects.getAmount(aspect) > 0) vis.put(aspect.getTag(), aspects.getAmount(aspect));
+        var cells = new ArrayList<Part>();
+        var items = new ArrayList<Object>();
+        for (int cell = 0; cell < width * height * depth; cell++) {
+            Object entry = cell < entries.size() ? entries.get(cell) : null;
+            cells.add(entry == null ? Part.NONE : emptySpace(entry) ? Part.AIR : Part.ITEM);
+            items.add(entry);
+        }
+        return new Blueprint(width, height, depth, cells, vis, items);
+    }
+
+    private static boolean emptySpace(Object entry) {
+        if (entry instanceof ItemStack stack) return stack.isEmpty();
+        return entry instanceof Block block ? block.defaultBlockState().isAir() : entry instanceof ItemLike item && item.asItem() == Items.AIR;
+    }
 
     private static Map<String, Blueprint> blueprints() {
         var all = new LinkedHashMap<String, Blueprint>();
@@ -80,7 +125,11 @@ public final class ConstructBlueprintDisplay {
 
     public static ThaumcraftRecipeDisplay.Hover render(String key, GuiGraphics graphics, Font font,
                                                         int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
-        Blueprint blueprint = BLUEPRINTS.get(key);
+        return render(BLUEPRINTS.get(key), graphics, font, x, y, width, height, mouseX, mouseY, cycle);
+    }
+
+    static ThaumcraftRecipeDisplay.Hover render(Blueprint blueprint, GuiGraphics graphics, Font font,
+                                                int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
         if (blueprint == null) return null;
         float scale = Math.min(width / 128F, height / 206F);
         if (scale <= 0) return null;
@@ -112,7 +161,8 @@ public final class ConstructBlueprintDisplay {
                     Part part = blueprint.at(layer, cellX, z);
                     if (part == Part.NONE) continue;
                     CellPosition cell = position(blueprint, layer, cellX, z);
-                    ItemStack stack = item(part, cycle);
+                    ItemStack stack = part == Part.ITEM ? entry(blueprint.entry(layer, cellX, z), cycle) : item(part, cycle);
+                    if (part == Part.ITEM && stack.isEmpty()) continue;
                     graphics.pose().pushPose();
                     try {
                         graphics.pose().translate(cell.x(), cell.y(), cell.depth() * cell.scale());
@@ -170,6 +220,30 @@ public final class ConstructBlueprintDisplay {
             case WOODEN_SLAB -> woodenSlab(cycle);
             default -> ItemStack.EMPTY;
         };
+    }
+
+    /** Original InventoryUtils.cycleItemStack: an ore dictionary name, a tag or a list shows one choice per second. */
+    private static ItemStack entry(Object entry, long cycle) {
+        return switch (entry) {
+            case ItemStack stack -> stack.copyWithCount(1);
+            case ItemLike item -> new ItemStack(item);
+            case String name -> choice(tagItems(OreDictionaryNames.itemTag(name)), cycle);
+            case TagKey<?> tag -> tag.isFor(Registries.ITEM) ? choice(tagItems(TagKey.create(Registries.ITEM, tag.location())), cycle) : ItemStack.EMPTY;
+            case Ingredient ingredient -> choice(List.of(ingredient.getItems()), cycle);
+            case List<?> choices -> choices.isEmpty() ? ItemStack.EMPTY : entry(choices.get((int) Math.floorMod(cycle, (long) choices.size())), cycle);
+            case null, default -> ItemStack.EMPTY;
+        };
+    }
+
+    private static List<ItemStack> tagItems(TagKey<Item> tag) {
+        return tag == null ? List.of() : BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(named -> named.stream()).map(ItemStack::new).toList();
+    }
+
+    private static ItemStack choice(List<ItemStack> stacks, long cycle) {
+        var minecraft = Minecraft.getInstance();
+        var level = minecraft == null ? null : minecraft.level;
+        var choices = stacks.stream().filter(stack -> !stack.isEmpty() && (level == null || stack.isItemEnabled(level.enabledFeatures()))).toList();
+        return choices.isEmpty() ? ItemStack.EMPTY : choices.get((int) Math.floorMod(cycle, (long) choices.size())).copyWithCount(1);
     }
 
     private static ItemStack woodenSlab(long cycle) {

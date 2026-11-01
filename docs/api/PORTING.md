@@ -213,7 +213,12 @@ its warp, and the knowledge of a player saves and syncs it.
 - Pages: text, concealed text, arcane/crucible/infusion/enchantment recipe objects (single or arrays, an
   array cycles once per second), vanilla `Recipe` objects, `ResearchPage(ItemStack)` smelting pages, aspect
   pages, image pages, and `ResearchPage.recipe(ResourceLocation...)` for data-driven recipes.
-  `COMPOUND_CRAFTING` (the wand construct diagrams of the original) is not drawn.
+  `COMPOUND_CRAFTING`, the wand construct diagram of the original, is drawn like the book's own construct
+  pages from the original list `[AspectList vis, Integer width, Integer height, Integer depth, List cells]`
+  (layers from the top; in a layer rows `depth - 1` down to 0, in a row columns `width - 1` down to 0). The
+  1.21.1 constructor is typed `ResearchPage(List<Recipe<?>>)`, so cast the list to a raw `List`. A cell is an
+  `ItemStack`, an item or block, an ore dictionary name, an item tag, an `Ingredient` or a list of these (one
+  per second); `null` draws nothing and an empty stack or air is the original "Empty Space" block.
 - Changing an original entry through its public view works as it did:
   `ResearchCategories.getResearch("NITOR").setSiblings("MY_KEY")` is laid over the original entry.
 - An add-on tab follows the six original ones, in registration order, as in the original.

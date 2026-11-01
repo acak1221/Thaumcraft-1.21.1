@@ -26,8 +26,12 @@ public final class GuiResearchRecipe extends Screen {
     private Map<ResearchDefinition.Page, ThaumcraftRecipeDisplay> recipes = Map.of();
     private int page, left, top, bookWidth, bookHeight, textWidth, textHeight;
     private Button previous, next;
+    private int requestedDescriptor = -1;
+    private List<RecipeItemLinks.Hitbox> itemLinks = List.of();
+    private int renderedPage = -1, renderedWidth, renderedHeight;
+    private net.minecraft.world.level.Level renderedLevel;
     private record Draw(FormattedCharSequence text, ResearchText.Image image, int y, int width, int height) {}
-    private record BookPage(List<Draw> text, ThaumcraftRecipeDisplay recipe) {}
+    private record BookPage(List<Draw> text, ThaumcraftRecipeDisplay recipe, int descriptor) {}
 
     public GuiResearchRecipe(Screen parent, ResearchDefinition research) { this(parent, research, 0); }
     /** Opens the research on the spread that holds {@code startPage}; the reopened page of the book. */
@@ -133,40 +137,51 @@ public final class GuiResearchRecipe extends Screen {
         descriptors = visible;
         recipes = Map.copyOf(resolved);
         layoutPages();
+        itemLinks = List.of();
+        renderedPage = -1;
+        if (requestedDescriptor >= 0) {
+            int spread = spreadForDescriptor(pages.stream().map(BookPage::descriptor).toList(), requestedDescriptor);
+            if (spread >= 0) page = spread;
+            requestedDescriptor = -1;
+        }
         page = Math.max(0, Math.min(page, Math.max(0, (pages.size() - 1) / 2 * 2)));
         if (previous != null && next != null) updateButtons();
     }
     private void layoutPages() {
         pages.clear();
-        List<Draw> current = new ArrayList<>(); int y = 0;
+        List<Draw> current = new ArrayList<>(); int y = 0, pagesDescriptor = -1;
         for (var descriptor : descriptors) {
-            if (!current.isEmpty()) { pages.add(new BookPage(List.copyOf(current), null)); current.clear(); y = 0; }
+            int ordinal = research.pages().indexOf(descriptor);
+            if (!current.isEmpty()) { pages.add(new BookPage(List.copyOf(current), null, pagesDescriptor)); current.clear(); y = 0; }
+            pagesDescriptor = ordinal;
             var recipe = recipes.get(descriptor);
             if (recipe != null) {
-                pages.add(new BookPage(List.of(), recipe));
+                pages.add(new BookPage(List.of(), recipe, ordinal));
                 continue;
             }
             for (var part : ResearchText.parse(Component.translatable(descriptor.textKey()).getString())) {
                 if (part instanceof ResearchText.Text text) {
                     for (var line : font.split(Component.literal(text.value()), textWidth)) {
-                        if (y + font.lineHeight > textHeight) { pages.add(new BookPage(List.copyOf(current), null)); current.clear(); y = 0; }
+                        if (y + font.lineHeight > textHeight) { pages.add(new BookPage(List.copyOf(current), null, ordinal)); current.clear(); y = 0; }
                         current.add(new Draw(line, null, y, 0, font.lineHeight)); y += font.lineHeight;
                     }
                 } else if (part instanceof ResearchText.Image image) {
                     float scale = Math.min(image.scale(), Math.min((float)textWidth / image.width(), (float)(textHeight - 4) / image.height()));
                     int w = Math.max(1, (int)(image.width() * scale)), h = Math.max(1, (int)(image.height() * scale));
-                    if (y + h + 4 > textHeight) { pages.add(new BookPage(List.copyOf(current), null)); current.clear(); y = 0; }
+                    if (y + h + 4 > textHeight) { pages.add(new BookPage(List.copyOf(current), null, ordinal)); current.clear(); y = 0; }
                     current.add(new Draw(null, image, y, w, h)); y += h + 4;
                 } else {
-                    if (y + 8 > textHeight) { pages.add(new BookPage(List.copyOf(current), null)); current.clear(); y = 0; }
+                    if (y + 8 > textHeight) { pages.add(new BookPage(List.copyOf(current), null, ordinal)); current.clear(); y = 0; }
                     current.add(new Draw(null, null, y, 96, 4)); y += font.lineHeight;
                 }
             }
         }
-        if (!current.isEmpty()) pages.add(new BookPage(List.copyOf(current), null));
+        if (!current.isEmpty()) pages.add(new BookPage(List.copyOf(current), null, pagesDescriptor));
     }
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         refreshPages(false); // Also removes unavailable recipes/gated pages while the book stays open.
+        itemLinks = List.of();
+        renderedPage = -1;
         super.renderBackground(graphics, mouseX, mouseY, delta);
         // Original GuiResearchRecipe draws the book sheet and the page icons
         // with the ordinary alpha blend of the 1.7.10 GUI. The plain 1.21.1
@@ -179,7 +194,7 @@ public final class GuiResearchRecipe extends Screen {
         // off.
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        try {
+        try (RecipeItemLinks links = RecipeItemLinks.capture()) {
             graphics.pose().pushPose();
             graphics.pose().translate((width - 256 * 1.3F) / 2, (height - 181 * 1.3F) / 2, 0);
             graphics.pose().scale(1.3F, 1.3F, 1);
@@ -224,10 +239,72 @@ public final class GuiResearchRecipe extends Screen {
                 }
             }
             super.render(graphics, mouseX, mouseY, delta);
-            if (hover != null) hover.render(graphics, font, mouseX, mouseY);
+            itemLinks = links.items();
+            renderedPage = page; renderedWidth = width; renderedHeight = height; renderedLevel = minecraft.level;
+            if (hover != null) {
+                if (!hover.stack().isEmpty() && itemLinks.stream().anyMatch(item -> item.contains(mouseX, mouseY))
+                        && reference(hover.stack()) != null) {
+                    hover = new ThaumcraftRecipeDisplay.Hover(hover.stack(), List.of(
+                            Component.translatable("recipe.clickthrough").withStyle(net.minecraft.ChatFormatting.DARK_GRAY,
+                                    net.minecraft.ChatFormatting.ITALIC)));
+                }
+                hover.render(graphics, font, mouseX, mouseY);
+            }
         } finally {
             RenderSystem.disableBlend();
         }
+    }
+
+    /** API page indices refer to source descriptors; long text and concealed pages alter the rendered page numbers. */
+    static int spreadForDescriptor(List<Integer> layout, int descriptor) {
+        int index = layout.indexOf(descriptor);
+        return index < 0 ? -1 : index / 2 * 2;
+    }
+
+    static GuiResearchRecipe followReference(GuiResearchRecipe current, ResearchDefinition target, int descriptor,
+                                              Set<String> completed) {
+        if (!mayFollow(current, target, descriptor, completed)) return null;
+        GuiResearchRecipe next = new GuiResearchRecipe(current, target);
+        next.requestedDescriptor = descriptor;
+        return next;
+    }
+
+    private static boolean mayFollow(GuiResearchRecipe current, ResearchDefinition target, int descriptor,
+                                     Set<String> completed) {
+        return target != null && !target.key().equals(current.research.key()) && completed.contains(target.key())
+                && ResearchBrowserData.isVisible(target, completed) && descriptor >= 0 && descriptor < target.pages().size()
+                && target.pages().get(descriptor).isVisible(completed);
+    }
+
+    private Object[] reference(net.minecraft.world.item.ItemStack stack) {
+        if (minecraft.player == null || stack.isEmpty()) return null;
+        Object[] reference = thaumcraft.api.ThaumcraftApi.getCraftingRecipeKey(minecraft.player, stack);
+        if (reference == null || reference.length != 2 || !(reference[0] instanceof String key)
+                || !(reference[1] instanceof Integer descriptor)) return null;
+        return mayFollow(this, thaumcraft.common.lib.research.ResearchCatalog.get(key), descriptor,
+                KnowledgeAccess.get(minecraft.player).getResearchComplete()) ? reference : null;
+    }
+
+    @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) return true;
+        refreshPages(false);
+        if (button != 0 || minecraft.player == null || minecraft.screen != this || renderedLevel != minecraft.level
+                || renderedPage != page || renderedWidth != width || renderedHeight != height) return false;
+        Set<String> complete = KnowledgeAccess.get(minecraft.player).getResearchComplete();
+        if (!complete.contains(research.key())) return false;
+        for (RecipeItemLinks.Hitbox item : itemLinks) {
+            if (!item.contains(mouseX, mouseY)) continue;
+            Object[] reference = reference(item.stack());
+            if (reference == null) return false;
+            var target = thaumcraft.common.lib.research.ResearchCatalog.get((String) reference[0]);
+            if (target == null || ThaumcraftRecipeDisplay.resolve(target.pages().get((Integer) reference[1]),
+                    target.key(), minecraft.level) == null) return false;
+            GuiResearchRecipe next = followReference(this, target, (Integer) reference[1], complete);
+            if (next == null) return false;
+            minecraft.setScreen(next);
+            return true;
+        }
+        return false;
     }
     /** Original TCFontRenderer.renderSplitString: <LINE/> blits (24,184), 96x4. */
     private static void rule(GuiGraphics graphics, int x, int y) {
@@ -261,9 +338,17 @@ public final class GuiResearchRecipe extends Screen {
     // second time: their explicit background pass is at the start of render.
     @Override public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {}
     @Override public void onClose() {
-        // Back to the map: the next opening shows the map, not this page.
+        // Back through recipe references, then to the map; the next opening shows the map.
         thaumcraft.client.lib.ResearchBookState.forgetPage();
-        minecraft.setScreen(parent);
+        minecraft.setScreen(backDestination(minecraft.player == null ? Set.of()
+                : KnowledgeAccess.get(minecraft.player).getResearchComplete()));
+    }
+    Screen backDestination(Set<String> completed) {
+        Screen destination = parent;
+        while (destination instanceof GuiResearchRecipe previous && !completed.contains(previous.research.key())) {
+            destination = previous.parent;
+        }
+        return destination;
     }
     @Override public boolean isPauseScreen() { return false; }
 }

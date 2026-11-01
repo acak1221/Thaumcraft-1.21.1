@@ -1,10 +1,11 @@
 package thaumcraft.common.items.armor;
 
 import dev.architectury.event.events.common.PlayerEvent;
-import java.util.Collections;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.WeakHashMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,7 +28,10 @@ public final class Hover {
     public static final int EFFICIENCY=360;
     public interface ClientEffects {void tick(Player player,ItemStack armor,boolean hovering);void forget(Player player);}
     private static ClientEffects effects=new ClientEffects(){public void tick(Player p,ItemStack s,boolean h){}public void forget(Player p){}};
-    private static final Map<Player,State> STATES=Collections.synchronizedMap(new WeakHashMap<>());
+    // Entity.equals/hashCode use the numeric entity id, shared by integrated client/server players
+    // and reusable by later worlds. A grant belongs to one Java player instance only.
+    private static final ReferenceQueue<Player> COLLECTED = new ReferenceQueue<>();
+    private static final Map<PlayerKey,State> STATES = new HashMap<>();
     private static boolean initialized;
     private record FlightGrant(boolean mayFly,boolean flying,GameType mode) {}
     private static final class State {boolean desired,executing;FlightGrant grant;State(boolean desired){this.desired=desired;}}
@@ -37,7 +41,20 @@ public final class Hover {
     private static ItemStack armor(Player player) {return player.getItemBySlot(EquipmentSlot.CHEST);}
     public static boolean hasHarness(Player player) {return HarnessData.isHarness(armor(player));}
     private static boolean canonical(ServerPlayer player) {return player.server.isSameThread()&&player.server.getPlayerList().getPlayer(player.getUUID())==player&&player.isAlive()&&!player.isRemoved()&&!player.hasDisconnected()&&!player.isSpectator();}
-    private static State state(Player player,ItemStack armor) {return STATES.computeIfAbsent(player,ignored->new State(HarnessData.enabled(armor)));}
+    private static final class PlayerKey extends WeakReference<Player> {
+        private final int hash;
+        PlayerKey(Player player, boolean tracked) { super(player, tracked ? COLLECTED : null); hash=System.identityHashCode(player); }
+        @Override public int hashCode() { return hash; }
+        @Override public boolean equals(Object other) { return this==other || other instanceof PlayerKey key && get()!=null && get()==key.get(); }
+    }
+    private static void expunge() { PlayerKey key; while((key=(PlayerKey)COLLECTED.poll())!=null)STATES.remove(key); }
+    private static synchronized State getState(Player player) { expunge(); return STATES.get(new PlayerKey(player,false)); }
+    private static synchronized State removeState(Player player) { expunge(); return STATES.remove(new PlayerKey(player,false)); }
+    private static synchronized State state(Player player,ItemStack armor) {
+        State state=getState(player);
+        if(state==null) {state=new State(HarnessData.enabled(armor));STATES.put(new PlayerKey(player,true),state);}
+        return state;
+    }
     public static boolean girdle(Player player) {var belt=PlayerAccessories.get(player);return !belt.isRejected()&&belt.getItem(3).getCount()==1&&belt.getItem(3).getItem() instanceof ItemGirdleHover;}
     /** The boots and mining hooks query the REAL worn, funded harness state.
      * A stale map entry, foreign player id or detached item cannot grant them. */
@@ -45,7 +62,7 @@ public final class Hover {
         ItemStack armor=armor(player);if(!HarnessData.isHarness(armor)||HarnessData.fuel(armor)==0)return false;
         try {HarnessData.charge(armor);}catch(IllegalArgumentException invalid){return false;}
         if(player.level().isClientSide)return HarnessData.enabled(armor);
-        State state=STATES.get(player);return state==null?HarnessData.enabled(armor):state.desired;
+        State state=getState(player);return state==null?HarnessData.enabled(armor):state.desired;
     }
     /** Only the sender is accepted. The packet carries no player id or flight
      * permission. Actual survival gear, jar and source are resolved here. */
@@ -62,7 +79,7 @@ public final class Hover {
         ItemStack armor=armor(player);
         if(player.level().isClientSide) {effects.tick(player,armor,getHover(player));return;}
         if(!(player instanceof ServerPlayer server)||!canonical(server)) {forget(player);return;}
-        State state=STATES.get(player);
+        State state=getState(player);
         if(!HarnessData.isHarness(armor)) {
             if(state!=null){state.desired=false;release(server,state,false);}return;
         }
@@ -123,14 +140,16 @@ public final class Hover {
      * into a permanent native mayfly permission after restart/crash. The saved
      * harness mode still restores through a newly paid worn tick on login. */
     public static void saveIntrinsicFlight(Player player,CompoundTag tag) {
-        State state=STATES.get(player);if(state==null||state.grant==null||!(player instanceof ServerPlayer server))return;
+        State state=getState(player);if(state==null||state.grant==null||!(player instanceof ServerPlayer server))return;
         FlightGrant grant=state.grant;if(server.gameMode.getGameModeForPlayer()!=grant.mode()||player.getAbilities().instabuild||player.isSpectator())return;
         if(tag.contains("abilities",10)) {CompoundTag abilities=tag.getCompound("abilities");abilities.putBoolean("mayfly",grant.mayFly());abilities.putBoolean("flying",grant.flying());}
     }
     public static void forget(Player player) {
         // The client disconnect event carries no player, so there is nothing to release then.
         if(player==null)return;
-        State state=STATES.remove(player);if(state!=null&&player instanceof ServerPlayer server)release(server,state,false);
+        // CLIENT_PLAYER_QUIT can precede integrated-server logout/save. It must never consume
+        // the authoritative grant that the server still needs to revoke and strip from its save.
+        if(player instanceof ServerPlayer server) {State state=removeState(player);if(state!=null)release(server,state,false);}
         TravellerBoots.restoreStep(player);if(player.level().isClientSide)effects.forget(player);
     }
 }

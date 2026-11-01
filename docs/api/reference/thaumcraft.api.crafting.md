@@ -298,6 +298,13 @@ public InfusionStackRecipe nativeRecipe()
 
 The native recipe behind this view.
 
+<a id="infusionrecipe-previewrecipe"></a>
+```java
+public InfusionStackRecipe previewRecipe()
+```
+
+The book's current sample, without crafting or spending anything. Programmatic recipes read their live input, components and input-aware virtual getters; a view of a data recipe retains its native tag alternatives, component predicates and result patch. Null or empty input/output has no display sample.
+
 <a id="infusionrecipe-of"></a>
 ```java
 public static InfusionRecipe of(InfusionStackRecipe recipe)

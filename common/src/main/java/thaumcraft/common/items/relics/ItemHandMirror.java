@@ -18,7 +18,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -26,12 +25,13 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.container.ContainerHandMirror;
 import thaumcraft.common.lib.crafting.DeviceContainerRules;
 import thaumcraft.common.lib.crafting.DeviceContainerRules.HandMirrorTarget;
 import thaumcraft.common.lib.items.EquipmentRules;
-import thaumcraft.common.lib.tiles.TileParityRules;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.tiles.TileMirror;
 
 /**
@@ -158,38 +158,48 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
      * of the mirror it is linked to, in the world of that mirror.
      */
     @Override public boolean transport(ItemStack mirror, ItemStack items, Player player, Level level) {
-        MirrorLink link = link(mirror);
-        if (link == null || items == null || items.isEmpty()) return false;
-        ServerLevel target = targetWorld(level, link);
-        boolean mirrorFound = target != null && target.getBlockEntity(new BlockPos(link.x(), link.y(), link.z())) instanceof TileMirror;
-        HandMirrorTarget outcome = DeviceContainerRules.handMirrorTarget(link != null, target != null, mirrorFound);
-        if (outcome != HandMirrorTarget.MIRROR) {
-            if (DeviceContainerRules.handMirrorClearsLink(outcome)) {
-                // Oracle ItemHandMirror:169-172 - the link dies with its mirror.
-                mirror.remove(ThaumcraftLegacyItems.MIRROR_LINK.get());
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), ZAP, SoundSource.PLAYERS, 1.0F, 0.8F);
-                player.displayClientMessage(Component.translatable("tc.handmirrorerror").withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.ITALIC), false);
+        if (!(level instanceof ServerLevel source) || !source.getServer().isSameThread()) return false;
+        boolean published = false;
+        try {
+            MirrorLink link = link(mirror);
+            if (link == null || items == null || items.isEmpty()) return false;
+            ServerLevel target = targetWorld(level, link);
+            boolean mirrorFound = target != null && target.getBlockEntity(new BlockPos(link.x(), link.y(), link.z())) instanceof TileMirror;
+            HandMirrorTarget outcome = DeviceContainerRules.handMirrorTarget(link != null, target != null, mirrorFound);
+            if (outcome != HandMirrorTarget.MIRROR) {
+                if (DeviceContainerRules.handMirrorClearsLink(outcome)) {
+                    // Oracle ItemHandMirror:169-172 - the link dies with its mirror.
+                    mirror.remove(ThaumcraftLegacyItems.MIRROR_LINK.get());
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), ZAP, SoundSource.PLAYERS, 1.0F, 0.8F);
+                    player.displayClientMessage(Component.translatable("tc.handmirrorerror").withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.ITALIC), false);
+                }
+                return false;
             }
-            return false;
+            BlockPos pos = new BlockPos(link.x(), link.y(), link.z());
+            Direction facing = ((TileMirror) target.getBlockEntity(pos)).getFacing();
+            // Oracle ItemHandMirror:175-181 - the item appears in front of the mirror.
+            Vec3 position = new Vec3(pos.getX() + 0.5D - facing.getStepX() * EquipmentRules.MIRROR_PUSH_OFFSET,
+                    pos.getY() + 0.5D - facing.getStepY() * EquipmentRules.MIRROR_PUSH_OFFSET,
+                    pos.getZ() + 0.5D - facing.getStepZ() * EquipmentRules.MIRROR_PUSH_OFFSET);
+            Vec3 motion = new Vec3(facing.getStepX() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
+                    facing.getStepY() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
+                    facing.getStepZ() * (float) EquipmentRules.MIRROR_ITEM_SPEED);
+            // Oracle ItemHandMirror:147 - the 1.7.10 field is Entity.timeUntilPortal, the
+            // portal cooldown, not the pick up delay. The native tree used the pick up delay
+            // and therefore kept the item out of the player's reach for twenty ticks.
+            // Publication itself has no ADD callbacks. After return the destination queue is the sole owner; cancellation,
+            // a close/reentry callback, or a later exception cannot refund the same stock back into the source menu.
+            DeferredItemDrops.enqueueMirrorOutput(target, pos, position, motion, items);
+            published = true;
+            DeferredItemDrops.tick(target); // Preserve immediate emission when admission succeeds; refusal remains owned for retry.
+            // Oracle ItemHandMirror:183-184 - the portal sound and the sound of the mirror.
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.1F, 1.0F);
+            target.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 1.0F, 1.0F);
+            return true;
+        } catch (RuntimeException | Error failure) {
+            thaumcraft.common.Thaumcraft.LOG.warn("Hand mirror transport failed (output published={})", published, failure);
+            return published; // A feedback failure after publication must never restore a second source copy.
         }
-        BlockPos pos = new BlockPos(link.x(), link.y(), link.z());
-        Direction facing = ((TileMirror) target.getBlockEntity(pos)).getFacing();
-        // Oracle ItemHandMirror:175-181 - the item appears in front of the mirror.
-        ItemEntity item = new ItemEntity(target, pos.getX() + 0.5D - facing.getStepX() * EquipmentRules.MIRROR_PUSH_OFFSET,
-                pos.getY() + 0.5D - facing.getStepY() * EquipmentRules.MIRROR_PUSH_OFFSET,
-                pos.getZ() + 0.5D - facing.getStepZ() * EquipmentRules.MIRROR_PUSH_OFFSET, items.copy());
-        item.setDeltaMovement(facing.getStepX() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
-                facing.getStepY() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
-                facing.getStepZ() * (float) EquipmentRules.MIRROR_ITEM_SPEED);
-        // Oracle ItemHandMirror:147 - the 1.7.10 field is Entity.timeUntilPortal, the
-        // portal cooldown, not the pick up delay. The native tree used the pick up delay
-        // and therefore kept the item out of the player's reach for twenty ticks.
-        item.setPortalCooldown(TileParityRules.MIRROR_PORTAL_COOLDOWN);
-        target.addFreshEntity(item);
-        // Oracle ItemHandMirror:183-184 - the portal sound and the sound of the mirror.
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.1F, 1.0F);
-        target.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 1.0F, 1.0F);
-        return true;
     }
 
     private static String blockId(Level level, BlockPos pos) {

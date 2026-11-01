@@ -713,8 +713,8 @@ public final class ThaumcraftRecipeDisplay {
         }
     }
 
-    /** One stable holder per recipe object, so an open book does not lay its pages out again every frame. */
-    private static final Map<Object, RecipeHolder<?>> ADDON_HOLDERS = java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+    /** Both sides are weak: a holder contains its recipe, and must never keep its own weak key alive. */
+    private static final Map<Object, java.lang.ref.WeakReference<RecipeHolder<?>>> ADDON_HOLDERS = new java.util.WeakHashMap<>();
 
     private static void addonRecipes(Object recipe, Level level, List<ThaumcraftRecipeDisplay> choices) {
         switch (recipe) {
@@ -722,22 +722,65 @@ public final class ThaumcraftRecipeDisplay {
             case Object[] array -> { for (Object element : array) addonRecipes(element, level, choices); }
             case Iterable<?> list -> { for (Object element : list) addonRecipes(element, level, choices); }
             case RecipeHolder<?> holder -> addResolved(resolve(holder, level), choices);
-            case thaumcraft.api.crafting.ShapedArcaneRecipe arcane -> addNative(arcane.nativeRecipe(), level, choices);
-            case thaumcraft.api.crafting.ShapelessArcaneRecipe arcane -> addNative(arcane.nativeRecipe(), level, choices);
-            case thaumcraft.api.crafting.CrucibleRecipe crucible -> addNative(crucible.nativeRecipe(), level, choices);
-            case thaumcraft.api.crafting.InfusionRecipe infusion -> addNative(infusion.nativeRecipe(), level, choices);
-            case thaumcraft.api.crafting.InfusionEnchantmentRecipe infusion -> addNative(infusion.nativeRecipe(), level, choices);
-            case net.minecraft.world.item.crafting.Recipe<?> vanilla -> addNative(vanilla, level, choices);
+            case thaumcraft.api.crafting.ShapedArcaneRecipe arcane -> addNative(arcane, arcane.nativeRecipe(), level, choices);
+            case thaumcraft.api.crafting.ShapelessArcaneRecipe arcane -> addNative(arcane, arcane.nativeRecipe(), level, choices);
+            case thaumcraft.api.crafting.CrucibleRecipe crucible -> addNative(crucible, crucible.nativeRecipe(), level, choices);
+            case thaumcraft.api.crafting.InfusionRecipe infusion -> addNative(infusion, infusion.previewRecipe(), level, choices);
+            case thaumcraft.api.crafting.InfusionEnchantmentRecipe infusion -> addNative(infusion, infusion.nativeRecipe(), level, choices);
+            case net.minecraft.world.item.crafting.Recipe<?> vanilla -> addNative(vanilla, vanilla, level, choices);
             default -> { }
         }
     }
 
-    private static void addNative(net.minecraft.world.item.crafting.Recipe<?> recipe, Level level, List<ThaumcraftRecipeDisplay> choices) {
+    private static void addNative(Object owner, net.minecraft.world.item.crafting.Recipe<?> recipe, Level level, List<ThaumcraftRecipeDisplay> choices) {
         if (recipe == null) return;
-        RecipeHolder<?> holder = ADDON_HOLDERS.computeIfAbsent(recipe, value -> new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath(
-                "thaumcraft", "api/page/" + Integer.toHexString(System.identityHashCode(value))),
-                (net.minecraft.world.item.crafting.Recipe<?>) value));
-        addResolved(resolve(holder, level), choices);
+        addResolved(resolve(addonHolder(owner, recipe), level), choices);
+    }
+
+    /** The API page owns the identity, even when its native snapshot is recreated on each call. */
+    static RecipeHolder<?> addonHolder(Object owner, net.minecraft.world.item.crafting.Recipe<?> recipe) {
+        synchronized (ADDON_HOLDERS) {
+            var reference = ADDON_HOLDERS.get(owner);
+            RecipeHolder<?> previous = reference == null ? null : reference.get();
+            if (previous != null && sameAddonRecipe(previous.value(), recipe)) return previous;
+            RecipeHolder<?> holder = new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath("thaumcraft",
+                    "api/page/" + Integer.toHexString(System.identityHashCode(owner))), recipe);
+            ADDON_HOLDERS.put(owner, new java.lang.ref.WeakReference<>(holder));
+            return holder;
+        }
+    }
+
+    /** Compare the actual display fields, including stack components, without relying on ItemStack identity. */
+    private static boolean sameAddonRecipe(net.minecraft.world.item.crafting.Recipe<?> first,
+                                           net.minecraft.world.item.crafting.Recipe<?> second) {
+        if (first == second) return true;
+        if (first instanceof ArcaneShapedRecipe a && second instanceof ArcaneShapedRecipe b)
+            return java.util.Objects.equals(a.research(), b.research()) && a.pattern().equals(b.pattern()) && a.vis().equals(b.vis())
+                    && a.mirrored() == b.mirrored() && ItemStack.matches(a.result(), b.result())
+                    && sameIngredients(a.getIngredients(), b.getIngredients());
+        if (first instanceof ArcaneShapelessRecipe a && second instanceof ArcaneShapelessRecipe b)
+            return java.util.Objects.equals(a.research(), b.research()) && a.vis().equals(b.vis())
+                    && ItemStack.matches(a.result(), b.result()) && sameIngredients(a.ingredients(), b.ingredients());
+        if (first instanceof CrucibleRecipe a && second instanceof CrucibleRecipe b)
+            return java.util.Objects.equals(a.research(), b.research()) && a.aspects().equals(b.aspects())
+                    && ItemStack.matches(a.result(), b.result()) && sameIngredients(a.getIngredients(), b.getIngredients());
+        if (first instanceof InfusionStackRecipe a && second instanceof InfusionStackRecipe b)
+            return java.util.Objects.equals(a.research(), b.research()) && a.aspects().equals(b.aspects())
+                    && a.instability() == b.instability() && ItemStack.matches(a.result(), b.result())
+                    && a.inputDamage().equals(b.inputDamage()) && a.resultPatch().equals(b.resultPatch())
+                    && a.componentPredicates().equals(b.componentPredicates()) && sameIngredients(a.getIngredients(), b.getIngredients());
+        return false;
+    }
+
+    private static boolean sameIngredients(List<Ingredient> first, List<Ingredient> second) {
+        if (first.size() != second.size()) return false;
+        for (int index = 0; index < first.size(); index++) {
+            if (first.get(index) == second.get(index)) continue;
+            ItemStack[] a = first.get(index).getItems(), b = second.get(index).getItems();
+            if (a.length != b.length) return false;
+            for (int choice = 0; choice < a.length; choice++) if (!ItemStack.matches(a[choice], b[choice])) return false;
+        }
+        return true;
     }
 
     private static void addResolved(ThaumcraftRecipeDisplay display, List<ThaumcraftRecipeDisplay> choices) {
@@ -868,7 +911,7 @@ public final class ThaumcraftRecipeDisplay {
                 if (enabled.isEmpty()) continue;
                 ItemStack stack = enabled.get((int) Math.floorMod(cycle, (long) enabled.size())).copy();
                 int sx = 16 + i % gridWidth * 32, sy = (arcane ? 66 : 76) + i / gridWidth * 32;
-                drawItem(graphics, font, stack, sx, sy);
+                drawIngredient(graphics, font, stack, sx, sy);
                 if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
             }
             if (arcane) {
@@ -934,7 +977,7 @@ public final class ThaumcraftRecipeDisplay {
                 ItemStack stack = input.getItem(slot);
                 if (stack.isEmpty()) continue;
                 int sx = 16 + slot % 3 * 32, sy = 66 + slot / 3 * 32;
-                drawItem(graphics, font, stack, sx, sy);
+                drawIngredient(graphics, font, stack, sx, sy);
                 if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
             }
             List<String> tags = WandData.PRIMALS.stream().filter(tag -> vis.getOrDefault(tag, 0) > 0)
@@ -988,7 +1031,7 @@ public final class ThaumcraftRecipeDisplay {
                 ItemStack stack = syntheticInputs.get(i);
                 if (stack.isEmpty()) continue;
                 int sx = 16 + i % 3 * 32, sy = 76 + i / 3 * 32;
-                drawItem(graphics, font, stack, sx, sy);
+                drawIngredient(graphics, font, stack, sx, sy);
                 if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
             }
         } finally {
@@ -1071,7 +1114,7 @@ public final class ThaumcraftRecipeDisplay {
             drawItem(graphics, font, result, 48, 28);
             if (inside(mx, my, 48, 28, 16, 16)) hover = new Hover(result, List.of());
             ItemStack center = declaredChoice(infusion.input(), level, cycle);
-            drawItem(graphics, font, center, 48, 94);
+            drawIngredient(graphics, font, center, 48, 94);
             if (inside(mx, my, 48, 94, 16, 16)) hover = new Hover(center, List.of());
             int count = infusion.components().size();
             // Source's 360 / length is integer division before assignment to float.
@@ -1084,7 +1127,7 @@ public final class ThaumcraftRecipeDisplay {
                 int sy = 102 + (int)(Math.sin(angle) * 40) - 8;
                 ItemStack component = selected.get(i).displayStack(declaredChoice(infusion.components().get(i), level, cycle));
                 if (!component.isEmpty()) infusion.componentDamage(i).ifPresent(component::setDamageValue);
-                drawItem(graphics, font, component, sx, sy);
+                drawIngredient(graphics, font, component, sx, sy);
                 if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
             }
             var tags = infusion.aspects().keySet().stream().sorted().toList();
@@ -1153,7 +1196,7 @@ public final class ThaumcraftRecipeDisplay {
                 double angle = (-90 + i * slice) / 180F * (float)Math.PI;
                 int sx = 56 + (int)(Math.cos(angle) * 40) - 8, sy = 102 + (int)(Math.sin(angle) * 40) - 8;
                 ItemStack component = selected.get(i).displayStack(declaredChoice(infusion.components().get(i), level, cycle));
-                drawItem(graphics, font, component, sx, sy);
+                drawIngredient(graphics, font, component, sx, sy);
                 if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
             }
             var tags = infusion.aspects().keySet().stream().sorted().toList();
@@ -1217,7 +1260,7 @@ public final class ThaumcraftRecipeDisplay {
             ItemStack[] choices = crucible.catalyst().getItems();
             if (choices.length > 0) {
                 ItemStack catalyst = choices[(int) Math.floorMod(cycle, (long) choices.length)].copyWithCount(1);
-                drawItem(graphics, font, catalyst, 26, 72);
+                drawIngredient(graphics, font, catalyst, 26, 72);
                 if (inside(mx, my, 26, 72, 16, 16)) hover = new Hover(catalyst, List.of());
             }
             var tags = crucible.aspects().keySet().stream().sorted().toList();
@@ -1407,7 +1450,7 @@ public final class ThaumcraftRecipeDisplay {
             RenderSystem.enableBlend();
             graphics.blit(OVERLAY, 0, 28, 112, 128, 0, 384, 112, 128, 512, 512);
             RenderSystem.disableBlend();
-            drawItem(graphics, font, smelting.input(), 48, 64);
+            drawIngredient(graphics, font, smelting.input(), 48, 64);
             if (inside(mx, my, 48, 64, 16, 16)) hover = new Hover(smelting.input(), List.of());
             drawItem(graphics, font, smelting.result(), 48, 144);
             if (inside(mx, my, 48, 144, 16, 16)) hover = new Hover(smelting.result(), List.of());
@@ -1454,6 +1497,11 @@ public final class ThaumcraftRecipeDisplay {
         graphics.renderItemDecorations(font, stack, x, y);
     }
 
+    static void drawIngredient(GuiGraphics graphics, Font font, ItemStack stack, int x, int y) {
+        RecipeItemLinks.record(graphics.pose(), stack, x, y);
+        drawItem(graphics, font, stack, x, y);
+    }
+
     private static void drawCenteredFit(GuiGraphics graphics, Font font, Component text, int center, int y, int width, int color) {
         float scale = Math.min(1, width / (float) Math.max(1, font.width(text)));
         graphics.pose().pushPose();
@@ -1496,7 +1544,12 @@ public final class ThaumcraftRecipeDisplay {
 
     public record Hover(ItemStack stack, List<Component> lines) {
         public void render(GuiGraphics graphics, Font font, int mouseX, int mouseY) {
-            if (!stack.isEmpty()) graphics.renderTooltip(font, stack, mouseX, mouseY);
+            if (!stack.isEmpty() && !lines.isEmpty()) {
+                var tooltip = new ArrayList<>(net.minecraft.client.gui.screens.Screen.getTooltipFromItem(
+                        net.minecraft.client.Minecraft.getInstance(), stack));
+                tooltip.addAll(lines);
+                graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY);
+            } else if (!stack.isEmpty()) graphics.renderTooltip(font, stack, mouseX, mouseY);
             else graphics.renderTooltip(font, lines.stream()
                     .flatMap(line -> font.split(line, Math.max(40, Math.min(260, graphics.guiWidth() - 24))).stream()).toList(), mouseX, mouseY);
         }

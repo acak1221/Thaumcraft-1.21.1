@@ -40,8 +40,8 @@ public final class ResearchManager {
     /**
      * Oracle {@code ResearchManager:497-527} - {@code completeResearch(player, key)}.
      *
-     * <p>The original completed the research, its siblings and its parents and paid the warp of
-     * the definition; the native completion path does the same.</p>
+     * <p>Completes only the requested research and pays its own warp. Parent/sibling recursion belongs to the
+     * privileged command, not this method.</p>
      *
      * @param player the player
      * @param key    the key of the research
@@ -50,7 +50,14 @@ public final class ResearchManager {
     public boolean completeResearch(Player player, String key) {
         if (player == null || key == null) return false;
         var knowledge = KnowledgeAccess.get(player);
-        if (!ResearchAdministration.grant(knowledge, key)) return false;
+        var definition = ResearchCatalog.get(key);
+        if (definition == null || !definition.isEnabled() || !knowledge.addResearch(key)) return false;
+        int warp = definition.currentWarp();
+        if (player instanceof ServerPlayer && !thaumcraft.common.lib.WarpEvents.isWussMode() && warp > 0) {
+            knowledge.addWarpPerm(warp - warp / 2);
+            knowledge.addWarpSticky(warp / 2);
+            knowledge.setWarpCounter(knowledge.getTotalWarp());
+        }
         sync(player);
         return true;
     }
@@ -60,11 +67,11 @@ public final class ResearchManager {
      *
      * @param player the player
      * @param aspect the aspect
-     * @param amount the amount of the aspect
+     * @param amount the absolute research point total, including zero and signed-short values
      */
     public void completeAspect(Player player, Aspect aspect, short amount) {
         if (player == null || aspect == null) return;
-        KnowledgeAccess.get(player).addAspectPool(aspect.getTag(), amount);
+        KnowledgeAccess.get(player).setAspectPool(aspect.getTag(), amount);
         sync(player);
     }
 

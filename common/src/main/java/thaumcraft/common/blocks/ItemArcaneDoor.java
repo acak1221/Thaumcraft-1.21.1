@@ -29,13 +29,22 @@ public final class ItemArcaneDoor extends Item {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
-        if (player == null) return InteractionResult.PASS;
-        BlockPos lower = pos;
+        if (player == null || player.isSpectator() || context.getClickedFace() != Direction.UP) return InteractionResult.PASS;
+        // Oracle ItemArcaneDoor.onItemUse increments the clicked ground's Y.
+        // This is a plain Item: BlockPlaceContext never offsets it for us.
+        BlockPos lower = pos.above();
+        BlockPos upper = lower.above();
+        if (!level.isInWorldBounds(lower) || !level.isInWorldBounds(upper)
+                || !level.hasChunkAt(lower) || !level.hasChunkAt(upper)
+                || !level.getWorldBorder().isWithinBounds(lower) || !level.getWorldBorder().isWithinBounds(upper)
+                || !level.mayInteract(player, lower) || !level.mayInteract(player, upper)
+                || !player.mayUseItemAt(lower, Direction.UP, stack) || !player.mayUseItemAt(upper, Direction.UP, stack)) return InteractionResult.FAIL;
         if (!level.getBlockState(lower.below()).isFaceSturdy(level, lower.below(), Direction.UP)) return InteractionResult.PASS;
         if (!level.getBlockState(lower).isAir() || !level.getBlockState(lower.above()).isAir()) return InteractionResult.PASS;
+        if (level.isClientSide) return InteractionResult.SUCCESS;
         Direction facing = player.getDirection().getOpposite();
         boolean flipped = shouldFlip(level, lower, facing);
-        placeDoor(level, lower, facing, flipped, player);
+        if (!placeOwnedDoor(level, lower, facing, flipped, player)) return InteractionResult.FAIL;
         if (!player.getAbilities().instabuild) stack.shrink(1);
         return InteractionResult.CONSUME;
     }
@@ -56,15 +65,24 @@ public final class ItemArcaneDoor extends Item {
 
     /** ItemArcaneDoor:57-83 - the two halves are placed with the owner. */
     public static void placeDoor(Level level, BlockPos pos, Direction facing, boolean flipped, Player player) {
+        placeOwnedDoor(level, pos, facing, flipped, player);
+    }
+
+    private static boolean placeOwnedDoor(Level level, BlockPos pos, Direction facing, boolean flipped, Player player) {
         Block door = ThaumcraftEldritchBlocks.ARCANE_DOOR.get();
         BlockState lower = door.defaultBlockState()
                 .setValue(BlockArcaneDoor.FACING, facing)
                 .setValue(BlockArcaneDoor.HALF, Half.BOTTOM)
                 .setValue(BlockArcaneDoor.OPEN, Boolean.FALSE)
                 .setValue(BlockArcaneDoor.FLIP, flipped);
-        level.setBlock(pos, lower, Block.UPDATE_ALL);
         BlockState upper = lower.setValue(BlockArcaneDoor.HALF, Half.TOP);
-        level.setBlock(pos.above(), upper, Block.UPDATE_ALL);
+        // As in the original, publish neighbours only after both halves and
+        // their ownership exist. A failed write must not consume the item.
+        if (!level.setBlock(pos, lower, Block.UPDATE_CLIENTS)) return false;
+        if (!level.getBlockState(pos.above()).isAir() || !level.setBlock(pos.above(), upper, Block.UPDATE_CLIENTS)) {
+            if (level.getBlockState(pos) == lower) level.removeBlock(pos, false);
+            return false;
+        }
         if (level.getBlockEntity(pos) instanceof TileOwned owned) {
             owned.setOwner(player.getGameProfile().getName());
             owned.setChanged();
@@ -73,5 +91,10 @@ public final class ItemArcaneDoor extends Item {
             owned.setOwner(player.getGameProfile().getName());
             owned.setChanged();
         }
+        level.sendBlockUpdated(pos, lower, lower, Block.UPDATE_CLIENTS);
+        level.sendBlockUpdated(pos.above(), upper, upper, Block.UPDATE_CLIENTS);
+        level.updateNeighborsAt(pos, door);
+        level.updateNeighborsAt(pos.above(), door);
+        return true;
     }
 }

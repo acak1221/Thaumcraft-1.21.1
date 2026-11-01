@@ -211,6 +211,7 @@ public final class Thaumcraft {
         TickEvent.SERVER_LEVEL_POST.register(level -> {
             NodeHarvest.endTick(level);
             DeferredItemDrops.tick(level);
+            thaumcraft.common.lib.utils.ExperienceOrbQueue.tick(level);
             thaumcraft.common.lib.GrowthLampTicks.tick(level);
             thaumcraft.common.lib.utils.AspectOrbQueue.tick(level);
             // The chunk regeneration queue of the original (oracle ServerTickEventsFML:83-104):
@@ -225,6 +226,7 @@ public final class Thaumcraft {
             VisNetFxNetworking.clearLevel(level);
         });
         LifecycleEvent.SERVER_STOPPED.register(server -> {
+            thaumcraft.api.ThaumcraftApi.clearTagObjectTags();
             thaumcraft.api.internal.ThaumcraftInternalMethods.serverStopped(server);
             thaumcraft.common.lib.events.ChunkRegeneration.clearServer(server);
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStopped(server);
@@ -241,12 +243,13 @@ public final class Thaumcraft {
             thaumcraft.api.internal.ThaumcraftInternalMethods.serverStarted(server);
             // Research an add-on registered or changed after registering it joins the live catalogue.
             thaumcraft.common.lib.research.AddonResearch.refresh();
-            // Object tags an add-on registered for an item tag at mod initialization, before tags were bound.
-            thaumcraft.api.ThaumcraftApi.applyTagObjectTags();
             // Original ConfigAspects ran in postInit, after the add-ons registered their aspects: their
             // Wisp rows belong to the public entity list before anything is scanned.
             thaumcraft.common.lib.research.EntityAspectBindings.registerLateWispVariants();
             ObjectAspectCatalog.validateAgainstRegistries();
+            // Bind the derived layer after explicit catalogue defaults exist.
+            // Native item-tag rebinds refresh it again on datapack reload.
+            thaumcraft.api.ThaumcraftApi.applyTagObjectTags();
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);
             // The original smelting bonus catalogue is bound to the data pack

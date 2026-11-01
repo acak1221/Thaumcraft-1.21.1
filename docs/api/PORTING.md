@@ -109,7 +109,7 @@ What add-ons reached through `ResearchManager` or `Thaumcraft.proxy.getPlayerKno
 | `ResearchManager.isResearchComplete(name, key)` | `isResearchComplete(player, key)` (the name form still works for online players) |
 | `ResearchManager.completeResearch(player, key)` + packet | `completeResearch(player, key)` (server; pays its warp, syncs) |
 | `getResearchForPlayer(name)` | `getCompletedResearch(player)` |
-| `completeAspect(player, aspect, amount)` | `addAspectPool(player, aspect, amount)` / `getAspectPool(player, aspect)` |
+| `completeAspect(player, aspect, total)` (absolute total) | Retained with its absolute-total contract; `addAspectPool(player, aspect, delta)` adds a delta instead, and `getAspectPool(player, aspect)` reads the current total |
 | `hasDiscoveredAspect`, `getDiscoveredAspects` | same names, player forms added |
 | `getWarpPerm/Sticky/Temp/Total(name)` | `getWarpPermanent/Sticky/Temporary/Total(player)` |
 | `Thaumcraft.addWarpToPlayer`, `addStickyWarpToPlayer` | `addWarpToPlayer(player, amount, temporary)`, `addStickyWarpToPlayer` |

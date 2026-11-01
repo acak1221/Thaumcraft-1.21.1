@@ -59,6 +59,28 @@ public class InfusionRecipe {
     public InfusionStackRecipe nativeRecipe() { return nativeRecipe; }
 
     /**
+     * The book's current sample, without crafting or spending anything. Programmatic recipes read their live
+     * input, components and input-aware virtual getters; a view of a data recipe retains its native tag
+     * alternatives, component predicates and result patch. Null or empty input/output has no display sample.
+     */
+    public InfusionStackRecipe previewRecipe() {
+        if (nativeView) return nativeRecipe;
+        ItemStack input = getRecipeInput();
+        if (input == null || input.isEmpty()) return null;
+        ItemStack sample = input.copy();
+        ItemStack output = assembleOutput(sample.copy());
+        if (output.isEmpty()) return null;
+        List<Ingredient> ingredients = new ArrayList<>();
+        ItemStack[] components = getComponents();
+        if (components != null) for (ItemStack component : components) {
+            if (component == null || component.isEmpty()) return null;
+            ingredients.add(ArcaneRecipes.ingredient(component.copy()));
+        }
+        return new InfusionStackRecipe(getResearch(), ArcaneRecipes.ingredient(sample), ingredients,
+                ArcaneRecipes.aspectCosts(getAspects(sample.copy())), getInstability(sample.copy()), output);
+    }
+
+    /**
      * The public view of a native infusion recipe.
      *
      * <p>Forced 1.21.1 change: the native recipe of the recipe manager is the real one, with its own

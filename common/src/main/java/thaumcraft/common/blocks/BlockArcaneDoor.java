@@ -114,7 +114,7 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
         // The original door has no onBlockActivated at all, so it never swallowed
         // the click: a wand click reached ItemWandCasting:400-415, which takes the
         // door back. The native door must leave that click to the wand as well.
-        if (holdsWand(player)) return InteractionResult.PASS;
+        if (holdsWand(player) || player.getMainHandItem().getItem() instanceof thaumcraft.common.items.ItemKey) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TileOwned door)) return InteractionResult.PASS;
         if (!EldritchBlockRules.doorAllows(door.getOwner(), door.getAccessList(), player.getGameProfile().getName())) {
@@ -141,9 +141,16 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
         BlockPos lower = state.getValue(HALF) == Half.TOP ? pos.below() : pos;
         BlockState lowerState = level.getBlockState(lower);
         if (!(lowerState.getBlock() instanceof BlockArcaneDoor) || lowerState.getValue(HALF) != Half.BOTTOM) return;
+        BlockPos upper = lower.above();
+        BlockState upperState = level.getBlockState(upper);
+        if (!upperState.is(lowerState.getBlock()) || upperState.getValue(HALF) != Half.TOP) return;
         if (lowerState.getValue(OPEN) == open) return;
         level.setBlock(lower, lowerState.setValue(OPEN, open), Block.UPDATE_ALL);
-        level.setBlock(pos.above(), level.getBlockState(pos.above()).setValue(OPEN, open), Block.UPDATE_ALL);
+        // A click on either half addresses the same pair. Recheck after the
+        // lower write, whose neighbour callbacks may have removed the upper.
+        upperState = level.getBlockState(upper);
+        if (upperState.is(lowerState.getBlock()) && upperState.getValue(HALF) == Half.TOP)
+            level.setBlock(upper, upperState.setValue(OPEN, open), Block.UPDATE_ALL);
         level.playSound(null, lower, open ? SoundEvents.IRON_DOOR_OPEN : SoundEvents.IRON_DOOR_CLOSE,
                 SoundSource.BLOCKS, 1.0F, level.random.nextFloat() * .1F + .9F);
     }

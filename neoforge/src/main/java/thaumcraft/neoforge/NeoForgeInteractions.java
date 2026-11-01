@@ -111,10 +111,28 @@ final class NeoForgeInteractions {
         var brk = new BlockEvent.BreakEvent(level, pos, before, player);
         NeoForge.EVENT_BUS.post(brk);
         if (brk.isCanceled()) return false;
-        var place = new BlockEvent.EntityPlaceEvent(
-                net.neoforged.neoforge.common.util.BlockSnapshot.create(level.dimension(), level, pos), before, player);
+        var place = new SwapPlaceEvent(
+                net.neoforged.neoforge.common.util.BlockSnapshot.create(level.dimension(), level, pos), before, after, player);
         NeoForge.EVENT_BUS.post(place);
         return !place.isCanceled();
+    }
+
+    /**
+     * A swap asks permission before changing the world. NeoForge's ordinary player-place event reads
+     * the placed state from the live snapshot position, which still contains the source here. Keep
+     * the real level and original snapshot, while exposing the proposed replacement to listeners.
+     */
+    private static final class SwapPlaceEvent extends BlockEvent.EntityPlaceEvent {
+        private final BlockState replacement;
+
+        private SwapPlaceEvent(net.neoforged.neoforge.common.util.BlockSnapshot snapshot, BlockState against,
+                               BlockState replacement, ServerPlayer player) {
+            super(snapshot, against, player);
+            this.replacement = replacement;
+        }
+
+        @Override public BlockState getState() { return replacement; }
+        @Override public BlockState getPlacedBlock() { return replacement; }
     }
 
     private static void consume(PlayerInteractEvent.RightClickBlock event, InteractionResult result) {

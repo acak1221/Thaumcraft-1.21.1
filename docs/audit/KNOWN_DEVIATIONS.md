@@ -258,3 +258,37 @@ Where the 1.7.10 behaviour could not or should not be kept, this is what an add-
 
 Details and evidence: `docs/analysis/2026-10-26-addon-api-ru.md`, `-addon-wand-parts-ru.md`,
 `-addon-aspects-ru.md`, `-addon-legacy-ids-ru.md`.
+
+## 10. Review fixes of 2026-11-01: runic HUD synchronization and potion scan keys
+
+The owner requested fixes for the repository review. Original `EventHandlerRunic:144-146`
+only sent a shield update when charge changed, so changing the maximum without changing charge
+left the client HUD stale. The port now synchronizes both charge and maximum, including during
+recharge delay and when no vis is available. Charge amounts, costs and timers retain their rules.
+This is an intentional correction of an original presentation defect.
+
+Potion scan identities now retain the registered potion subtype which 1.7.10 represented as
+metadata. Ordinary item markers are unchanged; named potions append `[potion=namespace:id]`.
+The old generic potion marker carries no subtype information and remains the water/unspecified
+marker. Other named potions can be scanned separately again. Custom names, colours and custom
+effects do not create separate identities, matching the original treatment of NBT.
+
+Implementation, regressions and verification limits: [review fixes](../analysis/2026-11-01-review-fixes.md).
+
+## 11. Second review fixes of 2026-11-01: resource custody
+
+The owner requested correction of all 23 findings from the second review. The original hand
+mirror transported before debiting its menu; the original traveling trunk spawned its contents
+before clearing them and retired after an unchecked spawner drop; the original infernal furnace
+did not retain rejected output entities. Native entity admission callbacks can cancel or reenter
+these operations. The port transfers paid output into saved custody before invoking those callbacks,
+retries rejected item/experience delivery, and preserves accepted-delivery receipts. This deliberately
+corrects inherited resource-authority defects; recipe quantities, XP calculation, mirror trajectory,
+trunk behaviour and furnace timing retain their existing rules.
+
+The Earthmover pays the number of placement items represented by a modern block state (including
+two slabs for a double slab). The Primal Crusher uses the ordinary native player harvest path for
+adjacent blocks, including protection callbacks, tool enchantments, drops and wear. This adapts
+the original item/metadata and tool-harvest semantics to Minecraft 1.21.1.
+
+Implementation, regressions and verification limits: [second review fixes](../analysis/2026-11-01-review2-fixes.md).

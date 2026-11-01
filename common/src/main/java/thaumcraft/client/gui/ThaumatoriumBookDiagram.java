@@ -26,7 +26,7 @@ public final class ThaumatoriumBookDiagram {
             for (int row = 0; row < 3; row++) {
                 int sy = 30 + row * 32;
                 ItemStack stack = new ItemStack(row == 2 ? ThaumcraftAlchemy.CRUCIBLE_ITEM.get() : ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT_ITEM.get());
-                graphics.fill(46, sy - 2, 66, sy + 18, 0x22634f36); graphics.renderItem(stack, 48, sy);
+                graphics.fill(46, sy - 2, 66, sy + 18, 0x22634f36); graphics.renderItem(stack, 48, sy); RecipeItemLinks.record(graphics.pose(), stack, 48, sy);
                 graphics.drawString(font, Integer.toString(3 - row), 30, sy + 4, 0x505050, false);
                 if (mx >= 46 && mx < 66 && my >= sy - 2 && my < sy + 18) hover = new ThaumcraftRecipeDisplay.Hover(stack, List.of());
             }

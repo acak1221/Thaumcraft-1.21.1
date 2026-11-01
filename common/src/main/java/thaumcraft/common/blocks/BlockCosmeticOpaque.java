@@ -166,6 +166,17 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateD
         return new TileOwned(ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state);
     }
 
+    /** Oracle BlockCosmeticOpaque.onBlockPlacedBy assigns the warded glass owner. */
+    @Override public void setPlacedBy(net.minecraft.world.level.Level level, BlockPos pos, BlockState state,
+                                     net.minecraft.world.entity.LivingEntity placer, net.minecraft.world.item.ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (!level.isClientSide && placer instanceof Player player && level.getBlockEntity(pos) instanceof TileOwned owned) {
+            owned.setOwner(player.getGameProfile().getName());
+            owned.setChanged();
+            level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
+        }
+    }
+
     /**
      * BlockCosmeticOpaque:190-192 and :221-223 - the original created the owned tile for the
      * metadata two only; the amber block and the amber brick got no tile at all, although the

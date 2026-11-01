@@ -2,16 +2,19 @@ package thaumcraft.common.container;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import thaumcraft.common.config.ThaumcraftDeviceMenus;
 import thaumcraft.common.lib.crafting.DeviceContainerRules;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /**
  * Original ContainerHandMirror: one item slot and the player inventory. An
@@ -19,9 +22,8 @@ import thaumcraft.common.lib.crafting.DeviceContainerRules;
  * mirror is linked to, and everything the slot still holds when the GUI
  * closes returns to the player.
  *
- * <p>The hand mirror item itself is not ported yet, so the transport is
- * delegated to a {@link Bridge} that the item implements. The container never
- * guesses a destination and never invents a transport.</p>
+ * <p>The item implements the destination bridge. Input ownership leaves the menu before that bridge can call out;
+ * the native bridge publishes a paid delivery to the destination's durable queue before returning success.</p>
  */
 public final class ContainerHandMirror extends AbstractContainerMenu {
     /** Implemented by the hand mirror item; the container owns no transport. */
@@ -29,6 +31,7 @@ public final class ContainerHandMirror extends AbstractContainerMenu {
         boolean isMirror(ItemStack stack);
         /** The original transport needs the mirror block link of the item. */
         boolean isLinked(ItemStack mirror);
+        /** True transfers ownership; false must publish no output. No exception may escape after publication. */
         boolean transport(ItemStack mirror, ItemStack items, Player player, Level level);
     }
 
@@ -37,7 +40,7 @@ public final class ContainerHandMirror extends AbstractContainerMenu {
     private final ItemStack mirror;
     private final MirrorInventory input;
     private final boolean server;
-    private boolean writing;
+    private boolean writing, closed;
 
     public ContainerHandMirror(int id, Inventory inventory, InteractionHand hand) { this(id, inventory, hand, true); }
 
@@ -47,7 +50,7 @@ public final class ContainerHandMirror extends AbstractContainerMenu {
         this.hand = hand;
         this.server = server;
         this.mirror = viewer.getItemInHand(hand);
-        this.input = new MirrorInventory(this::onInputChanged);
+        this.input = new MirrorInventory(() -> !writing && !closed, this::onInputChanged);
         addSlot(new Slot(input, 0, DeviceContainerRules.HAND_MIRROR_INPUT_X, DeviceContainerRules.HAND_MIRROR_INPUT_Y) {
             /** Original InventoryHandMirror:74 - the input slot accepts anything. */
             @Override public boolean mayPlace(ItemStack stack) { return DeviceContainerRules.handMirrorSlotAcceptsAnyItem(); }
@@ -80,7 +83,7 @@ public final class ContainerHandMirror extends AbstractContainerMenu {
      * mirror block and leaves the slot empty.
      */
     private void onInputChanged() {
-        if (writing || !server) return;
+        if (writing || closed || !server) return;
         ItemStack stack = input.getItem(0);
         if (stack.isEmpty()) return;
         if (DeviceContainerRules.handMirrorShowsLinkedInventory(stack.isEmpty(), ItemStack.matches(stack, mirror))) {
@@ -90,14 +93,21 @@ public final class ContainerHandMirror extends AbstractContainerMenu {
         Bridge bridge = bridge();
         if (bridge == null) return;
         if (!DeviceContainerRules.handMirrorCanTransport(server, bridge.isLinked(mirror))) return;
-        if (!bridge.transport(mirror, stack, viewer, viewer.level())) return;
+        // Relinquish the live slot BEFORE a link lookup, sound, queue publication or ADD-related callback can close
+        // or reenter this menu. The detached actual input has exactly one refund right until the bridge accepts it.
         writing = true;
+        ItemStack owned = input.takeRaw();
+        boolean accepted = false;
         try {
-            input.setItem(0, ItemStack.EMPTY);
+            accepted = bridge.transport(mirror, owned.copy(), viewer, viewer.level());
         } finally {
+            if (!accepted) {
+                if (closed) returnStock(owned);
+                else input.restoreRaw(owned);
+            }
             writing = false;
         }
-        broadcastChanges();
+        if (!closed) broadcastChanges();
     }
 
     /**
@@ -113,10 +123,14 @@ public final class ContainerHandMirror extends AbstractContainerMenu {
     public InteractionHand hand() { return hand; }
     public ItemStack inputStack() { return input.getItem(0); }
 
-    @Override public boolean stillValid(Player player) { return player == viewer && !player.isSpectator(); }
+    @Override public boolean stillValid(Player player) { return !closed && player == viewer && !player.isSpectator(); }
 
     private boolean active(Player player) {
-        return player == viewer && (!server || viewer.containerMenu == this && stillValid(player));
+        return !writing && player == viewer && (!server || viewer.containerMenu == this && stillValid(player));
+    }
+
+    @Override public void clicked(int slot, int button, ClickType type, Player player) {
+        if (active(player)) super.clicked(slot, button, type, player);
     }
 
     /** Original ContainerHandMirror:73-77 - a mirror never travels into the slot. */
@@ -143,21 +157,37 @@ public final class ContainerHandMirror extends AbstractContainerMenu {
 
     /** Original ContainerHandMirror:98-105 - the slot content returns to the player. */
     @Override public void removed(Player player) {
+        if (closed || player != viewer) return;
+        closed = true;
         super.removed(player);
-        if (!server || player != viewer) return;
-        ItemStack stack = input.removeItemNoUpdate(0);
+        if (!server) return;
+        ItemStack stack = input.takeRaw();
+        returnStock(stack);
+    }
+
+    private void returnStock(ItemStack stack) {
         if (stack.isEmpty()) return;
-        if (!player.getInventory().add(stack)) player.drop(stack, false);
+        if (viewer instanceof ServerPlayer player && player.isAlive() && !player.hasDisconnected()) {
+            player.getInventory().add(stack);
+        }
+        if (!stack.isEmpty() && viewer.level() instanceof ServerLevel level) {
+            DeferredItemDrops.enqueue(level, viewer.blockPosition(), java.util.List.of(stack));
+        }
     }
 
     /** Original InventoryHandMirror: the one slot mirror of the hand mirror. */
     private static final class MirrorInventory extends SimpleContainer {
         private final Runnable onChanged;
-        MirrorInventory(Runnable onChanged) { super(DeviceContainerRules.HAND_MIRROR_INPUT_SLOTS); this.onChanged = onChanged; }
+        private final java.util.function.BooleanSupplier writable;
+        MirrorInventory(java.util.function.BooleanSupplier writable, Runnable onChanged) {
+            super(DeviceContainerRules.HAND_MIRROR_INPUT_SLOTS); this.writable = writable; this.onChanged = onChanged;
+        }
+        ItemStack takeRaw() { return super.removeItemNoUpdate(0); }
+        void restoreRaw(ItemStack stack) { super.setItem(0, stack); }
         @Override public int getMaxStackSize() { return DeviceContainerRules.HAND_MIRROR_STACK_LIMIT; }
         /** Original InventoryHandMirror:57 - every change notifies the container. */
-        @Override public void setItem(int slot, ItemStack stack) { super.setItem(slot, stack); onChanged.run(); }
-        @Override public ItemStack removeItem(int slot, int amount) { ItemStack taken = super.removeItem(slot, amount); onChanged.run(); return taken; }
-        @Override public ItemStack removeItemNoUpdate(int slot) { ItemStack taken = super.removeItemNoUpdate(slot); onChanged.run(); return taken; }
+        @Override public void setItem(int slot, ItemStack stack) { if (writable.getAsBoolean()) { super.setItem(slot, stack); onChanged.run(); } }
+        @Override public ItemStack removeItem(int slot, int amount) { if (!writable.getAsBoolean()) return ItemStack.EMPTY; ItemStack taken = super.removeItem(slot, amount); onChanged.run(); return taken; }
+        @Override public ItemStack removeItemNoUpdate(int slot) { if (!writable.getAsBoolean()) return ItemStack.EMPTY; ItemStack taken = super.removeItemNoUpdate(slot); onChanged.run(); return taken; }
     }
 }

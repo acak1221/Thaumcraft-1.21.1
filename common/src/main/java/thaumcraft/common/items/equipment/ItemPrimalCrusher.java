@@ -4,10 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
@@ -24,6 +25,8 @@ import thaumcraft.api.IRepairable;
 import thaumcraft.api.IWarpingGear;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.lib.items.EquipmentRules;
+import thaumcraft.common.entities.golems.GolemUsePlatform;
+import thaumcraft.common.lib.world.ExcavationHarvest;
 
 /**
  * The Primal Crusher (original ItemPrimalCrusher). Its material {@code PRIMALVOID} has a harvest level of five, above netherite, five
@@ -36,6 +39,7 @@ import thaumcraft.common.lib.items.EquipmentRules;
  * warp to its wielder and mends itself by one point every second.
  */
 public class ItemPrimalCrusher extends DiggerItem implements IRepairable, IWarpingGear {
+    private static final ThreadLocal<Boolean> HARVESTING = new ThreadLocal<>();
     /** The blocks the crusher mines: the union of the pickaxe's and the shovel's blocks (original tool classes shovel and pickaxe). */
     public static final TagKey<net.minecraft.world.level.block.Block> MINEABLE = TagKey.create(Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "mineable/primal_crusher"));
@@ -60,23 +64,33 @@ public class ItemPrimalCrusher extends DiggerItem implements IRepairable, IWarpi
      */
     @Override public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity entity) {
         boolean result = super.mineBlock(stack, level, state, pos, entity);
-        if (level.isClientSide || !(entity instanceof Player player) || player.isShiftKeyDown()) return result;
+        if (!(level instanceof ServerLevel server) || !(entity instanceof ServerPlayer player) || player.isShiftKeyDown()
+                || HARVESTING.get() != null || ExcavationHarvest.hasActiveAttempt() || GolemUsePlatform.isActorBorrowed(player)
+                || !player.server.isSameThread() || player.level() != server || !player.isAlive() || player.isRemoved()
+                || player.isSpectator() || player.hasDisconnected() || player.server.getPlayerList().getPlayer(player.getUUID()) != player
+                || player.getMainHandItem() != stack || stack.isEmpty()) return result;
         if (!effectiveFor(stack, state)) return result;
         Direction face = lookedAtFace(level, player);
         int[] offsets = EquipmentRules.primalCrusherOffsets(face.ordinal());
+        HARVESTING.set(Boolean.TRUE);
+        try {
         for (int i = 0; i < offsets.length; i += 3) {
+            if (player.getMainHandItem() != stack || stack.isEmpty() || !(stack.getItem() instanceof ItemPrimalCrusher)) break;
             BlockPos target = pos.offset(offsets[i], offsets[i + 1], offsets[i + 2]);
             // The centre is the block the player mined: the loader breaks it with the tool, its drops and
             // its one point of wear (super.mineBlock). Fabric removes it before mineBlock, NeoForge after,
             // so without this skip NeoForge charged a tenth point and dropped the centre without the tool.
             if (target.equals(pos)) continue;
-            if (!level.isLoaded(target) || !level.mayInteract(player, target)) continue;
+            if (!server.isInWorldBounds(target) || !server.getWorldBorder().isWithinBounds(target)
+                    || !server.hasChunkAt(target) || !server.mayInteract(player, target)) continue;
             BlockState targetState = level.getBlockState(target);
             if (targetState.isAir() || targetState.getDestroySpeed(level, target) < 0.0F) continue;
             if (!effectiveFor(stack, targetState)) continue;
-            stack.hurtAndBreak(1, entity, EquipmentSlot.MAINHAND);
-            level.destroyBlock(target, true, entity);
+            // The ordinary player path supplies protection events, Silk/Fortune/XP and exactly
+            // its own tool wear. The scope prevents these nested calls from expanding another square.
+            player.gameMode.destroyBlock(target);
         }
+        } finally { HARVESTING.remove(); }
         return result;
     }
 

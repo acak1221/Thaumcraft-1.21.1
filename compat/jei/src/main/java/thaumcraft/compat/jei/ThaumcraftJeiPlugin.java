@@ -10,6 +10,7 @@ import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +26,7 @@ import thaumcraft.common.config.ThaumcraftArcane;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftInfusion;
 import thaumcraft.common.config.ThaumcraftRunic;
+import thaumcraft.common.config.ThaumcraftWandEnchantments;
 import thaumcraft.common.crafting.ArcaneShapedRecipe;
 import thaumcraft.common.crafting.ArcaneShapelessRecipe;
 import thaumcraft.common.crafting.NativeArcaneRecipe;
@@ -45,6 +47,17 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger("Thaumcraft/JEI");
 
     @Override public ResourceLocation getPluginUid() { return ResourceLocation.fromNamespaceAndPath("thaumcraft", "jei"); }
+
+    @Override public void registerItemSubtypes(ISubtypeRegistration registration) {
+        // As in the EMI comparison, a wand's material and sceptre flag identify its recipe;
+        // its current vis, stack count and cosmetic components do not create another subtype.
+        registration.registerSubtypeInterpreter(ThaumcraftContent.WAND.get(),
+                ItemSubtypes.wand(ThaumcraftContent.WAND_DATA.get(), ThaumcraftWandEnchantments.WAND_SCEPTRE.get()));
+        registration.registerSubtypeInterpreter(ThaumcraftContent.CRYSTAL_ESSENCE.get(),
+                ItemSubtypes.crystal(ThaumcraftContent.CRYSTAL_ESSENCE_DATA.get()));
+        registration.registerSubtypeInterpreter(ThaumcraftContent.FILLED_PHIAL.get(),
+                ItemSubtypes.phial(ThaumcraftContent.PHIAL_DATA.get()));
+    }
 
     @Override public void registerIngredients(IModIngredientRegistration registration) {
         List<AspectIngredient.Stack> aspects = new ArrayList<>();

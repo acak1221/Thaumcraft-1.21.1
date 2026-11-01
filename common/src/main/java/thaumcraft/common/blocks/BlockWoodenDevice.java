@@ -26,7 +26,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.api.aspects.Aspect;
-import thaumcraft.api.aspects.IAspectSource;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileBanner;
@@ -88,18 +87,43 @@ public final class BlockWoodenDevice extends BaseEntityBlock implements StateDep
 
     /** BlockWoodenDevice:363-401 - the owner cycles the plate sensitivity and the banner takes an aspect. */
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return interactBanner(state, level, pos, player, net.minecraft.world.InteractionHand.MAIN_HAND, player.getMainHandItem());
+    }
+
+    @Override protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+            BlockPos pos, Player player, net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
+        var result = interactBanner(state, level, pos, player, hand, stack);
+        return result == InteractionResult.PASS ? net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+                : net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    /** The phial item also uses this path when secondary use skips block activation. */
+    public static InteractionResult tryBannerInteraction(net.minecraft.world.item.context.UseOnContext context) {
+        Player player = context.getPlayer();
+        BlockState state = context.getLevel().getBlockState(context.getClickedPos());
+        if (player == null || !(state.getBlock() instanceof BlockWoodenDevice)) return InteractionResult.PASS;
+        return interactBanner(state, context.getLevel(), context.getClickedPos(), player, context.getHand(), context.getItemInHand());
+    }
+
+    private static InteractionResult interactBanner(BlockState state, Level level, BlockPos pos, Player player,
+                                                     net.minecraft.world.InteractionHand hand, ItemStack held) {
         int variant = state.getValue(VARIANT);
         if (variant != EldritchBlockRules.DEVICE_WOOD_BANNER) return InteractionResult.PASS;
         if (!(level.getBlockEntity(pos) instanceof TileBanner banner)) return InteractionResult.PASS;
-        ItemStack held = player.getItemInHand(player.getUsedItemHand());
+        if (banner.getColor() < 0) return InteractionResult.PASS;
+        if (player.isSpectator() || player.getItemInHand(hand) != held || !level.mayInteract(player, pos)) return InteractionResult.PASS;
+        var phial = held.is(thaumcraft.common.config.ThaumcraftContent.FILLED_PHIAL.get())
+                ? thaumcraft.common.items.ItemEssence.data(held) : null;
+        if (!player.isShiftKeyDown() && phial == null) return InteractionResult.PASS;
+        if (level.isClientSide) return InteractionResult.SUCCESS;
         if (player.isShiftKeyDown()) {
             banner.setAspect(null);
-        } else if (held.getItem() instanceof IAspectSource source && source.getAspects().getAspects().length > 0) {
-            Aspect aspect = source.getAspects().getAspects()[0];
-            banner.setAspect(aspect);
-            if (!player.getAbilities().instabuild) held.shrink(1);
         } else {
-            return InteractionResult.PASS;
+            banner.setAspect(Aspect.getAspect(phial.tag()));
+            held.shrink(1); // Original block interaction consumes the phial even in creative.
+            // Secondary-use reaches us through Item.useOn, whose creative
+            // wrapper restores its argument's count; detach the paid hand.
+            if (player.getAbilities().instabuild) player.setItemInHand(hand, held.copy());
         }
         banner.setChanged();
         level.sendBlockUpdated(pos, state, state, 3);

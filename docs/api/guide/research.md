@@ -119,7 +119,7 @@ What 1.7.10 add-ons reached through `ResearchManager` and `Thaumcraft.proxy.getP
 | Need | Call |
 |---|---|
 | has the player completed it? | `isResearchComplete(player, key)` (both sides for the client's own player) |
-| complete it (with parents, siblings, warp; synced) | `completeResearch(player, key)` (server) |
+| complete only that entry (its own warp; synced) | `completeResearch(player, key)` (server) |
 | everything the player completed | `getCompletedResearch(player)` |
 | research points | `addAspectPool(player, aspect, amount)`, `getAspectPool(player, aspect)` |
 | discovered aspects | `hasDiscoveredAspect(player, aspect)`, `getDiscoveredAspects(player)` |
@@ -147,7 +147,7 @@ public class InsightScroll extends Item {
         AspectList taught = stack.getOrDefault(ExampleAddon.STORED_ASPECTS, StoredAspects.NONE).aspects();
         for (Aspect aspect : taught.getAspects()) ThaumcraftApiHelper.addAspectPool(player, aspect, taught.getAmount(aspect));
         ThaumcraftApiHelper.addAspectPool(player, ExampleAddon.TEMPUS, 1);
-        // Completes the entry with its parents and pays its warp, as an original ResearchManager.completeResearch.
+        // Completes only this entry and pays its warp, as the original ResearchManager.completeResearch did.
         if (!ThaumcraftApiHelper.isResearchComplete(player, "EXAMPLE_SECRET")) ThaumcraftApiHelper.completeResearch(player, "EXAMPLE_SECRET");
         player.displayClientMessage(Component.translatable("tc4_example.insight_scroll.read", ThaumcraftApiHelper.getWarpTotal(player)), false);
         stack.consume(1, player);
@@ -191,7 +191,7 @@ public class ShareTome extends Item {
 ```
 <!-- /snippet -->
 
-- The markers are opaque keys, made to travel unchanged: `"@"` plus the registry id for a basic scan, `"#"` plus the same
+- The markers are opaque keys, made to travel unchanged: `"@"` plus the registry identity (including a named potion subtype) for a basic scan, `"#"` plus the same
   for an advanced one. Adding is idempotent; a basic marker never replaces an advanced one, an advanced one replaces a
   basic one. `addScans` returns how many markers were new and syncs the player once, only when it is above zero; a snapshot
   that holds both `"@x"` and `"#x"` counts as the one marker `"#x"`, whatever their order. A marker is never empty and at

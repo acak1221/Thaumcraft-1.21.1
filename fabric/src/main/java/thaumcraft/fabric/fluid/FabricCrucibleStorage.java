@@ -31,10 +31,8 @@ import thaumcraft.common.tiles.TileCrucible;
  * lives in the shared tile, this adapter only converts the unit and never decides anything.</p>
  */
 public final class FabricCrucibleStorage {
-    /** Fabric counts a bucket as eighty one thousand droplets. */
-    private static final long DROPLETS_PER_BUCKET = FluidConstants.BUCKET;
-    /** The original tank of the crucible holds one thousand millibuckets. */
-    private static final long MILLIBUCKETS_PER_BUCKET = 1000L;
+    /** One original millibucket is exactly eighty one Fabric droplets. */
+    private static final long DROPLETS_PER_MILLIBUCKET = FluidConstants.BUCKET / 1000L;
     private static boolean initialized;
     // One snapshot participant per real tank, including lookups on different faces.
     // Weak values avoid retaining the tile through the weak map's value.
@@ -55,12 +53,14 @@ public final class FabricCrucibleStorage {
 
     /** The droplets of the original millibuckets. */
     static long toDroplets(long millibuckets) {
-        return millibuckets * DROPLETS_PER_BUCKET / MILLIBUCKETS_PER_BUCKET;
+        return millibuckets * DROPLETS_PER_MILLIBUCKET;
     }
 
     /** The original millibuckets of the droplets. */
     static long toMillibuckets(long droplets) {
-        return droplets * MILLIBUCKETS_PER_BUCKET / DROPLETS_PER_BUCKET;
+        // Transfer API callers legitimately probe with Long.MAX_VALUE. Divide
+        // directly instead of overflowing an intermediate droplets * 1000.
+        return droplets / DROPLETS_PER_MILLIBUCKET;
     }
 
     private static final class Tank extends SnapshotParticipant<Integer> implements Storage<FluidVariant>, StorageView<FluidVariant> {

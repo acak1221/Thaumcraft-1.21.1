@@ -98,6 +98,10 @@ public final class ThaumcraftWarpClient {
     }
     public static void reset() {
         vignette = fogDuration = 0; fogDensity = vignetteBrightness = 0;
+        reloadResources();
+    }
+    /** Resource packs replace meshes and shader chains, without cancelling a running server event. */
+    public static void reloadResources() {
         for (PostChain chain : CHAINS.values()) chain.close();
         CHAINS.clear(); FAILED.clear(); width = height = 0;
         thaumcraft.client.fx.particles.WarpSonicParticle.resetMesh();

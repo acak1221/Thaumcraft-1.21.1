@@ -33,7 +33,7 @@ public final class AdvancedFurnaceBookDiagram {
                     ItemStack stack=part<0?ItemStack.EMPTY:new ItemStack(layer==0
                             ? part==0?ThaumcraftDistillation.ALCHEMY_FURNACE_ITEM.get():ThaumcraftAdvancedFurnace.ADVANCED_CONSTRUCT_ITEM.get()
                             : part==2?ThaumcraftAlembics.ALEMBIC_ITEM.get():ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT_ITEM.get());
-                    if(!stack.isEmpty())graphics.renderItem(stack,sx,sy);
+                    if(!stack.isEmpty()){graphics.renderItem(stack,sx,sy);RecipeItemLinks.record(graphics.pose(),stack,sx,sy);}
                     if(mx>=sx-1&&mx<sx+17&&my>=sy-1&&my<sy+17)
                         hover=new ThaumcraftRecipeDisplay.Hover(stack,stack.isEmpty()?List.of(Component.translatable("tc.port.advanced_furnace.free_center")):List.of());
                 }

@@ -112,6 +112,7 @@ public final class ThaumcraftNeoForgeClient {
         // model layer and entity renderer was lost, and the first Thaumcraft entity drawn crashed
         // the client. This event is the first initClientHooks posts; registries are filled by then.
         thaumcraft.client.ClientSetup.init();
+        NeoForgeDeathFluidClient.register(event);
         // The original robe dye in the native armour layer. It is not an item
         // renderer but the NeoForge native colour hook of the robe items.
         NeoForgeRobeDye.register(event);
@@ -217,8 +218,8 @@ public final class ThaumcraftNeoForgeClient {
 
     private static void resetClientState() {
         thaumcraft.client.renderers.item.PrimalWandFocusRenderer.reset();
-        ThaumcraftWarpClient.reset();
-        ThaumcraftRunicClient.reset();
+        ThaumcraftWarpClient.reloadResources();
+        ThaumcraftRunicClient.reloadResources();
         PlayerNotifications.reset();
         ThaumcraftTravelGearClient.reset();
         ThaumcraftTaintSporesClient.reset();
@@ -275,6 +276,6 @@ public final class ThaumcraftNeoForgeClient {
         // (oracle EventHandlerNetwork.clientLogsOut) through the Architectury
         // client event; this call is the loader's own belt-and-braces path
         // and is idempotent.
-        thaumcraft.common.config.ThaumcraftSettings.resetClient();
+        thaumcraft.client.ClientStateReset.reset();
     }
 }

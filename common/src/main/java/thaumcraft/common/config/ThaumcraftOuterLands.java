@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -348,12 +349,18 @@ public final class ThaumcraftOuterLands {
      * The entity ids of the parallel eldritch content groups are resolved lazily.
      */
     public static void spawnRoomEntities(WorldGenLevel level, DungeonRooms.Builder builder) {
+        // A generation region owns its own random; never unwrap it to the live ServerLevel RNG.
+        spawnRoomEntities(level, builder, level.getRandom());
+    }
+
+    /** Continues the room's deterministic world stream through entity and spawner configuration. */
+    public static void spawnRoomEntities(WorldGenLevel level, DungeonRooms.Builder builder, RandomSource random) {
         for (DungeonRooms.Spawn spawn : builder.spawns) {
             BlockPos pos = new BlockPos(spawn.x(), spawn.y(), spawn.z());
             switch (spawn.kind()) {
-                case ELDRITCH_GUARDIAN -> spawnGuardian(level, pos, spawn);
+                case ELDRITCH_GUARDIAN -> spawnGuardian(level, pos, spawn, random);
                 case PERMANENT_ITEM -> spawnPermanentItem(level, pos, spawn.variant());
-                case MIND_SPIDER -> spawnMindSpider(level, pos);
+                case MIND_SPIDER -> spawnMindSpider(level, pos, random);
                 default -> {
                 }
             }
@@ -367,12 +374,12 @@ public final class ThaumcraftOuterLands {
      * room as its home with a radius of sixteen, and the first guardian of a hard key room is a
      * champion.</p>
      */
-    private static void spawnGuardian(WorldGenLevel level, BlockPos pos, DungeonRooms.Spawn spawn) {
+    private static void spawnGuardian(WorldGenLevel level, BlockPos pos, DungeonRooms.Spawn spawn, RandomSource random) {
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id("eldritch_guardian"));
         if (type == null) return;
         Entity entity = type.create(level.getLevel());
         if (entity == null) return;
-        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, level.getLevel().getRandom().nextFloat() * 360.0F, 0.0F);
+        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, random.nextFloat() * 360.0F, 0.0F);
         // Oracle GenKeyRoom:110 - the guardian keeps the room as its home.
         DungeonRooms.Home home = spawn.home();
         if (home != null && entity instanceof Mob mob) {
@@ -380,18 +387,9 @@ public final class ThaumcraftOuterLands {
         }
         // Oracle GenKeyRoom:111-113 - the first guardian of a hard key room is a champion.
         if (spawn.champion() && entity instanceof Mob mob) {
-            int modifier = thaumcraft.common.lib.mods.ChampionRules.Adapter.makeChampion(mob, level.getLevel().getRandom(), false);
+            int modifier = thaumcraft.common.lib.mods.ChampionRules.Adapter.makeChampion(mob, random, false);
             thaumcraft.common.lib.mods.ChampionHooks.setChampionModifier(mob, modifier);
         }
-        level.addFreshEntity(entity);
-    }
-
-    private static void spawnEntity(WorldGenLevel level, BlockPos pos, String entityId) {
-        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id(entityId));
-        if (type == null) return;
-        Entity entity = type.create(level.getLevel());
-        if (entity == null) return;
-        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, level.getLevel().getRandom().nextFloat() * 360.0F, 0.0F);
         level.addFreshEntity(entity);
     }
 
@@ -409,10 +407,10 @@ public final class ThaumcraftOuterLands {
     }
 
     /** Oracle GenPassage:249-257 - the mind spider spawner of a spider passage. */
-    private static void spawnMindSpider(WorldGenLevel level, BlockPos pos) {
+    private static void spawnMindSpider(WorldGenLevel level, BlockPos pos, RandomSource random) {
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id("mind_spider"));
         if (type == null) return;
         if (!(level.getBlockEntity(pos) instanceof SpawnerBlockEntity spawner)) return;
-        spawner.setEntityId(type, level.getLevel().getRandom());
+        spawner.setEntityId(type, random);
     }
 }

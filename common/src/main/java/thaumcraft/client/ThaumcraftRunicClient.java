@@ -29,7 +29,9 @@ public final class ThaumcraftRunicClient {
         });
     }
     private static void receive(RunicChargePayload packet) { source=packet.source(); charge=packet.charge(); maximum=packet.maximum(); }
-    public static void reset() { source=-1; charge=maximum=0; RunicHitParticle.resetMesh(); }
+    public static void reset() { source=-1; charge=maximum=0; reloadResources(); }
+    /** Reload only render resources: the server sends another HUD snapshot only when its values change. */
+    public static void reloadResources() { RunicHitParticle.resetMesh(); }
     private static void hit(RunicHitPayload packet) {
         var client=Minecraft.getInstance(); var level=client.level;
         if(level==null) return;

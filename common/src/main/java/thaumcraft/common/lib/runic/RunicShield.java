@@ -28,7 +28,7 @@ public final class RunicShield {
         int rechargeDelay;
     }
     private static final class State {
-        int charge, max, last = -1, charged, healing, kinetic, emergency;
+        int charge, max, last = -1, lastMaximum = -1, charged, healing, kinetic, emergency;
         boolean present;
         long nextCycle, nextKinetic, nextHealing, nextEmergency;
     }
@@ -74,8 +74,11 @@ public final class RunicShield {
                 }
             }
             state.max = maximum; state.present = maximum > 0;
-            if (!state.present) { state.charge = 0; RunicNetworking.charge(player,0,0); }
-            else if (state.charge > maximum) { state.charge = maximum; RunicNetworking.charge(player,maximum,maximum); }
+            if (!state.present) state.charge = 0;
+            else if (state.charge > maximum) state.charge = maximum;
+            // Maximum is client state too. Publish equipment changes even during the global recharge delay or
+            // when no wand can pay for another charge; otherwise the HUD keeps the previous denominator forever.
+            syncChanged(player, state);
         }
         // Original delay is global and decreases ON EACH player's update, not once per world tick.
         if (server.rechargeDelay > 0) { --server.rechargeDelay; return; }
@@ -86,8 +89,14 @@ public final class RunicShield {
                 new AspectList().add(Aspect.AIR, RunicSettings.current().cost()).add(Aspect.EARTH, RunicSettings.current().cost()))) {
             state.nextCycle = now + RunicRules.rechargeInterval(RunicSettings.current().rechargeMillis(),state.charged); ++state.charge;
         }
-        if (state.last != state.charge) {
-            RunicNetworking.charge(player,state.charge,state.max); state.last = state.charge;
+        syncChanged(player, state);
+    }
+    private static void syncChanged(ServerPlayer player, State state) {
+        int maximum = state.present ? state.max : 0;
+        if (state.last != state.charge || state.lastMaximum != maximum) {
+            RunicNetworking.charge(player, state.charge, maximum);
+            state.last = state.charge;
+            state.lastMaximum = maximum;
         }
     }
     public static float onHurt(LivingEntity victim, DamageSource source, float damage) {
@@ -120,7 +129,7 @@ public final class RunicShield {
             player.level().playSound(null,player.getX(),player.getY(),player.getZ(),net.minecraft.sounds.SoundEvent.createVariableRangeEvent(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft","runicshieldcharge")),net.minecraft.sounds.SoundSource.PLAYERS,1,1);
         }
         if (state.charge <= 0) server.rechargeDelay = RunicSettings.current().delayTicks();
-        RunicNetworking.charge(player,state.charge,state.max);
+        syncChanged(player, state);
         return paid.damage();
     }
     /** Original ResearchManager741 persists current charge, never clock/cooldowns/max or the global delay. */

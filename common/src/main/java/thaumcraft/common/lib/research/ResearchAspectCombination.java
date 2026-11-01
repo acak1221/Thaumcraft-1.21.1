@@ -39,7 +39,7 @@ public final class ResearchAspectCombination {
             String tag = output.getTag();
             award = discovery ? 3 : 1; // checkAndSyncAspectKnowledge(combo, 1), plus first-discovery 2.
             int queried = ResearchNoteEditing.queryPool(staged.getAspectPoolFor(tag));
-            int cap = ScanManager.DEFAULT_ASPECT_TOTAL_CAP;
+            int cap = thaumcraft.common.config.ThaumcraftSettings.current().aspectCap();
             if (queried >= cap) award = (int) Math.sqrt(award);
             if (award > 1 && (float) queried >= (float) cap * 1.25F) award = 1;
             staged.addAspectPool(tag, (short) award);

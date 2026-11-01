@@ -167,7 +167,12 @@ public final class ThaumcraftApi {
     private static final ArrayList<Object> craftingRecipes = new ArrayList<>();
     private static final Map<Object, ItemStack> smeltingBonus = new HashMap<>();
     private static final Map<Object, Integer> warpMap = new HashMap<>();
-    private static final Map<List<?>, Object[]> keyCache = new HashMap<>();
+    private record RecipeKey(String research, int page) {
+        Object[] array() { return new Object[] {research, page}; }
+    }
+    private record RecipeKeyCache(RecipeManager manager, Object recipes,
+                                  ConcurrentHashMap<List<?>, java.util.Optional<RecipeKey>> entries) {}
+    private static volatile RecipeKeyCache keyCache;
     private static boolean originalSmeltingBonusesLoaded;
     private ThaumcraftApi() {}
 
@@ -299,7 +304,7 @@ public final class ThaumcraftApi {
                 && !(recipe instanceof InfusionRecipe) && !(recipe instanceof InfusionEnchantmentRecipe))
             throw new IllegalArgumentException("Unsupported programmatic recipe " + recipe);
         craftingRecipes.add(recipe);
-        keyCache.clear();
+        clearRecipeKeyCache();
         return recipe;
     }
 
@@ -308,7 +313,7 @@ public final class ThaumcraftApi {
         for (int index = 0; index < craftingRecipes.size(); index++) if (craftingRecipes.get(index) == recipe) {
             craftingRecipes.remove(index);
             thaumcraft.common.crafting.ProgrammaticRecipes.forget(recipe);
-            keyCache.clear();
+            clearRecipeKeyCache();
             return true;
         }
         return false;
@@ -317,7 +322,7 @@ public final class ThaumcraftApi {
     /** The runtime installs the recipe manager of the level it loaded; the cached answers belong to it. */
     public static void installRecipeManager(RecipeManager manager, net.minecraft.core.HolderLookup.Provider registries) {
         NativeRecipes.install(manager, registries);
-        keyCache.clear();
+        clearRecipeKeyCache();
     }
 
     /** Constructs and appends a live shaped recipe to the global programmatic list, returning it.
@@ -412,12 +417,10 @@ public final class ThaumcraftApi {
     public static Object[] getCraftingRecipeKey(net.minecraft.world.entity.player.Player player, ItemStack stack) {
         if (player == null || stack == null || stack.isEmpty()) return null;
         ResearchCatalog.loadBundled();
+        RecipeKeyCache cache = recipeKeyCache();
         List<?> key = List.of(stack.getItem(), stack.getDamageValue());
-        if (keyCache.containsKey(key)) {
-            Object[] cached = keyCache.get(key);
-            // The cached answer belongs to the registry: a caller may not edit it.
-            return cached == null ? null : researchVisible(player, cached.clone());
-        }
+        var cached = cache.entries().get(key);
+        if (cached != null) return cached.isEmpty() ? null : researchVisible(player, cached.get().array());
         for (ResearchDefinition definition : ResearchCatalog.all()) {
             List<ResearchDefinition.Page> pages = definition.pages();
             for (int index = 0; index < pages.size(); index++) {
@@ -425,23 +428,37 @@ public final class ThaumcraftApi {
                 if (pages.get(index).source() instanceof thaumcraft.api.research.ResearchPage page) {
                     for (ItemStack output : thaumcraft.common.lib.research.AddonResearch.outputs(page)) {
                         if (!sameOutput(output, stack)) continue;
-                        Object[] found = new Object[]{definition.key(), index};
-                        keyCache.put(key, found);
-                        return researchVisible(player, found.clone());
+                        RecipeKey found = new RecipeKey(definition.key(), index);
+                        cache.entries().put(key, java.util.Optional.of(found));
+                        return researchVisible(player, found.array());
                     }
                     continue;
                 }
                 for (String recipeKey : pageRecipeKeys(definition, pages.get(index))) {
                     ItemStack output = nativeResult(recipeKey);
                     if (output == null || !sameOutput(output, stack)) continue;
-                    Object[] found = new Object[]{definition.key(), index};
-                    keyCache.put(key, found);
-                    return researchVisible(player, found.clone());
+                    RecipeKey found = new RecipeKey(definition.key(), index);
+                    cache.entries().put(key, java.util.Optional.of(found));
+                    return researchVisible(player, found.array());
                 }
             }
         }
-        keyCache.put(key, null);
+        cache.entries().put(key, java.util.Optional.empty());
         return null;
+    }
+
+    /** RecipeManager survives reload, but its recipe collection is replaced. Old lookups write only into their own retired cache. */
+    private static RecipeKeyCache recipeKeyCache() {
+        RecipeManager manager = NativeRecipes.manager();
+        Object source = manager == null ? null : manager.getRecipes();
+        RecipeKeyCache cache = keyCache;
+        if (cache != null && cache.manager() == manager && cache.recipes() == source) return cache;
+        synchronized (ThaumcraftApi.class) {
+            cache = keyCache;
+            if (cache == null || cache.manager() != manager || cache.recipes() != source)
+                keyCache = cache = new RecipeKeyCache(manager, source, new ConcurrentHashMap<>());
+            return cache;
+        }
     }
 
     // ------------------------------------------------------------------ add-on lifecycle
@@ -457,7 +474,7 @@ public final class ThaumcraftApi {
     public static boolean isReady() { return thaumcraft.common.lib.AddonLifecycle.isReady(); }
 
     /** Forgets the answers of {@link #getCraftingRecipeKey}; the runtime calls it when research is added or changed. */
-    public static void clearRecipeKeyCache() { keyCache.clear(); }
+    public static void clearRecipeKeyCache() { keyCache = null; }
 
     // ------------------------------------------------------------------ server switches of the original Config
 
@@ -590,7 +607,13 @@ public final class ThaumcraftApi {
      * this is not a component predicate. Null item is ignored, null aspects stores a new empty list;
      * otherwise the live aspects reference replaces the global registration. */
     public static void registerObjectTag(Item item, int metadata, AspectList aspects) {
-        ObjectAspectRegistry.register(objectTags, item, metadata, aspects);
+        if (item == null) return;
+        synchronized (tagObjectTags) {
+            // Even an explicit registration reusing the same AspectList now
+            // belongs to the add-on, rather than to a removable tag expansion.
+            if (tagExpansionOwner == objectTags) expandedTagObjectTags.remove(List.of(item, metadata));
+            ObjectAspectRegistry.register(objectTags, item, metadata, aspects);
+        }
     }
     /** Resolves a native item ID then registers damage-point metadata, not old subtype IDs; unknown IDs throw IAE.
      * In 1.21.1 use distinct item IDs or TagKey registration rather than 1.7.10 metadata variants. */
@@ -601,11 +624,16 @@ public final class ThaumcraftApi {
     /** Registers a group of native damage-point keys; null/empty stack or null/empty metadata is ignored.
      * Unlike 1.7.10 subtype metadata, these cannot select flattened variants: use native item IDs or TagKey registration. */
     public static void registerObjectTag(ItemStack item, int[] metadata, AspectList aspects) {
-        if (item == null || item.isEmpty()) return;
-        ObjectAspectRegistry.register(objectTags, groupedObjectTags, item.getItem(), metadata, aspects);
+        if (item == null || item.isEmpty() || metadata == null || metadata.length == 0) return;
+        registerObjectTag(item.getItem(), metadata[0], aspects);
+        for (int value : metadata) groupedObjectTags.put(List.of(item.getItem(), value), metadata);
     }
     /** Tag registrations in call order, applied again whenever the tags of a world are bound. */
     private static final List<Map.Entry<TagKey<Item>, AspectList>> tagObjectTags = new ArrayList<>();
+    /** Only entries actually inserted by an expansion, never the add-on's explicit registrations. */
+    private static final Map<List<?>, AspectList> expandedTagObjectTags = new HashMap<>();
+    private static ConcurrentHashMap<List<?>, AspectList> tagExpansionOwner;
+    private static volatile boolean tagWorldActive;
 
     /**
      * Registers the aspects of every member of an item tag; null aspects become empty, null tags are not guarded.
@@ -619,18 +647,48 @@ public final class ThaumcraftApi {
     public static void registerObjectTag(TagKey<Item> tag, AspectList aspects) {
         AspectList shared = aspects == null ? new AspectList() : aspects;
         synchronized (tagObjectTags) { tagObjectTags.add(Map.entry(tag, shared)); }
-        BuiltInRegistries.ITEM.getTag(tag).ifPresent(items -> items.forEach(item -> registerObjectTag(item.value(), 0, shared)));
+        // At mod initialization tags are not bound yet. A late registration
+        // rebuilds the same layer as a reload, including later-tag precedence.
+        if (BuiltInRegistries.ITEM.getTag(tag).isPresent()) applyTagObjectTags();
     }
 
     /** The runtime calls it once the item tags of a world are bound; see {@link #registerObjectTag(TagKey, AspectList)}. */
     public static void applyTagObjectTags() {
-        List<Map.Entry<TagKey<Item>, AspectList>> registered;
-        synchronized (tagObjectTags) { registered = List.copyOf(tagObjectTags); }
-        for (int index = registered.size() - 1; index >= 0; index--) {
-            var registration = registered.get(index);
-            BuiltInRegistries.ITEM.getTag(registration.getKey()).ifPresent(items -> items.forEach(item ->
-                    objectTags.putIfAbsent(List.of(item.value(), 0), registration.getValue())));
+        synchronized (tagObjectTags) {
+            // Catalogue registrations are explicit defaults. Establish them
+            // before filling holes so retiring a tag cannot lose their base.
+            ObjectAspectCatalog.initializePublicTags();
+            retireTagObjectTags();
+            tagExpansionOwner = objectTags;
+            for (int index = tagObjectTags.size() - 1; index >= 0; index--) {
+                var registration = tagObjectTags.get(index);
+                BuiltInRegistries.ITEM.getTag(registration.getKey()).ifPresent(items -> items.forEach(item -> {
+                    List<?> key = List.of(item.value(), 0);
+                    if (tagExpansionOwner.putIfAbsent(key, registration.getValue()) == null)
+                        expandedTagObjectTags.put(key, registration.getValue());
+                }));
+            }
+            tagWorldActive = true;
         }
+    }
+
+    /** Called after the native item registry binds a world's tags, including a datapack reload. */
+    public static void onItemTagsBound() {
+        if (tagWorldActive) applyTagObjectTags();
+    }
+
+    /** Releases only the current world's tag-derived rows; static add-on declarations and explicit overrides survive. */
+    public static void clearTagObjectTags() {
+        synchronized (tagObjectTags) {
+            tagWorldActive = false;
+            retireTagObjectTags();
+        }
+    }
+
+    private static void retireTagObjectTags() {
+        if (tagExpansionOwner != null) expandedTagObjectTags.forEach((key, value) -> tagExpansionOwner.remove(key, value));
+        expandedTagObjectTags.clear();
+        tagExpansionOwner = null;
     }
 
     /**

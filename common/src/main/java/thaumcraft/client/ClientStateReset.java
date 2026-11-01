@@ -37,6 +37,10 @@ public final class ClientStateReset {
         PlayerNotifications.reset();
         ThaumcraftTravelGearClient.reset();
         ThaumcraftTaintSporesClient.reset();
+        var client = net.minecraft.client.Minecraft.getInstance();
+        if (client != null && !client.hasSingleplayerServer()) {
+            thaumcraft.api.ThaumcraftApi.clearTagObjectTags();
+        }
         // The original EventHandlerNetwork.clientLogsOut restores the client configuration.
         ThaumcraftSettings.resetClient();
     }

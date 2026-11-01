@@ -8,6 +8,7 @@ public final class FabricSpaClient {
     private FabricSpaClient() {}
     public static void init() {
         FabricFluidPureRenderHandler.init();
+        FabricFluidDeathRenderHandler.init();
         GuiSpa.setFluidAppearance((level,pos,stack)->{
             var handler=FluidRenderHandlerRegistry.INSTANCE.get(stack.getFluid());
             if(handler==null)return null;

@@ -81,6 +81,52 @@ public final class ThaumatoriumRuntimeChecks {
             } catch (RuntimeException | Error failure) { check.finish(); throw failure; }
         });
     }
+    public static void unsupportedOutputFallback(GameTestHelper test) {
+        Check check = new Check(test);
+        Runnable cleanup = () -> {
+            if (check.level.getBlockEntity(check.base.north()) instanceof net.minecraft.world.Container container) container.clearContent();
+            check.finish();
+        };
+        DeviceWorldRuntimeChecks.cleanup(test, cleanup);
+        try { check.prepare(); } catch (RuntimeException | Error failure) { cleanup.run(); throw failure; }
+        test.runAfterDelay(5, () -> {
+            try {
+                check.form();
+                check.tile.setItem(0, new ItemStack(Items.IRON_NUGGET));
+                check.select();
+                var destinations = List.of(Blocks.BARREL.defaultBlockState(), Blocks.TRAPPED_CHEST.defaultBlockState(),
+                        Blocks.SHULKER_BOX.defaultBlockState(), thaumcraft.common.config.ThaumcraftHungryChest.HUNGRY_CHEST.get().defaultBlockState());
+                for (int index = 0; index < destinations.size(); ++index) {
+                    check.set(check.base.north(), destinations.get(index));
+                    var destination = (net.minecraft.world.Container) check.level.getBlockEntity(check.base.north());
+                    var canary = new ItemStack(Items.DIAMOND, 5);
+                    destination.setItem(0, canary.copy());
+                    if (index > 0) {
+                        check.tile.setItem(0, new ItemStack(Items.IRON_NUGGET));
+                        test.assertTrue(check.source.addToContainer(Aspect.METAL, 2) == 0, "finite metal input for next fallback craft");
+                    }
+                    var plan = ThaumatoriumOutput.prepare(check.level, check.base.north(), Direction.SOUTH, new ItemStack(Items.IRON_NUGGET, 3));
+                    test.assertTrue(plan != null && plan.physical(), "unsupported native container uses physical output: " + destinations.get(index));
+                    check.ticks(20);
+                    test.assertTrue(check.tile.getItem(0).isEmpty() && check.source.getAmount() == 0 && check.tile.getAspects().visSize() == 0,
+                            "fallback consumes one catalyst and exactly two source units");
+                    DeferredItemDrops.tick(check.level);
+                    var drops = check.level.getEntitiesOfClass(ItemEntity.class, new AABB(check.base).inflate(3),
+                            item -> !check.existing.contains(item.getUUID()) && item.getItem().is(Items.IRON_NUGGET));
+                    test.assertTrue(drops.stream().mapToInt(item -> item.getItem().getCount()).sum() == 3
+                                    && ItemStack.matches(destination.getItem(0), canary),
+                            "three paid physical nuggets are published without mutating the unsupported inventory");
+                    drops.forEach(ItemEntity::discard);
+                    check.ticks(20); DeferredItemDrops.tick(check.level);
+                    test.assertTrue(check.level.getEntitiesOfClass(ItemEntity.class, new AABB(check.base).inflate(3),
+                                    item -> !check.existing.contains(item.getUUID()) && item.getItem().is(Items.IRON_NUGGET)).isEmpty(),
+                            "a finished fallback cannot replay output");
+                    destination.clearContent();
+                }
+                cleanup.run(); test.succeed();
+            } catch (RuntimeException | Error failure) { cleanup.run(); throw failure; }
+        });
+    }
     private static final class Check {
         final GameTestHelper test;
         final ServerLevel level;

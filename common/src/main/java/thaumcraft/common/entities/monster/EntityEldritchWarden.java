@@ -64,7 +64,6 @@ abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob, ITh
     protected int spawnTimer;
     private boolean aiFrozen;
     private final ServerBossEvent bossEvent;
-    private float previousMaxHealth;
 
     private static ResourceLocation modifierId(String id) { return ResourceLocation.fromNamespaceAndPath("thaumcraft",id); }
 
@@ -72,7 +71,6 @@ abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob, ITh
         super(type,level);
         xpReward=EldritchMobRules.WARDEN.experience();
         bossEvent=new ServerBossEvent(getDisplayName(),BossEvent.BossBarColor.PURPLE,BossEvent.BossBarOverlay.PROGRESS);
-        previousMaxHealth=getMaxHealth();
     }
 
     /** Original boss attribute row: follow range 40 and knockback resistance 0.95. */
@@ -125,9 +123,9 @@ abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob, ITh
         if(level().isClientSide) {
             if(level().random.nextInt(15)==0&&getAnger()>0) {
                 double dx=level().random.nextGaussian()*.02D,dy=level().random.nextGaussian()*.02D,dz=level().random.nextGaussian()*.02D;
-                if(level() instanceof ServerLevel server)server.sendParticles(ParticleTypes.ANGRY_VILLAGER,
+                level().addParticle(ParticleTypes.ANGRY_VILLAGER,
                         getX()+level().random.nextFloat()*getBbWidth()-.5F*getBbWidth(),getBoundingBox().maxY+level().random.nextFloat()*.5F,
-                        getZ()+level().random.nextFloat()*getBbWidth()-.5F*getBbWidth(),1,dx,dy,dz,0D);
+                        getZ()+level().random.nextFloat()*getBbWidth()-.5F*getBbWidth(),dx,dy,dz);
             }
         } else {
             if(tickCount%EldritchMobRules.BOSS_HEAL_INTERVAL==0)heal(EldritchMobRules.BOSS_HEAL_AMOUNT);
@@ -172,6 +170,9 @@ abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob, ITh
 
     /** Original multiplayer scaling: up to five extra players add 50 health and 0.5 damage each. */
     private void applyPlayerScaling(int bonusPlayers) {
+        // Oracle reads the current maximum before replacing the scaling modifiers. Saved modifiers
+        // and changes by another system may have changed it since construction or the last tick.
+        float oldMax=getMaxHealth();
         var health=getAttribute(Attributes.MAX_HEALTH);
         var damage=getAttribute(Attributes.ATTACK_DAMAGE);
         for(int i=0;i<EldritchMobRules.BOSS_MAX_BONUS_PLAYERS;i++) {
@@ -182,10 +183,8 @@ abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob, ITh
             health.addPermanentModifier(new AttributeModifier(HEALTH_BONUS[i],EldritchMobRules.BOSS_HEALTH_BONUS,AttributeModifier.Operation.ADD_VALUE));
             damage.addPermanentModifier(new AttributeModifier(DAMAGE_BONUS[i],EldritchMobRules.BOSS_DAMAGE_BONUS,AttributeModifier.Operation.ADD_VALUE));
         }
-        float oldMax=previousMaxHealth;
         float newMax=getMaxHealth();
         if(oldMax>0F)setHealth(Math.max(1F,Math.min(newMax,getHealth()*(newMax/oldMax))));
-        previousMaxHealth=newMax;
     }
 
     @Override public boolean isInvulnerableTo(DamageSource source) { return super.isInvulnerableTo(source)||spawnTimer>0; }

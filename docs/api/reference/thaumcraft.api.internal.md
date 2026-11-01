@@ -205,7 +205,7 @@ Returns false by default without reading nullable inputs or changing inventory; 
 default boolean completeResearch(Player player, String researchKey)
 ```
 
-Original `ResearchManager.completeResearch(player, key)`: completes the research, its parents and siblings as the original did, pays its warp and syncs the player. Server side only; false by default, on a client, for an unknown or disabled key.
+Original `ResearchManager.completeResearch(player, key)`: completes only that research, pays its own warp and syncs the player. Server side only; false by default, on a client, for an unknown or disabled key.
 
 <a id="iinternalmethodhandler-getcompletedresearch"></a>
 ```java
@@ -219,7 +219,7 @@ The research keys a player completed, as a new set without the "@" clue markers;
 default void addAspectPool(Player player, Aspect aspect, int amount)
 ```
 
-Original `ResearchManager.completeAspect`: adds research points of an aspect to the player's pool (the points the research table spends) and syncs. Server side only; no-op by default. amount is clamped to a short.
+Adds research points of an aspect to the player's pool (the points the research table spends) and syncs. This native convenience takes a delta; the retained ResearchManager.completeAspect takes an absolute total. Server side only; no-op by default. amount is clamped to a short.
 
 <a id="iinternalmethodhandler-getaspectpool"></a>
 ```java
@@ -406,7 +406,7 @@ public int[] getWarp(Player player)
 public boolean hasScannedItem(Player player, ItemStack stack)
 ```
 
-Original `ItemThaumometer` / `ScanManager.hasBeenScanned`: the item is looked up under the marker the thaumometer writes for it, `"@" + registry id`; either that marker or the advanced marker `"#" + id` counts.
+Original `ItemThaumometer` / `ScanManager.hasBeenScanned`: the item is looked up under the marker the thaumometer writes for it; either that marker or its advanced `"#"` form counts.
 
 ```java
 public boolean discoverAspect(Player player, Aspect aspect)

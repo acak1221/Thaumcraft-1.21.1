@@ -41,6 +41,7 @@ import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.HoneycombItem;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -486,43 +487,28 @@ public final class ObjectAspectResolver {
         return result;
     }
 
-    /**
-     * The original sword bonus is the constant five, not a tier scale.
-     *
-     * <p>Oracle {@code ThaumcraftCraftingManager.getBonusTags} (the 1.7.10 jar bytecode) computes
-     * {@code merge(WEAPON, (int)(ItemSword.func_150931_i() + 1.0F))}. The 1.7.10 vanilla
-     * {@code ItemSword} returns the constant base damage 4.0F for every sword - the tool material's
-     * damage is added when the attack-damage attribute modifier is built, not inside
-     * {@code func_150931_i()}. The 1.12 reference of this repository keeps the same expression with
-     * the renamed {@code ItemSword.getAttackDamage()}
-     * ({@code src/main/java/thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:92-94}),
-     * and TC 1.12's own {@code ItemThaumiumSword} has to override BOTH {@code getAttackDamage()}
-     * and {@code getAttributeModifiers()} to six
-     * ({@code src/main/java/thaumcraft/common/items/equipment/ItemThaumiumSword.java:17-25}) -
-     * which is only needed when the vanilla value is a constant that does not contain the
-     * material damage. Every sword of the original therefore contributes WEAPON 5.</p>
-     */
+    /** @deprecated The original bonus depends on the sword's material. Retained for binary compatibility only. */
+    @Deprecated
     public static final int SWORD_WEAPON_BONUS = 5;
 
     /**
      * The original branch order of {@code getBonusTags} is armour, sword, bow, pickaxe, tool,
      * shears/hoe, and every branch leaves the chain.
      *
-     * <p>The 1.7.10 {@code ItemHoe} extends {@code ItemTool}, so a hoe is caught by the tool branch
-     * and never reaches the shears/hoe branch: the original gives a hoe the TOOL bonus of the tool
-     * material and no harvest bonus. The 1.21.1 {@code HoeItem} extends {@code DiggerItem} exactly
-     * like the 1.7.10 {@code ItemHoe} extends {@code ItemTool}, so the native tool branch has to
-     * keep the hoe. The 1.7.10 {@code ItemShears} extends {@code Item} and keeps the harvest
-     * bonus alone, like the 1.21.1 {@code ShearsItem}.</p>
+     * <p>In the official 1.7.10 client, {@code ItemSword.func_150931_i} returns material damage,
+     * while its separate attack attribute adds four. {@code ItemHoe} extends {@code Item}, so
+     * hoes reach the durability-based harvest branch. Modern hoes extend DiggerItem and must
+     * therefore be excluded from the native tool branch.</p>
      */
     private static void equipmentTags(ItemStack stack, AspectList tags) {
         Item item = stack.getItem();
         if (item instanceof ArmorItem armor) tags.merge(Aspect.ARMOR, armor.getDefense());
-        else if (item instanceof SwordItem) tags.merge(Aspect.WEAPON, SWORD_WEAPON_BONUS);
+        else if (item instanceof SwordItem sword && sword.getTier().getAttackDamageBonus() + 1.0F > 0.0F)
+            tags.merge(Aspect.WEAPON, (int) (sword.getTier().getAttackDamageBonus() + 1.0F));
         else if (item instanceof BowItem) tags.merge(Aspect.WEAPON, 3).merge(Aspect.FLIGHT, 1);
         else if (item instanceof PickaxeItem pick && legacyHarvestLevel(pick.getTier()) >= 0) tags.merge(Aspect.MINE, legacyHarvestLevel(pick.getTier()) + 1);
-        else if (item instanceof DiggerItem tool && legacyHarvestLevel(tool.getTier()) >= 0) tags.merge(Aspect.TOOL, legacyHarvestLevel(tool.getTier()) + 1);
-        else if (item instanceof ShearsItem) {
+        else if (item instanceof DiggerItem tool && !(item instanceof HoeItem) && legacyHarvestLevel(tool.getTier()) >= 0) tags.merge(Aspect.TOOL, legacyHarvestLevel(tool.getTier()) + 1);
+        else if (item instanceof ShearsItem || item instanceof HoeItem) {
             int durability = stack.getMaxDamage();
             tags.merge(Aspect.HARVEST, durability <= 59 ? 1 : durability <= 131 || durability <= 32 ? 2 : durability <= 250 ? 3 : 4);
         }
@@ -536,6 +522,8 @@ public final class ObjectAspectResolver {
         if (tier == Tiers.STONE) return 1;
         if (tier == Tiers.IRON) return 2;
         if (tier == Tiers.DIAMOND || tier == ThaumcraftEquipment.THAUMIUM_TIER || tier == ThaumcraftEquipment.ELEMENTAL_TIER) return 3;
+        if (tier == ThaumcraftEquipment.VOID_TIER || tier == thaumcraft.common.config.ThaumcraftLegacyItems.CRIMSON_TIER) return 4;
+        if (tier == thaumcraft.common.config.ThaumcraftLegacyItems.PRIMAL_CRUSHER_TIER) return 5;
         return -1;
     }
 

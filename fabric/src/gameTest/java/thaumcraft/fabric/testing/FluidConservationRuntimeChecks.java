@@ -3,6 +3,7 @@ package thaumcraft.fabric.testing;
 import dev.architectury.fluid.FluidStack;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -40,6 +41,52 @@ public final class FluidConservationRuntimeChecks {
 
     public static void crucibleAbort(GameTestHelper test) { crucibleAbort(test,true); }
     public static void crucibleDrainAbort(GameTestHelper test) { crucibleAbort(test,false); }
+
+    public static void crucibleUnboundedTransfer(GameTestHelper test) {
+        var level = test.getLevel();
+        var pos = test.absolutePos(new BlockPos(8, 100, 8));
+        var before = level.getBlockState(pos);
+        try {
+            level.setBlock(pos, ThaumcraftAlchemy.CRUCIBLE.get().defaultBlockState(), Block.UPDATE_CLIENTS);
+            var tile = (TileCrucible) level.getBlockEntity(pos);
+            var storage = FluidStorage.SIDED.find(level, pos, Direction.UP);
+            var water = FluidVariant.of(Fluids.WATER);
+            test.assertTrue(storage != null, "registered crucible fluid storage");
+            for (long maximum : new long[] {Long.MAX_VALUE, Long.MAX_VALUE / 1000L + 1L}) {
+                try (var tx = Transaction.openOuter()) {
+                    test.assertTrue(storage.insert(water, maximum, tx) == 81000L,
+                            "large transfer maximum fills exactly one bucket");
+                    tx.commit();
+                }
+                test.assertTrue(tile.getWaterAmount() == 1000, "committed fill contains 1000mB");
+                test.assertTrue(water.equals(StorageUtil.findExtractableResource(storage, null)),
+                        "standard Fabric discovery sees extractable water");
+                test.assertTrue(tile.getWaterAmount() == 1000, "discovery rolls its probe back");
+                try (var tx = Transaction.openOuter()) {
+                    test.assertTrue(storage.extract(water, maximum, tx) == 81000L,
+                            "large extraction maximum drains only the available bucket");
+                }
+                test.assertTrue(tile.getWaterAmount() == 1000, "aborted large extraction preserves water");
+                try (var tx = Transaction.openOuter()) {
+                    test.assertTrue(storage.extract(water, maximum, tx) == 81000L,
+                            "committed large extraction drains exactly one bucket");
+                    tx.commit();
+                }
+                test.assertTrue(tile.getWaterAmount() == 0, "committed extraction empties the tank");
+            }
+            try (var tx = Transaction.openOuter()) {
+                test.assertTrue(storage.insert(water, 80L, tx) == 0L,
+                        "sub-millibucket request cannot create fractional water");
+                test.assertTrue(storage.insert(water, 82L, tx) == 81L,
+                        "fractional request transfers only complete millibuckets");
+                tx.commit();
+            }
+            test.assertTrue(tile.getWaterAmount() == 1, "fractional request conserves exactly one millibucket");
+        } finally {
+            level.setBlock(pos, before, Block.UPDATE_CLIENTS);
+        }
+        test.succeed();
+    }
     private static void crucibleAbort(GameTestHelper test,boolean fill) {
         var level=test.getLevel();var pos=test.absolutePos(new BlockPos(8,100,8));var before=level.getBlockState(pos);
         try {

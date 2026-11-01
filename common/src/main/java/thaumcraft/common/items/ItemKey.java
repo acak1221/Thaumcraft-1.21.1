@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Half;
 import thaumcraft.common.blocks.BlockArcaneDoor;
-import thaumcraft.common.blocks.BlockWoodenDevice;
+import thaumcraft.common.blocks.BlockArcanePressurePlate;
 import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.lib.items.EquipmentRules;
 import thaumcraft.common.lib.world.EldritchBlockRules;
@@ -147,8 +147,8 @@ public final class ItemKey extends Item {
             boolean upper = state.getValue(BlockArcaneDoor.HALF) == Half.TOP;
             return new Target(KIND_DOOR, upper ? pos.below() : pos, upper ? pos : pos.above());
         }
-        if (state.getBlock() instanceof BlockWoodenDevice) {
-            int variant = BlockWoodenDevice.variant(state);
+        if (state.getBlock() instanceof BlockArcanePressurePlate) {
+            int variant = BlockArcanePressurePlate.variant(state);
             // Original ItemKey.onItemUseFirst: the wooden device with the metadata two or three, the arcane pressure plate.
             if (variant == EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE
                     || variant == EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_PRESSED) {

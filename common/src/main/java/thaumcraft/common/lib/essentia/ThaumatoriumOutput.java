@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import thaumcraft.common.tiles.TileThaumatorium;
 
-/** Full-output capacity preflight and callback-free native field replacement. Unknown addon containers are left untouched. */
+/** Full-output capacity preflight and callback-free native field replacement. Other containers receive physical output. */
 public final class ThaumatoriumOutput {
     private static final ThreadLocal<Plan> RAW = new ThreadLocal<>();
     private ThaumatoriumOutput() {}
@@ -80,8 +80,10 @@ public final class ThaumatoriumOutput {
     public static Plan prepare(ServerLevel level, BlockPos target, Direction face, ItemStack output) {
         if (!level.hasChunkAt(target) || output.isEmpty() || output.getCount() > output.getMaxStackSize()) return null;
         BlockEntity tile = level.getBlockEntity(target);
-        if (!(tile instanceof Container)) return new Plan(level, List.of(), output);
-        if (!supported(tile)) return null;
+        // The original ejects anything it cannot insert. A container outside
+        // our closed raw adapters must not stop the machine or be mutated by
+        // an untracked callback; use the same paid physical-output path as air.
+        if (!(tile instanceof Container) || !supported(tile)) return new Plan(level, List.of(), output);
         var tiles = new ArrayList<BlockEntity>(); tiles.add(tile);
         if (tile instanceof ChestBlockEntity && tile.getBlockState().getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
             BlockPos pairedPos = target.relative(ChestBlock.getConnectedDirection(tile.getBlockState()));

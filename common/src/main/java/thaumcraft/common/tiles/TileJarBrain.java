@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.mixin.ExperienceOrbCountAccessor;
 
 /**
  * Original TileJarBrain: the brain jar. It swallows the experience orbs that
@@ -81,7 +82,11 @@ public final class TileJarBrain extends BlockEntity {
         for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class,
                 new AABB(pos.getX() - .1D, pos.getY() - .1D, pos.getZ() - .1D,
                         pos.getX() + 1.1D, pos.getY() + 1.1D, pos.getZ() + 1.1D))) {
-            jar.xp += orb.getValue();
+            // 1.21.1 merges equal-value orbs by increasing a separate count.
+            // getValue is the value of ONE constituent; discarding the entity
+            // consumes all of them. Keep the original next-tick capacity clamp.
+            long experience = (long) orb.getValue() * ((ExperienceOrbCountAccessor) orb).thaumcraft$getOrbCount();
+            jar.xp = (int) Math.min(Integer.MAX_VALUE, jar.xp + experience);
             level.playSound(null, orb.getX(), orb.getY(), orb.getZ(), SoundEvents.GENERIC_EAT,
                     SoundSource.BLOCKS, .1F, (level.random.nextFloat() - level.random.nextFloat()) * .2F + 1.0F);
             orb.discard();

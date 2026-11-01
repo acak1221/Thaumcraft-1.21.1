@@ -25,6 +25,7 @@ import thaumcraft.common.config.ThaumcraftSettings;
 import thaumcraft.common.lib.world.BlockFamilyShapes;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileArcanePressurePlate;
+import thaumcraft.common.tiles.TileOwned;
 
 /**
  * Original BlockWoodenDevice metadata two and three: the arcane pressure plate.
@@ -75,6 +76,17 @@ public final class BlockArcanePressurePlate extends BaseEntityBlock {
 
     /** BlockWoodenDevice:403 - the plate carries the owned block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileArcanePressurePlate(pos, state); }
+
+    /** Oracle BlockWoodenDevice.onBlockPlacedBy: the placer owns the plate. */
+    @Override public void setPlacedBy(Level level, BlockPos pos, BlockState state,
+                                     net.minecraft.world.entity.LivingEntity placer, net.minecraft.world.item.ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (!level.isClientSide && placer instanceof Player player && level.getBlockEntity(pos) instanceof TileOwned owned) {
+            owned.setOwner(player.getGameProfile().getName());
+            owned.setChanged();
+            level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
+        }
+    }
 
     /**
      * BlockWoodenDevice:249-256 - the plate is a thin square that is inset by a sixteenth on
@@ -147,9 +159,14 @@ public final class BlockArcanePressurePlate extends BaseEntityBlock {
 
     /** BlockWoodenDevice:363-401 - the owner cycles the sensitivity of the plate. */
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        // Keys and wands used to run in onItemUseFirst, before the plate's
+        // configuration click. Let their item handlers keep that precedence.
+        if (player.getMainHandItem().getItem() instanceof thaumcraft.common.items.ItemKey
+                || player.getMainHandItem().getItem() instanceof thaumcraft.common.items.wands.ItemWandCasting) return InteractionResult.PASS;
         if (!(level.getBlockEntity(pos) instanceof TileArcanePressurePlate plate)) return InteractionResult.PASS;
         if (!plate.getOwner().equals(player.getGameProfile().getName())
                 && !plate.getAccessList().contains("1" + player.getGameProfile().getName())) return InteractionResult.PASS;
+        if (level.isClientSide) return InteractionResult.SUCCESS;
         int setting = EldritchBlockRules.plateNextSetting(plate.getSetting());
         plate.setSetting((byte) setting);
         player.displayClientMessage(Component.translatable(switch (setting) {

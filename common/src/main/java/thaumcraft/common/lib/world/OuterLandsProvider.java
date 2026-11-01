@@ -255,7 +255,7 @@ public final class OuterLandsProvider {
                     crystal.setOrientation(Direction.from3DDataValue(placement.facing() < 0 ? 0 : placement.facing()));
             }
             decorations(level, builder, random);
-            ThaumcraftOuterLands.spawnRoomEntities(level, builder);
+            ThaumcraftOuterLands.spawnRoomEntities(level, builder, worldRandom);
         }
 
         /** Oracle {@code GenCommon.processDecorations:279-317}. */
@@ -318,7 +318,8 @@ public final class OuterLandsProvider {
         /** Oracle {@code GenCommon.isBedrockShowing:319-325}. */
         private static boolean bedrockShowing(WorldGenLevel level, BlockPos pos) {
             for (Direction direction : Direction.values()) {
-                if (level.getBlockState(pos.relative(direction)).isAir()) return true;
+                BlockPos neighbour = pos.relative(direction);
+                if (level.getBlockState(neighbour).isSolidRender(level, neighbour)) continue;
                 BlockState opposite = level.getBlockState(pos.relative(direction.getOpposite()));
                 if (opposite.is(ThaumcraftOuterLands.eldritchNothing()) || opposite.is(Blocks.BEDROCK)) return true;
             }

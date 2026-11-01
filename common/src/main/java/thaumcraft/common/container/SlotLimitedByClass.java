@@ -31,5 +31,5 @@ public class SlotLimitedByClass extends Slot {
     }
 
     @Override public int getMaxStackSize() { return limit; }
-    @Override public int getMaxStackSize(ItemStack stack) { return limit; }
+    @Override public int getMaxStackSize(ItemStack stack) { return Math.min(limit, stack.getMaxStackSize()); }
 }

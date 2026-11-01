@@ -53,6 +53,7 @@ import thaumcraft.common.items.golems.GolemDamageRules;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.ItemGolemUpgrade;
 import thaumcraft.common.items.golems.TrunkRules;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /**
  * Original EntityTravelingTrunk: a living chest that hops after its owner, keeps 27 (36 with Earth) stacks, takes one golem upgrade
@@ -76,6 +77,10 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
     public float lidrot;
     private int jumpDelay, attackTime;
     private float hopForward, hopStrafe;
+    /** Terminal ownership is established before any native item ADD callback. */
+    private boolean retiring, publishing;
+
+    boolean inventoryWritable() { return !retiring && !publishing; }
 
     public EntityTravelingTrunk(EntityType<? extends EntityTravelingTrunk> type, Level level) {
         super(type, level);
@@ -133,10 +138,13 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
         tag.putString("Owner", getOwnerName());
         if (getOwnerUUID() != null) tag.putUUID("OwnerUUID", getOwnerUUID());
         tag.put("Inventory", inventory.save(registryAccess()));
+        if (retiring) tag.putBoolean("TrunkRetired", true);
     }
 
     @Override public void readAdditionalSaveData(CompoundTag tag) {
+        if (retiring || publishing) throw new IllegalStateException("Cannot rewind trunk output custody during publication");
         super.readAdditionalSaveData(tag);
+        if (tag.getBoolean("TrunkRetired")) { retiring = true; inventory.clearRaw(); return; }
         setStay(tag.getBoolean("Stay"));
         int upgrade = tag.getByte("upgrade");
         if (!TrunkRules.validUpgrade(upgrade)) Thaumcraft.LOG.warn("Traveling trunk with unknown upgrade {} read as having none", upgrade);
@@ -169,20 +177,52 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
      */
     public boolean recall(Player player, boolean dismantle) {
         int upgrade = getUpgrade();
-        if (!isAlive() || !TrunkRules.mayOpen(upgrade, isOwner(player))) return false;
+        if (retiring || publishing || !isAlive() || !TrunkRules.mayOpen(upgrade, isOwner(player))
+                || !(level() instanceof ServerLevel server) || !server.getServer().isSameThread()) return false;
+        publishing = true;
+        try {
+        var outputs = new ArrayList<DeferredItemDrops.DirectedDrop>();
         ItemStack dropped = new ItemStack(ThaumcraftGolems.TRUNK_SPAWNER.get());
         if (dismantle) {
-            if (upgrade > TrunkRules.NO_UPGRADE && random.nextBoolean()) spawnAtLocation(new ItemStack(ThaumcraftGolems.upgradeItem(upgradeKind(upgrade))), 0.5F);
+            if (upgrade > TrunkRules.NO_UPGRADE && random.nextBoolean()) outputs.add(drop(new ItemStack(ThaumcraftGolems.upgradeItem(upgradeKind(upgrade))), .5));
         } else {
             if (hasCustomName()) dropped.set(DataComponents.CUSTOM_NAME, getCustomName());
             dropped.set(ThaumcraftGolems.TRUNK_UPGRADE.get(), upgrade);
-            if (upgrade == TrunkRules.ORDER) dropped.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(inventory.contents()));
+            if (upgrade == TrunkRules.ORDER) dropped.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(inventory.slotContents()));
         }
-        spawnAtLocation(dropped, 0.5F);
-        if (upgrade != TrunkRules.ORDER || dismantle) inventory.dropAll();
-        playSound(ZAP, 0.5F, 1.0F);
+        outputs.add(drop(dropped, .5));
+        if (upgrade != TrunkRules.ORDER || dismantle) for (ItemStack stack : inventory.contents()) outputs.add(drop(stack, 0));
+        var batch = DeferredItemDrops.prepareDirectedBatch(server, blockPosition(), outputs);
+        if (!batch.ready()) return false;
+        // These mutations and commit contain no hooks. Once callbacks can run,
+        // no source inventory or second recall right remains to replay.
+        retiring = true;
+        inventory.clearRaw();
+        batch.commitRaw();
         discard();
+        DeferredItemDrops.tick(server);
+        playSound(ZAP, 0.5F, 1.0F);
         return true;
+        } finally { publishing = false; }
+    }
+
+    private DeferredItemDrops.DirectedDrop drop(ItemStack stack, double height) {
+        return new DeferredItemDrops.DirectedDrop(stack, position().add(0, height, 0),
+                new Vec3(level().random.nextDouble() * .2 - .1, .2, level().random.nextDouble() * .2 - .1), 10);
+    }
+
+    /** Direct inventory drops keep the entity alive, but retire source slots
+     * before emission and keep them inaccessible to recursive ADD listeners. */
+    void dropInventory() {
+        if (retiring || publishing || !(level() instanceof ServerLevel server)) return;
+        publishing = true;
+        try {
+            var outputs = new ArrayList<DeferredItemDrops.DirectedDrop>();
+            for (ItemStack stack : inventory.contents()) outputs.add(drop(stack, 0));
+            var batch = DeferredItemDrops.prepareDirectedBatch(server, blockPosition(), outputs);
+            if (!batch.ready()) return;
+            inventory.clearRaw(); batch.commitRaw(); DeferredItemDrops.tick(server);
+        } finally { publishing = false; }
     }
 
     private static GolemUpgrade upgradeKind(int upgrade) {
@@ -191,8 +231,18 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
     }
 
     @Override public void die(DamageSource source) {
-        if (!level().isClientSide) inventory.dropAll();
-        super.die(source);
+        if (retiring || publishing) return;
+        if (!(level() instanceof ServerLevel server)) { super.die(source); return; }
+        publishing = true;
+        try {
+            var outputs = new ArrayList<DeferredItemDrops.DirectedDrop>();
+            for (ItemStack stack : inventory.contents()) outputs.add(drop(stack, 0));
+            var batch = DeferredItemDrops.prepareDirectedBatch(server, blockPosition(), outputs);
+            if (!batch.ready()) return;
+            retiring = true; inventory.clearRaw(); batch.commitRaw();
+            super.die(source);
+            DeferredItemDrops.tick(server);
+        } finally { publishing = false; }
     }
 
     @Override protected SoundEvent getHurtSound(DamageSource source) { return net.minecraft.world.level.block.SoundType.WOOD.getBreakSound(); }
@@ -204,6 +254,7 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
     // ---- interaction ---------------------------------------------------------------------------------------------
 
     @Override protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        if (retiring || publishing) return InteractionResult.PASS;
         if (player.isShiftKeyDown()) return InteractionResult.PASS;
         ItemStack stack = player.getItemInHand(hand);
         if (stack.is(ThaumcraftGolems.GOLEM_BELL.get())) {
@@ -256,6 +307,7 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
     }
 
     @Override public void tick() {
+        if (retiring) { if (isDeadOrDying()) super.tick(); else if (!isRemoved()) discard(); return; }
         super.tick();
         if (isInWater()) setDeltaMovement(getDeltaMovement().add(0, 0.033, 0));
         if (level().isClientSide) {
@@ -363,7 +415,7 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
     // ---- items ---------------------------------------------------------------------------------------------------
 
     private void pullItems() {
-        if (isRemoved() || getHealth() <= 0) return;
+        if (retiring || publishing || isRemoved() || getHealth() <= 0) return;
         if (!level().isClientSide) {
             AABB swallow = new AABB(getX() - TrunkRules.SWALLOW_RADIUS, getY() - TrunkRules.SWALLOW_RADIUS, getZ() - TrunkRules.SWALLOW_RADIUS,
                     getX() + TrunkRules.SWALLOW_RADIUS, getY() + TrunkRules.SWALLOW_RADIUS, getZ() + TrunkRules.SWALLOW_RADIUS);

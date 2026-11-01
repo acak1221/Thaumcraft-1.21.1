@@ -28,7 +28,7 @@ public class InsightScroll extends Item {
         AspectList taught = stack.getOrDefault(ExampleAddon.STORED_ASPECTS, StoredAspects.NONE).aspects();
         for (Aspect aspect : taught.getAspects()) ThaumcraftApiHelper.addAspectPool(player, aspect, taught.getAmount(aspect));
         ThaumcraftApiHelper.addAspectPool(player, ExampleAddon.TEMPUS, 1);
-        // Completes the entry with its parents and pays its warp, as an original ResearchManager.completeResearch.
+        // Completes only this entry and pays its warp, as the original ResearchManager.completeResearch did.
         if (!ThaumcraftApiHelper.isResearchComplete(player, "EXAMPLE_SECRET")) ThaumcraftApiHelper.completeResearch(player, "EXAMPLE_SECRET");
         player.displayClientMessage(Component.translatable("tc4_example.insight_scroll.read", ThaumcraftApiHelper.getWarpTotal(player)), false);
         stack.consume(1, player);

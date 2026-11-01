@@ -27,6 +27,8 @@ import thaumcraft.common.lib.research.ResearchBrowserData;
 import thaumcraft.common.lib.research.ResearchCatalog;
 import thaumcraft.common.lib.research.ResearchClues;
 import thaumcraft.common.lib.research.ResearchNoteIssuance;
+import thaumcraft.common.lib.research.ResearchNoteGenerator;
+import thaumcraft.common.lib.research.ResearchNoteLearning;
 import thaumcraft.common.lib.research.ResearchPurchase;
 import thaumcraft.common.lib.research.ResearchRegistrationOrder;
 
@@ -140,9 +142,16 @@ public final class AddonResearchRuntimeChecks {
             test.assertTrue(bought.success(), "the secondary add-on entry is bought: " + bought);
             test.assertValueEqual(knowledge.getAspectPoolFor("praecantatio"), 0, "its price is spent");
 
-            // Completing the changed original entry completes its new sibling.
+            // Oracle ResearchManager.completeResearch:508-527 grants only its own key; sibling processing is in
+            // ItemResearchNotes:87-104 / ResearchCompletion, not the public exact-grant method.
             test.assertTrue(ThaumcraftApiHelper.completeResearch(player, "NITOR"), "the original entry completes");
-            test.assertTrue(knowledge.isResearchComplete(SIBLING), "with the sibling an add-on gave it");
+            test.assertTrue(!knowledge.isResearchComplete(SIBLING), "the exact API grant does not grant an add-on sibling");
+            knowledge.removeResearch("NITOR");
+            var note = ResearchNoteGenerator.generate("NITOR", new Random(43));
+            // Explicit solved-note fixture: tests the learning transition, not acquisition or solving its puzzle.
+            var learned = ResearchNoteLearning.learn(knowledge, note.withCells(note.cells(), true));
+            test.assertTrue(learned.success() && knowledge.isResearchComplete("NITOR") && knowledge.isResearchComplete(SIBLING),
+                    "learning the changed original entry grants the sibling an add-on gave it");
 
             // The knowledge of a player keeps add-on keys through a save.
             PlayerKnowledge reloaded = new PlayerKnowledge();

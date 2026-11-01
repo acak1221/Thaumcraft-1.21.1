@@ -6,9 +6,12 @@
   "mixins": [
     "Tc4LevelStemLifecycleMixin",
     "PlayerKnowledgeMixin",
+    "ObjectAspectTagsBoundMixin",
     "ServerLevelEntityManagerAccess",
     "PersistentEntitySectionManagerAccess",
     "EntityLevelCallbackAccess",
+    "ExperienceOrbCountAccessor",
+    "PaidExperiencePickupMixin",
     "FluxEffectInstanceMixin",
     "ScopedFluxMilkBucketMixin",
     "VanillaFurnaceBellowsAccess",

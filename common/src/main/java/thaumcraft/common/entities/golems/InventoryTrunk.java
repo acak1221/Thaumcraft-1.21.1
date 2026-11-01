@@ -27,23 +27,27 @@ public final class InventoryTrunk implements Container {
     @Override public boolean isEmpty() { return stacks.stream().allMatch(ItemStack::isEmpty); }
     @Override public ItemStack getItem(int slot) { return slot >= 0 && slot < stacks.size() ? stacks.get(slot) : ItemStack.EMPTY; }
     @Override public ItemStack removeItem(int slot, int amount) {
+        if (!trunk.inventoryWritable()) return ItemStack.EMPTY;
         if (slot < 0 || slot >= stacks.size()) return ItemStack.EMPTY;
         ItemStack removed = ContainerHelper.removeItem(stacks, slot, amount);
         if (!removed.isEmpty()) setChanged();
         return removed;
     }
-    @Override public ItemStack removeItemNoUpdate(int slot) { return slot >= 0 && slot < stacks.size() ? ContainerHelper.takeItem(stacks, slot) : ItemStack.EMPTY; }
+    @Override public ItemStack removeItemNoUpdate(int slot) { return trunk.inventoryWritable() && slot >= 0 && slot < stacks.size() ? ContainerHelper.takeItem(stacks, slot) : ItemStack.EMPTY; }
     @Override public void setItem(int slot, ItemStack stack) {
+        if (!trunk.inventoryWritable()) return;
         if (slot < 0 || slot >= stacks.size()) return;
         stacks.set(slot, stack);
         setChanged();
     }
     @Override public void setChanged() {}
     @Override public boolean stillValid(Player player) { return true; } // Distance and liveness belong to the menu.
-    @Override public void clearContent() { for (int slot = 0; slot < stacks.size(); slot++) stacks.set(slot, ItemStack.EMPTY); }
+    @Override public void clearContent() { if (trunk.inventoryWritable()) clearRaw(); }
+    void clearRaw() { for (int slot = 0; slot < stacks.size(); slot++) stacks.set(slot, ItemStack.EMPTY); }
 
     /** Merges as much of {@code stack} as fits into the trunk's slots, then fills empty ones; returns what is left (a new stack, or empty). */
     public ItemStack insert(ItemStack stack) {
+        if (!trunk.inventoryWritable()) return stack.copy();
         ItemStack rest = stack.copy();
         int slots = getContainerSize();
         int limit = Math.min(rest.getMaxStackSize(), 64); // original stacklimit 64
@@ -69,6 +73,13 @@ public final class InventoryTrunk implements Container {
         return all;
     }
 
+    /** ItemContainerContents addresses slots by index, including the holes. */
+    public List<ItemStack> slotContents() {
+        List<ItemStack> all = new ArrayList<>(stacks.size());
+        for (ItemStack stack : stacks) all.add(stack.copy());
+        return all;
+    }
+
     public ListTag save(HolderLookup.Provider provider) {
         ListTag list = new ListTag();
         for (int slot = 0; slot < stacks.size(); slot++) {
@@ -82,6 +93,7 @@ public final class InventoryTrunk implements Container {
     }
 
     public void load(ListTag list, HolderLookup.Provider provider) {
+        if (!trunk.inventoryWritable()) throw new IllegalStateException("Trunk output custody is already being transferred");
         clearContent();
         for (int index = 0; index < list.size(); index++) {
             CompoundTag entry = list.getCompound(index);
@@ -93,11 +105,6 @@ public final class InventoryTrunk implements Container {
 
     /** Original dropAllItems: every stack is dropped at the trunk and the inventory emptied. */
     public void dropAll() {
-        for (int slot = 0; slot < stacks.size(); slot++) {
-            ItemStack stack = stacks.get(slot);
-            if (stack.isEmpty()) continue;
-            trunk.spawnAtLocation(stack, 0.0F);
-            stacks.set(slot, ItemStack.EMPTY);
-        }
+        trunk.dropInventory();
     }
 }

@@ -95,25 +95,11 @@ public final class InternalMethodHandler implements IInternalMethodHandler {
      * and the cost never splits across wands.
      */
     @Override public boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting) {
-        if (wand == null || wand.isEmpty() || !(wand.getItem() instanceof ItemWandCasting)) return false;
-        if (cost == null || cost.size() == 0) return true;
-        WandData data = ItemWandCasting.data(wand);
-        Map<String, Integer> prices = new LinkedHashMap<>();
-        for (Aspect aspect : cost.getAspects()) {
-            int amount = cost.getAmount(aspect);
-            if (data.amount(aspect.getTag()) < amount) return false;
-            prices.put(aspect.getTag(), amount);
-        }
-        if (!doit) return true;
-        for (Map.Entry<String, Integer> entry : prices.entrySet()) {
-            data = data.withAmount(entry.getKey(), data.amount(entry.getKey()) - entry.getValue());
-        }
-        wand.set(ThaumcraftContent.WAND_DATA.get(), data);
-        return true;
+        return thaumcraft.api.wands.WandHelper.consumeAllVis(wand, player, cost, doit, crafting);
     }
 
     @Override public boolean consumeVisFromWandCrafting(ItemStack wand, Player player, AspectList cost, boolean doit) {
-        return consumeVisFromWand(wand, player, cost, doit, true);
+        return thaumcraft.api.wands.WandHelper.consumeAllVisCrafting(wand, player, cost, doit);
     }
 
     @Override public boolean consumeVisFromInventory(Player player, AspectList cost) {

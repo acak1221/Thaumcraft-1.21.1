@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -13,6 +12,7 @@ import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.config.Config;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
+import thaumcraft.common.lib.research.ItemScanIdentity;
 
 /**
  * The aspect row of the hovered container slot.
@@ -90,9 +90,8 @@ public final class HoveredSlotAspectRow {
         ItemStack stack = slot.getItem();
         if (stack.isEmpty()) return;
         // Original ClientTickEventsFML:685-687 - only a scanned object shows its row.
-        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
         var scanned = KnowledgeAccess.get(player).getScannedItems();
-        if (!isScanned(scanned, id)) return;
+        if (!isScanned(scanned, stack)) return;
         // Original ClientTickEventsFML:688-690 - the object tags and the bonus tags.
         AspectList tags = ObjectAspectResolver.get(stack, player.level());
         if (tags == null || tags.size() == 0) return;
@@ -135,6 +134,11 @@ public final class HoveredSlotAspectRow {
 
     public static boolean isScanned(java.util.Set<String> scanned, String id) {
         return scanned != null && (scanned.contains("@" + id) || scanned.contains("#" + id));
+    }
+
+    /** The hovered physical stack uses the same subtype identity as the thaumometer and scan callbacks. */
+    public static boolean isScanned(java.util.Set<String> scanned, ItemStack stack) {
+        return stack != null && !stack.isEmpty() && isScanned(scanned, ItemScanIdentity.signature(stack).substring(1));
     }
 
     /**

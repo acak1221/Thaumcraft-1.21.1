@@ -69,16 +69,17 @@ public interface IInternalMethodHandler {
     // original reached through thaumcraft.common.lib.research.ResearchManager and PlayerKnowledge. Not 1.7.10 members
     // of this interface; inert by default so a replacement handler still compiles.
 
-    /** Original {@code ResearchManager.completeResearch(player, key)}: completes the research, its parents and siblings
-     * as the original did, pays its warp and syncs the player. Server side only; false by default, on a client, for an
+    /** Original {@code ResearchManager.completeResearch(player, key)}: completes only that research,
+     * pays its own warp and syncs the player. Server side only; false by default, on a client, for an
      * unknown or disabled key. */
     default boolean completeResearch(Player player, String researchKey) { return false; }
 
     /** The research keys a player completed, as a new set without the "@" clue markers; empty by default and for null. */
     default java.util.Set<String> getCompletedResearch(Player player) { return java.util.Set.of(); }
 
-    /** Original {@code ResearchManager.completeAspect}: adds research points of an aspect to the player's pool (the
-     * points the research table spends) and syncs. Server side only; no-op by default. amount is clamped to a short. */
+    /** Adds research points of an aspect to the player's pool (the points the research table spends) and syncs.
+     * This native convenience takes a delta; the retained ResearchManager.completeAspect takes an absolute total.
+     * Server side only; no-op by default. amount is clamped to a short. */
     default void addAspectPool(Player player, Aspect aspect, int amount) {}
 
     /** The research points of an aspect in the player's pool; zero by default and for null arguments. */

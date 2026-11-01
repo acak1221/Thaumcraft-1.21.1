@@ -20,7 +20,8 @@ import thaumcraft.common.lib.research.ResearchDefinition;
  *
  * <p>Like the original idea it only ever looks at research the player has completed, so it reveals
  * nothing: a research matches by its name or its key, and through the items its readable recipe
- * pages make ("where is the recipe for this?"). The index is built once per open book.</p>
+ * pages make ("where is the recipe for this?"). An open book rebuilds its index when knowledge,
+ * the research catalogue or the world's recipe collection changes.</p>
  */
 public final class ResearchSearch {
     /** One searchable line: a completed research, or an item one of its pages makes. */
@@ -29,6 +30,37 @@ public final class ResearchSearch {
     private final List<Entry> entries;
 
     private ResearchSearch(List<Entry> entries) { this.entries = List.copyOf(entries); }
+
+    /** One open book's index; knowledge snapshots can change while the map stays open after a purchase. */
+    static final class Cache {
+        private Set<String> completed;
+        private Level level;
+        private Object catalogue, recipes;
+        private ResearchSearch index;
+        private String query;
+        private List<Entry> results = List.of();
+
+        List<Entry> find(String query, Set<String> completed, Level level) {
+            if (query.isBlank()) return List.of();
+            Object catalogue = ResearchCatalog.all();
+            Object recipes = level == null ? null : level.getRecipeManager().getRecipes();
+            if (index == null || this.level != level || !completed.equals(this.completed)
+                    || this.catalogue != catalogue || this.recipes != recipes) {
+                this.completed = Set.copyOf(completed);
+                this.level = level;
+                this.catalogue = catalogue; this.recipes = recipes;
+                index = ResearchSearch.index(this.completed, level);
+                this.query = null;
+            }
+            if (!query.equals(this.query)) {
+                this.query = query;
+                results = index.find(query);
+            }
+            return results;
+        }
+
+        void clear() { completed = null; level = null; catalogue = recipes = null; index = null; query = null; results = List.of(); }
+    }
 
     /** The completed, visible research, then the results of their visible recipe pages. */
     public static ResearchSearch index(Set<String> completed, Level level) {

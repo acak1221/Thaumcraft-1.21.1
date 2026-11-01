@@ -36,6 +36,8 @@ public final class ItemEssence extends Item {
     @Override public InteractionResult useOn(UseOnContext context) {
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.PASS;
+        InteractionResult banner = thaumcraft.common.blocks.BlockWoodenDevice.tryBannerInteraction(context);
+        if (banner != InteractionResult.PASS) return banner;
         // Secondary-use skips the block hook in 1.21. Use exactly the same
         // item-first path, including its whole-phial price and creative debit.
         BlockHitResult hit = new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside());

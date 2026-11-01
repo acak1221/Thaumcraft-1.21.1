@@ -51,11 +51,9 @@ public final class ThaumcraftConfigScreen extends Screen {
     @Override protected void init() {
         var categories = ThaumcraftConfigStore.Category.values();
         // Each tab is as wide as its name; when the names cannot all fit, the tabs share the width.
-        int available = this.width - 20, total = 0;
         int[] widths = new int[categories.length];
-        for (int i = 0; i < categories.length; i++) total += widths[i] = Math.min(110, this.font.width(categoryName(categories[i])) + 10);
-        if (total > available) java.util.Arrays.fill(widths, total = available / categories.length);
-        int x = (this.width - total) / 2;
+        for (int i = 0; i < categories.length; i++) widths[i] = Math.min(110, this.font.width(categoryName(categories[i])) + 10);
+        int x = layoutTabs(this.width, widths);
         for (int i = 0; i < categories.length; i++) {
             ThaumcraftConfigStore.Category candidate = categories[i];
             Button tab = Button.builder(categoryName(candidate), button -> {
@@ -71,6 +69,15 @@ public final class ThaumcraftConfigScreen extends Screen {
         addRenderableWidget(list);
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
                 .bounds(this.width / 2 - 100, this.height - 26, 200, 20).build());
+    }
+
+    /** Fits the tab widths to the screen, then centers the entire row of tabs. */
+    static int layoutTabs(int screenWidth, int[] widths) {
+        int available = screenWidth - 20;
+        if (java.util.Arrays.stream(widths).sum() > available) {
+            java.util.Arrays.fill(widths, available / widths.length);
+        }
+        return (screenWidth - java.util.Arrays.stream(widths).sum()) / 2;
     }
 
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {

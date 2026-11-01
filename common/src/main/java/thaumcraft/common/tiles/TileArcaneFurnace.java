@@ -10,8 +10,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -29,6 +27,9 @@ import thaumcraft.common.blocks.BlockArcaneFurnaceNozzle;
 import thaumcraft.common.config.ThaumcraftLegacyTiles;
 import thaumcraft.common.lib.tiles.LegacyTileRules;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
+import thaumcraft.common.lib.utils.ExperienceOrbQueue;
+import net.minecraft.world.phys.Vec3;
+import thaumcraft.common.Thaumcraft;
 
 /**
  * Original TileArcaneFurnace: the furnace core of the three by three by three arcane furnace.
@@ -59,6 +60,7 @@ public class TileArcaneFurnace extends RetainedDataBlockEntity {
     public int facingZ = -5;
     /** The blaze of the collapsed furnace is released exactly once. */
     private boolean blazeReleased;
+    private boolean ticking, outputting, dropping;
 
     public TileArcaneFurnace(BlockPos pos, BlockState state) {
         super(ThaumcraftLegacyTiles.ARCANE_FURNACE_BLOCK_ENTITY.get(), pos, state);
@@ -109,15 +111,24 @@ public class TileArcaneFurnace extends RetainedDataBlockEntity {
 
     /** BlockContainer:breakBlock - the contents of the furnace are dropped when it breaks. */
     public void dropContents(ServerLevel level) {
-        if (isDataRejected()) return;
-        List<ItemStack> drops = new ArrayList<>();
-        for (int slot = 0; slot < furnaceItemStacks.length; slot++) {
-            if (furnaceItemStacks[slot].isEmpty()) continue;
-            drops.add(furnaceItemStacks[slot].copy());
-            furnaceItemStacks[slot] = ItemStack.EMPTY;
-        }
-        if (!drops.isEmpty()) DeferredItemDrops.enqueue(level, worldPosition, drops);
-        setChanged();
+        if (isDataRejected() || dropping) return;
+        dropping = true;
+        try {
+            var drops = new ArrayList<DeferredItemDrops.DirectedDrop>();
+            var random = new java.util.Random(); // Original InventoryUtils scatter, independent of world RNG.
+            for (ItemStack stack : furnaceItemStacks) if (!stack.isEmpty()) {
+                Vec3 position = new Vec3((float) worldPosition.getX() + random.nextFloat() * .8F + .1F,
+                        (float) worldPosition.getY() + random.nextFloat() * .8F + .1F,
+                        (float) worldPosition.getZ() + random.nextFloat() * .8F + .1F);
+                Vec3 motion = new Vec3(random.nextGaussian() * .05F, random.nextGaussian() * .05F + .2F, random.nextGaussian() * .05F);
+                drops.add(new DeferredItemDrops.DirectedDrop(stack, position, motion, 0));
+            }
+            var batch = DeferredItemDrops.prepareDirectedBatch(level, worldPosition, drops);
+            if (!batch.ready()) return;
+            java.util.Arrays.fill(furnaceItemStacks, ItemStack.EMPTY);
+            batch.commitRaw();
+            setChanged();
+        } finally { dropping = false; }
     }
 
     /** TileArcaneFurnace:131-133 - the furnace drains five fire vis a tick from the vis network. */
@@ -127,11 +138,13 @@ public class TileArcaneFurnace extends RetainedDataBlockEntity {
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, TileArcaneFurnace tile) {
-        if (tile.isDataRejected()) return;
+        if (tile.isDataRejected() || tile.ticking || tile.outputting) return;
         if (tile.level != level || !pos.equals(tile.worldPosition) || tile.isRemoved() || tile.getBlockState() != state) return;
         if (tile.facingX == -5) tile.getFacing(level);
         if (level.isClientSide || !(level instanceof ServerLevel server)) return;
         if (!server.getServer().isSameThread()) throw new IllegalStateException("Arcane furnace ticks require the server thread");
+        tile.ticking = true;
+        try {
         boolean cookedFlag = false;
         if (tile.furnaceCookTime > 0) {
             --tile.furnaceCookTime;
@@ -145,13 +158,26 @@ public class TileArcaneFurnace extends RetainedDataBlockEntity {
             for (int slot = 0; slot < tile.getSizeInventory(); slot++) {
                 ItemStack source = tile.furnaceItemStacks[slot];
                 if (source.isEmpty()) continue;
-                ItemStack result = tile.smeltResult(level, source);
+                ItemStack before = source.copy();
+                ItemStack result = tile.smeltResult(level, before);
                 if (result.isEmpty()) continue;
-                tile.ejectItem(level, result, source);
-                level.blockEvent(pos, state.getBlock(), 3, 0);
+                var output = tile.prepareEjection(server, result, before);
+                // Recipe/addon preparation can run foreign code. A changed,
+                // removed or replaced native source has no right to pay it.
+                if (server.getBlockEntity(pos) != tile || tile.isRemoved() || tile.level != level
+                        || tile.getBlockState() != state || tile.furnaceItemStacks[slot] != source
+                        || !ItemStack.matches(source, before) || !output.ready()) break;
+                // Raw debit and both queue commits contain no callbacks.
                 source.shrink(1);
                 if (source.isEmpty()) tile.furnaceItemStacks[slot] = ItemStack.EMPTY;
-                tile.setChanged();
+                output.commitRaw();
+                try {
+                    tile.setChanged();
+                    level.blockEvent(pos, state.getBlock(), 3, 0);
+                } catch (RuntimeException | Error failure) {
+                    Thaumcraft.LOG.warn("Paid furnace feedback failed at {}; outputs retained", pos, failure);
+                }
+                output.flush(server);
                 break;
             }
         }
@@ -163,6 +189,7 @@ public class TileArcaneFurnace extends RetainedDataBlockEntity {
                 break;
             }
         }
+        } finally { tile.ticking = false; }
     }
 
     /**
@@ -246,55 +273,56 @@ public class TileArcaneFurnace extends RetainedDataBlockEntity {
      * and the experience of the recipe.
      */
     public void ejectItem(Level level, ItemStack items, ItemStack furnaceItemStack) {
-        if (isDataRejected()) return;
-        if (items == null || items.isEmpty()) return;
-        ItemStack bit = items.copy();
+        if (isDataRejected() || outputting || ticking || items == null || items.isEmpty() || !(level instanceof ServerLevel server)) return;
+        outputting = true;
+        try {
+            var output = prepareEjection(server, items, furnaceItemStack.copy());
+            if (!output.ready()) return;
+            output.commitRaw();
+            output.flush(server);
+        } finally { outputting = false; }
+    }
+
+    private record Ejection(DeferredItemDrops.PreparedBatch items, ExperienceOrbQueue.Prepared experience) {
+        boolean ready() { return items.ready() && experience.ready(); }
+        void commitRaw() { items.commitRaw(); experience.commitRaw(); }
+        void flush(ServerLevel level) { DeferredItemDrops.tick(level); ExperienceOrbQueue.tick(level); }
+    }
+
+    private Ejection prepareEjection(ServerLevel level, ItemStack items, ItemStack input) {
         int bellows = getBellows(level);
-        float lx = .5F;
-        float lz = .5F;
-        float mx = LegacyTileRules.ejectMomentum(facingX);
-        float mz = LegacyTileRules.ejectMomentum(facingZ);
-        lx += facingX * LegacyTileRules.EJECT_OFFSET;
-        lz += facingZ * LegacyTileRules.EJECT_OFFSET;
-        ItemEntity entity = new ItemEntity(level, worldPosition.getX() + lx, worldPosition.getY() + .4F, worldPosition.getZ() + lz, items);
-        entity.setDeltaMovement(mx, 0D, mz);
-        level.addFreshEntity(entity);
-        ItemStack bonus = bonusProvider.bonusFor(furnaceItemStack);
-        // The registry entry only carries the identity of the bonus; the amount
-        // is decided by the bellows rolls below (oracle TileArcaneFurnace.java:237-259).
+        Vec3 position = new Vec3(worldPosition.getX() + .5F + facingX * LegacyTileRules.EJECT_OFFSET,
+                worldPosition.getY() + .4F, worldPosition.getZ() + .5F + facingZ * LegacyTileRules.EJECT_OFFSET);
+        Vec3 motion = new Vec3(LegacyTileRules.ejectMomentum(facingX), 0, LegacyTileRules.ejectMomentum(facingZ));
+        var outputs = new ArrayList<DeferredItemDrops.DirectedDrop>();
+        // The old convenience ItemEntity constructor drew two world doubles
+        // before the bonus roll, even though the furnace replaced its motion.
+        level.random.nextDouble(); level.random.nextDouble();
+        outputs.add(new DeferredItemDrops.DirectedDrop(items, position, motion, 0));
+        ItemStack bonus = bonusProvider.bonusFor(input.copy());
         if (bonus != null) {
             int count = 0;
             int rolls = LegacyTileRules.bonusRolls(bellows);
             float chance = LegacyTileRules.bonusChance(bellows);
             RandomSource random = level.random;
             for (int roll = 0; roll < rolls; roll++) if (random.nextFloat() < chance) ++count;
-            if (count > 0) {
-                // Build the paid stack from the item, so a registry entry without
-                // an amount can never turn into the shared empty stack.
-                ItemStack bonusStack = new ItemStack(bonus.getItem(), count);
-                mx = LegacyTileRules.ejectMomentum(facingX);
-                mz = LegacyTileRules.ejectMomentum(facingZ);
-                ItemEntity bonusEntity = new ItemEntity(level, worldPosition.getX() + lx, worldPosition.getY() + .4F, worldPosition.getZ() + lz, bonusStack);
-                bonusEntity.setDeltaMovement(mx, 0D, mz);
-                level.addFreshEntity(bonusEntity);
+            if (count > 0 && !bonus.isEmpty()) {
+                outputs.add(new DeferredItemDrops.DirectedDrop(bonus.copyWithCount(count), position, motion, 0));
+                level.random.nextDouble(); level.random.nextDouble();
             }
         }
         int amount = items.getCount();
-        float experience = smeltExperience(level, bit);
-        if (experience == 0F) {
-            amount = 0;
-        } else if (experience < 1F) {
+        // Native recipes match INPUT. Keep the actual paid source rather than
+        // querying the output, which would lose cactus/ore recipe experience.
+        float experience = smeltExperience(level, input);
+        if (experience == 0F) amount = 0;
+        else if (experience < 1F) {
             int floor = (int) (amount * experience);
             if (floor < Math.ceil(amount * experience) && level.random.nextFloat() < amount * experience - floor) ++floor;
             amount = floor;
         }
-        while (amount > 0) {
-            int value = ExperienceOrb.getExperienceValue(amount);
-            amount -= value;
-            ExperienceOrb orb = new ExperienceOrb(level, worldPosition.getX() + lx, worldPosition.getY() + .4F, worldPosition.getZ() + lz, value);
-            orb.setDeltaMovement(LegacyTileRules.ejectMomentum(facingX), 0D, LegacyTileRules.ejectMomentum(facingZ));
-            level.addFreshEntity(orb);
-        }
+        return new Ejection(DeferredItemDrops.prepareDirectedBatch(level, worldPosition, outputs),
+                ExperienceOrbQueue.prepare(level, position, motion, amount));
     }
 
     /** The smelting result of a stack, or an empty stack when it cannot be smelted. */
@@ -343,6 +371,7 @@ public class TileArcaneFurnace extends RetainedDataBlockEntity {
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (ticking || outputting || dropping) throw new IllegalStateException("Cannot rewind furnace custody during publication");
         if (retainMalformed(tag, () -> validateSlots(tag,"Items",furnaceItemStacks.length,registries))) return;
         super.loadAdditional(tag, registries);
         furnaceCookTime = tag.getShort("CookTime");

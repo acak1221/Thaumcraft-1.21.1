@@ -9,7 +9,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
@@ -22,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.IRepairable;
 import thaumcraft.common.config.ThaumcraftEquipment;
+import thaumcraft.common.lib.world.EarthmoverMaterial;
 
 /**
  * Shovel of the Earthmover (original ItemElementalShovel, Api THAUMIUM_ELEMENTAL: tier 3, 1500 uses, speed 10, damage 1 + 3, enchantability
@@ -51,19 +51,26 @@ public class ItemElementalShovel extends ShovelItem implements IRepairable {
         Player player = context.getPlayer();
         if (player == null || !(context.getLevel() instanceof ServerLevel level)) return InteractionResult.PASS;
         BlockPos clicked = context.getClickedPos();
+        if (player.level() != level || !player.isAlive() || player.isSpectator() || !level.getServer().isSameThread()
+                || !level.isInWorldBounds(clicked) || !level.getWorldBorder().isWithinBounds(clicked)
+                || !level.hasChunkAt(clicked)) return InteractionResult.FAIL;
         BlockState state = level.getBlockState(clicked);
         if (level.getBlockEntity(clicked) != null) return InteractionResult.PASS;
         ItemStack shovel = context.getItemInHand();
+        if (shovel.isEmpty() || player.getItemInHand(context.getHand()) != shovel) return InteractionResult.FAIL;
         Direction face = context.getClickedFace();
         boolean acted = false;
         for (BlockPos cell : ElementalShovelGeometry.layout(clicked, face, orientation(shovel), player.getYRot())) {
             if (shovel.isEmpty()) break;
+            if (!level.isInWorldBounds(cell) || !level.getWorldBorder().isWithinBounds(cell) || !level.hasChunkAt(cell)
+                    || !level.mayInteract(player, cell) || !player.mayUseItemAt(cell, face, shovel)) continue;
             BlockState there = level.getBlockState(cell);
             if (!there.isAir() && !there.canBeReplaced()) continue;
-            if (!level.isInWorldBounds(cell) || !level.mayInteract(player, cell) || !player.mayUseItemAt(cell, face, shovel)) continue;
             BlockState laid = null;
-            if (state.getBlock().asItem() != Items.AIR && (player.getAbilities().instabuild || consume(player, state.getBlock().asItem()))) laid = state;
-            else if (state.is(Blocks.GRASS_BLOCK) && (player.getAbilities().instabuild || consume(player, Items.DIRT))) laid = Blocks.DIRT.defaultBlockState();
+            if (state.getBlock().asItem() != Items.AIR && (player.getAbilities().instabuild || EarthmoverMaterial.consume(player, state)))
+                laid = EarthmoverMaterial.placementState(state);
+            else if (state.is(Blocks.GRASS_BLOCK) && (player.getAbilities().instabuild
+                    || EarthmoverMaterial.consume(player, Blocks.DIRT.defaultBlockState()))) laid = Blocks.DIRT.defaultBlockState();
             if (laid == null) continue;
             // Stock has already been paid (or creative placement accepted).
             // Even a rejected world write must not fall through to another use.
@@ -76,14 +83,4 @@ public class ItemElementalShovel extends ShovelItem implements IRepairable {
         return acted ? InteractionResult.CONSUME : InteractionResult.PASS;
     }
 
-    /** Original {@code InventoryUtils.consumeInventoryItem}: one item from the first matching stack of the main inventory. */
-    private static boolean consume(Player player, Item item) {
-        for (ItemStack stack : player.getInventory().items) {
-            if (!stack.isEmpty() && stack.is(item)) {
-                stack.shrink(1);
-                return true;
-            }
-        }
-        return false;
-    }
 }

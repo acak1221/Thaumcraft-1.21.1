@@ -119,7 +119,7 @@ ResearchCategories.getResearch("NITOR").setSiblings("MY_KEY");
 | Нужно | Вызов |
 |---|---|
 | завершил ли игрок запись? | `isResearchComplete(player, key)` (на обеих сторонах для своего игрока клиента) |
-| завершить её (с родителями, соседями, варпом; с синхронизацией) | `completeResearch(player, key)` (сервер) |
+| завершить только её (её собственный варп; с синхронизацией) | `completeResearch(player, key)` (сервер) |
 | всё, что игрок завершил | `getCompletedResearch(player)` |
 | очки исследований | `addAspectPool(player, aspect, amount)`, `getAspectPool(player, aspect)` |
 | открытые аспекты | `hasDiscoveredAspect(player, aspect)`, `getDiscoveredAspects(player)` |
@@ -147,7 +147,7 @@ public class InsightScroll extends Item {
         AspectList taught = stack.getOrDefault(ExampleAddon.STORED_ASPECTS, StoredAspects.NONE).aspects();
         for (Aspect aspect : taught.getAspects()) ThaumcraftApiHelper.addAspectPool(player, aspect, taught.getAmount(aspect));
         ThaumcraftApiHelper.addAspectPool(player, ExampleAddon.TEMPUS, 1);
-        // Completes the entry with its parents and pays its warp, as an original ResearchManager.completeResearch.
+        // Completes only this entry and pays its warp, as the original ResearchManager.completeResearch did.
         if (!ThaumcraftApiHelper.isResearchComplete(player, "EXAMPLE_SECRET")) ThaumcraftApiHelper.completeResearch(player, "EXAMPLE_SECRET");
         player.displayClientMessage(Component.translatable("tc4_example.insight_scroll.read", ThaumcraftApiHelper.getWarpTotal(player)), false);
         stack.consume(1, player);
@@ -191,7 +191,7 @@ public class ShareTome extends Item {
 ```
 <!-- /snippet -->
 
-- Метки — непрозрачные ключи, предназначенные для передачи без изменений: `"@"` и id реестра для простого скана, `"#"` и то
+- Метки — непрозрачные ключи, предназначенные для передачи без изменений: `"@"` и идентичность предмета (включая именованный тип зелья) для простого скана, `"#"` и то
   же самое для продвинутого. Добавление идемпотентно; простая метка никогда не заменяет продвинутую, продвинутая заменяет
   простую. `addScans` возвращает, сколько меток оказалось новыми, и синхронизирует игрока один раз, только если их больше
   нуля; снимок, где есть и `"@x"`, и `"#x"`, считается одной меткой `"#x"` в любом порядке. Метка никогда не бывает пустой и

@@ -51,6 +51,12 @@ sourceSets.main.java.srcDir rootProject.file('compat/jade/src/main/java')
 sourceSets.main.java.srcDir rootProject.file('compat/jei/src/main/java')
 
 sourceSets {
+ test {
+  // The shared common configuration is added to main explicitly above; the
+  // native client-extension tests must resolve that same production code.
+  compileClasspath += sourceSets.main.compileClasspath
+  runtimeClasspath += sourceSets.main.runtimeClasspath
+ }
  gameTest {
   compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + project(':common').sourceSets.gameTest.output
   runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + project(':common').sourceSets.gameTest.output

@@ -1,7 +1,6 @@
 package thaumcraft.api.internal;
 
 import java.lang.ref.WeakReference;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.Level;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
-import thaumcraft.common.crafting.ArcaneVis;
 import thaumcraft.common.items.wands.WandManager;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.network.KnowledgeEvents;
@@ -165,11 +163,11 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     }
 
     @Override public boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting) {
-        return consume(wand, cost, doit);
+        return thaumcraft.api.wands.WandHelper.consumeAllVis(wand, player, cost, doit, crafting);
     }
 
     @Override public boolean consumeVisFromWandCrafting(ItemStack wand, Player player, AspectList cost, boolean doit) {
-        return consume(wand, cost, doit);
+        return thaumcraft.api.wands.WandHelper.consumeAllVisCrafting(wand, player, cost, doit);
     }
 
     @Override public boolean consumeVisFromInventory(Player player, AspectList cost) {
@@ -200,9 +198,12 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     }
 
     @Override public void addAspectPool(Player player, Aspect aspect, int amount) {
-        if (!(player instanceof ServerPlayer) || aspect == null || amount == 0) return;
+        if (!(player instanceof ServerPlayer server) || aspect == null || amount == 0) return;
+        requireServerThread(server);
         short clamped = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, amount));
-        thaumcraft.common.lib.research.ResearchManager.INSTANCE.completeAspect(player, aspect, clamped);
+        // This new API takes a delta. The retained ResearchManager.completeAspect takes an absolute total.
+        KnowledgeAccess.get(server).addAspectPool(aspect.getTag(), clamped);
+        KnowledgeEvents.sync(server);
     }
 
     @Override public int getAspectPool(Player player, Aspect aspect) {
@@ -217,8 +218,7 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
 
     /**
      * Original {@code ItemThaumometer} / {@code ScanManager.hasBeenScanned}: the item is looked up under the marker the
-     * thaumometer writes for it, {@code "@" + registry id}; either that marker or the advanced marker {@code "#" + id}
-     * counts.
+     * thaumometer writes for it; either that marker or its advanced {@code "#"} form counts.
      */
     @Override public boolean hasScannedItem(Player player, ItemStack stack) {
         return scannedItem(knowledge(player), stack);
@@ -226,7 +226,7 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
 
     static boolean scannedItem(PlayerKnowledge knowledge, ItemStack stack) {
         if (knowledge == null || stack == null || stack.isEmpty()) return false;
-        return ScanManager.hasBeenScanned(knowledge, "@" + BuiltInRegistries.ITEM.getKey(stack.getItem()), ScanManager.ScanKind.ITEM);
+        return ScanManager.hasBeenScanned(knowledge, thaumcraft.common.lib.research.ItemScanIdentity.signature(stack), ScanManager.ScanKind.ITEM);
     }
 
     @Override public boolean discoverAspect(Player player, Aspect aspect) {
@@ -303,19 +303,6 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
 
     private static void requireServerThread(ServerPlayer player) {
         if (!player.server.isSameThread()) throw new IllegalStateException("Player knowledge may only be changed on the server thread");
-    }
-
-    private static boolean consume(ItemStack wand, AspectList cost, boolean doit) {
-        if (wand == null || wand.isEmpty() || cost == null || cost.size() == 0) return false;
-        Map<String, Integer> prices = new LinkedHashMap<>();
-        for (Aspect aspect : cost.getAspects()) {
-            int amount = cost.getAmount(aspect);
-            if (aspect == null || amount <= 0) continue;
-            prices.put(aspect.getTag(), amount);
-        }
-        if (prices.isEmpty() || !ArcaneVis.canPay(wand, prices)) return false;
-        if (!doit) return true;
-        return ArcaneVis.debit(wand, prices);
     }
 
     private static PlayerKnowledge knowledge(Player player) {

@@ -1,6 +1,5 @@
 package thaumcraft.common.items.relics;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
+import thaumcraft.common.lib.research.ItemScanIdentity;
 import thaumcraft.common.lib.research.EntityAspectBindings;
 import thaumcraft.common.lib.research.ResearchClues;
 import thaumcraft.common.lib.research.ScanManager;
@@ -145,8 +145,8 @@ public final class ItemThaumometer extends Item {
         if (entity instanceof ItemEntity itemEntity) {
             ItemStack item = itemEntity.getItem();
             if (item.isEmpty()) return null;
-            var id = BuiltInRegistries.ITEM.getKey(item.getItem());
-            return new Target("@" + id, "entity:" + entity.getId(), ObjectAspectResolver.scanTags(item, level),
+            String signature = ItemScanIdentity.signature(item);
+            return new Target(signature, ItemScanIdentity.entitySessionKey(entity.getId(), item), ObjectAspectResolver.scanTags(item, level),
                     ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item), entityRune(entity),
                     item.getHoverName().getString(), null);
         }
@@ -176,8 +176,8 @@ public final class ItemThaumometer extends Item {
         ItemStack picked = state.getBlock().getCloneItemStack(level, block.getBlockPos(), state);
         if (picked.isEmpty()) return null;
         var grouped = ObjectAspectResolver.groupedScanWitness(picked);
-        var id = BuiltInRegistries.ITEM.getKey(picked.getItem());
-        return new Target("@" + id, "item:" + id + ":" + grouped.metadata(), ObjectAspectResolver.scanTags(picked, level),
+        String signature = ItemScanIdentity.signature(picked);
+        return new Target(signature, ItemScanIdentity.itemSessionKey(picked, grouped.metadata()), ObjectAspectResolver.scanTags(picked, level),
                 ScanManager.ScanKind.ITEM, ResearchClues.Context.item(grouped.stack()),
                 ScanRunes.block(block.getBlockPos().getX(), block.getBlockPos().getY(), block.getBlockPos().getZ()),
                 picked.getHoverName().getString(), null);

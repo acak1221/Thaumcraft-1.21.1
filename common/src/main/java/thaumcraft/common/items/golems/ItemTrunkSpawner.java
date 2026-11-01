@@ -62,7 +62,7 @@ public final class ItemTrunkSpawner extends Item {
         ItemContainerContents contents = stack.get(DataComponents.CONTAINER);
         if (contents != null) {
             int slot = 0;
-            for (ItemStack kept : contents.nonEmptyItems()) {
+            for (ItemStack kept : contents.stream().toList()) {
                 if (slot >= TrunkRules.MAX_SLOTS) break;
                 trunk.inventory.setItem(slot++, kept.copy());
             }

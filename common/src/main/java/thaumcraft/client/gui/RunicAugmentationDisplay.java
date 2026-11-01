@@ -44,7 +44,7 @@ public final class RunicAugmentationDisplay {
             ItemStack result = RunicArmor.augment(center);
             drawItem(graphics, font, result, 48, 28);
             if (inside(mx, my, 48, 28, 16, 16)) hover = new Hover(result, List.of());
-            drawItem(graphics, font, center, 48, 94);
+            ThaumcraftRecipeDisplay.drawIngredient(graphics, font, center, 48, 94);
             if (inside(mx, my, 48, 94, 16, 16)) hover = new Hover(center, List.of());
             int count = components.size();
             // Source's 360 / length is integer division before assignment to float.
@@ -56,7 +56,7 @@ public final class RunicAugmentationDisplay {
                 int sx = 56 + (int)(Math.cos(angle) * 40) - 8;
                 int sy = 102 + (int)(Math.sin(angle) * 40) - 8;
                 ItemStack component = selected.get(i).displayStack(declaredChoice(components.get(i), level, cycle));
-                drawItem(graphics, font, component, sx, sy);
+                ThaumcraftRecipeDisplay.drawIngredient(graphics, font, component, sx, sy);
                 if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
             }
             var tags = aspects.keySet().stream().sorted().toList();

@@ -967,6 +967,20 @@ public static void applyTagObjectTags()
 
 The runtime calls it once the item tags of a world are bound; see `registerObjectTag(TagKey, AspectList)`.
 
+<a id="thaumcraftapi-onitemtagsbound"></a>
+```java
+public static void onItemTagsBound()
+```
+
+Called after the native item registry binds a world's tags, including a datapack reload.
+
+<a id="thaumcraftapi-cleartagobjecttags"></a>
+```java
+public static void clearTagObjectTags()
+```
+
+Releases only the current world's tag-derived rows; static add-on declarations and explicit overrides survive.
+
 <a id="thaumcraftapi-registerobjecttag-6"></a>
 ```java
 public static void registerObjectTag(String nativeItemTag, AspectList aspects)
@@ -1225,9 +1239,21 @@ public static AspectList getAllCompoundAspects(int amount)
 
 Original ThaumcraftApiHelper.getAllCompoundAspects: every registered compound, add-on compounds included, with this amount; a caller-owned copy, rebuilt like `getAllAspects(int)` when the registry or a component array changed.
 
+<a id="thaumcraftapihelper-consumevisfromwand"></a>
 ```java
 public static boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting)
+```
+
+Original centivis price with the wand's cap, gear and casting/crafting discounts; checks only when doit is false. The default handler never debits a client player's stack.
+
+<a id="thaumcraftapihelper-consumevisfromwandcrafting"></a>
+```java
 public static boolean consumeVisFromWandCrafting(ItemStack wand, Player player, AspectList cost, boolean doit)
+```
+
+Original crafting price in whole vis: multiply by 100 before applying crafting discounts, atomically paying the wand.
+
+```java
 public static boolean consumeVisFromInventory(Player player, AspectList cost)
 public static void addWarpToPlayer(Player player, int amount, boolean temporary)
 public static void addStickyWarpToPlayer(Player player, int amount)
@@ -1238,7 +1264,7 @@ public static void addStickyWarpToPlayer(Player player, int amount)
 public static boolean completeResearch(Player player, String researchKey)
 ```
 
-Original ResearchManager.completeResearch: completes the research with its parents and siblings, pays its warp and syncs. Server side only; returns false on a client and for an unknown or disabled key.
+Original ResearchManager.completeResearch: completes only the requested research, pays its own warp and syncs. Server side only; returns false on a client and for an unknown or disabled key.
 
 <a id="thaumcraftapihelper-getcompletedresearch"></a>
 ```java
@@ -1266,7 +1292,7 @@ Player-scoped form of `getDiscoveredAspects(String)`: a new list, or null for a 
 public static void addAspectPool(Player player, Aspect aspect, int amount)
 ```
 
-Original ResearchManager.completeAspect: adds research points of an aspect to the player's pool and syncs. Server side only. Discovering the aspect itself is a separate step of the original (scanning).
+Adds a delta of research points to an aspect's pool and syncs; the retained ResearchManager.completeAspect instead sets its absolute total. Server side only. A positive delta also discovers the aspect.
 
 <a id="thaumcraftapihelper-getaspectpool"></a>
 ```java
@@ -1310,7 +1336,7 @@ public static boolean hasScannedItem(Player player, ItemStack stack)
 
 Whether the player has scanned the item of the stack with a thaumometer: the answer the thaumometer readout uses to show the aspects of a target that was already scanned. Not a 1.7.10 member (the original compared a hash of the item and its metadata in `Thaumcraft.proxy.getScannedObjects`).
 
-**Identity.** The item is looked up by its registry id (the marker `"@" + id`, as `ItemThaumometer` writes it for the item it picked from a block or an item entity); the count, the damage and the data components of the stack do not matter, and there is no metadata in 1.21.1. The marker of an advanced scan (`"#" + id`) counts as scanned too. Scanning a dropped item counts for that item and scanning a block for the item a pick-block of it gives (a redstone wire is `minecraft:redstone`); scanning a mob counts for no item.
+**Identity.** The item is looked up by the marker the thaumometer writes for a block pick, dropped item or callback. Ordinary items and water/unspecified potions keep `"@" + registry id`; named potion types add `"[potion=namespace:type]"`, the counterpart of the original subtype metadata. Count, durable damage, custom name, colour and custom effects do not change that identity. The corresponding advanced marker (`"#"` in place of `"@"`) counts too. Scanning a dropped item counts for that item and scanning a block for the item a pick-block of it gives (a redstone wire is `minecraft:redstone`); scanning a mob counts for no item.
 
 False for a null player, a null or empty stack, and an item nobody scanned. Works on both sides for the client's own player (its knowledge is synced); the knowledge of another player is only known to the server.
 
@@ -1334,7 +1360,7 @@ public static Scans getScans(Player player)
 
 The scan markers of the player: everything the thaumometer recorded for items (and the blocks they were picked from), entities and phenomena (aura nodes). An immutable snapshot, so a Tome of Sharing can copy what one player scanned to another with `addScans`.
 
-**The markers are the mod's own keys** and are meant to travel unchanged, not to be built or parsed: a basic scan is `"@"` followed by the registry id of the item or the name of the entity or phenomenon, an advanced scan `"#"` followed by the same (it replaces the `"@"` marker). A marker is never empty and at most 1024 characters long (`Scans.MAX_KEY_LENGTH`): a longer one in the knowledge (the mod never writes one; a hand-edited save or an add-on's own scan handler could) is left out of the snapshot instead of failing the call.
+**The markers are the mod's own keys** and are meant to travel unchanged, not to be built or parsed: a basic scan is `"@"` followed by the item's registry identity (with its named potion subtype when present) or the name of the entity or phenomenon, an advanced scan `"#"` followed by the same (it replaces the `"@"` marker). A marker is never empty and at most 1024 characters long (`Scans.MAX_KEY_LENGTH`): a longer one in the knowledge (the mod never writes one; a hand-edited save or an add-on's own scan handler could) is left out of the snapshot instead of failing the call.
 
 **Not included:** the research clues a scan revealed (`"@KEY"` entries among the completed research; `getCompletedResearch` leaves them out and `completeResearch` refuses them), the discovered aspects (`getDiscoveredAspects(Player)`) and the research points (`getAspectPool`).
 

@@ -25,26 +25,10 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
 
-/**
- * The item bonus aspects of the 1.7.10 oracle against the native port.
- *
- * <p>Oracle {@code thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.getBonusTags} (read from
- * the bytecode of {@code Thaumcraft-1.7.10-4.2.3.5.jar}) walks the item class in the order armour,
- * sword, bow, pickaxe, tool, shears/hoe, leaves the chain on every branch and then adds the
- * enchantment bonus. The native port had three deviations:</p>
- *
- * <ul>
- *   <li>the sword bonus was scaled with the tool material
- *       ({@code getTier().getAttackDamageBonus() + 1}) instead of the original constant five;</li>
- *   <li>the hoe took the harvest bonus of the shears instead of the tool bonus of the original,
- *       because the original {@code ItemHoe} extends {@code ItemTool} and is therefore caught by
- *       the tool branch before the shears/hoe branch;</li>
- *   <li>the enchantment table had thorns and smite transposed: the original merges thorns into
- *       WEAPON and smite into ENTROPY.</li>
- * </ul>
- *
- * <p>The same file pins the original potion table of {@code getObjectTags}: the port had
- * confusion and weakness transposed and had no entry at all for the invisibility potion.</p>
+/** Original TC4 equipment/enchantment/potion bonuses, with vanilla 1.7.10 superclass and material semantics.
+ * The official 1.7.10 client (SHA1 e80d9b3bf5085002218d4be59e668bac718abbc6) has
+ * ItemHoe (ada) extend Item (adb), and ItemSword.i() (func_150931_i) return the material's damage.
+ * The separate sword attack attribute is four plus that value; it is not the aspect bonus.
  */
 class AspectBonusParityTest {
     @BeforeAll static void bootstrap() {
@@ -56,35 +40,25 @@ class AspectBonusParityTest {
         return ObjectAspectResolver.bonusTags(stack);
     }
 
-    @Test void everySwordCarriesTheOriginalConstantWeaponBonus() {
-        // Oracle getBonusTags: the sword branch merges WEAPON with
-        // (int)(ItemSword.func_150931_i() + 1.0F). The 1.7.10 vanilla ItemSword returns the
-        // constant base damage 4.0F for every sword, so every sword gets five.
-        for (ItemStack sword : new ItemStack[]{
-                new ItemStack(Items.WOODEN_SWORD), new ItemStack(Items.STONE_SWORD),
-                new ItemStack(Items.IRON_SWORD), new ItemStack(Items.GOLDEN_SWORD),
-                new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.NETHERITE_SWORD)}) {
-            AspectList tags = bonus(sword);
-            assertEquals(5, tags.getAmount(Aspect.WEAPON), sword.getItem().toString());
-            assertEquals(1, tags.size(), sword.getItem().toString() + " carries only the weapon bonus");
+    @Test void swordsUseMaterialDamageRatherThanTheirAttackAttribute() {
+        var swords = List.of(Items.WOODEN_SWORD, Items.STONE_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD, Items.DIAMOND_SWORD);
+        int[] expected = {1, 2, 3, 1, 4};
+        for (int i = 0; i < swords.size(); i++) {
+            AspectList tags = bonus(new ItemStack(swords.get(i)));
+            assertEquals(expected[i], tags.getAmount(Aspect.WEAPON), swords.get(i).toString());
+            assertEquals(1, tags.size(), "an unenchanted sword contributes only its material WEAPON bonus");
         }
-        assertEquals(5, ObjectAspectResolver.SWORD_WEAPON_BONUS);
     }
 
-    @Test void aHoeCarriesTheOriginalToolBonusAndNoHarvestBonus() {
-        // Oracle getBonusTags: ItemHoe extends ItemTool in 1.7.10, so the tool branch merges TOOL
-        // with the harvest level plus one and the shears/hoe branch is never reached.
-        for (ItemStack hoe : new ItemStack[]{
-                new ItemStack(Items.WOODEN_HOE), new ItemStack(Items.STONE_HOE),
-                new ItemStack(Items.IRON_HOE), new ItemStack(Items.DIAMOND_HOE)}) {
-            AspectList tags = bonus(hoe);
-            assertEquals(0, tags.getAmount(Aspect.HARVEST), hoe.getItem().toString() + " has no harvest bonus");
-            assertEquals(1, tags.size(), hoe.getItem().toString() + " carries only the tool bonus");
+    @Test void hoesReachTheOriginalDurabilityBasedHarvestBranch() {
+        var hoes = List.of(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE);
+        int[] expected = {1, 2, 3, 1, 4};
+        for (int i = 0; i < hoes.size(); i++) {
+            AspectList tags = bonus(new ItemStack(hoes.get(i)));
+            assertEquals(expected[i], tags.getAmount(Aspect.HARVEST), hoes.get(i).toString());
+            assertEquals(0, tags.getAmount(Aspect.TOOL), "ItemHoe was not an ItemTool in 1.7.10");
+            assertEquals(1, tags.size(), "an unenchanted hoe contributes only its durability HARVEST bonus");
         }
-        assertEquals(1, bonus(new ItemStack(Items.WOODEN_HOE)).getAmount(Aspect.TOOL));
-        assertEquals(2, bonus(new ItemStack(Items.STONE_HOE)).getAmount(Aspect.TOOL));
-        assertEquals(3, bonus(new ItemStack(Items.IRON_HOE)).getAmount(Aspect.TOOL));
-        assertEquals(4, bonus(new ItemStack(Items.DIAMOND_HOE)).getAmount(Aspect.TOOL));
     }
 
     @Test void shearsKeepTheOriginalHarvestBonusAndNoToolBonus() {

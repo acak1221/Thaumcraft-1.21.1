@@ -16,10 +16,10 @@ import thaumcraft.common.items.wands.WandData;
 /** Client-only, explicit aliases for original icons whose native items exist. */
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
-    // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusPrimal|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain|itemBathSalts|itemSanitySoap|itemEldritchObject)"
+    // and numeric metadata are accepted; every field/metadata pair is whitelisted below.
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusPrimal|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemBootsTraveller|itemHoverHarness|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain|itemBathSalts|itemSanitySoap|itemEldritchObject)"
             + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCrystal|blockCustomOre|blockChestHungry|blockTaint|blockTaintFibres|blockEssentiaReservoir|blockLifter|blockMirror))"
-            + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
+            + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]{1,3}))?)?\\)");
 
     // Original ItemResource:81-100; native ThaumcraftContent.MATERIALS flattening.
     private static final List<String> RESOURCES = List.of("alumentum", "nitor", "thaumium_ingot", "quick_silver",
@@ -88,10 +88,19 @@ final class ResearchIconDisplay {
             }
             return stack;
         }
+        ItemReference reference = itemReference(expression);
+        return reference == null ? ItemStack.EMPTY : registered(reference.path(), reference.count());
+    }
+
+    /** A literal corpus item icon, resolved before reading the live item registry. */
+    record ItemReference(String path, int count) {}
+
+    static ItemReference itemReference(String expression) {
+        if (expression == null) return null;
         var match = STACK.matcher(expression);
-        if (!match.matches()) return ItemStack.EMPTY;
+        if (!match.matches()) return null;
         int count = match.group(2) == null ? 1 : Integer.parseInt(match.group(2));
-        if (count > 64) return ItemStack.EMPTY;
+        if (count > 64) return null;
         int metadata = match.group(3) == null ? 0 : Integer.parseInt(match.group(3));
         String id = switch (match.group(1)) {
             case "ConfigItems.itemResource" -> variant(RESOURCES, metadata);
@@ -341,7 +350,7 @@ final class ResearchIconDisplay {
             case "ConfigBlocks.blockMirror" -> switch (metadata) { case 0 -> "mirror"; case 6 -> "mirror_essentia"; default -> null; };
             default -> null;
         };
-        return id == null ? ItemStack.EMPTY : registered(id, count);
+        return id == null ? null : new ItemReference(id, count);
     }
 
     private static String variant(List<String> variants, int metadata) {

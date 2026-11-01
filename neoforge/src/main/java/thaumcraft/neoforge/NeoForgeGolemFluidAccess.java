@@ -91,7 +91,13 @@ public final class NeoForgeGolemFluidAccess {
             if (handler == null || fluid == null) return false;
             Fluid variant = GolemFluidBlocks.fluid(fluid);
             if (variant == null) return false;
-            return handler.isFluidValid(0, new FluidStack(variant, 1));
+            // Validity belongs to each tank, while the original canFill question concerns the
+            // whole handler. A machine may reserve tank zero for another fluid or for output.
+            FluidStack candidate = new FluidStack(variant, 1);
+            for (int tank = 0; tank < handler.getTanks(); tank++) {
+                if (handler.isFluidValid(tank, candidate)) return true;
+            }
+            return false;
         }
 
         @Override public int drain(Direction face, ResourceLocation fluid, int amountMb, boolean commit) {

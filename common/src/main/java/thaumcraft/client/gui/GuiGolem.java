@@ -152,7 +152,7 @@ public final class GuiGolem extends ThaumcraftContainerScreen<ContainerGolem> {
                 int color = menu.slotColor(i);
                 Component name = color < 0 ? Component.translatable("tc.port.golem.color.any")
                         : Component.translatable("tc.port.golem.color." + color);
-                graphics.drawString(font, name, leftPos + 133 - font.width(name) / 2, topPos - 6, 0xfffdfdfd, false);
+                graphics.drawString(font, name, 133 - font.width(name) / 2, -6, 0xfffdfdfd, false);
                 break;
             }
         }
@@ -215,15 +215,15 @@ public final class GuiGolem extends ThaumcraftContainerScreen<ContainerGolem> {
             } finally { graphics.pose().popPose(); }
         }
         if (menu.canSwitchUseOptions()) {
-            // Original GuiGolem:228-235 — the three captions at (53, 42), (53, 62)
-            // and (53, 82), half sized, each naming the mode the golem is in now.
+            // Original GuiGolem:228-235 — after the half scale, the captions are
+            // ten pixels apart, beside the three switches at y=40,50,60.
             String[] keys = {menu.useEmptySpace() ? "tc.port.golem.use.empty" : "tc.port.golem.use.block",
                     menu.useLeftClick() ? "tc.port.golem.use.left" : "tc.port.golem.use.right",
                     menu.useSneaking() ? "tc.port.golem.use.sneak" : "tc.port.golem.use.not_sneak"};
             for (int i = 0; i < keys.length; i++) {
                 graphics.pose().pushPose();
                 try {
-                    graphics.pose().translate(53, 42 + 20 * i, 0);
+                    graphics.pose().translate(53, 42 + 10 * i, 0);
                     graphics.pose().scale(.5F, .5F, 1);
                     graphics.drawString(font, Component.translatable(keys[i]), 0, 0, 0xfffdfdfd, false);
                 } finally { graphics.pose().popPose(); }

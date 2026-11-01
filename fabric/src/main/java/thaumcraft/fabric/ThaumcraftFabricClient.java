@@ -88,8 +88,8 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     }
                     @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager resources) {
                         thaumcraft.client.renderers.item.PrimalWandFocusRenderer.reset();
-                        thaumcraft.client.ThaumcraftWarpClient.reset();
-                        thaumcraft.client.ThaumcraftRunicClient.reset();
+                        thaumcraft.client.ThaumcraftWarpClient.reloadResources();
+                        thaumcraft.client.ThaumcraftRunicClient.reloadResources();
                         thaumcraft.client.lib.PlayerNotifications.reset();
                         thaumcraft.client.ThaumcraftTravelGearClient.reset();
                         thaumcraft.client.ThaumcraftTaintSporesClient.reset();

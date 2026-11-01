@@ -1082,7 +1082,7 @@
       "ResourceLocation.tryParse(entry.getValue())",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"crucible/balanced_shard_\"+primal)",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/page/\"+Integer.toHexString(System.identityHashCode(value)))"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/page/\"+Integer.toHexString(System.identityHashCode(owner)))"
     ],
     "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": [
       "ResourceLocation.parse(entry.image())"
@@ -1483,7 +1483,7 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "b69e2cd79835f398d5d4c3b76dc21f725bb16aab58e0d97ff08d90ebadd711a3",
     "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": "7ed2c201abea159fca1baa780c3f7334bb01c6a410fd4b6ce45ecc1c98b500a5",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
-    "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "9a482d65fb0eaa1005d9110f130ff3f1ea4e772f8d419256f2e39748ee7c3efe",
+    "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "60439254c7d3163e4418f130f5341b7fcc7ac1927c625059e1142e984f4b9423",
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",
     "common/src/main/java/thaumcraft/client/fx/particles/ShockSparkParticle.java": "9f11e10c3f78b824ed049ba218805e7ff906f965483fcb91d0b888b7bcb125fe",
     "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": "26a99565842c9e75ada6f2df95f0e383227c6bccc2e37a3b3109d465c80de242",
@@ -1491,11 +1491,11 @@
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
     "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",
     "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "a70cb05e8fa4861308e6b0eacd1f668e3c588fa2adf9cdeca7b58b7d923e666a",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "1300a7e9586ec7603409e3f9429b671bd0e22f92841cf46dcec694228f8f4306",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "8601b6f46761823bf1e1a1d61899fc330e4a727cd38196a94444a8a6ce08e074",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "93d14fa2b44a81fc91ca9db2e1c87a49f631e1f1512f332dc0e48237f7c70c8e",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "ecfc90fcd0873efb9b6a8a09116b7d76ff457a1bfb6e3e81eb29fcc430c4e480",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "29e7f50dcca010bd39eb32f9b447807a192408488ec28108931c1a24c40161b6",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "220dafc23bc2d0d320e20a1522f9f01f93b760983213c731e5320b3f5e0f6b10",
-    "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "73e8c2b51da90c42dfb5087d21d9e0f4d4943d02d335e09a664df72f0c3a451d",
+    "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "c6eed32d8742c91d9e929c2c092b31dd8e531175419bdf76e972e4fc60e9546f",
     "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "310799552cea6c938b10a8070cbfd59dbe3c23d2bc376f7f5d760d298a8f8a0d",
     "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": "31b8d3d0aaba9681cd58196b93deea847235550776a74fc71ee12d7169d71cde",
     "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": "4a35fa5d288173a6d968271c88f9c35c9863112b1d2080b055afa0c10c6bf482",

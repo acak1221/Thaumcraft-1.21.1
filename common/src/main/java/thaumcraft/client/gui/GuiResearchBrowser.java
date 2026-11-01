@@ -51,7 +51,7 @@ public final class GuiResearchBrowser extends Screen {
     private static final int RESULT_ROW = 11, RESULT_WIDTH = 150;
     private net.minecraft.client.gui.components.EditBox search;
     private String query = "";
-    private ResearchSearch index;
+    private final ResearchSearch.Cache index = new ResearchSearch.Cache();
     private List<ResearchSearch.Entry> results = List.of();
     private int resultScroll;
 
@@ -88,6 +88,7 @@ public final class GuiResearchBrowser extends Screen {
     private static ResourceLocation texture(String path) { return ResourceLocation.fromNamespaceAndPath("thaumcraft", path); }
 
     @Override protected void init() {
+        index.clear(); // A language/font reload or a resized book builds a fresh index.
         // Oracle GuiResearchBrowser:75-76,272-275: no stretched replacement panel.
         panelWidth = 256; panelHeight = 230;
         left = (width - panelWidth) / 2; top = (height - panelHeight) / 2;
@@ -122,8 +123,7 @@ public final class GuiResearchBrowser extends Screen {
         query = text;
         resultScroll = 0;
         if (text.isBlank()) { results = List.of(); return; }
-        if (index == null) index = ResearchSearch.index(completed(), minecraft.level);
-        results = index.find(text);
+        results = index.find(text, completed(), minecraft.level);
     }
 
     private int resultRows() { return Math.min(results.size() - resultScroll, (graphHeight - 4) / RESULT_ROW); }
@@ -195,11 +195,15 @@ public final class GuiResearchBrowser extends Screen {
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.renderBackground(graphics, mouseX, mouseY, delta);
         var completed = completed();
+        if (!query.isBlank()) {
+            results = index.find(query, completed, minecraft.level);
+            resultScroll = Math.min(resultScroll, Math.max(0, results.size() - (graphHeight - 4) / RESULT_ROW));
+        }
         var entries = ResearchBrowserData.entries(category, completed);
         nodes.clear();
         int[] bounds = mapBounds();
-        int mapX = Math.clamp((int)(-panX - graphWidth / 2), bounds[0], bounds[2] - 1);
-        int mapY = Math.clamp((int)(-panY - graphHeight / 2), bounds[1], bounds[3] - 1);
+        int mapX = (int) clampMap((int)(-panX - graphWidth / 2), bounds[0], bounds[2]);
+        int mapY = (int) clampMap((int)(-panY - graphHeight / 2), bounds[1], bounds[3]);
         panX = -mapX - graphWidth / 2;
         panY = -mapY - graphHeight / 2;
         int originX = graphLeft - mapX;
@@ -339,6 +343,14 @@ public final class GuiResearchBrowser extends Screen {
 
     static int backgroundOffset(int map, int min, int max, int extent) {
         return (int)((float)(map - min) / Math.abs(min - max) * extent);
+    }
+
+    /** The original's two ordered bounds checks also admit empty or one-column add-on categories. */
+    static double clampMap(double coordinate, int min, int maxExclusive) {
+        // With reversed bounds the original first raises to min, then lowers to max - 1.
+        // Math.clamp instead throws unless its lower bound is normalized first.
+        int upper = maxExclusive - 1;
+        return Math.clamp(coordinate, Math.min(min, upper), upper);
     }
 
     private void drawConnectors(GuiGraphics graphics, Set<String> completed, int originX, int originY, float partialTick) {        Map<String, int[]> positions = new LinkedHashMap<>();
@@ -588,8 +600,8 @@ public final class GuiResearchBrowser extends Screen {
 
     private void pan(double dx, double dy) {
         int[] bounds = mapBounds();
-        panX = -Math.clamp(-panX - graphWidth / 2 - dx, bounds[0], bounds[2] - 1) - graphWidth / 2;
-        panY = -Math.clamp(-panY - graphHeight / 2 - dy, bounds[1], bounds[3] - 1) - graphHeight / 2;
+        panX = -clampMap(-panX - graphWidth / 2 - dx, bounds[0], bounds[2]) - graphWidth / 2;
+        panY = -clampMap(-panY - graphHeight / 2 - dy, bounds[1], bounds[3]) - graphHeight / 2;
     }
 
     private void selectCategory(String key) {

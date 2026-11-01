@@ -286,10 +286,13 @@ public class ThaumcraftApiHelper {
         return cached.copy();
     }
 
+    /** Original centivis price with the wand's cap, gear and casting/crafting discounts; checks only when doit is false.
+     * The default handler never debits a client player's stack. */
     public static boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting) {
         return ThaumcraftApi.internalMethods.consumeVisFromWand(wand, player, cost, doit, crafting);
     }
 
+    /** Original crafting price in whole vis: multiply by 100 before applying crafting discounts, atomically paying the wand. */
     public static boolean consumeVisFromWandCrafting(ItemStack wand, Player player, AspectList cost, boolean doit) {
         return ThaumcraftApi.internalMethods.consumeVisFromWandCrafting(wand, player, cost, doit);
     }
@@ -311,7 +314,7 @@ public class ThaumcraftApiHelper {
     // thaumcraft.common.lib.research.ResearchManager or Thaumcraft.proxy.getPlayerKnowledge(). They take the player
     // because 1.21.1 keeps knowledge on the player, and read the same native state as the rest of the mod.
 
-    /** Original ResearchManager.completeResearch: completes the research with its parents and siblings, pays its warp
+    /** Original ResearchManager.completeResearch: completes only the requested research, pays its own warp
      * and syncs. Server side only; returns false on a client and for an unknown or disabled key. */
     public static boolean completeResearch(Player player, String researchKey) {
         return ThaumcraftApi.internalMethods.completeResearch(player, researchKey);
@@ -333,8 +336,9 @@ public class ThaumcraftApiHelper {
         return ThaumcraftApi.internalMethods.getDiscoveredAspects(player);
     }
 
-    /** Original ResearchManager.completeAspect: adds research points of an aspect to the player's pool and syncs.
-     * Server side only. Discovering the aspect itself is a separate step of the original (scanning). */
+    /** Adds a delta of research points to an aspect's pool and syncs; the retained ResearchManager.completeAspect
+     * instead sets its absolute total.
+     * Server side only. A positive delta also discovers the aspect. */
     public static void addAspectPool(Player player, Aspect aspect, int amount) {
         ThaumcraftApi.internalMethods.addAspectPool(player, aspect, amount);
     }
@@ -365,10 +369,11 @@ public class ThaumcraftApiHelper {
      * show the aspects of a target that was already scanned. Not a 1.7.10 member (the original compared a hash of the
      * item and its metadata in {@code Thaumcraft.proxy.getScannedObjects}).
      *
-     * <p><b>Identity.</b> The item is looked up by its registry id (the marker {@code "@" + id}, as
-     * {@code ItemThaumometer} writes it for the item it picked from a block or an item entity); the count, the damage
-     * and the data components of the stack do not matter, and there is no metadata in 1.21.1. The marker of an
-     * advanced scan ({@code "#" + id}) counts as scanned too. Scanning a dropped item counts for that item and scanning
+     * <p><b>Identity.</b> The item is looked up by the marker the thaumometer writes for a block pick, dropped item or
+     * callback. Ordinary items and water/unspecified potions keep {@code "@" + registry id}; named potion types add
+     * {@code "[potion=namespace:type]"}, the counterpart of the original subtype metadata. Count, durable damage,
+     * custom name, colour and custom effects do not change that identity. The corresponding advanced marker
+     * ({@code "#"} in place of {@code "@"}) counts too. Scanning a dropped item counts for that item and scanning
      * a block for the item a pick-block of it gives (a redstone wire is {@code minecraft:redstone}); scanning a mob
      * counts for no item.</p>
      *
@@ -406,7 +411,8 @@ public class ThaumcraftApiHelper {
      * scanned to another with {@link #addScans}.
      *
      * <p><b>The markers are the mod's own keys</b> and are meant to travel unchanged, not to be built or parsed: a basic
-     * scan is {@code "@"} followed by the registry id of the item or the name of the entity or phenomenon, an advanced
+     * scan is {@code "@"} followed by the item's registry identity (with its named potion subtype when present) or the
+     * name of the entity or phenomenon, an advanced
      * scan {@code "#"} followed by the same (it replaces the {@code "@"} marker). A marker is never empty and at most
      * 1024 characters long ({@link Scans#MAX_KEY_LENGTH}): a longer one in the knowledge (the mod never writes one; a
      * hand-edited save or an add-on's own scan handler could) is left out of the snapshot instead of failing the call.</p>

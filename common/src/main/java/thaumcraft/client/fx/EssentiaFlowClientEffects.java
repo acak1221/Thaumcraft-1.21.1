@@ -3,6 +3,8 @@ package thaumcraft.client.fx;
 import dev.architectury.event.events.client.ClientTickEvent;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -35,12 +37,12 @@ public final class EssentiaFlowClientEffects {
     private EssentiaFlowClientEffects() {}
 
     /** One running flow: the consumer, the source, the colour and the remaining ticks. */
-    private static final class Flow {
+    static final class Flow {
         private final BlockPos consumer;
         private final BlockPos source;
         private final int rgb;
         private int ticks;
-        private Flow(BlockPos consumer, BlockPos source, int rgb, int ticks) {
+        Flow(BlockPos consumer, BlockPos source, int rgb, int ticks) {
             this.consumer = consumer; this.source = source; this.rgb = rgb; this.ticks = ticks;
         }
     }
@@ -119,15 +121,7 @@ public final class EssentiaFlowClientEffects {
             return;
         }
         ClientLevel level = client.level;
-        var iterator = FLOWS.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Flow> entry = iterator.next();
-            Flow flow = entry.getValue();
-            if (flow.ticks <= 0) {
-                iterator.remove();
-                continue;
-            }
-            if (!level.hasChunkAt(flow.consumer) || !level.hasChunkAt(flow.source)) continue;
+        tickFlows(FLOWS, level::hasChunkAt, flow -> {
             int offset = destinationOffset(level.getBlockEntity(flow.consumer) instanceof TileInfusionMatrix);
             Vec3 from = Vec3.atCenterOf(flow.source);
             Vec3 to = new Vec3(flow.consumer.getX() + .5D, flow.consumer.getY() + .5D + offset,
@@ -135,6 +129,19 @@ public final class EssentiaFlowClientEffects {
             int count = phase(tickCount, flow.ticks);
             float size = scale(flow.ticks);
             client.particleEngine.add(new EssentiaTrailParticle(level, flow.source, from, to, flow.rgb, count, size));
+        });
+    }
+
+    /** Chunk availability controls drawing, never the lifetime of an already received flow. */
+    static void tickFlows(Map<String, Flow> flows, Predicate<BlockPos> loaded, Consumer<Flow> draw) {
+        var iterator = flows.values().iterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.ticks <= 0) {
+                iterator.remove();
+                continue;
+            }
+            if (loaded.test(flow.consumer) && loaded.test(flow.source)) draw.accept(flow);
             --flow.ticks;
         }
     }

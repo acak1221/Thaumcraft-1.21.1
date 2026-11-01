@@ -75,7 +75,10 @@ public final class DeferredItemDrops extends SavedData {
     private record BoreDrop(UUID transaction, BlockPos target, int nozzle, int attachment, boolean evacuation, int member, int segment) {}
     /** The longest a catch may be saved as burning (a Fishing golem sets two seconds); anything above is a malformed row. */
     private static final int MAX_FIRE_TICKS = 600;
-    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop) {
+    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop, int portalCooldown) {
+        private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop) {
+            this(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, routing, bore, fireTicks, pechDrop, 0);
+        }
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks) {
             this(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, routing, bore, fireTicks, false);
         }
@@ -88,8 +91,8 @@ public final class DeferredItemDrops extends SavedData {
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter) {
             this(id, source, position, motion, stack, pickupDelay, retryAfter, -1, false, null);
         }
-        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore, fireTicks, pechDrop); }
-        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore, fireTicks, pechDrop); }
+        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore, fireTicks, pechDrop, portalCooldown); }
+        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore, fireTicks, pechDrop, portalCooldown); }
     }
 
     private static final class Attempt {
@@ -534,6 +537,55 @@ public final class DeferredItemDrops extends SavedData {
         data.setDirty();
     }
 
+    /** Preparation owns only private copies; no row becomes spendable before commitRaw. */
+    public record DirectedDrop(ItemStack stack, Vec3 position, Vec3 motion, int pickupDelay) {}
+    public static final class PreparedBatch {
+        private final ServerLevel level;
+        private final DeferredItemDrops queue;
+        private final List<Pending> rows;
+        private boolean committed;
+        private PreparedBatch(ServerLevel level, DeferredItemDrops queue, List<Pending> rows) {
+            this.level = level; this.queue = queue; this.rows = List.copyOf(rows);
+        }
+        /** World/storage observations belong before the producer's raw payment. */
+        public boolean ready() {
+            return !committed && level.getServer().isSameThread() && level.getServer().getLevel(level.dimension()) == level
+                    && level.getDataStorage().get(FACTORY, ID) == queue;
+        }
+        /** No world reads, copies, codecs, callbacks or fallible validation after publication starts.
+         * The producer relinquishes its matching stock in the same callback-free scope. */
+        public void commitRaw() {
+            if (committed) return;
+            committed = true;
+            queue.pending.addAll(rows);
+            queue.deliveryRequested |= !rows.isEmpty();
+            queue.setDirty();
+        }
+    }
+    public static PreparedBatch prepareDirectedBatch(ServerLevel level, BlockPos source, List<DirectedDrop> outputs) {
+        if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
+            throw new IllegalStateException("Paid output preparation requires the canonical server level");
+        var rows = new ArrayList<Pending>();
+        for (DirectedDrop output : outputs) {
+            if (source == null || output == null || output.stack() == null || output.stack().isEmpty()
+                    || output.position() == null || output.motion() == null || output.pickupDelay() < 0 || output.pickupDelay() > 32767
+                    || !Double.isFinite(output.position().lengthSqr()) || !Double.isFinite(output.motion().lengthSqr()))
+                throw new IllegalArgumentException("Finite actual directed output required");
+            rows.add(new Pending(UUID.randomUUID(), source.immutable(), output.position(), output.motion(), output.stack().copy(), output.pickupDelay(), Long.MIN_VALUE));
+        }
+        var queue = level.getDataStorage().computeIfAbsent(FACTORY, ID);
+        return new PreparedBatch(level, queue, rows);
+    }
+    /** Mirror ownership publication has no ADD/notification callbacks. All fallible work precedes its single append. */
+    public static void enqueueMirrorOutput(ServerLevel level, BlockPos source, Vec3 position, Vec3 motion, ItemStack output) {
+        var batch = prepareDirectedBatch(level, source, List.of(new DirectedDrop(output, position, motion, 0)));
+        Pending row = batch.rows.getFirst();
+        var mirror = new Pending(row.id, row.source, row.position, row.motion, row.stack, 0, Long.MIN_VALUE, -1, false, null, 0, false, 20);
+        var prepared = new PreparedBatch(level, batch.queue, List.of(mirror));
+        if (!prepared.ready()) throw new IllegalStateException("Mirror output storage changed during preparation");
+        prepared.commitRaw();
+    }
+
     public static void enqueue(ServerLevel level, BlockPos source, List<ItemStack> stacks) {
         if (!level.getServer().isSameThread()) throw new IllegalStateException("Inventory drops require the server thread");
         var data = level.getDataStorage().computeIfAbsent(FACTORY, ID);
@@ -649,10 +701,11 @@ public final class DeferredItemDrops extends SavedData {
                 attempt.entity = output;
                 output.setDeltaMovement(entry.motion);
                 output.setPickUpDelay(entry.pickupDelay);
+                if (entry.portalCooldown > 0) output.setPortalCooldown(entry.portalCooldown);
                 if (entry.fireTicks > 0) output.setRemainingFireTicks(entry.fireTicks);
                 if (entry.pechDrop) thaumcraft.common.lib.pech.PechDrops.mark(output);
                 beforeSpawn = RejectedEntitySpawn.snapshotBefore(level, output);
-            } catch (RuntimeException exception) {
+            } catch (RuntimeException | Error exception) {
                 pending.addLast(entry.retryAt(level.getGameTime() + RETRY_DELAY));
                 setDirty();
                 Thaumcraft.LOG.warn("Inventory output preparation failed at {}; retaining pending items", entry.source, exception);
@@ -663,7 +716,7 @@ public final class DeferredItemDrops extends SavedData {
                 if (entry.bore == null || BoreNativeContext.canDispatchOutputs(level) && level.getDataStorage().get(FACTORY, ID) == this
                         && level.hasChunkAt(entry.source) && level.hasChunkAt(entry.bore.target)
                         && level.hasChunkAt(BlockPos.containing(entry.position))) nativeAdded = level.addFreshEntity(output);
-            } catch (RuntimeException exception) {
+            } catch (RuntimeException | Error exception) {
                 Thaumcraft.LOG.warn("Inventory output spawn failed at {}; retaining pending items", entry.source, exception);
             }
             attempt.reconcile();
@@ -679,7 +732,7 @@ public final class DeferredItemDrops extends SavedData {
                     try {
                         if (managed(level, output)) output.discard();
                         RejectedEntitySpawn.releaseRejected(level, output, beforeSpawn, nativeAdded);
-                    } catch (RuntimeException exception) { Thaumcraft.LOG.warn("Destroyed paid item cleanup failed at {}", entry.source, exception); }
+                    } catch (RuntimeException | Error exception) { Thaumcraft.LOG.warn("Destroyed paid item cleanup failed at {}", entry.source, exception); }
                 }
             } else {
                 try {
@@ -690,7 +743,7 @@ public final class DeferredItemDrops extends SavedData {
                     // callback. Release only that unused, newly reserved UUID;
                     // a visible or hidden owner always keeps its reservation.
                     RejectedEntitySpawn.releaseRejected(level, output, beforeSpawn, nativeAdded);
-                } catch (RuntimeException exception) {
+                } catch (RuntimeException | Error exception) {
                     Thaumcraft.LOG.warn("Inventory output removal failed at {}; retaining pending items", entry.source, exception);
                 } finally {
                     pending.addLast(entry.retryAt(level.getGameTime() + RETRY_DELAY));
@@ -794,6 +847,10 @@ public final class DeferredItemDrops extends SavedData {
                         || pickupDelay != 40 || row.contains("Fire") || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
                     throw new IllegalArgumentException("Invalid Pech-return marker on pending drop");
                 int fireTicks = row.contains("Fire") ? row.getInt("Fire") : 0; // Only a Fire golem's fishing catch is ever saved alight.
+                int portalCooldown = row.getInt("PortalCooldown");
+                if (row.contains("PortalCooldown") && (!row.contains("PortalCooldown", Tag.TAG_INT) || portalCooldown != 20
+                        || pickupDelay != 0 || row.contains("Fire") || row.contains("PechDrop") || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
+                    throw new IllegalArgumentException("Invalid mirror portal cooldown");
                 if (row.contains("Fire") && (!row.contains("Fire", Tag.TAG_INT) || fireTicks <= 0 || fireTicks > MAX_FIRE_TICKS
                         || pickupDelay != 20 || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
                     throw new IllegalArgumentException("Invalid burning flag on a pending drop");
@@ -829,7 +886,7 @@ public final class DeferredItemDrops extends SavedData {
                 } else if (row.contains("Routing")) throw new IllegalArgumentException("Routing without a paid crystal");
                 // Saved ROUTING/IN_FLIGHT never replays inventory. The same paid
                 // UUID becomes a residual physical delivery, unless acknowledged.
-                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore, fireTicks, pechDrop));
+                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore, fireTicks, pechDrop, portalCooldown));
             } catch (RuntimeException exception) {
                 data.quarantined.add(row.copy());
                 Thaumcraft.LOG.error("Invalid pending inventory drop retained in quarantine", exception);
@@ -942,6 +999,7 @@ public final class DeferredItemDrops extends SavedData {
         if (entry.pickupDelay != 0) row.putInt("PickupDelay", entry.pickupDelay);
         if (entry.fireTicks != 0) row.putInt("Fire", entry.fireTicks);
         if (entry.pechDrop) row.putBoolean("PechDrop", true);
+        if (entry.portalCooldown != 0) row.putInt("PortalCooldown", entry.portalCooldown);
         row.putDouble("X", entry.position.x); row.putDouble("Y", entry.position.y); row.putDouble("Z", entry.position.z);
         row.putDouble("DX", entry.motion.x); row.putDouble("DY", entry.motion.y); row.putDouble("DZ", entry.motion.z);
         if (entry.crystalFace >= 0) { row.putInt("CrystalFace", entry.crystalFace); if (entry.routing) row.putBoolean("Routing", true); }
@@ -961,6 +1019,13 @@ public final class DeferredItemDrops extends SavedData {
         ++saveDepth;
         try {
         if (inFlight != null) inFlight.reconcile();
+        List<Map.Entry<ServerLevel, Set<UUID>>> liveReceipts;
+        synchronized (LIVE_RECEIPTS) { liveReceipts = List.copyOf(LIVE_RECEIPTS.entrySet()); }
+        for (var entry : liveReceipts) {
+            var level = entry.getKey();
+            if (level != null && level.getServer().isSameThread() && level.getServer().getLevel(level.dimension()) == level
+                    && level.getDataStorage().get(FACTORY, ID) == this) settled.addAll(entry.getValue());
+        }
         tag.putInt("Version", VERSION);
         ListTag rows = new ListTag();
         for (Pending entry : ownedRows()) {

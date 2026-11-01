@@ -86,6 +86,141 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_paid_machines")
+    public void review2FurnaceCanceledCompletionRetainsOutputs(GameTestHelper test) {
+        thaumcraft.common.testing.PaidMachineOutputRuntimeChecks.furnaceCanceledCompletionRetainsResultBonusAndExperience(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_paid_machines")
+    public void review2PaidQueuesSaveReceiptsBeforeReplacementTick(GameTestHelper test) {
+        thaumcraft.common.testing.PaidMachineOutputRuntimeChecks.paidQueuesSaveReceiptsBeforeReplacementTick(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_trunk")
+    public void review2OrderRecallRetriesAndPreservesSlotIndices(GameTestHelper test) {
+        thaumcraft.common.testing.PaidMachineOutputRuntimeChecks.orderRecallRetriesAndPreservesSlotIndices(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_trunk")
+    public void review2TrunkDeathAndDropsRetainCanceledStock(GameTestHelper test) {
+        thaumcraft.common.testing.PaidMachineOutputRuntimeChecks.trunkDeathAndInventoryDropsRetainCanceledStock(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review2_api")
+    public void review2CraftingVisPaysWholeUnitsAndCapPrice(GameTestHelper test) {
+        thaumcraft.common.testing.ApiLifecycleRuntimeChecks.craftingVisPaysWholeUnitsAndCapPrice(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review2_api")
+    public void review2RegisteredEquipmentKeepsOriginalAspectBonuses(GameTestHelper test) {
+        thaumcraft.common.testing.ApiLifecycleRuntimeChecks.registeredEquipmentKeepsOriginalAspectBonuses(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review2_api")
+    public void review2RecipeLookupRefreshesAfterSameManagerReload(GameTestHelper test) {
+        thaumcraft.common.testing.ApiLifecycleRuntimeChecks.recipeLookupRefreshesWhenTheSameManagerReloads(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review2_api")
+    public void review2TagAspectsFollowBindingAndPreserveOverrides(GameTestHelper test) {
+        thaumcraft.common.testing.ApiLifecycleRuntimeChecks.tagAspectsFollowBindingAndPreserveExplicitOverrides(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review2_mirror")
+    public void review2HandMirrorMissingDestinationReturnsInputOnce(GameTestHelper test) {
+        thaumcraft.common.testing.HandMirrorMenuReviewRuntimeChecks.handMirrorMissingDestinationReturnsInputOnce(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_mirror")
+    public void review2HandMirrorOwnsOutputAcrossCloseCancelAndRetry(GameTestHelper test) {
+        thaumcraft.common.testing.HandMirrorMenuReviewRuntimeChecks.handMirrorOwnsOneOutputAcrossCloseCancelAndRetry(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review2_slots")
+    public void review2RestrictedSlotsKeepItemLimits(GameTestHelper test) {
+        thaumcraft.common.testing.HandMirrorMenuReviewRuntimeChecks.restrictedSlotsKeepOneFocusAndOneInkwell(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_equipment")
+    public void review2EarthmoverPaysEveryMaterialUnit(GameTestHelper test) {
+        thaumcraft.common.testing.SecondReviewEquipmentRuntimeChecks.earthmoverPaysEveryMaterialUnit(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_equipment")
+    public void review2CrusherKeepsToolAndProtection(GameTestHelper test) {
+        thaumcraft.common.testing.SecondReviewEquipmentRuntimeChecks.crusherKeepsToolAndProtection(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review2_equipment")
+    public void review2HoverGrantUsesPlayerIdentity(GameTestHelper test) {
+        thaumcraft.common.testing.SecondReviewEquipmentRuntimeChecks.hoverGrantUsesPlayerIdentity(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_door")
+    public void reviewDoorPlacesAndBothHalvesOpen(GameTestHelper test) {
+        thaumcraft.common.testing.OwnedBlocksReviewRuntimeChecks.doorPlacesAndBothHalvesOpen(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_owned")
+    public void reviewOwnedPlacementKeysAndReclaim(GameTestHelper test) {
+        thaumcraft.common.testing.OwnedBlocksReviewRuntimeChecks.ownedPlacementKeysAndReclaim(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_banner")
+    public void reviewBannerUsesActualPhialAndHand(GameTestHelper test) {
+        thaumcraft.common.testing.OwnedBlocksReviewRuntimeChecks.bannerUsesActualPhialAndHand(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_bucket")
+    public void reviewDeathBucketHonorsPermissionsSolidsAndDrops(GameTestHelper test) {
+        thaumcraft.common.testing.OwnedBlocksReviewRuntimeChecks.deathBucketHonorsPermissionsSolidsAndDrops(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_knowledge")
+    public void reviewAbsoluteAspectAndExactResearch(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewKnowledgeRuntimeChecks.absoluteAspectAndExactResearch(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_knowledge")
+    public void reviewPotionSubtypesUseDistinctWorldTargets(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewKnowledgeRuntimeChecks.potionSubtypesUseDistinctWorldTargets(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_knowledge")
+    public void reviewRunicMaximumSyncsWithoutRecharge(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewKnowledgeRuntimeChecks.runicMaximumSyncsWithoutRecharge(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review_20261101_brain")
+    public void reviewBrainJarConservesMergedExperience(GameTestHelper test) {
+        thaumcraft.common.testing.MachineReviewRuntimeChecks.brainJarConservesMergedExperience(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review_20261101_furnace")
+    public void reviewFurnaceUsesInputExperienceAndPreservesBonusData(GameTestHelper test) {
+        thaumcraft.common.testing.MachineReviewRuntimeChecks.furnaceUsesInputExperienceAndPreservesBonusData(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review_20261101_thaumatorium")
+    public void reviewThaumatoriumUnsupportedOutputFallback(GameTestHelper test) {
+        thaumcraft.common.testing.ThaumatoriumRuntimeChecks.unsupportedOutputFallback(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_world")
+    public void reviewLoadedBossKeepsHealthRatio(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewWorldBossRuntimeChecks.loadedBossKeepsHealthRatio(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_world")
+    public void reviewRoomSpawnsUseOnlyTheirDeterministicStream(GameTestHelper test) {
+        thaumcraft.common.testing.ReviewWorldBossRuntimeChecks.roomSpawnsUseOnlyTheirDeterministicStream(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_20261101_fluid")
+    public void reviewCrucibleUnboundedTransfer(GameTestHelper test) {
+        FluidConservationRuntimeChecks.crucibleUnboundedTransfer(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_followup_resources")
     public void followupDeathBucketConservesInputs(GameTestHelper test) {
         thaumcraft.common.testing.ResourceSafetyRuntimeChecks.deathBucketConservesInputs(test);

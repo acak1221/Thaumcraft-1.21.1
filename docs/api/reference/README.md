@@ -112,6 +112,16 @@ The client-only part of the Thaumcraft API: the particles that 1.7.10 add-ons dr
 | [`IThaumcraftBoss`](thaumcraft.api.entities.md#ithaumcraftboss) | Original TC4 `EntityThaumcraftBoss` marker. |
 | [`ThaumcraftEntities`](thaumcraft.api.entities.md#thaumcraftentities) | The stable keys of the creatures and projectiles of Thaumcraft an add-on may need to recognise. |
 
+## [thaumcraft.api.golems](thaumcraft.api.golems.md)
+
+Read and edit Thaumcraft's golems from an add-on: what a golem is (material, core, accessories, health), where it is, its home and its markers.
+
+| Type | Summary |
+|---|---|
+| [`GolemApi`](thaumcraft.api.golems.md#golemapi) | Read and edit a Thaumcraft golem: the native counterpart of what the 1.7.10 Golem Connector of Thaumic Tinkerer did with the internal `EntityGolemBase` (`getGolemType`, `getCore`, `decoration`, `getHealth`, `getHomePosition`, `homeFacing`, `getMarkers`, `setHomeArea`, `setMarkers`). |
+| [`GolemMaterial`](thaumcraft.api.golems.md#golemmaterial) | The eight golem materials of TC4, in the order of the original `EnumGolemType`: the `id()` of a material is its ordinal there, the value a golem saves as `GolemType` and the 1.7.10 damage value of its golem placer. |
+| [`GolemView`](thaumcraft.api.golems.md#golemview) | An immutable snapshot of a Thaumcraft golem, as `GolemApi.view` reads it: what the 1.7.10 Golem Connector of Thaumic Tinkerer read from the internal `EntityGolemBase` (type, core, accessories, health, position, home and markers), plus the golem's id and dimension. |
+
 ## [thaumcraft.api.internal](thaumcraft.api.internal.md)
 
 | Type | Summary |
@@ -129,6 +139,17 @@ The client-only part of the Thaumcraft API: the particles that 1.7.10 add-ons dr
 | [`IRevealer`](thaumcraft.api.items.md#irevealer) | Thaumcraft 6 compatibility alias for addons compiled against the 1.12 API. |
 | [`IVisDiscountGear`](thaumcraft.api.items.md#ivisdiscountgear) | Thaumcraft 6 compatibility interface for addons compiled against the 1.12 API. |
 | [`ItemsTC`](thaumcraft.api.items.md#itemstc) | The public item registry of the native port. |
+
+## [thaumcraft.api.machines](thaumcraft.api.machines.md)
+
+What add-ons read from, and change in, four Thaumcraft machines: the Arcane Ear, the Brain in a Jar, the Deconstruction Table and the Arcane Bore.
+
+| Type | Summary |
+|---|---|
+| [`IArcaneBore`](thaumcraft.api.machines.md#iarcanebore) | The Arcane Bore (block `thaumcraft:arcane_bore`, the original `TileArcaneBore`): its two tools and what they make of it. |
+| [`IArcaneEar`](thaumcraft.api.machines.md#iarcaneear) | The Arcane Ear (block `thaumcraft:arcane_ear`, the original `TileSensor`): the note it listens for. |
+| [`IBrainJar`](thaumcraft.api.machines.md#ibrainjar) | The Brain in a Jar (block `thaumcraft:jar_brain`, the original `TileJarBrain`): the experience it holds. |
+| [`IDeconstructor`](thaumcraft.api.machines.md#ideconstructor) | The Deconstruction Table (block `thaumcraft:deconstruction_table`, the original `TileDeconstructionTable`): its input and the primal it found. |
 
 ## [thaumcraft.api.nodes](thaumcraft.api.nodes.md)
 

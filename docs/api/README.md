@@ -23,8 +23,8 @@ compiles; `python3 scripts/porting/api_docs.py --check` fails when a guide and t
    vis discounts, runic shielding, warping gear, goggles.
 8. **[Thaumcraft content, entities and the world](guide/world-and-content.md)** — item and block lookups, entity
    interfaces, damage, effects, stable keys (`WarpEffects`, `ThaumcraftEntities`, armour material holders,
-   `ThaumcraftSoundIds`), world generation, felling trees, client particles (`ThaumcraftClientFX`) and aspect tags
-   (`AspectRenderer`).
+   `ThaumcraftSoundIds`), world generation, felling trees, client particles (`ThaumcraftClientFX`), aspect tags
+   (`AspectRenderer`), golems (`GolemApi`) and four machines (`thaumcraft.api.machines`).
 
 ## Reference
 

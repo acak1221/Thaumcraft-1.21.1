@@ -11,6 +11,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,6 +27,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.InteractionResult;
@@ -40,11 +42,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import thaumcraft.api.machines.IArcaneBore;
 import thaumcraft.api.wands.FocusUpgradeType;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockArcaneBore;
 import thaumcraft.common.config.ThaumcraftArcaneBore;
 import thaumcraft.common.container.ContainerArcaneBore;
+import thaumcraft.common.items.equipment.ItemElementalPickaxe;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 import thaumcraft.common.items.wands.foci.ItemFocusExcavation;
@@ -57,7 +61,7 @@ import thaumcraft.common.lib.essentia.EssentiaTransfers;
  * owns every debit/wear/removal/output/evacuation; no fallback implementation.
  * The private native phases/consumable sequence do not accept supplied targets,
  * outputs, success booleans, mutable slot aliases or arbitrary commit callbacks. */
-public final class TileArcaneBore extends BlockEntity implements Container, MenuProvider {
+public final class TileArcaneBore extends BlockEntity implements Container, MenuProvider, IArcaneBore {
     private static final int SCHEMA = 1;
     /**
      * Original TileArcaneBore:707-713 — the dig event of the bore reaches the
@@ -166,8 +170,22 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
     public int getCountdown() { return count; }
     public float getAccelerationCredit() { return credit; }
     public BoreRepairState repairState() { return repairState; }
-    public boolean hasFocus() { return validSlot(0, focus); }
-    public boolean hasPickaxe() { return validSlot(1, pick); }
+    @Override public boolean hasFocus() { return validSlot(0, focus); }
+    @Override public boolean hasPickaxe() { return validSlot(1, pick); }
+    // IArcaneBore: the questions of the original peripheral tt_arcanebore, read-only. The stats are derived afresh because a
+    // detached disk load has no registry level for the pick's enchantments until the next native tick refreshes them.
+    @Override public ItemStack getPickaxe() { return pick.copy(); }
+    @Override public boolean isPickaxeBroken() { return !pick.isEmpty() && pick.getDamageValue() + 1 == pick.getMaxDamage(); }
+    @Override public boolean isWorking() { return !isQuarantined() && itemsValid() && isPowered(); }
+    @Override public int getRadius() { return derivedStats(focus, pick).radius(); }
+    @Override public int getSpeed() { return derivedStats(focus, pick).speed(); }
+    @Override public boolean hasNativeClusters() { return !pick.isEmpty() && pick.getItem() instanceof ItemElementalPickaxe; }
+    @Override public int getPickaxeFortune() { return pickEnchantment(Enchantments.FORTUNE); }
+    @Override public boolean hasSilkTouch() { return pickEnchantment(Enchantments.SILK_TOUCH) > 0; }
+    private int pickEnchantment(ResourceKey<Enchantment> enchantment) {
+        if (pick.isEmpty() || level == null) return 0;
+        return EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(enchantment), pick);
+    }
     public boolean isQuarantined() { return rejected != null || fenced; }
     public boolean wasEvacuated() { return evacuated; }
     public boolean needsLoadedReconciliation() { return needsReconciliation; }
@@ -199,7 +217,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
         TileArcaneBoreBase actual = installedBase();
         return actual == boundBase && actual != null && actual.lifetimeId().equals(boundBaseLifetime) ? actual : null;
     }
-    public boolean isPowered() {
+    @Override public boolean isPowered() {
         if (!isCurrent()) return false;
         BlockPos base = ArcaneBoreMath.basePosition(worldPosition, attachment());
         // Native signal lookup can follow a conducting neighbour to its own

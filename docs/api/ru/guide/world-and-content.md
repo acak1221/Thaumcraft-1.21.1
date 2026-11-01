@@ -278,9 +278,40 @@ HudRenderCallback.EVENT.register((graphics, tickDelta) -> {
 значок большего размера — это масштабированный стек поз вокруг `(x, y)`. Смешивание остаётся включённым, цвет сбрасывается в
 белый. Как и для частиц, числа проверены тестами, а пиксели на кадре не осматривались.
 
+## Големы
+
+`thaumcraft.api.golems` читает и меняет голема; в 1.7.10 у големов не было API, и аддон лез во внутреннее существо.
+`GolemApi.view(entity)` отвечает неизменяемым снимком `GolemView` или `Optional.empty()` для существа, которое не голем
+или удалено: его id и измерение, `materialId()` и `material()` (`GolemMaterial.STRAW` … `THAUMIUM`), `core()` (-1 без
+ядра, иначе исходный номер ядра 0..11), `decoration()` (по букве на аксессуар), `health()`, `position()`, `home()` и
+`homeFacing()`, `markers()` (`GolemView.Marker`: блок, измерение, сторона и цвет «Порядка», -1 без цвета). Метки живут на
+сервере; у снимка на клиенте их нет. За свежим снимком спрашивайте снова.
+
+`GolemApi.setHome(entity, pos, facing)` и `GolemApi.setMarkers(entity, markers)` меняют голема его собственным кодом, с
+последствиями размещателя голема и колокольчика (работа, зависевшая от старого дома или меток, сбрасывается, изменение
+синхронизируется и сохраняется). Они отвечают `false` и ничего не меняют, когда голем отказывает: цветная метка без
+улучшения «Порядок», больше `GolemApi.MAX_MARKERS` меток, дом вне мира, голем удалён, не поддерживается или переносит
+груз. Только сервер; любой вызов `GolemApi` с големом серверного мира вне серверного потока бросает `IllegalStateException`.
+
+## Механизмы
+
+`thaumcraft.api.machines` содержит вопросы, которые компьютерные периферии Thaumic Tinkerer задавали четырём механизмам;
+их сущности блоков реализуют эти интерфейсы, так что спрашивайте `level.getBlockEntity(pos) instanceof IArcaneEar ear`:
+
+| Интерфейс | Блок | Чтение и запись |
+|---|---|---|
+| `IArcaneEar` | `arcane_ear` | `getNote()`; `setNote(note)` настраивает как правый клик (0..24, сохраняется и синхронизируется, без звука; другая нота бросает `IllegalArgumentException`, другой поток — `IllegalStateException`) |
+| `IBrainJar` | `jar_brain` | `getXp()`, `getXpMax()` (2000) |
+| `IDeconstructor` | `deconstruction_table` | `getReward()` (ожидающий первичный аспект или `null`), `hasItem()` |
+| `IArcaneBore` | `arcane_bore` | `hasFocus()`, `hasPickaxe()`, `getPickaxe()` (копия), `isPickaxeBroken()`, `isPowered()`, `isWorking()`, `getRadius()`, `getSpeed()`, `hasNativeClusters()`, `getPickaxeFortune()`, `hasSilkTouch()` |
+
+Геттеры ничего не меняют; на клиенте они читают синхронизированную копию. Вызывайте их в потоке, которому принадлежит мир.
+Таблица переноса с полей 1.7.10 — в [PORTING.md](../../PORTING.md#10-golems-and-machines-thaumcraftapigolems-thaumcraftapimachines) (на английском).
+
 ## Не публичный API
 
-- У големов не было API в 1.7.10, нет и сейчас; `ThaumcraftEntities.GOLEM` лишь узнаёт существо.
+- `EntityGolemBase` и классы сущностей блоков механизмов — не API; пользуйтесь `GolemApi` и `thaumcraft.api.machines`
+  ([Големы](#големы), [Механизмы](#механизмы)). `ThaumcraftEntities.GOLEM` узнаёт существо.
 - Классы `thaumcraft.api` в духе Thaumcraft 6 (`theorycraft`, `ResearchEntry`/`ResearchStage`, `ScanningManager`,
   `IWandFocus`) — оболочки совместимости для аддонов, собранных под 1.12; к механикам Thaumcraft 4 они не подключены.
   Пользуйтесь классами TC4 из этих руководств.

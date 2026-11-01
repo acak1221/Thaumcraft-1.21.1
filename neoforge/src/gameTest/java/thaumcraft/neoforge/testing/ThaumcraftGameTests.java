@@ -2457,6 +2457,38 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.BaublesApiRuntimeChecks.getWornIsAReadOnlySnapshot(test);
     }
 
+    // The golem API (thaumcraft.api.golems): views of real golems, setHome/setMarkers with sync data and saves, refusals and threads.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "golem_api_view")
+    public void golemApiViewReadsTheRealGolem(GameTestHelper test) {
+        thaumcraft.common.testing.GolemMachineApiRuntimeChecks.golemViewReadsTheRealGolem(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "golem_api_write")
+    public void golemApiWritesChangeTheGolemSyncAndSurviveReload(GameTestHelper test) {
+        thaumcraft.common.testing.GolemMachineApiRuntimeChecks.golemWritesChangeTheGolemSyncAndSurviveReload(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "golem_api_refusals")
+    public void golemApiRefusesInvalidInputAndOtherThreads(GameTestHelper test) {
+        thaumcraft.common.testing.GolemMachineApiRuntimeChecks.golemApiRefusesInvalidInputAndOtherThreads(test);
+    }
+
+    // The machine API (thaumcraft.api.machines): the Arcane Ear, the Brain in a Jar, the Deconstruction Table and the Arcane Bore.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "machine_api_ear")
+    public void machineApiArcaneEarNoteIsTunedSyncedAndSaved(GameTestHelper test) {
+        thaumcraft.common.testing.GolemMachineApiRuntimeChecks.arcaneEarNoteIsTunedSyncedAndSaved(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "machine_api_jar_table")
+    public void machineApiBrainJarAndDeconstructorReadTheirBlockEntities(GameTestHelper test) {
+        thaumcraft.common.testing.GolemMachineApiRuntimeChecks.brainJarAndDeconstructorReadTheirBlockEntities(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "machine_api_bore")
+    public void machineApiArcaneBoreAnswersTheOriginalPeripheralQuestions(GameTestHelper test) {
+        thaumcraft.common.testing.GolemMachineApiRuntimeChecks.arcaneBoreAnswersTheOriginalPeripheralQuestions(test);
+    }
+
     // A focus pouch of an add-on (IFocusPouch, 40 and 130 cells, its own storage): offered by the wand's selector like the native one.
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "addon_pouch_select")
     public void addonFocusPouchIsOfferedAndSelectedLikeTheNativeOne(GameTestHelper test) {

@@ -24,8 +24,8 @@ Thaumcraft 4 Reload сохраняет публичный API Thaumcraft 4.2.3.5
    `BaublesApi.getWorn`), скидка вис, рунный щит, варп от снаряжения, очки.
 8. **[Содержимое Thaumcraft, существа и мир](guide/world-and-content.md)** — поиск предметов и блоков, интерфейсы
    существ, урон, эффекты, стабильные ключи (`WarpEffects`, `ThaumcraftEntities`, держатели материалов брони,
-   `ThaumcraftSoundIds`), генерация мира, рубка деревьев, клиентские частицы (`ThaumcraftClientFX`) и значки аспектов
-   (`AspectRenderer`).
+   `ThaumcraftSoundIds`), генерация мира, рубка деревьев, клиентские частицы (`ThaumcraftClientFX`), значки аспектов
+   (`AspectRenderer`), големы (`GolemApi`) и четыре механизма (`thaumcraft.api.machines`).
 
 ## Справочник
 

@@ -412,9 +412,10 @@ public class EntityGolemBase extends AbstractGolem {
         requireServerThread();
         if (!level().isClientSide && !busy && !useCustodyActive() && !hasUseRemainders() && !essentiaMutationActive()) entityData.set(OWNER, name == null ? "" : name);
     }
-    public void setHome(BlockPos pos, Direction facing) {
+    /** The golem's home and home side; false (nothing changed) on a client and while the golem refuses edits. */
+    public boolean setHome(BlockPos pos, Direction facing) {
         requireServerThread();
-        if (level().isClientSide || pos == null || facing == null || retiring || unsupported || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()) return;
+        if (level().isClientSide || pos == null || facing == null || retiring || unsupported || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()) return false;
         use.reset();
         alchemy.reset();
         liquid.reset();
@@ -427,6 +428,7 @@ public class EntityGolemBase extends AbstractGolem {
         entityData.set(HOME, pos.immutable());
         entityData.set(HOME_FACE, facing.get3DDataValue());
         getNavigation().stop();
+        return true;
     }
     public ItemStack getCarriedItem() { return (level().isClientSide ? entityData.get(CARRIED) : carried).copy(); }
     public float getBootupTimer() { return entityData.get(BOOTUP); }
@@ -653,17 +655,19 @@ public class EntityGolemBase extends AbstractGolem {
     public List<GolemMarker> getMarkers() { return copyMarkers(markers); }
     /** The live marker list of the golem, for the searches of {@link GolemHelper} only. */
     List<GolemMarker> liveMarkers() { return markers; }
-    public void setMarkers(List<GolemMarker> value) {
+    /** Replaces the markers; false (nothing changed) on a client, while the golem refuses edits and for a colour without Order. */
+    public boolean setMarkers(List<GolemMarker> value) {
         requireServerThread();
-        if (level().isClientSide || unsupported || retiring || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()) return;
+        if (level().isClientSide || unsupported || retiring || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()) return false;
         List<GolemMarker> copied = copyMarkers(value);
         // A colour is an Order rule: a golem without the upgrade keeps only uncoloured markers.
-        if (getUpgradeAmount(GolemUpgrade.ORDER) == 0 && copied.stream().anyMatch(marker -> marker.color() != GolemMarker.ANY)) return;
+        if (getUpgradeAmount(GolemUpgrade.ORDER) == 0 && copied.stream().anyMatch(marker -> marker.color() != GolemMarker.ANY)) return false;
         use.reset();
         alchemy.reset();
         liquid.reset();
         markers = copied; // Other dimensions persist, but never authorize work here.
         inventories.configurationChanged();
+        return true;
     }
     private boolean baselineEmptyControls() {
         if (isFillAnyAmount()) return false;

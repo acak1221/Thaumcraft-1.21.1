@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import thaumcraft.api.machines.IBrainJar;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 
 /**
@@ -25,7 +26,7 @@ import thaumcraft.common.config.ThaumcraftEldritchBlocks;
  * own block. The stored experience is capped at two thousand at the start of
  * the next tick; the block that empties the jar sets the eat delay to forty.</p>
  */
-public final class TileJarBrain extends BlockEntity {
+public final class TileJarBrain extends BlockEntity implements IBrainJar {
     /** Original TileJarBrain:24 - the stored experience. */
     public int xp = 0;
     /** Original TileJarBrain:25 - the jar never keeps more than two thousand. */
@@ -48,8 +49,8 @@ public final class TileJarBrain extends BlockEntity {
         super(ThaumcraftEldritchBlocks.JAR_BRAIN_TILE.get(), pos, state);
     }
 
-    public int getXp() { return xp; }
-    public int getXpMax() { return xpMax; }
+    @Override public int getXp() { return xp; }
+    @Override public int getXpMax() { return xpMax; }
 
     /** Original TileJarBrain:31-79 - the jar pulls the closest orb to itself. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileJarBrain jar) {

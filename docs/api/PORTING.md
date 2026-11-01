@@ -280,7 +280,52 @@ pouch's own `use`. Guides: [gear and baubles](guide/gear-and-baubles.md#a-bauble
 [focus pouches](guide/wands-and-foci.md#focus-pouches-ifocuspouch). Tests: `BaublesAndPouchApiTest`,
 `FocusSelectionExtendedCellsTest`, GameTests of `BaublesApiRuntimeChecks` and `AddonPouchRuntimeChecks`.
 
-## 10. Effects, and what is not public API
+## 10. Golems and machines (`thaumcraft.api.golems`, `thaumcraft.api.machines`)
+
+A 1.7.10 add-on that read a golem or a machine (Thaumic Tinkerer's ComputerCraft and OpenComputers peripherals and its
+Golem Connector) used the internal `EntityGolemBase`, `TileSensor`, `TileJarBrain`, `TileDeconstructionTable` and
+`TileArcaneBore` and their public fields. Those classes are not API; the same reads and writes are:
+
+| 1.7.10 (internal) | 1.21.1 |
+|---|---|
+| `entity instanceof EntityGolemBase` | `GolemApi.isGolem(entity)`; `GolemApi.view(entity)` answers an `Optional<GolemView>` snapshot |
+| `golem.getGolemType()` | `view.materialId()` (original ordinal), `view.material()` (`GolemMaterial`; `displayName()` is `"Straw"` … `"Thaumium"`) |
+| `golem.getCore()` | `view.core()`: -1 (`GolemView.NO_CORE`) or the `ItemGolemCore` damage 0..11 |
+| `golem.decoration` | `view.decoration()`: the accessory letters `HGBFRVPM` in the order they were put on |
+| `golem.getHealth()`, `golem.posX/posY/posZ` | `view.health()`, `view.position()` |
+| `golem.getHomePosition()`, `golem.homeFacing` | `view.home()`, `view.homeFacing()` (a `Direction`; `get3DDataValue()` is the old number) |
+| `golem.getMarkers()` (`Marker x, y, z, dim, side, color`) | `view.markers()`: `GolemView.Marker(pos, dimension, side, color)`, a `ResourceKey<Level>` and a `Direction` |
+| `golem.setHomeArea(x, y, z, 35); golem.homeFacing = f` | `GolemApi.setHome(entity, pos, facing)` |
+| `golem.setMarkers(list)` | `GolemApi.setMarkers(entity, markers)` |
+| `TileSensor.note` (read and write) | `IArcaneEar.getNote()`, `IArcaneEar.setNote(int)` |
+| `TileJarBrain.xp`, `xpMax` | `IBrainJar.getXp()`, `IBrainJar.getXpMax()` |
+| `TileDeconstructionTable.aspect`, `getStackInSlot(0)` | `IDeconstructor.getReward()`, `IDeconstructor.hasItem()` |
+| `TileArcaneBore.hasFocus`, `hasPickaxe`, `getStackInSlot(1)`, `gettingPower()`, `area + maxRadius`, `speed` | `IArcaneBore.hasFocus()`, `hasPickaxe()`, `getPickaxe()`, `isPowered()`, `getRadius()`, `getSpeed()` |
+| the peripheral's own formulas over the bore's pickaxe | `IArcaneBore.isPickaxeBroken()`, `isWorking()`, `hasNativeClusters()`, `getPickaxeFortune()`, `hasSilkTouch()` |
+
+Ask a block entity with `level.getBlockEntity(pos) instanceof IArcaneEar ear`; Thaumcraft's own four block entities are
+the only implementations. What changed:
+
+- **Threads.** A golem or machine of a server level belongs to the server thread. `GolemApi` (reads and writes) and
+  `IArcaneEar.setNote` throw `IllegalStateException` on another thread; the machine getters are plain reads to be called
+  on the same thread. A ComputerCraft peripheral runs its calls on the main thread (`mainThread = true`).
+- **Writes go through the owner's own code.** `setHome` is the golem placer's `setHome` (work in progress that depends on the
+  home is dropped, the home is synced and saved); `setMarkers` is the bell's (the inventory cores re-plan; the markers are
+  saved, and stay on the server as they did in 1.7.10); `setNote` is the hand tuning's save and sync, without playing the
+  note. Both golem writes answer `false` and change nothing when the golem refuses: a coloured marker on a golem without
+  the Order upgrade, a list of more than 64 markers or with a `null`, a home outside the world, a removed or unsupported
+  golem. The original wrote any value.
+- **Values.** `setNote` takes 0..24 and throws `IllegalArgumentException` for another note (the original stored any byte,
+  which the ear never heard). A marker's dimension is a `ResourceKey<Level>` instead of a number; markers of other
+  dimensions are kept, as before, and the golem works only in its own. The home radius is 32, the radius every
+  original golem got on load (the connector's 35 lasted until the next load; nothing in this port reads it). The original
+  peripheral's `getRadius` answered the width of the hole, `1 + 2 * IArcaneBore.getRadius()`.
+
+Tests: `GolemAndMachineApiTest`, GameTests of `GolemMachineApiRuntimeChecks` (`golemApi…`, `machineApi…`): every answer
+against the real golem or block entity, every write against its state, the vanilla sync packet and a save and reload, and
+every refusal. A client receiving the data was not run.
+
+## 11. Effects, and what is not public API
 
 - `ThaumcraftFX` sends the effect packets 1.7.10 add-ons built themselves (`PacketFXBlockSparkle`,
   `PacketFXBlockArc`, `PacketFXBlockZap`, `PacketFXBlockBubble`, `PacketFXEssentiaSource`, `PacketFXVisDrain`)
@@ -295,13 +340,13 @@ pouch's own `use`. Guides: [gear and baubles](guide/gear-and-baubles.md#a-bauble
 - Stable keys ([guide](guide/world-and-content.md#stable-keys)): `WarpEffects`, `ThaumcraftEntities`, the armour material
   holders of `ThaumcraftMaterials`/`ThaumcraftApi` and `ThaumcraftSoundIds` replace the numeric potion ids, `instanceof` on
   internal entity classes and sound names in strings. Tests: `StableKeysApiTest`, GameTest `stableKeysResolveToTheRegisteredObjects`.
-- Golems had no API in 1.7.10 and have none now.
+- Golems had no API in 1.7.10; [section 10](#10-golems-and-machines-thaumcraftapigolems-thaumcraftapimachines) is the one they have now.
 - The Thaumcraft 6 shaped classes of `thaumcraft.api` (theorycraft, `ResearchEntry`/`ResearchStage`,
   `ScanningManager`, `IWandFocus`) are not wired into Thaumcraft 4 gameplay; use the TC4 classes above.
 - Numeric enchantment ids, numeric dimensions and arbitrary item NBT are 1.7.10 identities; the
   deprecations in the Javadoc name the replacement. The contract details are in [the README](README.md).
 
-## 11. The example add-on
+## 12. The example add-on
 
 [`examples/example-addon`](../../examples/example-addon) registers items, a block with a block entity, an aspect of its
 own, object, complex and entity tags (one by a 1.7.10 ore dictionary name), arcane, shapeless arcane, crucible and

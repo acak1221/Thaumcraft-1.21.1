@@ -1,3 +1,22 @@
+## 2026-11-01 — add-on API: golems (`thaumcraft.api.golems`) and four machines (`thaumcraft.api.machines`)
+
+Thaumic Tinkerer's ComputerCraft peripherals and its Golem Connector read the internal EntityGolemBase, TileSensor,
+TileJarBrain, TileDeconstructionTable and TileArcaneBore in 1.7.10 (requests A11 and A12 of the add-on's
+docs/API_GAPS.md). Two new API packages answer them. thaumcraft.api.golems: GolemApi.isGolem and GolemApi.view (an
+immutable GolemView record: id, dimension, material id and GolemMaterial, core, accessory letters, health, position,
+home and its side, markers as GolemView.Marker records with a ResourceKey dimension and a Direction side), and
+GolemApi.setHome and GolemApi.setMarkers, which run the golem's own setHome and setMarkers (these now return whether
+they applied) and answer false for every refusal: null, a home outside the world, more than 64 markers, a coloured
+marker without Order, a removed or unsupported golem. Every call with a golem of a server level off the server thread
+throws IllegalStateException. thaumcraft.api.machines: IArcaneEar (getNote; setNote 0..24 with the hand tuning's save
+and sync, IllegalArgumentException for another note), IBrainJar (getXp, getXpMax), IDeconstructor (getReward,
+hasItem) and IArcaneBore (the questions of the original tt_arcanebore peripheral), implemented by the four block
+entities. No gameplay change. Documented in docs/api/PORTING.md section 10, the world-and-content guide (English and
+Russian) and the generated reference. Tests: GolemAndMachineApiTest (7 JUnit) and six GameTests of
+GolemMachineApiRuntimeChecks (added to required-gametests.json); two deliberate mutations (setNote without its
+save and sync, setHome without the world bound) made them fail on Fabric. Verified: 2768 JUnit of :common:test (0 failures; the 5 skips are OrphanMobOracleContractTest, whose original JAR is absent here), :fabric:build, GameTest Fabric 521/521 on a fresh world, :neoforge:build with its 13 JUnit, GameTest NeoForge 509/509 on a fresh world, 143 Python (9 skipped). Not run: a client
+receiving the synced data, a real ComputerCraft computer.
+
 ## 2026-10-27 — CI on main: three intermittent GameTests, JUnit skips without the original JARs
 
 The GameTest advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag failed now and then on main: its row of spiders

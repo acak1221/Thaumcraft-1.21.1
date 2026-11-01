@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.machines.IDeconstructor;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftDeconstruction;
 import thaumcraft.common.container.ContainerDeconstructionTable;
@@ -36,7 +37,7 @@ import thaumcraft.common.lib.research.ObjectAspectResolver;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /** One physical input and one unclaimed primal point; elapsed work is deliberately not saved. */
-public final class TileDeconstructionTable extends BlockEntity implements WorldlyContainer, MenuProvider, Nameable {
+public final class TileDeconstructionTable extends BlockEntity implements WorldlyContainer, MenuProvider, Nameable, IDeconstructor {
     private ItemStack input = ItemStack.EMPTY;
     private Aspect reward;
     private int breakTime;
@@ -46,6 +47,8 @@ public final class TileDeconstructionTable extends BlockEntity implements Worldl
 
     public TileDeconstructionTable(BlockPos pos, BlockState state) { super(ThaumcraftDeconstruction.TILE.get(), pos, state); }
     public Aspect reward() { return reward; }
+    @Override public Aspect getReward() { return reward; }
+    @Override public boolean hasItem() { return !getItem(0).isEmpty(); }
     public int breakTime() { return breakTime; }
     public boolean isQuarantined() { return rejected != null; }
     public boolean current() {

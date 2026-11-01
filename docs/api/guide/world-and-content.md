@@ -273,9 +273,41 @@ The renderer does not clip, scale to the screen or show a tooltip: the hover are
 a scaled pose stack around `(x, y)`. Blending is left enabled and the colour is reset to white. As with the particles,
 the numbers are tested and the pixels were not inspected on a frame.
 
+## Golems
+
+`thaumcraft.api.golems` reads and edits a golem; golems had no API in 1.7.10, and an add-on reached into the internal
+entity. `GolemApi.view(entity)` answers an immutable `GolemView` snapshot, or `Optional.empty()` for an entity that is no
+golem or is removed: its id and dimension, `materialId()` and `material()` (`GolemMaterial.STRAW` … `THAUMIUM`), `core()`
+(-1 for none, else the core's original number 0..11), `decoration()` (one letter per accessory), `health()`,
+`position()`, `home()` and `homeFacing()`, and `markers()` (`GolemView.Marker`: block, dimension, side and Order colour,
+-1 for none). The markers live on the server; a view on a client has none. Ask again for a fresh snapshot.
+
+`GolemApi.setHome(entity, pos, facing)` and `GolemApi.setMarkers(entity, markers)` change the golem through its own code,
+with the effects of the golem placer and the golem bell (work that depended on the old home or markers is dropped, the
+change is synced and saved). They answer `false` and change nothing when the golem refuses: a coloured marker without the
+Order upgrade, more than `GolemApi.MAX_MARKERS` markers, a home outside the world, a golem that is removed, unsupported or
+in the middle of moving cargo. Server only; every `GolemApi` call with a golem of a server level throws
+`IllegalStateException` off the server thread.
+
+## Machines
+
+`thaumcraft.api.machines` holds the questions Thaumic Tinkerer's computer peripherals asked of four machines; the block
+entities implement them, so ask `level.getBlockEntity(pos) instanceof IArcaneEar ear`:
+
+| Interface | Block | Reads and writes |
+|---|---|---|
+| `IArcaneEar` | `arcane_ear` | `getNote()`; `setNote(note)` tunes it like a right click (0..24, saved and synced, no sound; another note throws `IllegalArgumentException`, another thread `IllegalStateException`) |
+| `IBrainJar` | `jar_brain` | `getXp()`, `getXpMax()` (2000) |
+| `IDeconstructor` | `deconstruction_table` | `getReward()` (the waiting primal or `null`), `hasItem()` |
+| `IArcaneBore` | `arcane_bore` | `hasFocus()`, `hasPickaxe()`, `getPickaxe()` (a copy), `isPickaxeBroken()`, `isPowered()`, `isWorking()`, `getRadius()`, `getSpeed()`, `hasNativeClusters()`, `getPickaxeFortune()`, `hasSilkTouch()` |
+
+The getters change nothing; on a client they read the synced copy. Call them on the thread that owns the level. The
+porting table from the 1.7.10 fields is in [PORTING.md](../PORTING.md#10-golems-and-machines-thaumcraftapigolems-thaumcraftapimachines).
+
 ## Not public API
 
-- Golems had no API in 1.7.10 and have none now; `ThaumcraftEntities.GOLEM` only recognises the entity.
+- `EntityGolemBase` and the machines' block entity classes are not API; use `GolemApi` and `thaumcraft.api.machines`
+  ([Golems](#golems), [Machines](#machines)). `ThaumcraftEntities.GOLEM` recognises the entity.
 - The Thaumcraft 6 shaped classes of `thaumcraft.api` (`theorycraft`, `ResearchEntry`/`ResearchStage`,
   `ScanningManager`, `IWandFocus`) are compatibility shells for add-ons compiled against 1.12; they are not wired into
   Thaumcraft 4 gameplay. Use the TC4 classes in these guides.

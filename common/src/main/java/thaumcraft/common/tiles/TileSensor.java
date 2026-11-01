@@ -10,15 +10,26 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.api.machines.IArcaneEar;
 import thaumcraft.common.blocks.BlockArcaneEar;
 import thaumcraft.common.config.ThaumcraftArcaneEar;
 import thaumcraft.common.lib.ArcaneEarNotes;
 
 /** Original TileSensor: a matching note within 64 blocks retriggers ten ticks of power. Pitch/tone persist; the pulse does not. */
-public final class TileSensor extends BlockEntity {
+public final class TileSensor extends BlockEntity implements IArcaneEar {
     private int note, tone, redstoneSignal;
     public TileSensor(BlockPos pos, BlockState state) { super(ThaumcraftArcaneEar.ARCANE_EAR_TILE.get(), pos, state); }
-    public int getNote() { return note; }
+    @Override public int getNote() { return note; }
+    /** The API tuning ({@link IArcaneEar#setNote}): the hand tuning's save and sync, without the hand tuning's note. */
+    @Override public void setNote(int value) {
+        if (value < MIN_NOTE || value > MAX_NOTE) throw new IllegalArgumentException("An Arcane Ear note is 0..24, not " + value);
+        if (level instanceof ServerLevel server && !server.getServer().isSameThread()) {
+            throw new IllegalStateException("An Arcane Ear of a server level is tuned on the server thread only");
+        }
+        if (level == null || level.isClientSide || note == value) return;
+        note = value;
+        changed();
+    }
     public int getTone() { return tone; }
     public int getRedstoneTicks() { return redstoneSignal; }
 

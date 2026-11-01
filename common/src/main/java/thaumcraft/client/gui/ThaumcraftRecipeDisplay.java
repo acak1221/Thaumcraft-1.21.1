@@ -25,7 +25,6 @@ import thaumcraft.api.client.AspectRenderer;
 import thaumcraft.common.config.ThaumcraftArcane;
 import thaumcraft.common.config.ThaumcraftAlchemy;
 import thaumcraft.common.config.ThaumcraftInfusion;
-import thaumcraft.common.config.ThaumcraftMasonry;
 import thaumcraft.common.crafting.ArcaneShapedRecipe;
 import thaumcraft.common.crafting.ArcaneShapelessRecipe;
 import thaumcraft.common.crafting.NativeArcaneRecipe;
@@ -34,7 +33,6 @@ import thaumcraft.common.crafting.ArcaneVis;
 import thaumcraft.common.crafting.InfusionStackRecipe;
 import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.items.wands.WandData;
-import thaumcraft.common.lib.infusion.InfusionStructure;
 import thaumcraft.common.lib.research.ResearchDefinition;
 
 /**
@@ -290,26 +288,25 @@ public final class ThaumcraftRecipeDisplay {
     private final int gridWidth;
     private final boolean shapeless;
     private final List<ThaumcraftRecipeDisplay> alternatives;
-    private final boolean infusionAltar;
-    private final boolean thaumatorium;
-    private final boolean advancedFurnace;
     /** The three sceptre variants of the SCEPTRE page, null for every other page. */
     private final SceptreVariant[] sceptreVariants;
     /** The synthetic result of a page whose recipe has no native counterpart, null otherwise. */
     private final ItemStack syntheticResult;
     /** The synthetic inputs of such a page, in the order of the original recipe. */
     private final List<ItemStack> syntheticInputs;
-    /** The content of an add-on aspect, smelting or image page, null for every other page. */
+    /** The content of an aspect, smelting, image or construct page, null for every other page. */
     private final AddonPage addon;
 
-    /** The add-on pages the original drew without a recipe holder of their own. */
-    private sealed interface AddonPage permits Aspects, Smelting, Image {}
+    /** The pages the original drew without a recipe holder of their own. */
+    private sealed interface AddonPage permits Aspects, Smelting, Image, Compound {}
     /** Original GuiResearchRecipe.drawAspectPage: the aspects of the list, sorted, one row each. */
     private record Aspects(thaumcraft.api.aspects.AspectList aspects) implements AddonPage {}
     /** Original GuiResearchRecipe.drawSmeltingPage: the furnace input and its result. */
     private record Smelting(ItemStack input, ItemStack result) implements AddonPage {}
     /** An IMAGE page: the texture over the page width and its caption. */
     private record Image(ResourceLocation texture, String caption) implements AddonPage {}
+    /** Original GuiResearchRecipe.drawCompoundCraftingPage: the layered diagram of a wand construct ({@link CompoundLayout}). */
+    private record Compound(CompoundPage page) implements AddonPage {}
 
     /**
      * The items this page makes: its synthetic result, the result of every alternative, or the
@@ -338,9 +335,6 @@ public final class ThaumcraftRecipeDisplay {
         this.gridWidth = gridWidth;
         this.shapeless = shapeless;
         alternatives = List.of();
-        infusionAltar = false;
-        thaumatorium = false;
-        advancedFurnace = false;
         sceptreVariants = null;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
@@ -354,28 +348,6 @@ public final class ThaumcraftRecipeDisplay {
         gridWidth = first.gridWidth;
         shapeless = first.shapeless;
         this.alternatives = List.copyOf(alternatives);
-        infusionAltar = false;
-        thaumatorium = false;
-        advancedFurnace = false;
-        sceptreVariants = null;
-        syntheticResult = ItemStack.EMPTY;
-        syntheticInputs = List.of();
-        addon = null;
-    }
-
-    private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe, boolean thaumatorium) {
-        this(matrixRecipe, thaumatorium, false);
-    }
-
-    private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe, boolean thaumatorium, boolean advancedFurnace) {
-        recipe = matrixRecipe;
-        ingredients = List.of();
-        gridWidth = 3;
-        shapeless = false;
-        alternatives = List.of();
-        infusionAltar = !thaumatorium && !advancedFurnace;
-        this.advancedFurnace = advancedFurnace;
-        this.thaumatorium = thaumatorium;
         sceptreVariants = null;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
@@ -398,9 +370,6 @@ public final class ThaumcraftRecipeDisplay {
         gridWidth = 3;
         shapeless = false;
         alternatives = List.of();
-        infusionAltar = false;
-        thaumatorium = false;
-        advancedFurnace = false;
         sceptreVariants = variants;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
@@ -417,25 +386,19 @@ public final class ThaumcraftRecipeDisplay {
         gridWidth = 3;
         shapeless = true;
         alternatives = List.of();
-        infusionAltar = false;
-        thaumatorium = false;
-        advancedFurnace = false;
         sceptreVariants = null;
         syntheticResult = result;
         syntheticInputs = List.copyOf(inputs);
         addon = null;
     }
 
-    /** An add-on aspect, smelting or image page. */
+    /** An aspect, smelting, image or construct page. */
     private ThaumcraftRecipeDisplay(AddonPage page) {
         recipe = null;
         ingredients = List.of();
         gridWidth = 3;
         shapeless = false;
         alternatives = List.of();
-        infusionAltar = false;
-        thaumatorium = false;
-        advancedFurnace = false;
         sceptreVariants = null;
         syntheticResult = ItemStack.EMPTY;
         syntheticInputs = List.of();
@@ -481,7 +444,7 @@ public final class ThaumcraftRecipeDisplay {
     public RecipeHolder<?> recipe() { return recipe; }
     public boolean sameRecipes(ThaumcraftRecipeDisplay other) {
         if (addon != null || other.addon != null) return sameAddonPage(addon, other.addon);
-        if (recipe != other.recipe || infusionAltar != other.infusionAltar || thaumatorium != other.thaumatorium || alternatives.size() != other.alternatives.size()) return false;
+        if (recipe != other.recipe || alternatives.size() != other.alternatives.size()) return false;
         if (!ItemStack.matches(syntheticResult, other.syntheticResult)) return false;
         if (syntheticInputs.size() != other.syntheticInputs.size()) return false;
         for (int i = 0; i < syntheticInputs.size(); i++) if (!ItemStack.matches(syntheticInputs.get(i), other.syntheticInputs.get(i))) return false;
@@ -494,6 +457,9 @@ public final class ThaumcraftRecipeDisplay {
         if (first instanceof Smelting a && second instanceof Smelting b)
             return ItemStack.matches(a.input(), b.input()) && ItemStack.matches(a.result(), b.result());
         if (first instanceof Aspects a && second instanceof Aspects b) return a.aspects() == b.aspects();
+        // The list of an add-on page is the same object while the book is open; an original construct is its recipe key.
+        if (first instanceof Compound a && second instanceof Compound b)
+            return a.page().source() == b.page().source() || a.page().source() instanceof String key && key.equals(b.page().source());
         return first != null && first.equals(second);
     }
 
@@ -637,30 +603,12 @@ public final class ThaumcraftRecipeDisplay {
                     ? resolve(holder, level) : null;
         }
         if (!"recipe_reference".equals(page.kind()) || page.recipeKey() == null) return null;
-        // Original ConfigRecipes:93 is a wand construct, NOT an executable
-        // extracted expression or a registered fake crafting recipe. Display
-        // only this implemented blueprint, bound to its actual native devices.
-        if ("InfusionAltar".equals(page.recipeKey())) {
-            var matrix = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/infusion_matrix")).orElse(null);
-            return matrix != null && matrix.value() instanceof ArcaneShapedRecipe
-                    && !matrix.value().getResultItem(level.registryAccess()).isEmpty()
-                    && ThaumcraftInfusion.PEDESTAL.get().asItem() != net.minecraft.world.item.Items.AIR
-                    ? new ThaumcraftRecipeDisplay(matrix, false) : null;
-        }
-        // The original Thaumatorium recipe is a wand-formed column of two constructs over a crucible.
-        // Anchor its blueprint to the real construct recipe, without manufacturing a formed-machine item.
-        if ("Thaumatorium".equals(page.recipeKey())) {
-            var construct = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/alchemical_construct")).orElse(null);
-            return construct != null && construct.value() instanceof ArcaneShapedRecipe
-                    && !construct.value().getResultItem(level.registryAccess()).isEmpty()
-                    && ThaumcraftAlchemy.CRUCIBLE_ITEM.get() != net.minecraft.world.item.Items.AIR
-                    ? new ThaumcraftRecipeDisplay(construct, true) : null;
-        }
-        if ("AdvAlchemyFurnace".equals(page.recipeKey())) {
-            var construct = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/advanced_alchemical_construct")).orElse(null);
-            return construct != null && construct.value() instanceof ArcaneShapedRecipe
-                    && !construct.value().getResultItem(level.registryAccess()).isEmpty()
-                    ? new ThaumcraftRecipeDisplay(construct, false, true) : null;
+        // Original ConfigRecipes.initializeCompoundRecipes: the nine wand constructs are not recipes but
+        // the lists of COMPOUND_CRAFTING pages ((List) recipes.get(key) in ConfigResearch), drawn as the
+        // layered diagram of the original.
+        if (CompoundConstructs.all().containsKey(page.recipeKey())) {
+            CompoundPage construct = CompoundConstructs.page(page.recipeKey());
+            return construct == null ? null : new ThaumcraftRecipeDisplay(new Compound(construct));
         }
         ResourceLocation id = RESOLVED.get(page.recipeKey());
         if (id == null) return null;
@@ -675,8 +623,10 @@ public final class ThaumcraftRecipeDisplay {
      * <p>Original GuiResearchRecipe.drawPage draws the recipe objects of the page; a recipe array is shown one
      * entry per second (oracle :647-655). An API recipe is drawn through its native recipe, a vanilla recipe
      * object or holder through the native diagram of its type, and the recipes of
-     * {@code ResearchPage.recipe(ids)} through the recipe manager of the world. COMPOUND_CRAFTING (the wand
-     * construct diagrams of the original) has no add-on counterpart and is not shown.</p>
+     * {@code ResearchPage.recipe(ids)} through the recipe manager of the world. A COMPOUND_CRAFTING page, the
+     * {@code ResearchPage(List)} of the original, is the diagram of a wand construct ({@link CompoundPage}); a list of
+     * recipe objects instead (the 1.21.1 constructor is typed {@code List<Recipe<?>>}) is shown like a recipe array, and a
+     * list of neither shape is not shown.</p>
      */
     private static ThaumcraftRecipeDisplay resolveAddon(thaumcraft.api.research.ResearchPage page, Level level) {
         List<ThaumcraftRecipeDisplay> choices = new ArrayList<>();
@@ -703,7 +653,15 @@ public final class ThaumcraftRecipeDisplay {
             case IMAGE -> {
                 return page.image == null ? null : new ThaumcraftRecipeDisplay(new Image(page.image, page.text));
             }
-            case COMPOUND_CRAFTING, TEXT, TEXT_CONCEALED -> {
+            case COMPOUND_CRAFTING -> {
+                CompoundPage construct = CompoundPage.parse(page.recipe);
+                if (construct != null) return new ThaumcraftRecipeDisplay(new Compound(construct));
+                // The 1.21.1 constructor is typed ResearchPage(List<Recipe<?>>): a list of recipe objects is shown
+                // like a recipe array, one per second.
+                addonRecipes(page.recipe, level, choices);
+                return choices.isEmpty() ? null : choices.size() == 1 ? choices.getFirst() : new ThaumcraftRecipeDisplay(choices);
+            }
+            case TEXT, TEXT_CONCEALED -> {
                 return null;
             }
             default -> {
@@ -820,15 +778,14 @@ public final class ThaumcraftRecipeDisplay {
         if (addon instanceof Aspects aspects) return renderAspects(aspects.aspects(), graphics, font, x, y, width, height, mouseX, mouseY);
         if (addon instanceof Smelting smelting) return renderSmelting(smelting, graphics, font, x, y, width, height, mouseX, mouseY);
         if (addon instanceof Image image) return renderImage(image, graphics, font, x, y, width, height);
+        if (addon instanceof Compound compound) return renderCompound(compound.page(), graphics, font,
+                x, y, width, height, mouseX, mouseY, cycle);
         if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);
         if (sceptreVariants != null) return renderSceptre(graphics, font, level, player,
                 x, y, width, height, mouseX, mouseY, cycle);
         if (!syntheticResult.isEmpty()) return renderSynthetic(graphics, font, level, player,
                 x, y, width, height, mouseX, mouseY, cycle);
-        if (advancedFurnace) return AdvancedFurnaceBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
-        if (thaumatorium) return ThaumatoriumBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
-        if (infusionAltar) return renderInfusionAltar(graphics, font, x, y, width, height, mouseX, mouseY);
         if (recipe.value() instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe infusion)
             return RunicAugmentationDisplay.render(infusion, graphics, font, level, x, y, width, height, mouseX, mouseY, cycle);
         if (recipe.value() instanceof InfusionStackRecipe infusion) return renderInfusion(infusion, graphics, font, level,
@@ -990,56 +947,6 @@ public final class ThaumcraftRecipeDisplay {
                 int sx = 16 + i % 3 * 32, sy = 76 + i / 3 * 32;
                 drawItem(graphics, font, stack, sx, sy);
                 if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
-            }
-        } finally {
-            graphics.pose().popPose();
-        }
-        return hover;
-    }
-
-    /** Native layer-plan adaptation of the implemented original3x3x3 wand construct. */
-    private Hover renderInfusionAltar(GuiGraphics graphics, Font font, int x, int y, int width, int height, int mouseX, int mouseY) {
-        float scale = Math.min(width / 120F, height / 226F);
-        if (scale <= 0) return null;
-        float originX = x + (width - 120 * scale) / 2, originY = y + (height - 226 * scale) / 2;
-        float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
-        Hover hover = null;
-        graphics.pose().pushPose();
-        try {
-            graphics.pose().translate(originX, originY, 0);
-            graphics.pose().scale(scale, scale, 1);
-            drawCenteredFit(graphics, font, Component.translatable("recipe.type.construct"), 60, 0, 116, 0xFF505050);
-            for (int layer = 0; layer < 3; layer++) {
-                int sy = 24 + layer * 54;
-                graphics.drawString(font, Integer.toString(3 - layer), 8, sy + 20, 0xFF505050, false);
-                for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                    int sx = 36 + (dx + 1) * 16, cellY = sy + (dz + 1) * 16;
-                    graphics.fill(sx, cellY, sx + 16, cellY + 16, 0x22634F36);
-                    ItemStack stack = ItemStack.EMPTY;
-                    if (layer == 0 && dx == 0 && dz == 0) stack = new ItemStack(ThaumcraftInfusion.MATRIX_ITEM.get());
-                    else if (layer == 2 && dx == 0 && dz == 0) stack = new ItemStack(ThaumcraftInfusion.PEDESTAL_ITEM.get());
-                    else if (layer > 0 && dx != 0 && dz != 0) stack = new ItemStack(layer == 1
-                            ? ThaumcraftMasonry.ARCANE_STONE.get() : ThaumcraftMasonry.ARCANE_STONE_BRICKS.get());
-                    if (!stack.isEmpty()) drawItem(graphics, font, stack, sx, cellY);
-                    if (inside(mx, my, sx, cellY, 16, 16)) hover = stack.isEmpty()
-                            ? new Hover(ItemStack.EMPTY, List.of(Component.translatable("tc.port.book_recipe.required_air")))
-                            : new Hover(stack, List.of());
-                }
-            }
-            var vis = InfusionStructure.formationVisCost();
-            int index = 0;
-            for (var cost : vis.entrySet()) {
-                Aspect aspect = Aspect.getAspect(cost.getKey());
-                int sx = 6 + index++ * 18, color = aspect.getColor();
-                graphics.flush();
-                RenderSystem.enableBlend();
-                graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
-                graphics.blit(aspect.getImage(), sx, 192, 0, 0, 16, 16, 16, 16);
-                graphics.setColor(1, 1, 1, 1);
-                RenderSystem.disableBlend();
-                drawCenteredFit(graphics, font, Component.literal(Integer.toString(cost.getValue())), sx + 8, 210, 18, 0xFF43301F);
-                if (inside(mx, my, sx, 192, 16, 27)) hover = new Hover(ItemStack.EMPTY, List.of(Component.literal(aspect.getName()),
-                        Component.translatable("tc.port.book_recipe.base_vis")));
             }
         } finally {
             graphics.pose().popPose();
@@ -1415,6 +1322,133 @@ public final class ThaumcraftRecipeDisplay {
             graphics.pose().popPose();
         }
         return hover;
+    }
+
+    /**
+     * Original 4.2.3.5 GuiResearchRecipe.drawCompoundCraftingPage: the diagram of a wand construct, every layer at once
+     * (the geometry is {@link CompoundLayout}).
+     *
+     * <p>In the order of the original: the title, the aspects of the construct with their amounts and the faint wand icon
+     * behind them, the half opaque ground plate, then the blocks, layer by layer, each the item of its entry with the
+     * decorations of a single item. Hovering an aspect shows its name and description, hovering a block the tooltip of
+     * the item and hovering an "Empty Space" cell its name. The click-through of the original (a block that another
+     * research makes opens that research) is not part of the port's book, on this page as on every other one.</p>
+     */
+    private static Hover renderCompound(CompoundPage page, GuiGraphics graphics, Font font,
+                                        int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
+        CompoundLayout layout = page.layout();
+        float scale = Math.min(width / (float) CompoundLayout.FRAME_WIDTH, height / (float) CompoundLayout.FRAME_HEIGHT);
+        if (scale <= 0) return null;
+        float originX = x + (width - CompoundLayout.FRAME_WIDTH * scale) / 2 - CompoundLayout.FRAME_LEFT * scale;
+        float originY = y + (height - CompoundLayout.FRAME_HEIGHT * scale) / 2;
+        float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
+        List<CompoundLayout.Cell> cells = layout.cellsInOrder();
+        ItemStack[] shown = new ItemStack[cells.size()];
+        for (CompoundLayout.Cell cell : cells) shown[cell.index()] = compoundCell(page.entry(cell.index()), cycle);
+        Hover hover = null;
+        graphics.pose().pushPose();
+        try {
+            graphics.pose().translate(originX, originY, 0);
+            graphics.pose().scale(scale, scale, 1);
+            drawCenteredFit(graphics, font, Component.translatable("recipe.type.construct"), CompoundLayout.TITLE_CENTER, 0,
+                    112, 0xFF505050);
+            thaumcraft.api.aspects.AspectList aspects = page.aspects();
+            if (aspects != null && aspects.size() > 0) {
+                Aspect[] sorted = aspects.getAspectsSortedAmount();
+                for (int position = 0; position < sorted.length; position++) {
+                    Aspect aspect = sorted[position];
+                    int ax = CompoundLayout.aspectX(position, sorted.length);
+                    drawAspectTag(graphics, font, aspect, aspects.getAmount(aspect), ax, CompoundLayout.ASPECT_Y, 1);
+                    if (inside(mx, my, ax, CompoundLayout.ASPECT_Y, 16, 16)) hover = new Hover(ItemStack.EMPTY,
+                            List.of(Component.literal(aspect.getName()), Component.literal(aspect.getLocalizedDescription())));
+                }
+                graphics.flush();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                graphics.setColor(1, 1, 1, .4F);
+                graphics.blit(OVERLAY, CompoundLayout.WAND_X, CompoundLayout.WAND_Y, CompoundLayout.WAND_SIZE, CompoundLayout.WAND_SIZE,
+                        136, 152, 24, 24, 512, 512);
+                graphics.setColor(1, 1, 1, 1);
+            }
+            graphics.pose().pushPose();
+            try {
+                graphics.pose().translate(layout.originX(), layout.originY(), 0);
+                graphics.pose().scale(layout.scale(), layout.scale(), 1);
+                graphics.flush();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                graphics.setColor(1, 1, 1, .5F);
+                graphics.blit(OVERLAY, layout.groundX(), layout.groundY(), CompoundLayout.GROUND_WIDTH, CompoundLayout.GROUND_HEIGHT,
+                        0, 144, 128, 88, 512, 512);
+                graphics.setColor(1, 1, 1, 1);
+                for (CompoundLayout.Cell cell : cells) {
+                    ItemStack stack = shown[cell.index()];
+                    if (stack == null || stack.isEmpty()) continue;
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(0, 0, cell.depth());
+                    drawItem(graphics, font, stack.copyWithCount(1), cell.x(), cell.y());
+                    graphics.pose().popPose();
+                }
+            } finally {
+                graphics.pose().popPose();
+            }
+            int hit = layout.hit(mx, my, index -> shown[index] != null);
+            if (hit >= 0) hover = shown[hit].isEmpty()
+                    ? new Hover(ItemStack.EMPTY, List.of(Component.translatable("block.thaumcraft.hole")))
+                    : new Hover(shown[hit], List.of());
+        } finally {
+            graphics.pose().popPose();
+        }
+        return hover;
+    }
+
+    /**
+     * What a cell of a construct shows this second: null for nothing (the original skipped a null entry), the empty
+     * stack for the invisible "Empty Space" block of the original ({@code blockHole} metadata 15, which 1.21.1 has no item
+     * for), otherwise the item.
+     *
+     * <p>The entries the original read through {@code InventoryUtils.cycleItemStack}: an {@code ItemStack} (an empty one,
+     * like {@code ItemStack.EMPTY}, is the "Empty Space" block), a {@code String} ore dictionary name (its tag through
+     * {@link thaumcraft.api.OreDictionaryNames}) and a list, both showing one of their items per second. The 1.21.1 forms
+     * of these are taken as well: an item or a block ({@code Blocks.AIR} is the "Empty Space" block, another block
+     * without an item shows nothing), an item tag, an {@code Ingredient} and an array. Anything else shows nothing.</p>
+     */
+    static ItemStack compoundCell(Object entry, long cycle) {
+        switch (entry) {
+            case null -> { return null; }
+            case ItemStack stack -> { return stack.isEmpty() ? ItemStack.EMPTY : stack; }
+            case net.minecraft.world.level.block.Block block -> {
+                if (block.defaultBlockState().isAir()) return ItemStack.EMPTY;
+                ItemStack stack = new ItemStack(block);
+                return stack.isEmpty() ? null : stack;
+            }
+            case net.minecraft.world.level.ItemLike item -> {
+                ItemStack stack = new ItemStack(item);
+                return stack.isEmpty() ? ItemStack.EMPTY : stack;
+            }
+            case String name -> { return cycleItems(tagItems(thaumcraft.api.OreDictionaryNames.itemTag(name)), cycle); }
+            case net.minecraft.tags.TagKey<?> tag -> {
+                if (!tag.isFor(net.minecraft.core.registries.Registries.ITEM)) return null;
+                @SuppressWarnings("unchecked") var items = (net.minecraft.tags.TagKey<net.minecraft.world.item.Item>) tag;
+                return cycleItems(tagItems(items), cycle);
+            }
+            case Ingredient ingredient -> { return cycleItems(List.of(ingredient.getItems()), cycle); }
+            case List<?> list -> { return list.isEmpty() ? null : compoundCell(list.get((int) Math.floorMod(cycle, (long) list.size())), cycle); }
+            case Object[] array -> { return array.length == 0 ? null : compoundCell(array[(int) Math.floorMod(cycle, (long) array.length)], cycle); }
+            default -> { return null; }
+        }
+    }
+
+    private static List<ItemStack> tagItems(net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag) {
+        if (tag == null) return List.of();
+        List<ItemStack> items = new ArrayList<>();
+        net.minecraft.core.registries.BuiltInRegistries.ITEM.getTagOrEmpty(tag).forEach(holder -> items.add(new ItemStack(holder)));
+        return items;
+    }
+
+    private static ItemStack cycleItems(List<ItemStack> items, long cycle) {
+        List<ItemStack> present = items.stream().filter(stack -> !stack.isEmpty()).toList();
+        return present.isEmpty() ? null : present.get((int) Math.floorMod(cycle, (long) present.size()));
     }
 
     private static final Map<ResourceLocation, int[]> IMAGE_SIZES = new java.util.concurrent.ConcurrentHashMap<>();

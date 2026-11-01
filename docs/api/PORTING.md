@@ -213,7 +213,17 @@ its warp, and the knowledge of a player saves and syncs it.
 - Pages: text, concealed text, arcane/crucible/infusion/enchantment recipe objects (single or arrays, an
   array cycles once per second), vanilla `Recipe` objects, `ResearchPage(ItemStack)` smelting pages, aspect
   pages, image pages, and `ResearchPage.recipe(ResourceLocation...)` for data-driven recipes.
-  `COMPOUND_CRAFTING` (the wand construct diagrams of the original) is not drawn.
+- `COMPOUND_CRAFTING`, the wand construct diagram of the original, is drawn as TC4 drew it: every layer at once, top layer
+  first, in the isometric layout over the ground plate, the vis of the construct below, the item's tooltip on hover. The
+  page takes the original list `[AspectList vis, Integer dx, Integer dy, Integer dz, List blocks]`, the blocks in the
+  original's order: layer by layer from the top, and in a layer row `dz - 1` down to row 0, each row column `dx - 1` down to
+  column 0 (the first block of a layer is drawn at the right corner of its plan). The 1.21.1
+  constructor is typed `ResearchPage(List<Recipe<?>>)`, so cast the list: `new ResearchPage((List) Arrays.asList(vis, 5, 1,
+  1, blocks))`. A block is an `ItemStack`, an item or block, an ore dictionary name (`String`), an item tag, an `Ingredient`
+  or a list of these (shown one per second); `null` draws nothing, and an empty stack (`ItemStack.EMPTY`, `Blocks.AIR`) is the
+  original's invisible "Empty Space" block (`blockHole` metadata 15), drawn blank and named on hover. A list of recipe objects
+  given to the same constructor is shown like a recipe array. The book does not offer the click-through of the original on
+  this page or on any other.
 - Changing an original entry through its public view works as it did:
   `ResearchCategories.getResearch("NITOR").setSiblings("MY_KEY")` is laid over the original entry.
 - An add-on tab follows the six original ones, in registration order, as in the original.

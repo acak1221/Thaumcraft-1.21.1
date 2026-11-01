@@ -1052,6 +1052,9 @@
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/ripple\"+frame+\".png\")"
     ],
+    "common/src/main/java/thaumcraft/client/gui/CompoundConstructs.java": [
+      "ResourceLocation.tryParse(id)"
+    ],
     "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
     ],

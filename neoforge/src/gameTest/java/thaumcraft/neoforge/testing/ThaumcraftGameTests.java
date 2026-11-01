@@ -823,7 +823,10 @@ public final class ThaumcraftGameTests {
         JarItemRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 36000)
+    // Its own batch: its eight phases wait for the real 200 ms cooldown tick by tick under a 60-second wall bound, and in the
+    // default batch the chunk-generating and long golem/drop scenarios slowed the server's ticks enough to pass that bound
+    // (NeoForge full runs of 2026-11-01: 64.5 s at phase 4; 2.5 s alone).
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 36000, batch = "g31_frost_focus")
     public void frostFocusCraftsSelectsAndPays(GameTestHelper test) {
         FrostFocusRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }

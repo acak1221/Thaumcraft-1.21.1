@@ -59,8 +59,15 @@ public class ItemResearchNotes extends Item {
         if (data == null) return;
         var research = ResearchCatalog.get(data.key());
         if (research == null) return;
-        tooltip.add(Component.translatable(research.nameKey()).withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.translatable(research.textKey()).withStyle(ChatFormatting.ITALIC));
+        var api = thaumcraft.api.research.ResearchCategories.getResearch(research.key());
+        if (api != null && api.definition() == null) {
+            // Original ItemResearchNotes:156-157 calls the registered entry's virtual getters.
+            tooltip.add(Component.literal(api.getName()).withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.literal(api.getText()).withStyle(ChatFormatting.ITALIC));
+        } else {
+            tooltip.add(Component.translatable(research.nameKey()).withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.translatable(research.textKey()).withStyle(ChatFormatting.ITALIC));
+        }
         if (research.currentWarp() > 0) {
             // The original warning cap affects presentation, never the actual warp.
             tooltip.add(Component.translatable("tc.port.research.note_forbidden",

@@ -454,8 +454,15 @@ public final class GuiResearchBrowser extends Screen {
 
     private List<Component> tooltip(ResearchDefinition research) {
         var lines = new ArrayList<Component>();
-        lines.add(Component.translatable(research.nameKey()));
-        lines.add(Component.translatable(research.textKey()).withStyle(ChatFormatting.GRAY));
+        var api = thaumcraft.api.research.ResearchCategories.getResearch(research.key());
+        if (api != null && api.definition() == null) {
+            // Add-on overrides can depend on live configuration; aliases cannot represent that state.
+            lines.add(Component.literal(api.getName()));
+            lines.add(Component.literal(api.getText()).withStyle(ChatFormatting.GRAY));
+        } else {
+            lines.add(Component.translatable(research.nameKey()));
+            lines.add(Component.translatable(research.textKey()).withStyle(ChatFormatting.GRAY));
+        }
         if (minecraft.player == null) return lines;
         var knowledge = KnowledgeAccess.get(minecraft.player);
         if (knowledge.isResearchComplete(research.key())) {

@@ -185,7 +185,7 @@
         "thaumcraft:textures/misc/r_runicupg.png",
         "thaumcraft:textures/misc/r_warp.png"
       ],
-      "note": "Re-reviewed against 3ae61ca7: pane/pan/tab geometry and connectors changed; the two category-background filenames, fixed sheets and corpus/category icon sources are unchanged. Both background expansions and all declared corpus icons remain required."
+      "note": "Re-reviewed against 3ae61ca7: pane/pan/tab geometry and connectors changed; the two category-background filenames, fixed sheets and corpus/category icon sources are unchanged. Both background expansions and all declared corpus icons remain required. Reviewed2026-11-02: tooltip now reads add-on virtual name/text; bundled translation branches, every texture factory and finite resource expansion are unchanged."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java",
@@ -1496,7 +1496,7 @@
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
     "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",
     "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "a70cb05e8fa4861308e6b0eacd1f668e3c588fa2adf9cdeca7b58b7d923e666a",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "8601b6f46761823bf1e1a1d61899fc330e4a727cd38196a94444a8a6ce08e074",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "f7816816371cdbd80b80f13fa579988c4376af23f9368ab950ad0150c3f765f8",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "93d14fa2b44a81fc91ca9db2e1c87a49f631e1f1512f332dc0e48237f7c70c8e",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "abe80de143582d8e7002ca3c4f132b008db50575d91d25130ec9989c9621ece3",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "220dafc23bc2d0d320e20a1522f9f01f93b760983213c731e5320b3f5e0f6b10",

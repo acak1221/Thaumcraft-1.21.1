@@ -12,8 +12,12 @@ The add-on is a separate project. Its code, textures, donor libraries and test m
 
 ## Verification
 
-Java21 common JUnit:2851 tests, zero failures/errors, five existing skips without donor JARs. Fabric build/archive isolation and559/559 fresh native GameTests pass. Python:155 tests, nine existing skips; resource validation and scope ledger pass. A test-only arcane-lamp fixture now waits for the real native lighting `POST_UPDATE` future with a bounded deadline, preserving all brightness/spread/removal assertions;130 accelerated test ticks were insufficient wall-clock time for the worker thread.
+Java21 common JUnit:2855 tests, zero failures/errors, five existing skips without donor JARs. Fabric build/archive isolation and559/559 fresh native GameTests pass. Python:155 tests, nine existing skips; resource validation and scope ledger pass. A test-only arcane-lamp fixture now waits for the real native lighting `POST_UPDATE` future with a bounded deadline, preserving all brightness/spread/removal assertions;130 accelerated test ticks were insufficient wall-clock time for the worker thread.
 
 The separate Fabric add-on passes14 JUnit and37 native GameTests, including real API-recipe remainders, infusion component preservation, paid VisNet upgrades, effect ownership, flight persistence, source damage, teleport acknowledgement, consumable item events and original tree geometry. Its122 production classes compiled in the standalone project match the inspected development-client classes byte for byte. Rendered EN/RU acceptance and normal production-server loading are recorded in that separate project's verification report. Supplied fixtures do not establish a new survival acquisition or multiplayer playthrough.
 
 After Fabric acceptance, NeoForge build/archive isolation,15JUnit and538/538 fresh native GameTests pass. The external add-on remains Fabric-only; the base checks do not establish a NeoForge add-on.
+
+## Integrated main
+
+Preserved the independently committed `10739c47` construct-blueprint support while integrating this checkpoint. The combined sources pass2855common JUnit, Fabric/NeoForge builds and15NeoForge JUnit. Relative to the full559/538 native-suite inputs, the only production changes are10client GUI class entries; every server class and resource remains byte-identical. The separate add-on passes its37native tests again against the combined base. Focused EN/RU text, icons, crafting diagrams and real reload are checked against the updated GUI classes; prior full-client coverage is retained with its original input hashes.

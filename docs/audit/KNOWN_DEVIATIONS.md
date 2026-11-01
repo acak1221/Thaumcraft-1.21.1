@@ -292,3 +292,26 @@ adjacent blocks, including protection callbacks, tool enchantments, drops and we
 the original item/metadata and tool-harvest semantics to Minecraft 1.21.1.
 
 Implementation, regressions and verification limits: [second review fixes](../analysis/2026-11-01-review2-fixes.md).
+
+## 12. Node jar completion (2026-11-01)
+
+The owner explicitly requested a working capture, release and visible shrink animation. The
+original `TileJarRenderer:107–115` applied its animation scale after drawing, so it changed no
+vertices. The port deliberately makes the one-second transition visible: glass shell 3→1, node
+1→0.7. The settled node remains visible without goggles, as in the original.
+
+Original quantities, research, activation on glass, vis modifiers and the 75% quality degradation
+are preserved. Modern wooden slab tags represent the original wooden slab; double slabs are not
+a single lid item. Capture/release apply world bounds, loaded-chunk checks, player permissions
+and common/native protection vetoes. They do not generate unloaded chunks. Fabric's placement
+veto is the common event; the ordinary clicked-block use veto is not replayed as a synthetic click.
+
+The original resource handoff preceded neither a checked native replacement nor safe failure
+recovery. The port pays before native LOAD/UNLOAD, retires the source, supplies a filled native
+replacement once, and reconciles native admission before rollback. Item data includes the required
+1.21.1 block-entity id. An immediately harvested admitted target remains consumed. A rejected
+transfer restores the complete source and payment; a conflicting foreign block is preserved and
+unrestorable owned resources enter saved item custody. This corrects inherited loss/duplication
+and permission defects. It does not provide atomic multi-chunk disk checkpoints during power loss.
+
+Implementation and verification limits: [node jar completion](../analysis/2026-11-01-node-jar.md).

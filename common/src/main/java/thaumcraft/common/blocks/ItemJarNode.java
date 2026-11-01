@@ -170,6 +170,9 @@ public final class ItemJarNode extends BlockItem implements IEssentiaContainerIt
 
     /** The writer of the data of the item. */
     private static void write(ItemStack stack, CompoundTag tag) {
+        // BLOCK_ENTITY_DATA's native persistent codec requires the registered BE id.
+        // Without it a filled jar cannot be saved to player inventory or a chunk.
+        tag.putString("id", "thaumcraft:jar_node");
         stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
     }
 }

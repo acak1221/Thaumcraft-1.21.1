@@ -32,6 +32,7 @@ public final class ThaumcraftGameTestMod {
             event.register(NeoForgeFluidCapabilityGameTests.class);
             event.register(NeoForgeInteractionGameTests.class);
             event.register(NeoForgeMultiTankGameTests.class);
+            event.register(thaumcraft.common.testing.NeoForgeNodeJarProtectionGameTests.class);
         });
         bus.addListener(NeoForgeMultiTankGameTests::registerCapabilities);
         // The shared harness observes the loader's own block-break phases. NeoForge

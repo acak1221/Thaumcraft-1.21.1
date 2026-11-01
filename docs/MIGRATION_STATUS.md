@@ -1,3 +1,9 @@
+## 01.11.2026 — узел ауры в банке, alpha.9
+
+Завершены оригинальный захват (26 glass + девять деревянных плит, NODEJAR, 70 vis каждого primal с модификаторами), видимое секундное сжатие, перенос заполненной банки и бесплатный выпуск. Исправлены неверный airy variant и обязательный BE id в item codec. Native factory однократна, заполнена до LOAD и ограничена Level; источник опустошается и vis списывается до lifecycle callbacks. Отклонённый перенос восстанавливает данные/ресурсы либо сохраняет единственный payload в очереди, не затирая чужой блок; harvest/raw removal принятого владельца не возвращает вторую копию. Fabric и NeoForge protection veto проверены. Исходный 75% шанс ухудшения сохранён. [Отчёт и клиентские кадры](analysis/2026-11-01-node-jar.md), [отклонения §12](audit/KNOWN_DEVIATIONS.md#12-node-jar-completion-2026-11-01).
+
+Итог: common JUnit **2803** (5 прежних пропусков), Fabric build + GameTest **559/559**, затем NeoForge build + GameTest **538/538**, NeoForge JUnit **15/15**; Python **143** (9 прежних пропусков), catalogue/assets/scope/isolation PASS. Анимация и resource reload осмотрены в Fabric client с выданным creative fixture; NeoForge client, multiplayer и survival acquisition не перепроходились. Версия **0.1.0-alpha.9**.
+
 ## 01.11.2026 — исправлены ещё 23 дефекта второго ревью
 
 По запросу владельца исправлены все S01–S23: дюп составных блоков Earthmover, native harvesting Crusher, custody временного полёта, доставка зеркала/сундука/печи и XP, item stack limits, vis API/аспекты/перезагрузка tags и recipes, JEI subtypes, кэш/переходы/поиск книги, resource reload HUD и renderer жидкости смерти. Предыдущие R01–R29 сохранены. Подробности и покрытие: [отчёт второго набора исправлений](analysis/2026-11-01-review2-fixes.md).

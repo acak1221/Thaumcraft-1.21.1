@@ -29,6 +29,8 @@ FABRIC_ONLY_FIXTURES = (
     "SpaFluidStorageRuntimeChecks",
     "FluidConservationRuntimeChecks",
     "PureBucketStorageRuntimeChecks",
+    "NodeJarProtectionRuntimeChecks",
+    "NodeJarLifecycleRuntimeChecks",
 )
 # NeoForge bodies that no longer compile against the shared checks; the Fabric body replaces them.
 STALE_NEOFORGE = frozenset({"magicalFlowersGrowHarvestAndRefine"})

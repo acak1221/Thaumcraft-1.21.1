@@ -133,6 +133,12 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
      */
     public static void renderJarNode(TileJarNode jar, Minecraft minecraft, float partialTick,
                                      PoseStack pose, MultiBufferSource buffers) {
+        renderJarNode(jar, minecraft, partialTick, pose, buffers, JAR_NODE_SIZE);
+    }
+
+    /** The capture transition supplies its node size; ordinary jars retain the original 0.7. */
+    public static void renderJarNode(TileJarNode jar, Minecraft minecraft, float partialTick,
+                                     PoseStack pose, MultiBufferSource buffers, float size) {
         var aspects = jar.getAspects();
         if (aspects.size() == 0) return;
         var viewer = minecraft.player;
@@ -147,7 +153,7 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
             // Original TileJarRenderer:56 - the node of the jar is one tenth of a block lower.
             pose.translate(0, -.1F, 0);
             drawNode(minecraft, partialTick, pose, buffers, jar.getBlockPos().getX(), aspects,
-                    jar.getNodeType(), jar.getNodeModifier(), alpha, JAR_NODE_SIZE, false, age);
+                    jar.getNodeType(), jar.getNodeModifier(), alpha, size, false, age);
         } finally {
             pose.popPose();
         }

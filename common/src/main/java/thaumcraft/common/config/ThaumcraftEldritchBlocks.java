@@ -520,10 +520,21 @@ public final class ThaumcraftEldritchBlocks {
 
         @Override public MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
         public int kind() { return kind; }
+        @Override protected net.minecraft.world.level.block.RenderShape getRenderShape(BlockState state) {
+            return kind == 1 ? net.minecraft.world.level.block.RenderShape.ENTITYBLOCK_ANIMATED : super.getRenderShape(state);
+        }
         @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
         @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return Shapes.block(); }
         @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+            if (kind == 1 && thaumcraft.common.lib.NodeJarFormation.preparedReplacement(pos, state) instanceof TileJarNode jar) return jar;
             return kind == 0 ? new TileJarBrain(pos, state) : new TileJarNode(pos, state);
+        }
+
+        @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+            // A native LOAD listener may immediately harvest the new jar. Observe its ownership
+            // before vanilla removes the block entity and asks for its item drops.
+            if (kind == 1) thaumcraft.common.lib.NodeJarFormation.isTransferring(level, pos);
+            return super.playerWillDestroy(level, pos, state, player);
         }
 
         /**
@@ -569,6 +580,7 @@ public final class ThaumcraftEldritchBlocks {
 
         /** Original BlockJar:182-193 - breaking the brain jar drops the stored experience. */
         @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+            if (kind == 1) thaumcraft.common.lib.NodeJarFormation.isTransferring(level, pos);
             if (!state.is(newState.getBlock()) && !level.isClientSide
                     && level.getBlockEntity(pos) instanceof TileJarBrain jar) {
                 dropExperience(level, pos.getX(), pos.getY(), pos.getZ(), jar.getXp());
@@ -618,6 +630,7 @@ public final class ThaumcraftEldritchBlocks {
             if (kind != 1) return super.getDrops(state, params);
             ItemStack drop = new ItemStack(JAR_NODE_ITEM.get());
             BlockEntity tile = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+            if (tile instanceof TileJarNode node && (!node.drop || thaumcraft.common.lib.NodeJarFormation.isTransferring(node.getLevel(), node.getBlockPos()))) return java.util.List.of();
             if (tile instanceof TileJarNode node && node.drop) {
                 if (drop.getItem() instanceof thaumcraft.common.blocks.ItemJarNode item) {
                     item.setAspects(drop, node.getAspects());

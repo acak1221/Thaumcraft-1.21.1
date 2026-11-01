@@ -43,6 +43,7 @@ public final class ThaumcraftNeoForge {
         // every break attempt, also for the three refusals NeoForge posts its
         // native break event already cancelled for.
         NeoForgeSharedBreakEvent.init();
+        NeoForgeNodeJarProtection.init();
         NeoForgeSpaStorage.init(bus);
         // The loader independent fluid handler API of the golem (oracle GolemHelper:341-446).
         NeoForgeGolemFluidAccess.init();

@@ -47,7 +47,7 @@ import thaumcraft.common.lib.world.NodeStabilizerRules;
  * TC4 NORMAL/UNSTABLE/HUNGRY node state and lifecycle. Source: original TileNode.setAspects,
  * handleDischarge, handleRecharge and onUsingWandTick. Basic stabilizer locking,
  * UNSTABLE emissions/FADING repair and HUNGRY entity/block ecology are included; other special-node ecology,
- * advanced stabilization and jars remain separate unimplemented units. Real
+ * advanced stabilization has its own device. Node jar capture/release is handled by NodeJarFormation. Real
  * energized conversion/network routing live in the separate M09b node family.
  *
  * <p>Forced 1.21.1 change: none of the node types. The published enums
@@ -122,7 +122,10 @@ public final class TileNode extends BlockEntity implements INode {
     @Override public boolean isValidBlockState(BlockState state) {
         return getType() == null || super.isValidBlockState(state);
     }
-    @Override public AspectList getAspects() { return aspects.copy(); }
+    @Override public AspectList getAspects() {
+        thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition);
+        return aspects.copy();
+    }
     @Override public AspectList getAspectsBase() { return aspectsBase.copy(); }
     @Override public int getNodeVisBase(Aspect aspect) { return aspectsBase.getAmount(aspect); }
     /**
@@ -172,6 +175,16 @@ public final class TileNode extends BlockEntity implements INode {
     public int getRegenerationTicks() { return regeneration; }
     public int getRechargeWait() { return rechargeWait; }
 
+    @Override public void setLevel(Level level) {
+        thaumcraft.common.lib.NodeJarFormation.validatePreparedLevel(this, level);
+        super.setLevel(level);
+    }
+
+    @Override public void setRemoved() {
+        thaumcraft.common.lib.NodeJarFormation.removingPrepared(this);
+        super.setRemoved();
+    }
+
     boolean canTransduce() { return !transducing && !ticking && !notifying && !pearlPlanning && current(); }
     public boolean beginTransduction() {
         if (transducing || ticking || notifying || pearlPlanning) return false;
@@ -183,6 +196,14 @@ public final class TileNode extends BlockEntity implements INode {
     }
     boolean transductionCurrent() { return transducing && !ticking && !notifying && !pearlPlanning && current(); }
     public void endTransduction() { transducing = false; }
+
+    /** Callback-free retirement before the native UNLOAD can expose a cached old source. */
+    public void retireForJar() {
+        if (!transducing || !thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition))
+            throw new IllegalStateException("No active node-jar capture");
+        aspects = new AspectList();
+        aspectsBase = new AspectList();
+    }
     /** Detached native reversion only. Original converter69-72 sets BASE then
      * drains every current key toZERO; UUID is freshly generated, not preserved. */
     void initializeReverted(AspectList base, NodeType type, NodeModifier modifier) {
@@ -196,7 +217,7 @@ public final class TileNode extends BlockEntity implements INode {
 
     /** Like original setAspects: this initializes BOTH current vis and capacity. */
     @Override public void setAspects(AspectList values) {
-        if (transducing) throw new IllegalStateException("Node aura is captured by an active transduction");
+        if (transducing || thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) throw new IllegalStateException("Node aura is captured by an active transduction");
         aspects = new AspectList();
         if (values != null) for (Aspect aspect : values.getAspects()) {
             int amount = Math.max(0, values.getAmount(aspect));
@@ -220,7 +241,7 @@ public final class TileNode extends BlockEntity implements INode {
 
     /** Original TileNode:201-210: refill current vis only, up to its base. */
     @Override public int addToContainer(Aspect aspect, int amount) {
-        if (transducing) return amount;
+        if (transducing || thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) return amount;
         int left = Math.max(0, amount + aspects.getAmount(aspect) - aspectsBase.getAmount(aspect));
         aspects.add(aspect, amount - left);
         changed();
@@ -228,7 +249,7 @@ public final class TileNode extends BlockEntity implements INode {
     }
 
     @Override public boolean takeFromContainer(Aspect aspect, int amount) {
-        if (transducing) return false;
+        if (transducing || thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) return false;
         boolean taken = aspects.reduce(aspect, amount);
         if (taken) changed(); // Retain zero keys for the existing recharge/prune lifecycle.
         return taken;
@@ -421,7 +442,7 @@ public final class TileNode extends BlockEntity implements INode {
 
     /** Wand API: compounds stay in the node, but TC4 wands accept only primals. */
     public int takeVis(String tag, int amount) {
-        if (transducing) return 0;
+        if (transducing || thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) return 0;
         Aspect aspect = Aspect.getAspect(tag);
         if (aspect == null || !aspect.isPrimal() || amount <= 0) return 0;
         int taken = Math.min(amount, aspects.getAmount(aspect));
@@ -431,7 +452,7 @@ public final class TileNode extends BlockEntity implements INode {
         return taken;
     }
     public void drainIntoWand(ServerPlayer player, ItemStack stack) {
-        if (transducing) return;
+        if (transducing || thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) return;
         if (level == null || level.isClientSide || player.level() != level
                 || !player.canInteractWithBlock(worldPosition, 0.0D)
                 || !(stack.getItem() instanceof ItemWandCasting)) return;
@@ -639,7 +660,7 @@ public final class TileNode extends BlockEntity implements INode {
     private boolean current() {
         Level world = level;
         BlockState state = getBlockState();
-        return world != null && (!ticking || world == tickingLevel && state == tickingState) && !isRemoved() && isNodeHost(state)
+        return world != null && !thaumcraft.common.lib.NodeJarFormation.isTransferring(world, worldPosition) && (!ticking || world == tickingLevel && state == tickingState) && !isRemoved() && isNodeHost(state)
                 && !world.isOutsideBuildHeight(worldPosition) && world.hasChunkAt(worldPosition)
                 && world.getBlockEntity(worldPosition) == this && world.getBlockState(worldPosition) == state
                 && !isRemoved() && level == world && getBlockState() == state;
@@ -904,6 +925,7 @@ public final class TileNode extends BlockEntity implements INode {
         catchUp = interval > 0 && lastActive > 0 && System.currentTimeMillis() > lastActive + interval * 75L;
     }
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition);
         super.saveAdditional(tag, registries);
         aspects.writeToNBT(tag);
         aspectsBase.writeToNBT(tag, "AspectsBase");

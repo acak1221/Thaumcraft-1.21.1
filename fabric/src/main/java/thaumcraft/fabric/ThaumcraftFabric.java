@@ -21,6 +21,7 @@ import thaumcraft.common.blocks.BlockTube;
 public final class ThaumcraftFabric implements ModInitializer {
     @Override public void onInitialize() {
         Thaumcraft.init();
+        FabricNodeJarProtection.init();
         thaumcraft.fabric.fluid.FabricSpaStorage.init();
         // The loader independent fluid handler API of the golem (oracle GolemHelper:341-446).
         thaumcraft.fabric.fluid.FabricGolemFluidAccess.init();

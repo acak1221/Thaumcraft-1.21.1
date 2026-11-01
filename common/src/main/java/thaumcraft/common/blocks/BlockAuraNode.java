@@ -31,6 +31,7 @@ public final class BlockAuraNode extends BaseEntityBlock {
     public BlockAuraNode(Properties properties) { super(properties.strength(2.0F, 200.0F).noLootTable()); }
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        if (thaumcraft.common.lib.NodeJarFormation.preparedReplacement(pos, state) instanceof TileNode node) return node;
         return new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), pos, state);
     }
     // Native BER draws the original node strips; never a glass/cube stand-in.
@@ -49,10 +50,11 @@ public final class BlockAuraNode extends BaseEntityBlock {
         BlockState result = super.playerWillDestroy(level, pos, state, player);
         // Native callbacks may already have removed/replaced this exact node.
         // Snapshot only a still-current server BE; this is not a drop yet.
-        NodeHarvest.prepare(level, pos, state, player, node);
+        if (!thaumcraft.common.lib.NodeJarFormation.isTransferring(level, pos)) NodeHarvest.prepare(level, pos, state, player, node);
         return result;
     }
     @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
+        thaumcraft.common.lib.NodeJarFormation.isTransferring(level, pos);
         NodeHarvest.removing(level, pos, state, replacement);
         super.onRemove(state, level, pos, replacement, moving);
     }

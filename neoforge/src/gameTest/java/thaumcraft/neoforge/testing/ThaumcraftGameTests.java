@@ -92,6 +92,31 @@ import thaumcraft.common.testing.WispEssenceRuntimeChecks;
 
 @PrefixGameTestTemplate(false)
 public final class ThaumcraftGameTests {
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarCaptureCarryUnpackPreservesNodeAndPaysOnce(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.captureCarryUnpackPreservesNodeAndPaysOnce(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarFormationRejectsInvalidInputsWithoutPayment(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.formationRejectsInvalidInputsWithoutPayment(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarCallbacksCannotReenterOrChangePaidCapture(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.callbacksCannotReenterOrChangePaidCapture(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarRejectedUnpackKeepsJarDropAndAspects(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.rejectedUnpackKeepsJarDropAndAspects(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarUnloadedBlueprintDoesNotLoadChunks(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.unloadedBlueprintDoesNotLoadChunks(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "review2_paid_machines")
     public void review2FurnaceCanceledCompletionRetainsOutputs(GameTestHelper test) {
         thaumcraft.common.testing.PaidMachineOutputRuntimeChecks.furnaceCanceledCompletionRetainsResultBonusAndExperience(test);

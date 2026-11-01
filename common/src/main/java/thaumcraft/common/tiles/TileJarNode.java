@@ -1,6 +1,7 @@
 package thaumcraft.common.tiles;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -71,14 +72,34 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
         super(ThaumcraftEldritchBlocks.JAR_NODE_TILE.get(), pos, state);
     }
 
+    @Override public void setLevel(Level level) {
+        thaumcraft.common.lib.NodeJarFormation.validatePreparedLevel(this, level);
+        super.setLevel(level);
+    }
+
+    @Override public void setRemoved() {
+        thaumcraft.common.lib.NodeJarFormation.removingPrepared(this);
+        super.setRemoved();
+    }
+
     public NodeType getNodeType() { return nodeType; }
     public NodeModifier getNodeModifier() { return nodeModifier; }
     public String getId() { return id; }
 
     public void setId(String id) { this.id = id == null ? "" : id; }
 
+    /** Private-to-gameplay staging before this block entity is attached to the world. */
+    public void initializeNode(AspectList values, NodeType type, NodeModifier modifier, String identity) {
+        if (level != null) throw new IllegalStateException("Only a detached node jar can be initialized");
+        setAspects(values);
+        nodeType = type == null ? NodeType.NORMAL : type;
+        nodeModifier = modifier;
+        setId(identity);
+    }
+
     /** Original TileJarNode:83-87 - the aspects of the stored node. */
     public void setAspects(AspectList values) {
+        if (thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) return;
         aspects.aspects.clear();
         aspectsBase.aspects.clear();
         if (values != null) {
@@ -92,7 +113,19 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
     // ---------------------------------------------------------------- aspect container
     /** Original TileJarNode:110-131 - the jar is an aspect container whose stored aspects
      * never grow past the stored base of the node. */
-    @Override public AspectList getAspects() { return aspects.copy(); }
+    @Override public AspectList getAspects() {
+        thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition);
+        return aspects.copy();
+    }
+
+    /** Retire the old jar before UNLOAD; a staged, filled native node owns the transfer payload. */
+    public void retireForRelease() {
+        if (!thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition))
+            throw new IllegalStateException("No active node-jar release");
+        drop = false;
+        aspects.aspects.clear();
+        aspectsBase.aspects.clear();
+    }
 
     /** Original TileJarNode:getAspectsBase - the base of the stored node. */
     public AspectList getAspectsBase() { return aspectsBase.copy(); }
@@ -105,6 +138,7 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
      * node and returns the rest.
      */
     @Override public int addToContainer(Aspect aspect, int amount) {
+        if (thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) return amount;
         if (aspect == null || amount <= 0) return amount;
         int accepted = TileParityRules.jarNodeAccepted(aspects.getAmount(aspect), aspectsBase.getAmount(aspect), amount);
         if (accepted <= 0) return amount;
@@ -115,6 +149,7 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
 
     /** Original TileJarNode:129-138 - the jar gives an aspect back when it holds enough. */
     @Override public boolean takeFromContainer(Aspect aspect, int amount) {
+        if (thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition)) return false;
         if (aspect == null || !TileParityRules.jarNodeGives(aspects.getAmount(aspect), amount)) return false;
         aspects.remove(aspect, amount);
         changed();
@@ -155,21 +190,11 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
      * of the node to it. The original never consumes the wand.
      */
     @Override public int onWandRightClick(Level level, ItemStack stack, Player player, int x, int y, int z, int side, int event) {
-        BlockPos pos = new BlockPos(x, y, z);
-        if (!level.isClientSide) {
-            drop = false;
-            level.setBlock(pos, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.AIRY.get().defaultBlockState(), 0), 3);
-            if (level.getBlockEntity(pos) instanceof TileNode node) {
-                node.restoreFromJar(getAspects(), getNodeType(), getNodeModifier(), getId());
-                level.sendBlockUpdated(pos, level.getBlockState(pos), level.getBlockState(pos), 3);
-            }
-            level.levelEvent(2001, pos, 0);
-            level.playSound(null, pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D,
-                    net.minecraft.sounds.SoundEvents.GLASS_BREAK, net.minecraft.sounds.SoundSource.BLOCKS,
-                    1.0F, .9F + level.random.nextFloat() * .2F);
-        }
-        player.swing(InteractionHand.MAIN_HAND);
-        return 0;
+        if (!worldPosition.equals(new BlockPos(x, y, z))) return 0;
+        InteractionHand hand = player != null && player.getOffhandItem() == stack ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+        var result = thaumcraft.common.lib.NodeJarFormation.release(this, level, stack, player, Direction.from3DDataValue(side));
+        if (result.consumesAction()) player.swing(hand);
+        return result.consumesAction() ? 1 : 0;
     }
 
     /** Original TileJarNode:243-245 - the contract without a target does nothing. */
@@ -185,11 +210,12 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
      * Original TileJarNode:204-219 - the client event nine of the original: the burst of block
      * sparkles over the jar and the one second animation timer.
      *
-     * <p>The original growth itself is dead code: oracle
+     * <p>The original scaling itself is dead code: oracle
      * {@code thaumcraft/client/renderers/tile/TileJarRenderer.java:107-115} applies
      * {@code GL11.glScalef(size, size, size)} <em>after</em> every draw call of that renderer and pops
-     * the matrix immediately, so the scale never reaches a single vertex. The native tree therefore
-     * keeps the timer of the original and does not grow the node.</p>
+     * the matrix immediately, so the scale never reaches a single vertex. The owner requested a
+     * visible packing animation: the native renderer uses this timer to contract the shell from
+     * three times its size and the node from ordinary size to its stored size.</p>
      */
     @Override public boolean triggerEvent(int id, int data) {
         if (id == ANIMATE_EVENT) {
@@ -238,6 +264,7 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        thaumcraft.common.lib.NodeJarFormation.isTransferring(level, worldPosition);
         super.saveAdditional(tag, registries);
         ListTag list = new ListTag();
         for (Aspect aspect : aspects.getAspects()) {

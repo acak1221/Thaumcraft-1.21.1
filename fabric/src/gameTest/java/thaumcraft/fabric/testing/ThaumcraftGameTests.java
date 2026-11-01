@@ -86,6 +86,92 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarrawloadremovalkeepsonetransferredowner")
+    public void nodeJarRawLoadRemovalKeepsOneTransferredOwner(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.rawLoadRemovalKeepsOneTransferredOwner(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarrejectedrestorationpreservespayload")
+    public void nodeJarRejectedRestorationPreservesPayload(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.preAdmissionRejectedRestorationPreservesPayload(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarnativefactorycannotpublishpayloadinanotherlevel")
+    public void nodeJarNativeFactoryCannotPublishPayloadInAnotherLevel(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarProtectionRuntimeChecks.nativeFactoryCannotPublishPayloadInAnotherLevel(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarcaptureloadcannotreplaypreparedjar")
+    public void nodeJarCaptureLoadCannotReplayPreparedJar(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.captureLoadCannotReplayPreparedJar(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarreleaseloadcannotreplaypreparednode")
+    public void nodeJarReleaseLoadCannotReplayPreparedNode(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.releaseLoadCannotReplayPreparedNode(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarnativebreakclaimsprotectformation")
+    public void nodeJarNativeBreakClaimsProtectFormation(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarProtectionRuntimeChecks.nativeBreakClaimsProtectFormation(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarnativeclaimsprotectcaptureandrelease")
+    public void nodeJarNativeClaimsProtectCaptureAndRelease(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarProtectionRuntimeChecks.nativeClaimsProtectCaptureAndRelease(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarlifecycleseespaidretiredsource")
+    public void nodeJarLifecycleSeesPaidRetiredSource(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.captureLifecycleSeesPaidRetiredSource(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarlifecycleharvestsexactlyonefilledjar")
+    public void nodeJarLifecycleHarvestsExactlyOneFilledJar(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.captureLoadCanHarvestExactlyOneFilledJar(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarlifecycleharvestsexactlyonenode")
+    public void nodeJarLifecycleHarvestsExactlyOneNode(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.releaseLoadCanHarvestExactlyOneNode(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarunloadmutationcannotreviveconsumedshell")
+    public void nodeJarUnloadMutationCannotReviveConsumedShell(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.unloadMutationCannotReviveConsumedShell(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "nodejarpreadmissioncancellationrollsback")
+    public void nodeJarPreAdmissionCancellationRollsBack(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarLifecycleRuntimeChecks.preAdmissionCancellationRollsBackAllResources(test);
+    }
+
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarCaptureCarryUnpackPreservesNodeAndPaysOnce(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.captureCarryUnpackPreservesNodeAndPaysOnce(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarFormationRejectsInvalidInputsWithoutPayment(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.formationRejectsInvalidInputsWithoutPayment(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarCallbacksCannotReenterOrChangePaidCapture(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.callbacksCannotReenterOrChangePaidCapture(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarRejectedUnpackKeepsJarDropAndAspects(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.rejectedUnpackKeepsJarDropAndAspects(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "node_jar_lifecycle")
+    public void nodeJarUnloadedBlueprintDoesNotLoadChunks(GameTestHelper test) {
+        thaumcraft.common.testing.NodeJarRuntimeChecks.unloadedBlueprintDoesNotLoadChunks(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_paid_machines")
     public void review2FurnaceCanceledCompletionRetainsOutputs(GameTestHelper test) {
         thaumcraft.common.testing.PaidMachineOutputRuntimeChecks.furnaceCanceledCompletionRetainsResultBonusAndExperience(test);

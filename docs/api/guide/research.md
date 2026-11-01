@@ -93,12 +93,19 @@ original has no counterpart: list every item of a family.
 | text shown once another entry is complete | `new ResearchPage("OTHER_KEY", "lang.key")` |
 | an arcane, crucible, infusion or infusion enchantment recipe of the API | `new ResearchPage(recipe)`; an array cycles once per second |
 | a vanilla recipe object | `new ResearchPage(Recipe<?>)` (or an array, or a list) |
+| the diagram of a wand construct (`COMPOUND_CRAFTING`) | `new ResearchPage((List) Arrays.asList(vis, dx, dy, dz, blocks))`, the list of the original (below) |
 | a data-driven recipe | `ResearchPage.recipe(ResourceLocation... ids)`: any recipe of the recipe manager, the native Thaumcraft types included |
 | smelting | `new ResearchPage(ItemStack input)` |
 | aspects | `new ResearchPage(AspectList)` |
 | image | `new ResearchPage(ResourceLocation image, "caption.key")` |
 
-`COMPOUND_CRAFTING` pages (the wand construct diagrams of the original) are not drawn for add-on entries.
+A `COMPOUND_CRAFTING` page is drawn as TC4 drew the wand construct diagrams: all `dy` layers at once, top layer first, each an
+isometric plan, over the ground plate, with the vis of the construct (`vis`, an `AspectList`; empty for none) below. `blocks` lists
+the `dx * dy * dz` blocks layer by layer from the top, in a layer row `dz - 1` down to row 0, in a row column `dx - 1` down to
+column 0 (the first block of a layer is at the right corner of its plan); a block is an
+`ItemStack`, an item or block, an ore dictionary name, an item tag, an `Ingredient` or a list of these (one per second). `null`
+draws nothing; an empty stack is the original's invisible "Empty Space" block, blank and named on hover. The cast to a raw `List`
+is needed because the 1.21.1 constructor is typed `ResearchPage(List<Recipe<?>>)`.
 
 A recipe page also makes the book open on that page from a recipe viewer or from the recipe's output, as in 1.7.10
 (`ThaumcraftApi.getCraftingRecipeKey`).

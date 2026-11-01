@@ -16988,7 +16988,8 @@
         ],
         "notes": [
           "Same four elements with the same offsets, rotations and scales.",
-          "Minor deviation: the original tilted the spinning input with the item's own pitch, while the native lifts it in Y by the same (sin(ticks/14)*.2+.2)*.1 factor."
+          "Minor deviation: the original tilted the spinning input with the item's own pitch, while the native lifts it in Y by the same (sin(ticks/14)*.2+.2)*.1 factor.",
+          "2026-11-01 alpha.11: actual placed Fabric table inspected (13 final frames, natural diamond-block deconstruction and resource reload). Restore pinned Forge ENTITY renderInFrame helper for scanner scale/height/rotation; reward quad now has original V, SRC_ALPHA/ONE and lightmap without normal shading. See docs/analysis/2026-11-01-deconstructor-world-review.md. Input render alpha remains unchanged because RenderItem can overwrite the original external GL colour."
         ],
         "reviewed_sha256": {
           "original": "4ca2efaec01a6e0a5dfeedb79982a1c5081942587ef65082a5fbecd962df9195",

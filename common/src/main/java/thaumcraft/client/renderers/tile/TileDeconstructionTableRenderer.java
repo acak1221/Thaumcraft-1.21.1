@@ -1,10 +1,10 @@
 package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.client.renderers.item.DeconstructionTableItemRenderer;
+import thaumcraft.client.renderers.item.ThaumometerRenderTypes;
 import thaumcraft.common.tiles.TileDeconstructionTable;
 
 /** Original workbench geometry/decontable skin, persistent thaumometer, real input and unclaimed primal. */
@@ -28,14 +29,19 @@ public final class TileDeconstructionTableRenderer implements BlockEntityRendere
         }
         if (table.reward() != null) {
             pose.pushPose(); try { pose.translate(.5, 1.081, .5); pose.mulPose(Axis.XP.rotationDegrees(90)); pose.mulPose(Axis.ZP.rotationDegrees(ticks % 360)); pose.scale(.024F, .024F, .024F);
-                var aspect = table.reward(); int color = aspect.getColor(); var out = buffers.getBuffer(RenderType.entityTranslucent(aspect.getImage()));
-                float[] xy = {-8,8,8,8,8,-8,-8,-8};
-                for (int vertex = 0; vertex < 4; vertex++) out.addVertex(pose.last(), xy[vertex * 2], xy[vertex * 2 + 1], 0)
-                        .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, 204).setUv(vertex == 0 || vertex == 3 ? 0 : 1, vertex < 2 ? 0 : 1)
-                        .setOverlay(overlay).setLight(light).setNormal(pose.last(), 0, 0, -1);
+                var aspect = table.reward();
+                // Original drawTag: SRC_ALPHA/ONE, alpha .8, lightmap without normal shading.
+                rewardVertices(pose, buffers.getBuffer(ThaumometerRenderTypes.icon(aspect.getImage())), aspect.getColor(), light);
             } finally {
                 pose.popPose();
             }
         }
+    }
+
+    static void rewardVertices(PoseStack pose, VertexConsumer out, int color, int light) {
+        float[] xy = {-8,8,8,8,8,-8,-8,-8};
+        for (int vertex = 0; vertex < 4; vertex++) out.addVertex(pose.last(), xy[vertex * 2], xy[vertex * 2 + 1], 0)
+                .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, 204)
+                .setUv(vertex == 0 || vertex == 3 ? 0 : 1, vertex < 2 ? 1 : 0).setLight(light);
     }
 }

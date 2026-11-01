@@ -42,8 +42,8 @@ public final class DeconstructionTableItemRenderer {
         pose.pushPose();
         try {
             meterPose(pose);
-            // GROUND is the existing world tile's stationary entity-item view. It never draws
-            // first-person arms/readout, and preserves the native item display's lifting offset.
+            // Restore the original stationary RenderItem + Forge ENTITY helper before the
+            // native GROUND display. A bare renderStatic omits its frame scale and height.
             items.renderStatic(new ItemStack(ThaumcraftContent.THAUMOMETER.get()), ItemDisplayContext.GROUND,
                     light, overlay, pose, buffers, level, 0);
         } finally {
@@ -59,5 +59,15 @@ public final class DeconstructionTableItemRenderer {
     static void meterPose(PoseStack pose) {
         pose.translate(.5, .92, .5);
         pose.scale(.8F, .8F, .8F);
+        // Original EntityItem age/hoverStart/partial=0: bob=.1, rotation=0.
+        pose.translate(0, .1F, 0);
+        // ForgeHooksClient.renderEntityItem: renderInFrame, BLOCK_3D helper, non-block item.
+        pose.scale(1.25F, 1.25F, 1.25F);
+        pose.translate(0, .05F, 0);
+        pose.mulPose(Axis.YP.rotationDegrees(-90));
+        pose.scale(.5F, .5F, .5F);
+        // Cancel the authored modern ground lift; the original helper above supplies it.
+        // ItemRenderer still applies the display and builtin corner; the scanner centres itself.
+        pose.translate(0, -3F / 16F, 0);
     }
 }

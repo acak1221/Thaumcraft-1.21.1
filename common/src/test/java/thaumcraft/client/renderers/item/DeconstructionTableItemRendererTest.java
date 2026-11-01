@@ -40,8 +40,15 @@ class DeconstructionTableItemRendererTest {
         Vector3f face = pose.last().pose().transformPosition(new Vector3f(0, .11F, 0));
         assertEquals(.5F, face.x, 1E-6F);
         assertEquals(.5F, face.z, 1E-6F);
-        assertEquals(.92F + .8F * (3F / 16F + .11F * .5F), face.y, 1E-6F);
+        // Original stationary RenderItem bob .1, Forge frame S1.25/Ty.05/Ry-90/S.5,
+        // then ItemThaumometerRenderer ENTITY S.5. The modern display lift is cancelled.
+        assertEquals(.92F + .8F * (.1F + 1.25F * .05F) + .8F * 1.25F * .5F * .5F * .11F, face.y, 1E-6F);
         assertTrue(face.y > 1, "the native entity-item display lifts the scanner face above the tabletop");
+        assertEquals(.0035F, 1.081F - face.y, 1E-6F, "the reward glyph sits above the scanner face, rather than being occluded by it");
+        Vector3f across = pose.last().pose().transformDirection(new Vector3f(1, 0, 0));
+        assertEquals(0, across.x, 1E-6F);
+        assertEquals(0, across.y, 1E-6F);
+        assertEquals(.25F, across.z, 1E-6F, "original Forge frame rotation and complete scale");
     }
 
     @Test void builtinItemRetainsEveryPreviouslyAuthoredDisplayTransform() throws Exception {

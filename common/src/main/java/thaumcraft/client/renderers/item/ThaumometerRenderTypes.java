@@ -10,8 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import thaumcraft.client.fx.particles.MonsterSpriteParticle;
 import thaumcraft.client.renderers.models.ModelThaumometer;
 
-/** The scanner's own sampler and lit additive glyph state, without changing other item effects. */
-final class ThaumometerRenderTypes {
+/** Scanner surfaces and the original lightmapped drawTag state shared with its table glyph. */
+public final class ThaumometerRenderTypes {
     private static final int MAX_ICON_TYPES = 256;
     private static final Map<ResourceLocation, RenderType> ICONS = new LinkedHashMap<>(16, .75F, true) {
         @Override protected boolean removeEldestEntry(Map.Entry<ResourceLocation, RenderType> entry) {
@@ -27,7 +27,7 @@ final class ThaumometerRenderTypes {
 
     private ThaumometerRenderTypes() {}
 
-    static synchronized RenderType icon(ResourceLocation texture) {
+    public static synchronized RenderType icon(ResourceLocation texture) {
         return ICONS.computeIfAbsent(texture, key -> new SurfaceType(key, false));
     }
 

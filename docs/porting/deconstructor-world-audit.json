@@ -1,0 +1,225 @@
+{
+  "baseCommit": "fd1f08888295fdb114ca1fd814f331360724c611",
+  "version": "0.1.0-alpha.11",
+  "fixture": "Actual placed Fabric1.21.1 table in independent creative copies; supplied table and diamond blocks64; native result consumes exactly one item; no survival acquisition claim",
+  "forge": {
+    "repository": "https://github.com/MinecraftForge/MinecraftForge",
+    "branch": "1.7.10",
+    "commit": "9274e4fe435cb415099a8216c1b42235f185443e",
+    "date": "2017-06-08T05:15:18Z",
+    "files": {
+      "RenderItem.java.patch": "7dc84771af88e3f0df28b9093967eaf9e6ec86ef03f95115a64bbfe7e4c38822",
+      "ForgeHooksClient.java": "b76301f71f005999b75a16bb6559becd41479427a8e3596c6b85cbfb524bf787"
+    }
+  },
+  "before": {
+    "commonSHA256": "3b7341da07caf3cbe6b438264bff886364b4df761f4644517d8f433e07de7656",
+    "inputManifest": {
+      "commit": "fd1f08888295fdb114ca1fd814f331360724c611",
+      "commonSHA256": "3b7341da07caf3cbe6b438264bff886364b4df761f4644517d8f433e07de7656",
+      "fixtureSHA256": "a2982d3f5768cb512d61c0e1b9054556a541e240cd641ed9fb0d4334269d67d7",
+      "declaredFixture": "Copy of own 1.21.1 world; supplied table and diamond block stack; native random result, no acquisition replay"
+    },
+    "screenshots": [
+      {
+        "name": "01-day-front.png",
+        "sha256": "e75903a66da59aed230c2dd15b02a8853be08e14d7d09972a1e881270af43c6f",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "02-day-back.png",
+        "sha256": "089041a0419a4419d5a196744252a1a6886364de226ac7e0206ec2938f7e3bf2",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "03-day-left.png",
+        "sha256": "db10141c3dfb391586979b5f6543534babc54a68d5b74c98c7bbcd48ca0a4d6e",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "04-day-top.png",
+        "sha256": "74e0e34c7c5057552f60392f2853a97cdf227be306c0a314b71882e101e122f7",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "05-day-low.png",
+        "sha256": "99c11dc5ea80f73953053e2535dcc49c77f2c4b1b5b9fbc7f146a70664ebe73e",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "06-day-input.png",
+        "sha256": "02bf475768e07a0a535278d20033bb7e3626f45c53de41165913877e82af6866",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "07-day-natural-result.png",
+        "sha256": "72cf1396a55a7da7ee658e8cad54bc616aafa5115ad3d68e4da4b794b783f972",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "08-gui-result.png",
+        "sha256": "22e4e0e19c90412142d6c3226f04e6bc2c92eb74c56e8b81bcfa076ca6d76439",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "09-dark-result.png",
+        "sha256": "a06e4e213812257726eb04b3281ba484ba9ef365012d3f46b7fcc4c1de371d8b",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "10-dark-after-reload.png",
+        "sha256": "b69e7bf7b230516dc1f72c434a0459c2815df36422fd2ca801d5488807078f9a",
+        "manualFinalInspection": false
+      },
+      {
+        "name": "11-day-after-reload.png",
+        "sha256": "0934fc76e08e0f95c31dcd28734bb51d7eec1b0d9e08cc2a1f61113e6b64fce1",
+        "manualFinalInspection": false
+      }
+    ],
+    "captureRecords": [
+      "CAPTURE 01-day-front.png input=0 minecraft:air reward=null blockLight=3 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 02-day-back.png input=0 minecraft:air reward=null blockLight=1 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 03-day-left.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 04-day-top.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 05-day-low.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 06-day-input.png input=64 minecraft:diamond_block reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 07-day-natural-result.png input=63 minecraft:diamond_block reward=thaumcraft.api.aspects.Aspect@216d9454 blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 08-gui-result.png input=63 minecraft:diamond_block reward=thaumcraft.api.aspects.Aspect@216d9454 blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 09-dark-result.png input=63 minecraft:diamond_block reward=thaumcraft.api.aspects.Aspect@216d9454 blockLight=0 skyLight=0 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 10-dark-after-reload.png input=63 minecraft:diamond_block reward=thaumcraft.api.aspects.Aspect@216d9454 blockLight=0 skyLight=0 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar",
+      "CAPTURE 11-day-after-reload.png input=63 minecraft:diamond_block reward=thaumcraft.api.aspects.Aspect@216d9454 blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/baseline-common.jar"
+    ],
+    "renderClassSHA256": {
+      "thaumcraft/client/renderers/item/DeconstructionTableItemRenderer.class": "c1f35cd39a998b4fd7ef2dedf9a8b1d55ac8122f503ac2dfd991590486f0f39d",
+      "thaumcraft/client/renderers/item/ThaumometerRenderTypes.class": "0c2beeb7942dfaeb1fb4bbb39b69cf6b68cbec9f19185ea6c4f5548fdc50e4cd",
+      "thaumcraft/client/renderers/tile/TileDeconstructionTableRenderer.class": "a72cf715e8ffbde9f2c1677a843e5864a7788181c4b7ca6d3a750d6076c1a532"
+    }
+  },
+  "after": {
+    "commonSHA256": "0a9a1fdef14aa1277fb14c036c8d0a85410bf706952bdb21fbb4f2db89fc86b4",
+    "inputManifest": {
+      "baseCommit": "fd1f08888295fdb114ca1fd814f331360724c611",
+      "version": "0.1.0-alpha.11",
+      "commonSHA256": "0a9a1fdef14aa1277fb14c036c8d0a85410bf706952bdb21fbb4f2db89fc86b4",
+      "fixtureSHA256": "484d0d5d10ee0359e496b24ae052ac6b09454c89d1a669511b3d9964b5ff5fd2",
+      "fixture": "Actual world tile, supplied input diamond block64; naturally produced reward, no survival acquisition"
+    },
+    "screenshots": [
+      {
+        "name": "01-day-front.png",
+        "sha256": "1d2e490e36682ee31b6033f20d74818d7dc2700f35fac827658a7c4aa3740e8d",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "02-day-back.png",
+        "sha256": "50763f1155be426dac2da669801632245b9cfaa83a213593d9809fbdc8f21c8f",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "03-day-left.png",
+        "sha256": "114b06a0df86a030965664163e23a03837122b224341cce2ceb3303fefb488bd",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "04-day-top.png",
+        "sha256": "17c1e32d959bec93b2fd05f9c495100bb6f3db0f7999f1a3e6c8f8f70a375cd4",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "05-day-low.png",
+        "sha256": "7a19aff5023e32ce21eb3117e6c022c2a8eb266d135ec0ff64fc8bd515bf28e1",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "06-day-input.png",
+        "sha256": "e1179230a374d923f70eac9c2472dcbddff8fcb979a768e249ea182314c8174e",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "07-day-natural-result.png",
+        "sha256": "1535e58b08cf80f36b6053ae20dfead73209dcf27e225e30382c473a3657d32e",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "07b-day-result-top.png",
+        "sha256": "5108b57f2a81421c82806c182df74554e5a6cd1a436c3deaa15c883c348724c7",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "07c-day-result-side.png",
+        "sha256": "67c87fa674456e2b593ac6715ff885a0f69107bed589eb3740b4c02f06c01dcb",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "08-gui-result.png",
+        "sha256": "e33492e8daec5cbbe16c37dd6e878e1369e81cd1ab1636aecd5f78150fbbc071",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "09-dark-result.png",
+        "sha256": "c2345cb6204664e918c55792d51c0116303f3ba22f9bf285a5d99b52e9758a83",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "10-dark-after-reload.png",
+        "sha256": "09e0116029a1d4cb2dd9a15c73a94e4e5fad3c5b9358b378eb76186afc142204",
+        "manualFinalInspection": true
+      },
+      {
+        "name": "11-day-after-reload.png",
+        "sha256": "f392e2769567b9475f721e75fec9d1b49ff32095a4c5806e027db038c679f70a",
+        "manualFinalInspection": true
+      }
+    ],
+    "captureRecords": [
+      "CAPTURE 01-day-front.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 02-day-back.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 03-day-left.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 04-day-top.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 05-day-low.png input=0 minecraft:air reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 06-day-input.png input=64 minecraft:diamond_block reward=null blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 07-day-natural-result.png input=63 minecraft:diamond_block reward=ordo blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 07b-day-result-top.png input=63 minecraft:diamond_block reward=ordo blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 07c-day-result-side.png input=63 minecraft:diamond_block reward=ordo blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 08-gui-result.png input=63 minecraft:diamond_block reward=ordo blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 09-dark-result.png input=63 minecraft:diamond_block reward=ordo blockLight=0 skyLight=0 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 10-dark-after-reload.png input=63 minecraft:diamond_block reward=ordo blockLight=0 skyLight=0 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar",
+      "CAPTURE 11-day-after-reload.png input=63 minecraft:diamond_block reward=ordo blockLight=0 skyLight=15 BER=class thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer source=file:/workspace/Thaumcraft-1.21.1/.tmp/deconstructor-visual/fixed-common-alpha11.jar"
+    ],
+    "renderClassSHA256": {
+      "thaumcraft/client/renderers/item/DeconstructionTableItemRenderer.class": "3c75d76228ba5bc1567b2246573377218bf5dacaed799ca35cd981e8d0553571",
+      "thaumcraft/client/renderers/item/ThaumometerRenderTypes.class": "c532deb86a83afe6259b09a8d20f0e05f6dc8e7a3d2e11641b3f6ff4ba864683",
+      "thaumcraft/client/renderers/tile/TileDeconstructionTableRenderer.class": "ed3e4b413339dd6e32862f599f1d8c0da07d8fadec530540fbf8b92c46868343"
+    }
+  },
+  "checks": {
+    "commonJUnit": {
+      "tests": 2847,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5
+    },
+    "fabricBuildIsolation": "PASS",
+    "neoforgeBuildIsolation": "PASS",
+    "neoforgeJUnit": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "python": {
+      "tests": 155,
+      "skipped": 9,
+      "status": "PASS"
+    },
+    "assetsMissing": 0,
+    "scopeStale": 0
+  },
+  "limits": [
+    "NeoForge client not run",
+    "No survival acquisition replay",
+    "No new whole-book client sweep",
+    "Random primal and rotation phase not fixed between scenes"
+  ]
+}

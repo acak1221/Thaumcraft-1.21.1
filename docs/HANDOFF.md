@@ -1,3 +1,5 @@
+Дополнительный повторный CI-прогон выявил гонку Taintacle fixture: удалённая цель и Small могли попадать в FULL-чанк без entity ticking. Тест удерживает только свой точный footprint и ждёт существующий GameTestChunkAwait; production не изменён. Focused `taintaclesKeepOriginalRetaliationLifetimeAndLoot` — PASS. Новый полный CI запускается после test-only commit; результаты релиза аддона остаются отдельно подтверждёнными.
+
 ## 02.11.2026 — живые описания исследований аддонов, alpha.13
 
 Книга и tooltip записок читают виртуальные getName/getText зарегистрированного API-исследования. Статические alias игнорировали пользовательскую настройку RESEARCH_TAGS=false. Native bundled branches и стили сохранены; проверены оба положения настройки и исходное THAUMOMETER. Common2855 (5 прежних skips), обе сборки/isolation и NeoForge15JUnit, Python155 (9 прежних skips) — PASS. Отдельный аддон наalpha13 снова37native+14JUnit — PASS. Ранее принятые полные обходы/серверные проверки сохраняются с их точными входами; этот фикс не заявляет нового survival/multiplayer прохождения.

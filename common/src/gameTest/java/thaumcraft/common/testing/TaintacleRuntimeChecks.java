@@ -3,8 +3,10 @@ package thaumcraft.common.testing;
 import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +28,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
@@ -91,13 +94,16 @@ public final class TaintacleRuntimeChecks {
     }
     public static void retaliationLifetimeAndLoot(GameTestHelper test){
         try(var a=new FocusUpgradeRuntimeChecks.Actor(test,new BlockPos(8,220,8));var terrain=new Terrain(a)){
-            terrain.open();var parent=terrain.tentacle(a.root);a.player.setPos(a.root.getX()+17.5,a.root.getY(),a.root.getZ()+.5);
+            terrain.open();a.player.setPos(a.root.getX()+17.5,a.root.getY(),a.root.getZ()+.5);
+            terrain.holdEntities(a.root,a.root.west(2),BlockPos.containing(a.player.position()));
+            var parent=terrain.tentacle(a.root);
             terrain.column(BlockPos.containing(a.player.position()));
             terrain.put(BlockPos.containing(a.player.position()).below(),ThaumcraftTaint.SOIL.get().defaultBlockState());
             a.require(parent.hurt(a.level.damageSources().playerAttack(a.player),1),"real remote player attack reaches root hostile");
             var children=a.level.getEntitiesOfClass(EntityTaintacleSmall.class,parent.getBoundingBox().inflate(24));
             a.require(children.size()==1&&parent.originalAttackTime()>=40&&parent.originalAttackTime()<=59,
-                    "actual >16-block damage retaliation creates one real Small and original40..59 cooldown without natural spawn/floor gate");
+                    "actual >16-block damage retaliation creates one real Small and original40..59 cooldown without natural spawn/floor gate; children="+children.size()
+                            +", cooldown="+parent.originalAttackTime()+", parentIndexed="+(a.level.getEntity(parent.getUUID())==parent));
             var child=children.getFirst();terrain.owned.add(child);
             a.require(Math.abs(child.getX()-a.player.getX())<1&&Math.abs(child.getZ()-a.player.getZ())<1&&child.getY()==a.player.getY()
                             &&child.getMaxHealth()==8&&OriginalTaintCombat.mobDamage(child)==2,
@@ -247,8 +253,21 @@ public final class TaintacleRuntimeChecks {
     private static final class Terrain implements AutoCloseable{
         final FocusUpgradeRuntimeChecks.Actor a;final List<Entity> owned=new ArrayList<>();
         final Map<LevelChunk,List<byte[]>> biomes=new LinkedHashMap<>();final Map<BlockPos,net.minecraft.world.level.block.state.BlockState> extraBlocks=new LinkedHashMap<>();
+        final Set<ChunkPos> forced=new LinkedHashSet<>();
         Terrain(FocusUpgradeRuntimeChecks.Actor a){this.a=a;}
         void open(){a.clearLane();column(a.root);}
+        void holdEntities(BlockPos... anchors){
+            Set<ChunkPos> area=new LinkedHashSet<>();
+            // The remote retaliation has triangular offsets below one block: its child can cross either chunk edge.
+            // FULL/getChunk alone does not publish entities to ServerLevel's query index; await ENTITY_TICKING before ADD.
+            for(BlockPos anchor:anchors)for(int x=(anchor.getX()-1)>>4;x<=(anchor.getX()+1)>>4;x++)
+                for(int z=(anchor.getZ()-1)>>4;z<=(anchor.getZ()+1)>>4;z++)area.add(new ChunkPos(x,z));
+            for(ChunkPos chunk:area){
+                if(!a.level.getForcedChunks().contains(chunk.toLong())){a.level.setChunkForced(chunk.x,chunk.z,true);forced.add(chunk);}
+                a.level.getChunk(chunk.x,chunk.z);
+            }
+            for(ChunkPos chunk:area)GameTestChunkAwait.entityTicking(a.test,chunk.getMiddleBlockPosition(a.root.getY()));
+        }
         void column(BlockPos pos){
             var chunk=a.level.getChunkAt(pos);if(!biomes.containsKey(chunk)){
                 var sections=new ArrayList<byte[]>();for(var section:chunk.getSections()){
@@ -270,14 +289,16 @@ public final class TaintacleRuntimeChecks {
             a.require(ChampionJoinRoll.join(a.level,entity),"actual registered tainted hostile enters native world index");}
         net.minecraft.world.entity.animal.Cow cow(BlockPos pos){var entity=EntityType.COW.create(a.level);a.require(entity!=null&&entity.getMaxHealth()==10,"native cow input has10 health");entity.setPos(Vec3.atBottomCenterOf(pos));entity.setNoGravity(true);entity.setNoAi(true);owned.add(entity);a.require(a.level.addFreshEntity(entity),"native non-tainted target enters world");return entity;}
         @Override public void close(){
-            owned.forEach(Entity::discard);extraBlocks.forEach(a::put);
-            for(var entry:biomes.entrySet()){
-                var chunk=entry.getKey();for(int i=0;i<chunk.getSections().length;i++){
-                    var buffer=new FriendlyByteBuf(Unpooled.wrappedBuffer(entry.getValue().get(i)));try{chunk.getSections()[i].readBiomes(buffer);}finally{buffer.release();}
+            try{
+                owned.forEach(Entity::discard);extraBlocks.forEach(a::put);
+                for(var entry:biomes.entrySet()){
+                    var chunk=entry.getKey();for(int i=0;i<chunk.getSections().length;i++){
+                        var buffer=new FriendlyByteBuf(Unpooled.wrappedBuffer(entry.getValue().get(i)));try{chunk.getSections()[i].readBiomes(buffer);}finally{buffer.release();}
+                    }
+                    chunk.setUnsaved(true);
                 }
-                chunk.setUnsaved(true);
-            }
-            a.level.getChunkSource().chunkMap.resendBiomesForChunks(new ArrayList<>(biomes.keySet()));
+                a.level.getChunkSource().chunkMap.resendBiomesForChunks(new ArrayList<>(biomes.keySet()));
+            }finally{for(ChunkPos chunk:forced)a.level.setChunkForced(chunk.x,chunk.z,false);}
         }
     }
 }

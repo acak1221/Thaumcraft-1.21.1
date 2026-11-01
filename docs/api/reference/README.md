@@ -188,7 +188,7 @@ The client-only part of the Thaumcraft API: the particles that 1.7.10 add-ons dr
 
 | Type | Summary |
 |---|---|
-| [`FocusUpgradeType`](thaumcraft.api.wands.md#focusupgradetype) | Bounded native catalogue. |
+| [`FocusUpgradeType`](thaumcraft.api.wands.md#focusupgradetype) | Native upgrades and original-style add-on registrations, keyed by stable TC4 IDs. |
 | [`IFocusPouch`](thaumcraft.api.wands.md#ifocuspouch) | An item that stores focuses for the wand's focus selector: the native focus pouch, and a pouch of an add-on. |
 | [`IWandFocus`](thaumcraft.api.wands.md#iwandfocus) | **Deprecated.** The original TC4 wand focus contract. |
 | [`IWandRodOnUpdate`](thaumcraft.api.wands.md#iwandrodonupdate) | The original TC4 wand rod update hook. |

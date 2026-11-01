@@ -6,8 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 
-/** Bounded native catalogue. Stable TC4 IDs, not enum ordinals or enchantments.
- * Unimplemented specializations are deliberately absent, never paid placeholders. */
+/** Native upgrades and original-style add-on registrations, keyed by stable TC4 IDs. */
 public final class FocusUpgradeType {
     public static final FocusUpgradeType potency = new FocusUpgradeType(0, "potency", Aspect.WEAPON);
     public static final FocusUpgradeType frugal = new FocusUpgradeType(1, "frugal", Aspect.HUNGER);
@@ -50,13 +49,24 @@ public final class FocusUpgradeType {
         for (Aspect aspect : components) aspects.add(aspect, 1);
     }
 
+    /** Registers an add-on upgrade under an unused stable ID; its item supplies the actual behavior. */
+    public FocusUpgradeType(int id, ResourceLocation icon, String name, String text, AspectList aspects) {
+        if (id < 0 || id > Short.MAX_VALUE) throw new IllegalArgumentException("Invalid focus upgrade ID " + id);
+        this.id = (short) id;
+        this.icon = java.util.Objects.requireNonNull(icon, "icon");
+        this.name = java.util.Objects.requireNonNull(name, "name");
+        this.text = java.util.Objects.requireNonNull(text, "text");
+        this.aspects = java.util.Objects.requireNonNull(aspects, "aspects").copy();
+        if (TYPES.putIfAbsent(this.id, this) != null) throw new IllegalArgumentException("Duplicate focus upgrade ID " + id);
+    }
+
     private static Map<Short, FocusUpgradeType> catalogue(FocusUpgradeType... entries) {
         Map<Short, FocusUpgradeType> result = new LinkedHashMap<>();
         for (FocusUpgradeType entry : entries) {
             if (entry == null || entry.id < 0 || result.putIfAbsent(entry.id, entry) != null)
                 throw new IllegalArgumentException("Invalid or duplicate focus upgrade ID");
         }
-        return Map.copyOf(result);
+        return new java.util.concurrent.ConcurrentHashMap<>(result);
     }
 
     /** Returns a caller-owned copy of the upgrade's aspect weights (unitless recipe weights, not centivis); Aspect identities remain shared. */

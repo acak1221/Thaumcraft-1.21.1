@@ -104,6 +104,10 @@ public class ItemFocusBasic extends Item {
     /** Tests a free one-based rank 1..5 against subclass choices, without paying costs or writing components.
      * Null/wrong/unsupported stack, null/unregistered type or invalid/occupied rank returns false; player is ignored here. */
     public boolean canApplyUpgrade(ItemStack focusstack, Player player, FocusUpgradeType type, int rank) {
+        return structurallyApplicable(focusstack, type, rank);
+    }
+
+    private boolean structurallyApplicable(ItemStack focusstack, FocusUpgradeType type, int rank) {
         if (rank < 1 || rank > 5 || type == null || FocusUpgradeType.get(type.id) != type
                 || focusstack == null || focusstack.getItem() != this || !FocusUpgradeData.supportedForFocus(focusstack)
                 || FocusUpgradeData.read(focusstack).ranks().get(rank - 1) != -1) return false;
@@ -116,6 +120,18 @@ public class ItemFocusBasic extends Item {
      * progression. Direct API holes survive; unsupported branches cannot be paid. */
     public boolean applyUpgrade(ItemStack focusstack, FocusUpgradeType type, int rank) {
         if (!canApplyUpgrade(focusstack, null, type, rank)) return false;
+        focusstack.set(ThaumcraftFoci.FOCUS_UPGRADES.get(), FocusUpgradeData.read(focusstack).withUpgrade(type, rank));
+        return true;
+    }
+
+    /** The focal manipulator already checked the real payer's research BEFORE
+     * charging XP and vis. Completion must not query a null/offline player again.
+     * Only the machine can create this single-use authority for its exact private
+     * candidate; the normal actor-free API keeps its existing subclass checks. */
+    public final boolean applyUpgradeAfterPayment(ItemStack focusstack, FocusUpgradeType type, int rank,
+            thaumcraft.common.tiles.TileFocalManipulator.PaidUpgrade permit) {
+        if (permit == null || !permit.claim(focusstack, type, rank)
+                || !structurallyApplicable(focusstack, type, rank)) return false;
         focusstack.set(ThaumcraftFoci.FOCUS_UPGRADES.get(), FocusUpgradeData.read(focusstack).withUpgrade(type, rank));
         return true;
     }

@@ -63,6 +63,22 @@ public final class TileFocalManipulator extends BlockEntity implements WorldlyCo
 
     private record Job(UUID id, long revision, ItemStack baseline, AspectList initial) {}
 
+    /** Single-use authority for the exact private candidate of a fully paid,
+     * retired job. Add-ons cannot construct a permit or retarget one to a stack. */
+    public static final class PaidUpgrade {
+        private final ItemStack candidate;
+        private final FocusUpgradeType type;
+        private final int rank;
+        private boolean used;
+        private PaidUpgrade(ItemStack candidate, FocusUpgradeType type, int rank) {
+            this.candidate = candidate; this.type = type; this.rank = rank;
+        }
+        public synchronized boolean claim(ItemStack candidate, FocusUpgradeType type, int rank) {
+            if (used || candidate != this.candidate || type != this.type || rank != this.rank) return false;
+            used = true; return true;
+        }
+    }
+
     public TileFocalManipulator(BlockPos pos, BlockState state) {
         super(ThaumcraftFocalManipulation.FOCAL_MANIPULATOR_BLOCK_ENTITY.get(), pos, state);
     }
@@ -192,8 +208,9 @@ public final class TileFocalManipulator extends BlockEntity implements WorldlyCo
         if (!bound(paid)) return;
         final int completedRank = rank, completedUpgrade = upgrade;
         ItemStack candidate = paid.baseline().copy();
-        // Retire BEFORE the overridable apply hook. A hook/save cannot resurrect
-        // an active zero-debt job, and false/throw is a spent, failed job, not success.
+        // Retire BEFORE extension choice queries during the paid structural apply.
+        // A query/save cannot resurrect an active zero-debt job; false/throw is
+        // a spent, failed job, not success.
         cancelJob();
         long terminalRevision = revision;
         boolean success = false;
@@ -201,7 +218,8 @@ public final class TileFocalManipulator extends BlockEntity implements WorldlyCo
             FocusUpgradeType type = FocusUpgradeType.get(completedUpgrade);
             if (type != null && candidate.getItem() instanceof ItemFocusBasic focus) {
                 short[] expected = applied(focus, paid.baseline()); expected[completedRank - 1] = type.id;
-                success = focus.applyUpgrade(candidate, type, completedRank)
+                success = focus.applyUpgradeAfterPayment(candidate, type, completedRank,
+                        new PaidUpgrade(candidate, type, completedRank))
                         && candidate.getCount() == 1 && candidate.getItem() == paid.baseline().getItem()
                         && Arrays.equals(expected, applied(focus, candidate));
             }

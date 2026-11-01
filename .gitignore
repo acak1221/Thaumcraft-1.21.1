@@ -89,6 +89,8 @@ neoforge/build/
 common/run/
 fabric/run/
 neoforge/run/
+fabric/run-taintedmagic/
+fabric/run-taintedmagic-gametest/
 **/run-gametest/
 **/run-clienttest/
 **/run-multiplayer/

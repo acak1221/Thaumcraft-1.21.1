@@ -298,6 +298,13 @@ public InfusionStackRecipe nativeRecipe()
 
 The native recipe behind this view.
 
+<a id="infusionrecipe-objectaspectrecipe"></a>
+```java
+public InfusionStackRecipe objectAspectRecipe()
+```
+
+A fixed-output recipe for canonical object-aspect inference, or null. The base class exposes only a declared nonempty stack result. Custom recipes may explicitly override this with a side-effect-free native view of their fixed output; central-item patches and actor-dependent outputs must return null. This view never crafts, changes a stack, checks research or spends resources.
+
 <a id="infusionrecipe-previewrecipe"></a>
 ```java
 public InfusionStackRecipe previewRecipe()

@@ -58,6 +58,16 @@ public class InfusionRecipe {
     /** The native recipe behind this view. */
     public InfusionStackRecipe nativeRecipe() { return nativeRecipe; }
 
+    /** A fixed-output recipe for canonical object-aspect inference, or null.
+     * The base class exposes only a declared nonempty stack result. Custom recipes
+     * may explicitly override this with a side-effect-free native view of their
+     * fixed output; central-item patches and actor-dependent outputs must return null.
+     * This view never crafts, changes a stack, checks research or spends resources. */
+    public InfusionStackRecipe objectAspectRecipe() {
+        return getClass() == InfusionRecipe.class && recipeOutput instanceof ItemStack stack && !stack.isEmpty()
+                ? nativeRecipe() : null;
+    }
+
     /**
      * The book's current sample, without crafting or spending anything. Programmatic recipes read their live
      * input, components and input-aware virtual getters; a view of a data recipe retains its native tag

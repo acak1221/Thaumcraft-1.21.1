@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.locks.LockSupport;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -38,10 +39,10 @@ public final class ArcaneLampRuntimeChecks {
     private ArcaneLampRuntimeChecks() {}
     public static void run(GameTestHelper test) {
         Check check = new Check(test);
-        try { check.prepare(); } catch (RuntimeException | Error failure) { check.finish(); throw failure; }
-        awaitNativeLight(check, 0);
+        try { check.prepare(); check.awaitFixtureLighting(); } catch (RuntimeException | Error failure) { check.finish(); throw failure; }
+        awaitNativeLight(check);
     }
-    private static void awaitNativeLight(Check check, int attempts) {
+    private static void awaitNativeLight(Check check) {
         check.test.runAfterDelay(5, () -> {
             try {
                 check.test.assertTrue(check.level.getBlockState(check.center).is(ThaumcraftLamps.ARCANE_LAMP.get())
@@ -49,12 +50,8 @@ public final class ArcaneLampRuntimeChecks {
                                 && check.level.getBlockEntity(check.center) == check.tile,
                         "actual registered lamp remains a native emission15 source while threaded propagation completes");
                 int blockLight = check.level.getBrightness(LightLayer.BLOCK, check.center.above());
-                if (blockLight < 9) {
-                    check.test.assertTrue(attempts < 25,
-                            "native block-light propagation reaches lamp-adjacent cell within130 ordinary server ticks; actual=" + blockLight);
-                    awaitNativeLight(check, attempts + 1);
-                    return;
-                }
+                check.test.assertTrue(blockLight >= 9,
+                        "native block-light propagation reaches the lamp-adjacent cell after its POST_UPDATE fence; actual=" + blockLight);
                 check.direct(); check.recipe();
                 // direct() already replaced its sole injected light with cobblestone.
                 // Retain lights created by ordinary native ticks during the initial propagation wait.
@@ -91,6 +88,19 @@ public final class ArcaneLampRuntimeChecks {
             set(center,ThaumcraftLamps.ARCANE_LAMP.get().defaultBlockState(),QUIET);
             tile=(TileArcaneLamp) level.getBlockEntity(center);
             test.assertTrue(tile!=null,"a real Arcane Lamp is installed in an explicitly roofed room");
+        }
+        void awaitFixtureLighting() {
+            // GameTestServer has no50ms tick floor: await the native POST_UPDATE fence after building the room,
+            // rather than equating130 simulated ticks with time supplied to the independent light worker.
+            var source = level.getChunkSource();
+            var chunk = new ChunkPos(center);
+            var ready = source.getLightEngine().waitForPendingTasks(chunk.x, chunk.z);
+            long deadline = System.nanoTime() + java.time.Duration.ofSeconds(10).toNanos();
+            while (!ready.isDone() && System.nanoTime() < deadline) {
+                if (!source.pollTask()) LockSupport.parkNanos(1_000_000);
+            }
+            test.assertTrue(ready.isDone(), "native fixture light queue did not reach its POST_UPDATE fence within10seconds; pending=" + source.getPendingTasksCount());
+            ready.join();
         }
         RandomSource draws(int dx,int dy,int dz) {
             int[] values={Math.max(dx,0),Math.max(-dx,0),Math.max(dy,0),Math.max(-dy,0),Math.max(dz,0),Math.max(-dz,0)};

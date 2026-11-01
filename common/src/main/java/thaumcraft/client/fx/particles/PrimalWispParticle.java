@@ -81,6 +81,14 @@ public final class PrimalWispParticle extends SingleQuadParticle implements thau
     public static Spec spec(double x,double y,double z,float size,int type,boolean shrink,boolean noClip,float gravity){
         return new Spec(x,y,z,size,type,shrink,!noClip,gravity);
     }
+    /**
+     * Create the canonical original wisp without inserting it into a particle queue. Original add-ons set its initial
+     * motion after construction; callers can use {@link #setParticleSpeed} and then enqueue it with ParticleEngine.
+     */
+    public static PrimalWispParticle create(ClientLevel level,double x,double y,double z,float size,int type,boolean shrink,boolean noClip,float gravity){
+        Spec spec=spec(x,y,z,size,type,shrink,noClip,gravity);
+        return new PrimalWispParticle(level,spec.x(),spec.y(),spec.z(),spec.size(),spec.type(),null,spec.physics(),spec.gravity(),spec.shrink());
+    }
     /** The speed per tick that covers {@code from} to {@code to} in {@code lifetime} ticks (the velocity of {@code wispFX3}). */
     public static double velocityToward(double from,double to,int lifetime){return(to-from)/lifetime;}
     /**

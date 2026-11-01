@@ -73,13 +73,7 @@ public final class MagicWard {
     }
 
     private static double share(MagicWardGear gear, ItemStack stack, LivingEntity entity, Kind kind) {
-        int armor = gear.wardArmor(stack);
-        if (armor <= 0) return 0;
-        return switch (kind) {
-            case MAGIC -> ratio(armor) * gear.wardFactor(stack, entity);
-            case FIRE -> gear.wardsFire() ? fireRatio(armor) * gear.wardFactor(stack, entity) : 0;
-            default -> 0;
-        };
+        return gear.wardShare(stack, entity, kind);
     }
 
     /** The damage after the worn wards of the entity; the pieces are worn here. Neither magic nor fire, nothing worn or no damage: unchanged. */

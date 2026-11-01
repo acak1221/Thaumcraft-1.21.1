@@ -14,6 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -54,6 +55,8 @@ import thaumcraft.common.crafting.ArcaneShapedRecipe;
 import thaumcraft.common.crafting.ArcaneShapelessRecipe;
 import thaumcraft.common.crafting.InfusionStackRecipe;
 import thaumcraft.common.crafting.CrucibleRecipe;
+import thaumcraft.common.crafting.NativeArcaneRecipe;
+import thaumcraft.common.crafting.ProgrammaticRecipes;
 import thaumcraft.common.items.ItemEssence;
 import thaumcraft.common.items.ItemJarLabel;
 import thaumcraft.common.items.PhialData;
@@ -66,7 +69,10 @@ import thaumcraft.common.config.ThaumcraftSettings;
 /**
  * Native crafting/arcane/crucible/STACK infusion tags and item bonuses shared by scans and
  * dissolution. Original ThaumcraftCraftingManager:215-807, ApiHelper:40-80.
- * Enchantment/tag-patch/runic infusion and addon recipe contracts remain pending.
+ * Concrete API crucible/arcane/ordinary STACK-infusion native views share the same algorithms.
+ * Ordinary API infusion means a nonempty declared stack result, or a custom recipe's explicit fixed-output view.
+ * Arbitrary recipe callbacks and mutable public API fields not reflected by their native views,
+ * plus enchantment/tag-patch/runic infusion, remain outside this resolver contract.
  */
 public final class ObjectAspectResolver {
     private static final Map<RecipeManager, RecipeIndex> INDEXES = new WeakHashMap<>();
@@ -182,15 +188,43 @@ public final class ObjectAspectResolver {
     private static synchronized RecipeIndex index(Level level) {
         RecipeManager manager = level.getRecipeManager();
         Collection<RecipeHolder<?>> recipes = manager.getRecipes();
+        List<Object> registrations = ProgrammaticRecipes.registrations();
+        List<RecipeHolder<?>> apiViews = new ArrayList<>();
+        if (!registrations.isEmpty()) {
+            // Inference-only holders: do not ask the crucible recipe-type registry or
+            // copy stock holders back out of ProgrammaticRecipes.crucibles(manager).
+            Set<Object> declared = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+            for (int ordinal = 0; ordinal < registrations.size(); ordinal++) {
+                Object registration = registrations.get(ordinal);
+                if (registration instanceof thaumcraft.api.crafting.CrucibleRecipe crucible && declared.add(registration)) {
+                    apiViews.add(new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath("thaumcraft", "api/aspects/crucible/" + ordinal),
+                            CrucibleRecipe.programmatic(crucible)));
+                }
+                // Custom views opt in explicitly. Never infer from a preview that
+                // merely copies the centre for a null/tag-patched result. Keep the
+                // returned view itself: an add-on may create a new view on each call.
+                if (registration instanceof thaumcraft.api.crafting.InfusionRecipe infusion && declared.add(registration)) {
+                    InfusionStackRecipe fixed = infusion.objectAspectRecipe();
+                    if (fixed != null && fixed.resultPatch().isEmpty() && !fixed.getResultItem(level.registryAccess()).isEmpty())
+                        apiViews.add(new RecipeHolder<>(ResourceLocation.fromNamespaceAndPath("thaumcraft", "api/aspects/infusion/" + ordinal), fixed));
+                }
+            }
+            apiViews.addAll(ProgrammaticRecipes.arcaneViews());
+        }
+        List<ViewSnapshot> views = apiViews.stream().map(holder -> snapshot(holder, level)).toList();
         RecipeIndex existing = INDEXES.get(manager);
-        // Native byName.values changes identity when recipes are replaced, even
-        // if RecipeManager itself survives /reload. No cached aspect results or
-        // Level/RegistryAccess references survive a lookup or a server lifetime.
-        if (existing != null && existing.source == recipes) return existing;
+        // Recipe-manager replacement and API add/remove/reordering are independent.
+        // Relevant native-view values are copied too: shapeless views are recreated on
+        // every call, while a shaped view can expose a mutable output stack. Never
+        // retain a Level/RegistryAccess or cache resolved aspects between lookups.
+        if (existing != null && existing.source == recipes
+                && sameRegistrations(existing.registrations, registrations) && existing.views.equals(views)) return existing;
         Map<Item, List<RecipeHolder<?>>> outputs = new HashMap<>();
         Map<Item, List<RecipeHolder<?>>> modernOutputs = new HashMap<>();
         Map<Item, List<RecipeHolder<?>>> cookedFrom = new HashMap<>();
+        Set<Object> indexed = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         recipes.stream().sorted(Comparator.comparing(holder -> holder.id().toString())).forEach(holder -> {
+            indexed.add(holder.value());
             var recipe = holder.value();
             ItemStack result = recipe.getResultItem(level.registryAccess());
             if (recipe instanceof StonecutterRecipe || recipe instanceof SmithingTransformRecipe || recipe instanceof AbstractCookingRecipe) {
@@ -207,13 +241,54 @@ public final class ObjectAspectResolver {
                     || recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe)) return;
             if (!result.isEmpty()) outputs.computeIfAbsent(result.getItem(), ignored -> new ArrayList<>()).add(holder);
         });
-        var created = new RecipeIndex(recipes, outputs, modernOutputs, cookedFrom);
+        // Native order remains unchanged; API views follow their registration order.
+        // Arcane deliberately uses the last match, infusion the first, as TC4 did.
+        for (var holder : apiViews) {
+            if (!indexed.add(holder.value())) continue;
+            ItemStack result = holder.value().getResultItem(level.registryAccess());
+            if (!result.isEmpty()) outputs.computeIfAbsent(result.getItem(), ignored -> new ArrayList<>()).add(holder);
+        }
+        var created = new RecipeIndex(recipes, registrations, views, outputs, modernOutputs, cookedFrom);
         INDEXES.put(manager, created);
         return created;
     }
 
-    private record RecipeIndex(Collection<RecipeHolder<?>> source, Map<Item, List<RecipeHolder<?>>> outputs,
-                               Map<Item, List<RecipeHolder<?>>> modernOutputs, Map<Item, List<RecipeHolder<?>>> cookedFrom) {}
+    private record RecipeIndex(Collection<RecipeHolder<?>> source, List<Object> registrations, List<ViewSnapshot> views,
+                               Map<Item, List<RecipeHolder<?>>> outputs, Map<Item, List<RecipeHolder<?>>> modernOutputs,
+                               Map<Item, List<RecipeHolder<?>>> cookedFrom) {}
+
+    private static boolean sameRegistrations(List<Object> first, List<Object> second) {
+        if (first.size() != second.size()) return false;
+        for (int index = 0; index < first.size(); index++) if (first.get(index) != second.get(index)) return false;
+        return true;
+    }
+
+    /** Only values used by aspect inference, not matching callbacks, research, mirrors or instability. */
+    private record ViewSnapshot(ResourceLocation id, Class<?> type, Item output, int count, List<Ingredient> ingredients,
+                                List<Map.Entry<String, Integer>> costs, int width, int height) {}
+
+    private static ViewSnapshot snapshot(RecipeHolder<?> holder, Level level) {
+        var recipe = holder.value();
+        ItemStack output = recipe.getResultItem(level.registryAccess());
+        List<Ingredient> ingredients = new ArrayList<>();
+        Map<String, Integer> costs;
+        int width = 0, height = 0;
+        if (recipe instanceof CrucibleRecipe crucible) {
+            ingredients.add(crucible.catalyst());
+            costs = crucible.aspects();
+        } else if (recipe instanceof NativeArcaneRecipe arcane) {
+            ingredients.addAll(arcane.getIngredients());
+            costs = arcane.vis();
+            width = arcane instanceof ArcaneShapedRecipe shaped ? shaped.pattern().getFirst().length() : ingredients.size();
+            height = arcane instanceof ArcaneShapedRecipe shaped ? shaped.pattern().size() : 1;
+        } else if (recipe instanceof InfusionStackRecipe infusion) {
+            ingredients.add(infusion.input());
+            ingredients.addAll(infusion.components());
+            costs = infusion.aspects();
+        } else throw new IllegalArgumentException("Unsupported native API aspect view " + recipe.getClass());
+        var orderedCosts = costs.entrySet().stream().map(entry -> Map.entry(entry.getKey(), entry.getValue())).toList();
+        return new ViewSnapshot(holder.id(), recipe.getClass(), output.getItem(), output.getCount(), List.copyOf(ingredients), orderedCosts, width, height);
+    }
 
     /** The port's own aspect inference (server setting {@code aspect_inference}); off is the TC4 resolver. */
     public static boolean inference() { return ThaumcraftSettings.current().aspectInference(); }
@@ -390,7 +465,12 @@ public final class ObjectAspectResolver {
 
         private AspectList fromCrucible(List<RecipeHolder<?>> candidates) {
             var selected = candidates.stream().filter(holder -> holder.value() instanceof CrucibleRecipe)
-                    .min(Comparator.comparingInt(holder -> ((CrucibleRecipe) holder.value()).sourceOrder()));
+                    .min(Comparator.comparingInt(holder -> {
+                        var recipe = (CrucibleRecipe) holder.value();
+                        // API sourceOrder is a hash in its bridge, not its registration position.
+                        // Stock ConfigRecipes order wins; stable equal MAX keys keep API order.
+                        return recipe.programmatic() == null ? recipe.sourceOrder() : Integer.MAX_VALUE;
+                    }));
             if (selected.isEmpty()) return null;
             CrucibleRecipe recipe = (CrucibleRecipe) selected.get().value();
             ItemStack[] catalysts = recipe.catalyst().getItems();
@@ -398,7 +478,7 @@ public final class ObjectAspectResolver {
             // Unlike ordinary crafting, original crucible output copies ALL
             // catalyst tags without dividing by the recipe output stack size.
             AspectList result = base(catalysts[0].getItem());
-            addCost(result, recipe.aspects(), recipe.result().getCount());
+            addCost(result, recipe.aspects(), recipe.getResultItem(level.registryAccess()).getCount());
             return positive(result);
         }
 
@@ -516,14 +596,15 @@ public final class ObjectAspectResolver {
 
     private static int legacyHarvestLevel(Tier tier) {
         // 1.21 removed the integer harvest level. Only original anchored tiers
-        // have an anchored mapping; attack damage is NOT the harvest API and
-        // must not be used to invent bonuses for arbitrary modern/modded tiers.
+        // have an anchored mapping. A ported add-on may explicitly choose the same
+        // canonical diamond harvest gate; arbitrary tags and attack damage are not levels.
         if (tier == Tiers.WOOD || tier == Tiers.GOLD) return 0;
         if (tier == Tiers.STONE) return 1;
         if (tier == Tiers.IRON) return 2;
         if (tier == Tiers.DIAMOND || tier == ThaumcraftEquipment.THAUMIUM_TIER || tier == ThaumcraftEquipment.ELEMENTAL_TIER) return 3;
         if (tier == ThaumcraftEquipment.VOID_TIER || tier == thaumcraft.common.config.ThaumcraftLegacyItems.CRIMSON_TIER) return 4;
         if (tier == thaumcraft.common.config.ThaumcraftLegacyItems.PRIMAL_CRUSHER_TIER) return 5;
+        if (BlockTags.INCORRECT_FOR_DIAMOND_TOOL.equals(tier.getIncorrectBlocksForDrops())) return 3;
         return -1;
     }
 

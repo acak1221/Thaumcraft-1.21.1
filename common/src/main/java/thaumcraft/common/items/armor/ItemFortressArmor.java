@@ -30,10 +30,15 @@ public class ItemFortressArmor extends ArmorItem implements IRepairable, IRunicA
     private static final EquipmentSlot[] SET_SLOTS = {EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
 
     public ItemFortressArmor(Holder<ArmorMaterial> material, Type type, Properties properties) {
+        this(material, type, properties, FortressRules.DURABILITY_FACTOR, Rarity.RARE);
+    }
+
+    /** Add-on fortress families retain the same mask/set contracts with their own original material. */
+    public ItemFortressArmor(Holder<ArmorMaterial> material, Type type, Properties properties, int durabilityFactor, Rarity rarity) {
         super(material, type, properties.durability(switch (type) {
-            case HELMET, CHESTPLATE, LEGGINGS -> type.getDurability(FortressRules.DURABILITY_FACTOR);
+            case HELMET, CHESTPLATE, LEGGINGS -> type.getDurability(durabilityFactor);
             default -> throw new IllegalArgumentException("The Thaumium Fortress armor has no boots");
-        }).rarity(Rarity.RARE));
+        }).rarity(rarity));
     }
 
     @Override public int getRunicCharge(ItemStack stack) { return 0; }

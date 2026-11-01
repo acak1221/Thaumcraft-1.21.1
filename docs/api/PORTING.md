@@ -197,6 +197,14 @@ a `Block`, an `Ingredient`, a namespaced tag id or a 1.7.10 ore dictionary name 
 The recipe types are data driven as well (`data/thaumcraft/recipe/` of this repository shows the formats),
 so an add-on may ship JSON recipes instead and show them in the book with `ResearchPage.recipe(id)`.
 
+Since alpha.12, fixed native views of registered arcane, crucible and ordinary infusion recipes also
+feed canonical object-aspect inference. A custom `InfusionRecipe` subclass can explicitly override
+`objectAspectRecipe()` with a side-effect-free `InfusionStackRecipe` for a fixed nonempty output.
+Return `null` for central-item patches or actor-dependent outputs; a book preview that copies the
+centre is not an aspect recipe. Registration removal/readdition and view values invalidate the
+resolver's index without replacing the world's recipe manager. The separate Tainted Magic native
+tests exercise this path with canonical inference settings and no manually supplied object tags.
+
 ## 7. Research
 
 `ResearchCategories.registerCategory`, `new ResearchItem(...)...registerResearchItem()`, `ResearchPage` and
@@ -247,6 +255,14 @@ wand is carried, and the name uses `item.Wand.<tag>.rod` / `item.Wand.<tag>.cap`
 textures in the UV layout of the original `ModelWand`, so a 1.7.10 PNG works unchanged. A part registered under
 a native tag never replaces the native part. Any `ItemFocusBasic` subclass is a focus: it mounts on a wand and
 its hooks, colour and ornament are used.
+
+Since alpha.12, `new FocusUpgradeType(id, icon, nameKey, textKey, aspects)` registers an add-on upgrade
+under an unused ID in `0..32767`; collisions fail and aspect weights are copied. The focus supplies
+the rank choices and behavior. The focal manipulator checks `canApplyUpgrade` with the real payer
+before charging resources. Fully paid completion applies the accepted structural choice with a
+single-use machine permit, without querying a null/offline payer again; direct `applyUpgrade` keeps
+its existing checks. Tests: `AddonFocusUpgradeRegistrationTest` and the separate Tainted Magic
+Diffusion test using an actual paid VisNet/focal-manipulator job.
 
 `thaumcraft.api.wands.WandHelper` is the original `ItemWandCasting` surface: `isWand`, `getRod`, `getCap`,
 `getFocus`, `getFocusItem`, `setFocus`, `isStaff`, `isSceptre`, `getVis`/`getAllVis`/`getMaxVis` and

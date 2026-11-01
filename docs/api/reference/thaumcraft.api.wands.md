@@ -12,7 +12,7 @@ Types: [`FocusUpgradeType`](#focusupgradetype), [`IFocusPouch`](#ifocuspouch), [
 public final class FocusUpgradeType
 ```
 
-Bounded native catalogue. Stable TC4 IDs, not enum ordinals or enchantments. Unimplemented specializations are deliberately absent, never paid placeholders.
+Native upgrades and original-style add-on registrations, keyed by stable TC4 IDs.
 
 ```java
 public static final FocusUpgradeType potency
@@ -41,6 +41,13 @@ public final String name
 public final String text
 public final ResourceLocation icon
 ```
+
+<a id="focusupgradetype-focusupgradetype"></a>
+```java
+public FocusUpgradeType(int id, ResourceLocation icon, String name, String text, AspectList aspects)
+```
+
+Registers an add-on upgrade under an unused stable ID; its item supplies the actual behavior.
 
 <a id="focusupgradetype-getaspects"></a>
 ```java
@@ -443,6 +450,13 @@ public boolean applyUpgrade(ItemStack focusstack, FocusUpgradeType type, int ran
 ```
 
 Bounds-before-index fixes the original crash; machine owns sequential rank progression. Direct API holes survive; unsupported branches cannot be paid.
+
+<a id="itemfocusbasic-applyupgradeafterpayment"></a>
+```java
+public final boolean applyUpgradeAfterPayment(ItemStack focusstack, FocusUpgradeType type, int rank, thaumcraft.common.tiles.TileFocalManipulator.PaidUpgrade permit)
+```
+
+The focal manipulator already checked the real payer's research BEFORE charging XP and vis. Completion must not query a null/offline player again. Only the machine can create this single-use authority for its exact private candidate; the normal actor-free API keeps its existing subclass checks.
 
 ```java
 public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags)

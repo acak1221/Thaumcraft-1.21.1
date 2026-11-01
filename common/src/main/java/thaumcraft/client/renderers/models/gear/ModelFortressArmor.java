@@ -212,32 +212,33 @@ public final class ModelFortressArmor extends ModelGearArmor {
      * @param goggles whether the helm carries the infused goggles.
      */
     public void setPieceVisibility(int set, int mask, boolean goggles) {
-        this.goggles.visible = !goggles;
-        mask0.visible = mask != 0;
-        mask1.visible = mask != 1;
-        mask2.visible = mask != 2;
-        if (scroll != null) scroll.visible = set < 3;
-        if (book != null) book.visible = set < 2;
-        ornamentL.visible = set < 3;
-        ornamentL2.visible = set < 3;
-        ornamentR.visible = set < 3;
-        ornamentR2.visible = set < 3;
-        gemOrnament.visible = set < 3;
-        gem.visible = set < 3;
-        flapL.visible = set < 2;
-        flapR.visible = set < 2;
-        shoulderplateLtop.visible = set < 2;
-        shoulderplateL1.visible = set < 2;
-        shoulderplateL2.visible = set < 3;
-        shoulderplateL3.visible = set < 3;
-        shoulderplateRtop.visible = set < 2;
-        shoulderplateR1.visible = set < 2;
-        shoulderplateR2.visible = set < 3;
-        shoulderplateR3.visible = set < 3;
-        sidepanelR2.visible = set < 2;
-        sidepanelL2.visible = set < 2;
-        sidepanelR3.visible = set < 3;
-        sidepanelL3.visible = set < 3;
+        // Oracle field_78807_k is isHidden; modern ModelPart.visible has the opposite polarity.
+        this.goggles.visible = goggles;
+        mask0.visible = mask == 0;
+        mask1.visible = mask == 1;
+        mask2.visible = mask == 2;
+        if (scroll != null) scroll.visible = set >= 3;
+        if (book != null) book.visible = set >= 2;
+        ornamentL.visible = set >= 3;
+        ornamentL2.visible = set >= 3;
+        ornamentR.visible = set >= 3;
+        ornamentR2.visible = set >= 3;
+        gemOrnament.visible = set >= 3;
+        gem.visible = set >= 3;
+        flapL.visible = set >= 2;
+        flapR.visible = set >= 2;
+        shoulderplateLtop.visible = set >= 2;
+        shoulderplateL1.visible = set >= 2;
+        shoulderplateL2.visible = set >= 3;
+        shoulderplateL3.visible = set >= 3;
+        shoulderplateRtop.visible = set >= 2;
+        shoulderplateR1.visible = set >= 2;
+        shoulderplateR2.visible = set >= 3;
+        shoulderplateR3.visible = set >= 3;
+        sidepanelR2.visible = set >= 2;
+        sidepanelL2.visible = set >= 2;
+        sidepanelR3.visible = set >= 3;
+        sidepanelL3.visible = set >= 3;
     }
 
     /** The original ModelFortressArmor628-643 for a skeleton or a zombie wearer. */

@@ -53,7 +53,8 @@ public final class EntityExplosiveOrb extends ThrowableProjectile {
     }
     public float getStrength() { return entityData.get(STRENGTH); }
     public void setStrength(float value) {
-        if (!Float.isFinite(value) || value < 0 || value > 3) throw new IllegalArgumentException("Invalid explosive orb strength");
+        // Original Tainted Magic katana inscriptions legitimately use strengths up to5.1875.
+        if (!Float.isFinite(value) || value < 0 || value > 6) throw new IllegalArgumentException("Invalid explosive orb strength");
         entityData.set(STRENGTH, value);
     }
     public boolean isFiery() { return entityData.get(FIRE); }
@@ -114,7 +115,7 @@ public final class EntityExplosiveOrb extends ThrowableProjectile {
     @Override protected void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         float strength = tag.contains("OrbStrength") ? tag.getFloat("OrbStrength") : 1;
-        setStrength(Float.isFinite(strength) && strength >= 0 && strength <= 3 ? strength : 1);
+        setStrength(Float.isFinite(strength) && strength >= 0 && strength <= 6 ? strength : 1);
         setFiery(tag.getBoolean("OrbFire")); age = Math.max(0, tag.getInt("OrbAge")); entityData.set(AGE, age);
     }
 }

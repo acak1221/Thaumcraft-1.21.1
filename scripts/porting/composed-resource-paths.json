@@ -795,7 +795,7 @@
         "thaumcraft:textures/foci/treasure.png",
         "thaumcraft:textures/foci/vampirebats.png"
       ],
-      "note": ""
+      "note": "Reviewed 2026-11-02: all21 built-in key-to-texture paths unchanged. The new add-on constructor accepts an explicit ResourceLocation, which is caller-owned and unbounded; it creates no new bundled path. ObjectAspectResolver api/aspects/{crucible,infusion}/ordinal factories are inference-only recipe IDs, not resource files."
     },
     {
       "site": "common/src/main/java/thaumcraft/api/wands/WandCap.java:32",
@@ -1109,6 +1109,9 @@
     "common/src/main/java/thaumcraft/client/renderers/entity/RenderTravelingTrunk.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/items/golem_upgrade_\"+upgrade.key+\".png\")"
     ],
+    "common/src/main/java/thaumcraft/client/renderers/item/ResearchTableItemRenderer.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
+    ],
     "common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/models/\"+name+\".obj\")"
     ],
@@ -1326,6 +1329,10 @@
       "ResourceLocation.parse(id.getAsString())",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",flattened.get(metadata))"
     ],
+    "common/src/main/java/thaumcraft/common/lib/research/ObjectAspectResolver.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/aspects/crucible/\"+ordinal)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/aspects/infusion/\"+ordinal)"
+    ],
     "common/src/main/java/thaumcraft/common/lib/research/ResearchConditions.java": [
       "ResourceLocation.fromNamespaceAndPath(namespace,path)"
     ],
@@ -1397,12 +1404,6 @@
       "ResourceLocation.parse(tag.getString(\"Recipe\"))",
       "ResourceLocation.parse(row.getString(\"id\"))"
     ],
-    "fabric/src/main/java/thaumcraft/fabric/world/FabricBiomeSpawns.java": [
-      "ResourceLocation.parse(row.entity())"
-    ],
-    "neoforge/src/main/java/thaumcraft/neoforge/OriginalEntitySpawnsBiomeModifier.java": [
-      "ResourceLocation.parse(row.entity())"
-    ],
     "compat/emi/src/main/java/thaumcraft/compat/emi/AspectEmiStack.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",aspect.getTag())"
     ],
@@ -1419,8 +1420,11 @@
     "compat/jei/src/main/java/thaumcraft/compat/jei/Categories.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+recipe.aspect().getTag())"
     ],
-    "common/src/main/java/thaumcraft/client/renderers/item/ResearchTableItemRenderer.java": [
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/\"+path)"
+    "fabric/src/main/java/thaumcraft/fabric/world/FabricBiomeSpawns.java": [
+      "ResourceLocation.parse(row.entity())"
+    ],
+    "neoforge/src/main/java/thaumcraft/neoforge/OriginalEntitySpawnsBiomeModifier.java": [
+      "ResourceLocation.parse(row.entity())"
     ]
   },
   "helper_calls": {
@@ -1473,7 +1477,7 @@
   },
   "source_contracts": {
     "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "348e3afb2533acbf984b7fd3f105a240ee8dcb2cf3d793b469f8095cadb8199f",
-    "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": "d30a772140f079ffe0dc439aac08300d6bdb298907c05598b3aab5d24299f2ce",
+    "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": "58707a3d2cf7d1168990b583afd9a23cfae5e82b3a6af630169ffb76b5af11ff",
     "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "d5dfd3daa9e1894ef00eeb7d8fe4e4357dc536701d450eee45ae771efcf5745c",
     "common/src/main/java/thaumcraft/api/wands/WandCap.java": "7e2b9baeb986547a352dde829f0da1a945c54583e464ddcc29976d9b20c8a6aa",
     "common/src/main/java/thaumcraft/api/wands/WandRod.java": "0e2bd6a4981952f2ae1f702b328c1bcad451d711a8f131b66e69515adb84bd80",

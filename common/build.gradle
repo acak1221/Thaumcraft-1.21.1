@@ -53,7 +53,8 @@ def harnessMarkers = [
  'thaumcraft_gametest', 'thaumcraft_client_smoke', 'thaumcraft/clientsmoke', 'thaumcraft/gametest/',
  'net/minecraft/gametest/', 'net/fabricmc/fabric/api/gametest/',
  'net/neoforged/neoforge/gametest/', 'net/neoforged/neoforge/event/registergametestsevent',
- 'fabric-gametest', 'fabric-api/gametest', 'data/thaumcraft/structure/empty/nbt'
+ 'fabric-gametest', 'fabric-api/gametest', 'data/thaumcraft/structure/empty/nbt',
+ 'taintedmagic/testing/', 'taintedmagic_gametest'
 ]
 def containsHarnessMarker = { String text ->
  def normalized = text.replace('\\', '/').replace('.', '/').toLowerCase(java.util.Locale.ROOT)
@@ -61,7 +62,7 @@ def containsHarnessMarker = { String text ->
 }
 def isHarnessOutput = { File path ->
  def normalized = path.path.replace('\\', '/').toLowerCase(java.util.Locale.ROOT)
- normalized.tokenize('/').any { it in ['gametest', 'clienttest'] }
+ normalized.tokenize('/').any { it.endsWith('gametest') || it.endsWith('clienttest') }
 }
 def scanProductionEntry = { String name, byte[] bytes, String archive ->
  if (containsHarnessMarker(name) || isHarnessOutput(new File(name))) {
@@ -111,7 +112,7 @@ ext.configureTestIsolation = { Project loader, Map<String, String> isolatedRuns 
       throw new GradleException("Test mod leaked into $scope: ${mod.name}")
      }
      mod.modSourceSets.get().each { reference ->
-      if (reference.sourceSet().name in ['gameTest', 'clientTest']) {
+      if (reference.sourceSet().name in isolatedRuns.values()) {
        throw new GradleException("Test source set leaked into $scope: $reference")
       }
      }
@@ -186,7 +187,7 @@ ext.configureTestIsolation = { Project loader, Map<String, String> isolatedRuns 
       }
      }
     } else {
-     if (source.name in ['gameTest', 'clientTest']) {
+     if (source.name in isolatedRuns.values()) {
       throw new GradleException("Normal run ${loader.path}:${run.name} uses test source set ${source.name}")
      }
      rejectOutputs(source.runtimeClasspath.files, "${loader.path}:${run.name} runtime classpath")

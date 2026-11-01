@@ -19,4 +19,15 @@ public interface MagicWardGear {
 
     /** The multiplier on the piece's share (and on its ordinary armor): the Fortress armor's set bonus for a player, 1 otherwise. */
     default double wardFactor(ItemStack stack, LivingEntity wearer) { return 1.0; }
+
+    /** Source-specific priority-one share. Add-ons can preserve their own ISpecialArmor divisors. */
+    default double wardShare(ItemStack stack, LivingEntity wearer, thaumcraft.common.lib.MagicWard.Kind kind) {
+        int armor = wardArmor(stack);
+        if (armor <= 0) return 0;
+        return switch (kind) {
+            case MAGIC -> thaumcraft.common.lib.MagicWard.ratio(armor) * wardFactor(stack, wearer);
+            case FIRE -> wardsFire() ? thaumcraft.common.lib.MagicWard.fireRatio(armor) * wardFactor(stack, wearer) : 0;
+            default -> 0;
+        };
+    }
 }

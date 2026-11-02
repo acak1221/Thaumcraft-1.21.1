@@ -121,3 +121,5 @@ javac.*.args
 
 # Local agent worktrees
 /.claude/worktrees/
+# Isolated native recipe-transfer client fixture (worlds, logs and complete captures).
+fabric/run-recipe-transfer-client/

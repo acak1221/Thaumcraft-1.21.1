@@ -96,6 +96,14 @@ The client-only part of the Thaumcraft API: the particles that 1.7.10 add-ons dr
 | [`ShapedArcaneRecipe`](thaumcraft.api.crafting.md#shapedarcanerecipe) | The original TC4 shaped arcane recipe. |
 | [`ShapelessArcaneRecipe`](thaumcraft.api.crafting.md#shapelessarcanerecipe) | The original TC4 shapeless arcane recipe. |
 
+## [thaumcraft.api.crafting.transfer](thaumcraft.api.crafting.transfer.md)
+
+| Type | Summary |
+|---|---|
+| [`RecipeTransferPlan`](thaumcraft.api.crafting.transfer.md#recipetransferplan) | A server-prepared inventory rearrangement. |
+| [`RecipeTransferResult`](thaumcraft.api.crafting.transfer.md#recipetransferresult) | Arranging ingredients never crafts the result or spends wand vis. |
+| [`RecipeTransferTarget`](thaumcraft.api.crafting.transfer.md#recipetransfertarget) | Implement on the actual open menu. |
+
 ## [thaumcraft.api.damagesource](thaumcraft.api.damagesource.md)
 
 | Type | Summary |

@@ -2745,5 +2745,16 @@
   "config.jade.plugin_thaumcraft.essentia": "Эссенция Thaumcraft",
   "config.jade.plugin_thaumcraft.essentia_goggles": "Эссенция только в очках откровения (как в TC4)",
   "config.jade.plugin_thaumcraft.machine": "Машины Thaumcraft",
-  "config.jade.plugin_thaumcraft.golem": "Големы Thaumcraft"
+  "config.jade.plugin_thaumcraft.golem": "Големы Thaumcraft",
+  "tc.recipe_transfer.fill": "Перенести рецепт на магический верстак",
+  "tc.recipe_transfer.max": "Shift: заполнить максимальное количество",
+  "tc.recipe_transfer.success": "Ингредиенты рецепта перенесены",
+  "tc.recipe_transfer.no_target": "Рядом нет доступного магического верстака",
+  "tc.recipe_transfer.stale_menu": "Меню верстака изменилось; откройте его заново",
+  "tc.recipe_transfer.unknown_recipe": "Рецепт больше не существует",
+  "tc.recipe_transfer.unsupported": "Этот рецепт нельзя перенести",
+  "tc.recipe_transfer.locked_research": "Необходимое исследование не завершено",
+  "tc.recipe_transfer.missing_ingredients": "Недостаточно ингредиентов",
+  "tc.recipe_transfer.inventory_full": "Нет места для возврата прежних ингредиентов",
+  "tc.recipe_transfer.failed": "Не удалось перенести рецепт"
 }

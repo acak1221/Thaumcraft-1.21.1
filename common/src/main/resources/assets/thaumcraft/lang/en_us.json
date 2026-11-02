@@ -2745,5 +2745,16 @@
   "config.jade.plugin_thaumcraft.essentia": "Thaumcraft essentia",
   "config.jade.plugin_thaumcraft.essentia_goggles": "Essentia only with the goggles of revealing (as in TC4)",
   "config.jade.plugin_thaumcraft.machine": "Thaumcraft machines",
-  "config.jade.plugin_thaumcraft.golem": "Thaumcraft golems"
+  "config.jade.plugin_thaumcraft.golem": "Thaumcraft golems",
+  "tc.recipe_transfer.fill": "Move recipe to the arcane workbench",
+  "tc.recipe_transfer.max": "Shift: fill as many as possible",
+  "tc.recipe_transfer.success": "Recipe ingredients moved",
+  "tc.recipe_transfer.no_target": "No arcane workbench within reach",
+  "tc.recipe_transfer.stale_menu": "The workbench menu has changed; open it again",
+  "tc.recipe_transfer.unknown_recipe": "Recipe no longer exists",
+  "tc.recipe_transfer.unsupported": "This recipe cannot be transferred",
+  "tc.recipe_transfer.locked_research": "Required research is not complete",
+  "tc.recipe_transfer.missing_ingredients": "Not enough ingredients",
+  "tc.recipe_transfer.inventory_full": "No room to return the current ingredients",
+  "tc.recipe_transfer.failed": "Recipe transfer failed"
 }

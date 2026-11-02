@@ -29,6 +29,8 @@ public final class TileArcaneWorkbench extends BlockEntity implements WorldlyCon
     public static final int WAND_SLOT = 10;
     private final NonNullList<ItemStack> items = NonNullList.withSize(11, ItemStack.EMPTY);
     private boolean evacuating;
+    private boolean transferring;
+    public boolean isRecipeTransferActive() { return transferring; }
 
     public TileArcaneWorkbench(BlockPos pos, BlockState state) {
         super(ThaumcraftArcane.ARCANE_WORKBENCH_BLOCK_ENTITY.get(), pos, state);
@@ -38,22 +40,22 @@ public final class TileArcaneWorkbench extends BlockEntity implements WorldlyCon
     @Override public boolean isEmpty() { return items.stream().allMatch(ItemStack::isEmpty); }
     @Override public ItemStack getItem(int slot) { return slot == 9 ? ItemStack.EMPTY : items.get(slot); }
     @Override public ItemStack removeItem(int slot, int amount) {
-        if (slot == 9) return ItemStack.EMPTY;
+        if (slot == 9 || transferring) return ItemStack.EMPTY;
         ItemStack removed = ContainerHelper.removeItem(items, slot, amount);
         if (!removed.isEmpty()) setChanged();
         return removed;
     }
-    @Override public ItemStack removeItemNoUpdate(int slot) { return slot == 9 ? ItemStack.EMPTY : ContainerHelper.takeItem(items, slot); }
+    @Override public ItemStack removeItemNoUpdate(int slot) { return slot == 9 || transferring ? ItemStack.EMPTY : ContainerHelper.takeItem(items, slot); }
     @Override public void setItem(int slot, ItemStack stack) {
-        if (slot == 9) return;
+        if (slot == 9 || transferring) return;
         // Like TileMagicWorkbench:87-93, preserve the supplied whole stack.
         // Normal GUI/automation limits live on Slot/Container; silently applying
         // itemmax1 here would destroy data during the original wand transfer.
         items.set(slot, stack);
         setChanged();
     }
-    @Override public void clearContent() { items.clear(); setChanged(); }
-    @Override public boolean canPlaceItem(int slot, ItemStack stack) { return slot != 9 && (slot != WAND_SLOT || ArcaneVis.isWorkbenchWand(stack)); }
+    @Override public void clearContent() { if (!transferring) { items.clear(); setChanged(); } }
+    @Override public boolean canPlaceItem(int slot, ItemStack stack) { return !transferring && slot != 9 && (slot != WAND_SLOT || ArcaneVis.isWorkbenchWand(stack)); }
     @Override public int[] getSlotsForFace(Direction side) { return new int[] {WAND_SLOT}; }
     @Override public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) { return slot == WAND_SLOT && ArcaneVis.isWorkbenchWand(stack); }
     @Override public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) { return slot == WAND_SLOT; }
@@ -67,12 +69,34 @@ public final class TileArcaneWorkbench extends BlockEntity implements WorldlyCon
 
     /** One physical update after all server-side ingredient/vis checks have passed. */
     public void applyCraft(List<ItemStack> matrix, ItemStack wand) {
+        if (transferring) throw new IllegalStateException("Craft during recipe transfer");
         if (matrix.size() != 9 || !(level instanceof ServerLevel server) || !server.getServer().isSameThread()) {
             throw new IllegalStateException("Server-thread 3x3 craft required");
         }
         for (int slot = 0; slot < 9; slot++) items.set(slot, matrix.get(slot));
         items.set(WAND_SLOT, wand);
         setChanged();
+    }
+
+    /** Quietly replace BOTH inventories before any comparator/menu notification can observe them. */
+    public boolean applyRecipeTransfer(net.minecraft.server.level.ServerPlayer player, ContainerArcaneWorkbench menu,
+            thaumcraft.api.crafting.transfer.RecipeTransferPlan plan) {
+        if (transferring || !(level instanceof ServerLevel server) || !server.getServer().isSameThread()
+                || !stillValid(player) || player.containerMenu != menu || menu.tile() != this) return false;
+        var expected = plan.expectedMatrix(); var expectedSources = plan.expectedSources();
+        var next = plan.nextMatrix(); var nextSources = plan.nextSources();
+        if (expectedSources.size() != player.getInventory().items.size()
+                || !ItemStack.listMatches(expectedSources, player.getInventory().items)) return false;
+        for (int slot = 0; slot < 9; slot++) if (!ItemStack.matches(expected.get(slot), items.get(slot))) return false;
+        if (!stillValid(player) || player.containerMenu != menu) return false;
+        transferring = true;
+        try {
+            for (int slot = 0; slot < 9; slot++) items.set(slot, next.get(slot));
+            for (int slot = 0; slot < nextSources.size(); slot++) player.getInventory().items.set(slot, nextSources.get(slot));
+            try { player.getInventory().setChanged(); setChanged(); }
+            catch (RuntimeException failure) { thaumcraft.common.Thaumcraft.LOG.warn("Recipe transfer committed before workbench notification failed at {}", worldPosition, failure); }
+            return true;
+        } finally { transferring = false; }
     }
 
     public void evacuate() {
@@ -101,6 +125,7 @@ public final class TileArcaneWorkbench extends BlockEntity implements WorldlyCon
         ContainerHelper.saveAllItems(tag, items, registries);
     }
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (transferring) throw new IllegalStateException("Workbench contents are being transferred");
         super.loadAdditional(tag, registries);
         items.clear();
         ContainerHelper.loadAllItems(tag, items, registries);

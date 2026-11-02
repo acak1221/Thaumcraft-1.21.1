@@ -43,6 +43,7 @@ public final class ClientSetup {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        thaumcraft.common.lib.network.RecipeTransferNetworking.initClient(thaumcraft.client.gui.RecipeTransferRequestSender::send);
         dev.architectury.event.events.client.ClientTickEvent.CLIENT_PRE.register(client ->
                 thaumcraft.client.fx.ParticleEngine.tick(client.level));
         dev.architectury.event.events.client.ClientTickEvent.CLIENT_POST.register(thaumcraft.client.lib.UtilsFX::tick);

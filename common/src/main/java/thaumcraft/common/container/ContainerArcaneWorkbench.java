@@ -22,7 +22,7 @@ import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.tiles.TileArcaneWorkbench;
 
 /** Persistent shared inputs, per-viewer preview, and a server-atomic result transaction. */
-public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
+public final class ContainerArcaneWorkbench extends AbstractContainerMenu implements thaumcraft.api.crafting.transfer.RecipeTransferTarget {
     private final Container contents;
     private final TileArcaneWorkbench tile;
     private final Player viewer;
@@ -79,7 +79,16 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
     }
 
     private boolean active(Player player) {
-        return tile != null && player == viewer && viewer instanceof ServerPlayer && viewer.containerMenu == this && stillValid(player);
+        return tile != null && !tile.isRecipeTransferActive() && player == viewer && viewer instanceof ServerPlayer && viewer.containerMenu == this && stillValid(player);
+    }
+
+    @Override public Container recipeTransferContents() { return contents; }
+    @Override public boolean canTransferRecipe(ServerPlayer actor) {
+        return active(actor) && actor.canInteractWithBlock(tablePos, 0)
+                && actor.level().getWorldBorder().isWithinBounds(tablePos) && actor.level().mayInteract(actor, tablePos);
+    }
+    @Override public boolean applyRecipeTransfer(ServerPlayer actor, thaumcraft.api.crafting.transfer.RecipeTransferPlan plan) {
+        return canTransferRecipe(actor) && tile.applyRecipeTransfer(actor, this, plan);
     }
 
     private boolean allowed(ArcaneCrafting.Match match) {

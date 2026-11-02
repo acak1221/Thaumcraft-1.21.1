@@ -298,6 +298,16 @@ def multiplayerAllowPartial = providers.gradleProperty('multiplayerAllowPartial'
 // acceptance processes has to stay small enough to survive the OOM killer.
 def multiplayerHeap = providers.gradleProperty('multiplayerHeap').getOrElse('768M')
 loom.runs {
+ recipeTransferClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft native recipe transfer client'
+  runDir 'run-recipe-transfer-client'
+  vmArg '-Xmx1536M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.recipeTransferClient=true'
+  programArgs '--width', '1280', '--height', '900'
+ }
  // The development client with the example add-on loaded next to the mod.
  exampleClient {
   client()
@@ -637,7 +647,9 @@ tasks.named('runMultiplayerPeerClient') {
   logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+
+tasks.named('runRecipeTransferClient') { dependsOn tasks.named('clientTestClasses') }
 
 // Add-on authors compile against the mod jar; its sources jar carries the shared code too, the public
 // thaumcraft.api among it, so an IDE shows the documented API rather than decompiled classes.

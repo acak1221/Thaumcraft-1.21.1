@@ -483,6 +483,26 @@ public final class ThaumcraftRecipeDisplay {
 
     public static Map<String, ResourceLocation> aliases() { return RESOLVED; }
     public RecipeHolder<?> recipe() { return recipe; }
+    /** The real holder drawn on this tick; array pages cycle independently of their first recipe. */
+    public RecipeHolder<?> selectedRecipe(long cycle) {
+        if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size())).selectedRecipe(cycle);
+        return addon == null && syntheticResult.isEmpty() ? recipe : null;
+    }
+    /** Canonical transfer identity of the drawn recipe, including the visible native sceptre variant. */
+    public java.util.Optional<ResourceLocation> selectedTransferRecipeId(Level level, long cycle) {
+        if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
+                .selectedTransferRecipeId(level, cycle);
+        if (sceptreVariants != null && recipe != null
+                && recipe.value() instanceof thaumcraft.common.lib.crafting.ArcaneSceptreRecipe) {
+            // Keep this index identical to renderSceptre: the three displayed recipes share one dynamic holder.
+            SceptreVariant variant = SCEPTRE_VARIANTS.get((int) Math.floorMod(cycle, (long) SCEPTRE_VARIANTS.size()));
+            return java.util.Optional.of(ResourceLocation.fromNamespaceAndPath("thaumcraft",
+                    "sceptre/" + variant.rod() + "/" + variant.cap()));
+        }
+        RecipeHolder<?> selected = selectedRecipe(cycle);
+        return selected == null ? java.util.Optional.empty()
+                : thaumcraft.common.crafting.transfer.RecipeTransferRecipes.canonicalId(level, selected.value());
+    }
     public boolean sameRecipes(ThaumcraftRecipeDisplay other) {
         if (addon != null || other.addon != null) return sameAddonPage(addon, other.addon);
         if (recipe != other.recipe || infusionAltar != other.infusionAltar || thaumatorium != other.thaumatorium || alternatives.size() != other.alternatives.size()) return false;

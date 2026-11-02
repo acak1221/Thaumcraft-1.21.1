@@ -3,6 +3,7 @@ package thaumcraft.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,12 +27,15 @@ public final class GuiResearchRecipe extends Screen {
     private Map<ResearchDefinition.Page, ThaumcraftRecipeDisplay> recipes = Map.of();
     private int page, left, top, bookWidth, bookHeight, textWidth, textHeight;
     private Button previous, next;
+    private final TransferButton[] transferButtons = new TransferButton[2];
     private int requestedDescriptor = -1;
     private List<RecipeItemLinks.Hitbox> itemLinks = List.of();
     private int renderedPage = -1, renderedWidth, renderedHeight;
     private net.minecraft.world.level.Level renderedLevel;
     private record Draw(FormattedCharSequence text, ResearchText.Image image, int y, int width, int height) {}
     private record BookPage(List<Draw> text, ThaumcraftRecipeDisplay recipe, int descriptor) {}
+    private record TransferChoice(int pageIndex, long cycle, net.minecraft.world.item.crafting.RecipeHolder<?> holder,
+                                  ResourceLocation id) {}
 
     public GuiResearchRecipe(Screen parent, ResearchDefinition research) { this(parent, research, 0); }
     /** Opens the research on the spread that holds {@code startPage}; the reopened page of the book. */
@@ -57,7 +61,45 @@ public final class GuiResearchRecipe extends Screen {
                 Component.translatable("gui.back"), b -> onClose(), 38, 202, 20, 12, 0, 0));
         // The port's own bookmark ribbon on the top right corner of the book (ThaumcraftTweaks.bookmarks).
         if (thaumcraft.common.config.ThaumcraftTweaks.bookmarks()) addRenderableWidget(new BookmarkRibbon(left + bookWidth - 34, top - 4));
+        for (int side = 0; side < transferButtons.length; side++) transferButtons[side] = addRenderableWidget(new TransferButton(side));
         updateButtons();
+    }
+
+    private final class TransferButton extends Button {
+        private TransferChoice choice;
+        private TransferButton(int side) {
+            super(0, 0, 12, 12, Component.translatable("tc.recipe_transfer.fill"), button -> transferVisibleRecipe(side), DEFAULT_NARRATION);
+            visible = false;
+            active = false;
+            setTooltip(Tooltip.create(Component.translatable("tc.recipe_transfer.fill").append("\n")
+                    .append(Component.translatable("tc.recipe_transfer.max"))));
+        }
+        private void show(int x, int y, TransferChoice choice, boolean known) {
+            setX(x); setY(y); this.choice = choice; visible = true; active = known;
+        }
+        private void hide() { choice = null; visible = false; active = false; }
+        @Override protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+            int x = getX(), y = getY();
+            graphics.fill(x, y, x + width, y + height, 0xff6b5130);
+            graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1,
+                    !active ? 0xffa1957d : isHoveredOrFocused() ? 0xfff0deb7 : 0xffdfc89d);
+            graphics.drawCenteredString(font, Component.literal("+"), x + width / 2, y + 2,
+                    active ? 0xff3e3728 : 0xff6c6658);
+        }
+    }
+
+    private void transferVisibleRecipe(int side) {
+        TransferChoice choice = transferButtons[side].choice;
+        refreshPages(false);
+        if (choice == null || minecraft.player == null || minecraft.level == null || minecraft.screen != this
+                || renderedLevel != minecraft.level || renderedPage != page || renderedWidth != width || renderedHeight != height
+                || choice.pageIndex != page + side || choice.pageIndex >= pages.size()
+                || !KnowledgeAccess.get(minecraft.player).getResearchComplete().contains(research.key())) return;
+        var display = pages.get(choice.pageIndex).recipe;
+        if (display == null || display.selectedRecipe(choice.cycle) != choice.holder) return;
+        // Use the exact variant that was actually rendered, not the next second's array entry.
+        if (RecipeTransferClient.recipeId(display, choice.cycle).filter(choice.id::equals).isEmpty()) return;
+        RecipeTransferClient.request(choice.id, hasShiftDown());
     }
 
     /**
@@ -180,6 +222,7 @@ public final class GuiResearchRecipe extends Screen {
     }
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         refreshPages(false); // Also removes unavailable recipes/gated pages while the book stays open.
+        for (TransferButton button : transferButtons) if (button != null) button.hide();
         itemLinks = List.of();
         renderedPage = -1;
         super.renderBackground(graphics, mouseX, mouseY, delta);
@@ -202,6 +245,9 @@ public final class GuiResearchRecipe extends Screen {
             graphics.pose().popPose();
             int paneLeft = (width - 256) / 2, paneTop = (height - 181) / 2;
             ThaumcraftRecipeDisplay.Hover hover = null;
+            long cycle = net.minecraft.Util.getMillis() / 1000L;
+            boolean knownResearch = minecraft.player != null
+                    && KnowledgeAccess.get(minecraft.player).getResearchComplete().contains(research.key());
             for (int side = 0; side < 2; side++) {
                 int x = paneLeft - 15 + side * 152;
                 int index = page + side;
@@ -223,8 +269,11 @@ public final class GuiResearchRecipe extends Screen {
                 BookPage current = pages.get(index);
                 if (current.recipe != null && minecraft.level != null) {
                     var recipeHover = current.recipe.render(graphics, font, minecraft.level, minecraft.player,
-                            x, bodyTop, textWidth, textHeight, mouseX, mouseY, net.minecraft.Util.getMillis() / 1000L);
+                            x, bodyTop, textWidth, textHeight, mouseX, mouseY, cycle);
                     if (recipeHover != null) hover = recipeHover;
+                    var transferId = RecipeTransferClient.recipeId(current.recipe, cycle);
+                    if (transferId.isPresent()) transferButtons[side].show(x + textWidth - 14, bodyTop + 14,
+                            new TransferChoice(index, cycle, current.recipe.selectedRecipe(cycle), transferId.get()), knownResearch);
                 }
                 for (Draw draw : current.text) {
                     int y = bodyTop + draw.y;
@@ -286,8 +335,8 @@ public final class GuiResearchRecipe extends Screen {
     }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) return true;
         refreshPages(false);
+        if (super.mouseClicked(mouseX, mouseY, button)) return true;
         if (button != 0 || minecraft.player == null || minecraft.screen != this || renderedLevel != minecraft.level
                 || renderedPage != page || renderedWidth != width || renderedHeight != height) return false;
         Set<String> complete = KnowledgeAccess.get(minecraft.player).getResearchComplete();

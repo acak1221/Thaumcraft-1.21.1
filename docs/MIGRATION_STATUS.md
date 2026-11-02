@@ -1,3 +1,9 @@
+## 02.11.2026 — перенос рецептов в базовом Thaumcraft, alpha.14
+
+Кнопка `+` в таумономиконе и существующая интеграция EMI используют общий серверный перенос на магический верстак. Обычное/Shift-заполнение, возврат прежней матрицы, компоненты, исследования и текущая сессия проверяются до атомарного изменения; перенос не создаёт результат и не расходует vis. Добавлен независимый API целей переноса, Refined Thaum не изменён.
+
+Fabric build/isolation, 6 focused JUnit, 7 native GameTests — PASS. Настоящий EN/RU client + reload: 9 кликов/9 C2S/18 кадров; обычный production-server без аддонов: 51 тик, save/stop PASS. Не заявляется новый full survival/multiplayer/NeoForge обход. [Отчёт](analysis/2026-11-02-recipe-transfer.md), [точные входы и SHA](porting/recipe-transfer.json).
+
 ## 02.11.2026 — живые описания исследований аддонов, alpha.13
 
 Книга и tooltip записок читают виртуальные getName/getText зарегистрированного API-исследования. Статические alias игнорировали пользовательскую настройку RESEARCH_TAGS=false. Native bundled branches и стили сохранены; проверены оба положения настройки и исходное THAUMOMETER. Common2855 (5 прежних skips), обе сборки/isolation и NeoForge15JUnit, Python155 (9 прежних skips) — PASS. Отдельный аддон наalpha13 снова37native+14JUnit — PASS. Ранее принятые полные обходы/серверные проверки сохраняются с их точными входами; этот фикс не заявляет нового survival/multiplayer прохождения.

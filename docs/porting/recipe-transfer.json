@@ -1,0 +1,564 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-11-02",
+  "scope": "base Thaumcraft native arcane workbench recipe transfer; Fabric 1.21.1 Java21",
+  "artifact": {
+    "path": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.14.jar",
+    "bytes": 15807516,
+    "sha256": "9edd3a4266848052ca3d46cdb525aa3dd4718b80af77b9592b55f3d65e4a1e8d"
+  },
+  "game_tests": [
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "recipetransfergametests.nativefillandpersistence",
+      "time": "0.419",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "recipetransfergametests.shapedandshapelessvanilla",
+      "time": "0.041",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "thaumcraftgametests.arcaneworkbenchcraftswithvisandpersists",
+      "time": "0.055",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "recipetransfergametests.researchandwandareunaffected",
+      "time": "0.031",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "recipetransfergametests.stalesessionsandreachrefuse",
+      "time": "0.026",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "recipetransfergametests.maximumreuseandcomponents",
+      "time": "0.045",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "recipetransfergametests.missingfullandunknownarepure",
+      "time": "0.027",
+      "passed": true
+    }
+  ],
+  "junit": {
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "client": {
+    "status": "SCRIPT_PASSED",
+    "world": "recipe-transfer-2026-11-02T06-05-04.258266862Z",
+    "seed": 71338963,
+    "fixture": "fresh flat1.21.1 world; finite supplied ingredients; no survival acquisition claim",
+    "stage": 9,
+    "phase": 3,
+    "case": "book_arcane",
+    "actual_c2s_packets": 9,
+    "checks": [
+      {
+        "native_menu": 1,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 thaumcraft:air_shard",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 110,
+          "ignis": 110,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 0,
+        "locale": "en_us",
+        "case": "book_arcane",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 2,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 thaumcraft:air_shard",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 110,
+          "ignis": 110,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 0,
+        "locale": "en_us",
+        "case": "emi_arcane",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 3,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:oak_log",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 0,
+          "ignis": 0,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 0,
+        "locale": "en_us",
+        "case": "emi_vanilla",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 4,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 thaumcraft:air_shard",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 110,
+          "ignis": 110,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 1,
+        "locale": "ru_ru",
+        "case": "book_arcane",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 5,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 thaumcraft:air_shard",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 110,
+          "ignis": 110,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 1,
+        "locale": "ru_ru",
+        "case": "emi_arcane",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 6,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:oak_log",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 0,
+          "ignis": 0,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 1,
+        "locale": "ru_ru",
+        "case": "emi_vanilla",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 7,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 thaumcraft:air_shard",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 110,
+          "ignis": 110,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 2,
+        "locale": "en_us",
+        "case": "book_arcane",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 8,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 thaumcraft:air_shard",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone",
+          "1 minecraft:stone"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 110,
+          "ignis": 110,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 2,
+        "locale": "en_us",
+        "case": "emi_arcane",
+        "actual_c2s_packets": 1
+      },
+      {
+        "native_menu": 9,
+        "source_inventory_verified": true,
+        "matrix": [
+          "1 minecraft:oak_log",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air",
+          "0 minecraft:air"
+        ],
+        "output_not_taken": true,
+        "craftable": true,
+        "primal_prices_centivis": {
+          "aer": 0,
+          "terra": 0,
+          "ignis": 0,
+          "aqua": 0,
+          "ordo": 0,
+          "perditio": 0
+        },
+        "wand_unchanged": true,
+        "phase": 2,
+        "locale": "en_us",
+        "case": "emi_vanilla",
+        "actual_c2s_packets": 1
+      }
+    ],
+    "captures": [
+      {
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "language": "en_us",
+        "bytes": 856576,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-0-en_us-book_arcane-before.png",
+        "phase": 0,
+        "case": "book_arcane",
+        "sha256": "8cf6094f09aaf6e5b4172ccc90670f6b2a54b83cca874d2366045bab669d9078",
+        "committed_frame": "docs/images/recipe-transfer/recipe-transfer-0-en_us-book_arcane-before.png"
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "en_us",
+        "bytes": 472956,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-0-en_us-book_arcane-filled.png",
+        "phase": 0,
+        "case": "book_arcane",
+        "sha256": "8dcfad97a8b83e95e7475021b8299d3c757df02feb344e920e135a6d2202c161",
+        "committed_frame": null
+      },
+      {
+        "screen": "dev.emi.emi.screen.RecipeScreen",
+        "language": "en_us",
+        "bytes": 351202,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-0-en_us-emi_arcane-before.png",
+        "phase": 0,
+        "case": "emi_arcane",
+        "sha256": "6d48f5e32462f372f6d264ccd85d4a2208b2c2b523f38aa196df4ee6bc3e3c78",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "en_us",
+        "bytes": 447468,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-0-en_us-emi_arcane-filled.png",
+        "phase": 0,
+        "case": "emi_arcane",
+        "sha256": "26ab05dae3d8f61d52133c2510b5c4fc74b8f068a23f6a187d954c57ce8ff60d",
+        "committed_frame": null
+      },
+      {
+        "screen": "dev.emi.emi.screen.RecipeScreen",
+        "language": "en_us",
+        "bytes": 338084,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-0-en_us-emi_vanilla-before.png",
+        "phase": 0,
+        "case": "emi_vanilla",
+        "sha256": "67e22a7f3b06b987d4c295690bbeeac41b3d38957b0efb2bc1d6d239532e0a1f",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "en_us",
+        "bytes": 428749,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-0-en_us-emi_vanilla-filled.png",
+        "phase": 0,
+        "case": "emi_vanilla",
+        "sha256": "5dd5a4f371742f28463244edbc599bcb34ffb41ca6fd6e753961590e43c451d5",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "language": "ru_ru",
+        "bytes": 734050,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-1-ru_ru-book_arcane-before.png",
+        "phase": 1,
+        "case": "book_arcane",
+        "sha256": "7046f8d7b0f8d9a0457ef69da5a2391941ead07194f5e26388d6ae0d5141ae79",
+        "committed_frame": "docs/images/recipe-transfer/recipe-transfer-1-ru_ru-book_arcane-before.png"
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "ru_ru",
+        "bytes": 421344,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-1-ru_ru-book_arcane-filled.png",
+        "phase": 1,
+        "case": "book_arcane",
+        "sha256": "2f8e0282b23604c7484d87bd5cc9c2ec0ce75ab2b07f6b69c25d8e1b34d6dd81",
+        "committed_frame": "docs/images/recipe-transfer/recipe-transfer-1-ru_ru-book_arcane-filled.png"
+      },
+      {
+        "screen": "dev.emi.emi.screen.RecipeScreen",
+        "language": "ru_ru",
+        "bytes": 339916,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-1-ru_ru-emi_arcane-before.png",
+        "phase": 1,
+        "case": "emi_arcane",
+        "sha256": "0e9200b2add661cf0e91d51eadb3826b50f8f1d19536fe105ead65d4ee4e5ff7",
+        "committed_frame": "docs/images/recipe-transfer/recipe-transfer-1-ru_ru-emi_arcane-before.png"
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "ru_ru",
+        "bytes": 414366,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-1-ru_ru-emi_arcane-filled.png",
+        "phase": 1,
+        "case": "emi_arcane",
+        "sha256": "9ad3a8fb5883fafeffeee4b50a016c8e1cca59e3fa7cc5808b08d50c1dbe28d7",
+        "committed_frame": "docs/images/recipe-transfer/recipe-transfer-1-ru_ru-emi_arcane-filled.png"
+      },
+      {
+        "screen": "dev.emi.emi.screen.RecipeScreen",
+        "language": "ru_ru",
+        "bytes": 331855,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-1-ru_ru-emi_vanilla-before.png",
+        "phase": 1,
+        "case": "emi_vanilla",
+        "sha256": "9f70e5a0571ee2e78c0bfacda523aa77716f3acb42c310b7c917a2d95a399417",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "ru_ru",
+        "bytes": 408363,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-1-ru_ru-emi_vanilla-filled.png",
+        "phase": 1,
+        "case": "emi_vanilla",
+        "sha256": "10a0a7991ecbca16dd75044d187abb0aaed5834522923fdbffd196773aa77614",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "language": "en_us",
+        "bytes": 719682,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-2-en_us-book_arcane-before.png",
+        "phase": 2,
+        "case": "book_arcane",
+        "sha256": "39a2c1c6830b521e5f5064b25b9c8e8ffd0450ed12b873be3c3ee3dabccecc77",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "en_us",
+        "bytes": 408874,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-2-en_us-book_arcane-filled.png",
+        "phase": 2,
+        "case": "book_arcane",
+        "sha256": "87db0fe16f42738fa44dee6a632e66dfd10650ef088b7bd113c7a366855562f5",
+        "committed_frame": null
+      },
+      {
+        "screen": "dev.emi.emi.screen.RecipeScreen",
+        "language": "en_us",
+        "bytes": 337983,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-2-en_us-emi_arcane-before.png",
+        "phase": 2,
+        "case": "emi_arcane",
+        "sha256": "321d751d8ff49584214aa5c43cfff33e007af49dd3d5e2f1a98e5c68b708fbec",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "en_us",
+        "bytes": 408010,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-2-en_us-emi_arcane-filled.png",
+        "phase": 2,
+        "case": "emi_arcane",
+        "sha256": "2f7a858809b03303528138375405bf0b735d9d9b4ba6a0eccc6480b9f11ee2a1",
+        "committed_frame": null
+      },
+      {
+        "screen": "dev.emi.emi.screen.RecipeScreen",
+        "language": "en_us",
+        "bytes": 331418,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-2-en_us-emi_vanilla-before.png",
+        "phase": 2,
+        "case": "emi_vanilla",
+        "sha256": "178f4a29bd5ceb9c4b25e1b0cd17791f0dad31aea3bb175f273446bd7d69d65c",
+        "committed_frame": null
+      },
+      {
+        "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+        "language": "en_us",
+        "bytes": 405369,
+        "path": "fabric/run-recipe-transfer-client/screenshots/recipe-transfer-2-en_us-emi_vanilla-filled.png",
+        "phase": 2,
+        "case": "emi_vanilla",
+        "sha256": "427c435c1c067c3bbf3fa1605ec955732bab8085c5e1d66554c2985b81e63db1",
+        "committed_frame": "docs/images/recipe-transfer/recipe-transfer-2-en_us-emi_vanilla-filled.png"
+      }
+    ],
+    "addon_loaded": false
+  },
+  "production_server": {
+    "ready": true,
+    "tick_queries": [
+      1,
+      52
+    ],
+    "normal_stop": true,
+    "exit_code": 0,
+    "inputs": [
+      {
+        "file": "Thaumcraft-fabric-0.1.0-alpha.14.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.14.jar",
+        "sha256": "9edd3a4266848052ca3d46cdb525aa3dd4718b80af77b9592b55f3d65e4a1e8d",
+        "bytes": 15807516
+      },
+      {
+        "file": "fabric-api-0.116.17+1.21.1.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-api/0.116.17+1.21.1/810b2b0195371a012906241d8b85a32a1d6de53c/fabric-api-0.116.17+1.21.1.jar",
+        "sha256": "79ac44b40780acbd884b34c50be1e39af682847e5f5cb3b1fddeeaa768dce800",
+        "bytes": 2452735
+      },
+      {
+        "file": "architectury-fabric-13.0.11.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/dev.architectury/architectury-fabric/13.0.11/ae6c9231a07d8abac28847693d237166790f72a6/architectury-fabric-13.0.11.jar",
+        "sha256": "659016af3d85f3cf68bafe0e28bc80036779ff3d346f8c632d1e738075745678",
+        "bytes": 609113
+      }
+    ],
+    "optional_debug_messages": [
+      "[06:04:47] [main/INFO]: Fernflower could not be loaded, exported classes will not be decompiled. NoClassDefFoundError: org/jetbrains/java/decompiler/main/extern/IResultSaver"
+    ],
+    "mapping_errors": []
+  },
+  "limitations": [
+    "Supplied finite creative fixtures, no survival acquisition claim",
+    "No new multiplayer or NeoForge run",
+    "No new complete recipe/icon audit",
+    "Refined Thaum addon unchanged; external storage target is an API contract, not an implemented RS transfer adapter"
+  ]
+}

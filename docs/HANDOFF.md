@@ -1,3 +1,9 @@
+## 02.11.2026 — перенос рецептов в базовом Thaumcraft, alpha.14
+
+Кнопка `+` в таумономиконе и существующая интеграция EMI используют общий серверный перенос на магический верстак. Обычное/Shift-заполнение, возврат прежней матрицы, компоненты, исследования и текущая сессия проверяются до атомарного изменения; перенос не создаёт результат и не расходует vis. Добавлен независимый API целей переноса, Refined Thaum не изменён.
+
+Fabric build/isolation, 6 focused JUnit, 7 native GameTests — PASS. Настоящий EN/RU client + reload: 9 кликов/9 C2S/18 кадров; обычный production-server без аддонов: 51 тик, save/stop PASS. Не заявляется новый full survival/multiplayer/NeoForge обход. [Отчёт](analysis/2026-11-02-recipe-transfer.md), [точные входы и SHA](porting/recipe-transfer.json).
+
 Дополнительный повторный CI-прогон выявил гонку Taintacle fixture: удалённая цель и Small могли попадать в FULL-чанк без entity ticking. Тест удерживает только свой точный footprint и ждёт существующий GameTestChunkAwait; production не изменён. Focused `taintaclesKeepOriginalRetaliationLifetimeAndLoot` — PASS. Новый полный CI запускается после test-only commit; результаты релиза аддона остаются отдельно подтверждёнными.
 
 ## 02.11.2026 — живые описания исследований аддонов, alpha.13

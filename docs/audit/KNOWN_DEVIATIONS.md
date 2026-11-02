@@ -349,3 +349,20 @@ provide the source evidence.
 
 Exact coverage, fixes and selected native frames: [full audit](../analysis/2026-11-01-thaumometer-book-review.md).
 Machine-readable complete recipe/icon records: [audit manifest](../porting/thaumonomicon-visual-audit.json).
+
+## 14. Native recipe transfer — owner request 2026-11-02
+
+The owner explicitly requested recipe autofill in base Thaumcraft rather than a storage addon.
+This adds a Thaumonomicon `+` and a shared server transfer path for the existing optional EMI
+integration. Shift requests the largest complete arrangement that fits; only existing matrix and
+main inventory/hotbar ingredients move. Recipes, research requirements, output quantities and
+wand vis payment remain governed by the native crafting path. Autofill itself spends no vis.
+
+A standalone book may open the nearest loaded native arcane workbench within the actor's actual
+block interaction reach. Current menu/actor/block validity and the full expected inventory state
+are checked on the server. Unsupported machine/multiblock pages do not gain a workbench button.
+The public transfer-target API is independent of storage mods; no addon is bundled or changed.
+
+Focused Fabric native tests and a real EN/RU client with EMI cover the supplied finite fixture;
+this is not a fresh full survival/multiplayer or NeoForge acceptance. Exact receipts and limitations:
+[recipe transfer report](../analysis/2026-11-02-recipe-transfer.md).

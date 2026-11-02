@@ -4,12 +4,15 @@
   "version": "1.0.0",
   "name": "Thaumcraft isolated client smoke harness",
   "environment": "client",
-  "mixins": ["thaumcraft-client-smoke.mixins.json"],
+  "mixins": [
+    "thaumcraft-client-smoke.mixins.json"
+  ],
   "entrypoints": {
     "client": [
       "thaumcraft.fabric.clienttest.BookClientSmoke",
       "thaumcraft.fabric.clienttest.MultiplayerClientProbe",
-      "thaumcraft.fabric.clienttest.MultiplayerPeerProbe"
+      "thaumcraft.fabric.clienttest.MultiplayerPeerProbe",
+      "thaumcraft.fabric.testing.RecipeTransferClientProbe"
     ]
   },
   "depends": {

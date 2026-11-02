@@ -4,10 +4,18 @@
   "version": "1.0.0",
   "name": "Thaumcraft isolated GameTest harness",
   "environment": "server",
-  "mixins": ["thaumcraft-bore-gametest.mixins.json", "thaumcraft-gametest-selection.mixins.json"],
+  "mixins": [
+    "thaumcraft-bore-gametest.mixins.json",
+    "thaumcraft-gametest-selection.mixins.json"
+  ],
   "entrypoints": {
-    "main": ["thaumcraft.fabric.testing.ThaumcraftGameTestBootstrap"],
-    "fabric-gametest": ["thaumcraft.fabric.testing.ThaumcraftGameTests"]
+    "main": [
+      "thaumcraft.fabric.testing.ThaumcraftGameTestBootstrap"
+    ],
+    "fabric-gametest": [
+      "thaumcraft.fabric.testing.ThaumcraftGameTests",
+      "thaumcraft.fabric.testing.RecipeTransferGameTests"
+    ]
   },
   "depends": {
     "thaumcraft": "*",

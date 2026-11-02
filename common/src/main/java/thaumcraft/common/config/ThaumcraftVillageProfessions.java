@@ -23,8 +23,8 @@ import thaumcraft.common.Thaumcraft;
  * {@code VillagerVillageTradesMixin}.
  *
  * <p>The professions carry no job site: the original had none either, the piece of the
- * village placed the villager with its profession directly. A job site that no point of
- * interest grants keeps the profession of the villager, which is what the original did.
+ * village placed the villager with its profession directly. The native profession-reset
+ * behavior is guarded for these two original roles; POI predicates alone do not retain a novice.
  */
 public final class ThaumcraftVillageProfessions {
     private static final DeferredRegister<VillagerProfession> PROFESSIONS =
@@ -45,8 +45,8 @@ public final class ThaumcraftVillageProfessions {
      * A profession without a job site.
      *
      * <p>The two predicates of the original profession never accept a point of interest,
-     * so no villager acquires the profession on its own and no villager loses it: the
-     * pieces of the original placed the villager with the profession themselves.
+     * so no villager acquires the profession on its own. The original pieces placed their
+     * villagers directly; VillageProfessionBehaviors preserves those roles without changing XP or AI.
      */
     private static VillagerProfession profession(String name) {
         return new VillagerProfession(name, holder -> false, holder -> false,

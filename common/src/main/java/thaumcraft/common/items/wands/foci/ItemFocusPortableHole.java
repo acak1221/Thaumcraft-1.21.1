@@ -73,7 +73,8 @@ public final class ItemFocusPortableHole extends ItemFocusBasic {
             player.swing(hand);
             return;
         }
-        ItemStack focus = FocusData.get(wand);
+        ItemStack before = wand.copy();
+        ItemStack focus = FocusData.get(before);
         int max = PortableHoleRules.maxDepth(FocusUpgradeData.level(focus, FocusUpgradeType.enlarge));
         Direction inward = hit.getDirection().getOpposite();
         BlockPos cursor = pos;
@@ -82,13 +83,22 @@ public final class ItemFocusPortableHole extends ItemFocusBasic {
             cursor = cursor.relative(inward);
             depth++;
         }
-        ItemStack before = wand.copy(), paid = before.copy();
         Map<String, Integer> costs = activationCost(before, player, depth);
+        int chain = PortableHoleRules.chainLength(depth);
+        if (!PortableHoles.permitsFootprint(server, player, pos, hit.getDirection(), chain, wand)) {
+            level.playSound(null, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, WANDFAIL, SoundSource.PLAYERS, 1F, 1F);
+            player.swing(hand);
+            return;
+        }
+        // Permission and price queries must not redirect an already admitted cast to an orphaned wand.
+        if (player.level() != level || !player.isAlive() || player.isSpectator()
+                || player.getItemInHand(hand) != wand || !ItemStack.matches(before, wand)) return;
+        ItemStack paid = before.copy();
         // The vis is taken whether or not the first block can become a hole.
         if (FocusVis.debit(paid, costs)) {
             wand.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(paid));
             player.getInventory().setChanged();
-            PortableHoles.create(server, pos, hit.getDirection().get3DDataValue(), PortableHoleRules.chainLength(depth),
+            PortableHoles.create(server, pos, hit.getDirection().get3DDataValue(), chain,
                     PortableHoleRules.duration(FocusUpgradeData.level(focus, FocusUpgradeType.extend)));
         }
         player.swing(hand);

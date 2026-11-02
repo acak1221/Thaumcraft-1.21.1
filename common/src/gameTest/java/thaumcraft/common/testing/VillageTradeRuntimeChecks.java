@@ -1,15 +1,19 @@
 package thaumcraft.common.testing;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.locks.LockSupport;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.world.level.entity.EntitySection;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ChunkPos;
@@ -19,6 +23,8 @@ import thaumcraft.common.config.ThaumcraftVillageProfessions;
 import thaumcraft.common.lib.world.VillageBankerManager;
 import thaumcraft.common.lib.world.VillageWizardManager;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
+import thaumcraft.common.mixin.PersistentEntitySectionManagerAccess;
+import thaumcraft.common.mixin.ServerLevelEntityManagerAccess;
 
 /**
  * The trade tables of the TC4 villages on the villagers of the two professions.
@@ -40,6 +46,7 @@ public final class VillageTradeRuntimeChecks {
     private static final int SCAN_RADIUS = 96;
     /** The number of component chunks that are generated at most. */
     private static final int MAX_GENERATED = 12;
+    private static final Duration ENTITY_READINESS_BUDGET = Duration.ofSeconds(10);
     /**
      * A ticket that keeps a generated chunk loaded while the check reads its entities.
      * The ticket of the original types ({@code TicketType.POST_TELEPORT}) expires after
@@ -91,20 +98,49 @@ public final class VillageTradeRuntimeChecks {
         // it generates, so the villager of the piece stays in the world while it is read.
         List<ChunkPos> held = new ArrayList<>();
         int generated = 0;
-        for (int[] chunk : bankers) {
-            if (generated >= MAX_GENERATED) break;
-            ++generated;
-            ChunkPos pos = new ChunkPos(chunk[0], chunk[1]);
-            level.getChunkSource().addRegionTicket(HELD, pos, 1, pos);
-            held.add(pos);
-            level.getChunk(chunk[0], chunk[1]);
+        try {
+            for (int[] chunk : bankers) {
+                if (generated >= MAX_GENERATED) break;
+                ++generated;
+                ChunkPos pos = new ChunkPos(chunk[0], chunk[1]);
+                level.getChunkSource().addRegionTicket(HELD, pos, 1, pos);
+                held.add(pos);
+                level.getChunk(chunk[0], chunk[1]);
+            }
+        } catch (RuntimeException | Error failure) {
+            releaseHeld(level, held);
+            throw failure;
         }
         final int generatedChunks = generated;
-        // The entities of a generated chunk become visible one task after the generation:
-        // the chunk status of the world changes when the chunk reaches the full status,
-        // and only then the entity manager starts to track the entities of the chunk.
-        // The check therefore reads the villagers in a later tick.
-        test.runAfterDelay(5, () -> {
+        // WorldGenRegion stores its villagers in ProtoChunk NBT. Native FULL/tracking
+        // transitions and the asynchronous entity loading inbox must both settle before
+        // the live lookup can establish that a villager is absent. Five simulated ticks
+        // alone provide no wall-clock budget for those native tasks.
+        long deadline = System.nanoTime() + ENTITY_READINESS_BUDGET.toNanos();
+        long tickDeadline = test.getTick() + 2000;
+        test.runAfterDelay(5, () -> awaitEntities(test, level, held, generatedChunks, deadline, tickDeadline, true));
+    }
+
+    private static void awaitEntities(GameTestHelper test, ServerLevel level, List<ChunkPos> held,
+                                      int generatedChunks, long deadline, long tickDeadline, boolean first) {
+        boolean retrying = false;
+        try {
+            boolean ready = held.stream().allMatch(pos -> nativeEntitiesReady(level, pos));
+            if (first || ready) {
+                thaumcraft.common.Thaumcraft.LOG.info("Village trade fixture native readiness (ready={}, testTick={}): {}",
+                        ready, test.getTick(), readinessStates(level, held));
+            }
+            if (!ready) {
+                test.assertTrue(System.nanoTime() < deadline && test.getTick() < tickDeadline,
+                        "held village chunks did not finish native entity loading/tracking within " + ENTITY_READINESS_BUDGET
+                                + ": " + readinessStates(level, held));
+                // Yield to the disk executor, then return to an ordinary level tick so
+                // PersistentEntitySectionManager itself processes its loading inbox.
+                LockSupport.parkNanos(1_000_000L);
+                test.runAfterDelay(1, () -> awaitEntities(test, level, held, generatedChunks, deadline, tickDeadline, false));
+                retrying = true;
+                return;
+            }
             Villager banker = null;
             List<Villager> found = villagers(level);
             for (Villager villager : found) {
@@ -113,21 +149,54 @@ public final class VillageTradeRuntimeChecks {
                     break;
                 }
             }
-            try {
-                test.assertTrue(banker != null, "the house of the banker carries a villager of the banker profession, "
-                        + generatedChunks + " chunks were generated, " + found.size() + " villagers of the world found: "
-                        + professions(found));
-                var offers = banker.getOffers();
-                test.assertTrue(offers.size() == VillageBankerManager.trades().size(),
-                        "the banker carries the twelve trades of the original, found " + offers.size());
-                test.assertTrue(hasBookTrade(offers), "the banker buys the book for seven to nine gold coins");
-                test.succeed();
-            } finally {
-                for (ChunkPos pos : held) {
-                    level.getChunkSource().removeRegionTicket(HELD, pos, 1, pos);
-                }
+            test.assertTrue(banker != null, "the house of the banker carries a villager of the banker profession, "
+                    + generatedChunks + " chunks were generated, " + found.size() + " villagers of the world found: "
+                    + professions(found) + "; native readiness=" + readinessStates(level, held));
+            var offers = banker.getOffers();
+            test.assertTrue(offers.size() == VillageBankerManager.trades().size(),
+                    "the banker carries the twelve trades of the original, found " + offers.size());
+            test.assertTrue(hasBookTrade(offers), "the banker buys the book for seven to nine gold coins");
+            test.succeed();
+        } finally {
+            if (!retrying) releaseHeld(level, held);
+        }
+    }
+
+    private static boolean nativeEntitiesReady(ServerLevel level, ChunkPos pos) {
+        var chunk = level.getChunkSource().getChunkNow(pos.x, pos.z);
+        if (chunk == null || chunk.getFullStatus() == null || !chunk.getFullStatus().isOrAfter(FullChunkStatus.FULL)
+                || !level.areEntitiesLoaded(pos.toLong())) return false;
+        var manager = ((ServerLevelEntityManagerAccess) level).thaumcraft$getEntityManager();
+        var sections = ((PersistentEntitySectionManagerAccess) manager).thaumcraft$getSectionStorage();
+        try (var stream = sections.getExistingSectionsInChunk(pos.toLong())) {
+            return stream.allMatch(section -> section.getStatus().isAccessible());
+        }
+    }
+
+    private static List<String> readinessStates(ServerLevel level, List<ChunkPos> held) {
+        var manager = ((ServerLevelEntityManagerAccess) level).thaumcraft$getEntityManager();
+        var sections = ((PersistentEntitySectionManagerAccess) manager).thaumcraft$getSectionStorage();
+        List<String> states = new ArrayList<>();
+        for (ChunkPos pos : held) {
+            var chunk = level.getChunkSource().getChunkNow(pos.x, pos.z);
+            long bufferedVillagers;
+            List<String> visibility;
+            try (var stream = sections.getExistingSectionsInChunk(pos.toLong())) {
+                var existing = stream.toList();
+                bufferedVillagers = existing.stream().flatMap(EntitySection::getEntities).filter(entity -> entity instanceof Villager).count();
+                visibility = existing.stream().map(section -> section.getStatus().toString()).distinct().toList();
             }
-        });
+            states.add(pos + "[full=" + (chunk == null ? "absent" : chunk.getFullStatus())
+                    + ",entitiesLoaded=" + level.areEntitiesLoaded(pos.toLong()) + ",sectionVillagers=" + bufferedVillagers
+                    + ",sectionVisibility=" + visibility
+                    + ",pendingTasks=" + level.getChunkSource().getPendingTasksCount() + ']');
+        }
+        return states;
+    }
+
+    private static void releaseHeld(ServerLevel level, List<ChunkPos> held) {
+        for (ChunkPos pos : held) level.getChunkSource().removeRegionTicket(HELD, pos, 1, pos);
+        held.clear();
     }
 
     /**

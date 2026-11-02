@@ -51,6 +51,14 @@ public abstract class RetainedDataBlockEntity extends BlockEntity {
         if (result.isEmpty()) throw new IllegalArgumentException("Explicit stack decoded empty: "+stack);
         return result;
     }
+    /** A present unread cosmetic field belongs to the same recoverable stock owner. */
+    protected static net.minecraft.network.chat.Component readCustomName(CompoundTag tag, HolderLookup.Provider registries) {
+        if (!tag.contains("CustomName")) return null;
+        if (!tag.contains("CustomName", Tag.TAG_STRING)) throw new IllegalArgumentException("CustomName must be a string");
+        var name = net.minecraft.network.chat.Component.Serializer.fromJson(tag.getString("CustomName"), registries);
+        if (name == null) throw new IllegalArgumentException("CustomName must contain a text component");
+        return name;
+    }
     protected static void validateSlots(CompoundTag tag, String key, int size, HolderLookup.Provider registries) {
         boolean[] seen=new boolean[size];
         for (Tag value:compoundList(tag,key)) {

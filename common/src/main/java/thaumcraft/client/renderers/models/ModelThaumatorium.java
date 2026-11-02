@@ -44,19 +44,19 @@ public final class ModelThaumatorium {
         for (var triangle : mesh.triangles()) {
             float averageU = (triangle.a().u() + triangle.b().u() + triangle.c().u()) / 3F;
             float averageV = (triangle.a().v() + triangle.b().v() + triangle.c().v()) / 3F;
-            vertex(pose, vertices, triangle.a(), averageU, averageV, light);
-            vertex(pose, vertices, triangle.b(), averageU, averageV, light);
-            vertex(pose, vertices, triangle.c(), averageU, averageV, light);
+            vertex(pose, vertices, triangle.a(), averageU, averageV, light, overlay);
+            vertex(pose, vertices, triangle.b(), averageU, averageV, light, overlay);
+            vertex(pose, vertices, triangle.c(), averageU, averageV, light, overlay);
             // Native entity consumers are quad batches: a repeated final
             // vertex preserves exactly one triangle and one degenerate.
-            vertex(pose, vertices, triangle.c(), averageU, averageV, light);
+            vertex(pose, vertices, triangle.c(), averageU, averageV, light, overlay);
         }
     }
 
-    private static void vertex(PoseStack pose, VertexConsumer out, HarnessObjMesh.Vertex vertex, float averageU, float averageV, int light) {
+    private static void vertex(PoseStack pose, VertexConsumer out, HarnessObjMesh.Vertex vertex, float averageU, float averageV, int light, int overlay) {
         float u = vertex.u() + (vertex.u() > averageU ? -OBJ_UV_INSET : OBJ_UV_INSET);
         float v = vertex.v() + (vertex.v() > averageV ? -OBJ_UV_INSET : OBJ_UV_INSET);
-        out.addVertex(pose.last(), vertex.x(), vertex.y(), vertex.z()).setColor(0xffffffff).setUv(u, v).setLight(light)
+        out.addVertex(pose.last(), vertex.x(), vertex.y(), vertex.z()).setColor(0xffffffff).setUv(u, v).setOverlay(overlay).setLight(light)
                 .setNormal(pose.last(), vertex.nx(), vertex.ny(), vertex.nz());
     }
 }

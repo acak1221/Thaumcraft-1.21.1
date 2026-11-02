@@ -4,12 +4,15 @@ import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
+import thaumcraft.common.mixin.MerchantOfferMaxUsesAccess;
 
 /**
  * The trade tables of the TC4 villages as the trade offers of a villager.
@@ -40,16 +43,50 @@ public final class VillageTradeRules {
         for (VillageWorldGenRules.TradeSpec trade : trades) {
             Item payment = item(trade.payItem());
             if (payment == null) continue;
+            int paymentAmount = amount(trade.payMin(), trade.payMax(), random);
+            int rewardAmount = amount(trade.receiveMin(), trade.receiveMax(), random);
             int variant = trade.receiveItems().size() == 1 ? 0 : random.nextInt(trade.receiveItems().size());
             Item reward = item(trade.receiveItems().get(variant));
             if (reward == null) continue;
-            // Oracle VillageBankerManager:43 - the recipes of the original have no limit and
-            // no experience, and no price multiplier either.
+            // Oracle VillageBankerManager:43 uses the ordinary MerchantRecipe constructor,
+            // whose original default is seven uses. Native maxUses=0 means already exhausted.
             offers.add(new MerchantOffer(
-                    new ItemCost(payment, amount(trade.payMin(), trade.payMax(), random)),
-                    new ItemStack(reward, amount(trade.receiveMin(), trade.receiveMax(), random)),
-                    0, 0, 1.0F));
+                    new ItemCost(payment, paymentAmount),
+                    new ItemStack(reward, rewardAmount),
+                    7, 0, 1.0F));
         }
+    }
+
+    /** Original EntityVillager.useRecipe: trading an item-equivalent last offer arms the idle reset. */
+    public static boolean startsOriginalRestock(Villager villager, MerchantOffer paid) {
+        if (villager.level().isClientSide || !VillageProfessionBehaviors.hasOriginalProfession(villager) || paid == null) return false;
+        MerchantOffers offers = villager.getOffers();
+        if (offers.isEmpty()) return false;
+        MerchantOffer last = offers.getLast();
+        // Original comparison ignores amounts, metadata and NBT. Flattened native item IDs stay distinct;
+        // no cross-family aliases are invented for the old metadata families.
+        return sameItem(paid.getCostA(), last.getCostA()) && sameItem(paid.getResult(), last.getResult())
+                && sameItem(paid.getCostB(), last.getCostB());
+    }
+
+    /** Original1.7 EntityVillager.updateAITick: replenish exhausted offers, then regenerate. */
+    public static void finishOriginalRestock(Villager villager) {
+        if (villager.level().isClientSide || !VillageProfessionBehaviors.hasOriginalProfession(villager)) return;
+        MerchantOffers offers = villager.getOffers();
+        if (offers.size() > 1) {
+            for (MerchantOffer offer : offers) {
+                if (!offer.isOutOfStock()) continue;
+                int extra = villager.getRandom().nextInt(6) + villager.getRandom().nextInt(6) + 2;
+                ((MerchantOfferMaxUsesAccess) offer).thaumcraft$setMaxUses(offer.getMaxUses() + extra);
+            }
+        }
+        // Original also requests one new candidate recipe. This port already exposes the full TC4 table;
+        // preserve that existing list rather than inventing Forge's unverified candidate-pool integration.
+        villager.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0));
+    }
+
+    private static boolean sameItem(ItemStack first, ItemStack second) {
+        return first.isEmpty() ? second.isEmpty() : !second.isEmpty() && ItemStack.isSameItem(first, second);
     }
 
     /**

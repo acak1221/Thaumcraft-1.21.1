@@ -38,7 +38,7 @@ public final class ThaumcraftEldritchMobs {
                     .eyeHeight(1.53F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:inhabited_zombie"));
     public static final RegistrySupplier<EntityType<EntityWatcher>> WATCHER=ENTITIES.register("watcher",()->
             EntityType.Builder.<EntityWatcher>of(EntityWatcher::new,MobCategory.MONSTER).sized(.85F,.85F)
-                    .eyeHeight(.85F*.5F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:watcher"));
+                    .eyeHeight(.85F*.5F).fireImmune().clientTrackingRange(4).updateInterval(3).build("thaumcraft:watcher"));
     public static final RegistrySupplier<EntityType<EntityThaumicSlime>> THAUMIC_SLIME=ENTITIES.register("thaum_slime",()->
             EntityType.Builder.<EntityThaumicSlime>of(EntityThaumicSlime::new,MobCategory.MONSTER).sized(.5F,.5F)
                     .clientTrackingRange(4).updateInterval(3).build("thaumcraft:thaum_slime"));

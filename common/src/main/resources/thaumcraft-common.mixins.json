@@ -75,6 +75,8 @@
     "ChampionHurtMixin",
     "ChampionDeathLootMixin",
     "VillagerVillageTradesMixin",
+    "ResetProfessionMixin",
+    "MerchantOfferMaxUsesAccess",
     "WorldGenRegionStepAccess",
     "LevelChunkPendingBlockEntityMixin",
     "PerStateBlockEntityMixin",
@@ -83,6 +85,9 @@
     "EntityTypeSchemaNoticeMixin"
   ],
   "client": [
+    "client.VillagerSkinMixin",
+    "client.VillagerProfessionLayerMixin",
+    "client.VillagerHeadLayersMixin",
     "client.Tc4ParticleEngineMixin",
     "client.ParticleLevelAccess",
     "client.Tc4ParticleWorldRenderMixin",

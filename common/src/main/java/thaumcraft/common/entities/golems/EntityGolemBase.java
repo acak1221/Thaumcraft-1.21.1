@@ -1505,12 +1505,16 @@ public class EntityGolemBase extends AbstractGolem {
         // not vanilla hopper's fully-zero hasPickUpDelay approximation.
         if (source.isEmpty() || item.pickupDelay >= 5) return false;
         if (!carried.isEmpty() && (!ItemStack.isSameItemSameComponents(carried, source) || source.getCount() > carrySpace())) return false;
+        boolean fuzzy = getUpgradeAmount(GolemUpgrade.ENTROPY) > 0;
         boolean empty = true;
         for (EntityDataAccessor<ItemStack> filter : FILTERS) {
             ItemStack exemplar = entityData.get(filter);
             if (exemplar.isEmpty()) continue;
             empty = false;
-            if (ItemStack.isSameItemSameComponents(exemplar, source)) return true;
+            // Original AIItemPickup uses InventoryMob.getAmountNeededSmart(Entropy > 0),
+            // independent of the GUI switches: same item/damage ignores tags, then ore equivalence.
+            if (fuzzy ? ItemStack.isSameItem(exemplar, source) && exemplar.getDamageValue() == source.getDamageValue()
+                    || GolemItemMatch.sharesGroup(source, exemplar) : ItemStack.isSameItemSameComponents(exemplar, source)) return true;
         }
         return empty;
     }

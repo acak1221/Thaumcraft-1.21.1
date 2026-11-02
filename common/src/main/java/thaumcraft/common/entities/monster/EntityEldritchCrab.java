@@ -95,6 +95,7 @@ public class EntityEldritchCrab extends Monster implements IEldritchMob {
     /** Original crab ride and helm break behaviour. */
     @Override public void tick() {
         super.tick();
+        if(attackTime>0)--attackTime;
         if(tickCount<20)fallDistance=0F;
         LivingEntity victim=getTarget();
         if(getVehicle()==null&&victim!=null&&victim.getVehicle()==null&&!onGround()&&!hasHelm()&&victim.isAlive()

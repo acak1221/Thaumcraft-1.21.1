@@ -15,7 +15,7 @@ import thaumcraft.common.lib.entities.ProjectileRules;
  * The original is an {@code EntitySpecialItem} that never dies of old age: its
  * age counter is restarted five ticks before the vanilla item lifetime, so the
  * item stays in the world forever. It keeps the special item buoyancy, the
- * fire immunity and the random launch of the special item.
+ * explosion immunity and the random launch of the special item.
  * <p>
  * Declared native adaptations: the native item entity keeps its age private
  * and its lifetime is a fixed constant, so the endless lifetime is expressed
@@ -62,6 +62,6 @@ public final class EntityPermanentItem extends ItemEntity {
     @Override protected void applyGravity() {}
 
     @Override public boolean hurt(DamageSource source, float amount) {
-        return !source.is(DamageTypeTags.IS_FIRE) && super.hurt(source, amount);
+        return !source.is(DamageTypeTags.IS_EXPLOSION) && super.hurt(source, amount);
     }
 }

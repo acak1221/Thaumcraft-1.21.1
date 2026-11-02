@@ -2,6 +2,7 @@ package thaumcraft.common.lib.world;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import net.minecraft.util.RandomSource;
 
 /**
@@ -20,10 +21,9 @@ import net.minecraft.util.RandomSource;
  *       {@code thaumcraft/common/lib/world/dim/Gen2x2.java:16-225} - the 2x2 boss room.</li>
  * </ul>
  *
- * The class is pure: it turns a labyrinth cell into a list of block placements and entity
- * spawns. The world dependent parts (the "is this the eldritch nothing block" test, the exposed
- * side count and the neighbour lookups) are supplied through {@link View} so the layouts stay
- * unit testable.
+ * The default builder records a labyrinth cell as block placements and entity spawns. Native
+ * generation supplies synchronous placement/biome sinks so later {@link View} queries see the
+ * blocks already placed by this room, in the mutation order of the original.
  *
  * Two random streams are kept apart, exactly like the original: {@code random} is the chunk
  * generation stream the room code draws from and {@code worldRandom} is the world stream the
@@ -161,6 +161,27 @@ public final class DungeonRooms {
         public final List<int[]> commons = new ArrayList<>();
         public final List<int[]> crabSpawners = new ArrayList<>();
         public final List<Spawn> spawns = new ArrayList<>();
+        public final List<int[]> taintColumns = new ArrayList<>();
+        private final Consumer<Placement> placementSink;
+        private final Consumer<int[]> taintSink;
+
+        public Builder() { this(placement -> {}, column -> {}); }
+
+        public Builder(Consumer<Placement> placementSink, Consumer<int[]> taintSink) {
+            this.placementSink = placementSink;
+            this.taintSink = taintSink;
+        }
+
+        private void add(Placement placement) {
+            placements.add(placement);
+            placementSink.accept(placement);
+        }
+
+        private void taintColumn(int x, int z) {
+            int[] column = {x, z};
+            taintColumns.add(column);
+            taintSink.accept(column);
+        }
 
         /** Oracle GenCommon.placeBlock:66-98 removes the decoration of an overwritten position. */
         void clearDecoration(int x, int y, int z) {
@@ -315,7 +336,7 @@ public final class DungeonRooms {
                 return;
             }
         }
-        out.placements.add(new Placement(x, y, z, kind, variant, facing));
+        out.add(new Placement(x, y, z, kind, variant, facing));
     }
 
     /** Oracle GenCommon.placeBlock:195-260 maps the direction ordinal onto the stair metadata. */
@@ -560,9 +581,10 @@ public final class DungeonRooms {
                         if (!view.isAir(x + 8 + w, y + 4 + h, z + 8 + j)) continue;
                         if (!view.isSolidAdjacent(x + 8 + w, y + 4 + h, z + 8 + j)) continue;
                         if (random.nextInt(3) != 0) {
-                            out.placements.add(new Placement(x + 8 + w, y + 4 + h, z + 8 + j, Kind.TAINT_FIBRES,
+                            out.add(new Placement(x + 8 + w, y + 4 + h, z + 8 + j, Kind.TAINT_FIBRES,
                                     OuterLandsRules.taintFibreMeta(random.nextInt(4)), -1));
                         }
+                        out.taintColumn(x + 8 + w, z + 8 + j);
                     }
                 }
             }
@@ -572,9 +594,9 @@ public final class DungeonRooms {
                 for (int h = -3; h <= 3; ++h) {
                     for (int j = -3; j <= 3; ++j) {
                         if (view.isAir(x + 8 + w, y + 4 + h, z + 8 + j) && random.nextFloat() < 0.35F) {
-                            out.placements.add(new Placement(x + 8 + w, y + 4 + h, z + 8 + j, Kind.WEB, 0, -1));
+                            out.add(new Placement(x + 8 + w, y + 4 + h, z + 8 + j, Kind.WEB, 0, -1));
                         }
-                        out.placements.add(new Placement(x + 8, y + 4, z + 8, Kind.MOB_SPAWNER, 0, -1));
+                        out.add(new Placement(x + 8, y + 4, z + 8, Kind.MOB_SPAWNER, 0, -1));
                         out.spawns.add(new Spawn(x + 8, y + 4, z + 8, SpawnKind.MIND_SPIDER, 0, 1, false, null));
                     }
                 }
@@ -743,15 +765,15 @@ public final class DungeonRooms {
         place(out, view, worldRandom, x + 12, y + 8, z + 11, 11, 3, cell);
         place(out, view, worldRandom, x + 11, y + 8, z + 11, 11, 3, cell);
         place(out, view, worldRandom, x + 11, y + 8, z + 12, 11, 5, cell);
-        out.placements.add(new Placement(x + 8, y + 2, z + 8, Kind.ELDRITCH, 3, -1));
-        out.placements.add(new Placement(x + 8, y + 3, z + 8, Kind.ELDRITCH_PORTAL, 0, -1));
+        out.add(new Placement(x + 8, y + 2, z + 8, Kind.ELDRITCH, 3, -1));
+        out.add(new Placement(x + 8, y + 3, z + 8, Kind.ELDRITCH_PORTAL, 0, -1));
         genObelisk(out, x + 8, y + 4, z + 8);
     }
 
     /** Oracle GenCommon.genObelisk:271-277. */
     public static void genObelisk(Builder out, int x, int y, int z) {
-        out.placements.add(new Placement(x, y, z, Kind.ELDRITCH, 1, -1));
-        for (int i = 1; i <= 4; ++i) out.placements.add(new Placement(x, y + i, z, Kind.ELDRITCH, 2, -1));
+        out.add(new Placement(x, y, z, Kind.ELDRITCH, 1, -1));
+        for (int i = 1; i <= 4; ++i) out.add(new Placement(x, y + i, z, Kind.ELDRITCH, 2, -1));
     }
 
     /* ------------------------------------------------------------------ */
@@ -829,7 +851,7 @@ public final class DungeonRooms {
             place(out, view, worldRandom, x + 4, y + 2, z + 6 + g, 10, 4, cell);
         }
         connections(out, view, worldRandom, cx, cz, y, cell, 3, true, true);
-        out.placements.add(new Placement(x + 8, y + 2, z + 8, Kind.ELDRITCH, 3, -1));
+        out.add(new Placement(x + 8, y + 2, z + 8, Kind.ELDRITCH, 3, -1));
         out.spawns.add(new Spawn(x + 8, y + 3, z + 8, SpawnKind.PERMANENT_ITEM, 2, 1, false, null));
         int guardians = OuterLandsRules.keyRoomGuardians(difficulty);
         for (int i = 0; i < guardians; ++i) {
@@ -876,9 +898,9 @@ public final class DungeonRooms {
                     if (a == 3 || a == 13 || b == 3 || b == 13) {
                         place(out, view, worldRandom, x + a, y + c, z + b, 21, -1, cell);
                     }
-                    boolean open = !(a == 4 && !cell.west || a == 12 && !cell.east || b == 4 && !cell.north)
+                    boolean openInterior = !(a == 4 && !cell.west || a == 12 && !cell.east || b == 4 && !cell.north)
                             && (b != 12 || cell.south);
-                    if (!open || !random.nextBoolean()) continue;
+                    if (openInterior || !random.nextBoolean()) continue;
                     place(out, view, worldRandom, x + a, y + c, z + b, 21, -1, cell);
                 }
             }
@@ -898,7 +920,7 @@ public final class DungeonRooms {
                 if (!random.nextBoolean()) continue;
                 if (!view.isAir(x + a, y + 8, z + b)) continue;
                 // Oracle GenNestRoom:66-68 - the crystal points down.
-                out.placements.add(new Placement(x + a, y + 8, z + b, Kind.CRYSTAL, 7, 0));
+                out.add(new Placement(x + a, y + 8, z + b, Kind.CRYSTAL, 7, 0));
             }
         }
         place(out, view, worldRandom, x + 8, y + 2, z + 8, 21, -1, cell);
@@ -932,7 +954,7 @@ public final class DungeonRooms {
                 // Oracle GenNestRoom:117 - the nest room rolls its own rarity table.
                 int meta = OuterLandsRules.nestLootUrnMeta(random.nextFloat());
                 Kind kind = OuterLandsRules.nestLootIsCrate(random.nextFloat()) ? Kind.LOOT_CRATE : Kind.LOOT_URN;
-                out.placements.add(new Placement(x + 8 + a, y + 2, z + 8 + b, kind, meta, -1));
+                out.add(new Placement(x + 8 + a, y + 2, z + 8 + b, kind, meta, -1));
             }
         }
     }
@@ -989,8 +1011,8 @@ public final class DungeonRooms {
                 }
                 boolean corner = a == 5 && b == 5 || a == 5 && b == 11 || a == 11 && b == 5 || a == 11 && b == 11;
                 if (!corner) continue;
-                out.placements.add(new Placement(x + a, y + 3, z + b, Kind.COSMETIC_SOLID, 15, -1));
-                out.placements.add(new Placement(x + a, y + 8, z + b, Kind.COSMETIC_SOLID, 15, -1));
+                out.add(new Placement(x + a, y + 3, z + b, Kind.COSMETIC_SOLID, 15, -1));
+                out.add(new Placement(x + a, y + 8, z + b, Kind.COSMETIC_SOLID, 15, -1));
             }
         }
         for (int g = 0; g < 5; ++g) {
@@ -1011,9 +1033,9 @@ public final class DungeonRooms {
         libraryDesk(out, x + 5, y + 7, z + 11, true);
         libraryDesk(out, x + 11, y + 7, z + 5, true);
         libraryDesk(out, x + 11, y + 7, z + 11, true);
-        out.placements.add(new Placement(x + 8, y + 2, z + 8, Kind.COSMETIC_SOLID, 15, -1));
+        out.add(new Placement(x + 8, y + 2, z + 8, Kind.COSMETIC_SOLID, 15, -1));
         libraryDesk(out, x + 8, y + 3, z + 8, false);
-        out.placements.add(new Placement(x + 8, y + 9, z + 8, Kind.COSMETIC_SOLID, 15, -1));
+        out.add(new Placement(x + 8, y + 9, z + 8, Kind.COSMETIC_SOLID, 15, -1));
         libraryDesk(out, x + 8, y + 8, z + 8, true);
         connections(out, view, worldRandom, cx, cz, y, cell, 3, true, true);
     }
@@ -1027,8 +1049,8 @@ public final class DungeonRooms {
      * @param top true for the upper desks, whose slab hangs below the eldritch block
      */
     private static void libraryDesk(Builder out, int x, int y, int z, boolean top) {
-        out.placements.add(new Placement(x, y, z, Kind.ELDRITCH, 5, -1));
-        out.placements.add(new Placement(x, top ? y - 1 : y + 1, z, Kind.COSMETIC_SLAB_STONE, top ? 9 : 1, -1));
+        out.add(new Placement(x, y, z, Kind.ELDRITCH, 5, -1));
+        out.add(new Placement(x, top ? y - 1 : y + 1, z, Kind.COSMETIC_SLAB_STONE, top ? 9 : 1, -1));
     }
 
     /* ------------------------------------------------------------------ */

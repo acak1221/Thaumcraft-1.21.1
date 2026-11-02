@@ -15,7 +15,9 @@
       "thaumcraft.fabric.testing.RecipeTransferClientProbe",
       "thaumcraft.fabric.testing.WandCrucibleClientProbe",
       "thaumcraft.fabric.testing.DeepslateOreClientProbe",
-      "thaumcraft.fabric.testing.ModernAdaptationsClientProbe"
+      "thaumcraft.fabric.testing.ModernAdaptationsClientProbe",
+      "thaumcraft.fabric.testing.EmiIdentityReviewClientEntrypoint",
+      "thaumcraft.fabric.testing.RendererReviewClientProbe"
     ]
   },
   "depends": {

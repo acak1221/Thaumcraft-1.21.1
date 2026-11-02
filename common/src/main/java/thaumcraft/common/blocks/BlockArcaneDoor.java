@@ -91,7 +91,6 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
         Direction facing = state.getValue(FACING);
         boolean open = state.getValue(OPEN);
         boolean flipped = state.getValue(FLIP);
-        boolean upper = state.getValue(HALF) == Half.TOP;
         if (!open) {
             return switch (facing) {
                 case SOUTH -> SOUTH;
@@ -100,12 +99,11 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
                 default -> EAST;
             };
         }
-        VoxelShape hinge = flipped ? (upper ? EAST : WEST) : (upper ? WEST : EAST);
         return switch (facing) {
-            case SOUTH -> hinge;
-            case WEST -> flipped ? NORTH : SOUTH;
+            case SOUTH -> flipped ? EAST : WEST;
+            case WEST -> flipped ? SOUTH : NORTH;
             case NORTH -> flipped ? WEST : EAST;
-            default -> flipped ? SOUTH : NORTH;
+            default -> flipped ? NORTH : SOUTH;
         };
     }
 

@@ -545,6 +545,8 @@ public final class ModelEldritchCrystal {
             addVertex(buffer, pose, triangle, 0, light, overlay, color);
             addVertex(buffer, pose, triangle, 3, light, overlay, color);
             addVertex(buffer, pose, triangle, 6, light, overlay, color);
+            // Both independently textured world passes use native QUADS.
+            addVertex(buffer, pose, triangle, 6, light, overlay, color);
         }
     }
 

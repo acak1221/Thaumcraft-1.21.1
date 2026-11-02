@@ -19,8 +19,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.level.entity.EntitySection;
 import net.minecraft.world.item.ItemStack;
@@ -29,7 +31,9 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.entities.EntityInventoryItem;
+import thaumcraft.common.entities.EntityItemGrate;
 import thaumcraft.common.entities.golems.EntityGolemBase;
+import thaumcraft.common.lib.GrateRules;
 import thaumcraft.api.aspects.IEssentiaContainerItem;
 import thaumcraft.common.lib.essentia.EssentiaAtomicEndpoint;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
@@ -49,7 +53,7 @@ public final class DeferredItemDrops extends SavedData {
     private static final String ID = "thaumcraft_pending_inventory_drops";
     private static final Factory<DeferredItemDrops> FACTORY = new Factory<>(
             DeferredItemDrops::new, DeferredItemDrops::load, null);
-    private static final int VERSION = 4; // V1..V3 rows retain physics/ownership; absent PechDrop is false.
+    private static final int VERSION = 5; // Older rows retain physics/ownership; absent PechDrop/GrateDrop is false.
     private static final int BATCH = 64;
     /** Bounded first-slice physical plan, NOT a source-count clamp. */
     public static final int MAX_BORE_EJECTION_SEGMENTS = 4096;
@@ -75,7 +79,10 @@ public final class DeferredItemDrops extends SavedData {
     private record BoreDrop(UUID transaction, BlockPos target, int nozzle, int attachment, boolean evacuation, int member, int segment) {}
     /** The longest a catch may be saved as burning (a Fishing golem sets two seconds); anything above is a malformed row. */
     private static final int MAX_FIRE_TICKS = 600;
-    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop, int portalCooldown) {
+    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop, int portalCooldown, boolean grateDrop) {
+        private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop, int portalCooldown) {
+            this(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, routing, bore, fireTicks, pechDrop, portalCooldown, false);
+        }
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop) {
             this(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, routing, bore, fireTicks, pechDrop, 0);
         }
@@ -91,8 +98,8 @@ public final class DeferredItemDrops extends SavedData {
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter) {
             this(id, source, position, motion, stack, pickupDelay, retryAfter, -1, false, null);
         }
-        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore, fireTicks, pechDrop, portalCooldown); }
-        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore, fireTicks, pechDrop, portalCooldown); }
+        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore, fireTicks, pechDrop, portalCooldown, grateDrop); }
+        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore, fireTicks, pechDrop, portalCooldown, grateDrop); }
     }
 
     private static final class Attempt {
@@ -576,13 +583,51 @@ public final class DeferredItemDrops extends SavedData {
         var queue = level.getDataStorage().computeIfAbsent(FACTORY, ID);
         return new PreparedBatch(level, queue, rows);
     }
+
+    /** Player.drop(stack, false): sample its native directed throw once, without admitting an unpaid entity. */
+    public static PreparedBatch preparePlayerDrop(ServerLevel level, Player player, ItemStack stack) {
+        if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
+            throw new IllegalStateException("Player return preparation requires the canonical server level");
+        if (player == null || player.level() != level || stack == null || stack.isEmpty())
+            throw new IllegalArgumentException("A current player and actual return stack are required");
+        float yaw = player.getYRot() / 180 * (float) Math.PI, pitch = player.getXRot() / 180 * (float) Math.PI;
+        double vx = -Mth.sin(yaw) * Mth.cos(pitch) * .3F;
+        double vz = Mth.cos(yaw) * Mth.cos(pitch) * .3F;
+        double vy = -Mth.sin(pitch) * .3F + .1F;
+        float angle = player.getRandom().nextFloat() * (float) Math.PI * 2;
+        float spread = .02F * player.getRandom().nextFloat();
+        vx += Math.cos(angle) * spread;
+        vy += (double) ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * .1F);
+        vz += Math.sin(angle) * spread;
+        Vec3 position = new Vec3(player.getX(), player.getY() - (double) .3F + player.getEyeHeight(), player.getZ());
+        return prepareDirectedBatch(level, player.blockPosition(), List.of(
+                new DirectedDrop(stack, position, new Vec3(vx, vy, vz), 40)));
+    }
     /** Mirror ownership publication has no ADD/notification callbacks. All fallible work precedes its single append. */
     public static void enqueueMirrorOutput(ServerLevel level, BlockPos source, Vec3 position, Vec3 motion, ItemStack output) {
-        var batch = prepareDirectedBatch(level, source, List.of(new DirectedDrop(output, position, motion, 0)));
+        enqueueMirrorOutput(level, source, position, motion, output, 0);
+    }
+    /** Hand mirrors emit without pickup delay; stationary mirrors retain their native ten-tick delay. */
+    public static void enqueueMirrorOutput(ServerLevel level, BlockPos source, Vec3 position, Vec3 motion, ItemStack output, int pickupDelay) {
+        if (pickupDelay != 0 && pickupDelay != 10) throw new IllegalArgumentException("Mirror pickup delay must be zero or ten ticks");
+        var batch = prepareDirectedBatch(level, source, List.of(new DirectedDrop(output, position, motion, pickupDelay)));
         Pending row = batch.rows.getFirst();
-        var mirror = new Pending(row.id, row.source, row.position, row.motion, row.stack, 0, Long.MIN_VALUE, -1, false, null, 0, false, 20);
+        var mirror = new Pending(row.id, row.source, row.position, row.motion, row.stack, pickupDelay, Long.MIN_VALUE, -1, false, null, 0, false, 20);
         var prepared = new PreparedBatch(level, batch.queue, List.of(mirror));
         if (!prepared.ready()) throw new IllegalStateException("Mirror output storage changed during preparation");
+        prepared.commitRaw();
+    }
+
+    /** A grate's accepted stack keeps its native item subtype and straight-fall physics across refusal/reload. */
+    public static void enqueueGrateOutput(ServerLevel level, BlockPos source, ItemStack output) {
+        // The native ItemEntity codec can persist at most99; ordinary grate/hopper slots accept at most64.
+        if (source == null || output == null || output.isEmpty() || output.getCount() > 99) throw new IllegalArgumentException("Native grate stack and source required");
+        Vec3 position = new Vec3(source.getX() + .5, source.getY() + GrateRules.SPAWN_HEIGHT, source.getZ() + .5);
+        var batch = prepareDirectedBatch(level, source, List.of(new DirectedDrop(output, position, new Vec3(0, GrateRules.FALL_SPEED, 0), 0)));
+        Pending row = batch.rows.getFirst();
+        var grate = new Pending(row.id, row.source, row.position, row.motion, row.stack, 0, Long.MIN_VALUE, -1, false, null, 0, false, 0, true);
+        var prepared = new PreparedBatch(level, batch.queue, List.of(grate));
+        if (!prepared.ready()) throw new IllegalStateException("Grate output storage changed during preparation");
         prepared.commitRaw();
     }
 
@@ -685,7 +730,9 @@ public final class DeferredItemDrops extends SavedData {
                 if (entry.bore != null && entry.stack.getCount() > 64) throw new IllegalStateException("Unrepresentable native Bore entity segment");
                 ItemStack physical = entry.bore == null ? entry.stack.copy()
                         : BoreInventoryPlan.Stack.of(level.registryAccess(), entry.stack, entry.stack.getMaxStackSize()).copyStack(level.registryAccess());
-                if (entry.stack.getCount() > 99) {
+                if (entry.grateDrop) {
+                    output = new EntityItemGrate(level, entry.position.x, entry.position.y, entry.position.z, physical);
+                } else if (entry.stack.getCount() > 99) {
                     // The native ItemStack save codec rejects count100..127, which
                     // original discovery overstack could hold in one entity.
                     output = new EntityInventoryItem(ThaumcraftContent.INVENTORY_ITEM.get(), level);
@@ -849,8 +896,19 @@ public final class DeferredItemDrops extends SavedData {
                 int fireTicks = row.contains("Fire") ? row.getInt("Fire") : 0; // Only a Fire golem's fishing catch is ever saved alight.
                 int portalCooldown = row.getInt("PortalCooldown");
                 if (row.contains("PortalCooldown") && (!row.contains("PortalCooldown", Tag.TAG_INT) || portalCooldown != 20
-                        || pickupDelay != 0 || row.contains("Fire") || row.contains("PechDrop") || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
+                        || pickupDelay != 0 && pickupDelay != 10 || row.contains("Fire") || row.contains("PechDrop") || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
                     throw new IllegalArgumentException("Invalid mirror portal cooldown");
+                boolean grateDrop = row.getBoolean("GrateDrop");
+                if (row.contains("GrateDrop")) {
+                    BlockPos source = BlockPos.of(row.getLong("Source"));
+                    Vec3 gratePosition = new Vec3(source.getX() + .5, source.getY() + GrateRules.SPAWN_HEIGHT, source.getZ() + .5);
+                    if (tag.getInt("Version") < 5 || !row.contains("GrateDrop", Tag.TAG_BYTE) || row.getByte("GrateDrop") != 1
+                            || !row.contains("Source", Tag.TAG_LONG) || !row.contains("Count", Tag.TAG_INT) || count > 99 || pickupDelay != 0
+                            || row.contains("PortalCooldown") || row.contains("Fire") || row.contains("PechDrop")
+                            || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")
+                            || !position.equals(gratePosition) || !motion.equals(new Vec3(0, GrateRules.FALL_SPEED, 0)))
+                        throw new IllegalArgumentException("Invalid grate output kind or physics");
+                }
                 if (row.contains("Fire") && (!row.contains("Fire", Tag.TAG_INT) || fireTicks <= 0 || fireTicks > MAX_FIRE_TICKS
                         || pickupDelay != 20 || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
                     throw new IllegalArgumentException("Invalid burning flag on a pending drop");
@@ -886,7 +944,7 @@ public final class DeferredItemDrops extends SavedData {
                 } else if (row.contains("Routing")) throw new IllegalArgumentException("Routing without a paid crystal");
                 // Saved ROUTING/IN_FLIGHT never replays inventory. The same paid
                 // UUID becomes a residual physical delivery, unless acknowledged.
-                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore, fireTicks, pechDrop, portalCooldown));
+                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore, fireTicks, pechDrop, portalCooldown, grateDrop));
             } catch (RuntimeException exception) {
                 data.quarantined.add(row.copy());
                 Thaumcraft.LOG.error("Invalid pending inventory drop retained in quarantine", exception);
@@ -1000,6 +1058,7 @@ public final class DeferredItemDrops extends SavedData {
         if (entry.fireTicks != 0) row.putInt("Fire", entry.fireTicks);
         if (entry.pechDrop) row.putBoolean("PechDrop", true);
         if (entry.portalCooldown != 0) row.putInt("PortalCooldown", entry.portalCooldown);
+        if (entry.grateDrop) row.putBoolean("GrateDrop", true);
         row.putDouble("X", entry.position.x); row.putDouble("Y", entry.position.y); row.putDouble("Z", entry.position.z);
         row.putDouble("DX", entry.motion.x); row.putDouble("DY", entry.motion.y); row.putDouble("DZ", entry.motion.z);
         if (entry.crystalFace >= 0) { row.putInt("CrystalFace", entry.crystalFace); if (entry.routing) row.putBoolean("Routing", true); }

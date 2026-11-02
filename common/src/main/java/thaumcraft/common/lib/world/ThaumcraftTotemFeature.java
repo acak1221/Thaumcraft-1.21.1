@@ -90,8 +90,8 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         // the rolls before the totem is asked. Only a structure the chain actually builds
         // suppresses the totem (:434, :441, :451), not a roll that failed its ground test.
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
-        if (AuraGenRules.finalAuraGen(auraGen, wildNode,
-                AuraGenRules.structureBuilt(level, chunkX, chunkZ, draw.kind()))) auraGen = true;
+        auraGen = AuraGenRules.finalAuraGen(auraGen, wildNode,
+                AuraGenRules.structureBuilt(level, chunkX, chunkZ, draw.kind()));
         // Oracle ThaumcraftWorldGenerator:149 - `!auraGen` comes before the rarity draw, so a
         // suppressed chunk does not consume it.
         if (auraGen) return false;

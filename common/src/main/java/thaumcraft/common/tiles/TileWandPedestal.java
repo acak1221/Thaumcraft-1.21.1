@@ -8,6 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -25,6 +26,7 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.foci.FocalUpgradeCosts;
 import thaumcraft.common.lib.tiles.LegacyTileRules;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
@@ -51,7 +53,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     /** The node the client draws the vis from. */
     public int drainX, drainY, drainZ, drainColor;
     private List<BlockPos> nodes;
-    private boolean ticking;
+    private boolean ticking, returning;
     private Charge charge;
     private record Charge(TileNode node, ItemStack stack, ItemStack before, ItemStack after,
                           Aspect source, Aspect primal, int reserve) {}
@@ -239,6 +241,30 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
         return removed;
     }
 
+    /** Native retrieval transfers the slot before comparator or entity-admission callbacks can observe it. */
+    public boolean returnStoredItem(Player player) {
+        if (returning || ticking || !current() || player == null || player.level() != level || isEmpty()) return false;
+        returning = true;
+        try {
+            var server = (ServerLevel) level;
+            ItemStack stored = itemStacks.get(0), before = stored.copy(), output = before.copy();
+            DeferredItemDrops.PreparedBatch overflow = null;
+            if (!player.getInventory().add(output)) {
+                overflow = DeferredItemDrops.preparePlayerDrop(server, player, output);
+                if (!overflow.ready() || !current() || player.level() != level
+                        || itemStacks.get(0) != stored || !ItemStack.matches(stored, before) || !current()) return false;
+            }
+            // Native inventory success is already a physical owner. Otherwise
+            // these adjacent raw writes give the durable queue the removed wand.
+            itemStacks.set(0, ItemStack.EMPTY);
+            draining = false;
+            if (overflow != null) overflow.commitRaw();
+            try { inventoryChanged(); }
+            finally { if (overflow != null) DeferredItemDrops.tick(server); }
+            return true;
+        } finally { returning = false; }
+    }
+
     @Override public void clearContent() {
         if (isDataRejected() || isEmpty()) return;
         super.clearContent();
@@ -316,6 +342,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (returning) throw new IllegalStateException("Cannot reload a pedestal during its paid return");
         super.loadAdditional(tag, registries);
         if (isDataRejected()) return;
         draining = tag.getBoolean("draining");

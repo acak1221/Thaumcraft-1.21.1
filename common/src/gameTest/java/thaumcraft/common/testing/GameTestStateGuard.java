@@ -122,9 +122,9 @@ public final class GameTestStateGuard {
         });
         if (!leaks.isEmpty()) {
             String message = "GameTest isolation: " + info.getTestName() + ": " + String.join("; ", leaks);
-            thaumcraft.common.Thaumcraft.LOG.error(message);
             var failure = new AssertionError(message);
             if (info.getError() != null) failure.addSuppressed(info.getError());
+            thaumcraft.common.Thaumcraft.LOG.error(message, failure);
             info.fail(failure);
         }
     }

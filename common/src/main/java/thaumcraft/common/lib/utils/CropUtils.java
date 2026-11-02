@@ -79,7 +79,7 @@ public final class CropUtils {
     /** Original {@code IGrowable.canGrow}: may the crop still grow one more stage? */
     public static boolean canGrow(BlockState state) {
         if (state == null) return false;
-        if (state.getBlock() instanceof CropBlock crop) return state.getValue(CropBlock.AGE) < CropBlock.MAX_AGE;
+        if (state.getBlock() instanceof CropBlock crop) return !crop.isMaxAge(state);
         if (state.getBlock() instanceof StemBlock stem) return state.getValue(StemBlock.AGE) < StemBlock.MAX_AGE;
         if (state.getBlock() instanceof NetherWartBlock wart) return state.getValue(NetherWartBlock.AGE) < NetherWartBlock.MAX_AGE;
         return false;

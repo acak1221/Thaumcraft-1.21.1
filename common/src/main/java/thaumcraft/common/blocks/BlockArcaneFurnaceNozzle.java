@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftLegacyTiles;
 
@@ -30,10 +29,10 @@ public final class BlockArcaneFurnaceNozzle extends Block {
     public static final MapCodec<BlockArcaneFurnaceNozzle> CODEC = simpleCodec(BlockArcaneFurnaceNozzle::new);
     /** The side the core of the furnace is on. */
     public static final DirectionProperty FACING = DirectionProperty.create("facing");
-    private static final VoxelShape WEST_SHAPE = Shapes.box(0, 0, 0, 8, 16, 16);
-    private static final VoxelShape EAST_SHAPE = Shapes.box(8, 0, 0, 16, 16, 16);
-    private static final VoxelShape NORTH_SHAPE = Shapes.box(0, 0, 0, 16, 16, 8);
-    private static final VoxelShape SOUTH_SHAPE = Shapes.box(0, 8, 0, 16, 16, 16);
+    private static final VoxelShape WEST_SHAPE = Block.box(0, 0, 0, 8, 16, 16);
+    private static final VoxelShape EAST_SHAPE = Block.box(8, 0, 0, 16, 16, 16);
+    private static final VoxelShape NORTH_SHAPE = Block.box(0, 0, 0, 16, 16, 8);
+    private static final VoxelShape SOUTH_SHAPE = Block.box(0, 0, 8, 16, 16, 16);
 
     public BlockArcaneFurnaceNozzle(Properties properties) {
         super(properties);

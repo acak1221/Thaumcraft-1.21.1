@@ -183,18 +183,20 @@ public final class TilePedestal extends RetainedDataBlockEntity implements World
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        Component[] decodedName = new Component[1];
         if (retainMalformed(tag, () -> {
             if (tag.contains("Stack")) {
                 requiredStack(registries,tag.get("Stack"));
                 if (!tag.contains("Count",Tag.TAG_INT) || tag.getInt("Count")<=0) throw new IllegalArgumentException("Count must be positive int");
             } else if (tag.getInt("Count")!=0) throw new IllegalArgumentException("Count without Stack");
+            decodedName[0] = readCustomName(tag, registries);
         })) return;
         super.loadAdditional(tag, registries);
         stack = tag.contains("Stack") ? requiredStack(registries, tag.get("Stack")) : ItemStack.EMPTY;
         int count = tag.getInt("Count");
         if (!stack.isEmpty() && count > 0) stack.setCount(count);
         else stack = ItemStack.EMPTY;
-        customName = tag.contains("CustomName") ? Component.Serializer.fromJson(tag.getString("CustomName"), registries) : null;
+        customName = decodedName[0];
     }
 
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveWithoutMetadata(registries); }

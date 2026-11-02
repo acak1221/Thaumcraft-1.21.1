@@ -109,7 +109,8 @@ final class UseGolemGoals {
         BlockPos home = golem.getHomePosition(), pos = marker.pos();
         double dx = (double) pos.getX() - home.getX(), dy = (double) pos.getY() - home.getY(), dz = (double) pos.getZ() - home.getZ();
         // The original computes ceil(range / 3) here and never uses it; the port's own home bound is the live range.
-        return dx * dx + dy * dy + dz * dz <= golem.rangeSqr() && loaded(level, pos) && loaded(level, pos.relative(marker.face()));
+        return dx * dx + dy * dy + dz * dz <= golem.rangeSqr() && loaded(level, pos) && loaded(level, pos.relative(marker.face()))
+                && loaded(level, clickPos(marker, golem.getUseOptions().emptySpace()));
     }
     Target findTarget(ItemStack actual) {
         if (!working() || actual == null || !golem.useItemAllowed(actual) || !homePermits(actual)

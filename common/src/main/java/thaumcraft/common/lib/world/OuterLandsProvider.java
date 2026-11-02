@@ -214,7 +214,8 @@ public final class OuterLandsProvider {
             RandomSource worldRandom = level.getLevel().getChunkSource().randomState()
                     .getOrCreateRandomFactory(ResourceLocation.fromNamespaceAndPath("thaumcraft", "outer_lands"))
                     .at(chunkX, OuterLandsRules.MAZE_FLOOR_Y, chunkZ);
-            DungeonRooms.Builder builder = new DungeonRooms.Builder();
+            DungeonRooms.Builder builder = new DungeonRooms.Builder(placement -> apply(level, placement),
+                    column -> BiomeColumns.set(level, column[0], column[1], thaumcraft.common.config.ThaumcraftBiomes.TAINT));
             View view = new View(level, chunkX, chunkZ);
             int y = OuterLandsRules.MAZE_FLOOR_Y;
             int cx = chunkX;
@@ -228,34 +229,30 @@ public final class OuterLandsProvider {
                 case LIBRARY_ROOM -> DungeonRooms.generateLibraryRoom(builder, view, random, worldRandom, cx, cz, y, cell);
                 case PASSAGE -> DungeonRooms.generatePassage(builder, view, random, worldRandom, cx, cz, y, cell);
             }
-            apply(level, builder, random, worldRandom);
+            decorations(level, builder, random);
+            ThaumcraftOuterLands.spawnRoomEntities(level, builder, worldRandom);
             return true;
         }
 
-        private static void apply(WorldGenLevel level, DungeonRooms.Builder builder, RandomSource random,
-                                  RandomSource worldRandom) {
-            for (DungeonRooms.Placement placement : builder.placements) {
-                BlockState state = ThaumcraftOuterLands.state(placement.kind(), placement.variant(), placement.facing());
-                if (state == null) continue;
-                int flags = switch (placement.kind()) {
-                    case ELDRITCH_NOTHING, BEDROCK, AIR -> 0;
-                    default -> Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS;
-                };
-                BlockPos pos = new BlockPos(placement.x(), placement.y(), placement.z());
-                level.setBlock(pos, state, flags);
-                // Oracle GenBossRoom:72-75 - the eldritch lock of a boss room takes the
-                // direction of the side of the room it stands on.
-                if (placement.kind() == DungeonRooms.Kind.ELDRITCH
-                        && placement.variant() == EldritchBlockRules.ELDRITCH_LOCK) {
-                    ThaumcraftOuterLands.configureFacing(level.getBlockEntity(pos), (byte) placement.facing());
-                }
-                if (placement.kind() != DungeonRooms.Kind.CRYSTAL) continue;
-                // Oracle GenCommon:296-299 - the crystal points into the free neighbour.
-                if (level.getBlockEntity(pos) instanceof thaumcraft.common.tiles.TileCrystal crystal)
-                    crystal.setOrientation(Direction.from3DDataValue(placement.facing() < 0 ? 0 : placement.facing()));
+        private static void apply(WorldGenLevel level, DungeonRooms.Placement placement) {
+            BlockState state = ThaumcraftOuterLands.state(placement.kind(), placement.variant(), placement.facing());
+            if (state == null) return;
+            int flags = switch (placement.kind()) {
+                case ELDRITCH_NOTHING, BEDROCK, AIR -> 0;
+                default -> Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS;
+            };
+            BlockPos pos = new BlockPos(placement.x(), placement.y(), placement.z());
+            level.setBlock(pos, state, flags);
+            // Oracle GenBossRoom:72-75 - the eldritch lock of a boss room takes the
+            // direction of the side of the room it stands on.
+            if (placement.kind() == DungeonRooms.Kind.ELDRITCH
+                    && placement.variant() == EldritchBlockRules.ELDRITCH_LOCK) {
+                ThaumcraftOuterLands.configureFacing(level.getBlockEntity(pos), (byte) placement.facing());
             }
-            decorations(level, builder, random);
-            ThaumcraftOuterLands.spawnRoomEntities(level, builder, worldRandom);
+            if (placement.kind() != DungeonRooms.Kind.CRYSTAL) return;
+            // Oracle GenCommon:296-299 - the crystal points into the free neighbour.
+            if (level.getBlockEntity(pos) instanceof thaumcraft.common.tiles.TileCrystal crystal)
+                crystal.setOrientation(Direction.from3DDataValue(placement.facing() < 0 ? 0 : placement.facing()));
         }
 
         /** Oracle {@code GenCommon.processDecorations:279-317}. */
@@ -274,7 +271,8 @@ public final class OuterLandsProvider {
                 if (exposed <= 0) continue;
                 if (exposed != 1 && bedrockShowing(level, target)) continue;
                 if (adjacentToEldritch(level, target)) continue;
-                int meta = OuterLandsRules.commonDecorationMeta(random.nextInt(3), random.nextInt(8));
+                int firstRoll = random.nextInt(3);
+                int meta = OuterLandsRules.commonDecorationMeta(firstRoll, firstRoll == 0 ? random.nextInt(8) : 0);
                 BlockState state = ThaumcraftOuterLands.state(DungeonRooms.Kind.ELDRITCH, meta, -1);
                 if (state == null) continue;
                 level.setBlock(target, state, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);

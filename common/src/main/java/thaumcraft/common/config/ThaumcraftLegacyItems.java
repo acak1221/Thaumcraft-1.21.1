@@ -107,6 +107,18 @@ public final class ThaumcraftLegacyItems {
     public static final RegistrySupplier<DataComponentType<ItemKey.KeyLink>> KEY_LINK = COMPONENTS.register("key_link",
             () -> DataComponentType.<ItemKey.KeyLink>builder().persistent(KEY_LINK_CODEC).networkSynchronized(KEY_LINK_STREAM).build());
 
+    /** Dimension and lock-owner binding is separate so the legacy KeyLink API and saved xyz/type stay intact. */
+    public static final Codec<ItemKey.KeyScope> KEY_SCOPE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("dimension").forGetter(ItemKey.KeyScope::dimension),
+            Codec.STRING.fieldOf("owner").forGetter(ItemKey.KeyScope::owner)
+    ).apply(instance, ItemKey.KeyScope::new));
+    public static final StreamCodec<io.netty.buffer.ByteBuf, ItemKey.KeyScope> KEY_SCOPE_STREAM = StreamCodec.composite(
+            ResourceLocation.STREAM_CODEC, ItemKey.KeyScope::dimension,
+            ByteBufCodecs.STRING_UTF8, ItemKey.KeyScope::owner,
+            ItemKey.KeyScope::new);
+    public static final RegistrySupplier<DataComponentType<ItemKey.KeyScope>> KEY_SCOPE = COMPONENTS.register("key_scope",
+            () -> DataComponentType.<ItemKey.KeyScope>builder().persistent(KEY_SCOPE_CODEC).networkSynchronized(KEY_SCOPE_STREAM).build());
+
     /** The bone bow, original ItemBowBone. */
     public static final RegistrySupplier<ItemBowBone> BONE_BOW = ITEMS.register("bone_bow", () -> new ItemBowBone(new Item.Properties()));
     /** The crimson blade, original ItemCrimsonSword. */

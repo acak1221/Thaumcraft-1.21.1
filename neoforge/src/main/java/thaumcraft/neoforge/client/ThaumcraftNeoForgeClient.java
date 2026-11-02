@@ -229,6 +229,7 @@ public final class ThaumcraftNeoForgeClient {
     }
 
     private static void resetClientState() {
+        thaumcraft.client.gui.ThaumcraftRecipeDisplay.reloadResources();
         thaumcraft.client.renderers.item.PrimalWandFocusRenderer.reset();
         ThaumcraftWarpClient.reloadResources();
         ThaumcraftRunicClient.reloadResources();

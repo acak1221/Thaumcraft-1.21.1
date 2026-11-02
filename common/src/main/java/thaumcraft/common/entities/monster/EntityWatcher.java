@@ -48,6 +48,8 @@ public class EntityWatcher extends Monster {
         xpReward=EldritchMobRules.WATCHER.experience();
         lookHelper=new GuardianLookHelper(this);
         moveHelper=new GuardianMoveHelper(this);
+        lookControl=lookHelper;
+        moveControl=moveHelper;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -212,6 +214,7 @@ public class EntityWatcher extends Monster {
             this.watcher=watcher;
             setFlags(java.util.EnumSet.of(Goal.Flag.MOVE,Goal.Flag.LOOK));
         }
+        @Override public boolean requiresUpdateEveryTick() { return true; }
         @Override public boolean canUse() {
             LivingEntity target=watcher.getTarget();
             return target!=null&&target.isAlive();

@@ -53,7 +53,7 @@ public final class TileEldritchCapRenderer {
             // The original translates to the middle of the block and turns the cap on its side.
             pose.translate(.5F, 0.0F, .5F);
             pose.mulPose(Axis.XP.rotationDegrees(-90.0F));
-            model.renderCapGroup(pose, out, light, overlay, 0xffffffff);
+            model.renderCapGroupQuads(pose, out, light, overlay, 0xffffffff);
         } finally {
             pose.popPose();
         }

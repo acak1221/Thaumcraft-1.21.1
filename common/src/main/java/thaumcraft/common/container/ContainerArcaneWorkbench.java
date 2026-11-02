@@ -155,12 +155,22 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu implem
             else viewer.drop(remainder, false);
         }
         ItemStack output = match.output().copy();
-        output.onCraftedBy(viewer.level(), viewer, output.getCount());
-        dev.architectury.event.events.common.PlayerEvent.CRAFT_ITEM.invoker().craft(viewer, output, eventInputs);
-        result.setRecipeUsed(match.recipe());
-        result.awardUsedRecipes(viewer, match.input().items());
-        viewer.getInventory().setChanged();
-        refreshResult();
+        try {
+            output.onCraftedBy(viewer.level(), viewer, output.getCount());
+            dev.architectury.event.events.common.PlayerEvent.CRAFT_ITEM.invoker().craft(viewer, output, eventInputs);
+            result.setRecipeUsed(match.recipe());
+            result.awardUsedRecipes(viewer, match.input().items());
+            viewer.getInventory().setChanged();
+            refreshResult();
+        } catch (RuntimeException | Error failure) {
+            // Payment is committed. Retain the live result, including changes
+            // made by a hook, before propagating that hook's original failure.
+            try { returnToInventory(output); }
+            catch (RuntimeException | Error recoveryFailure) {
+                if (recoveryFailure != failure) failure.addSuppressed(recoveryFailure);
+            }
+            throw failure;
+        }
         return output;
     }
 
@@ -190,10 +200,16 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu implem
                         || carried.getCount() + preview.getCount() > carried.getMaxStackSize())) return;
                 ItemStack crafted = takeResult();
                 if (!crafted.isEmpty()) {
-                    if (carried.isEmpty()) setCarried(crafted);
-                    else if (ItemStack.isSameItemSameComponents(carried, crafted)
-                            && carried.getCount() + crafted.getCount() <= carried.getMaxStackSize()) carried.grow(crafted.getCount());
-                    else returnToInventory(crafted); // A native onCraftedBy hook may change map/components.
+                    // Craft hooks run after payment and can close this menu or replace its cursor.
+                    // Deliver to the current owner, never a captured/abandoned cursor object.
+                    if (!active(player)) returnToInventory(crafted);
+                    else {
+                        carried = getCarried();
+                        if (carried.isEmpty()) setCarried(crafted);
+                        else if (ItemStack.isSameItemSameComponents(carried, crafted)
+                                && carried.getCount() + crafted.getCount() <= carried.getMaxStackSize()) carried.grow(crafted.getCount());
+                        else returnToInventory(crafted); // A native onCraftedBy hook may change map/components.
+                    }
                 }
             } else if (type == ClickType.THROW) {
                 if (getCarried().isEmpty()) {
@@ -214,7 +230,10 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu implem
     }
 
     private void returnToInventory(ItemStack stack) {
-        if (!viewer.getInventory().add(stack) && !stack.isEmpty()) viewer.drop(stack, false);
+        if (viewer instanceof ServerPlayer player && player.isAlive() && !player.hasDisconnected()
+                && player.server.getPlayerList().getPlayer(player.getUUID()) == player) player.getInventory().add(stack);
+        if (!stack.isEmpty() && viewer.level() instanceof net.minecraft.server.level.ServerLevel level)
+            thaumcraft.common.lib.utils.DeferredItemDrops.enqueue(level, viewer.blockPosition(), java.util.List.of(stack));
     }
 
     @Override public ItemStack quickMoveStack(Player player, int index) {

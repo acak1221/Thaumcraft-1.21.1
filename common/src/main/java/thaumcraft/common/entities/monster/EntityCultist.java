@@ -234,6 +234,8 @@ public class EntityCultist extends Monster {
             setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
         }
 
+        @Override public boolean requiresUpdateEveryTick() { return true; }
+
         @Override public boolean canUse() {
             LivingEntity target = mob.getTarget();
             if (target == null || !target.isAlive()) return false;
@@ -304,6 +306,8 @@ public class EntityCultist extends Monster {
             this.maxRangeSquared = maxRange * maxRange;
             setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
         }
+
+        @Override public boolean requiresUpdateEveryTick() { return true; }
 
         @Override public boolean canUse() {
             LivingEntity current = mob.getTarget();

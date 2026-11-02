@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "policy": "First 37 entries reconcile CLIENT_QUALITY findings: 33 construction + 2 classpath loaders + 2 silent fallbacks; remaining entries are independently found shared/API paths. Registry, sound, recipe, model-layer and tag factories are inventoried but are NOT file paths. Addon-supplied arguments are unbounded and are not bundled-asset claims. Alpha.14/16 review: recipe-transfer canonical IDs/packet recipe IDs and deep ore/aspect/tag identifiers are registry keys, not resource files; no new dynamic file family. Alpha.17 modern adaptations review: magical wood names are the two registered Greatwood/Silverwood families, expanded as two block-atlas materials and four native hanging-editor files. Modern research factories create recipe registry keys, not file requests. Armor trim overlays resolve native holder-selected atlas sprites through ArmorTrim.innerTexture/outerTexture and remain external vanilla/resource-pack dependencies.",
+  "policy": "First 37 entries reconcile CLIENT_QUALITY findings: 33 construction + 2 classpath loaders + 2 silent fallbacks; remaining entries are independently found shared/API paths. Registry, sound, recipe, model-layer and tag factories are inventoried but are NOT file paths. Addon-supplied arguments are unbounded and are not bundled-asset claims. Alpha.14/16 review: recipe-transfer canonical IDs/packet recipe IDs and deep ore/aspect/tag identifiers are registry keys, not resource files; no new dynamic file family. Alpha.17 modern adaptations review: magical wood names are the two registered Greatwood/Silverwood families, expanded as two block-atlas materials and four native hanging-editor files. Modern research factories create recipe registry keys, not file requests. Armor trim overlays resolve native holder-selected atlas sprites through ArmorTrim.innerTexture/outerTexture and remain external vanilla/resource-pack dependencies. Review 2026-11-02: Aspect short-array guard changes combination logic only; composed aspect texture paths and registry bounds were rechecked and remain unchanged.",
   "sites": [
     {
       "site": "common/src/main/java/thaumcraft/client/BoreClientEffects.java",
@@ -1530,7 +1530,7 @@
     ]
   },
   "source_contracts": {
-    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "348e3afb2533acbf984b7fd3f105a240ee8dcb2cf3d793b469f8095cadb8199f",
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "9306ee3ca36aab1aa0ac3d47ccfdb1212c9896a507e99a40828be563665e1a50",
     "common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java": "58707a3d2cf7d1168990b583afd9a23cfae5e82b3a6af630169ffb76b5af11ff",
     "common/src/main/java/thaumcraft/api/wands/StaffRod.java": "d5dfd3daa9e1894ef00eeb7d8fe4e4357dc536701d450eee45ae771efcf5745c",
     "common/src/main/java/thaumcraft/api/wands/WandCap.java": "7e2b9baeb986547a352dde829f0da1a945c54583e464ddcc29976d9b20c8a6aa",

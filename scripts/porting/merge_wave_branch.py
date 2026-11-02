@@ -52,7 +52,7 @@ def merge_base_ledger(branch: str) -> dict | None:
                           capture_output=True, text=True).stdout.strip()
     if not base:
         return None
-    return stage(f"{base}:{LEDGER}", LEDGER)
+    return stage(base, LEDGER)
 
 
 def _union(ours: list | None, theirs: list | None) -> list:
@@ -189,11 +189,22 @@ def main() -> int:
     if not branches:
         print(__doc__)
         return 2
+    status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+    if status.returncode or status.stdout.strip():
+        print("Refusing to merge with an unreadable or non-clean worktree/index; preserve the caller's changes")
+        return 1
     for branch in branches:
         print(f"=== merging {branch} ===")
-        subprocess.run(["git", "merge", "--no-commit", "--no-ff", branch], capture_output=True, text=True)
-        conflicted = subprocess.run(["git", "diff", "--name-only", "--diff-filter=U"],
-                                   capture_output=True, text=True).stdout.split()
+        merge = subprocess.run(["git", "merge", "--no-commit", "--no-ff", branch], capture_output=True, text=True)
+        unmerged = subprocess.run(["git", "diff", "--name-only", "--diff-filter=U"],
+                                  capture_output=True, text=True)
+        if unmerged.returncode:
+            print("Cannot inspect unresolved merge paths:", unmerged.stderr)
+            return 1
+        conflicted = unmerged.stdout.split()
+        if merge.returncode and not conflicted:
+            print(merge.stdout, merge.stderr)
+            return 1
         for name in list(conflicted):
             path = Path(name)
             if path.suffix == ".json" and resolve_json_conflict(path, branch):
@@ -210,6 +221,11 @@ def main() -> int:
         if conflicted:
             print("UNRESOLVED CONFLICTS:", conflicted)
             return 1
+        pending = subprocess.run(["git", "rev-parse", "--quiet", "--verify", "MERGE_HEAD"],
+                                 capture_output=True, text=True)
+        if pending.returncode:
+            print(f"{branch}: no merge commit is pending")
+            continue
         result = subprocess.run(["git", "commit", "--no-edit"], capture_output=True, text=True)
         if result.returncode != 0:
             print(result.stdout, result.stderr)

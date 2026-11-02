@@ -17,6 +17,7 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -377,15 +378,23 @@ public final class InventoryUtils {
     /**
      * Original {@code areItemStacksEqual(ItemStack, ItemStack, boolean, boolean, boolean)}.
      *
-     * <p>The original's metadata comparison became the damage value comparison. The wildcard metadata of the
-     * original ({@code Short.MAX_VALUE}) has no native form and is therefore gone.
+     * <p>The original's metadata comparison became the separate damage value comparison, including its
+     * wildcard rule. Native DAMAGE is excluded from component equality only when that comparison may ignore it.
      */
     public static boolean areItemStacksEqual(ItemStack stack0, ItemStack stack1, boolean useOre, boolean ignoreDamage, boolean ignoreNBT) {
         if (stack0 == null || stack1 == null) return false;
         if (stack0.isEmpty() && stack1.isEmpty()) return true;
         if (useOre && matchesOre(stack0, stack1)) return true;
         boolean t1 = true;
-        if (!ignoreNBT) t1 = ItemStack.isSameItemSameComponents(stack0, stack1);
+        if (!ignoreNBT) {
+            ItemStack compared0 = stack0, compared1 = stack1;
+            if (ignoreDamage && (stack0.isDamageableItem() && stack1.isDamageableItem()
+                    || stack0.getDamageValue() == ANY_DAMAGE || stack1.getDamageValue() == ANY_DAMAGE)) {
+                compared0 = stack0.copy(); compared0.remove(DataComponents.DAMAGE);
+                compared1 = stack1.copy(); compared1.remove(DataComponents.DAMAGE);
+            }
+            t1 = ItemStack.isSameItemSameComponents(compared0, compared1);
+        }
         if (!damageMatches(stack0.getDamageValue(), stack1.getDamageValue(), ignoreDamage,
                 stack0.isDamageableItem(), stack1.isDamageableItem())) return false;
         return stack0.getItem() == stack1.getItem() && t1;
@@ -564,14 +573,11 @@ public final class InventoryUtils {
         return stack;
     }
 
-    /** The original {@code EnchantmentDurability.breakItem}: the unbreaking reduction of one damage point. */
+    /** The original {@code EnchantmentDurability.negateDamage}: decide whether to avoid one wear point. */
     private static boolean breakItem(ItemStack stack, int unbreaking, RandomSource random) {
         if (unbreaking <= 0) return false;
-        if (random.nextInt(unbreaking + 1) > 0) return false;
-        int remaining = stack.getMaxDamage() - stack.getDamageValue();
-        int step = 1 + random.nextInt(Math.max(0, remaining) + 1);
-        stack.setDamageValue(stack.getDamageValue() + step);
-        return true;
+        if (stack.getItem() instanceof ArmorItem && random.nextFloat() < .6F) return false;
+        return random.nextInt(unbreaking + 1) > 0;
     }
 
     /** The unbreaking level of a stack, read from its native enchantment data. */

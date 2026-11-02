@@ -1688,7 +1688,8 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.FortressRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "tc_isolated_essentia_reservoir")
+    // Async native chunk/entity setup has its own wall-clock deadline; the scenario retains a 600-tick active deadline.
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 20000, batch = "tc_isolated_essentia_reservoir")
     public void essentiaReservoirHoldsMixedEssentiaPullsAndBursts(GameTestHelper test) {
         thaumcraft.common.testing.ReservoirRuntimeChecks.run(test);
     }

@@ -60,7 +60,14 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
         aspects = Collections.unmodifiableMap(new LinkedHashMap<>(aspects));
     }
     private DataResult<InfusionEnchantmentRecipe> validate() {
-        return components.isEmpty() || components.size() > InfusionComponentPredicate.MAX_COMPONENTS || components.stream().anyMatch(Ingredient::isEmpty)
+        return validate(false);
+    }
+    private DataResult<InfusionEnchantmentRecipe> validate(boolean resolvedEmptyAllowed) {
+        // CONTENTS_STREAM_CODEC turns an empty optional tag into EMPTY on the
+        // client. Permit that wire representation only; JSON stays strict and
+        // InfusionMatching never accepts an empty offered pedestal stack.
+        return components.isEmpty() || components.size() > InfusionComponentPredicate.MAX_COMPONENTS
+                || !resolvedEmptyAllowed && components.stream().anyMatch(Ingredient::isEmpty)
                 || aspects.isEmpty() || aspects.entrySet().stream().anyMatch(e -> Aspect.getAspect(e.getKey()) == null || e.getValue() <= 0)
                 || aspects.values().stream().mapToLong(Integer::longValue).sum() > Integer.MAX_VALUE
                 || instability < 0 || instability > 24 || firstLevelMinimumCost < 0
@@ -167,7 +174,7 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
     public static final class Serializer implements RecipeSerializer<InfusionEnchantmentRecipe> {
         public static final StreamCodec<RegistryFriendlyByteBuf, InfusionEnchantmentRecipe> STREAM_CODEC = StreamCodec.of(Serializer::encode, Serializer::decode);
         private static void encode(RegistryFriendlyByteBuf buffer, InfusionEnchantmentRecipe recipe) {
-            recipe.validate().getOrThrow(); buffer.writeUtf(recipe.research); buffer.writeResourceLocation(recipe.enchantment);
+            recipe.validate(true).getOrThrow(); buffer.writeUtf(recipe.research); buffer.writeResourceLocation(recipe.enchantment);
             buffer.writeVarInt(recipe.instability); buffer.writeVarInt(recipe.firstLevelMinimumCost);
             buffer.writeVarInt(recipe.components.size());
             for (Ingredient component : recipe.components) Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, component);
@@ -184,7 +191,7 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
             if (count < 1 || count > Aspect.aspects.size()) throw new IllegalArgumentException("Invalid enchantment aspect count");
             Map<String, Integer> aspects = new LinkedHashMap<>();
             for (int i = 0; i < count; i++) if (aspects.put(buffer.readUtf(), buffer.readVarInt()) != null) throw new IllegalArgumentException("Duplicate enchantment aspect");
-            return new InfusionEnchantmentRecipe(research, enchantment, components, aspects, instability, minimum).validate().getOrThrow();
+            return new InfusionEnchantmentRecipe(research, enchantment, components, aspects, instability, minimum).validate(true).getOrThrow();
         }
         @Override public MapCodec<InfusionEnchantmentRecipe> codec() { return CODEC; }
         @Override public StreamCodec<RegistryFriendlyByteBuf, InfusionEnchantmentRecipe> streamCodec() { return STREAM_CODEC; }

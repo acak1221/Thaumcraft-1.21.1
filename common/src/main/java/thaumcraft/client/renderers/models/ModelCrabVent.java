@@ -878,6 +878,8 @@ public final class ModelCrabVent {
             addVertex(buffer, pose, triangle, 0, light, overlay, color);
             addVertex(buffer, pose, triangle, 3, light, overlay, color);
             addVertex(buffer, pose, triangle, 6, light, overlay, color);
+            // The world renderer uses native QUADS: keep one source triangle and one degenerate triangle.
+            addVertex(buffer, pose, triangle, 6, light, overlay, color);
         }
     }
 

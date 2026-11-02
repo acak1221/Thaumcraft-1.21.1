@@ -121,16 +121,26 @@ public final class ModelEldritchCap {
         renderGroup(TRIANGLES, pose, buffer, light, overlay, color);
     }
 
+    /** The same original Cap group for native entity QUADS consumers. */
+    public void renderCapGroupQuads(PoseStack pose, VertexConsumer buffer, int light, int overlay, int color) {
+        renderGroup(TRIANGLES, pose, buffer, light, overlay, color, true);
+    }
+
     /** Original obelisk_cap.obj "Tip" group only. */
     public void renderTipGroup(PoseStack pose, VertexConsumer buffer, int light, int overlay, int color) {
         renderGroup(TIP_TRIANGLES, pose, buffer, light, overlay, color);
     }
 
     private static void renderGroup(int[][] triangles, PoseStack pose, VertexConsumer buffer, int light, int overlay, int color) {
+        renderGroup(triangles, pose, buffer, light, overlay, color, false);
+    }
+
+    private static void renderGroup(int[][] triangles, PoseStack pose, VertexConsumer buffer, int light, int overlay, int color, boolean quads) {
         for (int[] triangle : triangles) {
             addVertex(buffer, pose, triangle, 0, light, overlay, color);
             addVertex(buffer, pose, triangle, 3, light, overlay, color);
             addVertex(buffer, pose, triangle, 6, light, overlay, color);
+            if (quads) addVertex(buffer, pose, triangle, 6, light, overlay, color);
         }
     }
 

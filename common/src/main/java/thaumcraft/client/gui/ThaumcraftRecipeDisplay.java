@@ -1534,6 +1534,11 @@ public final class ThaumcraftRecipeDisplay {
 
     private static final Map<ResourceLocation, int[]> IMAGE_SIZES = new java.util.concurrent.ConcurrentHashMap<>();
 
+    /** Image resources may appear or change dimensions when client packs reload. */
+    public static void reloadResources() {
+        IMAGE_SIZES.clear();
+    }
+
     /**
      * An IMAGE page. Original 4.2.3.5 drawPage has no IMAGE branch and leaves the page blank; the port draws
      * the texture over the page width, keeping its proportions, with the translated caption below it.
@@ -1607,9 +1612,13 @@ public final class ThaumcraftRecipeDisplay {
         if (!wand.isEmpty()) {
             // Exactly the native crafting price (currently wood/iron's penalty),
             // not hypothetical armour/bauble/other-wand discount arithmetic.
-            int cost = ArcaneVis.price(vis, wand, player).get(tag);
-            lines.add(Component.translatable("tc.port.book_recipe.held_wand", wand.getHoverName()).withStyle(ChatFormatting.GRAY));
-            lines.add(Component.translatable("tc.port.book_recipe.wand_cost", BigDecimal.valueOf(cost, 2).stripTrailingZeros().toPlainString()));
+            try {
+                int cost = ArcaneVis.price(vis, wand, player).get(tag);
+                lines.add(Component.translatable("tc.port.book_recipe.held_wand", wand.getHoverName()).withStyle(ChatFormatting.GRAY));
+                lines.add(Component.translatable("tc.port.book_recipe.wand_cost", BigDecimal.valueOf(cost, 2).stripTrailingZeros().toPlainString()));
+            } catch (IllegalArgumentException invalidCost) {
+                lines.add(Component.translatable("tc.port.book_recipe.invalid_cost").withStyle(ChatFormatting.RED));
+            }
         } else lines.add(Component.translatable("tc.port.book_recipe.no_wand_context").withStyle(ChatFormatting.GRAY));
         return new Hover(ItemStack.EMPTY, List.copyOf(lines));
     }

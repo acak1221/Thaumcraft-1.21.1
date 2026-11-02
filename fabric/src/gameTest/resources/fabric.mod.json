@@ -17,7 +17,9 @@
       "thaumcraft.fabric.testing.RecipeTransferGameTests",
       "thaumcraft.fabric.testing.WandVisualGameTests",
       "thaumcraft.fabric.testing.DeepslateOreGameTests",
-      "thaumcraft.fabric.testing.ModernAdaptationsGameTests"
+      "thaumcraft.fabric.testing.ModernAdaptationsGameTests",
+      "thaumcraft.fabric.testing.ComprehensiveReviewGameTests",
+      "thaumcraft.fabric.testing.TailReviewGameTests"
     ]
   },
   "depends": {

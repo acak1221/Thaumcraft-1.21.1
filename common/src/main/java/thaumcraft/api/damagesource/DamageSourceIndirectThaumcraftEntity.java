@@ -30,12 +30,12 @@ public final class DamageSourceIndirectThaumcraftEntity {
 
     /** A damage source that names the direct attacker and the real cause. */
     public static DamageSource create(Entity direct, Entity cause, Holder<DamageType> type) {
-        return new DamageSource(type, cause, direct);
+        return new DamageSource(type, direct, cause);
     }
 
     /** A damage source that names the direct attacker and the real cause. */
     public static DamageSource create(Entity direct, Entity cause, ResourceKey<DamageType> type, RegistryAccess registries) {
-        return new DamageSource(registries.registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(type), cause, direct);
+        return new DamageSource(registries.registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(type), direct, cause);
     }
 
     /**
@@ -53,7 +53,7 @@ public final class DamageSourceIndirectThaumcraftEntity {
         if (type == null || !type.is(DamageTypeTags.IS_FIRE)) {
             throw new IllegalArgumentException("The fire damage modifier needs a damage type of the fire tag");
         }
-        return new DamageSource(type, cause, direct);
+        return new DamageSource(type, direct, cause);
     }
 
     /**
@@ -72,6 +72,6 @@ public final class DamageSourceIndirectThaumcraftEntity {
         if (type == null || !type.is(DamageTypeTags.BYPASSES_ARMOR) || type.value().exhaustion() != 0.0F) {
             throw new IllegalArgumentException("The unblockable modifier needs a damage type that bypasses the armour and exhausts nothing");
         }
-        return new DamageSource(type, cause, direct);
+        return new DamageSource(type, direct, cause);
     }
 }

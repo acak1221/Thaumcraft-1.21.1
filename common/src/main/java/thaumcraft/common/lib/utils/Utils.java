@@ -273,7 +273,7 @@ public final class Utils {
 
     /** Original {@code isChunkLoaded}: is the chunk of the given block coordinates loaded? */
     public static boolean isChunkLoaded(Level level, int x, int z) {
-        return level != null && level.hasChunkAt(x >> 4, z >> 4);
+        return level != null && level.hasChunkAt(x, z);
     }
 
     /**

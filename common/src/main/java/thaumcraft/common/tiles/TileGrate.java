@@ -12,8 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import thaumcraft.common.blocks.BlockItemGrate;
 import thaumcraft.common.blocks.BlockMetalDevice;
 import thaumcraft.common.config.ThaumcraftGrate;
-import thaumcraft.common.entities.EntityItemGrate;
 import thaumcraft.common.lib.GrateRules;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
@@ -52,12 +52,10 @@ public final class TileGrate extends BlockEntity implements WorldlyContainer {
 
     @Override public void setItem(int slot, ItemStack stack) {
         if (!(level instanceof ServerLevel server) || stack.isEmpty()) return;
-        // Oracle TileGrate:41-47 - the original drops the item as an
-        // EntityItemGrate, the item that is pushed out of the filter block.
-        EntityItemGrate item = new EntityItemGrate(server, worldPosition.getX() + 0.5D, worldPosition.getY() + GrateRules.SPAWN_HEIGHT, worldPosition.getZ() + 0.5D, stack.copy());
-        // A new ItemEntity starts with a random sideways drift; the original overwrote it with a straight fall.
-        item.setDeltaMovement(0.0D, GrateRules.FALL_SPEED, 0.0D);
-        server.addFreshEntity(item);
+        // Native hopper removal already paid this input before calling the setter.
+        // Keep its original EntityItemGrate output in durable custody before ADD.
+        DeferredItemDrops.enqueueGrateOutput(server, worldPosition, stack);
+        DeferredItemDrops.tick(server); // Normal delivery stays immediate; refused admission is retried.
     }
 
     @Override public boolean canPlaceItem(int slot, ItemStack stack) { return !closed(); }

@@ -1,0 +1,9 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "",
+  "input": {"tag": "thaumcraft_review:empty_optional_ingredient"},
+  "components": [{"item": "minecraft:dirt"}],
+  "aspects": {"terra": 1},
+  "instability": 0,
+  "result": {"id": "minecraft:diamond"}
+}

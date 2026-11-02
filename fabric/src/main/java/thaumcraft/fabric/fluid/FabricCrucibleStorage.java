@@ -84,7 +84,9 @@ public final class FabricCrucibleStorage {
         @Override public long insert(FluidVariant resource, long maximum, TransactionContext transaction) {
             if (resource == null || maximum <= 0 || !current()) return 0;
             Fluid fluid = resource.getFluid();
-            if (fluid != Fluids.WATER) return 0;
+            // This tank advertises and saves plain water only. Accepting a different
+            // patch would discard it; extracting one would invent its components.
+            if (!resource.equals(FluidVariant.of(Fluids.WATER))) return 0;
             long millibuckets = Math.min(toMillibuckets(maximum), crucible.getWaterCapacity() - crucible.getWaterAmount());
             if (millibuckets <= 0) return 0;
             updateSnapshots(transaction);
@@ -94,7 +96,7 @@ public final class FabricCrucibleStorage {
 
         @Override public long extract(FluidVariant resource, long maximum, TransactionContext transaction) {
             if (resource == null || maximum <= 0 || !current()) return 0;
-            if (resource.getFluid() != Fluids.WATER) return 0;
+            if (!resource.equals(FluidVariant.of(Fluids.WATER))) return 0;
             long millibuckets = Math.min(toMillibuckets(maximum), crucible.getWaterAmount());
             if (millibuckets <= 0) return 0;
             updateSnapshots(transaction);

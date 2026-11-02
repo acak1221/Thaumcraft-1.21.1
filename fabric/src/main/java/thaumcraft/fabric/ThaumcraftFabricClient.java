@@ -87,6 +87,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                         return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "warp_effects");
                     }
                     @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager resources) {
+                        thaumcraft.client.gui.ThaumcraftRecipeDisplay.reloadResources();
                         thaumcraft.client.renderers.item.PrimalWandFocusRenderer.reset();
                         thaumcraft.client.ThaumcraftWarpClient.reloadResources();
                         thaumcraft.client.ThaumcraftRunicClient.reloadResources();

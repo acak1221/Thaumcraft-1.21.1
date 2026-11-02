@@ -17,10 +17,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.blocks.BlockAiry;
 import thaumcraft.common.blocks.BlockTaintFibres;
 import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftOuterLands;
@@ -262,18 +262,15 @@ public final class OuterLandsBossRooms {
         }
         // Oracle TileEldritchLock:110-119 - the invisible barrier of the room disappears and
         // the lock itself with it.
-        Block airy = ThaumcraftOuterLands.block("airy");
-        if (airy != null) {
-            for (int a = -2; a <= 2; ++a) {
-                for (int b = -2; b <= 2; ++b) {
-                    for (int c = -2; c <= 2; ++c) {
-                        BlockPos target = lockPos.offset(a, b, c);
-                        if (!level.getBlockState(target).is(airy)) continue;
-                        // Oracle TileEldritchLock:130 - every removed eldritch field block
-                        // flashes with the original dark violet 0x400040 of the block sparkle.
-                        thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(level, target, 0x400040);
-                        level.removeBlock(target, false);
-                    }
+        for (int a = -2; a <= 2; ++a) {
+            for (int b = -2; b <= 2; ++b) {
+                for (int c = -2; c <= 2; ++c) {
+                    BlockPos target = lockPos.offset(a, b, c);
+                    if (!(level.getBlockState(target).getBlock() instanceof BlockAiry)) continue;
+                    // Oracle TileEldritchLock:130 - every removed eldritch field block
+                    // flashes with the original dark violet 0x400040 of the block sparkle.
+                    thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(level, target, 0x400040);
+                    level.removeBlock(target, false);
                 }
             }
         }

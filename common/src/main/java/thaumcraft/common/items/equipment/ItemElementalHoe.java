@@ -52,21 +52,23 @@ public class ItemElementalHoe extends HoeItem implements IRepairable {
 
     @Override public InteractionResult useOn(UseOnContext context) {
         Player player = context.getPlayer();
-        if (player == null || player.isShiftKeyDown()) return super.useOn(context);
+        if (player == null) return super.useOn(context);
         Level level = context.getLevel();
         ItemStack stack = context.getItemInHand();
         BlockPos pos = context.getClickedPos();
         Direction face = context.getClickedFace();
+        if (!mayModify(player, level, pos, face, stack)) return InteractionResult.FAIL;
+        if (player.isShiftKeyDown()) return super.useOn(context);
         boolean did = false;
         for (int x = -ElementalHoeRules.TILL_RADIUS; x <= ElementalHoeRules.TILL_RADIUS; ++x) {
             for (int z = -ElementalHoeRules.TILL_RADIUS; z <= ElementalHoeRules.TILL_RADIUS; ++z) {
                 BlockPos cell = pos.offset(x, 0, z);
-                if (!player.mayUseItemAt(cell, face, stack)) continue;
+                if (!mayModify(player, level, cell, face, stack)) continue;
                 var hit = new BlockHitResult(Vec3.atCenterOf(cell), face, cell, context.isInside());
                 if (super.useOn(new UseOnContext(player, context.getHand(), hit)).consumesAction()) did = true;
             }
         }
-        if (!did) {
+        if (!did && mayModify(player, level, pos, face, stack)) {
             if (bonemeal(level, pos)) {
                 stack.hurtAndBreak(ElementalHoeRules.BONEMEAL_WEAR, player, EquipmentSlot.MAINHAND);
                 did = true;
@@ -81,6 +83,11 @@ public class ItemElementalHoe extends HoeItem implements IRepairable {
             }
         }
         return did ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
+    }
+
+    private static boolean mayModify(Player player, Level level, BlockPos pos, Direction face, ItemStack stack) {
+        return level.isInWorldBounds(pos) && level.getWorldBorder().isWithinBounds(pos) && level.hasChunkAt(pos)
+                && level.mayInteract(player, pos) && player.mayUseItemAt(pos, face, stack);
     }
 
     /** Original {@code Utils.useBonemealAtLoc}: a growable block that can still be fertilised is, whether or not this roll takes. */

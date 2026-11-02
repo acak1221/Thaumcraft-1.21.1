@@ -2,13 +2,16 @@ package thaumcraft.common.mixin;
 
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.item.trading.MerchantOffer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import thaumcraft.common.config.ThaumcraftVillageProfessions;
 import thaumcraft.common.lib.world.VillageBankerManager;
 import thaumcraft.common.lib.world.VillageTradeRules;
+import thaumcraft.common.lib.world.VillageProfessionBehaviors;
 import thaumcraft.common.lib.world.VillageWizardManager;
 
 /**
@@ -27,6 +30,25 @@ import thaumcraft.common.lib.world.VillageWizardManager;
  */
 @Mixin(Villager.class)
 public abstract class VillagerVillageTradesMixin {
+    /** Original reset intent is transient; only a qualifying paid last-offer trade arms it. */
+    @Unique private int thaumcraft$originalRestockTicks;
+
+    @Inject(method = "rewardTradeXp(Lnet/minecraft/world/item/trading/MerchantOffer;)V", at = @At("TAIL"))
+    private void thaumcraft$rememberOriginalLastTrade(MerchantOffer offer, CallbackInfo info) {
+        if (VillageTradeRules.startsOriginalRestock((Villager) (Object) this, offer)) thaumcraft$originalRestockTicks = 40;
+    }
+
+    @Inject(method = "customServerAiStep()V", at = @At("TAIL"))
+    private void thaumcraft$originalIdleRestock(CallbackInfo info) {
+        Villager villager = (Villager) (Object) this;
+        if (!VillageProfessionBehaviors.hasOriginalProfession(villager)) {
+            thaumcraft$originalRestockTicks = 0;
+            return;
+        }
+        if (thaumcraft$originalRestockTicks <= 0 || villager.getTradingPlayer() != null) return;
+        if (--thaumcraft$originalRestockTicks == 0) VillageTradeRules.finishOriginalRestock(villager);
+    }
+
     @Inject(method = "updateTrades", at = @At("HEAD"))
     private void thaumcraft$addVillageTrades(CallbackInfo info) {
         Villager villager = (Villager) (Object) this;

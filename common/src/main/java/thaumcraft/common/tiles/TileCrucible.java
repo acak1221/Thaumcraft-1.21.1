@@ -1,6 +1,8 @@
 package thaumcraft.common.tiles;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.core.BlockPos;
@@ -327,30 +329,58 @@ public final class TileCrucible extends BlockEntity implements IAspectContainer 
             // i. Preserve ceil(stackSize/2) per collision, NOT whole-stack smelting.
             for (int i = 0; i < remaining; ++i) {
                 if (!isCurrent() || entity.isRemoved()) break;
+                ItemStack catalyst = entity.getItem(), catalystBefore = catalyst.copy();
+                AspectList pool = aspects, poolBefore = pool.copy();
+                int waterBefore = water;
                 var holder = CrucibleCrafting.find(server, entity, aspects);
                 if (holder != null && water > 0) {
                     var recipe = holder.value();
                     ItemStack output = recipe.assemble(new CrucibleRecipeInput(entity.getItem(), aspects), server.registryAccess());
-                    // Original TileCrucible:253-259 - the craft fires the player crafting
-                    // event of the original for the player who threw the item, with the
-                    // fake inventory of the input item as the matrix. The sticky warp of
-                    // the output reaches that player through the event.
+                    if (output.isEmpty()) break;
+                    AspectList after = recipe.removeMatching(poolBefore.copy());
+                    // Durable fallback preparation must not consume the world
+                    // RNG ahead of the original live crafting hook.
+                    var ejection = prepareEjection(server, output, false);
                     ServerPlayer thrower = CrucibleCrafting.thrower(server, entity);
-                    if (thrower != null) {
-                        SimpleContainer matrix = new SimpleContainer(1);
-                        matrix.setItem(0, entity.getItem().copy());
-                        PlayerEvent.CRAFT_ITEM.invoker().craft(thrower, output, matrix);
+                    SimpleContainer matrix = new SimpleContainer(1);
+                    matrix.setItem(0, catalystBefore.copy());
+                    // Recipe/addon preparation cannot pay from a replaced BE,
+                    // changed physical catalyst or a different water/aspect pool.
+                    if (after == null || !ejection.ready(server) || !isCurrent() || heat <= 150
+                            || entity.isRemoved() || entity.level() != server || server.getEntity(entity.getUUID()) != entity
+                            || entity.getItem() != catalyst || catalyst.getCount() != remaining || !ItemStack.matches(catalyst, catalystBefore)
+                            || aspects != pool || !pool.aspects.equals(poolBefore.aspects) || water != waterBefore || !isCurrent()) break;
+                    // Debit and durable SPECIAL-item custody are adjacent raw
+                    // writes, before entity removal and CRAFT_ITEM callbacks.
+                    ++ejection.queue.holdDepth;
+                    Throwable callbackFailure = null;
+                    try {
+                        aspects = after;
+                        water = Math.max(0, waterBefore - 50); // Original accepts any positive water.
+                        catalyst.shrink(1);
+                        --remaining;
+                        ejection.commitRaw();
+                        crafted = true;
+                        counter = -250L;
+                        server.blockEntityChanged(worldPosition);
+                        consume(entity, remaining);
+                        // The original event owns a live mutable output. Its
+                        // initial paid fallback cannot dispatch from REMOVE or
+                        // CRAFT callbacks before those edits have completed.
+                        if (thrower != null) PlayerEvent.CRAFT_ITEM.invoker().craft(thrower, output, matrix);
+                    } catch (RuntimeException | Error failure) {
+                        callbackFailure = failure;
+                        throw failure;
+                    } finally {
+                        try {
+                            var edited = prepareEjection(server, output, true);
+                            ejection.replaceRaw(edited);
+                        } catch (RuntimeException | Error replacementFailure) {
+                            // Planning did not touch the initial paid rows.
+                            if (callbackFailure == null) throw replacementFailure;
+                            if (callbackFailure != replacementFailure) callbackFailure.addSuppressed(replacementFailure);
+                        } finally { --ejection.queue.holdDepth; }
                     }
-                    aspects = recipe.removeMatching(aspects);
-                    // Original accepts ANY positive water, even the last <50mB.
-                    water = Math.max(0, water - 50);
-                    // Enqueue the paid output before discarding the catalyst:
-                    // entity-remove callbacks may synchronously replace this BE.
-                    // No output may vanish behind ejectItem's stale-tile guard.
-                    ejectItem(output);
-                    consume(entity, --remaining);
-                    crafted = true;
-                    counter = -250L;
                 } else {
                     AspectList tags = ObjectAspectResolver.get(entity.getItem(), server);
                     if (tags == null || tags.size() == 0) {
@@ -386,20 +416,46 @@ public final class TileCrucible extends BlockEntity implements IAspectContainer 
 
     public void ejectItem(ItemStack items) {
         if (!(level instanceof ServerLevel server) || !isCurrent() || !server.getServer().isSameThread() || items.isEmpty()) return;
+        var ejection = prepareEjection(server, items, true);
+        if (isCurrent() && ejection.ready(server)) ejection.commitRaw();
+    }
+
+    private record Ejection(CrucibleActions queue, List<Output> outputs) {
+        private Ejection { outputs = List.copyOf(outputs); }
+        boolean ready(ServerLevel server) { return server.getDataStorage().get(CrucibleActions.FACTORY, CrucibleActions.ID) == queue; }
+        void commitRaw() {
+            queue.outputs.addAll(outputs);
+            queue.requested = true;
+            queue.setDirty();
+        }
+        void replaceRaw(Ejection edited) {
+            if (edited.queue != queue || queue.holdDepth <= 0) throw new IllegalStateException("Lost held crucible output owner");
+            var ids = new java.util.HashSet<UUID>();
+            for (Output row : outputs) ids.add(row.id);
+            // Only this craft's fallback rows are retired. Nested crafts and
+            // unrelated queued outputs keep their own rows and ordering.
+            queue.outputs.removeIf(row -> ids.contains(row.id));
+            edited.commitRaw();
+        }
+    }
+
+    private Ejection prepareEjection(ServerLevel server, ItemStack items, boolean sampleMotion) {
         CrucibleActions queue = CrucibleActions.get(server);
         ItemStack remaining = items.copy();
+        int maximum = remaining.getMaxStackSize();
+        if (!remaining.isEmpty() && maximum <= 0) throw new IllegalArgumentException("Crucible output needs a positive maximum stack size");
+        var outputs = new ArrayList<Output>();
         boolean first = true;
         // JAR ejectItem offsets4-30 copy THEN cap, fixing CFR's uninitialized
         // spitout artifact. Every split keeps output count and all components.
         while (!remaining.isEmpty()) {
-            ItemStack stack = remaining.split(Math.min(remaining.getCount(), remaining.getMaxStackSize()));
-            double dx = first ? 0 : (server.random.nextFloat() - server.random.nextFloat()) * .01F;
-            double dz = first ? 0 : (server.random.nextFloat() - server.random.nextFloat()) * .01F;
-            queue.outputs.addLast(new Output(UUID.randomUUID(), worldPosition.immutable(), stack, new Vec3(dx, .1F, dz), Long.MIN_VALUE));
+            ItemStack stack = remaining.split(Math.min(remaining.getCount(), maximum));
+            double dx = first || !sampleMotion ? 0 : (server.random.nextFloat() - server.random.nextFloat()) * .01F;
+            double dz = first || !sampleMotion ? 0 : (server.random.nextFloat() - server.random.nextFloat()) * .01F;
+            outputs.add(new Output(UUID.randomUUID(), worldPosition.immutable(), stack, new Vec3(dx, .1F, dz), Long.MIN_VALUE));
             first = false;
         }
-        queue.requested = true;
-        queue.setDirty();
+        return new Ejection(queue, outputs);
     }
 
     public void spillRemnants() {
@@ -481,13 +537,14 @@ public final class TileCrucible extends BlockEntity implements IAspectContainer 
         private final ArrayDeque<Spill> spills = new ArrayDeque<>();
         private final ListTag quarantined = new ListTag();
         private boolean flushing, requested;
+        private int holdDepth;
         private long retryAfter;
 
         private static CrucibleActions get(ServerLevel level) { return level.getDataStorage().computeIfAbsent(FACTORY, ID); }
 
         private void tick(ServerLevel level) {
             if (!level.getServer().isSameThread()) throw new IllegalStateException("Crucible delivery requires the server thread");
-            if (flushing || outputs.isEmpty() && spills.isEmpty() || !requested && level.getGameTime() < retryAfter) return;
+            if (holdDepth > 0 || flushing || outputs.isEmpty() && spills.isEmpty() || !requested && level.getGameTime() < retryAfter) return;
             requested = false;
             retryAfter = level.getGameTime() + 20;
             flushing = true;

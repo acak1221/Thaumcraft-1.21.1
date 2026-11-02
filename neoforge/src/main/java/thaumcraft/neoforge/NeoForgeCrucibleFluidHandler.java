@@ -63,17 +63,23 @@ final class NeoForgeCrucibleFluidHandler {
         @Override public int getTankCapacity(int tank) { return crucible.getWaterCapacity(); }
 
         @Override public boolean isFluidValid(int tank, net.neoforged.neoforge.fluids.FluidStack stack) {
-            return stack != null && !stack.isEmpty() && crucible.canFillWater(stack.getFluid());
+            return plainWater(stack);
+        }
+
+        /** The shared integer tank stores plain water and cannot retain a component patch. */
+        private static boolean plainWater(net.neoforged.neoforge.fluids.FluidStack stack) {
+            return stack != null && !stack.isEmpty() && stack.getFluid() == Fluids.WATER
+                    && stack.getComponentsPatch().isEmpty();
         }
 
         @Override public int fill(net.neoforged.neoforge.fluids.FluidStack resource, FluidAction action) {
-            if (resource == null || resource.isEmpty() || !live()) return 0;
+            if (!plainWater(resource) || !live()) return 0;
             return crucible.fillWater(resource.getFluid(), resource.getAmount(), action.execute());
         }
 
         @Override public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack resource,
                                                                           FluidAction action) {
-            if (resource == null || resource.isEmpty() || !live()) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
+            if (!plainWater(resource) || !live()) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
             int drained = crucible.drainWater(resource.getFluid(), resource.getAmount(), action.execute());
             if (drained <= 0) return net.neoforged.neoforge.fluids.FluidStack.EMPTY;
             return new net.neoforged.neoforge.fluids.FluidStack(

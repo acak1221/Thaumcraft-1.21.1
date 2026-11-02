@@ -339,14 +339,14 @@ public class Aspect {
     /**
      * Original ResearchManager.getCombinationResult: the first registry aspect whose components are the
      * two identities in either order, add-on aspects included, or null for null inputs/no match.
-     * Malformed short component arrays can throw.
+     * Arrays shorter than two have no pair; longer arrays retain the original first-pair behavior.
      */
     public static Aspect getCombinationResult(Aspect first, Aspect second) {
         if (first == null || second == null) return null;
         synchronized (aspects) {
             for (Aspect aspect : aspects.values()) {
                 Aspect[] parents = aspect.components;
-                if (parents != null && ((parents[0] == first && parents[1] == second)
+                if (parents != null && parents.length >= 2 && ((parents[0] == first && parents[1] == second)
                         || (parents[1] == first && parents[0] == second))) return aspect;
             }
         }

@@ -54,7 +54,7 @@ public final class BlockArcaneFurnace extends BaseEntityBlock implements StateDe
     /** The render level of a shell block, worked out from the blocks above and below it. */
     public static final IntegerProperty LEVEL = IntegerProperty.create("level", 0, 18);
     /** The core of the furnace is a quarter high block. */
-    public static final VoxelShape CORE_SHAPE = Shapes.box(0, 0, 0, 16, 4, 16);
+    public static final VoxelShape CORE_SHAPE = Block.box(0, 0, 0, 16, 4, 16);
 
     public BlockArcaneFurnace(Properties properties) {
         super(properties);

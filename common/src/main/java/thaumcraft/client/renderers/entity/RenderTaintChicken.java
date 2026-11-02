@@ -11,7 +11,7 @@ import thaumcraft.common.entities.monster.EntityTaintChicken;
 /**
  * Original TC4 RenderTaintChicken: the vanilla chicken mesh with the taint sheet and the
  * original wing swing. The original wing swing was the renderer's swing progress; the
- * native renderer feeds the same value through the attack animation hook.
+ * native renderer feeds the same value through the model's bob/age hook.
  */
 public final class RenderTaintChicken extends MobRenderer<EntityTaintChicken, ChickenModel<EntityTaintChicken>> {
     private static final ResourceLocation SKIN = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/chicken.png");
@@ -23,7 +23,7 @@ public final class RenderTaintChicken extends MobRenderer<EntityTaintChicken, Ch
     @Override public ResourceLocation getTextureLocation(EntityTaintChicken chicken) { return SKIN; }
 
     /** Original getWingRotation and func_77044_a. */
-    @Override protected float getAttackAnim(EntityTaintChicken chicken, float partial) {
+    @Override protected float getBob(EntityTaintChicken chicken, float partial) {
         float angle = chicken.oFlap + (chicken.flap - chicken.oFlap) * partial;
         float speed = chicken.oFlapSpeed + (chicken.flapSpeed - chicken.oFlapSpeed) * partial;
         return (Mth.sin(angle) + 1.0F) * speed;

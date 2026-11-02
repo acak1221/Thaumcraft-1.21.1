@@ -102,14 +102,33 @@ public class SparkFocus extends ItemFocusBasic {
         HitResult hit = player.pick(range, 1.0F, false);
         if (!(hit instanceof BlockHitResult block) || hit.getType() != HitResult.Type.BLOCK) return null; // not handled
         if (level.isClientSide) return wand; // both sides run this; the server pays and acts
+        if (!(level instanceof ServerLevel server)) return null;
+        BlockPos fire = block.getBlockPos().relative(block.getDirection());
+        if (!mayIgnite(server, player, wand, hand, block, fire)) return null;
         // All or nothing; the cost is discounted by the wand's cap, worn gear and the frugal upgrade.
         if (!WandHelper.consumeAllVis(wand, player, getVisCost(WandHelper.getFocusItem(wand)), true, false)) return null;
-        ThaumcraftFX.zap((ServerLevel) level, player.getEyePosition().add(0, -0.2, 0), hit.getLocation());
-        BlockPos fire = block.getBlockPos().relative(block.getDirection());
-        if (level.isEmptyBlock(fire) && BaseFireBlock.canBePlacedAt(level, fire, block.getDirection())) {
-            level.setBlockAndUpdate(fire, BaseFireBlock.getState(level, fire));
+        if (!mayIgnite(server, player, wand, hand, block, fire)) return null;
+        ThaumcraftFX.zap(server, player.getEyePosition().add(0, -0.2, 0), hit.getLocation());
+        if (server.isEmptyBlock(fire) && BaseFireBlock.canBePlacedAt(server, fire, block.getDirection())
+                && mayIgnite(server, player, wand, hand, block, fire)) {
+            server.setBlockAndUpdate(fire, BaseFireBlock.getState(server, fire));
         }
         return wand;
+    }
+
+    /** Air-use raycasts do not pass through vanilla's block-use permission checks. */
+    private static boolean mayIgnite(ServerLevel level, Player player, ItemStack wand, InteractionHand hand,
+                                     BlockHitResult hit, BlockPos fire) {
+        BlockPos source = hit.getBlockPos();
+        return player instanceof ServerPlayer actor && actor.serverLevel() == level
+                && level.getServer().isSameThread() && level.getServer().getLevel(level.dimension()) == level
+                && actor.isAlive() && !actor.isRemoved() && !actor.isSpectator()
+                && actor.getItemInHand(hand) == wand
+                && !level.isOutsideBuildHeight(source) && !level.isOutsideBuildHeight(fire)
+                && level.getWorldBorder().isWithinBounds(source) && level.getWorldBorder().isWithinBounds(fire)
+                && level.hasChunkAt(source) && level.hasChunkAt(fire)
+                && level.mayInteract(actor, source) && level.mayInteract(actor, fire)
+                && actor.mayUseItemAt(fire, hit.getDirection(), wand);
     }
 }
 ```

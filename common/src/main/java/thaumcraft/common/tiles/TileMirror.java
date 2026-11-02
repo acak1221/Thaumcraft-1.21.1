@@ -21,10 +21,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.visnet.VisNetHandler;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.tiles.TileParityRules;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
@@ -168,16 +170,28 @@ public final class TileMirror extends RetainedDataBlockEntity implements Worldly
     /** Original TileMirror:218-232 - the output of the mirror is ejected. */
     public void eject() {
         if (isDataRejected()) return;
+        if (!(level instanceof ServerLevel server) || isRemoved() || !level.hasChunkAt(worldPosition)
+                || level.getBlockEntity(worldPosition) != this) return;
         if (outputStacks.isEmpty() || count <= EldritchBlockRules.MIRROR_EJECT_DELAY) return;
         int index = level.getRandom().nextInt(outputStacks.size());
         ItemStack stack = outputStacks.get(index);
         if (stack == null || stack.isEmpty()) return;
         ItemStack out = stack.copyWithCount(1);
-        if (!spawnItem(out)) return;
+        Direction face = getFacing();
+        // Publish durable destination custody before relinquishing the source.
+        // Native ADD observers must never see a second spendable buffered copy.
+        DeferredItemDrops.enqueueMirrorOutput(server, worldPosition,
+                new Vec3(worldPosition.getX() + .5D - face.getStepX() * .3D,
+                        worldPosition.getY() + .5D - face.getStepY() * .3D,
+                        worldPosition.getZ() + .5D - face.getStepZ() * .3D),
+                new Vec3(face.getStepX() * .15F, face.getStepY() * .15F, face.getStepZ() * .15F), out, 10);
         stack.shrink(1);
         addInstability(null, 1);
         if (stack.isEmpty()) outputStacks.remove(index);
         setChanged();
+        // Ordinary admission remains immediate. A canceled output keeps exactly
+        // one paid queue owner and uses the existing level-post retry machinery.
+        DeferredItemDrops.tick(server);
     }
 
     /** Original TileMirror:234-247 - the item leaves the mirror in front of it. */

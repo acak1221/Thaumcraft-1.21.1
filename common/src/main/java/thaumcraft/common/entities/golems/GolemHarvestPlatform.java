@@ -389,7 +389,7 @@ public final class GolemHarvestPlatform {
      * Order (original AIHarvestCrops:194-245), only after {@link #harvest} actually removed a crop. Every real drop within
      * the box around the golem is considered: a fresh one is pushed toward the golem, cocoa beans re-grow the pod against its
      * jungle log, and the vanilla seed family is planted into the nine cells below the harvested column. Each placement runs
-     * the full permission sequence and is paid by exactly one real seed AFTER the block is set. Never throws and never undoes
+     * the full permission sequence and is paid by exactly one real seed before placement feedback. Never throws and never undoes
      * the harvest; a refused cell loses nothing.
      */
     static void replant(EntityGolemBase golem, BlockPos harvested, BlockState harvestedState) {
@@ -423,7 +423,7 @@ public final class GolemHarvestPlatform {
                         BlockPos ground = GolemReplant.ground(at, cell);
                         boolean settled = crop.defaultBlockState().canSurvive(level, ground.above());
                         if (settled != (pass == 0)) continue;
-                        if (plantSeed(level, golem, item, crop, ground)) debit(item);
+                        plantSeed(level, golem, item, crop, ground);
                     }
                 }
             }
@@ -435,7 +435,7 @@ public final class GolemHarvestPlatform {
     private static boolean plantSeed(ServerLevel level, EntityGolemBase golem, ItemEntity item, Block crop, BlockPos ground) {
         ItemStack seed = item.getItem().copyWithCount(1);
         return place(level, golem, seed, crop.defaultBlockState(), ground.above(), ground, Direction.UP,
-                () -> item.isAlive() && ItemStack.isSameItemSameComponents(item.getItem(), seed));
+                () -> item.isAlive() && ItemStack.isSameItemSameComponents(item.getItem(), seed), () -> debit(item));
     }
 
     /** Adaptation: the original plants cocoa from any bean drop using the HARVESTED block's metadata; here only a harvested pod regrows. */
@@ -446,13 +446,13 @@ public final class GolemHarvestPlatform {
         if (!cellLoaded(level, log) || !level.getBlockState(log).is(BlockTags.JUNGLE_LOGS)) return;
         BlockState planted = Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.FACING, facing);
         ItemStack bean = item.getItem().copyWithCount(1);
-        if (place(level, golem, bean, planted, at, log, facing.getOpposite(),
-                () -> item.isAlive() && ItemStack.isSameItemSameComponents(item.getItem(), bean))) debit(item);
+        place(level, golem, bean, planted, at, log, facing.getOpposite(),
+                () -> item.isAlive() && ItemStack.isSameItemSameComponents(item.getItem(), bean), () -> debit(item));
     }
 
     /** One placement through the whole permission sequence; the world is changed only when every check still holds. */
     private static boolean place(ServerLevel level, EntityGolemBase golem, ItemStack held, BlockState state,
-                                 BlockPos pos, BlockPos clicked, Direction face, BooleanSupplier owned) {
+                                 BlockPos pos, BlockPos clicked, Direction face, BooleanSupplier owned, Runnable payment) {
         Bridge platform = bridge;
         if (!placementEligible(level, golem, state, pos, clicked, owned)) return false;
         ServerPlayer actor = platform.actor(level);
@@ -472,18 +472,49 @@ public final class GolemHarvestPlatform {
         } finally { actor.getInventory().setItem(slot, ItemStack.EMPTY); }
         if (!allowed || !bound(platform, level, actor) || actor.distanceToSqr(golem) != 0
                 || !placementEligible(level, golem, state, pos, clicked, owned)) return false;
-        if (!level.setBlock(pos, state, Block.UPDATE_ALL)) return false;
+        LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        if (level.isDebug() || chunk == null || chunk.getLevel() != level
+                || chunk.getFullStatus() == null || !chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)) return false;
+        BlockState before = chunk.getBlockState(pos);
+        // This path owns only native air -> the finite vanilla seed/cocoa family above.
+        // Their raw onRemove/onPlace bodies publish no callbacks. Native chunk mutation
+        // keeps palette, heightmap and light accounting; feedback follows the seed debit.
+        if (!before.is(Blocks.AIR) && !before.is(Blocks.CAVE_AIR) && !before.is(Blocks.VOID_AIR)) return false;
+        if (state.getBlock() != GolemReplant.seedBlock(held) && !(held.is(Items.COCOA_BEANS) && state.is(Blocks.COCOA))) return false;
+        if (chunk.setBlockState(pos, state, false) != before || chunk.getBlockState(pos) != state) return false;
+        payment.run();
+        notifyPlantChange(level, chunk, pos, before, state);
         SoundType sound = state.getSoundType();
         level.playSound(null, pos, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
         level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(golem, state));
         return true;
     }
 
-    /** The one real seed is paid only after its block exists; a stack of one disappears, a larger one shrinks in place. */
+    /** Shrink the real stack before removal notifications: even a retained removed-entity reference cannot pick up the paid seed. */
     private static void debit(ItemEntity item) {
         ItemStack current = item.getItem();
-        if (current.getCount() <= 1) item.discard();
-        else item.setItem(current.copyWithCount(current.getCount() - 1));
+        current.shrink(1);
+        if (current.isEmpty()) item.discard();
+        else item.setItem(current.copy());
+    }
+
+    /** Level.setBlock flags3 tail, after the callback-free placement and raw seed payment. */
+    private static void notifyPlantChange(ServerLevel level, LevelChunk chunk, BlockPos pos, BlockState old, BlockState now) {
+        if (!sameCell(level, chunk, pos, now)) return;
+        level.setBlocksDirty(pos, old, now);
+        if (!sameCell(level, chunk, pos, now)) return;
+        level.sendBlockUpdated(pos, old, now, Block.UPDATE_ALL);
+        if (!sameCell(level, chunk, pos, now)) return;
+        level.blockUpdated(pos, old.getBlock());
+        if (!sameCell(level, chunk, pos, now)) return;
+        if (now.hasAnalogOutputSignal()) level.updateNeighbourForOutputSignal(pos, now.getBlock());
+        if (!sameCell(level, chunk, pos, now)) return;
+        old.updateIndirectNeighbourShapes(level, pos, Block.UPDATE_CLIENTS, 511);
+        if (!sameCell(level, chunk, pos, now)) return;
+        now.updateNeighbourShapes(level, pos, Block.UPDATE_CLIENTS, 511);
+        if (!sameCell(level, chunk, pos, now)) return;
+        now.updateIndirectNeighbourShapes(level, pos, Block.UPDATE_CLIENTS, 511);
+        if (sameCell(level, chunk, pos, now)) level.onBlockStateChange(pos, old, now);
     }
 
     private static boolean placementEligible(ServerLevel level, EntityGolemBase golem, BlockState state, BlockPos pos, BlockPos clicked,

@@ -123,7 +123,7 @@ public final class RuntimeChecks {
     }
     public static void bootstrapAndItemComponents(GameTestHelper test) {
         test.assertValueEqual(Aspect.aspects.size(), 48, "original aspect count");
-        test.assertValueEqual(ResearchCatalog.all().size(), 201, "original research definition count");
+        test.assertValueEqual(ResearchCatalog.bundled().size(), 201, "original bundled research definition count");
         ItemStack wand = new ItemStack(ThaumcraftContent.WAND.get());
         wand.set(ThaumcraftContent.WAND_DATA.get(), WandData.EMPTY.withAmount("aer", 2450));
         var registries = test.getLevel().registryAccess();

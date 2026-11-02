@@ -115,6 +115,7 @@ public class TileThaumcraftInventory extends RetainedDataBlockEntity implements 
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        Component[] decodedName = new Component[1];
         if (retainMalformed(tag, () -> {
             validateSlots(tag,"Items",itemStacks.size(),registries);
             validateSlots(tag,"ItemsSynced",itemStacks.size(),registries);
@@ -122,9 +123,10 @@ public class TileThaumcraftInventory extends RetainedDataBlockEntity implements 
                 int slot=((CompoundTag)value).getByte("Slot") & 255;
                 if (isSyncedSlot(slot)!=key.equals("ItemsSynced")) throw new IllegalArgumentException(key+": wrong slot group "+slot);
             }
+            decodedName[0] = readCustomName(tag, registries);
         })) return;
         super.loadAdditional(tag, registries);
-        customName = tag.contains("CustomName") ? Component.Serializer.fromJson(tag.getString("CustomName"), registries) : null;
+        customName = decodedName[0];
         // Lists are complete snapshots, not patches. In particular, the empty
         // ItemsSynced update after removing a wand must clear the previous wand.
         // Original readCustomNBT allocates a fresh inventory before reading.

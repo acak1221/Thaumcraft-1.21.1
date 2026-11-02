@@ -147,12 +147,35 @@ public final class ThaumcraftConfigStore {
         for (String key : values.stringPropertyNames()) if (!ordered.containsKey(key)) ordered.put(key, values.getProperty(key));
         StringBuilder text = new StringBuilder();
         for (String line : HEADER) text.append(line).append('\n');
-        for (Map.Entry<String, String> row : ordered.entrySet()) text.append(row.getKey()).append('=').append(row.getValue()).append('\n');
+        for (Map.Entry<String, String> row : ordered.entrySet()) text.append(escapeProperty(row.getKey(), true))
+                .append('=').append(escapeProperty(row.getValue(), false)).append('\n');
         try {
             if (file.getParent() != null) Files.createDirectories(file.getParent());
             Files.writeString(file, text.toString(), StandardCharsets.UTF_8);
         } catch (IOException failure) {
             thaumcraft.common.Thaumcraft.LOG.error("Cannot write the Thaumcraft configuration at {}", file, failure);
         }
+    }
+
+    /** Preserve the Properties grammar while keeping the existing UTF-8 file and stable key order. */
+    private static String escapeProperty(String value, boolean key) {
+        StringBuilder escaped = new StringBuilder(value.length());
+        for (int index = 0; index < value.length(); index++) {
+            char character = value.charAt(index);
+            switch (character) {
+                case '\\' -> escaped.append("\\\\");
+                case '\t' -> escaped.append("\\t");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\f' -> escaped.append("\\f");
+                case ' ' -> {
+                    if (key || index == 0) escaped.append('\\');
+                    escaped.append(character);
+                }
+                case '=', ':', '#', '!' -> escaped.append('\\').append(character);
+                default -> escaped.append(character);
+            }
+        }
+        return escaped.toString();
     }
 }

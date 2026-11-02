@@ -52,6 +52,19 @@ public class InfusionEnchantmentRecipe {
         this.nativeRecipe = new thaumcraft.common.crafting.InfusionEnchantmentRecipe(research, id, ingredients, costs, inst, this.enchantment.getMinCost(1));
     }
 
+    /** A native optional tag may have no display sample; it is not an empty physical ingredient. */
+    private InfusionEnchantmentRecipe(thaumcraft.common.crafting.InfusionEnchantmentRecipe recipe, Holder<Enchantment> holder) {
+        this.research = recipe.research();
+        this.enchantmentHolder = holder;
+        this.enchantment = holder.value();
+        this.aspects = NativeRecipes.aspects(recipe.aspects());
+        this.components = samples(recipe.components());
+        this.instability = recipe.instability();
+        this.recipeXP = Math.max(1, this.enchantment.getMinCost(1) / 3);
+        this.nativeRecipe = recipe;
+        this.nativeView = true;
+    }
+
     /** The native recipe behind this view. */
     public thaumcraft.common.crafting.InfusionEnchantmentRecipe nativeRecipe() { return nativeRecipe; }
 
@@ -63,11 +76,7 @@ public class InfusionEnchantmentRecipe {
     public static InfusionEnchantmentRecipe of(thaumcraft.common.crafting.InfusionEnchantmentRecipe recipe) {
         Holder<Enchantment> holder = NativeRecipes.holder(recipe.enchantment());
         if (holder == null) return null;
-        InfusionEnchantmentRecipe view = new InfusionEnchantmentRecipe(recipe.research(), holder, recipe.instability(),
-                NativeRecipes.aspects(recipe.aspects()), samples(recipe.components()));
-        view.nativeRecipe = recipe;
-        view.nativeView = true;
-        return view;
+        return new InfusionEnchantmentRecipe(recipe, holder);
     }
 
     private static ItemStack[] samples(List<net.minecraft.world.item.crafting.Ingredient> components) {

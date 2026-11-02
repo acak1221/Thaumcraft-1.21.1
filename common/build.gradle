@@ -22,6 +22,12 @@ dependencies {
  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Exercise the real API guide focus in the isolated native harness, without
+// loading the complete example add-on or copying its implementation.
+tasks.named('compileGameTestJava', JavaCompile) {
+ source rootProject.file('examples/example-addon/src/main/java/com/example/tc4addon/SparkFocus.java')
+}
+
 // Audit the actual production archive and resolved runtime artifacts, not a class's package name.
 tasks.named('test') {
  dependsOn tasks.named('jar')

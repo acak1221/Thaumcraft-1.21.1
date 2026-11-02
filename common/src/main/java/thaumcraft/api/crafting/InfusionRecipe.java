@@ -55,6 +55,18 @@ public class InfusionRecipe {
                 List.of(), java.util.Optional.empty(), patch == null ? java.util.Optional.empty() : java.util.Optional.of(patch));
     }
 
+    /** A native tag may have no current items; its empty display sample is not a programmatic ingredient. */
+    private InfusionRecipe(InfusionStackRecipe recipe) {
+        this.research = recipe.research();
+        this.recipeOutput = recipe.result();
+        this.recipeInput = NativeRecipes.sample(recipe.input());
+        this.aspects = NativeRecipes.aspects(recipe.aspects());
+        this.components = samples(recipe.components());
+        this.instability = recipe.instability();
+        this.nativeRecipe = recipe;
+        this.nativeView = true;
+    }
+
     /** The native recipe behind this view. */
     public InfusionStackRecipe nativeRecipe() { return nativeRecipe; }
 
@@ -97,11 +109,7 @@ public class InfusionRecipe {
      * component predicates and result patches; the view keeps the original argument shape.</p>
      */
     public static InfusionRecipe of(InfusionStackRecipe recipe) {
-        InfusionRecipe view = new InfusionRecipe(recipe.research(), recipe.result(), recipe.instability(),
-                NativeRecipes.aspects(recipe.aspects()), NativeRecipes.sample(recipe.input()), samples(recipe.components()));
-        view.nativeRecipe = recipe;
-        view.nativeView = true;
-        return view;
+        return new InfusionRecipe(recipe);
     }
 
     private static ItemStack[] samples(List<Ingredient> components) {

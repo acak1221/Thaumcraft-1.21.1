@@ -89,7 +89,7 @@ public final class BlockEldritchNothing extends BaseEntityBlock implements State
     @Override protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         super.entityInside(state, level, pos, entity);
         if (entity.tickCount <= 20) return;
-        if (entity instanceof Player player && !player.getAbilities().invulnerable) return;
+        if (entity instanceof Player player && player.getAbilities().invulnerable) return;
         entity.hurt(level.damageSources().generic(), 8.0F);
     }
 

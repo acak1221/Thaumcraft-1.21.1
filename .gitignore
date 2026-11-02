@@ -126,3 +126,5 @@ fabric/run-recipe-transfer-client/
 fabric/run-wand-crucible-client/
 fabric/run-deepslate-ore-client/
 fabric/run-modern-adaptations-client/
+fabric/run-review-emi-identity/
+fabric/run-review-renderers/

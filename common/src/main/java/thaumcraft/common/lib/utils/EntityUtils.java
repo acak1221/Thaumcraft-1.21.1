@@ -17,7 +17,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.lib.mods.ChampionHooks;
 import thaumcraft.common.lib.mods.ChampionModifier;
@@ -126,7 +128,7 @@ public final class EntityUtils {
         double d2 = 0.0;
         for (Entity entity : candidates) {
             if (belowMinRange(entity.distanceToSqr(entityplayer), minrange)) continue;
-            if (!entity.canBeCollidedWith() && !nonCollide) continue;
+            if (!entity.isPickable() && !nonCollide) continue;
             if (rayTrace(level, vec3d, new Vec3(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ())) != null) continue;
             AABB box = entity.getBoundingBox().inflate(pickPadding(entity.getBbWidth()));
             java.util.Optional<Vec3> hit = box.clip(vec3d, vec3d2);
@@ -162,7 +164,7 @@ public final class EntityUtils {
         List<Entity> candidates = level.getEntities(entityplayer, expand(entityplayer.getBoundingBox(), vec3d1.x * d, vec3d1.y * d, vec3d1.z * d).inflate(f1));
         double d2 = 0.0;
         for (Entity entity : candidates) {
-            if (!entity.canBeCollidedWith()) continue;
+            if (!entity.isPickable()) continue;
             if (rayTrace(level, vec3d, new Vec3(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ())) != null) continue;
             if (excluded != null && excluded.isInstance(entity)) continue;
             AABB box = entity.getBoundingBox().inflate(pickPadding(entity.getBbWidth()));
@@ -258,7 +260,8 @@ public final class EntityUtils {
      * form of "is the line of sight blocked".
      */
     private static BlockHitResult rayTrace(Level level, Vec3 from, Vec3 to) {
-        return level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (net.minecraft.world.entity.Entity) null));
+        BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
+        return hit.getType() == HitResult.Type.MISS ? null : hit;
     }
 
     /**

@@ -2,8 +2,6 @@ package thaumcraft.common.entities.monster;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -27,7 +25,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -47,8 +44,6 @@ import thaumcraft.common.lib.world.BiomeColumns;
 public class EntityTaintacle extends Monster implements ITaintedMob {
     @FunctionalInterface public interface ClientEffects { void arise(EntityTaintacle entity); }
     private static ClientEffects clientEffects;
-    // This key is not registered here: the real Outer Lands biome is a separate remaining unit.
-    private static final ResourceKey<Biome> ELDRITCH=ResourceKey.create(Registries.BIOME,ResourceLocation.fromNamespaceAndPath("thaumcraft","eldritch"));
     public float flailIntensity=1;
     private int attackTime;
     private boolean creatingTentacle;
@@ -121,7 +116,7 @@ public class EntityTaintacle extends Monster implements ITaintedMob {
         if(!server.hasChunkAt(at)||!server.hasChunkAt(at.below()))return;
         if(!server.getWorldBorder().isWithinBounds(at))return;
         var biome=BiomeColumns.surfaceHolder(server,at.getX(),at.getZ());if(biome==null)return;
-        boolean outer=biome.is(ELDRITCH);
+        boolean outer=biome.is(ThaumcraftBiomes.ELDRITCH_LANDS);
         if(!outer&&!(biome.is(ThaumcraftBiomes.TAINT)&&(isTaintMaterial(server.getBlockState(at))||isTaintMaterial(server.getBlockState(at.below())))))return;
         // Native ADD callbacks may reenter the parent. Retire this one creation intent before publication.
         creatingTentacle=true;

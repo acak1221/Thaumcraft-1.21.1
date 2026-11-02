@@ -1,6 +1,7 @@
 package thaumcraft.common.mixin;
 
 import java.util.UUID;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,11 +28,13 @@ public abstract class StreamAxeItemMixin implements StreamAxeItemMotion.Followin
     @Unique private int thaumcraft$streamCounter = StreamAxeGeometry.FOLLOW_START;
     @Unique private Vec3 thaumcraft$streamFrom;
     @Unique private Vec3 thaumcraft$streamStep;
+    @Unique private boolean thaumcraft$streamOriginalNoGravity;
 
     @Override public boolean thaumcraft$streamFollowing() { return thaumcraft$streamTarget != null; }
 
     @Override public boolean thaumcraft$streamFollow(UUID target) {
         if (thaumcraft$streamTarget != null) return false;
+        thaumcraft$streamOriginalNoGravity = ((ItemEntity) (Object) this).isNoGravity();
         thaumcraft$streamTarget = target;
         thaumcraft$streamCounter = StreamAxeGeometry.FOLLOW_START;
         return true;
@@ -41,7 +44,16 @@ public abstract class StreamAxeItemMixin implements StreamAxeItemMotion.Followin
         thaumcraft$streamTarget = null;
         thaumcraft$streamFrom = null;
         thaumcraft$streamStep = null;
-        self.setNoGravity(false);
+        self.setNoGravity(thaumcraft$streamOriginalNoGravity);
+    }
+
+    @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
+    private void thaumcraft$saveOriginalGravity(CompoundTag tag, CallbackInfo callback) {
+        if (thaumcraft$streamTarget == null) return;
+        // Entity.saveWithoutId wrote the live NoGravity flag before dispatching here.
+        // The approach is transient, so disk keeps the item's flag from before following.
+        if (thaumcraft$streamOriginalNoGravity) tag.putBoolean("NoGravity", true);
+        else tag.remove("NoGravity");
     }
 
     @Inject(method = "tick()V", at = @At("HEAD"))

@@ -29,9 +29,10 @@ public final class ItemWandPedestalFocus extends BlockItem {
         for (var property : state.getProperties()) {
             if (property instanceof net.minecraft.world.level.block.state.properties.BooleanProperty flag
                     && "focus".equals(property.getName())) {
-                return state.setValue(flag, true);
+                state = state.setValue(flag, true);
+                break;
             }
         }
-        return state;
+        return canPlace(context, state) ? state : null;
     }
 }

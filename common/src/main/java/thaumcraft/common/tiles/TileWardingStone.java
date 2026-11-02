@@ -54,7 +54,7 @@ public final class TileWardingStone extends BlockEntity {
             net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(pos.getX(), pos.getY(), pos.getZ(),
                     pos.getX() + 1.0D, pos.getY() + EldritchBlockRules.WARDING_STONE_HEIGHT, pos.getZ() + 1.0D).inflate(.1D, .1D, .1D);
             for (net.minecraft.world.entity.LivingEntity entity : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box)) {
-                if (!EldritchBlockRules.wardingStonePushes(entity instanceof net.minecraft.world.entity.player.Player, !entity.isAlive())) continue;
+                if (!EldritchBlockRules.wardingStonePushes(entity instanceof net.minecraft.world.entity.player.Player, entity.onGround())) continue;
                 double angle = (entity.getYRot() + 180.0F) * Math.PI / 180.0D;
                 entity.push(-Math.sin(angle) * EldritchBlockRules.WARDING_STONE_PUSH, EldritchBlockRules.WARDING_STONE_PUSH_Y,
                         Math.cos(angle) * EldritchBlockRules.WARDING_STONE_PUSH);

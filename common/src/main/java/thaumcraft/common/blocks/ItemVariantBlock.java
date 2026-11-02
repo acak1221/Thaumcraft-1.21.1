@@ -35,7 +35,10 @@ public class ItemVariantBlock extends BlockItem {
     @Override public String getDescriptionId() { return "item." + Thaumcraft.MODID + "." + name; }
 
     /** The original metadata value becomes the "variant" block state of the family block. */
-    @Override protected BlockState getPlacementState(BlockPlaceContext context) { return variantState(); }
+    @Override protected BlockState getPlacementState(BlockPlaceContext context) {
+        BlockState state = variantState();
+        return canPlace(context, state) ? state : null;
+    }
 
     /** The state of the family block with the original metadata value set. */
     public BlockState variantState() {

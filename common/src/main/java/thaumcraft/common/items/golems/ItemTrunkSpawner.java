@@ -23,6 +23,9 @@ import thaumcraft.common.entities.golems.EntityTravelingTrunk;
  * the {@code upgrade} and contents the item carries (flattened from NBT to data components). Not consumed in creative.
  */
 public final class ItemTrunkSpawner extends Item {
+    /** Native entity admission may synchronously call back into the same held-item use. */
+    private static final ThreadLocal<Boolean> placing = new ThreadLocal<>();
+
     public ItemTrunkSpawner(Properties properties) { super(properties); }
 
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
@@ -42,6 +45,9 @@ public final class ItemTrunkSpawner extends Item {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.FAIL;
+        if (Boolean.TRUE.equals(placing.get())) return InteractionResult.FAIL;
+        placing.set(true);
+        try {
         ItemStack stack = context.getItemInHand();
         BlockPos clicked = context.getClickedPos();
         Direction face = context.getClickedFace();
@@ -70,5 +76,8 @@ public final class ItemTrunkSpawner extends Item {
         if (!level.addFreshEntity(trunk)) return InteractionResult.FAIL;
         if (!player.getAbilities().instabuild) stack.shrink(1);
         return InteractionResult.CONSUME;
+        } finally {
+            placing.remove();
+        }
     }
 }

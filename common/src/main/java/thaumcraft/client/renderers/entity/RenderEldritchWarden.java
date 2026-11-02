@@ -2,6 +2,7 @@ package thaumcraft.client.renderers.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -76,12 +77,14 @@ public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWar
     @Override public void render(EntityEldritchWarden warden, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
         pose.pushPose();
         try {
+            float bodyYaw = Mth.rotLerp(partial, warden.yBodyRotO, warden.yBodyRot);
+            pose.mulPose(Axis.YP.rotationDegrees(180.0F - bodyYaw));
             // The original RenderLiving transform: the model is drawn flipped and
             // shifted down by 1.501 units, then the warden's own 1.5 scale.
             pose.scale(-1.0F, -1.0F, 1.0F);
             pose.scale(1.5F, 1.5F, 1.5F);
             pose.translate(0.0F, -1.501F, 0.0F);
-            animate(warden, partial);
+            animate(warden, partial, bodyYaw);
             VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(SKIN));
             root.render(pose, out, light, OverlayTexture.NO_OVERLAY, 0xffffffff);
             // Original ModelEldritchGuardian:467-479 - the warden alone draws its hood eye
@@ -107,11 +110,15 @@ public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWar
     }
 
     /** The original ModelEldritchGuardian animation, with the warden's own arm lift. */
-    private void animate(EntityEldritchWarden warden, float age) {
-        float headYaw = Mth.rotLerp(age, warden.yHeadRotO, warden.getYHeadRot());
-        float headPitch = Mth.lerp(age, warden.xRotO, warden.getXRot());
+    private void animate(EntityEldritchWarden warden, float partial, float bodyYaw) {
+        float age = warden.tickCount + partial;
+        float headYaw = Mth.wrapDegrees(Mth.rotLerp(partial, warden.yHeadRotO, warden.getYHeadRot()) - bodyYaw);
+        float headPitch = Mth.lerp(partial, warden.xRotO, warden.getXRot());
         hood1.yRot = headYaw / 57.295776F;
         hood1.xRot = headPitch / 57.295776F;
+        ModelPart eye = root.getChild("HoodEye");
+        eye.yRot = hood1.yRot;
+        eye.xRot = hood1.xRot;
         armL1.xRot = -1 - warden.armLiftL + Mth.sin((age + 20) / 10) * .08F;
         armR1.xRot = -1 - warden.armLiftR + Mth.sin(age / 10) * .08F;
         legpanelC1.xRot = -.15F + Mth.sin(age / 8) * .12F;

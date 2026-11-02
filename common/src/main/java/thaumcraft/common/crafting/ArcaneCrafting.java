@@ -44,8 +44,10 @@ public final class ArcaneCrafting {
             if (!recipe.matches(grid, level) || !recipe.hasResearch(grid, player)) continue;
             ItemStack output = recipe.assemble(grid, level.registryAccess());
             if (output.isEmpty() || !output.isItemEnabled(level.enabledFeatures())) continue;
-            return new Match(holder, grid, output, recipe.getRemainingItems(grid),
-                    ArcaneVis.price(recipe.vis(grid), contents.getItem(TileArcaneWorkbench.WAND_SLOT), player), true);
+            Map<String, Integer> prices;
+            try { prices = ArcaneVis.price(recipe.vis(grid), contents.getItem(TileArcaneWorkbench.WAND_SLOT), player); }
+            catch (IllegalArgumentException invalidCost) { continue; } // No payable result; later valid recipes remain eligible.
+            return new Match(holder, grid, output, recipe.getRemainingItems(grid), prices, true);
         }
         int registration = 0;
         for (Object candidate : ProgrammaticRecipes.registrations()) {
@@ -56,8 +58,10 @@ public final class ArcaneCrafting {
             ItemStack output = recipe.assemble(grid, level.registryAccess());
             if (output.isEmpty() || !output.isItemEnabled(level.enabledFeatures())) continue;
             var holder = new RecipeHolder<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "api/arcane/" + index), recipe);
-            return new Match(holder, grid, output, recipe.getRemainingItems(grid),
-                    ArcaneVis.price(recipe.vis(grid), contents.getItem(TileArcaneWorkbench.WAND_SLOT), player), true);
+            Map<String, Integer> prices;
+            try { prices = ArcaneVis.price(recipe.vis(grid), contents.getItem(TileArcaneWorkbench.WAND_SLOT), player); }
+            catch (IllegalArgumentException invalidCost) { continue; }
+            return new Match(holder, grid, output, recipe.getRemainingItems(grid), prices, true);
         }
         return null;
     }

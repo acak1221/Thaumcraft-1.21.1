@@ -48,6 +48,25 @@ class CheckpointEvidenceTest(unittest.TestCase):
         self.assertEqual(evidence.validate_snapshot(self.root, snapshot), snapshot["started_ns"])
         self.assertEqual(json.loads((self.root / "snapshot.json").read_text()), snapshot)
 
+    def test_compiled_optional_integrations_and_example_sources_are_validation_inputs(self) -> None:
+        paths = (
+            "compat/emi/src/main/java/Plugin.java",
+            "compat/jei/src/main/java/Plugin.java",
+            "compat/jade/src/main/java/Plugin.java",
+            "examples/example-addon/src/main/java/Addon.java",
+            "examples/example-addon/src/main/resources/data/example/recipe/item.json",
+        )
+        for name in paths:
+            self.write(name, "original")
+        snapshot = self.snapshot()
+        for name in paths:
+            with self.subTest(source=name):
+                self.assertIn(name, snapshot["source_fingerprints_sha256"])
+                self.write(name, "changed after validation began")
+                with self.assertRaisesRegex(ValueError, "Inputs changed"):
+                    evidence.validate_snapshot(self.root, snapshot)
+                self.write(name, "original")
+
     def test_snapshot_is_not_overwritten(self) -> None:
         self.snapshot()
         with self.assertRaises(FileExistsError):

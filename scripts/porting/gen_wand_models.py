@@ -43,33 +43,35 @@ def model_name(rod, cap, suffix):
     return f"wand_{rod}_{cap}" + (f"_{suffix}" if suffix else "")
 
 
-def write_primal_shapes():
+def write_primal_shapes(models: Path):
     # Both original depth+outer cubes have a dedicated direct-texture renderer.
     # The retained6px depth strip must stay out of the global mipmap4 block atlas.
     for kind in ["wand", "staff"]:
         shape = {"parent": f"thaumcraft:item/{kind}_shape"}
-        (MODELS / f"{kind}_primal_shape.json").write_text(json.dumps(shape, indent=2) + "\n", encoding="utf-8", newline="")
+        (models / f"{kind}_primal_shape.json").write_text(json.dumps(shape, indent=2) + "\n", encoding="utf-8", newline="")
 
 
-def write_addon_model():
+def write_addon_model(models: Path):
     # A wand with any add-on rod or cap (thaumcraft:wand_addon = 1, WandModels.addonValue). Its parts are drawn by the
     # builtin item renderer from the add-on's own textures, so the model only has to reach builtin/entity through the
     # shape chain; the textures are the fallback particle of the shape. One model serves wands, staves and sceptres:
     # the shape's elements are never baked for a builtin model, and the renderer picks the staff geometry itself.
     model = {"parent": "thaumcraft:item/wand_shape",
              "textures": {"rod": "thaumcraft:models/wand_rod_greatwood", "cap": "thaumcraft:models/wand_cap_iron"}}
-    (MODELS / "wand_addon.json").write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8", newline="")
+    (models / "wand_addon.json").write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8", newline="")
 
 
-def main():
-    write_primal_shapes()
-    write_addon_model()
+def generate(models: Path) -> int:
+    """Write the selector at an explicit destination without CLI output."""
+    models.mkdir(parents=True, exist_ok=True)
+    write_primal_shapes(models)
+    write_addon_model(models)
     overrides = []
     for r, rod in enumerate(ROD_TAGS):
         for c, cap in enumerate(CAP_TAGS):
             for suffix, focus in FOCI:
                 name = model_name(rod, cap, suffix)
-                path = MODELS / f"{name}.json"
+                path = models / f"{name}.json"
                 if not path.exists():
                     textures = {"rod": f"thaumcraft:models/wand_rod_{base_tag(rod)}", "cap": f"thaumcraft:models/wand_cap_{cap}"}
                     if suffix:
@@ -94,8 +96,12 @@ def main():
             "textures": {"rod": "thaumcraft:models/wand_rod_greatwood",
                          "cap": "thaumcraft:models/wand_cap_iron"},
             "overrides": overrides}
-    (MODELS / "wand.json").write_text(json.dumps(wand, indent=1) + "\n", encoding="utf-8", newline="")
-    print(f"{len(overrides)} overrides")
+    (models / "wand.json").write_text(json.dumps(wand, indent=1) + "\n", encoding="utf-8", newline="")
+    return len(overrides)
+
+
+def main():
+    print(f"{generate(MODELS)} overrides")
 
 
 if __name__ == "__main__":

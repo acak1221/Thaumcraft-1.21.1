@@ -42,9 +42,9 @@ public final class BlockWandPedestal extends BaseEntityBlock implements StateDep
     public static final BooleanProperty FOCUS = BooleanProperty.create("focus");
     /** The three steps of the pedestal. */
     private static final VoxelShape PEDESTAL_SHAPE = Shapes.or(
-            Shapes.box(0, 0, 0, 16, 4, 16),
-            Shapes.box(2, 4, 2, 14, 8, 14),
-            Shapes.box(4, 8, 4, 12, 16, 12));
+            Block.box(0, 0, 0, 16, 4, 16),
+            Block.box(2, 4, 2, 14, 8, 14),
+            Block.box(4, 8, 4, 12, 16, 12));
 
     public BlockWandPedestal(Properties properties) {
         super(properties);
@@ -91,11 +91,7 @@ public final class BlockWandPedestal extends BaseEntityBlock implements StateDep
         if (!player.canInteractWithBlock(pos, 0) || !level.mayInteract(player, pos)) return ItemInteractionResult.FAIL;
         if (level.isClientSide) return ItemInteractionResult.SUCCESS;
         if (!pedestal.isEmpty()) {
-            ItemStack stored = pedestal.removeItemNoUpdate(0);
-            if (stored.isEmpty()) return ItemInteractionResult.FAIL;
-            if (!player.getInventory().add(stored)) player.drop(stored, false);
-            pedestal.setChanged();
-            return ItemInteractionResult.CONSUME;
+            return pedestal.returnStoredItem(player) ? ItemInteractionResult.CONSUME : ItemInteractionResult.FAIL;
         }
         if (held.isEmpty() || !pedestal.canPlaceItem(0, held)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         ItemStack stored = held.copyWithCount(1);

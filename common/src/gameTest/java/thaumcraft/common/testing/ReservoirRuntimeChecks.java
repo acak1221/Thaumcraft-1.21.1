@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.time.Duration;
+import java.util.concurrent.locks.LockSupport;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -69,6 +72,7 @@ import thaumcraft.common.tiles.TileTubeBuffer;
  */
 public final class ReservoirRuntimeChecks {
     private static final Aspect AQUA = Aspect.getAspect("aqua"), IGNIS = Aspect.getAspect("ignis"), TERRA = Aspect.getAspect("terra");
+    private static final Duration READINESS_BUDGET = Duration.ofSeconds(10);
 
     private ReservoirRuntimeChecks() {}
 
@@ -106,11 +110,13 @@ public final class ReservoirRuntimeChecks {
         // Entities (pigs, drops, the player) only exist where the chunk is entity-ticking; force the columns the fixtures use (and only
         // those nobody else forced, so that the unforcing below never takes another test's).
         Set<ChunkPos> forced = new LinkedHashSet<>();
+        Set<ChunkPos> required = new LinkedHashSet<>();
         for (BlockPos spot : List.of(origin.offset(30, 0, 0), origin.offset(44, 0, 0), origin.offset(58, 0, 0), origin.offset(72, 0, 0),
                 origin.offset(0, 0, 48), origin.offset(0, 0, 56), origin.offset(0, 0, 64), origin.offset(0, 0, 72), origin.offset(0, 0, 80),
                 origin.offset(0, 0, 90), origin.offset(10, 0, 90))) {
             for (int x = (spot.getX() - 3) >> 4; x <= ((spot.getX() + 3) >> 4); x++) for (int z = (spot.getZ() - 3) >> 4; z <= ((spot.getZ() + 3) >> 4); z++) {
                 ChunkPos chunk = new ChunkPos(x, z);
+                required.add(chunk);
                 if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }
             }
         }
@@ -122,22 +128,62 @@ public final class ReservoirRuntimeChecks {
             unforce(level, forced);
             throw failure;
         }
-        // A forced chunk becomes entity-ticking a tick later: the pigs and the player come after that.
-        test.runAfterDelay(5, () -> {
-            try {
-                burst(test, level, origin.offset(30, 0, 0), spawned);
-                pulls(test, level, origin, spawned, forced);
-            } catch (RuntimeException | Error failure) {
-                spawned.forEach(Mob::discard);
-                unforce(level, forced);
-                throw failure;
-            }
-        });
+        // Disk/entity inbox completion needs real time plus ordinary level ticks, not five simulated ticks.
+        long readinessDeadline = System.nanoTime() + READINESS_BUDGET.toNanos();
+        after(test, 5, level, spawned, forced, () -> awaitNativeFixtures(test, level, origin, spawned, forced,
+                required, readinessDeadline, true));
+    }
+
+    private static void awaitNativeFixtures(GameTestHelper test, ServerLevel level, BlockPos origin,
+                                            List<Mob> spawned, Set<ChunkPos> forced, Set<ChunkPos> required,
+                                            long deadline, boolean first) {
+        boolean ready = required.stream().allMatch(chunk -> nativeTickReady(level, chunk.getMiddleBlockPosition(origin.getY())));
+        if (first || ready) {
+            var states = required.stream().map(chunk -> nativeTickState(level, chunk.getMiddleBlockPosition(origin.getY()))).toList();
+            thaumcraft.common.Thaumcraft.LOG.info("Reservoir already-forced native fixture readiness (ready={}): {}", ready, states);
+        }
+        if (!ready) {
+            test.assertTrue(System.nanoTime() < deadline, "already-forced reservoir fixture chunks did not reach native ticking readiness within "
+                    + READINESS_BUDGET + ": " + required.stream().map(chunk -> nativeTickState(level, chunk.getMiddleBlockPosition(origin.getY()))).toList());
+            // Return to the normal level tick so PersistentEntitySectionManager can process its load inbox.
+            // A one-millisecond yield gives its disk executor a wall-clock budget even in the fast GameTestServer loop.
+            LockSupport.parkNanos(1_000_000L);
+            after(test, 1, level, spawned, forced, () -> awaitNativeFixtures(test, level, origin, spawned, forced,
+                    required, deadline, false));
+            return;
+        }
+        // The larger outer GameTest timeout covers setup only. Keep the original active scenario budget.
+        after(test, 600, level, spawned, forced, () -> test.assertTrue(false,
+                "reservoir scenario exceeded its original 600 active ticks after native chunk readiness"));
+        burst(test, level, origin.offset(30, 0, 0), spawned);
+        pulls(test, level, origin, spawned, forced);
     }
 
     private static void unforce(ServerLevel level, Set<ChunkPos> forced) {
         for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
         forced.clear();
+    }
+
+    /** A later callback runs outside the try/catch that scheduled it and owns the same fixtures. */
+    private static void after(GameTestHelper test, long delay, ServerLevel level, List<Mob> spawned,
+                              Set<ChunkPos> forced, Runnable action) {
+        test.runAfterDelay(delay, () -> {
+            try {
+                action.run();
+            } catch (RuntimeException | Error failure) {
+                try {
+                    spawned.forEach(Mob::discard);
+                } catch (RuntimeException | Error cleanup) {
+                    failure.addSuppressed(cleanup);
+                }
+                try {
+                    unforce(level, forced);
+                } catch (RuntimeException | Error cleanup) {
+                    failure.addSuppressed(cleanup);
+                }
+                throw failure;
+            }
+        });
     }
 
     // ---- numbers ---------------------------------------------------------------------------------------------------------
@@ -405,6 +451,17 @@ public final class ReservoirRuntimeChecks {
     }
 
     private static void pulls(GameTestHelper test, ServerLevel level, BlockPos origin, List<Mob> spawned, Set<ChunkPos> forced) {
+        // These columns are already forced above. FULL alone does not authorize the native block-entity ticker:
+        // LevelChunk.isTicking also requires BLOCK_TICKING status and the entity load inbox to have completed.
+        List<BlockPos> ticking = new ArrayList<>();
+        for (int z : new int[]{48, 56, 64, 72, 80}) {
+            ticking.add(origin.offset(0, 0, z));
+            ticking.add(origin.offset(z == 80 ? 2 : 1, 0, z));
+        }
+        var readiness = ticking.stream().map(pos -> nativeTickState(level, pos)).toList();
+        thaumcraft.common.Thaumcraft.LOG.info("Reservoir native readiness before pull fixtures: {}", readiness);
+        test.assertTrue(ticking.stream().allMatch(pos -> nativeTickReady(level, pos)),
+                "already-forced reservoir fixtures must reach native ticking readiness before the twelve-tick window: " + readiness);
         Aspect[] units = {AQUA, AQUA, AQUA, IGNIS, IGNIS, TERRA, TERRA};
         Map<Aspect, Integer> loaded = new LinkedHashMap<>();
         for (Aspect aspect : units) loaded.merge(aspect, 1, Integer::sum);
@@ -430,10 +487,12 @@ public final class ReservoirRuntimeChecks {
         Map<Aspect, Integer> chainLoaded = Map.of(AQUA, 2, IGNIS, 1, TERRA, 1);
         test.assertTrue(directReservoir.getAmount() == 0 && directBuffer.getAmount() == 7 && awayBuffer.getAmount() == 7 && closedBuffer.getAmount() == 7 && fullBuffer.getAmount() == 7 && chainBuffer.getAmount() == 4,
                 "the fixtures are stocked");
-        test.runAfterDelay(12, () -> {
+        after(test, 12, level, spawned, forced, () -> {
             test.assertTrue(directReservoir.getAmount() >= 1 && directReservoir.getAmount() <= 3
-                            && sum(stock(directReservoir), bufferStock(directBuffer)).equals(loaded), "after twelve ticks one to three units came over and none was lost: " + stock(directReservoir) + " " + bufferStock(directBuffer));
-            test.runAfterDelay(60, () -> {
+                            && sum(stock(directReservoir), bufferStock(directBuffer)).equals(loaded), "after twelve ticks one to three units came over and none was lost: " + stock(directReservoir) + " " + bufferStock(directBuffer)
+                            + "; reservoirTicks=" + directReservoir.getTickCount() + "; bufferTicks=" + directBuffer.getTickCount()
+                            + "; reservoir=" + nativeTickState(level, direct) + "; buffer=" + nativeTickState(level, direct.east()));
+            after(test, 60, level, spawned, forced, () -> {
                 test.assertTrue(directReservoir.getAmount() == 7 && directBuffer.getAmount() == 0 && stock(directReservoir).equals(loaded),
                         "a unit every fifth tick moves the whole buffer, aspect by aspect: " + stock(directReservoir) + " " + bufferStock(directBuffer));
                 test.assertTrue(awayReservoir.getAmount() == 0 && awayBuffer.getAmount() == 7, "a reservoir opening away from the buffer draws nothing");
@@ -442,10 +501,10 @@ public final class ReservoirRuntimeChecks {
                 // The pulls go on as long as something is there: open the side of the closed buffer, turn the away one around.
                 closedBuffer.setSideOpen(Direction.WEST, true);
                 test.assertTrue(awayReservoir.setFacing(Direction.EAST), "the wand turns it");
-                test.runAfterDelay(60, () -> {
+                after(test, 60, level, spawned, forced, () -> {
                     test.assertTrue(closedReservoir.getAmount() == 7 && closedBuffer.getAmount() == 0 && stock(closedReservoir).equals(loaded), "the side opened: everything came over: " + stock(closedReservoir));
                     test.assertTrue(awayReservoir.getAmount() == 7 && awayBuffer.getAmount() == 0 && stock(awayReservoir).equals(loaded), "turned toward it: everything came over: " + stock(awayReservoir));
-                    test.runAfterDelay(120, () -> {
+                    after(test, 120, level, spawned, forced, () -> {
                         test.assertTrue(chainReservoir.getAmount() == 4 && chainBuffer.getAmount() == 0 && stock(chainReservoir).equals(chainLoaded),
                                 "through a real tube the whole buffer reached the reservoir: " + stock(chainReservoir) + " " + bufferStock(chainBuffer));
                         player(test, level, origin.offset(0, 0, 90), spawned, forced);
@@ -453,6 +512,24 @@ public final class ReservoirRuntimeChecks {
                 });
             });
         });
+    }
+
+    private static boolean nativeTickReady(ServerLevel level, BlockPos pos) {
+        var chunk = new ChunkPos(pos);
+        var loaded = level.getChunkSource().getChunkNow(chunk.x, chunk.z);
+        return loaded != null && loaded.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)
+                && level.shouldTickBlocksAt(chunk.toLong()) && level.areEntitiesLoaded(chunk.toLong())
+                && level.isPositionEntityTicking(pos);
+    }
+
+    private static String nativeTickState(ServerLevel level, BlockPos pos) {
+        var chunk = new ChunkPos(pos);
+        var loaded = level.getChunkSource().getChunkNow(chunk.x, chunk.z);
+        return chunk + "[full=" + (loaded == null ? "absent" : loaded.getFullStatus())
+                + ",blockRange=" + level.shouldTickBlocksAt(chunk.toLong())
+                + ",entityTicking=" + level.isPositionEntityTicking(pos)
+                + ",entitiesLoaded=" + level.areEntitiesLoaded(chunk.toLong())
+                + ",pendingTasks=" + level.getChunkSource().getPendingTasksCount() + ']';
     }
 
     private static InteractionResult use(ServerPlayer player, BlockPos pos, Direction face) {

@@ -2083,6 +2083,7 @@
   "tc.port.book_recipe.base_cost": "Базовая стоимость: %s вис",
   "tc.port.book_recipe.held_wand": "Жезл в руке: %s",
   "tc.port.book_recipe.wand_cost": "Стоимость с этим жезлом: %s вис",
+  "tc.port.book_recipe.invalid_cost": "Этот жезл не может оплатить стоимость рецепта.",
   "tc.port.book_recipe.no_wand_context": "Возьмите поддерживаемый жезл в руку, чтобы увидеть стоимость вис.",
   "block.thaumcraft.crucible": "Тигель",
   "block.thaumcraft.nitor": "Нитор",

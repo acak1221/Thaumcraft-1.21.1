@@ -84,6 +84,13 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
         // A wand is one item whose rod, caps and sceptre flag are components: tell the variants
         // apart, so the recipes of one wand are not buried under every other rod and cap.
         registry.setDefaultComparison(ThaumcraftContent.WAND.get(), Comparison.compareData(ThaumcraftEmiPlugin::wandIdentity));
+        // EMI otherwise compares only the item key. Essence contents are recipe identities;
+        // amount/order and absent versus explicitly empty crystal data must remain distinct.
+        // Incidental stack counts, names and other cosmetic components do not make variants.
+        registry.setDefaultComparison(ThaumcraftContent.CRYSTAL_ESSENCE.get(), Comparison.compareData(
+                stack -> stack.get(ThaumcraftContent.CRYSTAL_ESSENCE_DATA.get())));
+        registry.setDefaultComparison(ThaumcraftContent.FILLED_PHIAL.get(), Comparison.compareData(
+                stack -> stack.get(ThaumcraftContent.PHIAL_DATA.get())));
 
         for (Aspect aspect : Aspect.aspects.values()) {
             registry.addEmiStack(new AspectEmiStack(aspect, 1));

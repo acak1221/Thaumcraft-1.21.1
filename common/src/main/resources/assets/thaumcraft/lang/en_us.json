@@ -2083,6 +2083,7 @@
   "tc.port.book_recipe.base_cost": "Base cost: %s vis",
   "tc.port.book_recipe.held_wand": "Held wand: %s",
   "tc.port.book_recipe.wand_cost": "Cost with this wand: %s vis",
+  "tc.port.book_recipe.invalid_cost": "This recipe cannot be paid with the held wand.",
   "tc.port.book_recipe.no_wand_context": "Hold a supported wand to see its vis cost.",
   "block.thaumcraft.crucible": "Crucible",
   "block.thaumcraft.nitor": "Nitor",

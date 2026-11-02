@@ -83,8 +83,16 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
     }
 
     private DataResult<InfusionStackRecipe> validate() {
-        if (input.isEmpty() || components.isEmpty() || components.size() > InfusionComponentPredicate.MAX_COMPONENTS
-                || components.stream().anyMatch(Ingredient::isEmpty)
+        return validate(false);
+    }
+
+    private DataResult<InfusionStackRecipe> validate(boolean resolvedEmptyAllowed) {
+        // The clientbound ingredient codec resolves tags to concrete items: a
+        // valid, currently empty optional tag arrives as Ingredient.EMPTY.
+        // Keep JSON and gameplay validation strict; InfusionMatching also
+        // refuses missing altar stock before native EMPTY.test(EMPTY) can match.
+        if ((!resolvedEmptyAllowed && (input.isEmpty() || components.stream().anyMatch(Ingredient::isEmpty)))
+                || components.isEmpty() || components.size() > InfusionComponentPredicate.MAX_COMPONENTS
                 || result.isEmpty() || aspects.isEmpty() || instability < 0 || instability > 24
                 || aspects.entrySet().stream().anyMatch(entry -> Aspect.getAspect(entry.getKey()) == null || entry.getValue() <= 0)
                 || aspects.values().stream().mapToLong(Integer::longValue).sum() > Integer.MAX_VALUE) {
@@ -172,7 +180,7 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
         public static final StreamCodec<RegistryFriendlyByteBuf, InfusionStackRecipe> STREAM_CODEC = StreamCodec.of(Serializer::encode, Serializer::decode);
 
         private static void encode(RegistryFriendlyByteBuf buffer, InfusionStackRecipe recipe) {
-            recipe.validate().getOrThrow();
+            recipe.validate(true).getOrThrow();
             buffer.writeUtf(recipe.research);
             Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.input);
             buffer.writeVarInt(recipe.components.size());
@@ -222,7 +230,7 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
             Optional<Integer> inputDamage = buffer.readBoolean() ? Optional.of(buffer.readVarInt()) : Optional.empty();
             Optional<String> resultPatch = buffer.readBoolean() ? Optional.of(buffer.readUtf()) : Optional.empty();
             var recipe = new InfusionStackRecipe(research, input, components, aspects, instability, result, predicates, inputDamage, resultPatch);
-            return recipe.validate().getOrThrow();
+            return recipe.validate(true).getOrThrow();
         }
 
         @Override public MapCodec<InfusionStackRecipe> codec() { return CODEC; }

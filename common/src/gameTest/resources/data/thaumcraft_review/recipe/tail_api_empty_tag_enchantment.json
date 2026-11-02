@@ -1,0 +1,9 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "",
+  "enchantment": "minecraft:unbreaking",
+  "components": [{"tag": "thaumcraft_review:empty_optional_ingredient"}],
+  "aspects": {"aer": 1},
+  "instability": 0,
+  "first_level_minimum_cost": 1
+}

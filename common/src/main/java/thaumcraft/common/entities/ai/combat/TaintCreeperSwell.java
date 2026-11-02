@@ -8,8 +8,8 @@ import thaumcraft.common.entities.monster.EntityTaintCreeper;
 /**
  * Original {@code thaumcraft/common/entities/ai/combat/AICreeperSwell.java}.
  *
- * <p>The taint creeper starts swelling as soon as its target is nearer than nine blocks, keeps the swell while the
- * target stays within forty nine blocks and in sight, and gives it up otherwise. The goal also stops the path of
+ * <p>The taint creeper starts swelling as soon as its target is nearer than three blocks, keeps the swell while the
+ * target stays within seven blocks and in sight, and gives it up otherwise. The goal also stops the path of
  * the creeper, so the creeper stands still while it primes its charge.</p>
  *
  * <p>The original registered this goal with priority 1 and used the goal selector of 1.7.10, where the LOWEST
@@ -20,9 +20,9 @@ public final class TaintCreeperSwell extends Goal {
     /** The original 1.7 goal priority of {@code AICreeperSwell}. */
     public static final int PRIORITY = 1;
 
-    /** Original {@code func_75250_a}: the swell starts below nine blocks. */
+    /** Original {@code func_75250_a}: squared distance below nine, or three blocks. */
     public static final double SWELL_RANGE = 9.0D;
-    /** Original {@code func_75246_d}: the swell is given up beyond forty nine blocks. */
+    /** Original {@code func_75246_d}: squared distance beyond forty nine, or seven blocks. */
     public static final double SWELL_CANCEL_RANGE = 49.0D;
 
     private final EntityTaintCreeper creeper;
@@ -37,10 +37,10 @@ public final class TaintCreeperSwell extends Goal {
 
     @Override public boolean canUse() {
         LivingEntity target = creeper.getTarget();
-        return creeper.getCreeperState() > 0 || target != null && creeper.distanceTo(target) < SWELL_RANGE;
+        return creeper.getCreeperState() > 0 || target != null && creeper.distanceToSqr(target) < SWELL_RANGE;
     }
 
-    @Override public boolean canContinueToUse() { return attackTarget != null || creeper.getCreeperState() > 0; }
+    @Override public boolean canContinueToUse() { return canUse(); }
 
     @Override public void start() {
         creeper.getNavigation().stop();
@@ -55,7 +55,7 @@ public final class TaintCreeperSwell extends Goal {
     @Override public void tick() {
         if (attackTarget == null) {
             creeper.setCreeperState(-1);
-        } else if (creeper.distanceTo(attackTarget) > SWELL_CANCEL_RANGE) {
+        } else if (creeper.distanceToSqr(attackTarget) > SWELL_CANCEL_RANGE) {
             creeper.setCreeperState(-1);
         } else if (!creeper.getSensing().hasLineOfSight(attackTarget)) {
             creeper.setCreeperState(-1);

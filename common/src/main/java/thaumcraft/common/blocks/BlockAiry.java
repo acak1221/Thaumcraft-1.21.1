@@ -6,8 +6,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -19,6 +22,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
@@ -81,7 +85,7 @@ public final class BlockAiry extends BaseEntityBlock implements StateDependentBl
     }
 
     private BlockAiry(int group, Property<Integer> property, Properties properties) {
-        super(properties);
+        super(properties.dynamicShape());
         thaumcraft.common.lib.world.FamilyVariant.pending().remove();
         this.group = group;
         this.variants = EldritchBlockRules.airyGroupVariants(group);
@@ -167,6 +171,20 @@ public final class BlockAiry extends BaseEntityBlock implements StateDependentBl
             default:
                 return Shapes.block();
         }
+    }
+
+    /** Original BlockAiry:188-204 - invisible barriers and the powered mob fence still collide. */
+    @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        int metadata = variant(state);
+        if (metadata == EldritchBlockRules.AIRY_UNBREAKABLE) return Shapes.block();
+        if (metadata == EldritchBlockRules.AIRY_WARDING_FENCE
+                && context instanceof EntityCollisionContext entityContext
+                && entityContext.getEntity() instanceof LivingEntity entity && !(entity instanceof Player)) {
+            BlockPos stone = pos.below();
+            if (!(level.getBlockState(stone).getBlock() instanceof BlockCosmeticSolid)) stone = pos.below(2);
+            if (!(level instanceof SignalGetter signals) || !signals.hasNeighborSignal(stone)) return Shapes.block();
+        }
+        return Shapes.empty();
     }
 
     /** Original BlockAiry:393-405 - the warden's field, not an inert visual effect. */

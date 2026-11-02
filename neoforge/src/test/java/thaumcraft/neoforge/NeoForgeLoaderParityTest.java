@@ -1,6 +1,7 @@
 package thaumcraft.neoforge;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -320,14 +321,14 @@ class NeoForgeLoaderParityTest {
     // ------------------------------------------------------------------ the access transformer
 
     /**
-     * NeoForge has no access widener. The six entries of the shared access widener must be the
-     * six entries of the NeoForge access transformer, or the shared module throws an
+     * NeoForge has no access widener. Every shared access rule must have an equivalent
+     * entry in the NeoForge access transformer, or the shared module throws an
      * {@code IllegalAccessError} on NeoForge.
      */
     @Test void theAccessTransformerIsTheSharedAccessWidener() {
         List<String> widener = accessWidener();
         List<String> transformer = accessTransformer();
-        assertEquals(6, widener.size(), "the shared access widener owns six entries");
+        assertFalse(widener.isEmpty(), "the shared access widener must be present");
         assertEquals(widener, transformer,
                 "the NeoForge access transformer is the shared access widener, entry by entry");
     }
@@ -338,14 +339,15 @@ class NeoForgeLoaderParityTest {
             String text = line.trim();
             if (text.startsWith("#") || text.isEmpty()) continue;
             if (text.startsWith("accessWidener ")) continue; // the header of the file
-            Matcher method = Pattern.compile("^accessible\\s+method\\s+(\\S+)\\s+(\\S+)\\s+\\((.*)\\)V$").matcher(text);
+            Matcher method = Pattern.compile("^(accessible|extendable)\\s+method\\s+(\\S+)\\s+(\\S+)\\s+(\\([^\\s]*\\)\\S+)$").matcher(text);
             if (method.matches()) {
-                found.add(method.group(1).replace('/', '.') + "#" + method.group(2) + "(" + method.group(3) + ")V");
+                String access = method.group(1).equals("extendable") ? "public-f " : "public ";
+                found.add(access + method.group(2).replace('/', '.') + "#" + method.group(3) + method.group(4));
                 continue;
             }
             Matcher field = Pattern.compile("^accessible\\s+field\\s+(\\S+)\\s+(\\S+)\\s+(?:I|L[^;\\s]+;)$").matcher(text);
             if (field.matches()) {
-                found.add(field.group(1).replace('/', '.') + "#" + field.group(2));
+                found.add("public " + field.group(1).replace('/', '.') + "#" + field.group(2));
                 continue;
             }
             throw new IllegalStateException("unknown access widener entry: " + text);
@@ -358,14 +360,14 @@ class NeoForgeLoaderParityTest {
         for (String line : read("neoforge/src/main/resources/META-INF/accesstransformer.cfg").split("\n")) {
             String text = line.trim();
             if (text.startsWith("#") || text.isEmpty()) continue;
-            Matcher method = Pattern.compile("^public\\s+(\\S+)\\s+(\\S+)\\((.*)\\)V$").matcher(text);
+            Matcher method = Pattern.compile("^(public(?:-f)?)\\s+(\\S+)\\s+(\\S+\\([^\\s]*\\)\\S+)$").matcher(text);
             if (method.matches()) {
-                found.add(method.group(1) + "#" + method.group(2) + "(" + method.group(3) + ")V");
+                found.add(method.group(1) + " " + method.group(2) + "#" + method.group(3));
                 continue;
             }
             Matcher field = Pattern.compile("^public\\s+(\\S+)\\s+(\\S+)$").matcher(text);
             if (field.matches()) {
-                found.add(field.group(1) + "#" + field.group(2));
+                found.add("public " + field.group(1) + "#" + field.group(2));
                 continue;
             }
             throw new IllegalStateException("unknown access transformer entry: " + text);

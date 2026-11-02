@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -20,6 +21,7 @@ import thaumcraft.common.items.relics.ItemHandMirror;
 import thaumcraft.common.items.relics.ItemHandMirror.MirrorLink;
 import thaumcraft.common.lib.crafting.DeviceContainerRules;
 import thaumcraft.common.lib.crafting.DeviceContainerRules.MirrorLinkAction;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.tiles.TileMirror;
 import thaumcraft.common.tiles.TileMirrorEssentia;
 
@@ -37,6 +39,7 @@ public final class ItemMirrorBlock extends BlockItem {
     private static final SoundEvent JAR = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "jar"));
 
     private final boolean essentia;
+    private final ThreadLocal<Boolean> using = ThreadLocal.withInitial(() -> false);
 
     public ItemMirrorBlock(Block block, Properties properties) { this(block, false, properties); }
 
@@ -65,6 +68,13 @@ public final class ItemMirrorBlock extends BlockItem {
      * valid partner binds this item to it and gives the bound item back.
      */
     @Override public InteractionResult useOn(UseOnContext context) {
+        if (Boolean.TRUE.equals(using.get())) return InteractionResult.FAIL;
+        using.set(true);
+        try { return useMirror(context); }
+        finally { using.remove(); }
+    }
+
+    private InteractionResult useMirror(UseOnContext context) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
@@ -84,12 +94,24 @@ public final class ItemMirrorBlock extends BlockItem {
             return InteractionResult.PASS;
         }
         if (action != MirrorLinkAction.BIND_ITEM) return InteractionResult.PASS;
+        if (!(level instanceof ServerLevel server)) return InteractionResult.FAIL;
+        ItemStack source = context.getItemInHand(), before = source.copy();
+        if (source.isEmpty() || !source.is(this) || player.getItemInHand(context.getHand()) != source
+                || level.getBlockEntity(pos) != tile || tile.isRemoved() || level.getBlockState(pos) != state) return InteractionResult.FAIL;
         ItemStack bound = new ItemStack(this);
         bound.set(ThaumcraftLegacyItems.MIRROR_LINK.get(),
                 MirrorLink.of(pos, level.dimension().location().toString(), level.dimension().location().getPath()));
+        DeferredItemDrops.PreparedBatch overflow = null;
+        if (!player.getInventory().add(bound)) {
+            overflow = DeferredItemDrops.preparePlayerDrop(server, player, bound);
+            if (!overflow.ready() || player.level() != level || player.getItemInHand(context.getHand()) != source
+                    || !ItemStack.matches(source, before) || level.getBlockEntity(pos) != tile
+                    || tile.isRemoved() || level.getBlockState(pos) != state) return InteractionResult.FAIL;
+        }
+        if (!player.getAbilities().instabuild) source.shrink(1);
+        if (overflow != null) overflow.commitRaw();
         level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, JAR, SoundSource.BLOCKS, 1.0F, 2.0F);
-        if (!player.getInventory().add(bound)) player.drop(bound, false);
-        if (!player.getAbilities().instabuild) context.getItemInHand().shrink(1);
+        if (overflow != null) DeferredItemDrops.tick(server);
         player.releaseUsingItem();
         return InteractionResult.SUCCESS;
     }

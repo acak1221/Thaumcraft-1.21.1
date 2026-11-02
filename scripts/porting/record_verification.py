@@ -94,6 +94,15 @@ def unittest_summary(log: str) -> tuple[int, int]:
     return int(ran.group(1)), int(result.group(1) or 0)
 
 
+def required_cases_for_loader(manifest: dict, loader: str) -> list[str]:
+    """Keep the shared baseline while pinning independently authored loader-specific suites."""
+    shared = manifest["cases"]
+    additional = manifest.get(loader + "_cases", [])
+    if not isinstance(shared, list) or not isinstance(additional, list):
+        raise ValueError("Required GameTest case groups must be lists")
+    return shared + additional
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--loaders", nargs="+", choices=("fabric", "neoforge"), default=["fabric"],
@@ -170,7 +179,7 @@ def main() -> None:
         xml = ROOT / module / "build/gametest-results.xml"
         checked_output(xml)
         summary = checkpoint_evidence.validate_test_report(
-            xml, required=required["cases"], fabric_prefix=module == "fabric")
+            xml, required=required_cases_for_loader(required, module), fabric_prefix=module == "fabric")
         summary["result_file"] = xml.relative_to(ROOT).as_posix()
         gametests[module] = summary
         jar = ROOT / module / f"build/libs/Thaumcraft-{module}-{mod_version}.jar"

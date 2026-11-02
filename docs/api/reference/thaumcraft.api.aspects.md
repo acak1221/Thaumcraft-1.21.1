@@ -259,7 +259,7 @@ Returns a new registry-ordered list of nonprimal aspects, read from the live reg
 public static Aspect getCombinationResult(Aspect first, Aspect second)
 ```
 
-Original ResearchManager.getCombinationResult: the first registry aspect whose components are the two identities in either order, add-on aspects included, or null for null inputs/no match. Malformed short component arrays can throw.
+Original ResearchManager.getCombinationResult: the first registry aspect whose components are the two identities in either order, add-on aspects included, or null for null inputs/no match. Arrays shorter than two have no pair; longer arrays retain the original first-pair behavior.
 
 ## AspectEventProxy
 

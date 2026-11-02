@@ -360,6 +360,7 @@ public final class GolemHelper {
         if (golem == null || fluid == null || !(golem.level() instanceof ServerLevel server)) return results;
         for (GolemMarker marker : golem.getMarkers()) {
             if (!marker.dimension().equals(server.dimension().location())) continue;
+            if (!LiquidGolemGoals.loaded(server, marker.pos())) continue;
             BlockState state = server.getBlockState(marker.pos());
             if (!GolemFluidBlocks.isFluid(state, fluid) || !GolemFluidBlocks.isSource(state)) continue;
             results.add(marker);

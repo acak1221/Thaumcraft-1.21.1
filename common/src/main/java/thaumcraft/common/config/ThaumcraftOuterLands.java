@@ -189,7 +189,7 @@ public final class ThaumcraftOuterLands {
                 return Blocks.SPAWNER.defaultBlockState();
             }
             case TAINT_FIBRES -> {
-                return ThaumcraftTaint.FIBRES.get().defaultBlockState();
+                return ThaumcraftTaint.FIBRES.get().defaultBlockState().setValue(thaumcraft.common.blocks.BlockTaintFibres.TYPE, variant);
             }
             case CRYSTAL -> {
                 // The original eldritch crystal uses the out of range metadata 7, which renders as
@@ -201,7 +201,7 @@ public final class ThaumcraftOuterLands {
                 return block == null ? null : block.defaultBlockState();
             }
             case AIRY -> {
-                Block block = block("airy");
+                Block block = blockById(OuterLandsWiringRules.airyBlock(variant));
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case ELDRITCH_PORTAL -> {
@@ -291,7 +291,7 @@ public final class ThaumcraftOuterLands {
             case 2 -> Direction.SOUTH;
             default -> Direction.NORTH;
         };
-        if (state.hasProperty(BlockStateProperties.FACING)) state = state.setValue(BlockStateProperties.FACING, facing);
+        if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) state = state.setValue(BlockStateProperties.HORIZONTAL_FACING, facing);
         if (state.hasProperty(BlockStateProperties.HALF)) {
             state = state.setValue(BlockStateProperties.HALF, (meta & 4) != 0 ? Half.TOP : Half.BOTTOM);
         }

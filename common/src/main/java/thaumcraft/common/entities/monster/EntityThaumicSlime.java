@@ -167,7 +167,7 @@ public class EntityThaumicSlime extends Monster implements ITaintedMob {
     /** Original slime looks for the closest player within sixteen blocks. */
     private Player closestPlayer() {
         Player closest=null;
-        double distance=16D;
+        double distance=16D*16D;
         for(var candidate:level().players()) {
             double next=candidate.distanceToSqr(this);
             if(next<distance) {
@@ -253,7 +253,7 @@ public class EntityThaumicSlime extends Monster implements ITaintedMob {
     @Override protected void dropCustomDeathLoot(ServerLevel level,DamageSource source,boolean recentlyHit) {
         super.dropCustomDeathLoot(level,source,recentlyHit);
         if(getSlimeSize()<3&&getRandom().nextInt(3)==0) {
-            var resource=net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath("thaumcraft","resource"));
+            var resource=net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath("thaumcraft","tainted_goo"));
             if(resource.isPresent())spawnAtLocation(new ItemStack(resource.get()),getBbHeight()/2F);
         }
     }

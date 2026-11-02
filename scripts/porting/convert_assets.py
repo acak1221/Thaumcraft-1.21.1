@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import composed_resources
+import gen_wand_models
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "src/main/resources/assets/thaumcraft"
@@ -87,8 +88,8 @@ PRIMALS = (
 GAPS = [
     {"id": "scanner_mesh", "status": "pending",
      "detail": "Thaumometer icon aliases the original scanner UV atlas byte-for-byte; scanner.obj and hand/screen rendering are not implemented."},
-    {"id": "wand_mesh", "status": "pending",
-     "detail": "Foundation wand is a static layered original rod/cap icon; dynamic TC4 rod/cap/focus geometry and use poses remain to port."},
+    {"id": "wand_mesh", "status": "implemented_client_unverified",
+     "detail": "Native rod/cap/focus and addon selectors route to the builtin wand renderer; regenerated models alone do not establish visual or use-pose parity."},
     {"id": "crystal_geometry", "status": "implemented_client_unverified",
      "detail": "Seven native tile/builtin item renderers use the original six-piece ModelCrystal geometry, face attachment and positional Java RNG; inspected client visual acceptance remains pending."},
     {"id": "jar_contents", "status": "pending",
@@ -514,9 +515,9 @@ def create_models() -> list[dict[str, Any]]:
                       "tint_source": "ResearchNoteData.color (presentation independent of complete)",
                       "default_tint_rgb": "#999999"})
         mappings.append(entry)
-    item_model("wand", "items/wand_rod_greatwood", "items/wand_cap_iron", handheld=True)
-    mappings.append(legacy_mapping("wandcasting", 0, "wand", ["items/wand_rod_greatwood", "items/wand_cap_iron"],
-                                   ["item.thaumcraft.wand_casting.name"], visual_status="foundation_static_layered_icon"))
+    gen_wand_models.generate(ASSETS / "models/item")
+    mappings.append(legacy_mapping("wandcasting", 0, "wand", ["models/wand_rod_greatwood", "models/wand_cap_iron"],
+                                   ["item.thaumcraft.wand_casting.name"], visual_status="native_wand_renderer_client_unverified"))
 
     # The historical44-entry foundation identity manifest is not a catalogue of
     # every later content unit. Void metadata3 is tracked in its bounded contract.

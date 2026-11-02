@@ -718,7 +718,7 @@ public final class VillageWorldGenRules {
         contents.add(new ChestContent("minecraft:glass_bottle", 1, 5, 10));
         contents.add(new ChestContent("minecraft:gold_nugget", 1, 3, 5));
         contents.add(new ChestContent("minecraft:fire_charge", 1, 1, 5));
-        contents.add(new ChestContent("minecraft:skull", 1, 1, 3));
+        contents.add(new ChestContent("minecraft:skeleton_skull", 1, 1, 3));
         contents.add(new ChestContent("thaumcraft:knowledge_fragment", 1, 3, 20));
         contents.add(new ChestContent("thaumcraft:alumentum", 1, 1, 5));
         contents.add(new ChestContent("thaumcraft:nitor", 1, 1, 5));

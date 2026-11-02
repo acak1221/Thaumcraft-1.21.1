@@ -103,7 +103,7 @@ public final class TileEldritchObeliskRenderer implements BlockEntityRenderer<Ti
         try {
             pose.translate(.5F, 1.0F + bob, .5F);
             pose.mulPose(Axis.XP.rotationDegrees(90.0F));
-            model.renderCapGroup(pose, capBuffer, light, overlay, 0xffffffff);
+            model.renderCapGroupQuads(pose, capBuffer, light, overlay, 0xffffffff);
         } finally {
             pose.popPose();
         }
@@ -111,7 +111,7 @@ public final class TileEldritchObeliskRenderer implements BlockEntityRenderer<Ti
         try {
             pose.translate(.5F, 1.0F + HEIGHT + bob, .5F);
             pose.mulPose(Axis.XP.rotationDegrees(-90.0F));
-            model.renderCapGroup(pose, capBuffer, light, overlay, 0xffffffff);
+            model.renderCapGroupQuads(pose, capBuffer, light, overlay, 0xffffffff);
         } finally {
             pose.popPose();
         }

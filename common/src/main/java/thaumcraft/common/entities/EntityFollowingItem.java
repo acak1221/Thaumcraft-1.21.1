@@ -2,6 +2,7 @@ package thaumcraft.common.entities;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -24,7 +25,7 @@ import thaumcraft.common.lib.entities.ProjectileRules;
  * a block, and falls with its own gravity of 0.04 once it has no target.
  * <p>
  * Declared native adaptations: the native special item is final, so the
- * buoyancy, the fire immunity and the 0.25 block size are repeated here; the
+ * buoyancy, the explosion immunity and the 0.25 block size are repeated here; the
  * original stored the follow divisor in the item age field, which the native
  * item entity keeps private, so the divisor is a field of this class; the
  * client sparkle is a hook instead of a proxy call.
@@ -125,7 +126,7 @@ public final class EntityFollowingItem extends ItemEntity {
                 targetX = 0D;
                 targetY = 0D;
                 targetZ = 0D;
-                target = null;
+                setTarget((Entity) null);
                 clipDisabled = false;
             }
             if (level().isClientSide) clientSparkle.accept(this);
@@ -139,6 +140,17 @@ public final class EntityFollowingItem extends ItemEntity {
 
     @Override protected void applyGravity() {}
 
+    @Override public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putShort("type", (short) getSparkleType());
+    }
+
+    @Override public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        // Earlier native saves omitted the effect kind; retain their constructor default.
+        if (tag.contains("type")) setSparkleType(tag.getShort("type"));
+    }
+
     /** The original item does not collide while it follows its target. */
     @Override public void move(net.minecraft.world.entity.MoverType moverType, net.minecraft.world.phys.Vec3 motion) {
         if (clipDisabled) {
@@ -149,7 +161,7 @@ public final class EntityFollowingItem extends ItemEntity {
     }
 
     @Override public boolean hurt(DamageSource source, float amount) {
-        return !source.is(DamageTypeTags.IS_FIRE) && super.hurt(source, amount);
+        return !source.is(DamageTypeTags.IS_EXPLOSION) && super.hurt(source, amount);
     }
 
     public static void setClientSparkle(Consumer<EntityFollowingItem> effect) {

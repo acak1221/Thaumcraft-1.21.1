@@ -25,7 +25,9 @@ def source_fingerprints(root: Path) -> dict[str, str]:
     mtimes or Git HEAD (work may be dirty).
     """
     files = set()
-    for relative in ("common/src", "fabric/src", "neoforge/src", "src/main/resources", "gradle", "scripts"):
+    for relative in ("common/src", "fabric/src", "neoforge/src",
+                     "compat/emi/src", "compat/jei/src", "compat/jade/src",
+                     "examples/example-addon/src", "src/main/resources", "gradle", "scripts"):
         directory = root / relative
         if directory.is_dir():
             files.update(path for path in directory.rglob("*")

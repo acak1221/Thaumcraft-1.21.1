@@ -298,6 +298,26 @@ def multiplayerAllowPartial = providers.gradleProperty('multiplayerAllowPartial'
 // acceptance processes has to stay small enough to survive the OOM killer.
 def multiplayerHeap = providers.gradleProperty('multiplayerHeap').getOrElse('768M')
 loom.runs {
+ rendererReviewClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft renderer review'
+  runDir 'run-review-renderers'
+  vmArg '-Xmx1536M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.rendererReview=true'
+  programArgs '--width', '1280', '--height', '900'
+ }
+ reviewEmiIdentityClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft EMI identity review'
+  runDir 'run-review-emi-identity'
+  vmArg '-Xmx1536M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.emiIdentityReview=true'
+  programArgs '--width', '1280', '--height', '900'
+ }
  modernAdaptationsClient {
   client()
   source sourceSets.clientTest
@@ -677,7 +697,7 @@ tasks.named('runMultiplayerPeerClient') {
   logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', modernAdaptationsClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', modernAdaptationsClient: 'clientTest', reviewEmiIdentityClient: 'clientTest', rendererReviewClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
 
 tasks.named('runRecipeTransferClient') { dependsOn tasks.named('clientTestClasses') }
 tasks.named('runWandCrucibleClient') { dependsOn tasks.named('clientTestClasses') }
@@ -699,6 +719,28 @@ tasks.named('runModernAdaptationsClient') {
        || !java.nio.file.Files.isRegularFile(path) || java.nio.file.Files.size(path) != (capture.bytes as long)) {
     throw new GradleException('Missing or changed native modern adaptations capture: ' + path)
    }
+  }
+ }
+}
+
+tasks.named('runReviewEmiIdentityClient') {
+ dependsOn tasks.named('clientTestClasses')
+ doFirst { delete file('run-review-emi-identity/emi-identity-review.json') }
+ doLast {
+  def receipt = file('run-review-emi-identity/emi-identity-review.json')
+  if (!receipt.isFile() || new groovy.json.JsonSlurper().parse(receipt, 'UTF-8').status != 'PASS') {
+   throw new GradleException('EMI identity review failed; inspect ' + receipt)
+  }
+ }
+}
+
+tasks.named('runRendererReviewClient') {
+ dependsOn tasks.named('clientTestClasses')
+ doFirst { delete file('run-review-renderers/renderer-review.json') }
+ doLast {
+  def receipt = file('run-review-renderers/renderer-review.json')
+  if (!receipt.isFile() || new groovy.json.JsonSlurper().parse(receipt, 'UTF-8').status != 'PASS') {
+   throw new GradleException('Renderer review failed; inspect ' + receipt)
   }
  }
 }

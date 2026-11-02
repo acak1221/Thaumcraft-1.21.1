@@ -39,7 +39,14 @@ public final class ArcaneVis {
         // modifier, then truncates. Addon gear may discount each aspect differently.
         for (String tag : WandData.PRIMALS) {
             int amount = vis.getOrDefault(tag, 0);
-            if (amount > 0) costs.put(tag, (int) (amount * 100 * WandVisDiscount.modifier(wand, actor, Aspect.getAspect(tag))));
+            if (amount > 0) {
+                // Public programmatic recipes do not pass through the native JSON cost bound.
+                // Keep ordinary FLOAT truncation, but never wrap whole vis into a cheap positive cost.
+                float derived = ((long) amount * 100) * WandVisDiscount.modifier(wand, actor, Aspect.getAspect(tag));
+                if (!Float.isFinite(derived) || derived >= Integer.MAX_VALUE)
+                    throw new IllegalArgumentException("Arcane price exceeds the supported centivis range");
+                costs.put(tag, (int) derived);
+            }
         }
         return Map.copyOf(costs);
     }

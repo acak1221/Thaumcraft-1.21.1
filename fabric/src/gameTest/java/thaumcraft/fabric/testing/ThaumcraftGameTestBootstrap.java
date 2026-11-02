@@ -20,6 +20,7 @@ public final class ThaumcraftGameTestBootstrap implements ModInitializer {
         thaumcraft.common.testing.BiologicalLampRuntimeChecks.registerTestProbes();
         // The test add-on's wand rod, staff core, cap and focus items (the API parts register at test time).
         thaumcraft.common.testing.WandApiRuntimeChecks.registerTestItems();
+        thaumcraft.common.testing.ExampleSparkReviewRuntimeChecks.registerTestFocus();
         // The shared harness observes the loader's own block-break phases. Fabric
         // owns the three PlayerBlockBreakEvents; the shared side never names them.
         thaumcraft.common.testing.NativeBreakPhases.Holder.install(FabricBreakPhases::install);

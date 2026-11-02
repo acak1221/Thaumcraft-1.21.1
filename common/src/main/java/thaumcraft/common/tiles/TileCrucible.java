@@ -30,6 +30,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.aspects.IAspectContainer;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftAlchemy;
 import thaumcraft.common.config.ThaumcraftContent;
@@ -42,7 +43,7 @@ import thaumcraft.common.lib.research.ObjectAspectResolver;
 import thaumcraft.common.lib.utils.RejectedEntitySpawn;
 
 /** Original TileCrucible's physical alchemy loop; native fluid-loader adapters are not implemented here. */
-public final class TileCrucible extends BlockEntity {
+public final class TileCrucible extends BlockEntity implements IAspectContainer {
     public static final int CAPACITY = 1000;
     public static final int MAX_TAGS = 100;
     private static final ResourceLocation BELLOWS = ResourceLocation.fromNamespaceAndPath("thaumcraft", "bellows");
@@ -70,7 +71,18 @@ public final class TileCrucible extends BlockEntity {
     public static void setClientEffects(ClientEffects effects) { clientEffects = effects; }
 
     public TileCrucible(BlockPos pos, BlockState state) { super(ThaumcraftAlchemy.CRUCIBLE_BLOCK_ENTITY.get(), pos, state); }
-    public AspectList getAspects() { return aspects.copy(); }
+    @Override public AspectList getAspects() { return aspects.copy(); }
+    // Original TileCrucible:438-480 exposes the pool to goggles through this
+    // interface, while retaining inert insertion/extraction/query quirks. The
+    // physical alchemy loop alone owns mutations; this is not a tube endpoint.
+    @Override public void setAspects(AspectList aspects) {}
+    @Override public int addToContainer(Aspect aspect, int amount) { return 0; }
+    @Override public boolean takeFromContainer(Aspect aspect, int amount) { return false; }
+    @Override public boolean takeFromContainer(AspectList aspects) { return false; }
+    @Override public boolean doesContainerContainAmount(Aspect aspect, int amount) { return false; }
+    @Override public boolean doesContainerContain(AspectList aspects) { return false; }
+    @Override public int containerContains(Aspect aspect) { return 0; }
+    @Override public boolean doesContainerAccept(Aspect aspect) { return true; }
     public int getWaterAmount() { return water; }
     public short getHeat() { return heat; }
     public int tagAmount() { return aspects.visSize(); }

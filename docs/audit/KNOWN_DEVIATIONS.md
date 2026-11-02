@@ -366,3 +366,19 @@ The public transfer-target API is independent of storage mods; no addon is bundl
 Focused Fabric native tests and a real EN/RU client with EMI cover the supplied finite fixture;
 this is not a fresh full survival/multiplayer or NeoForge acceptance. Exact receipts and limitations:
 [recipe transfer report](../analysis/2026-11-02-recipe-transfer.md).
+
+## 15. Crucible HUD and node siphon presentation — 2026-11-02
+
+The missing original IAspectContainer surface on native TileCrucible is restored with its
+original inert mutation/query methods; native physical alchemy and the existing copied aspect
+snapshot remain unchanged. Worn IGoggles controls the popup; undiscovered aspects stay unknown.
+
+A narrow ItemInHandRenderer hook ignores only changing vis for otherwise identical native
+wands. It preserves ordinary equip transitions for material/focus/name/other component changes.
+Actual use sessions and node payment are unchanged. Original node drainer/color presentation
+uses a visual-only S2C with short-lived client state and the retained wispy FloatyLine renderer;
+it is independent of goggles and cannot refund/retry gameplay payment on delivery failure.
+
+Focused native/client evidence and exact artifact inputs are recorded in the
+[wand/crucible report](../analysis/2026-11-02-wand-crucible.md). This is Fabric presentation
+acceptance with a finite supplied fresh-world fixture, not new survival/multiplayer/NeoForge coverage.

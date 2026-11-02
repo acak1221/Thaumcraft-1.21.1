@@ -12,7 +12,8 @@
       "thaumcraft.fabric.clienttest.BookClientSmoke",
       "thaumcraft.fabric.clienttest.MultiplayerClientProbe",
       "thaumcraft.fabric.clienttest.MultiplayerPeerProbe",
-      "thaumcraft.fabric.testing.RecipeTransferClientProbe"
+      "thaumcraft.fabric.testing.RecipeTransferClientProbe",
+      "thaumcraft.fabric.testing.WandCrucibleClientProbe"
     ]
   },
   "depends": {

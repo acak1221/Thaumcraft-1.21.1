@@ -31,6 +31,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.aspects.IAspectContainer;
 import thaumcraft.common.config.ThaumcraftAlchemy;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.crafting.CrucibleCrafting;
@@ -113,6 +114,7 @@ public final class CrucibleRuntimeChecks {
             test.assertTrue(tile.getAspects().getAmount(Aspect.ENERGY) == 4 && tile.getAspects().getAmount(Aspect.FIRE) == 4
                     && tile.getAspects().getAmount(Aspect.LIGHT) == 3 && tile.getWaterAmount() == 1000,
                     "original coal potentia2/ignis2 and torch lux1 accumulate through real collisions without dissolving water cost");
+            assertOriginalAspectContainer(test, tile, level);
             ItemEntity unknown = drop(level, pos, Items.BARRIER, 2, player);
             var beforeUnknown = tile.saveWithoutMetadata(level.registryAccess());
             collide(level, pos, unknown);
@@ -189,6 +191,28 @@ public final class CrucibleRuntimeChecks {
             KnowledgeAccess.get(player).copyFrom(knowledge);
         }
         test.succeed();
+    }
+
+    private static void assertOriginalAspectContainer(GameTestHelper test, TileCrucible tile, ServerLevel level) {
+        // The goggles' normal crosshair target resolver consumes precisely this
+        // interface. Test the real paid pool rather than a synthetic tile stub.
+        IAspectContainer container = tile;
+        var before = tile.saveWithoutMetadata(level.registryAccess());
+        test.assertTrue(same(container.getAspects(), tile.getAspects()) && container.getAspects().visSize() == 11,
+                "the native crucible is an IAspectContainer exposing the actual dissolved pool to goggles");
+        container.getAspects().add(Aspect.ENERGY, 90);
+        container.setAspects(new AspectList().add(Aspect.AIR, 90));
+        container.setAspects(null);
+        test.assertTrue(container.addToContainer(Aspect.AIR, 1) == 0 && container.addToContainer(null, -1) == 0
+                        && !container.takeFromContainer(Aspect.ENERGY, 1) && !container.takeFromContainer((AspectList) null)
+                        && !container.takeFromContainer(new AspectList().add(Aspect.ENERGY, 1))
+                        && !container.doesContainerContainAmount(Aspect.ENERGY, 1)
+                        && !container.doesContainerContain((AspectList) null) && !container.doesContainerContain(container.getAspects())
+                        && container.containerContains(Aspect.ENERGY) == 0 && container.containerContains(null) == 0
+                        && container.doesContainerAccept(Aspect.AIR) && container.doesContainerAccept(null),
+                "the original crucible's inert insertion/extraction/query quirks are preserved, including null inputs");
+        test.assertTrue(before.equals(tile.saveWithoutMetadata(level.registryAccess())),
+                "goggles API reads and original no-op calls never debit, inject or replace physical alchemy contents");
     }
 
     private static boolean same(AspectList left, AspectList right) { return left.aspects.equals(right.aspects); }

@@ -177,6 +177,7 @@ public final class Thaumcraft {
         thaumcraft.common.lib.network.ShovelOrientationNetworking.init();
         FocalManipulatorNetworking.init();
         thaumcraft.common.lib.network.RecipeTransferNetworking.init();
+        thaumcraft.common.lib.network.NodeDrainFxNetworking.initServer();
         InfusionFxNetworking.initServer();
         ShockFxNetworking.initServer();
         ExcavationFxNetworking.initServer();

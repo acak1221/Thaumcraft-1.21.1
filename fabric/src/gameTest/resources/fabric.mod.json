@@ -14,7 +14,8 @@
     ],
     "fabric-gametest": [
       "thaumcraft.fabric.testing.ThaumcraftGameTests",
-      "thaumcraft.fabric.testing.RecipeTransferGameTests"
+      "thaumcraft.fabric.testing.RecipeTransferGameTests",
+      "thaumcraft.fabric.testing.WandVisualGameTests"
     ]
   },
   "depends": {

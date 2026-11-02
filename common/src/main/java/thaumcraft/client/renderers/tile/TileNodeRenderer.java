@@ -32,7 +32,7 @@ import thaumcraft.api.nodes.NodeType;
  * Full node sight is head IRevealer, otherwise main-hand thaumometer with the
  * original UtilsFX:629-654 visibility equation. The late world pass draws full
  * nodes even when opaque terrain culls their ordinary block-entity section.
- * Drain beams and special-node gameplay remain outside this renderer's scope.
+ * The original node-to-wand siphon is drawn independently of node sight.
  */
 public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/nodes.png");
@@ -55,6 +55,7 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
     @Override public void render(TileNode node, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) return;
+        thaumcraft.client.fx.NodeDrainClientEffects.render(node, partialTick, pose, buffers);
         // Original renderNode:160-173 has NO explicit faint-branch range check.
         // Normal native BER distance/frustum culling still applies to this core.
         if (view(node, minecraft).revealed() && node.getAspects().size() > 0) return;

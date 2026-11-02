@@ -1,0 +1,1139 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-11-02",
+  "scope": "base Thaumcraft crucible goggles HUD and first-person aura-node wand charging; Fabric1.21.1 Java21",
+  "artifact": {
+    "path": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.15.jar",
+    "bytes": 15822242,
+    "sha256": "14679c4ebbe340d60ecfb4ee2e65d31fb45238f209486a7a1c388c3409b818d4"
+  },
+  "game_tests": [
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "wandvisualgametests.wandchargepreservesrenderidentity",
+      "time": "0.005",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "thaumcraftgametests.crucibledissolvesandcraftswithoriginalcosts",
+      "time": "0.414",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "thaumcraftgametests.naturalnodesdrainandregenerate",
+      "time": "0.116",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "thaumcraftgametests.nodedrainpreservestc4rounding",
+      "time": "0.011",
+      "passed": true
+    }
+  ],
+  "junit": [
+    {
+      "name": "thaumcraft.client.fx.NodeDrainColorTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "thaumcraft.common.lib.network.NodeDrainFxPayloadTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "client": {
+    "status": "SCRIPT_PASSED",
+    "run_id": "wand-crucible-2026-11-02T06-12-29.808655330Z",
+    "stage": 16,
+    "fixture": "fresh1.21.1 flat world; lava-heated water1000 and actual one-coal dissolution; finite natural aer30 node and empty wood/iron wand; supplied, not survival acquisition",
+    "hud_checks": [
+      {
+        "goggles": true,
+        "locale": "en_us",
+        "entries": [
+          {
+            "known": false,
+            "image": "thaumcraft:textures/aspects/_unknown.png",
+            "amount": 2,
+            "tag": "potentia"
+          },
+          {
+            "known": true,
+            "image": "thaumcraft:textures/aspects/ignis.png",
+            "amount": 2,
+            "tag": "ignis"
+          }
+        ]
+      },
+      {
+        "goggles": false,
+        "aspect_popup_absent": true,
+        "target": "0, 100, 1"
+      },
+      {
+        "goggles": true,
+        "locale": "ru_ru",
+        "entries": [
+          {
+            "known": false,
+            "image": "thaumcraft:textures/aspects/_unknown.png",
+            "amount": 2,
+            "tag": "potentia"
+          },
+          {
+            "known": true,
+            "image": "thaumcraft:textures/aspects/ignis.png",
+            "amount": 2,
+            "tag": "ignis"
+          }
+        ]
+      },
+      {
+        "goggles": true,
+        "locale": "ru_ru",
+        "entries": [
+          {
+            "known": true,
+            "image": "thaumcraft:textures/aspects/potentia.png",
+            "amount": 2,
+            "tag": "potentia"
+          },
+          {
+            "known": true,
+            "image": "thaumcraft:textures/aspects/ignis.png",
+            "amount": 2,
+            "tag": "ignis"
+          }
+        ]
+      }
+    ],
+    "charge_samples": [
+      {
+        "charge_tick": 1,
+        "use_ticks": 1,
+        "aer_centivis": 0,
+        "fx_active": 0,
+        "using_item": true,
+        "fx_rendered": 0,
+        "fx_received": 0,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 2,
+        "use_ticks": 2,
+        "aer_centivis": 0,
+        "fx_active": 0,
+        "using_item": true,
+        "fx_rendered": 0,
+        "fx_received": 0,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 3,
+        "use_ticks": 3,
+        "aer_centivis": 0,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 0,
+        "fx_received": 1,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 4,
+        "use_ticks": 4,
+        "aer_centivis": 100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 1,
+        "fx_received": 1,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 5,
+        "use_ticks": 5,
+        "aer_centivis": 100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 3,
+        "fx_received": 1,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 6,
+        "use_ticks": 6,
+        "aer_centivis": 100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 6,
+        "fx_received": 1,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 7,
+        "use_ticks": 7,
+        "aer_centivis": 100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 8,
+        "fx_received": 1,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 8,
+        "use_ticks": 8,
+        "aer_centivis": 100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 11,
+        "fx_received": 2,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 9,
+        "use_ticks": 9,
+        "aer_centivis": 200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 12,
+        "fx_received": 2,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 10,
+        "use_ticks": 10,
+        "aer_centivis": 200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 14,
+        "fx_received": 2,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 11,
+        "use_ticks": 11,
+        "aer_centivis": 200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 17,
+        "fx_received": 2,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 12,
+        "use_ticks": 12,
+        "aer_centivis": 200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 19,
+        "fx_received": 2,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 13,
+        "use_ticks": 13,
+        "aer_centivis": 200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 21,
+        "fx_received": 3,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 14,
+        "use_ticks": 14,
+        "aer_centivis": 300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 24,
+        "fx_received": 3,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 15,
+        "use_ticks": 15,
+        "aer_centivis": 300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 27,
+        "fx_received": 3,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 16,
+        "use_ticks": 16,
+        "aer_centivis": 300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 29,
+        "fx_received": 3,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 17,
+        "use_ticks": 17,
+        "aer_centivis": 300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 31,
+        "fx_received": 3,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 18,
+        "use_ticks": 18,
+        "aer_centivis": 300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 33,
+        "fx_received": 4,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 19,
+        "use_ticks": 19,
+        "aer_centivis": 400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 36,
+        "fx_received": 4,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 20,
+        "use_ticks": 20,
+        "aer_centivis": 400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 38,
+        "fx_received": 4,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 21,
+        "use_ticks": 21,
+        "aer_centivis": 400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 41,
+        "fx_received": 4,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 22,
+        "use_ticks": 22,
+        "aer_centivis": 400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 43,
+        "fx_received": 4,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 23,
+        "use_ticks": 23,
+        "aer_centivis": 400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 46,
+        "fx_received": 5,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 24,
+        "use_ticks": 24,
+        "aer_centivis": 500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 48,
+        "fx_received": 5,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 25,
+        "use_ticks": 25,
+        "aer_centivis": 500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 50,
+        "fx_received": 5,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 26,
+        "use_ticks": 26,
+        "aer_centivis": 500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 53,
+        "fx_received": 5,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 27,
+        "use_ticks": 27,
+        "aer_centivis": 500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 56,
+        "fx_received": 5,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 28,
+        "use_ticks": 28,
+        "aer_centivis": 500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 58,
+        "fx_received": 6,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 29,
+        "use_ticks": 29,
+        "aer_centivis": 600,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 61,
+        "fx_received": 6,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 30,
+        "use_ticks": 30,
+        "aer_centivis": 600,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 63,
+        "fx_received": 6,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 31,
+        "use_ticks": 31,
+        "aer_centivis": 600,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 66,
+        "fx_received": 6,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 32,
+        "use_ticks": 32,
+        "aer_centivis": 600,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 68,
+        "fx_received": 6,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 33,
+        "use_ticks": 33,
+        "aer_centivis": 600,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 70,
+        "fx_received": 7,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 34,
+        "use_ticks": 34,
+        "aer_centivis": 700,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 73,
+        "fx_received": 7,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 35,
+        "use_ticks": 35,
+        "aer_centivis": 700,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 74,
+        "fx_received": 7,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 36,
+        "use_ticks": 36,
+        "aer_centivis": 700,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 76,
+        "fx_received": 7,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 37,
+        "use_ticks": 37,
+        "aer_centivis": 700,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 78,
+        "fx_received": 7,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 38,
+        "use_ticks": 38,
+        "aer_centivis": 700,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 81,
+        "fx_received": 8,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 39,
+        "use_ticks": 39,
+        "aer_centivis": 800,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 83,
+        "fx_received": 8,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 40,
+        "use_ticks": 40,
+        "aer_centivis": 800,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 85,
+        "fx_received": 8,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 41,
+        "use_ticks": 41,
+        "aer_centivis": 800,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 88,
+        "fx_received": 8,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 42,
+        "use_ticks": 42,
+        "aer_centivis": 800,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 90,
+        "fx_received": 8,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 43,
+        "use_ticks": 43,
+        "aer_centivis": 800,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 93,
+        "fx_received": 9,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 44,
+        "use_ticks": 44,
+        "aer_centivis": 900,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 96,
+        "fx_received": 9,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 45,
+        "use_ticks": 45,
+        "aer_centivis": 900,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 99,
+        "fx_received": 9,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 46,
+        "use_ticks": 46,
+        "aer_centivis": 900,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 101,
+        "fx_received": 9,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 47,
+        "use_ticks": 47,
+        "aer_centivis": 900,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 104,
+        "fx_received": 9,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 48,
+        "use_ticks": 48,
+        "aer_centivis": 900,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 106,
+        "fx_received": 10,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 49,
+        "use_ticks": 49,
+        "aer_centivis": 1000,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 109,
+        "fx_received": 10,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 50,
+        "use_ticks": 50,
+        "aer_centivis": 1000,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 111,
+        "fx_received": 10,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 51,
+        "use_ticks": 51,
+        "aer_centivis": 1000,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 113,
+        "fx_received": 10,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 52,
+        "use_ticks": 52,
+        "aer_centivis": 1000,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 116,
+        "fx_received": 10,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 53,
+        "use_ticks": 53,
+        "aer_centivis": 1000,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 118,
+        "fx_received": 11,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 54,
+        "use_ticks": 54,
+        "aer_centivis": 1100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 120,
+        "fx_received": 11,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 55,
+        "use_ticks": 55,
+        "aer_centivis": 1100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 122,
+        "fx_received": 11,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 56,
+        "use_ticks": 56,
+        "aer_centivis": 1100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 124,
+        "fx_received": 11,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 57,
+        "use_ticks": 57,
+        "aer_centivis": 1100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 126,
+        "fx_received": 11,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 58,
+        "use_ticks": 58,
+        "aer_centivis": 1100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 129,
+        "fx_received": 12,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 59,
+        "use_ticks": 59,
+        "aer_centivis": 1100,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 131,
+        "fx_received": 12,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 60,
+        "use_ticks": 60,
+        "aer_centivis": 1200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 132,
+        "fx_received": 12,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 61,
+        "use_ticks": 61,
+        "aer_centivis": 1200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 134,
+        "fx_received": 12,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 62,
+        "use_ticks": 62,
+        "aer_centivis": 1200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 136,
+        "fx_received": 12,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 63,
+        "use_ticks": 63,
+        "aer_centivis": 1200,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 139,
+        "fx_received": 13,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 64,
+        "use_ticks": 64,
+        "aer_centivis": 1300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 141,
+        "fx_received": 13,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 65,
+        "use_ticks": 65,
+        "aer_centivis": 1300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 144,
+        "fx_received": 13,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 66,
+        "use_ticks": 66,
+        "aer_centivis": 1300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 147,
+        "fx_received": 13,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 67,
+        "use_ticks": 67,
+        "aer_centivis": 1300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 150,
+        "fx_received": 13,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 68,
+        "use_ticks": 68,
+        "aer_centivis": 1300,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 152,
+        "fx_received": 14,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 69,
+        "use_ticks": 69,
+        "aer_centivis": 1400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 155,
+        "fx_received": 14,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 70,
+        "use_ticks": 70,
+        "aer_centivis": 1400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 157,
+        "fx_received": 14,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 71,
+        "use_ticks": 71,
+        "aer_centivis": 1400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 160,
+        "fx_received": 14,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 72,
+        "use_ticks": 72,
+        "aer_centivis": 1400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 163,
+        "fx_received": 14,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 73,
+        "use_ticks": 73,
+        "aer_centivis": 1400,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 165,
+        "fx_received": 15,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 74,
+        "use_ticks": 74,
+        "aer_centivis": 1500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 168,
+        "fx_received": 15,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 75,
+        "use_ticks": 75,
+        "aer_centivis": 1500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 171,
+        "fx_received": 15,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 76,
+        "use_ticks": 76,
+        "aer_centivis": 1500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 173,
+        "fx_received": 15,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 77,
+        "use_ticks": 77,
+        "aer_centivis": 1500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 176,
+        "fx_received": 15,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 78,
+        "use_ticks": 78,
+        "aer_centivis": 1500,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 178,
+        "fx_received": 16,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 79,
+        "use_ticks": 79,
+        "aer_centivis": 1600,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 181,
+        "fx_received": 16,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      },
+      {
+        "charge_tick": 80,
+        "use_ticks": 80,
+        "aer_centivis": 1600,
+        "fx_active": 1,
+        "using_item": true,
+        "fx_rendered": 183,
+        "fx_received": 16,
+        "main_hand_height": 1.0,
+        "legacy_equipped_progress": 1.0
+      }
+    ],
+    "server_verification": {
+      "head_empty": true,
+      "wand_aer_centivis": 1600,
+      "node_aer_remaining": 14,
+      "node_aer_initial": 30,
+      "server_use_packet_session": true
+    },
+    "captures": [
+      {
+        "screen": "native first-person world",
+        "name": "en-goggles-known-ignis-unknown-potentia",
+        "language": "en_us",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-en-goggles-known-ignis-unknown-potentia.png",
+        "bytes": 211648,
+        "sha256": "2c2cc0a229f0793391e09c191119085fc05450e51ecffcab170fcaa0df7cb444",
+        "committed_frame": "docs/images/wand-crucible/en-goggles-known-ignis-unknown-potentia.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "en-unaided-no-aspect-popup",
+        "language": "en_us",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-en-unaided-no-aspect-popup.png",
+        "bytes": 188917,
+        "sha256": "d6e896e44c3c5267dec97915b6a8483c2ad6af05279010ec430337fb45faa543",
+        "committed_frame": "docs/images/wand-crucible/en-unaided-no-aspect-popup.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "ru-goggles-unknown-after-resource-reload",
+        "language": "ru_ru",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-ru-goggles-unknown-after-resource-reload.png",
+        "bytes": 192747,
+        "sha256": "0eccffe5316cfc8dcc02482fac20df3326dc972d219e41577c10a79e324d2c88",
+        "committed_frame": "docs/images/wand-crucible/ru-goggles-unknown-after-resource-reload.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "ru-goggles-both-aspects-known",
+        "language": "ru_ru",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-ru-goggles-both-aspects-known.png",
+        "bytes": 179747,
+        "sha256": "f84bcd015f9aa7f3f5dabb7301bd302d2f2274010131436b5ac5db36d81657ae",
+        "committed_frame": "docs/images/wand-crucible/ru-goggles-both-aspects-known.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "first-person-wand-before-charge-no-goggles",
+        "language": "ru_ru",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-first-person-wand-before-charge-no-goggles.png",
+        "bytes": 178690,
+        "sha256": "282e8f0a7c66249b68e40a06b150eab675135fbcbec6ec79a87850f723732e34",
+        "committed_frame": "docs/images/wand-crucible/first-person-wand-before-charge-no-goggles.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "first-person-active-charge-15",
+        "language": "ru_ru",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-first-person-active-charge-15.png",
+        "bytes": 224584,
+        "sha256": "26a8cc107f9f5300ae8a3c4d9ca69b8598def2641e066042e8f2f78ab9f89d02",
+        "committed_frame": "docs/images/wand-crucible/first-person-active-charge-15.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "first-person-active-charge-35",
+        "language": "ru_ru",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-first-person-active-charge-35.png",
+        "bytes": 201782,
+        "sha256": "e7cb7a80d0dd74e2199140fd496e95af50bf1acf7459c647e5d7269268210c7a",
+        "committed_frame": "docs/images/wand-crucible/first-person-active-charge-35.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "first-person-active-charge-60",
+        "language": "ru_ru",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-first-person-active-charge-60.png",
+        "bytes": 196754,
+        "sha256": "3f1babc8999f36350d0d5bc8fe9ec13cc78c5373a96909e1c9dd859724f14a1c",
+        "committed_frame": "docs/images/wand-crucible/first-person-active-charge-60.png"
+      },
+      {
+        "screen": "native first-person world",
+        "name": "first-person-released-charge-effect-stopped",
+        "language": "ru_ru",
+        "path": "fabric/run-wand-crucible-client/screenshots/wand-crucible-2026-11-02T06-12-29.808655330Z-first-person-released-charge-effect-stopped.png",
+        "bytes": 154768,
+        "sha256": "3cf8b0014fda640f17db4cf67abc73daf4b732088c30e7314cc5da70d6390399",
+        "committed_frame": "docs/images/wand-crucible/first-person-released-charge-effect-stopped.png"
+      }
+    ],
+    "particle_diagnostics": {
+      "received": 16,
+      "rendered": 183,
+      "active": 0,
+      "lastNode": {
+        "x": 4,
+        "y": 101,
+        "z": 1
+      }
+    }
+  },
+  "production_server": {
+    "ready": true,
+    "tick_queries": [
+      6,
+      56
+    ],
+    "normal_stop": true,
+    "exit_code": 0,
+    "inputs": [
+      {
+        "file": "Thaumcraft-fabric-0.1.0-alpha.15.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.15.jar",
+        "sha256": "14679c4ebbe340d60ecfb4ee2e65d31fb45238f209486a7a1c388c3409b818d4",
+        "bytes": 15822242
+      },
+      {
+        "file": "fabric-api-0.116.17+1.21.1.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-api/0.116.17+1.21.1/810b2b0195371a012906241d8b85a32a1d6de53c/fabric-api-0.116.17+1.21.1.jar",
+        "sha256": "79ac44b40780acbd884b34c50be1e39af682847e5f5cb3b1fddeeaa768dce800",
+        "bytes": 2452735
+      },
+      {
+        "file": "architectury-fabric-13.0.11.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/dev.architectury/architectury-fabric/13.0.11/ae6c9231a07d8abac28847693d237166790f72a6/architectury-fabric-13.0.11.jar",
+        "sha256": "659016af3d85f3cf68bafe0e28bc80036779ff3d346f8c632d1e738075745678",
+        "bytes": 609113
+      }
+    ],
+    "optional_debug_messages": [
+      "[06:12:15] [main/INFO]: Fernflower could not be loaded, exported classes will not be decompiled. NoClassDefFoundError: org/jetbrains/java/decompiler/main/extern/IResultSaver"
+    ],
+    "mapping_errors": []
+  },
+  "limitations": [
+    "Finite supplied fresh1.21.1 fixture, not survival acquisition",
+    "No new multiplayer or NeoForge acceptance",
+    "Recipe transfer alpha14 verification retained independently in recipe-transfer.json"
+  ]
+}

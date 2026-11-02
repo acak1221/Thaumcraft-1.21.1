@@ -465,19 +465,24 @@ public final class TileNode extends BlockEntity implements INode {
             if (aspects.getAmount(aspect) > (preserve ? 1 : 0)
                     && ItemWandCasting.getVis(stack, aspect.getTag()) < ItemWandCasting.getMaxVis(stack)) eligible.add(aspect);
         }
-        if (eligible.isEmpty()) return;
+        if (eligible.isEmpty()) { thaumcraft.common.lib.network.NodeDrainFxNetworking.stop(player, worldPosition); return; }
         Aspect aspect = eligible.get(level.random.nextInt(eligible.size()));
         int tap = 1;
         if (knowledge.isResearchComplete("NODETAPPER1")) tap++;
         if (knowledge.isResearchComplete("NODETAPPER2")) tap++;
         int available = Math.min(aspects.getAmount(aspect), tap);
         if (preserve && available == aspects.getAmount(aspect)) available--;
-        if (available <= 0) return;
+        if (available <= 0) { thaumcraft.common.lib.network.NodeDrainFxNetworking.stop(player, worldPosition); return; }
         int left = ItemWandCasting.addRealVis(stack, aspect.getTag(), available * 100, true);
         // Original addVis returns leftover / 100, so a partially filled final
         // unit consumes one node vis unit; preserve that TC4 rounding rule.
         int transferred = available - left / 100;
-        if (transferred > 0) takeVis(aspect.getTag(), transferred);
+        if (transferred > 0) {
+            takeVis(aspect.getTag(), transferred);
+            // The visual follows committed payment; a networking failure cannot refund or retry it.
+            try { thaumcraft.common.lib.network.NodeDrainFxNetworking.send(player, worldPosition, aspect.getColor()); }
+            catch (RuntimeException failure) { thaumcraft.common.Thaumcraft.LOG.warn("Node drain committed before its visual notification failed at {}", worldPosition, failure); }
+        } else thaumcraft.common.lib.network.NodeDrainFxNetworking.stop(player, worldPosition);
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TileNode node) {

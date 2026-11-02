@@ -44,6 +44,8 @@ public final class ClientSetup {
         if (initialized) return;
         initialized = true;
         thaumcraft.common.lib.network.RecipeTransferNetworking.initClient(thaumcraft.client.gui.RecipeTransferRequestSender::send);
+        thaumcraft.common.lib.network.NodeDrainFxNetworking.initClient(thaumcraft.client.fx.NodeDrainClientEffects::accept);
+        thaumcraft.client.fx.NodeDrainClientEffects.init();
         dev.architectury.event.events.client.ClientTickEvent.CLIENT_PRE.register(client ->
                 thaumcraft.client.fx.ParticleEngine.tick(client.level));
         dev.architectury.event.events.client.ClientTickEvent.CLIENT_POST.register(thaumcraft.client.lib.UtilsFX::tick);

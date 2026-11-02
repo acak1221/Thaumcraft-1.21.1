@@ -49,7 +49,10 @@ public final class LegacyBlockQuads {
         }
         out.addAll(base.getQuads(state,null,random));
         out.addAll(emissive);
-        if(state.getBlock() instanceof BlockCustomOre && OreRenderRules.stonePass()) {
+        // The deep variant has an opaque host, so an inset stone pass is neither needed
+        // nor appropriate. Original perforated stone textures keep their historical pass.
+        if(state.getBlock() instanceof BlockCustomOre
+                && !state.is(thaumcraft.common.config.ThaumcraftOres.DEEPSLATE_INFUSED_ORES) && OreRenderRules.stonePass()) {
             List<BakedQuad> stone=new ArrayList<>();
             var sprite=sprite("legacy_stone");
             PositionBlockModels.box(stone,new float[]{OreRenderRules.STONE_MIN*16,OreRenderRules.STONE_MIN*16,OreRenderRules.STONE_MIN*16,

@@ -25,7 +25,8 @@ class FoundationAssetsTest(unittest.TestCase):
         checks = converter.validate_resources()
         self.assertEqual(0, checks["missing_references"])
         self.assertGreater(checks["checked_model_texture_refs"], 36)
-        self.assertEqual(checks["checked_model_texture_refs"], checks["checked_atlas_sprite_refs"])
+        self.assertEqual(checks["checked_model_texture_refs"],
+                         checks["checked_atlas_sprite_refs"] + checks["checked_external_model_texture_refs"])
         self.assertEqual(111, checks["checked_sound_refs"])
 
     def test_reused_asset_bytes_match_source_and_manifest(self) -> None:
@@ -816,6 +817,23 @@ class FoundationAssetsTest(unittest.TestCase):
                 block = json.loads((assets / f"models/block/{name}.json").read_text())
                 self.assertEqual("minecraft:builtin/entity", item["parent"])
                 self.assertEqual([], block["elements"], "six-piece renderer must not be replaced by the old crossed-plane block marker")
+
+    def test_native_deepslate_texture_references_do_not_allow_unchecked_external_typos(self) -> None:
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            assets = Path(temporary)
+            (assets / "models/block").mkdir(parents=True)
+            (assets / "blockstates").mkdir()
+            (assets / "sounds.json").write_text("{}")
+            model = assets / "models/block/host.json"
+            with patch.object(converter, "ASSETS", assets), patch.object(converter, "block_atlas_sprites", return_value={}):
+                for texture in ("minecraft:block/deepslate", "minecraft:block/deepslate_top"):
+                    model.write_text(json.dumps({"textures": {"particle": texture}}))
+                    checks = converter.validate_resources(include_composed=False)
+                    self.assertEqual(1, checks["checked_external_model_texture_refs"])
+                    self.assertEqual(0, checks["missing_references"])
+                model.write_text(json.dumps({"textures": {"particle": "minecraft:block/deepslate_typo"}}))
+                with self.assertRaisesRegex(ValueError, "unexpected namespace minecraft:block/deepslate_typo"):
+                    converter.validate_resources(include_composed=False)
 
     def _validate_blockstate_fixture(self, blockstates: dict[str, dict], models: tuple[str, ...] = ("known", "weighted")) -> dict:
         with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:

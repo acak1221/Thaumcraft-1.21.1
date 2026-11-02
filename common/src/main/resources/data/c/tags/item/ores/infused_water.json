@@ -1,1 +1,7 @@
-{"replace": false, "values": ["thaumcraft:water_infused_stone"]}
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:water_infused_stone",
+    "thaumcraft:deepslate_water_infused_stone"
+  ]
+}

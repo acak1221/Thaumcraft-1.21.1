@@ -1,0 +1,481 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-11-02",
+  "scope": "six owner-requested deepslate infused ores in baseThaumcraft; Fabric1.21.1 Java21",
+  "artifact": {
+    "path": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.16.jar",
+    "bytes": 15835791,
+    "sha256": "cd2a501b614eb1be396e72592edc2d75918986456bce8a1416297567b7754cee"
+  },
+  "native_tests": [
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "thaumcraftgametests.infusedoresharvestandsmelt",
+      "time": "0.464",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "thaumcraftgametests.naturaloresfeedthaumometerrecipe",
+      "time": "2.626",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "deepslateoregametests.deeporeskeepshardlootandharvest",
+      "time": "0.034",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "deepslateoregametests.deeporesgeneratebelowzero",
+      "time": "0.125",
+      "passed": true
+    }
+  ],
+  "natural_ore_sample": {
+    "dimension": "thaumcraft_gametest:natural",
+    "chunks": "x96..99 z96..99",
+    "height": "-64..-1",
+    "counts": {
+      "aqua": 51,
+      "terra": 63,
+      "ordo": 55,
+      "ignis": 29,
+      "aer": 120,
+      "perditio": 64
+    },
+    "total": 382
+  },
+  "junit": [
+    {
+      "name": "thaumcraft.aspects.ObjectAspectCatalogTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "thaumcraft.assets.RegisteredAssetCoverageTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "thaumcraft.world.InfusedOreRegionSafetyTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "python_asset_tests": {
+    "tests": 71,
+    "failures": 0,
+    "errors": 0
+  },
+  "assets": {
+    "atlas_mipmap_level_guard": 4,
+    "atlas_sprites_available": 518,
+    "checked_atlas_sprite_refs": 3997,
+    "checked_composed_files": 290,
+    "checked_composed_sites": 49,
+    "checked_composed_sprites": 23,
+    "checked_external_model_texture_refs": 3,
+    "checked_literal_client_files": 139,
+    "checked_local_model_refs": 3048,
+    "checked_model_texture_refs": 4000,
+    "checked_sound_event_ids": 66,
+    "checked_sound_event_refs": 0,
+    "checked_sound_refs": 111,
+    "missing_references": 0
+  },
+  "client": {
+    "status": "SCRIPT_PASSED",
+    "run_id": "deepslate-ore-2026-11-02T09-44-39.461421287Z",
+    "stage": 17,
+    "fixture": "fresh flat1.21.1 native world; supplied six deepslate and six ordinary infused ore blocks/items; no survival acquisition claim",
+    "gallery": "ordinary y102, deepslate y100, aspect order aer/ignis/aqua/terra/ordo/perditio at x-5/-3/-1/1/3/5,z0; vanilla stone/deepslate x8",
+    "checks": [
+      {
+        "native_model_and_tint_checks": [
+          {
+            "aspect": "aer",
+            "block": "thaumcraft:deepslate_air_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -130,
+            "block_tint": 16777086,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "ignis",
+            "block": "thaumcraft:deepslate_fire_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -50175,
+            "block_tint": 16727041,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "aqua",
+            "block": "thaumcraft:deepslate_water_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -16740097,
+            "block_tint": 37119,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "terra",
+            "block": "thaumcraft:deepslate_earth_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -16736256,
+            "block_tint": 40960,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "ordo",
+            "block": "thaumcraft:deepslate_order_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -1127169,
+            "block_tint": 15650047,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "perditio",
+            "block": "thaumcraft:deepslate_entropy_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -11184777,
+            "block_tint": 5592439,
+            "animation_unique_frames": 16
+          }
+        ],
+        "locale": "en_us"
+      },
+      {
+        "sky_light": 0,
+        "enclosed_dark_gallery": true
+      },
+      {
+        "native_inventory_names": {
+          "aer": "Deepslate Air Infused Stone",
+          "ignis": "Deepslate Fire Infused Stone",
+          "aqua": "Deepslate Water Infused Stone",
+          "terra": "Deepslate Earth Infused Stone",
+          "ordo": "Deepslate Order Infused Stone",
+          "perditio": "Deepslate Entropy Infused Stone"
+        },
+        "locale": "en_us"
+      },
+      {
+        "native_model_and_tint_checks": [
+          {
+            "aspect": "aer",
+            "block": "thaumcraft:deepslate_air_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -130,
+            "block_tint": 16777086,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "ignis",
+            "block": "thaumcraft:deepslate_fire_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -50175,
+            "block_tint": 16727041,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "aqua",
+            "block": "thaumcraft:deepslate_water_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -16740097,
+            "block_tint": 37119,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "terra",
+            "block": "thaumcraft:deepslate_earth_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -16736256,
+            "block_tint": 40960,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "ordo",
+            "block": "thaumcraft:deepslate_order_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -1127169,
+            "block_tint": 15650047,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "perditio",
+            "block": "thaumcraft:deepslate_entropy_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -11184777,
+            "block_tint": 5592439,
+            "animation_unique_frames": 16
+          }
+        ],
+        "locale": "ru_ru"
+      },
+      {
+        "native_inventory_names": {
+          "aer": "Глубинная грозовая руда",
+          "ignis": "Глубинная огненная руда",
+          "aqua": "Глубинная ледяная руда",
+          "terra": "Глубинная руда земляного кристалла",
+          "ordo": "Глубинная руда кристалла порядка",
+          "perditio": "Глубинная энтропийная руда"
+        },
+        "locale": "ru_ru"
+      },
+      {
+        "native_model_and_tint_checks": [
+          {
+            "aspect": "aer",
+            "block": "thaumcraft:deepslate_air_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -130,
+            "block_tint": 16777086,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "ignis",
+            "block": "thaumcraft:deepslate_fire_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -50175,
+            "block_tint": 16727041,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "aqua",
+            "block": "thaumcraft:deepslate_water_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -16740097,
+            "block_tint": 37119,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "terra",
+            "block": "thaumcraft:deepslate_earth_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -16736256,
+            "block_tint": 40960,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "ordo",
+            "block": "thaumcraft:deepslate_order_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -1127169,
+            "block_tint": 15650047,
+            "animation_unique_frames": 16
+          },
+          {
+            "aspect": "perditio",
+            "block": "thaumcraft:deepslate_entropy_infused_stone",
+            "textures": [
+              "minecraft:block/deepslate_top",
+              "thaumcraft:blocks/infusedore",
+              "minecraft:block/deepslate"
+            ],
+            "item_argb": -11184777,
+            "block_tint": 5592439,
+            "animation_unique_frames": 16
+          }
+        ],
+        "locale": "ru_ru"
+      }
+    ],
+    "captures": [
+      {
+        "screen": "native first-person world",
+        "locale": "en_us",
+        "name": "en-day-six-deepslate-and-stone-comparison",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-en-day-six-deepslate-and-stone-comparison.png",
+        "game_time": 51,
+        "bytes": 364362,
+        "sha256": "76bc83849c5daae7308898dac42b6753f4c851adb86ee69b34cc004b1a132783",
+        "committed_frame": "docs/images/deepslate-ore/en-day-six-deepslate-and-stone-comparison.png"
+      },
+      {
+        "screen": "native first-person world",
+        "locale": "en_us",
+        "name": "en-day-air-fire-water-front-side-top",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-en-day-air-fire-water-front-side-top.png",
+        "game_time": 74,
+        "bytes": 501314,
+        "sha256": "0efaf587a7fe66cadc49eff1028db919c56017c16819922a3608f6f8caad45b9",
+        "committed_frame": "docs/images/deepslate-ore/en-day-air-fire-water-front-side-top.png"
+      },
+      {
+        "screen": "native first-person world",
+        "locale": "en_us",
+        "name": "en-day-earth-order-entropy-front-side-top",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-en-day-earth-order-entropy-front-side-top.png",
+        "game_time": 99,
+        "bytes": 488909,
+        "sha256": "165faedfa87d66613b48e40b38e2e9d4b54813f8c9016840e3d95dfd65f123ea",
+        "committed_frame": "docs/images/deepslate-ore/en-day-earth-order-entropy-front-side-top.png"
+      },
+      {
+        "screen": "native first-person world",
+        "locale": "en_us",
+        "name": "en-dark-six-deepslate-and-stone-comparison",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-en-dark-six-deepslate-and-stone-comparison.png",
+        "game_time": 181,
+        "bytes": 258713,
+        "sha256": "e21c196daa56a0d4c2a61ddc1a86f88cf0b5ab149c515a7fcacf3bf99be1bd9e",
+        "committed_frame": "docs/images/deepslate-ore/en-dark-six-deepslate-and-stone-comparison.png"
+      },
+      {
+        "screen": "native InventoryScreen",
+        "locale": "en_us",
+        "name": "en-native-inventory-six-deepslate-item-models",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-en-native-inventory-six-deepslate-item-models.png",
+        "game_time": 198,
+        "bytes": 339597,
+        "sha256": "003e23192b979a947535592a7502e3684ded56974700291b26bcd6b50591a87a",
+        "committed_frame": "docs/images/deepslate-ore/en-native-inventory-six-deepslate-item-models.png"
+      },
+      {
+        "screen": "native InventoryScreen",
+        "locale": "ru_ru",
+        "name": "ru-native-inventory-after-resource-reload",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-ru-native-inventory-after-resource-reload.png",
+        "game_time": 217,
+        "bytes": 340394,
+        "sha256": "99b24b2e7b3d4573e4ac598ffa834b1c50ac1a68e07b91aa161fa77755a67127",
+        "committed_frame": "docs/images/deepslate-ore/ru-native-inventory-after-resource-reload.png"
+      },
+      {
+        "screen": "native first-person world",
+        "locale": "ru_ru",
+        "name": "ru-day-six-deepslate-after-resource-reload",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-ru-day-six-deepslate-after-resource-reload.png",
+        "game_time": 299,
+        "bytes": 320735,
+        "sha256": "8a7482d9252520b2f0dd9367fc6527515982d97e7643d3dea50f555b7eef62f4",
+        "committed_frame": "docs/images/deepslate-ore/ru-day-six-deepslate-after-resource-reload.png"
+      },
+      {
+        "screen": "native first-person world",
+        "locale": "ru_ru",
+        "name": "ru-day-six-deepslate-later-animation-frame",
+        "path": "fabric/run-deepslate-ore-client/screenshots/deepslate-ore-2026-11-02T09-44-39.461421287Z-ru-day-six-deepslate-later-animation-frame.png",
+        "game_time": 313,
+        "bytes": 308037,
+        "sha256": "11ce9da2e474f78a30d6f4bbdec6a7ba35b07e2276782ece227e025e42151a5f",
+        "committed_frame": "docs/images/deepslate-ore/ru-day-six-deepslate-later-animation-frame.png"
+      }
+    ]
+  },
+  "production_server": {
+    "ready": true,
+    "tick_queries": [
+      6,
+      56
+    ],
+    "normal_stop": true,
+    "exit_code": 0,
+    "inputs": [
+      {
+        "file": "Thaumcraft-fabric-0.1.0-alpha.16.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.16.jar",
+        "sha256": "cd2a501b614eb1be396e72592edc2d75918986456bce8a1416297567b7754cee",
+        "bytes": 15835791
+      },
+      {
+        "file": "fabric-api-0.116.17+1.21.1.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-api/0.116.17+1.21.1/810b2b0195371a012906241d8b85a32a1d6de53c/fabric-api-0.116.17+1.21.1.jar",
+        "sha256": "79ac44b40780acbd884b34c50be1e39af682847e5f5cb3b1fddeeaa768dce800",
+        "bytes": 2452735
+      },
+      {
+        "file": "architectury-fabric-13.0.11.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/dev.architectury/architectury-fabric/13.0.11/ae6c9231a07d8abac28847693d237166790f72a6/architectury-fabric-13.0.11.jar",
+        "sha256": "659016af3d85f3cf68bafe0e28bc80036779ff3d346f8c632d1e738075745678",
+        "bytes": 609113
+      }
+    ],
+    "optional_debug_messages": [
+      "[09:45:44] [main/INFO]: Fernflower could not be loaded, exported classes will not be decompiled. NoClassDefFoundError: org/jetbrains/java/decompiler/main/extern/IResultSaver"
+    ],
+    "mapping_errors": []
+  },
+  "limitations": [
+    "Native normal-noise generation tested in fresh1.21.1 chunks, no automatic old-world conversion",
+    "Clientblocks/items provided as finite visualfixture, no complete survival progression",
+    "No new multiplayer or NeoForge acceptance",
+    "Separate review of othermodernadaptations is advisory, not implementedfeatures"
+  ]
+}

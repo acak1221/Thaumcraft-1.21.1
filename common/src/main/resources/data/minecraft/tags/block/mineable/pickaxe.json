@@ -42,6 +42,7 @@
     "thaumcraft:fertility_lamp",
     "thaumcraft:advanced_alchemical_construct",
     "thaumcraft:advanced_alchemical_furnace",
-    "thaumcraft:item_grate"
+    "thaumcraft:item_grate",
+    "#thaumcraft:deepslate_infused_ores"
   ]
 }

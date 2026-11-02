@@ -382,3 +382,23 @@ it is independent of goggles and cannot refund/retry gameplay payment on deliver
 Focused native/client evidence and exact artifact inputs are recorded in the
 [wand/crucible report](../analysis/2026-11-02-wand-crucible.md). This is Fabric presentation
 acceptance with a finite supplied fresh-world fixture, not new survival/multiplayer/NeoForge coverage.
+
+## 16. Deepslate infused ores — owner request 2026-11-02
+
+Six new host variants extend the original crystal-bearing stone into Minecraft1.21.1's deep
+underground. Original TC4 did not contain deepslate. Native deepslate side/end sprites are
+combined with the retained animated crystal overlay and six tints; source PNGs stay unchanged.
+The opaque host skips the old inset stone pass and separates overlay depth slightly.
+
+The original stone pass remains, with host-aware transition targets. An additional eight
+size-six veins sample the negative world-height interval, use vanilla deepslate ore targets,
+and share the existing infused-stone toggle and biome/dimension/loaded/write constraints.
+This deliberately adds modern-depth supply rather than claiming original seed/quantity parity.
+Old chunks are not automatically converted; explicit existing regeneration is separate.
+Shard/Fortune/XP behavior is retained, Silk Touch keeps the new host block, and scanning,
+ore-tag integrations and research-table bonuses recognise both variants. Physical deepslate
+hardness/resistance/sound apply. Cinnabar/amber are unchanged.
+
+Exact Fabric native/client/production inputs, selected frames and limits:
+[deepslate report](../analysis/2026-11-02-deepslate-ore.md). Othermodernadaptation suggestions
+are recorded separately and were not implemented in this checkpoint.

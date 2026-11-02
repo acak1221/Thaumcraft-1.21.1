@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "policy": "First 37 entries reconcile CLIENT_QUALITY findings: 33 construction + 2 classpath loaders + 2 silent fallbacks; remaining entries are independently found shared/API paths. Registry, sound, recipe, model-layer and tag factories are inventoried but are NOT file paths. Addon-supplied arguments are unbounded and are not bundled-asset claims.",
+  "policy": "First 37 entries reconcile CLIENT_QUALITY findings: 33 construction + 2 classpath loaders + 2 silent fallbacks; remaining entries are independently found shared/API paths. Registry, sound, recipe, model-layer and tag factories are inventoried but are NOT file paths. Addon-supplied arguments are unbounded and are not bundled-asset claims. Alpha.14/16 review: recipe-transfer canonical IDs/packet recipe IDs and deep ore/aspect/tag identifiers are registry keys, not resource files; no new dynamic file family.",
   "sites": [
     {
       "site": "common/src/main/java/thaumcraft/client/BoreClientEffects.java",
@@ -238,7 +238,7 @@
         "thaumcraft:textures/misc/research4.png",
         "thaumcraft:textures/misc/research5.png"
       ],
-      "note": "Re-reviewed against 3ae61ca7: page geometry, textured navigation and rules reuse the fixed gui_researchbook.png sheet; image.texture still comes from the same language-image corpus. No new computed filename or image-source family."
+      "note": "Re-reviewed against 3ae61ca7: page geometry, textured navigation and rules reuse the fixed gui_researchbook.png sheet; image.texture still comes from the same language-image corpus. No new computed filename or image-source family. Reviewed alpha.14 recipe transfer: primitive + button adds no resource path; language-image corpus unchanged."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java",
@@ -374,7 +374,7 @@
         "thaumcraft:blocks/taintgrass1",
         "thaumcraft:blocks/taintgrass2"
       ],
-      "note": ""
+      "note": "Reviewed alpha.16: skip the historical inset stone pass for opaque deepslate hosts; original normal-stone sprite families unchanged. Vanilla host model sprites are checked separately by the model validator and native client."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java",
@@ -1081,6 +1081,7 @@
     "common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",nativeId)",
       "ResourceLocation.tryParse(entry.getValue())",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"sceptre/\"+variant.rod()+\"/\"+variant.cap())",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",id)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"crucible/balanced_shard_\"+primal)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/page/\"+Integer.toHexString(System.identityHashCode(owner)))"
@@ -1170,6 +1171,9 @@
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"aura_totem\")",
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"normal_aura_node_biomes\")"
     ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java": [
+      "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"deepslate_infused_ores\")"
+    ],
     "common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java": [
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"tc4_outer_lands_maze\")",
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"tc4_eldritch_ring\")",
@@ -1214,6 +1218,9 @@
     "common/src/main/java/thaumcraft/common/crafting/ProgrammaticRecipes.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/crucible/\"+Integer.toUnsignedString(recipe.hash,16)+\"_\"+collision)",
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/\"+kind+\"/\"+index)"
+    ],
+    "common/src/main/java/thaumcraft/common/crafting/transfer/RecipeTransferRecipes.java": [
+      "ResourceLocation.fromNamespaceAndPath(id.getNamespace(),id.getPath().substring(1))"
     ],
     "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
@@ -1314,6 +1321,9 @@
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"eldritch_lands\")",
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"node_biome_types/\"+name)"
     ],
+    "common/src/main/java/thaumcraft/common/lib/network/RecipeTransferPayload.java": [
+      "ResourceLocation.tryParse(buffer.readUtf(256))"
+    ],
     "common/src/main/java/thaumcraft/common/lib/research/AspectInferenceTable.java": [
       "ResourceLocation.parse(entry.getKey())",
       "ResourceLocation.parse(entry.getValue().getAsString())",
@@ -1327,7 +1337,9 @@
     ],
     "common/src/main/java/thaumcraft/common/lib/research/ObjectAspectCatalog.java": [
       "ResourceLocation.parse(id.getAsString())",
-      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",flattened.get(metadata))"
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",flattened.get(metadata))",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",ore)",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"deepslate_\"+ore)"
     ],
     "common/src/main/java/thaumcraft/common/lib/research/ObjectAspectResolver.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"api/aspects/crucible/\"+ordinal)",
@@ -1498,14 +1510,14 @@
     "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "a70cb05e8fa4861308e6b0eacd1f668e3c588fa2adf9cdeca7b58b7d923e666a",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "f7816816371cdbd80b80f13fa579988c4376af23f9368ab950ad0150c3f765f8",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "93d14fa2b44a81fc91ca9db2e1c87a49f631e1f1512f332dc0e48237f7c70c8e",
-    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "abe80de143582d8e7002ca3c4f132b008db50575d91d25130ec9989c9621ece3",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "bd8f75e97342e5f382a382b26651a8030518ba9ed2c2e9d5db9a2fe00745f1aa",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "220dafc23bc2d0d320e20a1522f9f01f93b760983213c731e5320b3f5e0f6b10",
     "common/src/main/java/thaumcraft/client/gui/HoveredSlotAspectRow.java": "c6eed32d8742c91d9e929c2c092b31dd8e531175419bdf76e972e4fc60e9546f",
     "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "91a6cb977a6b5843beddd178613b9c757a13ee3d5d38d07db5e0ab08866c51d6",
     "common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java": "31b8d3d0aaba9681cd58196b93deea847235550776a74fc71ee12d7169d71cde",
     "common/src/main/java/thaumcraft/client/lib/UtilsFX.java": "e3f17c7a2dab4dc4833060056504e5d14598df7c1bc27d327b3d980fc22717d6",
     "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java": "c681c1eb91f2ab06bbdafa4c1b00c0b9a05bb2c31590846db073a9a9ea21e517",
-    "common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java": "929d264b2b14947d22cf5156cfa6ce0f0c11a021d5d7518eb998aaf0797803eb",
+    "common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java": "e9975441a4a7f3f163f89e58c397e667dc2f5b269ee19963cd216947f64e13da",
     "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java": "6d7e1d3ff571c8d64181e3ee7f113f7727eb3b2991faef5598a502fc3a060b6f",
     "common/src/main/java/thaumcraft/client/renderers/block/TaintFibreWorldQuads.java": "296250e26ab5af2aebf066c6d23d3944dfaad66bde95d6b9db3752869efdaba3",
     "common/src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java": "f6a7444e8effb800bbd4ab4867c3b126881b0e0cad0ed000b7baef45f4e76f65",

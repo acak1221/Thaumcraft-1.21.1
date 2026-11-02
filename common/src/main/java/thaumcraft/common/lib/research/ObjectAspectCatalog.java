@@ -119,6 +119,15 @@ public final class ObjectAspectCatalog {
                 conflicts.remove(id);
                 if ("thaumcraft".equals(id.getNamespace())) ownContent.add(id);
             });
+            // Owner-requested modern host variants retain the corresponding original ore tags.
+            for (String ore : ORE_IDS.subList(1, 7)) {
+                var original = ResourceLocation.fromNamespaceAndPath("thaumcraft", ore);
+                var deep = ResourceLocation.fromNamespaceAndPath("thaumcraft", "deepslate_" + ore);
+                loaded.put(deep, loaded.get(original).copy());
+                conflicts.remove(deep);
+                ownContent.add(deep);
+                blocks.add(deep);
+            }
             // Original ConfigAspects431: crystal essence has an explicit EMPTY
             // base. Its IEssentiaContainerItem contents are added once by the
             // resolver; never inherit ethereal auram2, shard or recipe tags.

@@ -258,7 +258,8 @@ public final class ClientSetup {
         // thaumcraft/common/blocks/BlockCustomOreItem.java:17).
         ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(0x00A000) : tint == 1 ? opaque(0xEECCFF) : -1,
                 thaumcraft.common.config.ThaumcraftLevitator.LEVITATOR_ITEM);
-        for (var ore : ThaumcraftOres.INFUSED.values()) {
+        for (var ore : java.util.stream.Stream.concat(ThaumcraftOres.INFUSED.values().stream(),
+                ThaumcraftOres.DEEPSLATE_INFUSED.values().stream()).toList()) {
             var block = ore.get();
             ColorHandlerRegistry.registerBlockColors((state, level, pos, tint) -> tint == 0 ? block.tintColor() : -1, ore);
             ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(block.tintColor()) : -1, () -> block.asItem());

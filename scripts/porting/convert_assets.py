@@ -27,6 +27,9 @@ ASSETS = RESOURCE_ROOT / "assets/thaumcraft"
 BLOCK_ATLAS = RESOURCE_ROOT / "assets/minecraft/atlases/blocks.json"
 MANIFEST = ROOT / "docs/porting/resource-manifest.json"
 CANONICAL_TEXT_SUFFIXES = frozenset({".mcmeta", ".obj", ".mtl", ".json", ".lang"})
+# Native 1.21.1 host sprites, resolved from Minecraft/resource packs rather than copied
+# into our atlas. Keep explicit names so an external-texture typo still fails validation.
+VANILLA_MODEL_TEXTURES = frozenset({"minecraft:block/deepslate", "minecraft:block/deepslate_top"})
 # These original model UV sheets are full-image static sprites, not animation
 # strips. Native 1.21.1 AnimationMetadataSection.EMPTY keeps the full W/H and
 # Stitcher accepts rectangular sprites. Explicit singles avoid stitching the
@@ -764,6 +767,7 @@ def validate_resources(*, include_composed: bool = True) -> dict[str, int]:
     """Validate output; tiny model-only test fixtures may omit the Java contract."""
     missing: list[str] = []
     texture_refs = 0
+    external_texture_refs = 0
     atlas_refs = 0
     model_refs = 0
     sprites = block_atlas_sprites()
@@ -801,6 +805,10 @@ def validate_resources(*, include_composed: bool = True) -> dict[str, int]:
             if texture.startswith("#"):
                 continue
             resource_location(texture)
+            if texture in VANILLA_MODEL_TEXTURES:
+                texture_refs += 1
+                external_texture_refs += 1
+                continue
             if not texture.startswith("thaumcraft:"):
                 missing.append(f"{path.relative_to(ROOT)} texture has unexpected namespace {texture}")
                 continue
@@ -850,6 +858,7 @@ def validate_resources(*, include_composed: bool = True) -> dict[str, int]:
     if missing:
         raise ValueError("Resource validation failed:\n" + "\n".join(missing))
     checks = {"checked_model_texture_refs": texture_refs, "checked_local_model_refs": model_refs,
+            "checked_external_model_texture_refs": external_texture_refs,
             "checked_atlas_sprite_refs": atlas_refs, "atlas_sprites_available": len(sprites),
             "atlas_mipmap_level_guard": 4,
             "checked_sound_refs": sound_refs, "checked_sound_event_ids": len(sound_events),

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:deepslate_air_infused_stone",
+    "thaumcraft:deepslate_fire_infused_stone",
+    "thaumcraft:deepslate_water_infused_stone",
+    "thaumcraft:deepslate_earth_infused_stone",
+    "thaumcraft:deepslate_order_infused_stone",
+    "thaumcraft:deepslate_entropy_infused_stone"
+  ]
+}

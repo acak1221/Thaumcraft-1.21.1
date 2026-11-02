@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -24,8 +25,8 @@ import thaumcraft.common.config.ThaumcraftBiomeSettings;
 
 /** Source: TC4 ThaumcraftWorldGenerator:481-546; one invocation is one chunk's complete ore pass. */
 public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration> {
-    // Default is stone ONLY, like TC4's Blocks.stone target. This datapack tag
-    // replaces the old isReplaceableOreGen extension point, not a deepslate pass.
+    // The original stone host keeps its own datapack extension point. The
+    // owner-requested deepslate variants use vanilla's separate host tag.
     public static final TagKey<Block> REPLACEABLE = TagKey.create(Registries.BLOCK, id("ore_replaceables"));
     public static final TagKey<Biome> BIOME_BLACKLIST = TagKey.create(Registries.BIOME, id("ore_generation_blacklist"));
     private static final ResourceLocation OUTER_LANDS = id("outer_lands");
@@ -79,7 +80,8 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
          * WORLD_SURFACE is the live first-free surface Y, including water/leaves.
          * Amber can go below zero in low terrain. Out-of-world samples are
          * skipped, never clamped; an exotic height<5 uses bound1, never bound0.
-         * No extra deepslate pass, attempt scaling, retrogen or old-seed identity.
+         * These original stone draws stay unchanged. The owner-requested
+         * deepslate adaptation appends its own negative-height pass below.
          */
         int cinnabarBound = Math.max(1, level.getHeight() / 5);
         if (cinnabar) for (int attempt = 0; attempt < 18; attempt++) {
@@ -99,18 +101,45 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
             int z = originZ + random.nextInt(16);
             int top = surface(level, x, z);
             int y = random.nextInt(Math.max(5, top - 5));
-            int variant = random.nextInt(6) + 1;
-            if (random.nextInt(3) == 0) variant = biomeVariant(surfaceBiome(level, x, top, z), random, variant);
-            BlockPos pos = new BlockPos(x, y, z);
-            // Vanilla size6 OreFeature reads a small surrounding heightmap and
-            // section area. Preflight it without loading chunks; its own writes
-            // use ensureCanWrite. Veins may cross chunks in the native region.
-            if (level.isOutsideBuildHeight(pos) || !level.hasChunksAt(pos.offset(-3, 0, -3), pos.offset(3, 0, 3))) continue;
-            var state = ThaumcraftOres.INFUSED.get(PRIMALS.get(variant - 1)).get().defaultBlockState();
-            placed |= Feature.ORE.place(new OreConfiguration(new TagMatchTest(REPLACEABLE), state, 6),
-                    level, level.getLevel().getChunkSource().getGenerator(), random, pos);
+            int variant = infusedVariant(level, random, x, top, z);
+            placed |= infusedVein(level, random, new BlockPos(x, y, z), variant, false);
+        }
+        // MC 1.21's deep underground has no counterpart in the zero-anchored
+        // original. A separate eight-vein pass gives it the same six aspects
+        // without moving/duplicating the original stone pass or touching old
+        // chunks unless the existing explicit regeneration option runs it.
+        int deepBottom = level.getMinBuildHeight();
+        int deepTop = Math.min(0, level.getMaxBuildHeight());
+        if (infused && deepBottom < deepTop) for (int attempt = 0; attempt < 8; attempt++) {
+            int x = originX + random.nextInt(16);
+            int z = originZ + random.nextInt(16);
+            int top = surface(level, x, z);
+            int y = deepBottom + random.nextInt(deepTop - deepBottom);
+            int variant = infusedVariant(level, random, x, top, z);
+            placed |= infusedVein(level, random, new BlockPos(x, y, z), variant, true);
         }
         return placed;
+    }
+
+    private static int infusedVariant(WorldGenLevel level, RandomSource random, int x, int top, int z) {
+        int variant = random.nextInt(6) + 1;
+        return random.nextInt(3) == 0 ? biomeVariant(surfaceBiome(level, x, top, z), random, variant) : variant;
+    }
+
+    private static boolean infusedVein(WorldGenLevel level, RandomSource random, BlockPos pos, int variant, boolean deepOnly) {
+        // Vanilla size6 OreFeature reads a small surrounding heightmap and
+        // section area. Preflight without loading chunks or logging failed far
+        // writes. A vein may still cross into the permitted neighbouring chunk.
+        BlockPos min = pos.offset(-3, 0, -3), max = pos.offset(3, 0, 3);
+        if (level.isOutsideBuildHeight(pos) || !level.hasChunksAt(min, max)
+                || !WorldGenWriteArea.canWrite(level, min) || !WorldGenWriteArea.canWrite(level, max)) return false;
+        String tag = PRIMALS.get(variant - 1);
+        var deep = OreConfiguration.target(new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES),
+                ThaumcraftOres.DEEPSLATE_INFUSED.get(tag).get().defaultBlockState());
+        var targets = deepOnly ? List.of(deep) : List.of(
+                OreConfiguration.target(new TagMatchTest(REPLACEABLE), ThaumcraftOres.INFUSED.get(tag).get().defaultBlockState()), deep);
+        return Feature.ORE.place(new OreConfiguration(targets, 6),
+                level, level.getLevel().getChunkSource().getGenerator(), random, pos);
     }
 
     public static boolean isSurfaceDimension(WorldGenLevel level) {

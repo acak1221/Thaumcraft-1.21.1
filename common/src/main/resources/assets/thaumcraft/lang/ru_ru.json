@@ -2756,5 +2756,11 @@
   "tc.recipe_transfer.locked_research": "Необходимое исследование не завершено",
   "tc.recipe_transfer.missing_ingredients": "Недостаточно ингредиентов",
   "tc.recipe_transfer.inventory_full": "Нет места для возврата прежних ингредиентов",
-  "tc.recipe_transfer.failed": "Не удалось перенести рецепт"
+  "tc.recipe_transfer.failed": "Не удалось перенести рецепт",
+  "block.thaumcraft.deepslate_air_infused_stone": "Глубинная грозовая руда",
+  "block.thaumcraft.deepslate_fire_infused_stone": "Глубинная огненная руда",
+  "block.thaumcraft.deepslate_water_infused_stone": "Глубинная ледяная руда",
+  "block.thaumcraft.deepslate_earth_infused_stone": "Глубинная руда земляного кристалла",
+  "block.thaumcraft.deepslate_order_infused_stone": "Глубинная руда кристалла порядка",
+  "block.thaumcraft.deepslate_entropy_infused_stone": "Глубинная энтропийная руда"
 }

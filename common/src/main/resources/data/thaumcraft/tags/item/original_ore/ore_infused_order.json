@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "thaumcraft:order_infused_stone"
+    "thaumcraft:order_infused_stone",
+    "thaumcraft:deepslate_order_infused_stone"
   ]
 }

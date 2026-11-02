@@ -2756,5 +2756,11 @@
   "tc.recipe_transfer.locked_research": "Required research is not complete",
   "tc.recipe_transfer.missing_ingredients": "Not enough ingredients",
   "tc.recipe_transfer.inventory_full": "No room to return the current ingredients",
-  "tc.recipe_transfer.failed": "Recipe transfer failed"
+  "tc.recipe_transfer.failed": "Recipe transfer failed",
+  "block.thaumcraft.deepslate_air_infused_stone": "Deepslate Air Infused Stone",
+  "block.thaumcraft.deepslate_fire_infused_stone": "Deepslate Fire Infused Stone",
+  "block.thaumcraft.deepslate_water_infused_stone": "Deepslate Water Infused Stone",
+  "block.thaumcraft.deepslate_earth_infused_stone": "Deepslate Earth Infused Stone",
+  "block.thaumcraft.deepslate_order_infused_stone": "Deepslate Order Infused Stone",
+  "block.thaumcraft.deepslate_entropy_infused_stone": "Deepslate Entropy Infused Stone"
 }

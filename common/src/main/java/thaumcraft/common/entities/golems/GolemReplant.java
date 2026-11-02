@@ -32,7 +32,9 @@ public final class GolemReplant {
             Items.PUMPKIN_SEEDS, Blocks.PUMPKIN_STEM,
             Items.CARROT, Blocks.CARROTS,
             Items.POTATO, Blocks.POTATOES,
-            Items.NETHER_WART, Blocks.NETHER_WART);
+            Items.NETHER_WART, Blocks.NETHER_WART,
+            Items.TORCHFLOWER_SEEDS, Blocks.TORCHFLOWER_CROP,
+            Items.PITCHER_POD, Blocks.PITCHER_CROP);
 
     private GolemReplant() {}
 

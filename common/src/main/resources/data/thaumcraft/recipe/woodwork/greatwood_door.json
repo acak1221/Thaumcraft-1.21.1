@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PP",
+    "PP",
+    "PP"
+  ],
+  "key": {
+    "P": {
+      "item": "thaumcraft:greatwood_planks"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:greatwood_door",
+    "count": 3
+  }
+}

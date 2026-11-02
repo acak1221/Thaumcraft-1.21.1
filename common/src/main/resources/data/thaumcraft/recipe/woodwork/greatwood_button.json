@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    {
+      "item": "thaumcraft:greatwood_planks"
+    }
+  ],
+  "result": {
+    "id": "thaumcraft:greatwood_button",
+    "count": 1
+  }
+}

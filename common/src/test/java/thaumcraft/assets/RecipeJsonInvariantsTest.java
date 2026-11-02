@@ -32,6 +32,7 @@ class RecipeJsonInvariantsTest {
     private static Set<String> researchKeys() throws Exception {
         Set<String> keys = new HashSet<>();
         for (JsonElement element : ResourceTree.object("data/thaumcraft/tc4/research.json").getAsJsonArray("research")) keys.add(element.getAsJsonObject().get("key").getAsString());
+        keys.addAll(thaumcraft.common.config.ThaumcraftModernResearch.keys());
         return keys;
     }
 
@@ -60,7 +61,8 @@ class RecipeJsonInvariantsTest {
         for (String path : recipePaths()) {
             JsonObject recipe = ResourceTree.object(path);
             String type = recipe.has("type") ? recipe.get("type").getAsString() : "";
-            if (!(type.startsWith("thaumcraft:") || type.equals("minecraft:crafting_shaped") || type.equals("minecraft:crafting_shapeless") || type.equals("minecraft:smelting"))) bad.add(path + " has type '" + type + "'");
+            if (!(type.startsWith("thaumcraft:") || type.equals("minecraft:crafting_shaped") || type.equals("minecraft:crafting_shapeless")
+                    || type.equals("minecraft:smelting") || type.equals("minecraft:stonecutting"))) bad.add(path + " has type '" + type + "'");
         }
         assertEquals(List.of(), bad);
         assertTrue(recipePaths().size() > 200, "the recipe tree was not found");
@@ -147,11 +149,18 @@ class RecipeJsonInvariantsTest {
 
     @Test void theEnchantmentInfusionsAreTheOriginalTwentyFour() throws Exception {
         List<String> enchantments = new ArrayList<>();
-        for (String file : ResourceTree.files(RECIPES + "/infusion_enchantment")) if (file.endsWith(".json")) enchantments.add(ResourceTree.object(RECIPES + "/infusion_enchantment/" + file).get("enchantment").getAsString());
+        List<String> modern = new ArrayList<>();
+        for (String file : ResourceTree.files(RECIPES + "/infusion_enchantment")) if (file.endsWith(".json")) {
+            String enchantment = ResourceTree.object(RECIPES + "/infusion_enchantment/" + file).get("enchantment").getAsString();
+            (file.startsWith("modern/") ? modern : enchantments).add(enchantment);
+        }
         assertEquals(24, enchantments.size(), "InfEnchRepair, InfEnchHaste and InfEnch0..21 of ConfigRecipes");
         assertEquals(24, new HashSet<>(enchantments).size(), "one infusion per enchantment");
         assertTrue(enchantments.containsAll(List.of("thaumcraft:haste", "thaumcraft:repair")));
         assertEquals(22, enchantments.stream().filter(id -> id.startsWith("minecraft:")).count());
+        assertEquals(12, modern.size(), "separately approved native modern-enchantment extension");
+        Set<String> all = new HashSet<>(enchantments);
+        for (String enchantment : modern) assertTrue(all.add(enchantment), "one infusion per native enchantment: " + enchantment);
     }
 
     @Test void theTwoThaumcraftEnchantmentsAreDefinedAsData() throws Exception {

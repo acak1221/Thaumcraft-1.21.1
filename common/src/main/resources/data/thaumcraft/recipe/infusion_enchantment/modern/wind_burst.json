@@ -1,0 +1,27 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "DEEPINFUSION",
+  "enchantment": "minecraft:wind_burst",
+  "components": [
+    {
+      "item": "minecraft:heavy_core"
+    },
+    {
+      "item": "minecraft:breeze_rod"
+    },
+    {
+      "item": "minecraft:wind_charge"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 24,
+    "aer": 32,
+    "motus": 32,
+    "telum": 16
+  },
+  "instability": 8,
+  "first_level_minimum_cost": 45
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PPP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "thaumcraft:greatwood_planks"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:greatwood_trapdoor",
+    "count": 2
+  }
+}

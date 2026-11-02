@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PPP",
+    "PPP",
+    " S "
+  ],
+  "key": {
+    "P": {
+      "item": "thaumcraft:silverwood_planks"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:silverwood_sign",
+    "count": 3
+  }
+}

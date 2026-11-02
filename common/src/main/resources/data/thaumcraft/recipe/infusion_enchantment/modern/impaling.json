@@ -1,0 +1,23 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "MODERNINFUSION",
+  "enchantment": "minecraft:impaling",
+  "components": [
+    {
+      "item": "minecraft:nautilus_shell"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 8,
+    "aqua": 16,
+    "telum": 12
+  },
+  "instability": 4,
+  "first_level_minimum_cost": 18
+}

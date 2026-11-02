@@ -1,0 +1,23 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "MODERNINFUSION",
+  "enchantment": "minecraft:loyalty",
+  "components": [
+    {
+      "item": "minecraft:ender_pearl"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 8,
+    "aer": 8,
+    "iter": 12
+  },
+  "instability": 3,
+  "first_level_minimum_cost": 15
+}

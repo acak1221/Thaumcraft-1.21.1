@@ -1,0 +1,27 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "DEEPINFUSION",
+  "enchantment": "minecraft:swift_sneak",
+  "components": [
+    {
+      "item": "minecraft:recovery_compass"
+    },
+    {
+      "item": "minecraft:echo_shard"
+    },
+    {
+      "item": "minecraft:sculk_catalyst"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 24,
+    "alienis": 16,
+    "sensus": 24,
+    "motus": 24
+  },
+  "instability": 8,
+  "first_level_minimum_cost": 42
+}

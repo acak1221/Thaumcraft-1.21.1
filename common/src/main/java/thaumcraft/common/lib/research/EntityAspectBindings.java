@@ -157,6 +157,13 @@ public final class EntityAspectBindings {
         return result;
     }
 
+    /** One-time native baseline. Modern rows precede any later public addon registrations. */
+    public static List<ThaumcraftApi.EntityTags> baselineTags() {
+        var result = new ArrayList<>(originalTags());
+        result.addAll(ModernEntityAspectBindings.tags());
+        return result;
+    }
+
     private static ThaumcraftApi.EntityTags tags(Row row, Aspect variant) {
         var aspects = new AspectList();
         if (row.wisp) aspects.add(variant, 2);

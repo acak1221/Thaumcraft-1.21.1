@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -67,8 +68,8 @@ public final class GolemHarvestPlatform {
         void canceled(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state);
         void after(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state);
         /**
-         * The loader's right-click-on-block consultation for a replanting placement (the actor holds the one
-         * seed in its main hand). True only when no listener objected or took the interaction over.
+         * The loader's right-click-on-block consultation for planting (the actor holds one seed)
+         * or picking an existing berry plant (empty hand). Only an untouched interaction is admitted.
          */
         boolean allowsPlacement(ServerLevel level, ServerPlayer actor, BlockHitResult hit);
     }
@@ -229,7 +230,75 @@ public final class GolemHarvestPlatform {
     }
 
     static boolean harvest(EntityGolemBase golem, BlockPos target, BlockState expected) {
+        if (GolemCrops.berryHarvest(expected)) return pickBerries(golem, target, expected);
         return guardedBreak(golem, target, expected, GolemHarvestPlatform::eligible);
+    }
+
+    /**
+     * Finite vanilla berry picking. Vanilla useWithoutItem spawns before resetting the plant;
+     * here both the raw same-block state change and durable output ownership precede callbacks.
+     * SweetBerryBushBlock's mature yield is2..3 and CaveVines.use yields1. No loot-table copy,
+     * break callback, seed synthesis or extra replant is involved.
+     */
+    private static boolean pickBerries(EntityGolemBase golem, BlockPos target, BlockState expected) {
+        if (!(golem.level() instanceof ServerLevel level) || bridge == null || target == null) return false;
+        BlockPos pos = target.immutable();
+        LevelChunk chunk = loadedWaterChunk(level, pos); // Same finite canonical loaded-chunk admission.
+        if (chunk == null || !eligible(level, golem, pos, expected)) return false;
+        Bridge platform = bridge;
+        boolean committed = false;
+        try {
+            ServerPlayer actor = platform.actor(level);
+            if (!bound(platform, level, actor)) return false;
+            actor.setPos(golem.getX(), golem.getY(), golem.getZ());
+            actor.setYRot(golem.getYRot()); actor.setXRot(golem.getXRot());
+            BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+            if (!eligible(level, golem, pos, expected) || !level.mayInteract(actor, pos)
+                    || !platform.allowsPlacement(level, actor, hit)) return false;
+            if (!bound(platform, level, actor) || actor.distanceToSqr(golem) != 0 || !level.mayInteract(actor, pos)
+                    || !eligible(level, golem, pos, expected) || loadedWaterChunk(level, pos) != chunk) return false;
+            boolean sweet = expected.is(Blocks.SWEET_BERRY_BUSH);
+            int count = sweet ? 2 + level.random.nextInt(2) : 1;
+            boolean drops = level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS);
+            var outputs = drops ? List.of(new DeferredItemDrops.DirectedDrop(
+                    new ItemStack(sweet ? Items.SWEET_BERRIES : Items.GLOW_BERRIES, count),
+                    Vec3.atCenterOf(pos), new Vec3(0, .2, 0), 10)) : List.<DeferredItemDrops.DirectedDrop>of();
+            var output = DeferredItemDrops.prepareDirectedBatch(level, pos, outputs);
+            BlockState picked = GolemCrops.pickedBerries(expected);
+            if (!output.ready() || !bound(platform, level, actor) || !eligible(level, golem, pos, expected)
+                    || loadedWaterChunk(level, pos) != chunk || !level.mayInteract(actor, pos)) return false;
+            // Only exact native same-block age/berries properties change; neither class has
+            // an external lifecycle callback on this same-block chunk mutation.
+            if (chunk.setBlockState(pos, picked, false) != expected) return false;
+            output.commitRaw();
+            committed = true;
+            notifyBerryChange(level, chunk, pos, expected, picked);
+            if (sameCell(level, chunk, pos, picked)) {
+                level.playSound(null, pos, sweet ? SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES : SoundEvents.CAVE_VINES_PICK_BERRIES,
+                        SoundSource.BLOCKS, 1, .8F + level.random.nextFloat() * .4F);
+                level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(golem, picked));
+            }
+            return true;
+        } catch (RuntimeException failure) {
+            Thaumcraft.LOG.warn("Golem berry pick {} at {}; no repeated yield or post-commit rollback",
+                    committed ? "committed before feedback failed" : "refused or interrupted", pos, failure);
+            return committed;
+        }
+    }
+
+    /** Native berry use sets flags2: client update and shape propagation, without blockUpdated. */
+    private static void notifyBerryChange(ServerLevel level, LevelChunk chunk, BlockPos pos, BlockState old, BlockState now) {
+        if (!sameCell(level, chunk, pos, now)) return;
+        level.setBlocksDirty(pos, old, now);
+        if (!sameCell(level, chunk, pos, now)) return;
+        level.sendBlockUpdated(pos, old, now, Block.UPDATE_CLIENTS);
+        if (!sameCell(level, chunk, pos, now)) return;
+        old.updateIndirectNeighbourShapes(level, pos, 0, 511);
+        if (!sameCell(level, chunk, pos, now)) return;
+        now.updateNeighbourShapes(level, pos, 0, 511);
+        if (!sameCell(level, chunk, pos, now)) return;
+        now.updateIndirectNeighbourShapes(level, pos, 0, 511);
+        if (sameCell(level, chunk, pos, now)) level.onBlockStateChange(pos, old, now);
     }
 
     /**

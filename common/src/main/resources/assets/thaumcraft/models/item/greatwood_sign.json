@@ -1,0 +1,75 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "wood": "thaumcraft:blocks/planks_greatwood",
+    "log": "thaumcraft:blocks/greatwoodside",
+    "metal": "thaumcraft:blocks/metalbase",
+    "particle": "thaumcraft:blocks/planks_greatwood"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        6,
+        7
+      ],
+      "to": [
+        15,
+        14,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        6,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#log"
+        },
+        "up": {
+          "texture": "#log"
+        },
+        "north": {
+          "texture": "#log"
+        },
+        "south": {
+          "texture": "#log"
+        },
+        "west": {
+          "texture": "#log"
+        },
+        "east": {
+          "texture": "#log"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "MODERNINFUSION",
+  "enchantment": "minecraft:channeling",
+  "components": [
+    {
+      "item": "minecraft:lightning_rod"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 16,
+    "aer": 16,
+    "potentia": 24
+  },
+  "instability": 5,
+  "first_level_minimum_cost": 27
+}

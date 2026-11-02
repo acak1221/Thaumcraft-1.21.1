@@ -160,7 +160,7 @@ public final class ThaumcraftApi {
     /** The original plug point between the public API and the gameplay internals. */
     public static IInternalMethodHandler internalMethods = new ThaumcraftInternalMethods();
     public static ArrayList<IScanEventHandler> scanEventhandlers = new ArrayList<>();
-    public static ArrayList<EntityTags> scanEntities = new ArrayList<>(EntityAspectBindings.originalTags());
+    public static ArrayList<EntityTags> scanEntities = new ArrayList<>(EntityAspectBindings.baselineTags());
     public static ConcurrentHashMap<List<?>, AspectList> objectTags = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<List<?>, int[]> groupedObjectTags = new ConcurrentHashMap<>();
     /** Original programmatic recipe registry; the native datapack recipes live in the recipe manager. */

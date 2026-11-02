@@ -22,9 +22,9 @@ class ComposedResourcesTest(unittest.TestCase):
 
     def test_all_audited_expansions_exist_and_atlas_sprites_are_stitched(self):
         checks = self.validate()
-        self.assertEqual(49, checks['checked_composed_sites'])
-        self.assertEqual(290, checks['checked_composed_files'])  # +beam.png, +beam3.png: the client effect facade draws beam types 0 to 3
-        self.assertEqual(23, checks['checked_composed_sprites'])
+        self.assertEqual(52, checks['checked_composed_sites'])
+        self.assertEqual(294, checks['checked_composed_files'])  # Includes four real magical-wood sign editor PNGs.
+        self.assertEqual(26, checks['checked_composed_sprites'])
         with patch.object(composed, 'validate', side_effect=ValueError('composed guard reached')):
             with self.assertRaisesRegex(ValueError, 'composed guard reached'):
                 converter.validate_resources()
@@ -75,6 +75,63 @@ class ComposedResourcesTest(unittest.TestCase):
         del sprites['thaumcraft:blocks/pipe_valve']
         with self.assertRaisesRegex(ValueError, 'Unstitched composed sprite thaumcraft:blocks/pipe_valve'):
             self.validate(sprites=sprites)
+
+    def test_magical_sign_expansions_are_bounded_by_registered_wood_families(self):
+        client = 'common/src/main/java/thaumcraft/client/ThaumcraftWoodworkClient.java'
+        editor = 'common/src/main/java/thaumcraft/common/mixin/client/WoodworkHangingSignEditorMixin.java'
+        config = 'common/src/main/java/thaumcraft/common/config/ThaumcraftWoodwork.java'
+        material_site = next(site for site in self.contract['sites'] if site['site'] == client)
+        editor_site = next(site for site in self.contract['sites'] if site['site'] == editor)
+        self.assertEqual({'thaumcraft:blocks/planks_greatwood', 'thaumcraft:blocks/planks_silverwood'},
+                         set(material_site['paths']))
+        self.assertEqual({'thaumcraft:textures/blocks/planks_greatwood.png',
+                          'thaumcraft:textures/blocks/planks_silverwood.png',
+                          'thaumcraft:textures/blocks/greatwoodside.png',
+                          'thaumcraft:textures/blocks/silverwoodside.png'}, set(editor_site['paths']))
+        for relative in (client, editor, config):
+            self.assertEqual(composed.source_contract((converter.ROOT / relative).read_text()),
+                             self.contract['source_contracts'][relative])
+
+    def test_magical_sign_materials_require_stitching_even_when_the_png_exists(self):
+        for wood in ('greatwood', 'silverwood'):
+            sprite = 'thaumcraft:blocks/planks_' + wood
+            sprites = dict(self.sprites)
+            del sprites[sprite]
+            with self.subTest(wood=wood), self.assertRaisesRegex(
+                    ValueError, 'Unstitched composed sprite ' + sprite):
+                self.validate(sprites=sprites)
+
+    def test_native_hanging_chain_dependency_is_one_exact_sign_atlas_sprite(self):
+        helper = 'common/src/main/java/thaumcraft/client/renderers/block/WoodworkSignModels.java'
+        editor = 'common/src/main/java/thaumcraft/common/mixin/client/WoodworkSignEditorMixin.java'
+        site = next(site for site in self.contract['sites'] if site['site'] == helper + ':renderHanging')
+        self.assertEqual(['minecraft:entity/signs/hanging/oak'], site['paths'])
+        self.assertEqual('sprite', site['kind'])
+        self.assertIs(True, site['external'])
+        for relative in (helper, editor):
+            self.assertEqual(composed.source_contract((converter.ROOT / relative).read_text()),
+                             self.contract['source_contracts'][relative])
+
+    def test_magical_hanging_sign_editor_requires_each_board_and_frame_png(self):
+        exists = Path.is_file
+        for wood in ('greatwood', 'silverwood'):
+            for name in ('planks_' + wood, wood + 'side'):
+                suffix = '/textures/blocks/' + name + '.png'
+                with self.subTest(texture=name), patch.object(
+                        Path, 'is_file', lambda path, suffix=suffix: False if str(path).endswith(suffix) else exists(path)):
+                    with self.assertRaisesRegex(ValueError, 'Missing composed resource .*' + name + r'\.png'):
+                        self.validate()
+
+    def test_wood_family_supplier_changes_require_expansion_review(self):
+        relative = 'common/src/main/java/thaumcraft/common/config/ThaumcraftWoodwork.java'
+        source = (converter.ROOT / relative).read_text()
+        altered = source.replace('"silverwood"', '"rowan"')
+        self.assertNotEqual(source, altered)
+        read_text = Path.read_text
+        with patch.object(Path, 'read_text', lambda path, *args, **kwargs:
+                          altered if path == converter.ROOT / relative else read_text(path, *args, **kwargs)):
+            with self.assertRaisesRegex(ValueError, 'Resource supplier changed: .*ThaumcraftWoodwork.java'):
+                self.validate()
 
     def test_literal_obj_is_checked_without_a_json_model_reference(self):
         exists = Path.is_file

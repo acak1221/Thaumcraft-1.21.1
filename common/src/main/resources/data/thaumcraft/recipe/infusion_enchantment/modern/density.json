@@ -1,0 +1,23 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "MODERNINFUSION",
+  "enchantment": "minecraft:density",
+  "components": [
+    {
+      "item": "minecraft:iron_block"
+    },
+    {
+      "item": "minecraft:breeze_rod"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 8,
+    "terra": 24,
+    "telum": 8
+  },
+  "instability": 4,
+  "first_level_minimum_cost": 24
+}

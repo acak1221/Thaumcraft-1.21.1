@@ -10,6 +10,7 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import thaumcraft.common.config.ThaumcraftBaubles;
 import thaumcraft.common.config.ThaumcraftLoot;
+import thaumcraft.common.lib.loot.ModernStructureLoot;
 
 /** Native chest adapter: one existing weighted pool, retaining its vanilla rolls/functions. */
 public final class FabricThaumcraftLoot {
@@ -31,6 +32,16 @@ public final class FabricThaumcraftLoot {
             // Match NeoForge's LootTableLoadEvent, which also includes user datapacks:
             // replacing a vanilla chest table must not silently disable its TC4 rows.
             if (!key.location().getNamespace().equals("minecraft")) return;
+            var modern = ModernStructureLoot.kind(key.location());
+            if (modern != null) {
+                if (modern == ModernStructureLoot.Kind.ARCHAEOLOGY) {
+                    var first = new AtomicBoolean(true);
+                    ((FabricLootTableBuilder) table).modifyPools(pool -> {
+                        if (first.getAndSet(false)) pool.add(ModernStructureLoot.archaeologyEntry());
+                    });
+                } else table.withPool(ModernStructureLoot.bonusPool(modern));
+                return;
+            }
             String category = CATEGORIES.get(key.location().getPath());
             if (category == null) return;
             var additions = ThaumcraftLoot.chestAdditions(category);

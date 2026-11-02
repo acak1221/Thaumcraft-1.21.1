@@ -1,0 +1,26 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "MODERNINFUSION",
+  "enchantment": "minecraft:multishot",
+  "components": [
+    {
+      "item": "minecraft:tripwire_hook"
+    },
+    {
+      "item": "minecraft:arrow"
+    },
+    {
+      "item": "minecraft:arrow"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 8,
+    "telum": 16,
+    "fabrico": 8
+  },
+  "instability": 4,
+  "first_level_minimum_cost": 18
+}

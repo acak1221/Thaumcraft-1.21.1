@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "thaumcraft:block/silverwood_pressure_plate"
+    },
+    "powered=true": {
+      "model": "thaumcraft:block/silverwood_pressure_plate_down"
+    }
+  }
+}

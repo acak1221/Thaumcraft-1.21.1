@@ -14,7 +14,8 @@
       "thaumcraft.fabric.clienttest.MultiplayerPeerProbe",
       "thaumcraft.fabric.testing.RecipeTransferClientProbe",
       "thaumcraft.fabric.testing.WandCrucibleClientProbe",
-      "thaumcraft.fabric.testing.DeepslateOreClientProbe"
+      "thaumcraft.fabric.testing.DeepslateOreClientProbe",
+      "thaumcraft.fabric.testing.ModernAdaptationsClientProbe"
     ]
   },
   "depends": {

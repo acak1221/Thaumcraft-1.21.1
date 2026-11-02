@@ -41,8 +41,10 @@ class GolemReplantTest {
         assertSame(Blocks.CARROTS, GolemReplant.seedBlock(new ItemStack(Items.CARROT)));
         assertSame(Blocks.POTATOES, GolemReplant.seedBlock(new ItemStack(Items.POTATO)));
         assertSame(Blocks.NETHER_WART, GolemReplant.seedBlock(new ItemStack(Items.NETHER_WART)));
+        assertSame(Blocks.TORCHFLOWER_CROP, GolemReplant.seedBlock(new ItemStack(Items.TORCHFLOWER_SEEDS)));
+        assertSame(Blocks.PITCHER_CROP, GolemReplant.seedBlock(new ItemStack(Items.PITCHER_POD)));
         for (var other : List.of(Items.COCOA_BEANS, Items.WHEAT, Items.SUGAR_CANE, Items.CACTUS, Items.MELON_SLICE, Items.PUMPKIN,
-                Items.TORCHFLOWER_SEEDS, Items.BONE_MEAL, Items.APPLE, Items.DIRT)) {
+                Items.TORCHFLOWER, Items.PITCHER_PLANT, Items.BONE_MEAL, Items.APPLE, Items.DIRT)) {
             assertNull(GolemReplant.seedBlock(new ItemStack(other)), other.toString());
         }
         assertNull(GolemReplant.seedBlock(ItemStack.EMPTY));

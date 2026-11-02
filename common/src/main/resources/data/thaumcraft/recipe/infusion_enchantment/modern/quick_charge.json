@@ -1,0 +1,23 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "MODERNINFUSION",
+  "enchantment": "minecraft:quick_charge",
+  "components": [
+    {
+      "item": "minecraft:redstone_block"
+    },
+    {
+      "item": "minecraft:phantom_membrane"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 8,
+    "motus": 16,
+    "sensus": 8
+  },
+  "instability": 4,
+  "first_level_minimum_cost": 18
+}

@@ -330,6 +330,7 @@ public final class ThaumcraftGearModelsClient {
         if (!voidRobe) {
             renderGear(pose, buffers, model, CULTIST_ROBE_TEXTURE, entity, slot, light, context, -1,
                     RenderType.entityCutoutNoCull(CULTIST_ROBE_TEXTURE));
+            thaumcraft.client.renderers.models.gear.RobeArmorTrims.render(pose, buffers, armor, slot, light, model);
             return;
         }
         int tint = 0xff000000 | ItemRobeArmor.color(armor);
@@ -340,6 +341,7 @@ public final class ThaumcraftGearModelsClient {
                     layer.dyed() ? tint : -1,
                     layer.dyed() ? RenderType.entityTranslucent(sheet) : RenderType.entityCutoutNoCull(sheet));
         }
+        thaumcraft.client.renderers.models.gear.RobeArmorTrims.render(pose, buffers, armor, slot, light, model);
     }
 
     /**
@@ -354,6 +356,7 @@ public final class ThaumcraftGearModelsClient {
         boolean goggles = armor.getItem() instanceof ItemFortressArmor && armor.has(thaumcraft.common.config.ThaumcraftEquipment.FORTRESS_GOGGLES.get());
         model.setPieceVisibility(set, mask, goggles);
         renderGear(pose, buffers, model, FORTRESS_TEXTURE, entity, slot, light, context, -1);
+        thaumcraft.client.renderers.models.gear.FortressArmorTrims.render(pose, buffers, armor, slot, light, model);
     }
 
     /** The original ModelKnightArmor for a worn cultist plate piece. */

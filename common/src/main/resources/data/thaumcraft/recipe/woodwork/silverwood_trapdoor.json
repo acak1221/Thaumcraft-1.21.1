@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PPP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "thaumcraft:silverwood_planks"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:silverwood_trapdoor",
+    "count": 2
+  }
+}

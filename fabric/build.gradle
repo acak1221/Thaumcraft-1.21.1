@@ -298,6 +298,16 @@ def multiplayerAllowPartial = providers.gradleProperty('multiplayerAllowPartial'
 // acceptance processes has to stay small enough to survive the OOM killer.
 def multiplayerHeap = providers.gradleProperty('multiplayerHeap').getOrElse('768M')
 loom.runs {
+ modernAdaptationsClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft modern content client'
+  runDir 'run-modern-adaptations-client'
+  vmArg '-Xmx1536M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.modernAdaptationsClient=true'
+  programArgs '--width', '1280', '--height', '900'
+ }
  deepslateOreClient {
   client()
   source sourceSets.clientTest
@@ -667,11 +677,31 @@ tasks.named('runMultiplayerPeerClient') {
   logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', modernAdaptationsClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
 
 tasks.named('runRecipeTransferClient') { dependsOn tasks.named('clientTestClasses') }
 tasks.named('runWandCrucibleClient') { dependsOn tasks.named('clientTestClasses') }
 tasks.named('runDeepslateOreClient') { dependsOn tasks.named('clientTestClasses') }
+tasks.named('runModernAdaptationsClient') {
+ dependsOn tasks.named('clientTestClasses')
+ doFirst { delete file('run-modern-adaptations-client/modern-adaptations-client-result.json') }
+ doLast {
+  def receipt = file('run-modern-adaptations-client/modern-adaptations-client-result.json')
+  if (!receipt.isFile()) throw new GradleException('Modern adaptations client produced no receipt')
+  def result = new groovy.json.JsonSlurper().parse(receipt, 'UTF-8')
+  if (result.status != 'SCRIPT_PASSED' || !(result.captures instanceof List) || result.captures.size() != 25) {
+   throw new GradleException('Modern adaptations client did not complete all 25 captures; inspect ' + receipt)
+  }
+  def captureRoot = file('run-modern-adaptations-client/screenshots').toPath().toAbsolutePath().normalize()
+  result.captures.each { capture ->
+   def path = java.nio.file.Path.of(capture.path as String).toAbsolutePath().normalize()
+   if (!path.startsWith(captureRoot) || !path.fileName.toString().startsWith(result.run_id + '-')
+       || !java.nio.file.Files.isRegularFile(path) || java.nio.file.Files.size(path) != (capture.bytes as long)) {
+    throw new GradleException('Missing or changed native modern adaptations capture: ' + path)
+   }
+  }
+ }
+}
 
 // Add-on authors compile against the mod jar; its sources jar carries the shared code too, the public
 // thaumcraft.api among it, so an IDE shows the documented API rather than decompiled classes.

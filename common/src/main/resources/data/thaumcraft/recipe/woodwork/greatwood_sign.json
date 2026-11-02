@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PPP",
+    "PPP",
+    " S "
+  ],
+  "key": {
+    "P": {
+      "item": "thaumcraft:greatwood_planks"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:greatwood_sign",
+    "count": 3
+  }
+}

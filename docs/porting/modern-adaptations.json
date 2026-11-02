@@ -1,0 +1,825 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-11-02",
+  "scope": "Seven owner-approved modern adaptations in base Thaumcraft; Fabric 1.21.1 Java 21",
+  "artifact": {
+    "path": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.17.jar",
+    "bytes": 15955736,
+    "sha256": "a67c0b233c5b4f69d9f6b1c7a789d4f7946e46a09d86c2d8387af7693d568913"
+  },
+  "preserved_baseline": {
+    "canonical_research": 201,
+    "original_infusion_enchantment_recipes": 24,
+    "live_research": 203
+  },
+  "content": {
+    "modern_mob_aspect_rows": 9,
+    "modern_crop_groups": 5,
+    "wood_blocks": 20,
+    "wood_items": 16,
+    "wood_recipes": 16,
+    "modern_loot_tables": 14,
+    "stonecutter_recipes": 5,
+    "modern_enchantment_recipes": 12,
+    "custom_trim_renderers": [
+      "fortress",
+      "void_robe"
+    ]
+  },
+  "junit": {
+    "tests": 2874,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5
+  },
+  "native_tests": [
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernenchantmentcompatibilityandlimits",
+      "time": "0.041",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernwoodworkrecipespaymaterials",
+      "time": "0.006",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernmobaspectsrespectpublicapi",
+      "time": "0.102",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernresearchhasactualrecipepages",
+      "time": "0.003",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernwoodworkplacementandsigndata",
+      "time": "0.364",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernenchantmentinfusionpaysallinputs",
+      "time": "0.37",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernmobscanusesrealheldsession",
+      "time": "0.215",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.moderngolemsharvestandreplantcrops",
+      "time": "1.39",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernstructuresyieldnativeloot",
+      "time": "0.062",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernarmorsmithingpreservesequipment",
+      "time": "0.063",
+      "passed": true
+    },
+    {
+      "classname": "fabric-gametest-api-v1:empty",
+      "name": "modernadaptationsgametests.modernstonecutterpaysforbuildingblocks",
+      "time": "0.032",
+      "passed": true
+    }
+  ],
+  "assets": {
+    "asset_python_tests": 71,
+    "composed_python_tests": 18,
+    "verification": {
+      "atlas_mipmap_level_guard": 4,
+      "atlas_sprites_available": 518,
+      "checked_atlas_sprite_refs": 4141,
+      "checked_composed_files": 294,
+      "checked_composed_sites": 52,
+      "checked_composed_sprites": 26,
+      "checked_external_model_texture_refs": 3,
+      "checked_literal_client_files": 139,
+      "checked_local_model_refs": 3256,
+      "checked_model_texture_refs": 4144,
+      "checked_sound_event_ids": 66,
+      "checked_sound_event_refs": 0,
+      "checked_sound_refs": 111,
+      "missing_references": 0
+    }
+  },
+  "client": {
+    "status": "SCRIPT_PASSED",
+    "run_id": "modern-adaptations-2026-11-02T10-34-32.410750373Z",
+    "stage": 38,
+    "fixture": "fresh1.21.1 flat world; supplied modern woodwork, labelled native sign text, native armour stands/components, all-aspect/research knowledge and frog; not survival acquisition",
+    "checks": [
+      {
+        "woodwork_models_and_names": 16,
+        "locale": "en_us"
+      },
+      {
+        "native_sign_text_glow_wax": true,
+        "locale": "en_us"
+      },
+      {
+        "existing_text_preserved": true,
+        "native_sign_editor": "standing",
+        "typed_text_committed_on_server": "Synced"
+      },
+      {
+        "existing_text_preserved": true,
+        "native_sign_editor": "hanging",
+        "typed_text_committed_on_server": "Synced"
+      },
+      {
+        "opened_on_server": true,
+        "real_client_door_use": "greatwood_door"
+      },
+      {
+        "locale": "en_us",
+        "native_inventory_names": {
+          "greatwood_door": "Greatwood Door",
+          "greatwood_trapdoor": "Greatwood Trapdoor",
+          "greatwood_fence": "Greatwood Fence",
+          "greatwood_fence_gate": "Greatwood Fence Gate",
+          "greatwood_sign": "Greatwood Sign",
+          "greatwood_hanging_sign": "Greatwood Hanging Sign",
+          "greatwood_button": "Greatwood Button",
+          "greatwood_pressure_plate": "Greatwood Pressure Plate",
+          "silverwood_door": "Silverwood Door",
+          "silverwood_trapdoor": "Silverwood Trapdoor",
+          "silverwood_fence": "Silverwood Fence",
+          "silverwood_fence_gate": "Silverwood Fence Gate",
+          "silverwood_sign": "Silverwood Sign",
+          "silverwood_hanging_sign": "Silverwood Hanging Sign",
+          "silverwood_button": "Silverwood Button",
+          "silverwood_pressure_plate": "Silverwood Pressure Plate"
+        }
+      },
+      {
+        "woodwork_models_and_names": 16,
+        "locale": "ru_ru"
+      },
+      {
+        "native_sign_text_glow_wax": true,
+        "locale": "ru_ru"
+      },
+      {
+        "locale": "ru_ru",
+        "native_inventory_names": {
+          "greatwood_door": "Дверь из великого дерева",
+          "greatwood_trapdoor": "Люк из великого дерева",
+          "greatwood_fence": "Забор из великого дерева",
+          "greatwood_fence_gate": "Калитка из великого дерева",
+          "greatwood_sign": "Табличка из великого дерева",
+          "greatwood_hanging_sign": "Подвесная табличка из великого дерева",
+          "greatwood_button": "Кнопка из великого дерева",
+          "greatwood_pressure_plate": "Нажимная плита из великого дерева",
+          "silverwood_door": "Дверь из сребродрева",
+          "silverwood_trapdoor": "Люк из сребродрева",
+          "silverwood_fence": "Забор из сребродрева",
+          "silverwood_fence_gate": "Калитка из сребродрева",
+          "silverwood_sign": "Табличка из сребродрева",
+          "silverwood_hanging_sign": "Подвесная табличка из сребродрева",
+          "silverwood_button": "Кнопка из сребродрева",
+          "silverwood_pressure_plate": "Нажимная плита из сребродрева"
+        }
+      },
+      {
+        "fortress_patterns": [
+          "sentry/diamond",
+          "dune/gold"
+        ],
+        "native_armor_stands": 5,
+        "void_pattern": "sentry/emerald"
+      },
+      {
+        "last_sprite": "minecraft:trims/models/armor/dune_gold",
+        "fortress_trim_rendered": 702
+      },
+      {
+        "existing_mask_and_goggles_retained": true,
+        "actual_player_fortress_trim_rendered": true
+      },
+      {
+        "native_dyed_void_robe_control": true,
+        "cloth_rgb": "335599",
+        "trim_pattern": "sentry/gold"
+      },
+      {
+        "robe_trim_rendered": 366,
+        "last_sprite": "minecraft:trims/models/armor/sentry_gold"
+      },
+      {
+        "server_knowledge_committed": true,
+        "frog_uuid": "172587f3-1aa7-4288-9456-7c81910852b1",
+        "real_native_entity_scan": "@entity:minecraft:frog"
+      },
+      {
+        "native_research": "MODERNINFUSION",
+        "resolved_recipe_ids": [
+          "thaumcraft:infusion_enchantment/modern/multishot",
+          "thaumcraft:infusion_enchantment/modern/loyalty",
+          "thaumcraft:infusion_enchantment/modern/riptide",
+          "thaumcraft:infusion_enchantment/modern/piercing",
+          "thaumcraft:infusion_enchantment/modern/breach",
+          "thaumcraft:infusion_enchantment/modern/quick_charge",
+          "thaumcraft:infusion_enchantment/modern/density",
+          "thaumcraft:infusion_enchantment/modern/impaling",
+          "thaumcraft:infusion_enchantment/modern/channeling"
+        ]
+      },
+      {
+        "visible_recipe_icons": [
+          "loyalty"
+        ],
+        "native_book_spread": 0
+      },
+      {
+        "visible_recipe_icons": [
+          "impaling",
+          "riptide"
+        ],
+        "native_book_spread": 2
+      },
+      {
+        "visible_recipe_icons": [
+          "channeling",
+          "multishot"
+        ],
+        "native_book_spread": 4
+      },
+      {
+        "visible_recipe_icons": [
+          "piercing",
+          "quick_charge"
+        ],
+        "native_book_spread": 6
+      },
+      {
+        "visible_recipe_icons": [
+          "density",
+          "breach"
+        ],
+        "native_book_spread": 8
+      },
+      {
+        "native_research": "DEEPINFUSION",
+        "resolved_recipe_ids": [
+          "thaumcraft:infusion_enchantment/modern/wind_burst",
+          "thaumcraft:infusion_enchantment/modern/swift_sneak",
+          "thaumcraft:infusion_enchantment/modern/soul_speed"
+        ]
+      },
+      {
+        "visible_recipe_icons": [
+          "wind_burst"
+        ],
+        "native_book_spread": 0
+      },
+      {
+        "visible_recipe_icons": [
+          "soul_speed",
+          "swift_sneak"
+        ],
+        "native_book_spread": 2
+      }
+    ],
+    "captures": [
+      {
+        "bytes": 382915,
+        "path": "docs/images/modern-adaptations/en-woodwork-both-families.png",
+        "locale": "en_us",
+        "name": "en-woodwork-both-families",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-en-woodwork-both-families.png",
+        "sha256": "d3ceb4fce9a8b94f6fb8ff708c191afde42c095e07432559a987a825921ab585"
+      },
+      {
+        "bytes": 351259,
+        "path": "docs/images/modern-adaptations/en-greatwood-door-trapdoor-fence-signs.png",
+        "locale": "en_us",
+        "name": "en-greatwood-door-trapdoor-fence-signs",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-en-greatwood-door-trapdoor-fence-signs.png",
+        "sha256": "60869ee3bccfbce2a091e40f65e3dbe07cd5ade08371b1c13269724285a1a8ce"
+      },
+      {
+        "bytes": 349684,
+        "path": "docs/images/modern-adaptations/en-silverwood-door-trapdoor-fence-signs.png",
+        "locale": "en_us",
+        "name": "en-silverwood-door-trapdoor-fence-signs",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-en-silverwood-door-trapdoor-fence-signs.png",
+        "sha256": "d270ac6c3695671e12f22cf65d5301ad99aed44f1d976926cf66dc7acb12e173"
+      },
+      {
+        "bytes": 166271,
+        "path": "docs/images/modern-adaptations/en-greatwood-native-sign-editor.png",
+        "locale": "en_us",
+        "name": "en-greatwood-native-sign-editor",
+        "screen": "net.minecraft.client.gui.screens.inventory.SignEditScreen",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-en-greatwood-native-sign-editor.png",
+        "sha256": "6fe59116ef170382aef9514efc7c97951c7ac32339ebf4092228b61adc52fab7"
+      },
+      {
+        "bytes": 168677,
+        "path": "docs/images/modern-adaptations/en-silverwood-native-hanging-sign-editor.png",
+        "locale": "en_us",
+        "name": "en-silverwood-native-hanging-sign-editor",
+        "screen": "net.minecraft.client.gui.screens.inventory.HangingSignEditScreen",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-en-silverwood-native-hanging-sign-editor.png",
+        "sha256": "ed7ec471543d02b783838e7c1a3cecaf2971ddcc7ae8fde2a30add5d6bf6cd17"
+      },
+      {
+        "bytes": 171241,
+        "path": "docs/images/modern-adaptations/en-greatwood-door-after-native-use.png",
+        "locale": "en_us",
+        "name": "en-greatwood-door-after-native-use",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-en-greatwood-door-after-native-use.png",
+        "sha256": "e9b66c8f4ddaf767fa06afc7cddc812ec21f87426a8cef783fe81c54dc93e658"
+      },
+      {
+        "bytes": 387368,
+        "path": "docs/images/modern-adaptations/en-native-woodwork-inventory.png",
+        "locale": "en_us",
+        "name": "en-native-woodwork-inventory",
+        "screen": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-en-native-woodwork-inventory.png",
+        "sha256": "e522ea5ae3cc7bb66cab7a060c055d947be8b8c2d734936b5e5ec31b2b413df7"
+      },
+      {
+        "bytes": 387022,
+        "path": "docs/images/modern-adaptations/ru-native-woodwork-inventory-after-reload.png",
+        "locale": "ru_ru",
+        "name": "ru-native-woodwork-inventory-after-reload",
+        "screen": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-native-woodwork-inventory-after-reload.png",
+        "sha256": "99f22bbbcacb4d51cae6c4284a7b699eda47e7ce94cf3126327f035b4ec5ffa7"
+      },
+      {
+        "bytes": 221467,
+        "path": "docs/images/modern-adaptations/ru-woodwork-text-and-models-after-reload.png",
+        "locale": "ru_ru",
+        "name": "ru-woodwork-text-and-models-after-reload",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-woodwork-text-and-models-after-reload.png",
+        "sha256": "0fe6ee6ce0601b9e9107e4b33b695a9c7189e82d6e3662a597fb54041f977eb7"
+      },
+      {
+        "bytes": 212803,
+        "path": "docs/images/modern-adaptations/ru-native-fortress-void-trim-controls.png",
+        "locale": "ru_ru",
+        "name": "ru-native-fortress-void-trim-controls",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-native-fortress-void-trim-controls.png",
+        "sha256": "0534167be3098d2d3d99f1889586002adddfc66f7483417c9609625a85e6fa20"
+      },
+      {
+        "bytes": 231041,
+        "path": "docs/images/modern-adaptations/ru-fortress-trim-diamond-sentry-gold-dune-close.png",
+        "locale": "ru_ru",
+        "name": "ru-fortress-trim-diamond-sentry-gold-dune-close",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-fortress-trim-diamond-sentry-gold-dune-close.png",
+        "sha256": "583a45b01326588c2a59a6940067e4e62d4977b5499c1df4c79dd4487b1d3358"
+      },
+      {
+        "bytes": 203062,
+        "path": "docs/images/modern-adaptations/ru-player-worn-fortress-trim-mask-goggles.png",
+        "locale": "ru_ru",
+        "name": "ru-player-worn-fortress-trim-mask-goggles",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-player-worn-fortress-trim-mask-goggles.png",
+        "sha256": "411dad65ab8ca9d539d3ae7c7324075aeade20215a025b7d920e575cfbf2c2bb"
+      },
+      {
+        "bytes": 214244,
+        "path": "docs/images/modern-adaptations/ru-dyed-void-robes-native-trim-control.png",
+        "locale": "ru_ru",
+        "name": "ru-dyed-void-robes-native-trim-control",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-dyed-void-robes-native-trim-control.png",
+        "sha256": "f75ad397ddef587221dd4a8b89e7ee9b059f64fdfc4a83a20eb0ef9431d51341"
+      },
+      {
+        "bytes": 197738,
+        "path": "docs/images/modern-adaptations/ru-dyed-void-robe-gold-sentry-trim-close.png",
+        "locale": "ru_ru",
+        "name": "ru-dyed-void-robe-gold-sentry-trim-close",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-dyed-void-robe-gold-sentry-trim-close.png",
+        "sha256": "dad1e15e7438b6ea109d773fb022f2f766228ab16cda23df44d0b1dae4849d91"
+      },
+      {
+        "bytes": 363521,
+        "path": "docs/images/modern-adaptations/ru-new-frog-native-thaumometer-before-scan.png",
+        "locale": "ru_ru",
+        "name": "ru-new-frog-native-thaumometer-before-scan",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-new-frog-native-thaumometer-before-scan.png",
+        "sha256": "196e30b6fdd14ffeba7c1326671cef4ab2b43d41c3f358633d37560863ee0f81"
+      },
+      {
+        "bytes": 374901,
+        "path": "docs/images/modern-adaptations/ru-new-frog-real-timed-scan-runes.png",
+        "locale": "ru_ru",
+        "name": "ru-new-frog-real-timed-scan-runes",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-new-frog-real-timed-scan-runes.png",
+        "sha256": "68cc5f96cfaae1191bda415728265fb02a775601731f83e2b8c01e06ed9aec6c"
+      },
+      {
+        "bytes": 405051,
+        "path": "docs/images/modern-adaptations/ru-new-frog-native-thaumometer-known.png",
+        "locale": "ru_ru",
+        "name": "ru-new-frog-native-thaumometer-known",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-new-frog-native-thaumometer-known.png",
+        "sha256": "82bf04872deca724c549b35310f7d48b38cc8c42b6c19d7fc692ddb4a38c6019"
+      },
+      {
+        "bytes": 353314,
+        "path": "docs/images/modern-adaptations/ru-modern-crop-native-world-fixtures.png",
+        "locale": "ru_ru",
+        "name": "ru-modern-crop-native-world-fixtures",
+        "screen": "native world",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-modern-crop-native-world-fixtures.png",
+        "sha256": "8245108637c364e70a162bd5d27b5dd9ba3cb7fa6314ec2fbf5ac4af9f6d20a1"
+      },
+      {
+        "bytes": 907370,
+        "path": "docs/images/modern-adaptations/ru-modern-infusion-native-book-first.png",
+        "locale": "ru_ru",
+        "name": "ru-modern-infusion-native-book-first",
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-modern-infusion-native-book-first.png",
+        "sha256": "717a0cea52f4f7b64264bb3d20f1a87ed2da22be8eaf6e95e5eed82140f0ecd1"
+      },
+      {
+        "bytes": 918504,
+        "path": "docs/images/modern-adaptations/ru-modern-infusion-native-book-impaling-riptide.png",
+        "locale": "ru_ru",
+        "name": "ru-modern-infusion-native-book-impaling-riptide",
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-modern-infusion-native-book-impaling-riptide.png",
+        "sha256": "cb876c1853dd653d61b517595439956260c675edd4d996fac7063965aa73123c"
+      },
+      {
+        "bytes": 919773,
+        "path": "docs/images/modern-adaptations/ru-modern-infusion-native-book-channeling-multishot.png",
+        "locale": "ru_ru",
+        "name": "ru-modern-infusion-native-book-channeling-multishot",
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-modern-infusion-native-book-channeling-multishot.png",
+        "sha256": "f52fb5fb1670e69c5e7a1e1e18e2595d33ad851c2e3dd8bbad8b3ece287e5703"
+      },
+      {
+        "bytes": 916045,
+        "path": "docs/images/modern-adaptations/ru-modern-infusion-native-book-piercing-quick-charge.png",
+        "locale": "ru_ru",
+        "name": "ru-modern-infusion-native-book-piercing-quick-charge",
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-modern-infusion-native-book-piercing-quick-charge.png",
+        "sha256": "79c91fd281d976502e9f2ff6c9fb5536177d64019dcace5a2a80e717b084d326"
+      },
+      {
+        "bytes": 915517,
+        "path": "docs/images/modern-adaptations/ru-modern-infusion-native-book-last.png",
+        "locale": "ru_ru",
+        "name": "ru-modern-infusion-native-book-last",
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-modern-infusion-native-book-last.png",
+        "sha256": "14f064def4c7c173988cfcc11af93a011d289ed07291c69f54b3489026f9b1ab"
+      },
+      {
+        "bytes": 901926,
+        "path": "docs/images/modern-adaptations/ru-deep-infusion-native-book-first.png",
+        "locale": "ru_ru",
+        "name": "ru-deep-infusion-native-book-first",
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-deep-infusion-native-book-first.png",
+        "sha256": "98cb435147b903585c6313cdba4e18883a2bce1232657f77fb3498acdd115d6c"
+      },
+      {
+        "bytes": 912536,
+        "path": "docs/images/modern-adaptations/ru-deep-infusion-native-book-last.png",
+        "locale": "ru_ru",
+        "name": "ru-deep-infusion-native-book-last",
+        "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+        "native_capture": "/workspace/Thaumcraft-1.21.1/fabric/run-modern-adaptations-client/screenshots/modern-adaptations-2026-11-02T10-34-32.410750373Z-ru-deep-infusion-native-book-last.png",
+        "sha256": "778a953827833e458096698741a56c21c9233f2c96b57c5b8a75777b59753053"
+      }
+    ]
+  },
+  "production_server": {
+    "ready": true,
+    "tick_queries": [
+      7,
+      57
+    ],
+    "normal_stop": true,
+    "exit_code": 0,
+    "inputs": [
+      {
+        "file": "Thaumcraft-fabric-0.1.0-alpha.17.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.17.jar",
+        "sha256": "a67c0b233c5b4f69d9f6b1c7a789d4f7946e46a09d86c2d8387af7693d568913",
+        "bytes": 15955736
+      },
+      {
+        "file": "fabric-api-0.116.17+1.21.1.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-api/0.116.17+1.21.1/810b2b0195371a012906241d8b85a32a1d6de53c/fabric-api-0.116.17+1.21.1.jar",
+        "sha256": "79ac44b40780acbd884b34c50be1e39af682847e5f5cb3b1fddeeaa768dce800",
+        "bytes": 2452735
+      },
+      {
+        "file": "architectury-fabric-13.0.11.jar",
+        "source": "/workspace/Thaumcraft-1.21.1/.gradle21/caches/modules-2/files-2.1/dev.architectury/architectury-fabric/13.0.11/ae6c9231a07d8abac28847693d237166790f72a6/architectury-fabric-13.0.11.jar",
+        "sha256": "659016af3d85f3cf68bafe0e28bc80036779ff3d346f8c632d1e738075745678",
+        "bytes": 609113
+      }
+    ],
+    "optional_debug_messages": [
+      "[10:26:24] [main/INFO]: Fernflower could not be loaded, exported classes will not be decompiled. NoClassDefFoundError: org/jetbrains/java/decompiler/main/extern/IResultSaver"
+    ],
+    "mapping_errors": []
+  },
+  "commands": {
+    "unit": "./gradlew :common:test",
+    "native": "./gradlew :fabric:runGameTest -PgameTestFilter=modernenchantmentcompatibilityandlimits,modernwoodworkrecipespaymaterials,modernmobaspectsrespectpublicapi,modernresearchhasactualrecipepages,modernwoodworkplacementandsigndata,modernenchantmentinfusionpaysallinputs,modernmobscanusesrealheldsession,moderngolemsharvestandreplantcrops,modernstructuresyieldnativeloot,modernarmorsmithingpreservesequipment,modernstonecutterpaysforbuildingblocks",
+    "client": "DISPLAY=:97 LIBGL_ALWAYS_SOFTWARE=1 ALSOFT_DRIVERS=null ./gradlew :fabric:runModernAdaptationsClient -PwithEmi -x :fabric:downloadAssets",
+    "build": "./gradlew :fabric:build :fabric:verifyProductionIsolation"
+  },
+  "rejected_diagnostics": [
+    {
+      "run": "gametest-1",
+      "reason": "Fixture overlapped GameTest block entity; sequential RNG seed sample omitted one archaeology reward."
+    },
+    {
+      "run": "gametest-2",
+      "reason": "Berry assertion counted historical break callbacks from earlier crop phases on the shared fixture cells."
+    },
+    {
+      "run": "client-1",
+      "status": "FAILED",
+      "stage": 24,
+      "reason": "Probe did not synchronize selected hotbar slot to the client; scan phase timed out. Sign UV/chain visual defect was corrected before accepted client-2."
+    }
+  ],
+  "limits": [
+    "Supplied fresh 1.21.1 fixtures and knowledge; no survival acquisition replay.",
+    "No multiplayer or NeoForge acceptance in this checkpoint.",
+    "Custom trim visuals inspected for Sentry and Dune with diamond/gold; all native pattern/material pairs were not individually photographed.",
+    "Loot verification loads and rolls the 14 actual vanilla tables; this is not natural structure discovery or a brushing gameplay replay.",
+    "Only existing real seed/pod drops within the original six-block golem search can fund Order planting; torchflowers and pitcher plants do not drop their own seeds."
+  ],
+  "production_source_hashes": {
+    "common/src/main/java/thaumcraft/api/ThaumcraftApi.java": "1a8666900a969a32307809d464f9142fba0eda5a31fc567e4d23270a2084bc7a",
+    "common/src/main/java/thaumcraft/client/ClientSetup.java": "d7e478cd4eca8ddba69c7b99805b6435d215c1a8eaa995a1f5563adc309e0f6d",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "8d064e620e912ad577d02860b9f7345340bfa9a7ccbf45ae17afb932c6c7221f",
+    "common/src/main/java/thaumcraft/client/ThaumcraftWoodworkClient.java": "042de133a79d4599514e3f836a69c296d5ab761fa232d894cdab72dba7e19faf",
+    "common/src/main/java/thaumcraft/client/renderers/block/WoodworkSignModels.java": "995f9a2c53676827173e3950fb0b36b5d6ed1142b3c063ac0b92c4c71c904f15",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ArmorTrimModelGeometry.java": "b6c6b57c0b2b135dd1615f819bd9ccd7168fd4fc613e971d9b97ab2b0f592d4e",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/FortressArmorTrims.java": "69fa2e350211ca915413ba74ab46eca23c311203d7fc75db9f0092b433b29c12",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelFortressTrim.java": "e883377444ca2d3d6f7c4f6cbbb8c6fb1d5cb03b7d7c8c2ee65f1388e2c9db0a",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/ModelRobeTrim.java": "bb6ffc6368781046add7d7569983d87a2bc3f122be34936b89c35287e2996c5a",
+    "common/src/main/java/thaumcraft/client/renderers/models/gear/RobeArmorTrims.java": "b075fda6c1ba7b41bc56d821b94c3bdbf4e09905ef8b69c19d383e8703b93f6e",
+    "common/src/main/java/thaumcraft/common/Thaumcraft.java": "65fda7c591c4cda7d9524bc2c7d9e8d501dd9bb4f56a3921beadb519b830c5af",
+    "common/src/main/java/thaumcraft/common/blocks/WoodworkBlocks.java": "68b20c3c54db2c91bbecda132b12be02f31266da2e64a1b20eefd61ae1aa7ad4",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftModernResearch.java": "eb0bd11eaa1caeb0fe16129ff410d0fc524d15a1ba2bdf2a6e1cf95473015f3a",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWoodwork.java": "81f702c29d8396319598d995d0e24f84530c8474f708b19d0bfc43ae353c0461",
+    "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java": "ccdce84ba35a0f309ff7e5c4e30c6605d1bca607b6dbbddde011d47cd4b069d6",
+    "common/src/main/java/thaumcraft/common/entities/golems/GolemCrops.java": "46e3b900da48505cb7f96bcfd74dc27e07e3cfd1f8ddc3a85b65eca23a4c181d",
+    "common/src/main/java/thaumcraft/common/entities/golems/GolemHarvestPlatform.java": "0eecf46faed1c9b794c3298a7163adad6ea9e48fe4390a3eb0e684117cd7fe8a",
+    "common/src/main/java/thaumcraft/common/entities/golems/GolemReplant.java": "36e6cecf679788553d5e835917fa1a46535f87821623975b381899aa81b09cfd",
+    "common/src/main/java/thaumcraft/common/lib/loot/ModernStructureLoot.java": "a14e6da7a268b1bc23c545be54eabbfcc7ae8c5c46877c91a343f00a71e1b128",
+    "common/src/main/java/thaumcraft/common/lib/research/EntityAspectBindings.java": "2ffa4a65abc896dbd6c699ab01bb48bec4895d66d6634cbf4abea171b5680fec",
+    "common/src/main/java/thaumcraft/common/lib/research/ModernEntityAspectBindings.java": "4f8401b5ee3f00a09951a9698ece6134d1cc4028ee5918cbabd1768d2ba73cec",
+    "common/src/main/java/thaumcraft/common/mixin/client/WoodworkHangingSignEditorMixin.java": "289281046beff92383459bf4553a286013d3749c7cd3a6752a81d1ee80bd564b",
+    "common/src/main/java/thaumcraft/common/mixin/client/WoodworkSignEditorMixin.java": "ac56b45a9c04117f1cc194229a69893b47cfd16a5fa5730f8b47ad8b096f1759",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_button.json": "b2f362d2741d1f7fb3b9ae0984b1dac671b43b37b8455a9d0b64ee59e2b0eac4",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_door.json": "b4df58955e63c693508dc3f6122f81bbb905f92fd8cae55fda965e6339baa9e7",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_fence.json": "a554afed7a952f4865585459770c4a0743d26398ec5889541712462b7b6b3ee7",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_fence_gate.json": "a2db692fe5315463e32a05b2121b8b49b60447944086625dae694962c1c5957a",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_hanging_sign.json": "e6b1d6bdb714cddebe474f6de9f0ab65f826edd624d9b0f183d01667ec8e8d49",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_pressure_plate.json": "68e86692f272fca55217800792ce5be55b0d678832790288fc3c4c9b0c29efea",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_sign.json": "628609aae18b8791a1be94a80bf9496e7aaf6459a4b16bb2b8963a510a30435c",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_trapdoor.json": "e838e9c9198069e054cd8baf8828061eec50f6ba9fb39ae9903e5bb0d670c424",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_wall_hanging_sign.json": "e6b1d6bdb714cddebe474f6de9f0ab65f826edd624d9b0f183d01667ec8e8d49",
+    "common/src/main/resources/assets/thaumcraft/blockstates/greatwood_wall_sign.json": "628609aae18b8791a1be94a80bf9496e7aaf6459a4b16bb2b8963a510a30435c",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_button.json": "92c9b81b3ce7cb48ae6cb6b1c9b6cbfacc080465b9ea83fe976e7d40cda9ea66",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_door.json": "badeb8c0d027f05e12f94baf0d5d4fd7929b4b49c33a359e7ca983d80ea2e111",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_fence.json": "4115af30e687aebcc01a1150fd482280d3bbd5e02f88320c70c14af3c8854dd4",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_fence_gate.json": "e5e64847910aa76fdf083704dcaab3e7390025896d581add67ca85c21c5bd814",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_hanging_sign.json": "0d59c9e6425fc8b62939ef8aca95671b5a0e2995c6829d3ac6409b92c3824f4d",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_pressure_plate.json": "2610985ab285cc1bd7b51a7d70b0543ebbf223ac552c041dfe1b423a3d279b05",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_sign.json": "c1057f614dacab2b0228d6a98fc393385ac6da4ec15375c7d314b1ccda9789c6",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_trapdoor.json": "fbf128d1f8d6b90dfb4a870caf9ad30005084a16edf1af6960e09ae87308b145",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_wall_hanging_sign.json": "0d59c9e6425fc8b62939ef8aca95671b5a0e2995c6829d3ac6409b92c3824f4d",
+    "common/src/main/resources/assets/thaumcraft/blockstates/silverwood_wall_sign.json": "c1057f614dacab2b0228d6a98fc393385ac6da4ec15375c7d314b1ccda9789c6",
+    "common/src/main/resources/assets/thaumcraft/lang/en_us.json": "67d5190f7cdedfe020488639dbfb55059162dd655f70e6569787502c828a781c",
+    "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json": "172dd3e801bb04e753813948373a89ba5e049d5399ca06d5c87466bf139c45e4",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_button.json": "35f1383830338cdc67db11d64be678f694f4e228d00e2a0cf0f4556c035ac68b",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_button_inventory.json": "4becf355dd5a5e7d4eb4558c81ea8a204991a98c932ff4fee0dcd6057f6dd5fb",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_button_pressed.json": "bfa6b13dabc897702b4c789500b804c382f9862f46d8e3a94ba1ea255635fd23",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_bottom_left.json": "c0fb919066a9c4431f9aa06b14667e39131ac78359ff3f564ff06cc6db25035c",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_bottom_left_open.json": "c0fb919066a9c4431f9aa06b14667e39131ac78359ff3f564ff06cc6db25035c",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_bottom_right.json": "c6315e6a522889cb727b39ea0d606bd46529ac229d005c1588b143d47c5233f2",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_bottom_right_open.json": "c6315e6a522889cb727b39ea0d606bd46529ac229d005c1588b143d47c5233f2",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_top_left.json": "4f1c6e9d63e4515a8c10bd7f00111cfcfe5194868684cf6df2c3688805d013c3",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_top_left_open.json": "4f1c6e9d63e4515a8c10bd7f00111cfcfe5194868684cf6df2c3688805d013c3",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_top_right.json": "4f1c6e9d63e4515a8c10bd7f00111cfcfe5194868684cf6df2c3688805d013c3",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_door_top_right_open.json": "4f1c6e9d63e4515a8c10bd7f00111cfcfe5194868684cf6df2c3688805d013c3",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_fence_gate.json": "84abf86ea166f298c393391d7fd7c610fd3f48a3ecd812e89da78942c8cae485",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_fence_gate_open.json": "4bb5211083baa775db7a32b87701e31f8b378751180fa93fb9bb0c29f41d8375",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_fence_gate_wall.json": "45130b520f670996e6d5750f9fbf570ced35ed3e8dc49fb540c5e6573a3535c2",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_fence_gate_wall_open.json": "67d30ce9fbb4a6d4ca9d56ba5458ef3737debf910428943e665c9ea48cf9bf57",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_fence_inventory.json": "9645e21478e8a457f9691b503c4f08017a95f29106b4d4cb988467f974716ec5",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_fence_post.json": "c473282e112933a8d44429c23194aa0a34aeb6c2ee7ba44a823cf9e1aae536c4",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_fence_side.json": "54b8f91bed776bb4d5d4520ea097d8e53039b486aee04d4a9ea957a8facaf490",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_hanging_sign.json": "790a2542f5f8eff410be5f8ae3443b72035489f7e7cdf9abe460e8068d632672",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_pressure_plate.json": "6e37e4ae7cf9c555499ef6c8a180617e1369bae196c400a44f16027cbf96af15",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_pressure_plate_down.json": "59daad1b0daa3da8f6b4d2bd3fe898a82f992bbcd5d1275e86e7c832b670d626",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_sign.json": "790a2542f5f8eff410be5f8ae3443b72035489f7e7cdf9abe460e8068d632672",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_trapdoor_bottom.json": "d4e493d536aed1ad070e11926642c4d459e9f5ad6963ce32edc28002d6124927",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_trapdoor_open.json": "364d77d83a9b67e376f286d754ae07b970729e76c48aa1d03c72cf77dead3378",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_trapdoor_top.json": "5708f764609d57a286bdb1abe38831992275aa92d7a4ff22b2e0db0e6bc7d839",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_wall_hanging_sign.json": "790a2542f5f8eff410be5f8ae3443b72035489f7e7cdf9abe460e8068d632672",
+    "common/src/main/resources/assets/thaumcraft/models/block/greatwood_wall_sign.json": "790a2542f5f8eff410be5f8ae3443b72035489f7e7cdf9abe460e8068d632672",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_button.json": "f6078984f23d6ee295cf89088652354ee02feccd2ba6a4817cb7bb1c9aa24015",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_button_inventory.json": "0bb70ad9f99ee0b5a19131229ceea80f5a2cf2814ec2f3c26b80eb2687d571f3",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_button_pressed.json": "3f62625ec996278046639ef3587eac1b1be3ecde88ae4093b059ba2d5822253d",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_bottom_left.json": "27d7bdb327ff9c8ab165011d6fef95746a4cac707fce328abf1cf9c4f1e787db",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_bottom_left_open.json": "27d7bdb327ff9c8ab165011d6fef95746a4cac707fce328abf1cf9c4f1e787db",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_bottom_right.json": "7f1897a77f48214358725996a5fe35ec4b8fe8394633c0df2aac7c10cb9caeee",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_bottom_right_open.json": "7f1897a77f48214358725996a5fe35ec4b8fe8394633c0df2aac7c10cb9caeee",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_top_left.json": "a61252108abec7310bba818a92bff3cea8ffe930359544a4518eeb938336f19b",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_top_left_open.json": "a61252108abec7310bba818a92bff3cea8ffe930359544a4518eeb938336f19b",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_top_right.json": "a61252108abec7310bba818a92bff3cea8ffe930359544a4518eeb938336f19b",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_door_top_right_open.json": "a61252108abec7310bba818a92bff3cea8ffe930359544a4518eeb938336f19b",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_fence_gate.json": "5c79f54169b8157db28e3eda740fdb31b20ffde5c147042139574f317b31a60c",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_fence_gate_open.json": "9619a9ef029a6d11fd1ef8300320d1d0594ad2c0f3361f507498edb2cb475794",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_fence_gate_wall.json": "9f610411bebb66ed8aa7ffc83c9f09a5b84b1217dbb45f98e9b1581fbce7e397",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_fence_gate_wall_open.json": "bb62c4b58533603b7a8654ce0f3ddf3b91a140dbbcd30968f7907219a69a40dd",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_fence_inventory.json": "d2fea33c6104e4229b9551bc7b8d862fd4de7a963695113b20985152d9e69adc",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_fence_post.json": "c995c6a726f585212d6d643ef689389e0896ded73ca49059bd5789135b99e3d6",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_fence_side.json": "f8662bdc2b5bac31eed288c5c52475af71e103eaf84968eaf56c28221cace00d",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_hanging_sign.json": "bf7b54d101685dcd4f897fbf13b162451def1d41275b8df04d5ddfcb2b8c2eaf",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_pressure_plate.json": "55cb6d1f29635a3da6f8dd0cd98edd1ffcdd200a3bf57b17df891088714ac0d1",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_pressure_plate_down.json": "751126505ef7be52de2e1177e9bcd81767a66ea6b0563ac64f8a95d484d0b348",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_sign.json": "bf7b54d101685dcd4f897fbf13b162451def1d41275b8df04d5ddfcb2b8c2eaf",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_trapdoor_bottom.json": "23c07243dc4120c637150f672b72ac212fc1ca24e45699d654a7825c01027d42",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_trapdoor_open.json": "d5c8493cdc84f286daa2571e31e26ccdfaee3a23ab2446523f5ac2ce110189b9",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_trapdoor_top.json": "de2c7dfdb5cbd0b32a4728877d753ce732b8bd79179c42941b302947fd8ce131",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_wall_hanging_sign.json": "bf7b54d101685dcd4f897fbf13b162451def1d41275b8df04d5ddfcb2b8c2eaf",
+    "common/src/main/resources/assets/thaumcraft/models/block/silverwood_wall_sign.json": "bf7b54d101685dcd4f897fbf13b162451def1d41275b8df04d5ddfcb2b8c2eaf",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_button.json": "c01ca52c2fbdc94ca92c4c1e69b606b99b608b993dff531c085db101697eed62",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_door.json": "d45a4e6a56b96ed4d0d10b88addab66696f9eb73642d9dba22f1159ebc7d3441",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_fence.json": "ea280156924fbc76027ad79b0156c9a1d99bfb6925e5f44aab4ad8830476840c",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_fence_gate.json": "0ad5992e92cfc16b332eda7ddff5ec1f66e47809c36bee9cdf8dc98dd8f8ba5c",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_hanging_sign.json": "5f805456609c2c7e52a020f4bd3fce706d2669c700e668a4a280892a47b2e690",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_pressure_plate.json": "8fcb913676bbed53e929fa6dd16aedcc2695bd25f1d44970d3a1e214e091a766",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_sign.json": "466938f503d38d83aadc5941a9bd8aaac2b7bcc812ffd61025cb827330281c46",
+    "common/src/main/resources/assets/thaumcraft/models/item/greatwood_trapdoor.json": "d3dc33eeb2cb555c33a504977aacc81ab713950a8da4f2eb84b1a6d27c6a9508",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_button.json": "0ae9903590abaa4a6b1ccb2a246e0421f18368df39ed327e0526a4b1a7d6a085",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_door.json": "ebd644e1ee3c9ec16148dfe4f5d69454773603b1232a1faa943b50e288443965",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_fence.json": "09006c15787ffc0046277edba51c087077b1deded6b303dcd7889d7d584b0b5a",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_fence_gate.json": "1c19e914d32c181eab1be065b2eeaeeaa8bc8d39e192652923f0279067142dd6",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_hanging_sign.json": "e2e0607afdfabd052b3131b8145ea89a27fb97cdcd3408c21d3bbaf2d1dfbde3",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_pressure_plate.json": "d1a31f3b077f4a9bc7a752096ad0ac8b1718b4a67403dad8abb8a8d3122c2657",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_sign.json": "dc5498fc7bd74ff229e7a4901b7e40b0537806a3d882612e39a68a886c1f88a6",
+    "common/src/main/resources/assets/thaumcraft/models/item/silverwood_trapdoor.json": "1ff9ae3c79851fb96bad919cf45239b173803538c965a10e9dcf8a70195827eb",
+    "common/src/main/resources/data/minecraft/tags/block/ceiling_hanging_signs.json": "2209c53691fc71462b5e670e35b67feffd59f510647c0fd6be2848029113b1a8",
+    "common/src/main/resources/data/minecraft/tags/block/fence_gates.json": "1c96887ebccb58d7cd6d2d72ac39a0ace7f9b35af2fa2bb2f885bb76017edcd1",
+    "common/src/main/resources/data/minecraft/tags/block/mineable/axe.json": "ddbbf5b5f509ac9679f5b24b47505b6ab0503abbe807d70613b66a6c207b0219",
+    "common/src/main/resources/data/minecraft/tags/block/standing_signs.json": "ddc177819cddb4c12e58fe2ff95bdf5bf6a2fcfdb9fca81bb4270dd705288d29",
+    "common/src/main/resources/data/minecraft/tags/block/wall_hanging_signs.json": "3958b807e8cb3e0a224b64a162fc1b39d2a2b42a9a1e10a6b65b5c55a78e8beb",
+    "common/src/main/resources/data/minecraft/tags/block/wall_signs.json": "df08a953296174f55e3c16034e75c1b7e33014145fa81b7e20cb31afd58b4515",
+    "common/src/main/resources/data/minecraft/tags/block/wooden_buttons.json": "337774a6fd0e03d024b8d9fc59f33735b750d26ef57274c27040e4eaaadc36e8",
+    "common/src/main/resources/data/minecraft/tags/block/wooden_doors.json": "8870836652222bbd43531e08d0a18bf6566295569b0f94f688315a127d6c197e",
+    "common/src/main/resources/data/minecraft/tags/block/wooden_fences.json": "74d0949aef699cec4fdee765fddb7c8fbd6cc89d489429b926ed69587064a03f",
+    "common/src/main/resources/data/minecraft/tags/block/wooden_pressure_plates.json": "9bd3378613b7a353130566e57bb21662ad7dd0296b84add363a330b5fdaf4c38",
+    "common/src/main/resources/data/minecraft/tags/block/wooden_trapdoors.json": "776d654d7bd43d0366808fbdc25b0c408210bbd2003cd6ae91a756c404fbdb71",
+    "common/src/main/resources/data/minecraft/tags/item/fence_gates.json": "1c96887ebccb58d7cd6d2d72ac39a0ace7f9b35af2fa2bb2f885bb76017edcd1",
+    "common/src/main/resources/data/minecraft/tags/item/hanging_signs.json": "2209c53691fc71462b5e670e35b67feffd59f510647c0fd6be2848029113b1a8",
+    "common/src/main/resources/data/minecraft/tags/item/signs.json": "ddc177819cddb4c12e58fe2ff95bdf5bf6a2fcfdb9fca81bb4270dd705288d29",
+    "common/src/main/resources/data/minecraft/tags/item/wooden_buttons.json": "337774a6fd0e03d024b8d9fc59f33735b750d26ef57274c27040e4eaaadc36e8",
+    "common/src/main/resources/data/minecraft/tags/item/wooden_doors.json": "8870836652222bbd43531e08d0a18bf6566295569b0f94f688315a127d6c197e",
+    "common/src/main/resources/data/minecraft/tags/item/wooden_fences.json": "74d0949aef699cec4fdee765fddb7c8fbd6cc89d489429b926ed69587064a03f",
+    "common/src/main/resources/data/minecraft/tags/item/wooden_pressure_plates.json": "9bd3378613b7a353130566e57bb21662ad7dd0296b84add363a330b5fdaf4c38",
+    "common/src/main/resources/data/minecraft/tags/item/wooden_trapdoors.json": "776d654d7bd43d0366808fbdc25b0c408210bbd2003cd6ae91a756c404fbdb71",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_button.json": "7804fe0f2ff4def4d4085ac1f1265811281b87332afce89b279dde6c75c5c2cf",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_door.json": "14160faab02872c8fb7e8dc7ea52c3270324131bf503e4f4f1b53fd0b225069e",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_fence.json": "dd070f572079be381b063cb4cb6719276bcbdd560888c914c455abfb9bebcbb3",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_fence_gate.json": "2596afccf775da39d1c43f579e408c89dd78e8c30eb80ea068acaed2de5ab0f1",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_hanging_sign.json": "54d30b4aae1a0cbb851f42bf33cfcec41110890df525d66ca9ff17794c130391",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_pressure_plate.json": "1c2b1b439416d8861c41c16cb7002e033915cb72e0c460450e20021b21a13148",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_sign.json": "df8dcb35ff554610a8fdac74358e8ae05556dcc6906290d08d45f401e5867af7",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_trapdoor.json": "5410d1cd7bb85120a7aad0ed0a49eb921e6ab5efe1834c217fc25fe5341b99dc",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_wall_hanging_sign.json": "54d30b4aae1a0cbb851f42bf33cfcec41110890df525d66ca9ff17794c130391",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/greatwood_wall_sign.json": "df8dcb35ff554610a8fdac74358e8ae05556dcc6906290d08d45f401e5867af7",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_button.json": "8782ccb1a893d83c1ba6e2c8afce8701956092b58ace9d566d15fcd0f29af714",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_door.json": "5645ba191d212d0f8c792487a63c06b38af132af22ba16e7d516c9efdf5252ef",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_fence.json": "9998e0e3e805a33537639284ee726b60f4dde98fe819f303dbd858dbdf02a845",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_fence_gate.json": "482e01392a8d82152fdfc1c6173a171506f9252975fde4f7138c3c0e0c8883e5",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_hanging_sign.json": "87775c0889dad0b16efb91d6112bbebb3b3a78d645bf4096d7fbb3c8053f7d89",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_pressure_plate.json": "5d61ee89bd5aa636e81e1d354f4f5807f361f116a0ed2117c98b1530eed337e4",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_sign.json": "a402af49fb1b9d1dadf0dc84e4820b6b8b75bd4721707cb2a096875317f5d791",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_trapdoor.json": "d1dea3a1f02f93fc39150988696bfea2cb690bb4870d2d48084e8cf5c5efbcb0",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_wall_hanging_sign.json": "87775c0889dad0b16efb91d6112bbebb3b3a78d645bf4096d7fbb3c8053f7d89",
+    "common/src/main/resources/data/thaumcraft/loot_table/blocks/silverwood_wall_sign.json": "a402af49fb1b9d1dadf0dc84e4820b6b8b75bd4721707cb2a096875317f5d791",
+    "common/src/main/resources/data/thaumcraft/port/modern_entity_aspects.json": "c7fd43552c644f24361bf99d78379e47b960fae87065e3aa00bb937ee3a8defa",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/breach.json": "4f10ea583246e82496f8c2c6caa0434d397c4299b3f3ba7bc7d375a831ae8481",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/channeling.json": "7d23031f443b6f68292900f173c8cf3f368a1c9c6694c0498e2f48495982a3d5",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/density.json": "28b98444fec631f8314d51d62528536d8e4b44dfeb9a2b13fdf92e138204fa7d",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/impaling.json": "cb41319daa298f073e58b932441df81bccd4d2997a8ffd7359f90cb280341925",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/loyalty.json": "b1cb7a5428b09c173af3dcc162f9826bf1289cc14fb0e54401a05f0e44eed644",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/multishot.json": "f5666019db7f913180e86d737d475bff20ea17ef6621929bbc8f8921a5cc8e5b",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/piercing.json": "a2732fe9afb86555b918b5582fbdafcd053bcf6ab4223ce7114c1c618d1c58a8",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/quick_charge.json": "e3aae890571d5b9245a51def723d43f37de550e2ae4d007c188af37fefa4eeda",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/riptide.json": "a08baa4dc526daacc5de637ddc2ed0037baab232a53f95d7f53decedff7c1883",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/soul_speed.json": "92d6869533e9a990fe5219217f0a960f71bb685f953e948ffc155ed5da76b58d",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/swift_sneak.json": "906836e60699900eec70a9f1e2c9fb00f87c8ca1c28ad30b814868d4388414f8",
+    "common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment/modern/wind_burst.json": "ddfb6c918c0c3fe79d1db1ca897653c18433a7032ccbf78043dd3b25335852f5",
+    "common/src/main/resources/data/thaumcraft/recipe/stonecutting/arcane_stone_brick_slab_from_arcane_stone.json": "8812635cb1be12eb7dc57fa40ddfee1d14051f52d171ba6ebd69913ee34c1b18",
+    "common/src/main/resources/data/thaumcraft/recipe/stonecutting/arcane_stone_brick_slab_from_arcane_stone_bricks.json": "4d60b99068852b68354de5725b32233a1c6e73bbc37ad431d54b00d59f3386f5",
+    "common/src/main/resources/data/thaumcraft/recipe/stonecutting/arcane_stone_brick_stairs_from_arcane_stone.json": "31d31ee1eaf4c4d814df21f625ecc66a1d8f8fe017a60acab9270a9edc2cd3d4",
+    "common/src/main/resources/data/thaumcraft/recipe/stonecutting/arcane_stone_brick_stairs_from_arcane_stone_bricks.json": "e0a8959b1e2d59cac4d310f16207ea6096f7419fdcdcbe35847219cb45f56bd7",
+    "common/src/main/resources/data/thaumcraft/recipe/stonecutting/arcane_stone_bricks_from_arcane_stone.json": "aa6d0914e55dc969c4b27c694352996f49d88db0b8486b9be9469278caffbc43",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_button.json": "e0e6276b9798cce92ae46caa1c0d3bb08edabd2e2e0568135d8f853b4d8498d6",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_door.json": "286c08d9d896048b0c01f3c31b2957197f4d81d9674ca69b2a0c7394accb81b1",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_fence.json": "5d3608d9f79654d36cb238516ef8f886556935e1f7346a538d0676d4e791e8dd",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_fence_gate.json": "aa6b577d3e014c8d0e6c9ae01ac14f7f3f026379c6955dd3d497ae704dbe9aca",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_hanging_sign.json": "f4694eebd73e517ecdd30083d7ff7d87b81ec2ef81109028330f564cad42cbef",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_pressure_plate.json": "a799bb70e40edbb7b73a348f6a91187dc0b8fdfbf56a6bea4c6e31548cd61ff1",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_sign.json": "f564c1b7491d207e4ba3ee6062a1ebbd2cbcdcf6ba69c6b4dbd72179e4d4ae27",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/greatwood_trapdoor.json": "9ab8047eb19dab323bd2447862150caeddf49fab657bb823331165b57a2df6ed",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_button.json": "79fc68f8d0952408da47f402816625c01684a97ffc4b506548aa85d8bc5726d6",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_door.json": "4e8125097f6c92dc93d7935bb50bfe13c8f420129c8b2c3f5b6d161b7111678c",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_fence.json": "3f605a1d6cd521c44aad433e1c872447490141f69db819267374bd19017ba662",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_fence_gate.json": "70aedb8ca2dedec33190da384d9c5f1cd736488a24380af1a359c3c23b8e0117",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_hanging_sign.json": "bc18f68eda9e4fdb3dedd96f76f3b69fa067dca09dd427455e83c85e977eea7b",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_pressure_plate.json": "7132f8c3fb2e185556d9db77194354b60f7d1dcfabf72211bd671a2eedf67866",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_sign.json": "fcbf71507631b5d9a8e2d19007fbfd7fb3d69ac94e46c3e3c5c137058c241f8e",
+    "common/src/main/resources/data/thaumcraft/recipe/woodwork/silverwood_trapdoor.json": "c79c01b3b1e802f37fca6228287d9a9c7da3f25a0f6e9d0dae12d30d8e93f357",
+    "common/src/main/resources/data/thaumcraft/tags/block/woodwork.json": "cc355cd9897df8c3b10378c9fcdc74b7f3a5096eb05d233daf1434212e37f50e",
+    "common/src/main/resources/thaumcraft-common.mixins.json": "384e46529573a8685bee820c11a112340f4bfe5f8e4f2e4637f7fe19dbd268d3",
+    "common/src/main/resources/thaumcraft.accesswidener": "d7210bd1ec8aa14d4fcb822f5932601efad5281b2d27c7873aa0f6a401da9b70",
+    "fabric/src/main/java/thaumcraft/fabric/loot/FabricThaumcraftLoot.java": "e516b77407444d7ec995c48cfef8cdaa7eb51f4ad4b1cef99b7d13807c7d5270"
+  },
+  "base_commit": "5d3bf26c793da98564d49ac3b8efab49c61318b9",
+  "presentation_diagnostics": [
+    {
+      "run_id": "modern-adaptations-2026-11-02T10-27-32.951286501Z",
+      "status": "SCRIPT_PASSED",
+      "note": "All 25 captured; tooltip obscured3 inventory icons and held thaumometer obscured crop gallery. Final capture input was improved."
+    },
+    {
+      "run_id": "modern-adaptations-2026-11-02T10-32-13.247619643Z",
+      "status": "SCRIPT_PASSED",
+      "note": "Crop gallery clear. Native cursor callback was additionally dispatched for unobscured inventory captures in final run."
+    }
+  ],
+  "api_documentation": {
+    "guides": 21,
+    "snippets": 28,
+    "reference_files": 20,
+    "status": "PASS"
+  },
+  "visual_review": {
+    "status": "PASS",
+    "inspected_captures": 25,
+    "scope": "All 25 actual native PNGs from final client4 were viewed by root and three reviewers.",
+    "observations": [
+      "All 16 woodwork item icons visible in EN/RU without tooltip occlusion; complete door silhouettes.",
+      "Woodworlds, native sign/hanging editor backgrounds, alpha chain links and synchronized text remain correct after reload.",
+      "Fortress diamond Sentry/gold Dune, ordinary void emerald Sentry, dyed void robe gold Sentry and untrimmed controls are visually distinct; mask, goggles and dyed cloth remain intact.",
+      "Frog before/during/after native timed scan: localized target, purple runes, then Aqua 2 / Bestia 2 / Limus 1 and native awards.",
+      "All 5 modern crop groups visible without the held instrument covering the gallery.",
+      "Seven native book spreads expose all 12 modern recipe labels, component/aspect icons, XP, instability and readable Russian intros."
+    ]
+  },
+  "build": {
+    "status": "PASS",
+    "production_isolation": "PASS",
+    "logs": [
+      ".tmp/modern-adaptations/build-final.log",
+      ".tmp/modern-adaptations/build-export.log"
+    ]
+  }
+}

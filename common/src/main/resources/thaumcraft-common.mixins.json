@@ -103,7 +103,9 @@
     "client.Tc4BiomeColorMixin",
     "client.ContainerScreenAspectRowMixin",
     "client.AbstractContainerScreenAccess",
-    "client.WandEquipProgressMixin"
+    "client.WandEquipProgressMixin",
+    "client.WoodworkHangingSignEditorMixin",
+    "client.WoodworkSignEditorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

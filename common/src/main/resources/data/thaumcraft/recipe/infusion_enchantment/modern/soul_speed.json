@@ -1,0 +1,27 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "DEEPINFUSION",
+  "enchantment": "minecraft:soul_speed",
+  "components": [
+    {
+      "item": "minecraft:netherite_scrap"
+    },
+    {
+      "item": "minecraft:soul_campfire"
+    },
+    {
+      "item": "minecraft:rabbit_foot"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 16,
+    "spiritus": 24,
+    "motus": 24,
+    "iter": 16
+  },
+  "instability": 7,
+  "first_level_minimum_cost": 36
+}

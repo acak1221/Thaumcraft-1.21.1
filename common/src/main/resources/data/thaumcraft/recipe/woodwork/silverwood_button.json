@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    {
+      "item": "thaumcraft:silverwood_planks"
+    }
+  ],
+  "result": {
+    "id": "thaumcraft:silverwood_button",
+    "count": 1
+  }
+}

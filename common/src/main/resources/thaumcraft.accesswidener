@@ -1,4 +1,10 @@
 accessWidener v2 named
+# Modern wood families register native door/sign types and keep vanilla sign editors.
+accessible method net/minecraft/world/level/block/state/properties/BlockSetType register (Lnet/minecraft/world/level/block/state/properties/BlockSetType;)Lnet/minecraft/world/level/block/state/properties/BlockSetType;
+accessible method net/minecraft/world/level/block/state/properties/WoodType register (Lnet/minecraft/world/level/block/state/properties/WoodType;)Lnet/minecraft/world/level/block/state/properties/WoodType;
+extendable method net/minecraft/client/renderer/blockentity/SignRenderer getSignMaterial (Lnet/minecraft/world/level/block/state/properties/WoodType;)Lnet/minecraft/client/resources/model/Material;
+extendable method net/minecraft/client/renderer/blockentity/HangingSignRenderer getSignMaterial (Lnet/minecraft/world/level/block/state/properties/WoodType;)Lnet/minecraft/client/resources/model/Material;
+extendable method net/minecraft/client/renderer/blockentity/SignRenderer renderSign (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/world/level/block/state/properties/WoodType;Lnet/minecraft/client/model/Model;)V
 # 1.21.1 Projectile's package-private constructor blocks a direct subclass.
 # Keep its native ownership/base tick, without ThrowableProjectile's cached
 # pre-impact movement overriding Frost's original post-bounce flight order.

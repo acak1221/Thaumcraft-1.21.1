@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:greatwood_door",
+    "thaumcraft:greatwood_trapdoor",
+    "thaumcraft:greatwood_fence",
+    "thaumcraft:greatwood_fence_gate",
+    "thaumcraft:greatwood_button",
+    "thaumcraft:greatwood_pressure_plate",
+    "thaumcraft:greatwood_sign",
+    "thaumcraft:greatwood_wall_sign",
+    "thaumcraft:greatwood_hanging_sign",
+    "thaumcraft:greatwood_wall_hanging_sign",
+    "thaumcraft:silverwood_door",
+    "thaumcraft:silverwood_trapdoor",
+    "thaumcraft:silverwood_fence",
+    "thaumcraft:silverwood_fence_gate",
+    "thaumcraft:silverwood_button",
+    "thaumcraft:silverwood_pressure_plate",
+    "thaumcraft:silverwood_sign",
+    "thaumcraft:silverwood_wall_sign",
+    "thaumcraft:silverwood_hanging_sign",
+    "thaumcraft:silverwood_wall_hanging_sign"
+  ]
+}

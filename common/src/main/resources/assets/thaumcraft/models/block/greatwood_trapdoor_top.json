@@ -1,0 +1,203 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "wood": "thaumcraft:blocks/planks_greatwood",
+    "log": "thaumcraft:blocks/greatwoodside",
+    "metal": "thaumcraft:blocks/metalbase",
+    "particle": "thaumcraft:blocks/planks_greatwood"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        13,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        2
+      ],
+      "faces": {
+        "down": {
+          "texture": "#log"
+        },
+        "up": {
+          "texture": "#log"
+        },
+        "north": {
+          "texture": "#log"
+        },
+        "south": {
+          "texture": "#log"
+        },
+        "west": {
+          "texture": "#log"
+        },
+        "east": {
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        13,
+        14
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#log"
+        },
+        "up": {
+          "texture": "#log"
+        },
+        "north": {
+          "texture": "#log"
+        },
+        "south": {
+          "texture": "#log"
+        },
+        "west": {
+          "texture": "#log"
+        },
+        "east": {
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        13,
+        2
+      ],
+      "to": [
+        2,
+        16,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#log"
+        },
+        "up": {
+          "texture": "#log"
+        },
+        "north": {
+          "texture": "#log"
+        },
+        "south": {
+          "texture": "#log"
+        },
+        "west": {
+          "texture": "#log"
+        },
+        "east": {
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        13,
+        2
+      ],
+      "to": [
+        16,
+        16,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#log"
+        },
+        "up": {
+          "texture": "#log"
+        },
+        "north": {
+          "texture": "#log"
+        },
+        "south": {
+          "texture": "#log"
+        },
+        "west": {
+          "texture": "#log"
+        },
+        "east": {
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        14,
+        2
+      ],
+      "to": [
+        9,
+        15,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        14,
+        7
+      ],
+      "to": [
+        14,
+        15,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        }
+      }
+    }
+  ]
+}

@@ -125,3 +125,4 @@ javac.*.args
 fabric/run-recipe-transfer-client/
 fabric/run-wand-crucible-client/
 fabric/run-deepslate-ore-client/
+fabric/run-modern-adaptations-client/

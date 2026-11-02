@@ -402,3 +402,55 @@ hardness/resistance/sound apply. Cinnabar/amber are unchanged.
 Exact Fabric native/client/production inputs, selected frames and limits:
 [deepslate report](../analysis/2026-11-02-deepslate-ore.md). Othermodernadaptation suggestions
 are recorded separately and were not implemented in this checkpoint.
+
+## 17. Modern Minecraft adaptations — owner request 2026-11-02
+
+The owner approved seven additions for Minecraft 1.21.1 after the alpha.16 review. These are
+modern extensions, not original TC4 values: nine entity aspect tables, five Harvest crop groups,
+modern exploration loot in 14 vanilla tables, Greatwood/Silverwood building families (20 blocks,
+16 items and 16 crafting recipes), five stonecutting recipes, custom-model armour trim rendering,
+and 12 enchantment infusion recipes with two research branches.
+
+The canonical 201 research entries and original 24 enchantment infusion recipes are unchanged.
+`MODERNINFUSION` and `DEEPINFUSION` are registered beside the original corpus, giving 203 live
+research entries. Modern enchantment ingredients, aspect costs and instability are new balance
+choices. Native enchantment applicability, maximum levels, incompatibilities and actual infusion
+payment remain in the existing engine. The advanced branch also requires the hidden original
+`ELDRITCHMINOR` parent.
+
+Modern entity rows seed the existing public registry once; later addon overrides, explicit null
+tags and removal remain authoritative. Scanning uses the existing knowledge prerequisites,
+20-tick session, awards and repeat prevention. The crop whitelist adds beetroot, torchflower,
+pitcher crop, sweet berries and glow berries. Berry picking preserves the plant. Mature native
+torchflowers and pitcher plants do not drop seeds/pods: Order spends real supplied seed/pod
+items found within the original six-block AABB search, and leaves harvested cells empty when
+none are available. Structure loot leaves existing vanilla pools and the original ten chest
+categories in place. Archaeology adds one weighted fragment entry to its existing first pool,
+while trial vaults receive only a top-level bonus pool.
+
+The preliminary review incorrectly said ordinary magical armour lacked native trim admission.
+It already supported native smithing and ordinary trim rendering. The new visible trim layer
+addresses the custom fortress and void-robe models, preserving their native materials and the
+existing dyed cloth, mask and goggles layers. The passing native smithing check covers 17 armour
+pieces and verifies payment, component preservation, persistence and refused invalid/duplicate trims.
+
+Native sign board/support geometry now uses bounded per-face UVs for the magical plank block
+sprite, rather than sampling a 64x32 entity unwrap through a block sprite. Native hanging-sign
+chain geometry keeps its separate alpha sheet and attachment visibility. Door items render both
+halves. Two rendered-vertex UV checks pass in the final common suite; visual acceptance remains
+separate from these assertions.
+
+Final Fabric build and production/test isolation pass; common JUnit reports 2874 tests with
+zero failures/errors and five existing skips. The final focused native receipt passes all 11
+checks. The ordinary production server runs the final JAR for 50 measured ticks, saves and stops
+normally with exit 0. Earlier failed native fixtures and the first client probe (stage-24 timeout)
+are declined receipts, not partial passes. The final EN/RU client/reload script passes and captures
+25 frames with Gradle PASS. All 25 final client4 frames have been inspected by the root and three
+reviewers: wood/inventory, both native sign editors, armour layers, all 12 new recipe pages,
+timed Frog scan and the crop fixture pass. Client2/3 also completed SCRIPT_PASSED; their later
+replacements only improve presentation visibility, removing covering tooltips and moving the
+held instrument away from the crop fixture. The final accepted run is
+`modern-adaptations-2026-11-02T10-34-32.410750373Z`; its production JAR SHA remains unchanged.
+No fresh survival acquisition, multiplayer or NeoForge acceptance is claimed.
+Exact inputs, all frame hashes and limits: [receipt](../porting/modern-adaptations.json),
+[report and gallery](../analysis/2026-11-02-modern-adaptations.md).

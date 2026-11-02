@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "policy": "First 37 entries reconcile CLIENT_QUALITY findings: 33 construction + 2 classpath loaders + 2 silent fallbacks; remaining entries are independently found shared/API paths. Registry, sound, recipe, model-layer and tag factories are inventoried but are NOT file paths. Addon-supplied arguments are unbounded and are not bundled-asset claims. Alpha.14/16 review: recipe-transfer canonical IDs/packet recipe IDs and deep ore/aspect/tag identifiers are registry keys, not resource files; no new dynamic file family.",
+  "policy": "First 37 entries reconcile CLIENT_QUALITY findings: 33 construction + 2 classpath loaders + 2 silent fallbacks; remaining entries are independently found shared/API paths. Registry, sound, recipe, model-layer and tag factories are inventoried but are NOT file paths. Addon-supplied arguments are unbounded and are not bundled-asset claims. Alpha.14/16 review: recipe-transfer canonical IDs/packet recipe IDs and deep ore/aspect/tag identifiers are registry keys, not resource files; no new dynamic file family. Alpha.17 modern adaptations review: magical wood names are the two registered Greatwood/Silverwood families, expanded as two block-atlas materials and four native hanging-editor files. Modern research factories create recipe registry keys, not file requests. Armor trim overlays resolve native holder-selected atlas sprites through ArmorTrim.innerTexture/outerTexture and remain external vanilla/resource-pack dependencies.",
   "sites": [
     {
       "site": "common/src/main/java/thaumcraft/client/BoreClientEffects.java",
@@ -87,7 +87,7 @@
         "thaumcraft:textures/models/void_robe_armor.png",
         "thaumcraft:textures/models/void_robe_armor_overlay.png"
       ],
-      "note": "Reviewed 2026-10-25 follow-up: focus drawing delegates to the public depth-icon hook renderer and armor copies the original zombie/skeleton arm pose after the wearer pose. Rod/cap and armor sheet suppliers and finite expansions are unchanged; four built-in depth sheets are literal PNG requests checked by the literal-resource verifier. Re-reviewed 2026-10-25 bebe0a7: only the wand use-pose matrix chain moved into WandUsePose.apply; no ResourceLocation supplier, bound or expansion changed."
+      "note": "Reviewed 2026-10-25 follow-up: focus drawing delegates to the public depth-icon hook renderer and armor copies the original zombie/skeleton arm pose after the wearer pose. Rod/cap and armor sheet suppliers and finite expansions are unchanged; four built-in depth sheets are literal PNG requests checked by the literal-resource verifier. Re-reviewed 2026-10-25 bebe0a7: only the wand use-pose matrix chain moved into WandUsePose.apply; no ResourceLocation supplier, bound or expansion changed. Reviewed 2026-11-02: the three new armor rendering calls delegate to native holder-selected ArmorTrim inner/outer atlas textures; existing void-robe sheet suppliers and finite file expansions are unchanged."
     },
     {
       "site": "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java",
@@ -941,6 +941,35 @@
         "thaumcraft:textures/misc/script.png"
       ],
       "note": "Golem bell marks: oracle RenderEventHandler.renderMarkedBlocks and its four overlay helpers."
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/ThaumcraftWoodworkClient.java",
+      "kind": "sprite",
+      "paths": [
+        "thaumcraft:blocks/planks_greatwood",
+        "thaumcraft:blocks/planks_silverwood"
+      ],
+      "note": "The registered FAMILIES map has exactly Greatwood and Silverwood. Native world renderer hooks and ordinary sign editor use the UV-correct board model with these real block-atlas plank materials; resource reload resolves the live sprites."
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/common/mixin/client/WoodworkHangingSignEditorMixin.java",
+      "kind": "file",
+      "paths": [
+        "thaumcraft:textures/blocks/planks_greatwood.png",
+        "thaumcraft:textures/blocks/planks_silverwood.png",
+        "thaumcraft:textures/blocks/greatwoodside.png",
+        "thaumcraft:textures/blocks/silverwoodside.png"
+      ],
+      "note": "The two magical wood families expand native hanging sign editor board/frame requests. The native editor retains text, dye, glow and synchronization; its own vanilla wood-name PNG lookup is cancelled only for these two registered families."
+    },
+    {
+      "site": "common/src/main/java/thaumcraft/client/renderers/block/WoodworkSignModels.java:renderHanging",
+      "kind": "sprite",
+      "external": true,
+      "paths": [
+        "minecraft:entity/signs/hanging/oak"
+      ],
+      "note": "Only the original native alpha chain ModelParts use Sheets.getHangingSignMaterial(WoodType.OAK). The magical board/plank still uses its own actual plank sprite. Exact 409-byte native PNG and signs atlas directory (entity/signs) verified in Minecraft 1.21.1 client JAR; no wildcard external texture exemption."
     }
   ],
   "external_dependencies": {
@@ -951,6 +980,9 @@
       "minecraft:drip_hang",
       "minecraft:drip_fall",
       "minecraft:drip_land"
+    ],
+    "WoodworkSignModels.java:renderHanging": [
+      "minecraft:entity/signs/hanging/oak"
     ]
   },
   "dynamic_factories": {
@@ -1042,6 +1074,9 @@
     ],
     "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"shaders/post/\"+name+\".json\")"
+    ],
+    "common/src/main/java/thaumcraft/client/ThaumcraftWoodworkClient.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"blocks/planks_\"+family.name())"
     ],
     "common/src/main/java/thaumcraft/client/fx/InfusionClientEffects.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",name)"
@@ -1162,6 +1197,9 @@
     ],
     "common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java": [
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"incorrect_for_primal_crusher\")"
+    ],
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftModernResearch.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"infusion_enchantment/modern/\"+recipe)"
     ],
     "common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java": [
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,path)"
@@ -1390,6 +1428,10 @@
     "common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java": [
       "ResourceLocation.parse(id)"
     ],
+    "common/src/main/java/thaumcraft/common/mixin/client/WoodworkHangingSignEditorMixin.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/blocks/planks_\"+family.name()+\".png\")",
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"textures/blocks/\"+family.name()+\"side.png\")"
+    ],
     "common/src/main/java/thaumcraft/common/tiles/TileEldritchCrabSpawner.java": [
       "ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID,\"gore\")"
     ],
@@ -1497,10 +1539,11 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java": "0129a3a85f941d1ef4b7d7a03abaa56da1489872026c1ed5fc78e465a69324b9",
     "common/src/main/java/thaumcraft/client/ThaumcraftChampionClient.java": "5c95a7c011439dc7c419e319a9bd7e8e26d8dcd72f3282ff0f6611a51d30f780",
     "common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java": "428815e78254cd03baf1008438295ad93616201a0f2735de0b01d4d8b10a376d",
-    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "b69e2cd79835f398d5d4c3b76dc21f725bb16aab58e0d97ff08d90ebadd711a3",
+    "common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java": "1fe03230357c5954207278d147d39dab91dfdf3cc71d274c48268324e262e6a3",
     "common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java": "fca6a8063a419ffcc8aebfab68ee39db9488515e7ba057fd24cdf8733e51d071",
     "common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java": "ea5c9192891fba97f6b5012f8bb0dec0578466c62916192b4ca488fd19a442c4",
     "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java": "60439254c7d3163e4418f130f5341b7fcc7ac1927c625059e1142e984f4b9423",
+    "common/src/main/java/thaumcraft/client/ThaumcraftWoodworkClient.java": "d5dc7a8400c671b312a85395a6d32291bfe97988c67dc27a972766fa92ea88d3",
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",
     "common/src/main/java/thaumcraft/client/fx/particles/ShockSparkParticle.java": "9f11e10c3f78b824ed049ba218805e7ff906f965483fcb91d0b888b7bcb125fe",
     "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": "26a99565842c9e75ada6f2df95f0e383227c6bccc2e37a3b3109d465c80de242",
@@ -1521,10 +1564,12 @@
     "common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java": "6d7e1d3ff571c8d64181e3ee7f113f7727eb3b2991faef5598a502fc3a060b6f",
     "common/src/main/java/thaumcraft/client/renderers/block/TaintFibreWorldQuads.java": "296250e26ab5af2aebf066c6d23d3944dfaad66bde95d6b9db3752869efdaba3",
     "common/src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java": "f6a7444e8effb800bbd4ab4867c3b126881b0e0cad0ed000b7baef45f4e76f65",
+    "common/src/main/java/thaumcraft/client/renderers/block/WoodworkSignModels.java": "fce268a0f2b670449636ee09888056fa8ea904ed801972110a54103705229700",
     "common/src/main/java/thaumcraft/client/renderers/entity/RenderPech.java": "0c8dc5f4c7dc8427141774c5694b15db213b375fe9eb4dc98f707a61afc21278",
     "common/src/main/java/thaumcraft/client/renderers/entity/RenderPrimalArrow.java": "d87fa7bb06fc85773f75a33c4e54fdf32bdb19388bbbfaf7dfe976d77aee05bd",
     "common/src/main/java/thaumcraft/client/renderers/entity/RenderTravelingTrunk.java": "5a5f1c81aca1b68d46f7dd975da25e11a8f898bc91198f10f803db0bd5715d24",
     "common/src/main/java/thaumcraft/client/renderers/entity/RenderWisp.java": "3309e49e436b169d67f9841c2ee3b88186416baf8b47b864af3d7e2da0318d75",
+    "common/src/main/java/thaumcraft/client/renderers/item/ResearchTableItemRenderer.java": "6315d888a032165366e76df6d43f7f5d49b9f641f8d6f183994a782d0adc3771",
     "common/src/main/java/thaumcraft/client/renderers/models/ModelAdvancedAlchemyFurnace.java": "58ab026d8b9af77e1a06aab2292e6d87177b46a774691a81ae4233f237a2b7f6",
     "common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java": "a912db88b759e986c038cbc8cd126e86bb151463a894dff8f78c855d1c53810f",
     "common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java": "ea10e543e92f616e94af656eaec78fb2b0a9a31a3a9a7be7cdab980b65d2bb54",
@@ -1544,12 +1589,14 @@
     "common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java": "f2cc7513778677ed8ed2206f2957c6451eddeb42f4a4981278fb482adb3c257a",
     "common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java": "39e8a870dd9a0c1d49548d1c13c9a3269b8d5a1a69dd5f0216a26192553708ef",
     "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java": "b520f52dee8c0acce222b0dde081f683b92a2933ae263a8a625d2983678cc9cb",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWoodwork.java": "3f1344e783c575d0ffbc3a757754948e7fe549eafa9dc31d592149df33f96636",
     "common/src/main/java/thaumcraft/common/items/armor/VoidRobeLayers.java": "8241dc3e7534ccbc90ef2f79894b1218189681f3880c2ffe5b3733941e6f1a16",
     "common/src/main/java/thaumcraft/common/items/golems/GolemUpgrade.java": "770663031aea503eda84ecaafbee6907835a1fc9a55aa22c308bc60d2c36fd15",
     "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java": "f06cc2c0dbf79a70a14d03ea5c7c00657e38417b72d0201939a82e6214daeaf9",
     "common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java": "2b904622570ec5abe19aec92f515edca39c1f0843780f8afa1343f4b1b532919",
     "common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java": "653d2e42aeb3842b8c917c7a41671ea8f0fe7dbc5328454fd026f7299b6d48ef",
     "common/src/main/java/thaumcraft/common/lib/world/WardingOverlay.java": "02f4d10b8880c9255b638b507a37dfa1ece81472bce974fae0e35425a62de7cf",
-    "common/src/main/java/thaumcraft/client/renderers/item/ResearchTableItemRenderer.java": "6315d888a032165366e76df6d43f7f5d49b9f641f8d6f183994a782d0adc3771"
+    "common/src/main/java/thaumcraft/common/mixin/client/WoodworkHangingSignEditorMixin.java": "26e75820c3124df8f577ca7521e21627410745cda2bbb687e080c1d1e16d667b",
+    "common/src/main/java/thaumcraft/common/mixin/client/WoodworkSignEditorMixin.java": "1b6f70ae95d1e93f1e01dd588b474367ad0b879ae33eb71edeedeec5f49b03aa"
   }
 }

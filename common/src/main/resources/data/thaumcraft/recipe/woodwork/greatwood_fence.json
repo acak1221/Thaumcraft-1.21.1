@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PSP",
+    "PSP"
+  ],
+  "key": {
+    "P": {
+      "item": "thaumcraft:greatwood_planks"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:greatwood_fence",
+    "count": 3
+  }
+}

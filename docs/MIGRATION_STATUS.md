@@ -1,3 +1,13 @@
+## 02.11.2026 — семь современных адаптаций, alpha.17
+
+Реализованы owner-approved расширения базового Thaumcraft для Fabric 1.21.1: девять современных мобов для таумометра; пять групп культур для Harvest/Order; 14 современных loot tables; 20 блоков/16 предметов/16 рецептов Greatwood и Silverwood; пять stonecutting recipes; видимый native trim на крепостной броне и пустотных робах; 12 enchantment infusion recipes и ветви `MODERNINFUSION`/`DEEPINFUSION`. Native smithing/trim обычной магической брони уже был реализован до этого этапа.
+
+Исходный корпус остаётся 201 canonical research + 24 original enchantment infusion recipes; live research total теперь 203 за счёт отдельной регистрации двух ветвей. Новые значения аспектов, редкости и цены — явно современные расширения. Добавлены focused native checks, включая реальные сессии сканирования и native smithing для 17 частей брони.
+
+Fabric build/isolation — PASS; common JUnit 2874 (0 failures/errors, 5 прежних skips), в том числе две новые проверки sign UV — PASS; focused native 11/11 — PASS. Обычный production-server: ready, 50 тиков (7→57), save/stop, exit 0 — PASS с JAR 15 955 736 байт, SHA-256 `a67c0b233c5b4f69d9f6b1c7a789d4f7946e46a09d86c2d8387af7693d568913`.
+
+UV табличек ограничены своим block sprite; native alpha-цепи и двухчастный door item сохранены отдельно от дерева. Факельник/кувшинница не роняют seeds/pods, поэтому Order пересаживает их только при наличии реальных предметов рядом в исходной области поиска 6 блоков. Первый client probe отклонён после stage-24 timeout; client2/3 успешно SCRIPT_PASSED, затем только улучшена видимость кадров. Финальный client4 `modern-adaptations-2026-11-02T10-34-32.410750373Z`: EN/RU + reload, SCRIPT_PASSED/Gradle PASS, **25/25 кадров осмотрены — PASS**. NeoForge parity, новое survival acquisition и multiplayer прохождение здесь не заявлены. [Отчёт и галерея](analysis/2026-11-02-modern-adaptations.md), [точные входы/SHA/25 кадров](porting/modern-adaptations.json).
+
 ## 02.11.2026 — глубинные кристаллические руды, alpha.16
 
 По запросу владельца добавлены шесть deepslate-вариантов infused stone: исходные анимированные кристаллы/цвета на ванильных боках и торцах глубинного сланца. Сохранены осколки/Fortune/XP; Silk Touch возвращает соответствующий новый блок. Есть аспекты, ore-теги, бонус исследовательского стола и ускоренная добыча фокусом. В свежих чанках добавлены восемь жил размера 6 ниже Y=0, действующая настройка infused stone управляет обоими проходами; старые чанки автоматически не переписываются.

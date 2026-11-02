@@ -121,6 +121,7 @@ public final class Thaumcraft {
         ThaumcraftResources.register();
         ThaumcraftAlchemy.register();
         ThaumcraftNaturals.register();
+        thaumcraft.common.config.ThaumcraftWoodwork.register();
         ThaumcraftPlants.register();
         ThaumcraftMasonry.register();
         thaumcraft.common.config.ThaumcraftGrate.register();
@@ -268,6 +269,7 @@ public final class Thaumcraft {
         thaumcraft.api.ThaumcraftApi.refreshPortableHoleBlackList();
         thaumcraft.api.aspects.AspectRegistryEvent.post();
         ThaumcraftCommands.register();
+        thaumcraft.common.config.ThaumcraftModernResearch.register();
         LOG.info("TC4 Minecraft 1.21.1 migration: {} research definitions loaded; gameplay coverage is tracked in MIGRATION_STATUS.md",
                 ResearchCatalog.all().size());
     }

@@ -1480,7 +1480,8 @@ public class EntityGolemBase extends AbstractGolem {
         try {
             boolean harvested = GolemHarvestPlatform.harvest(this, pos, expected);
             // Order (original AIHarvestCrops:194): only after the crop was actually removed; never undoes the harvest.
-            if (harvested && getUpgradeAmount(GolemUpgrade.ORDER) > 0) GolemHarvestPlatform.replant(this, pos, expected);
+            if (harvested && getUpgradeAmount(GolemUpgrade.ORDER) > 0 && !GolemCrops.berryHarvest(expected))
+                GolemHarvestPlatform.replant(this, pos, expected);
             return harvested;
         } finally { busy = false; }
     }

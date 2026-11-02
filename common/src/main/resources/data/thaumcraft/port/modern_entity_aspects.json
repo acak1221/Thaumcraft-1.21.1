@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "provenance": "Owner-requested Minecraft 1.21.1 adaptation. These are new balance choices, not original TC4 quantities.",
+  "entries": [
+    {"entity": "minecraft:breeze", "aspects": {"aer": 3, "motus": 2, "tempestas": 2}, "rationale": "Air and controlled wind movement."},
+    {"entity": "minecraft:bogged", "aspects": {"exanimis": 3, "humanus": 1, "terra": 1, "venenum": 2}, "rationale": "Skeleton body with its native poisonous attack."},
+    {"entity": "minecraft:warden", "aspects": {"bestia": 4, "sensus": 4, "tenebrae": 4}, "rationale": "A powerful deep-dark creature guided by hearing and smell."},
+    {"entity": "minecraft:allay", "aspects": {"volatus": 2, "spiritus": 2, "praecantatio": 2}, "rationale": "A flying magical helper spirit."},
+    {"entity": "minecraft:sniffer", "aspects": {"bestia": 3, "herba": 2, "sensus": 2}, "rationale": "A large animal that smells and uncovers ancient plants."},
+    {"entity": "minecraft:frog", "aspects": {"bestia": 2, "aqua": 2, "limus": 1}, "rationale": "An amphibian with its slime-eating ecology."},
+    {"entity": "minecraft:armadillo", "aspects": {"bestia": 2, "tutamen": 2, "terra": 1}, "rationale": "A ground animal protected by its shell."},
+    {"entity": "minecraft:axolotl", "aspects": {"bestia": 2, "aqua": 2, "sano": 1}, "rationale": "An aquatic animal with regenerative behavior."},
+    {"entity": "minecraft:goat", "aspects": {"bestia": 3, "telum": 1, "aer": 1}, "rationale": "A mountain animal with jumping and horn ramming."}
+  ]
+}

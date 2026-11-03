@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.runtime.IJeiRuntime;
@@ -62,6 +64,9 @@ public final class AspectSourcesClientProbe implements ClientModInitializer {
     private IJeiRuntime firstRuntime;
     private AspectSources coldSources;
     private Pages.Source coldPlaceholder;
+    private Pages.Source retainedSource;
+    private IRecipeLayoutDrawable<Pages.Source> retainedLayout;
+    private IRecipeLayoutDrawable<Pages.Source> forgottenLayout;
     private String pending;
 
     @Override public void onInitializeClient() {
@@ -151,17 +156,37 @@ public final class AspectSourcesClientProbe implements ClientModInitializer {
                     if (!ScannedAspectSources.isIdle()) return;
                     require(sources.size() == 2 && sources.stream().anyMatch(source -> source.item().is(Items.CLAY))
                             && sources.stream().anyMatch(source -> source.item().is(Items.CLAY_BALL)), "advanced scan updates actual JEI lookup without reload/relogin");
+                    retainedSource = sources.stream().filter(source -> source.item().is(Items.CLAY_BALL)).findFirst().orElseThrow();
+                    retainedLayout = runtime.getRecipeManager().createRecipeLayoutDrawable(
+                            runtime.getRecipeManager().getRecipeCategory(Categories.SOURCES), retainedSource,
+                            runtime.getJeiHelpers().getFocusFactory().createFocusGroup(List.of(focus()))).orElseThrow();
+                    retainedLayout.setPosition(0, 0);
+                    require(retainedLayout.getIngredientUnderMouse(5, 6, VanillaTypes.ITEM_STACK)
+                            .filter(stack -> stack.is(Items.CLAY_BALL)).isPresent(), "native retained layout initially exposes its known source item");
                     record("new advanced scan refreshes Aqua sources", sources); showAqua(); pending = "aqua-after-studying-clay-block";
                 }
                 case 5 -> {
-                    client.setScreen(null);
+                    require(client.screen instanceof mezz.jei.api.runtime.IRecipesGui, "reset arrives while the native JEI source GUI stays open");
                     operation = client.getSingleplayerServer().submit(() -> { KnowledgeAccess.get(actor(client)).reset(); KnowledgeEvents.sync(actor(client)); });
                     advance(6);
                 }
                 case 6 -> {
                     if (!complete() || ticks < 25 || !KnowledgeAccess.get(client.player).getScannedItems().isEmpty()) return;
                     require(aqua().isEmpty(), "forgetting scanned items removes cached sources"); record("forgotten scans hide sources again", List.of());
-                    advance(7);
+                    require(retainedSource.item().isEmpty(), "a retained JEI recipe no longer exposes its forgotten item");
+                    require(retainedLayout.getIngredientUnderMouse(5, 6, VanillaTypes.ITEM_STACK).isEmpty()
+                            && retainedLayout.getRecipeSlotUnderMouse(5, 6).isEmpty()
+                            && retainedLayout.getRecipeSlotUnderMouse(89, 6).isEmpty(),
+                            "the same materialized native layout hides forgotten input/output tooltips and click targets");
+                    forgottenLayout = runtime.getRecipeManager().createRecipeLayoutDrawable(
+                            runtime.getRecipeManager().getRecipeCategory(Categories.SOURCES), retainedSource,
+                            runtime.getJeiHelpers().getFocusFactory().createFocusGroup(List.of(focus()))).orElseThrow();
+                    forgottenLayout.setPosition(0, 0);
+                    require(forgottenLayout.getRecipeSlotUnderMouse(5, 6).isEmpty()
+                            && forgottenLayout.getRecipeSlotUnderMouse(89, 6).isEmpty(),
+                            "a history layout rebuilt while knowledge is revoked also hides both slots");
+                    record("open JEI source layout hides forgotten items without reopening", List.of());
+                    pending = "aqua-open-after-forgetting";
                 }
                 case 7 -> {
                     Set<String> scans = new LinkedHashSet<>();
@@ -182,6 +207,13 @@ public final class AspectSourcesClientProbe implements ClientModInitializer {
                     for (Aspect aspect : aspects) query(aspect);
                     if (!ScannedAspectSources.isIdle()) { warmTicks = 0; return; }
                     if (++warmTicks < 40) return;
+                    require(retainedSource.item().is(Items.CLAY_BALL)
+                            && retainedLayout.getIngredientUnderMouse(5, 6, VanillaTypes.ITEM_STACK)
+                                    .filter(stack -> stack.is(Items.CLAY_BALL)).isPresent()
+                            && forgottenLayout.getIngredientUnderMouse(5, 6, VanillaTypes.ITEM_STACK)
+                                    .filter(stack -> stack.is(Items.CLAY_BALL)).isPresent(),
+                            "same-connection rescan restores both existing and while-forgotten rebuilt native source slots");
+                    record("same-world rescan restores retained and rebuilt history layouts", List.of(retainedSource));
                     require(!aqua().isEmpty(), "first world has known Aqua sources before switching worlds");
                     long before = ScannedAspectSources.resolvedItemCount(), started = System.nanoTime();
                     long rows = 0;
@@ -245,6 +277,22 @@ public final class AspectSourcesClientProbe implements ClientModInitializer {
                             "retained first-world JEI provider cannot rebind to the second world's player or recipes");
                     if (!ScannedAspectSources.isIdle()) return;
                     record("disconnect and fresh world in same client hide all first-world sources", List.of());
+                    operation = client.getSingleplayerServer().submit(() -> ThaumcraftApiHelper.addScans(actor(client),
+                            new ThaumcraftApiHelper.Scans(Set.of("@minecraft:clay_ball"), Set.of(), Set.of())));
+                    advance(13);
+                }
+                case 13 -> {
+                    if (!complete() || ticks < 25 || !ThaumcraftApiHelper.hasScannedItem(client.player, new ItemStack(Items.CLAY_BALL))) return;
+                    var sources = aqua();
+                    if (!ScannedAspectSources.isIdle()) return;
+                    require(sources.size() == 1 && sources.getFirst().item().is(Items.CLAY_BALL), "new second-world JEI pages accept their own scan");
+                    require(retainedSource.item().isEmpty()
+                            && retainedLayout.getRecipeSlotUnderMouse(5, 6).isEmpty()
+                            && retainedLayout.getRecipeSlotUnderMouse(89, 6).isEmpty()
+                            && forgottenLayout.getRecipeSlotUnderMouse(5, 6).isEmpty()
+                            && forgottenLayout.getRecipeSlotUnderMouse(89, 6).isEmpty(),
+                            "rescan in a new connection cannot reactivate a retained first-world recipe or native layout");
+                    record("second-world scan leaves retained first-world JEI layouts retired", sources);
                     finish(client, null);
                 }
                 default -> throw new IllegalStateException("Unknown stage " + stage);
@@ -283,7 +331,7 @@ public final class AspectSourcesClientProbe implements ClientModInitializer {
         try {
             Map<String, Object> report = new LinkedHashMap<>();
             report.put("status", error == null ? "PASS" : "FAILED"); report.put("run_id", runId); report.put("stage", stage);
-            report.put("fixture", "two fresh1.21.1 worlds in one client; first receives supplied @clay_ball/@dirt, #clay and at least500 indexed scan identities through the server API; second receives no supplied scans; actual JEI lookups and knowledge packets; not survival acquisition or a measured FPS claim");
+            report.put("fixture", "two fresh1.21.1 worlds in one client; first receives supplied @clay_ball/@dirt, #clay and at least500 indexed scan identities through the server API; reset while JEI remains open; second begins without scans, then receives only @clay_ball; actual JEI lookups, retained native layout and knowledge packets; not survival acquisition or a measured FPS claim");
             report.put("checks", checks); report.put("captures", captures);
             if (error != null) { report.put("error", error.toString()); error.printStackTrace(); }
             Files.writeString(directory.resolve("jei-aspect-sources-client-result.json"), new GsonBuilder().setPrettyPrinting().create().toJson(report));

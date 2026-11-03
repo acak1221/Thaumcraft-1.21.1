@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.properties.ChestType;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
@@ -597,15 +598,23 @@ public final class InventoryUtils {
 
     /** Original {@code getDoubleChest(TileEntity)}. */
     public static ChestBlockEntity getDoubleChest(BlockEntity tile) {
-        if (tile == null || !(tile instanceof ChestBlockEntity chest)) return null;
+        if (!(tile instanceof ChestBlockEntity) || tile.isRemoved()) return null;
         Level level = tile.getLevel();
         if (level == null) return null;
         BlockPos pos = tile.getBlockPos();
+        if (level.getBlockEntity(pos) != tile) return null;
         var state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof ChestBlock)) return null;
-        Direction connected = ChestBlock.getConnectedDirection(state);
-        if (connected == null) return null;
-        if (level.getBlockEntity(pos.relative(connected)) instanceof ChestBlockEntity other) return other;
+        // Unlike the original cached adjacent-half fields, the native direction
+        // helper also returns a direction for SINGLE chests. Only a real mutual
+        // pair may receive overflow; a separate adjacent chest owns its own stock.
+        if (!(state.getBlock() instanceof ChestBlock) || state.getValue(ChestBlock.TYPE) == ChestType.SINGLE) return null;
+        BlockPos otherPos = pos.relative(ChestBlock.getConnectedDirection(state));
+        if (!level.hasChunkAt(otherPos)) return null;
+        var otherState = level.getBlockState(otherPos);
+        if (!otherState.is(state.getBlock())
+                || otherState.getValue(ChestBlock.TYPE) != state.getValue(ChestBlock.TYPE).getOpposite()
+                || otherState.getValue(ChestBlock.FACING) != state.getValue(ChestBlock.FACING)) return null;
+        if (level.getBlockEntity(otherPos) instanceof ChestBlockEntity other && !other.isRemoved()) return other;
         return null;
     }
 

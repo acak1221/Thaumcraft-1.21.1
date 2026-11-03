@@ -84,8 +84,10 @@ public final class TileFluxScrubber extends BlockEntity implements EssentiaStora
             scrubber.charges -= EldritchBlockRules.FLUX_CHARGE_COST;
             if (level.getRandom().nextInt(EldritchBlockRules.FLUX_ESSENTIA_CHANCE) == 0) {
                 scrubber.essentia = EldritchBlockRules.fluxScrubberEssentiaAfterCharge(scrubber.essentia);
-                scrubber.setChanged();
             }
+            // A failed conversion still spends four saved charges. Persist the
+            // debit so unloading a clean chunk cannot restore another attempt.
+            scrubber.setChanged();
         }
         // Original TileFluxScrubber:58-60 - the scrubber is powered by the vis
         // network, it draws ten AIR vis while it has less than five power.
@@ -200,14 +202,14 @@ public final class TileFluxScrubber extends BlockEntity implements EssentiaStora
 
     /** Original TileFluxScrubber:183-188 - the essentia is taken from the front. */
     @Override public int takeEssentia(Aspect aspect, int amount, Direction face) {
-        int taken = Math.min(essentia, amount);
-        essentia -= taken;
-        setChanged();
-        return taken;
+        return takeEssentia(amount);
     }
 
     /** Original TileFluxScrubber:170-176 - the essentia is taken one unit at a time. */
     public int takeEssentia(int amount) {
+        // The original subtracts a negative request, creating free essentia
+        // (and MIN_VALUE can overflow the stock). Extraction cannot mint units.
+        if (amount <= 0) return 0;
         int taken = Math.min(essentia, amount);
         essentia -= taken;
         setChanged();

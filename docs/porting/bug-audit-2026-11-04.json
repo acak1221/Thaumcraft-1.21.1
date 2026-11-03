@@ -1,0 +1,253 @@
+{
+  "schema": 1,
+  "date": "2026-11-04",
+  "timezone": "Asia/Qyzylorda",
+  "status": "PASS",
+  "base_commit": "d16d649cc0cfef844429b29e2e319b3522537976",
+  "source_inputs_sha256": {
+    "common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java": "3b1e99b1b9b1496f190c615abdfa1b9ee8b5649cf7d8c5c353d8facb8c4cb18d",
+    "common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java": "07523b3f7ebfd1f41e9ecceed75e5de4cdff31dc6afcb1f0cfcee58354ddd6d2",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/Pages.java": "0ba5a1c48f51768d0674659cb89a7cc76c5baf0cc3ff1cc6c6adc4badc2b50bb",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/Categories.java": "9edfdf1d683112d71b0b5fc2ef13a58dee4c7d14a7cc7ad63f4a259243800d28",
+    "common/src/gameTest/java/thaumcraft/common/testing/InventoryUtilityRuntimeChecks.java": "4c5ad051567688dceefe50df30ab165eacccb0c7d0cd71c2e4bdbbc40467f87d",
+    "common/src/gameTest/java/thaumcraft/common/testing/EldritchBlockRuntimeChecks.java": "c61eaf42463dd188bc3d4a44d53c7125b48a2860b9ab9e1a52877a07e5f25ff8",
+    "fabric/src/gameTest/java/thaumcraft/fabric/testing/ThaumcraftGameTests.java": "4d105414735aa6487a98965967d7b976450c1bb35a8f79e2e249a7e6f620c894",
+    "fabric/src/clientTest/java/thaumcraft/compat/jei/AspectSourcesClientProbe.java": "d7476fc691adfa56b62a412e8b1b4d1accefff2ffb92b78754ab1533d1edf844"
+  },
+  "junit": {
+    "suites": 492,
+    "tests": 2912,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 2907
+  },
+  "dedicated_gametest": {
+    "status": "PASS",
+    "tests": [
+      "thaumcraftgametests.inventoryinsertiononlyusestheactualdoublechestpartner",
+      "thaumcraftgametests.flux_scrubber_spends_its_charges"
+    ],
+    "shutdown": "saved and stopped normally",
+    "xml_sha256": "2994f8510ccef705637308e5eff081ade20de13cd0f4fa5812a8fc01b53a5f3b"
+  },
+  "client": {
+    "status": "PASS",
+    "run_id": "jei-aspect-sources-2026-11-03T21-55-34.801700486Z",
+    "stage": 13,
+    "fixture": "two fresh1.21.1 worlds in one client; first receives supplied @clay_ball/@dirt, #clay and at least500 indexed scan identities through the server API; reset while JEI remains open; second begins without scans, then receives only @clay_ball; actual JEI lookups, retained native layout and knowledge packets; not survival acquisition or a measured FPS claim",
+    "checks": [
+      {
+        "check": "empty scans hide every source",
+        "passed": true,
+        "sources": []
+      },
+      {
+        "check": "Aqua lookup filters unscanned and non-Aqua items",
+        "passed": true,
+        "sources": [
+          {
+            "item": "minecraft:clay_ball",
+            "aspect": "aqua",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "check": "new advanced scan refreshes Aqua sources",
+        "passed": true,
+        "sources": [
+          {
+            "item": "minecraft:clay",
+            "aspect": "aqua",
+            "amount": 3
+          },
+          {
+            "item": "minecraft:clay_ball",
+            "aspect": "aqua",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "check": "forgotten scans hide sources again",
+        "passed": true,
+        "sources": []
+      },
+      {
+        "check": "open JEI source layout hides forgotten items without reopening",
+        "passed": true,
+        "sources": []
+      },
+      {
+        "check": "same-world rescan restores retained and rebuilt history layouts",
+        "passed": true,
+        "sources": [
+          {
+            "item": "minecraft:clay_ball",
+            "aspect": "aqua",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "check": "warm JEI lookups reuse resolved source index",
+        "passed": true,
+        "supplied_scan_count": 602,
+        "lookups": 1000,
+        "aspects": 48,
+        "returned_rows": 21083,
+        "elapsed_ns": 3822329,
+        "warm_ticks": 40,
+        "item_resolutions_before": 605,
+        "item_resolutions_after": 605,
+        "additional_item_resolutions": 0
+      },
+      {
+        "check": "cold JEI placeholder completes its source-page refresh after background loading",
+        "passed": true,
+        "loaded_source_rows": 15,
+        "settled_refresh_ticks": 5
+      },
+      {
+        "check": "disconnect and fresh world in same client hide all first-world sources",
+        "passed": true,
+        "sources": []
+      },
+      {
+        "check": "second-world scan leaves retained first-world JEI layouts retired",
+        "passed": true,
+        "sources": [
+          {
+            "item": "minecraft:clay_ball",
+            "aspect": "aqua",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "captures": [
+      {
+        "bytes": 280986,
+        "label": "aqua-only-scanned-clay-ball",
+        "file": "docs/images/bug-audit-2026-11-04/aqua-only-scanned-clay-ball.png",
+        "sha256": "f92ebee9e50eb65d7df6280938a154024915c37c9b1df94f874e6ad69d534e1c",
+        "visually_inspected": true
+      },
+      {
+        "bytes": 275966,
+        "label": "aqua-after-studying-clay-block",
+        "file": "docs/images/bug-audit-2026-11-04/aqua-after-studying-clay-block.png",
+        "sha256": "04489e752bc6f660302c5bbc3355a0465d250f4481259c3a3ec524ab54a8c69c",
+        "visually_inspected": true
+      },
+      {
+        "bytes": 262287,
+        "label": "aqua-open-after-forgetting",
+        "file": "docs/images/bug-audit-2026-11-04/aqua-open-after-forgetting.png",
+        "sha256": "6573824bfe4484c719bc2f17705dad127c3178216603693bdcfabca6c2bea973",
+        "visually_inspected": true
+      },
+      {
+        "bytes": 281425,
+        "label": "aqua-large-scan-index",
+        "file": "docs/images/bug-audit-2026-11-04/aqua-large-scan-index.png",
+        "sha256": "c63d0b3ad855effb4e5df10c2ce9d5a6d8113b69b1131d13baf50d2eab24cb0c",
+        "visually_inspected": true
+      },
+      {
+        "bytes": 279764,
+        "label": "aqua-after-cold-loading",
+        "file": "docs/images/bug-audit-2026-11-04/aqua-after-cold-loading.png",
+        "sha256": "6c42fc1b2e620500a242cc5d824882ac1028ba89583670233c340581fee59d90",
+        "visually_inspected": true
+      }
+    ]
+  },
+  "assets": {
+    "atlas_mipmap_level_guard": 4,
+    "atlas_sprites_available": 518,
+    "checked_atlas_sprite_refs": 4141,
+    "checked_composed_files": 294,
+    "checked_composed_sites": 52,
+    "checked_composed_sprites": 26,
+    "checked_external_model_texture_refs": 3,
+    "checked_literal_client_files": 141,
+    "checked_local_model_refs": 3256,
+    "checked_model_texture_refs": 4144,
+    "checked_sound_event_ids": 66,
+    "checked_sound_event_refs": 0,
+    "checked_sound_refs": 111,
+    "missing_references": 0
+  },
+  "scope": {
+    "mode": "check",
+    "original_units": 859,
+    "legacy_units": 934,
+    "union_rows": 1044,
+    "shared_path": 749,
+    "original_only": 110,
+    "legacy_only": 185,
+    "native_linked_rows": 37,
+    "unique_native_counterparts": 57,
+    "dispositions": {
+      "adapt": 263,
+      "exclude": 163,
+      "port": 291,
+      "replace": 327
+    },
+    "milestone_queue": {
+      "M00": 75,
+      "M01": 57,
+      "M02": 96,
+      "M03": 37,
+      "M04": 20,
+      "M05": 29,
+      "M06": 27,
+      "M07": 14,
+      "M08": 84,
+      "M09": 120,
+      "M10": 69,
+      "M11": 143,
+      "M12": 80,
+      "M13": 68,
+      "M14": 125
+    },
+    "stale_review_fingerprints": 0
+  },
+  "commands": [
+    {
+      "command": ":common:test :fabric:clientTestClasses :fabric:build",
+      "exit_code": 0
+    },
+    {
+      "command": ":fabric:runGameTest -PgameTestFilter=inventoryInsertionOnlyUsesTheActualDoubleChestPartner,flux_scrubber_spends_its_charges",
+      "exit_code": 0
+    },
+    {
+      "command": "-PwithJei :fabric:build :fabric:runJeiAspectSourcesClient",
+      "exit_code": 0,
+      "display": ":99",
+      "renderer": "Mesa llvmpipe"
+    },
+    {
+      "command": "python3 -B scripts/porting/convert_assets.py --verify",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -B scripts/porting/update_scope_ledger.py --check",
+      "exit_code": 0
+    }
+  ],
+  "artifact": {
+    "file": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.24.jar",
+    "bytes": 16027135,
+    "sha256": "c7a8ac06e6436becf60c90b8a52c174cef056af2ed0f93b20653b7a96bc09317"
+  },
+  "limitations": [
+    "Fabric only; no NeoForge build or runtime verification.",
+    "Two fresh client worlds use explicitly supplied scan fixtures; no new survival acquisition or remote multiplayer acceptance.",
+    "Server verification is the dedicated GameTest harness; no separate packaged production-server run for this checkpoint.",
+    "Initial non-activated Gradle attempts failed to fetch metadata and are not accepted verification."
+  ]
+}

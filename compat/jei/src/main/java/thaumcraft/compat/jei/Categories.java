@@ -1,8 +1,13 @@
 package thaumcraft.compat.jei;
 
 import java.util.List;
+import java.util.Optional;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
+import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
+import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -10,6 +15,7 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.runtime.IRecipesGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -160,10 +166,32 @@ final class Categories {
 
         @Override public void setRecipe(IRecipeLayoutBuilder builder, Pages.Source source, IFocusGroup focuses) {
             if (source.pending() == null) {
-                builder.addSlot(RecipeIngredientRole.INPUT, 4, 5).setStandardSlotBackground().addItemStack(source.item());
+                builder.addSlot(RecipeIngredientRole.INPUT, 4, 5).setStandardSlotBackground().addItemStack(source.slotSnapshot());
             }
             builder.addSlot(RecipeIngredientRole.OUTPUT, 88, 5).setOutputSlotBackground()
                     .addIngredient(AspectIngredient.TYPE, new AspectIngredient.Stack(source.aspect(), source.pending() == null ? source.amount() : 1));
+        }
+
+        @Override public void createRecipeExtras(IRecipeExtrasBuilder builder, Pages.Source source, IFocusGroup focuses) {
+            if (source.pending() != null) return;
+            var slots = List.copyOf(builder.getRecipeSlots().getSlots());
+            // JEI retains its materialized slots while a recipe is open or in
+            // history. Guard drawing AND hit tests against scan resets and reconnects.
+            builder.addSlottedWidget(new ISlottedRecipeWidget() {
+                @Override public ScreenPosition getPosition() { return new ScreenPosition(0, 0); }
+
+                @Override public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
+                    if (source.current()) for (IRecipeSlotDrawable slot : slots) {
+                        slot.draw(graphics, slot.isMouseOver(mouseX, mouseY));
+                    }
+                }
+
+                @Override public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
+                    if (!source.current()) return Optional.empty();
+                    return slots.stream().filter(slot -> slot.isMouseOver(mouseX, mouseY)).findFirst()
+                            .map(slot -> new RecipeSlotUnderMouse(slot, getPosition()));
+                }
+            }, slots);
         }
 
         @Override public void draw(Pages.Source source, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
@@ -190,6 +218,11 @@ final class Categories {
                         } else pending.refreshScheduled = false;
                     });
                 }
+                return;
+            }
+            if (!source.current()) {
+                graphics.drawString(Minecraft.getInstance().font,
+                        trim(Component.translatable("tc.port.emi.aspect_sources.empty").getString(), 110), 4, 29, TEXT, false);
                 return;
             }
             gui.getRecipeArrow().draw(graphics, 49, 5);

@@ -1,3 +1,21 @@
+## 2026-11-04 — chest ownership, scrubber accounting and retained JEI sources
+
+The public insertion helper no longer treats independent adjacent chests as a
+double chest. Negative scrubber extraction cannot create essentia, and failed
+four-charge conversion attempts are marked dirty so the debit persists. Open JEI
+source pages and history hide forgotten item/aspect slots, including tooltips and
+click targets, restore them after a same-connection rescan, and cannot reactivate
+in a different world.
+
+Verified: 2,907 common JUnit passes (five expected skips), Fabric build/isolation,
+two focused dedicated GameTests, zero missing asset references and a real JEI
+client with ten checks across two fresh worlds. All five final frames were
+inspected. The 1,000-query source-cache check still performs zero additional item
+resolutions. NeoForge, fresh survival acquisition, remote multiplayer and a
+separate packaged production-server run were not tested. Original scrubber bug
+corrections are recorded in known deviations §19; exact evidence and artifact SHA
+are in `docs/porting/bug-audit-2026-11-04.json`.
+
 ## 2026-11-04 — focal upgrades charge fixed experience points
 
 Focal upgrades now cost 112/352/828/1628/2920 XP points for ranks 1–5,

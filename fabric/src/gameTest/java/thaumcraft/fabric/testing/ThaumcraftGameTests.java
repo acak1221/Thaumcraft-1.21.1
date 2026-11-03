@@ -227,6 +227,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.HandMirrorMenuReviewRuntimeChecks.restrictedSlotsKeepOneFocusAndOneInkwell(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "review_inventory_20261104")
+    public void inventoryInsertionOnlyUsesTheActualDoubleChestPartner(GameTestHelper test) {
+        thaumcraft.common.testing.InventoryUtilityRuntimeChecks.insertionOnlyUsesTheActualDoubleChestPartner(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "review2_equipment")
     public void review2EarthmoverPaysEveryMaterialUnit(GameTestHelper test) {
         thaumcraft.common.testing.SecondReviewEquipmentRuntimeChecks.earthmoverPaysEveryMaterialUnit(test);

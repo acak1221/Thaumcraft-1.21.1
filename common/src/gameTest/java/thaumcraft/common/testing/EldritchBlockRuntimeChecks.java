@@ -6,11 +6,14 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
@@ -382,12 +385,69 @@ public final class EldritchBlockRuntimeChecks {
             scrubber.essentia = 2;
             test.assertTrue(scrubber.takeEssentia(1) == 1 && scrubber.getEssentia() == 1,
                     "the scrubber hands its essentia out one unit at a time: " + scrubber.getEssentia());
+            // Original takeEssentia subtracts Math.min(stock, request), so a
+            // negative request mints stock and MIN_VALUE can overflow it. Both
+            // public routes must preserve the physical unit and its saved data.
+            for (int stock : new int[]{0, 2}) {
+                scrubber.essentia = stock;
+                CompoundTag before = scrubber.saveWithFullMetadata(level.registryAccess());
+                for (int request : new int[]{0, -1, Integer.MIN_VALUE}) {
+                    test.assertTrue(scrubber.takeEssentia(request) == 0 && scrubber.getEssentia() == stock,
+                            "the quantity-only route refuses nonpositive extraction without creating stock");
+                    test.assertTrue(scrubber.takeEssentia(Aspect.MAGIC, request, scrubber.getFacing()) == 0
+                                    && scrubber.getEssentia() == stock,
+                            "the transport route refuses nonpositive extraction without creating stock");
+                    test.assertTrue(before.equals(scrubber.saveWithFullMetadata(level.registryAccess())),
+                            "a refused request preserves the complete persisted scrubber state");
+                }
+            }
+            test.assertTrue(scrubber.takeEssentia(Aspect.MAGIC, Integer.MAX_VALUE, scrubber.getFacing()) == 2
+                            && scrubber.getEssentia() == 0 && scrubber.takeEssentia(1) == 0,
+                    "a large positive request extracts only the two paid units and the empty scrubber stays empty");
+            failedScrubberConversionPersistsItsChargeDebit(test, level, scrubberPos, scrubber);
         } catch (RuntimeException | Error failure) {
             lane.clean();
             throw failure;
         }
         lane.clean();
         test.succeed();
+    }
+
+    /** Only the synchronous conversion roll is a declared input; restore the exact world RNG afterwards. */
+    private static void failedScrubberConversionPersistsItsChargeDebit(GameTestHelper test, ServerLevel level,
+                                                                      BlockPos pos, TileFluxScrubber scrubber) {
+        var chunk = level.getChunkAt(pos);
+        boolean wasDirty = chunk.isUnsaved();
+        RandomSource original = level.random;
+        try {
+            var field = Level.class.getDeclaredField("random");
+            field.setAccessible(true);
+            try {
+                field.set(level, new LegacyRandomSource(0) {
+                    @Override public int nextInt(int bound) {
+                        test.assertTrue(bound == 1000 || bound == EldritchBlockRules.FLUX_ESSENTIA_CHANCE,
+                                "only the scrubber's initial counter and conversion use the declared random input");
+                        return 1; // Failed one-in-four conversion, never a success that already marked dirty.
+                    }
+                });
+                scrubber.charges = EldritchBlockRules.FLUX_CHARGE_COST;
+                scrubber.power = 0;
+                chunk.setUnsaved(false);
+                TileFluxScrubber.tick(level, pos, scrubber.getBlockState(), scrubber);
+                test.assertTrue(scrubber.getCharges() == 0 && scrubber.getEssentia() == 0 && scrubber.getPower() == 0,
+                        "a failed conversion spends four charges without essentia or an unrelated network grant");
+                test.assertTrue(chunk.isUnsaved(), "a failed conversion marks the chunk dirty for the paid charge debit");
+                var saved = scrubber.saveWithFullMetadata(level.registryAccess());
+                test.assertTrue(saved.getInt("charges") == 0 && saved.getInt("essentia") == 0,
+                        "the next chunk save retains the failed attempt instead of restoring four reusable charges");
+            } finally {
+                field.set(level, original);
+            }
+        } catch (ReflectiveOperationException failure) {
+            throw new AssertionError("Cannot install the test's scoped conversion input", failure);
+        } finally {
+            chunk.setUnsaved(wasDirty || chunk.isUnsaved());
+        }
     }
 
     /** A real player interaction with a real block, exactly as the original altar expects it. */

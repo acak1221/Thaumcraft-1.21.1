@@ -468,3 +468,19 @@ debit preserves vanilla bar/level synchronization. Original creative affordabili
 and no-debit rules, vis costs, paid-job persistence and non-refunding cancellation
 are preserved. No other enchantment/infusion payment policy is changed.
 See [implementation and verification](../analysis/2026-11-04-focal-xp-points.md).
+
+## 19. Flux scrubber resource conservation — 2026-11-04
+
+Original `TileFluxScrubber.java:183–187` subtracts `Math.min(stock, request)`
+without rejecting a negative request. At zero stock a request of `-4` creates
+four essentia; `Integer.MIN_VALUE` can overflow positive stock. Both native public
+extraction routes now return zero without mutation for nonpositive requests.
+Positive extraction keeps the original aspect/face semantics and bounded amount.
+
+Original `TileFluxScrubber.java:48–56` spends four charges but marks dirty only
+on a successful conversion. The native now marks every conversion debit dirty,
+so a failed roll cannot restore spent charges when a clean chunk unloads. The
+four-charge price and one-in-four conversion chance are unchanged. Both are
+intentional corrections of reproduced original resource defects, covered by the
+actual-BE `flux_scrubber_spends_its_charges` regression. See
+[audit and verification](../analysis/2026-11-04-bug-audit.md).

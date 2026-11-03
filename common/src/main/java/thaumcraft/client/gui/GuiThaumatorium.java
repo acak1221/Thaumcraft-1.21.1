@@ -2,26 +2,26 @@ package thaumcraft.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.common.container.ContainerThaumatorium;
 import thaumcraft.api.aspects.Aspect;
 
-/** Original art and input position, with a bounded row of recipe choices sent by the authoritative menu. */
+/** Original art and recipe arrows, using choices sent by the authoritative menu. */
 public final class GuiThaumatorium extends ThaumcraftContainerScreen<ContainerThaumatorium> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/gui_thaumatorium.png");
-    private int page;
+    private final ThaumatoriumRecipeNavigation navigation = new ThaumatoriumRecipeNavigation();
     public GuiThaumatorium(ContainerThaumatorium menu, Inventory inventory, Component title) { super(menu, inventory, title); imageWidth = 176; imageHeight = 166; }
     @Override protected void renderBg(GuiGraphics graphics, float partial, int x, int y) {
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
-        int visible = 0;
-        for (int index = 0; index < menu.recipes().size(); index++) {
-            if (!menu.available(index)) continue;
-            if (visible++ != page) continue;
+        navigation.refresh(menu.recipes().size(), menu::available);
+        int index = navigation.recipeIndex();
+        if (index >= 0) {
             if (menu.selected(index)) graphics.fill(leftPos + 109, topPos + 13, leftPos + 131, topPos + 35, 0x886666ff);
-            graphics.renderItem(menu.recipes().get(index).value().getResultItem(minecraft.level.registryAccess()), leftPos + 112, topPos + 16);
+            var output = menu.recipes().get(index).value().getResultItem(minecraft.level.registryAccess());
+            graphics.renderItem(output, leftPos + 112, topPos + 16);
+            graphics.renderItemDecorations(font, output, leftPos + 112, topPos + 16);
             var cost = menu.recipes().get(index).value().aspects();
             int aspectIndex = 0;
             for (String tag : cost.keySet().stream().sorted().limit(6).toList()) {
@@ -36,16 +36,22 @@ public final class GuiThaumatorium extends ThaumcraftContainerScreen<ContainerTh
                     graphics.pose().popPose();
                 }
             }
-            graphics.drawString(font, "<   >", leftPos + 96, topPos + 60, 0x443322, false);
-            break;
+            if (navigation.size() > 1) {
+                graphics.blit(TEXTURE, leftPos + ThaumatoriumRecipeNavigation.ARROW_X, topPos + ThaumatoriumRecipeNavigation.PREVIOUS_Y,
+                        navigation.hasPrevious() ? 192 : 176, 16, ThaumatoriumRecipeNavigation.ARROW_WIDTH, ThaumatoriumRecipeNavigation.ARROW_HEIGHT, 256, 256);
+                graphics.blit(TEXTURE, leftPos + ThaumatoriumRecipeNavigation.ARROW_X, topPos + ThaumatoriumRecipeNavigation.NEXT_Y,
+                        navigation.hasNext() ? 192 : 176, 24, ThaumatoriumRecipeNavigation.ARROW_WIDTH, ThaumatoriumRecipeNavigation.ARROW_HEIGHT, 256, 256);
+                String position = (navigation.page() + 1) + "/" + navigation.size();
+                graphics.drawString(font, position, leftPos + 120 - font.width(position) / 2, topPos + 66, 0x443322, false);
+            }
         }
-        if (page >= visible && page > 0) page = Math.max(0, visible - 1);
     }
     @Override public boolean mouseClicked(double x, double y, int button) {
-        if (button == 0 && isHovering(96, 55, 44, 18, x, y)) { page = Math.max(0, page + (x - leftPos < 117 ? -1 : 1)); return true; }
-        if (button == 0 && isHovering(110, 14, 20, 20, x, y)) {
-            int visible = 0;
-            for (int index = 0; index < menu.recipes().size(); index++) if (menu.available(index) && visible++ == page) {
+        navigation.refresh(menu.recipes().size(), menu::available);
+        if (button == 0 && navigation.click(x - leftPos, y - topPos)) return true;
+        if (button == 0 && isHovering(112, 16, 16, 16, x, y)) {
+            int index = navigation.recipeIndex();
+            if (index >= 0) {
                 if (minecraft != null && minecraft.gameMode != null) minecraft.gameMode.handleInventoryButtonClick(menu.containerId, index);
                 return true;
             }
@@ -53,5 +59,12 @@ public final class GuiThaumatorium extends ThaumcraftContainerScreen<ContainerTh
         return super.mouseClicked(x, y, button);
     }
     @Override protected void renderLabels(GuiGraphics graphics, int x, int y) {}
-    @Override public void render(GuiGraphics graphics, int x, int y, float partial) { super.render(graphics, x, y, partial); renderTooltip(graphics, x, y); }
+    @Override public void render(GuiGraphics graphics, int x, int y, float partial) {
+        super.render(graphics, x, y, partial);
+        renderTooltip(graphics, x, y);
+        int index = navigation.recipeIndex();
+        if (index >= 0 && isHovering(112, 16, 16, 16, x, y)) {
+            graphics.renderTooltip(font, menu.recipes().get(index).value().getResultItem(minecraft.level.registryAccess()), x, y);
+        }
+    }
 }

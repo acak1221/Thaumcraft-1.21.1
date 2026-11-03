@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -14,7 +15,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -80,29 +83,74 @@ public final class ProgrammaticRecipeRuntimeChecks {
                 TileThaumatorium machine = (TileThaumatorium) fixture.level.getBlockEntity(pos);
                 actor.player.setPos(Vec3.atCenterOf(pos).add(0, 1, 0));
                 KnowledgeAccess.get(actor.player).addResearch(RESEARCH);
+                KnowledgeAccess.get(actor.player).addResearch("THAUMIUM");
                 ItemStack expected = named(Items.DIAMOND_BLOCK);
-                var recipe = fixture.register(ThaumcraftApi.addCrucibleRecipe(RESEARCH, expected, named(Items.PHANTOM_MEMBRANE),
+                var recipe = fixture.register(ThaumcraftApi.addCrucibleRecipe(RESEARCH, expected, Items.IRON_INGOT,
                         new AspectList().add(Aspect.AIR, 2).add(Aspect.EARTH, 3)));
-                machine.setItem(0, named(Items.PHANTOM_MEMBRANE));
+                var lockedRecipe = fixture.register(ThaumcraftApi.addCrucibleRecipe(RESEARCH + "_LOCKED", named(Items.EMERALD_BLOCK), Items.IRON_INGOT,
+                        new AspectList().add(Aspect.WATER, 1)));
+                machine.setItem(0, new ItemStack(Items.IRON_INGOT));
                 var serverRecipes = ProgrammaticRecipes.crucibles(fixture.level.getRecipeManager());
                 var serverMenu = new ContainerThaumatorium(122, actor.player.getInventory(), machine, serverRecipes);
                 actor.player.containerMenu = serverMenu;
-                int selected = -1;
-                for (int index = 0; index < serverRecipes.size(); index++) if (serverRecipes.get(index).value().programmatic() == recipe) selected = index;
-                test.assertTrue(selected >= 0 && serverMenu.clickMenuButton(actor.player, selected)
-                        && machine.isRecipeSelected(serverRecipes.get(selected).id()), "the server's authoritative menu index selects the actual addon formula");
+                int selected = -1, thaumium = -1, locked = -1;
+                for (int index = 0; index < serverRecipes.size(); index++) {
+                    var holder = serverRecipes.get(index);
+                    if (holder.value().programmatic() == recipe) selected = index;
+                    if (holder.value().programmatic() == lockedRecipe) locked = index;
+                    if (holder.id().toString().equals("thaumcraft:crucible/thaumium")) thaumium = index;
+                }
+                test.assertTrue(selected >= 0 && thaumium >= 0 && locked >= 0
+                                && serverMenu.available(thaumium) && serverMenu.available(selected) && !serverMenu.available(locked),
+                        "one plain iron ingot exposes both researched bundled and addon outputs while the unresearched addon remains hidden");
+                test.assertTrue(!serverMenu.clickMenuButton(actor.player, locked), "a matching iron catalyst cannot bypass the other addon's research gate");
+                test.assertTrue(machine.recipeCapacity() == 1 && serverMenu.clickMenuButton(actor.player, thaumium)
+                                && !serverMenu.clickMenuButton(actor.player, selected),
+                        "the ordinary machine keeps its one installed formula limit without hiding the other matching choice");
+                test.assertTrue(serverMenu.clickMenuButton(actor.player, thaumium) && serverMenu.clickMenuButton(actor.player, selected)
+                                && machine.isRecipeSelected(serverRecipes.get(selected).id()) && !machine.isRecipeSelected(serverRecipes.get(thaumium).id()),
+                        "deselecting thaumium lets the second visible iron recipe install at its original authoritative menu index");
                 FriendlyByteBuf opening = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
                 try {
                     opening.writeBlockPos(pos);
                     thaumcraft.common.crafting.CrucibleRecipeDisplay.write(opening, fixture.level.registryAccess(), serverRecipes);
-                    // Simulate a client without this server-only registration in the shared-process test.
+                    // Simulate a client without either server-only registration in the shared-process test.
                     ThaumcraftApi.unregisterCraftingRecipe(recipe);
+                    ThaumcraftApi.unregisterCraftingRecipe(lockedRecipe);
                     var clientMenu = new ContainerThaumatorium(122, actor.player.getInventory(), opening);
+                    test.assertTrue(clientMenu.recipes().size() == serverRecipes.size(), "the opening snapshot includes every bundled and server-only addon recipe");
+                    for (int index = 0; index < serverRecipes.size(); index++) {
+                        var server = serverRecipes.get(index);
+                        var client = clientMenu.recipes().get(index);
+                        test.assertTrue(client.id().equals(server.id()) && client.value().programmatic() == null
+                                        && ItemStack.matches(server.value().getResultItem(fixture.level.registryAccess()), client.value().getResultItem(fixture.level.registryAccess()))
+                                        && client.value().aspects().equals(server.value().aspects()),
+                                "every opening preview preserves output, costs and authoritative index without recreating addon callbacks: " + server.id());
+                    }
                     var preview = clientMenu.recipes().get(selected);
-                    test.assertTrue(clientMenu.recipes().size() == serverMenu.recipes().size() && preview.id().equals(serverRecipes.get(selected).id())
-                            && preview.value().programmatic() == null && ItemStack.matches(expected, preview.value().getResultItem(fixture.level.registryAccess()))
+                    test.assertTrue(ItemStack.matches(expected, preview.value().getResultItem(fixture.level.registryAccess()))
                             && preview.value().aspects().equals(Map.of("aer", 2, "terra", 3)),
-                            "opening data retains exact output components, costs and indices without consulting or recreating client addon callbacks");
+                            "the second iron recipe retains its exact output components and aspect costs in the client preview");
+                    serverMenu.setSynchronizer(new ContainerSynchronizer() {
+                        @Override public void sendInitialData(AbstractContainerMenu container, NonNullList<ItemStack> items, ItemStack carried, int[] data) {
+                            for (int index = 0; index < data.length; index++) clientMenu.setData(index, (short) data[index]);
+                        }
+                        @Override public void sendSlotChange(AbstractContainerMenu container, int slot, ItemStack stack) {}
+                        @Override public void sendCarriedChange(AbstractContainerMenu container, ItemStack stack) {}
+                        @Override public void sendDataChange(AbstractContainerMenu container, int index, int value) { clientMenu.setData(index, (short) value); }
+                    });
+                    for (int index = 0; index < serverRecipes.size(); index++) {
+                        test.assertTrue(clientMenu.available(index) == serverMenu.available(index) && clientMenu.selected(index) == serverMenu.selected(index),
+                                "initial synchronizer fields retain availability and selection at server recipe index " + index);
+                    }
+                    test.assertTrue(clientMenu.available(thaumium) && clientMenu.available(selected) && !clientMenu.available(locked)
+                                    && clientMenu.selected(selected) && !clientMenu.selected(thaumium),
+                            "the native initial menu data exposes both learned iron choices and marks only the installed addon formula");
+                    test.assertTrue(serverMenu.clickMenuButton(actor.player, selected) && serverMenu.clickMenuButton(actor.player, thaumium),
+                            "the selected server-only addon formula can be removed and the bundled iron formula reinstalled");
+                    serverMenu.broadcastChanges();
+                    test.assertTrue(clientMenu.selected(thaumium) && !clientMenu.selected(selected) && clientMenu.available(selected) && !clientMenu.available(locked),
+                            "native menu changes preserve the second choice while updating the installed formula at the same server indices");
                 } finally { opening.release(); }
                 for (int invalid : new int[]{-1, thaumcraft.common.crafting.CrucibleRecipeDisplay.MAX_RECIPES + 1}) {
                     FriendlyByteBuf malformed = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());

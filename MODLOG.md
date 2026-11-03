@@ -1,3 +1,14 @@
+## 2026-11-04 — Thaumatorium recipe navigation
+
+The next-recipe glyph mostly clicked the previous-recipe region, making alternate
+outputs from a shared catalyst difficult to reach. Restored the original textured
+arrows with matching hitboxes, clamped navigation before rendering/selection, and
+added a page counter and output tooltip. Verified: five focused JUnit cases,
+Fabric build, and two focused native GameTests including bundled and addon iron
+recipes, research gates, formula capacity and menu synchronization. The user's
+Tainted Magic installation and rendered client remain unverified; see
+`docs/analysis/2026-11-04-thaumatorium-recipe-navigation.md`.
+
 ## 2026-10-27 — CI on main: three intermittent GameTests, JUnit skips without the original JARs
 
 The GameTest advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag failed now and then on main: its row of spiders

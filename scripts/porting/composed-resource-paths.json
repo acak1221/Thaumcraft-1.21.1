@@ -1546,7 +1546,7 @@
     "common/src/main/java/thaumcraft/client/ThaumcraftWoodworkClient.java": "d5dc7a8400c671b312a85395a6d32291bfe97988c67dc27a972766fa92ea88d3",
     "common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java": "8f7ed0d527ef24269b5438f206c9dc9b8791b5eaeac90bf93e0615e130ca7fb2",
     "common/src/main/java/thaumcraft/client/fx/particles/ShockSparkParticle.java": "9f11e10c3f78b824ed049ba218805e7ff906f965483fcb91d0b888b7bcb125fe",
-    "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": "26a99565842c9e75ada6f2df95f0e383227c6bccc2e37a3b3109d465c80de242",
+    "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": "a1d474cff4c3e4dd695fa5aea380ab149c7c90864aa56a75f0f4acd8309ca94e",
     "common/src/main/java/thaumcraft/client/fx/particles/WardHitParticle.java": "13b59286b12f7b99a128c4d46a32447fa38f517f03313e54988dd806f6a28f57",
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
     "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",

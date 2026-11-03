@@ -28,11 +28,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import thaumcraft.api.IGoggles;
 import thaumcraft.api.aspects.IAspectContainer;
+import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.nodes.IRevealer;
 import thaumcraft.client.renderers.tile.TileNodeRenderer;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.items.relics.ItemThaumometer;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.common.tiles.TileInfusionMatrix;
 
 /**
  * World optics only: original RenderEventHandler:215-239,250-255,287-363.
@@ -87,8 +89,15 @@ public final class ThaumcraftGogglesClient {
         if (state.getBlock() instanceof NoteBlock) {
             return new TargetView(pos, face, spaceAbove, List.of(), state.getValue(NoteBlock.NOTE));
         }
-        if (!(level.getBlockEntity(pos) instanceof IAspectContainer container)) return null;
-        var aspects = container.getAspects();
+        var entity = level.getBlockEntity(pos);
+        AspectList aspects;
+        if (entity instanceof TileInfusionMatrix matrix) {
+            // The matrix owns demand, not stored essentia. Its normal BE update
+            // already carries the remaining debt after each paid unit.
+            if (!matrix.isCrafting()) return null;
+            aspects = matrix.getDemand();
+        } else if (entity instanceof IAspectContainer container) aspects = container.getAspects();
+        else return null;
         if (aspects == null || aspects.size() == 0) return null;
         var knowledge = KnowledgeAccess.get(player);
         List<AspectView> entries = new ArrayList<>(aspects.size());

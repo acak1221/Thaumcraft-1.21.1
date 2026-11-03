@@ -19,4 +19,10 @@ final class Pages {
 
     /** A compound aspect and the two the research table combines into it. */
     record Combination(Aspect aspect) {}
+
+    /** One aspect contained in a scanned item, not a recipe that manufactures an item. */
+    record Source(ItemStack item, Aspect aspect, int amount) {
+        Source { item = item.copyWithCount(1); }
+        @Override public ItemStack item() { return item.copy(); }
+    }
 }

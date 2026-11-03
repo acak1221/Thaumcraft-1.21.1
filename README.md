@@ -88,6 +88,8 @@ NeoForge) and on by default; switched off, the original rule applies.
 - **Recipe viewers.** Arcane, crucible, infusion and enchantment infusion recipes, and aspect
   combinations, in [EMI](https://modrinth.com/mod/emi) (including "fill the workbench") and
   [JEI](https://modrinth.com/mod/jei).
+  In JEI, click an aspect to open Aspect Sources: only items your character has scanned are listed, with
+  the amount of that aspect per item. Newly scanned items appear on the next lookup.
 - **[Jade](https://modrinth.com/mod/jade).** Essentia in jars, tubes and machines behind the goggles
   of revealing, the state of furnaces, crucibles and infusions, a golem's core and upgrades.
 

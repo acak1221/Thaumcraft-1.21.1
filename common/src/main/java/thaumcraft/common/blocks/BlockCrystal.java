@@ -32,6 +32,11 @@ public final class BlockCrystal extends BaseEntityBlock implements IInfusionStab
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.ENTITYBLOCK_ANIMATED; }
     @Override protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos position, CollisionContext context) { return Shapes.block(); }
     @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos position, CollisionContext context) { return Shapes.block(); }
+    // Selection/collision remain the original cube. Native AO and skylight must
+    // instead see the original non-opaque crystal, not that physical cube.
+    @Override protected VoxelShape getOcclusionShape(BlockState state, BlockGetter world, BlockPos position) { return Shapes.empty(); }
+    @Override protected float getShadeBrightness(BlockState state, BlockGetter world, BlockPos position) { return 1.0F; }
+    @Override protected boolean propagatesSkylightDown(BlockState state, BlockGetter world, BlockPos position) { return true; }
     // Original isOpaqueCube/isNormalCube are false, so a cluster cannot be another cluster's solid support.
     @Override protected VoxelShape getBlockSupportShape(BlockState state, BlockGetter world, BlockPos position) { return Shapes.empty(); }
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {

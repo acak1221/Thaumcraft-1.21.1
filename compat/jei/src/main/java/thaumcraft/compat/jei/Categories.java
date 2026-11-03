@@ -18,7 +18,7 @@ import thaumcraft.common.config.ThaumcraftArcane;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftInfusion;
 
-/** The five Thaumcraft JEI categories, laid out like the EMI pages of the same recipes. */
+/** Thaumcraft JEI recipes and scanned aspect sources. */
 final class Categories {
     static final RecipeType<Pages.Arcane> ARCANE = RecipeType.create("thaumcraft", "arcane", Pages.Arcane.class);
     static final RecipeType<Pages.Crucible> CRUCIBLE = RecipeType.create("thaumcraft", "crucible", Pages.Crucible.class);
@@ -26,6 +26,7 @@ final class Categories {
     static final RecipeType<RecipeViews.Infusion> INFUSION_ENCHANTMENT =
             RecipeType.create("thaumcraft", "infusion_enchantment", RecipeViews.Infusion.class);
     static final RecipeType<Pages.Combination> COMBINATION = RecipeType.create("thaumcraft", "aspect_combination", Pages.Combination.class);
+    static final RecipeType<Pages.Source> SOURCES = RecipeType.create("thaumcraft", "aspect_sources", Pages.Source.class);
 
     private Categories() {}
 
@@ -153,7 +154,26 @@ final class Categories {
         }
     }
 
+    static final class Sources extends ThaumcraftCategory<Pages.Source> {
+        Sources(IGuiHelper gui) { super(SOURCES, "aspect_sources", ThaumcraftContent.THAUMOMETER.get(), gui, 118, 42); }
+
+        @Override public void setRecipe(IRecipeLayoutBuilder builder, Pages.Source source, IFocusGroup focuses) {
+            builder.addSlot(RecipeIngredientRole.INPUT, 4, 5).setStandardSlotBackground().addItemStack(source.item());
+            builder.addSlot(RecipeIngredientRole.OUTPUT, 88, 5).setOutputSlotBackground()
+                    .addIngredient(AspectIngredient.TYPE, new AspectIngredient.Stack(source.aspect(), source.amount()));
+        }
+
+        @Override public void draw(Pages.Source source, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+            gui.getRecipeArrow().draw(graphics, 49, 5);
+            var text = Component.translatable("jei.thaumcraft.aspect_sources.contains");
+            graphics.drawString(Minecraft.getInstance().font, text, 4, 29, TEXT, false);
+        }
+
+        @Override String research(Pages.Source source) { return ""; }
+        @Override int researchY(Pages.Source source) { return 0; }
+    }
+
     static List<ThaumcraftCategory<?>> all(IGuiHelper gui) {
-        return List.of(new Arcane(gui), new Crucible(gui), new Infusion(gui, false), new Infusion(gui, true), new Combination(gui));
+        return List.of(new Arcane(gui), new Crucible(gui), new Infusion(gui, false), new Infusion(gui, true), new Combination(gui), new Sources(gui));
     }
 }

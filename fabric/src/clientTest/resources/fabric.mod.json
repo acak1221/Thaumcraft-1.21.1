@@ -17,8 +17,11 @@
       "thaumcraft.fabric.testing.DeepslateOreClientProbe",
       "thaumcraft.fabric.testing.ModernAdaptationsClientProbe",
       "thaumcraft.fabric.testing.EmiIdentityReviewClientEntrypoint",
-      "thaumcraft.fabric.testing.RendererReviewClientProbe"
-    ]
+      "thaumcraft.fabric.testing.RendererReviewClientProbe",
+      "thaumcraft.fabric.testing.MatrixCrystalClientProbe",
+      "thaumcraft.fabric.testing.AspectSourcesClientEntrypoint"
+    ],
+    "jei_mod_plugin": ["thaumcraft.compat.jei.AspectSourcesClientProbe$JeiCapture"]
   },
   "depends": {
     "thaumcraft": "*",

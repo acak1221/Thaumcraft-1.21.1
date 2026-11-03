@@ -77,6 +77,11 @@ public final class CrystalClustersRuntimeChecks {
                                     && actor.player.getOffhandItem().isEmpty() && actor.level.getBlockState(actor.root).is(cluster),
                             "actual native BlockCrystalItem spends one earned identity on clicked face " + metadata + "/" + face);
                     var state = actor.level.getBlockState(actor.root); var tile = (TileCrystal) actor.level.getBlockEntity(actor.root);
+                    actor.require(state.getOcclusionShape(actor.level, actor.root).isEmpty()
+                                    && state.getShadeBrightness(actor.level, actor.root) == 1.0F
+                                    && state.propagatesSkylightDown(actor.level, actor.root)
+                                    && state.getLightBlock(actor.level, actor.root) == 0,
+                            "every attached cluster transmits skylight without a full-cube ambient-occlusion shadow");
                     actor.require(tile != null && tile.orientation == face.get3DDataValue() && ThaumcraftCrystalClusters.metadata(state) == metadata,
                             "all seven actual native tiles retain clicked orientation even after native item BE-data merge, independently of color");
                     actor.require(state.getShape(actor.level, actor.root).bounds().equals(new AABB(0, 0, 0, 1, 1, 1))

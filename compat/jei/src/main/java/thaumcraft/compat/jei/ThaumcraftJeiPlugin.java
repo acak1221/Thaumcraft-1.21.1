@@ -11,6 +11,7 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.registration.IAdvancedRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
@@ -69,11 +70,17 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
         Categories.all(registration.getJeiHelpers().getGuiHelper()).forEach(registration::addRecipeCategories);
     }
 
+    @Override public void registerAdvanced(IAdvancedRegistration registration) {
+        registration.addTypedRecipeManagerPlugin(Categories.SOURCES,
+                new AspectSources(registration.getJeiHelpers().getIngredientManager()));
+    }
+
     @Override public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(ThaumcraftArcane.ARCANE_WORKBENCH_ITEM.get(), Categories.ARCANE);
         registration.addRecipeCatalyst(ThaumcraftAlchemy.CRUCIBLE_ITEM.get(), Categories.CRUCIBLE);
         registration.addRecipeCatalyst(ThaumcraftInfusion.MATRIX_ITEM.get(), Categories.INFUSION, Categories.INFUSION_ENCHANTMENT);
         registration.addRecipeCatalyst(ThaumcraftContent.RESEARCH_TABLE_ITEM.get(), Categories.COMBINATION);
+        registration.addRecipeCatalyst(ThaumcraftContent.THAUMOMETER.get(), Categories.SOURCES);
     }
 
     @Override public void registerRecipes(IRecipeRegistration registration) {

@@ -1,0 +1,140 @@
+{
+  "version": "0.1.0-alpha.20",
+  "minecraft": "1.21.1",
+  "loader": "Fabric",
+  "java": 21,
+  "jei": "19.43.0.398",
+  "reports": [
+    {
+      "run_id": "matrix-crystal-2026-11-03T10-03-45.611387400Z",
+      "status": "PASS",
+      "fixture": "fresh1.21.1 flat world, supplied Silverwood ritual ingredients, skull stabilisers and one real jar unit; no survival acquisition claim",
+      "checks": [
+        {
+          "check": "initial remaining demand",
+          "shown": {
+            "aer": 9,
+            "ignis": 9,
+            "aqua": 9,
+            "terra": 9,
+            "ordo": 9,
+            "perditio": 9,
+            "praecantatio": 9
+          },
+          "passed": true
+        },
+        {
+          "check": "remaining demand after one genuine source debit",
+          "shown": {
+            "aer": 8,
+            "ignis": 9,
+            "aqua": 9,
+            "terra": 9,
+            "ordo": 9,
+            "perditio": 9,
+            "praecantatio": 9
+          },
+          "passed": true
+        },
+        {
+          "passed": true,
+          "check": "all seven native crystal lighting states"
+        }
+      ],
+      "captures": [
+        {
+          "file": "matrix-crystal-2026-11-03T10-03-45.611387400Z-matrix-needed-aspects.png",
+          "sha256": "f7e67bc7a759483943ab82cf5286876bb538f8bc75030f490c7f9e71dbcec2ee",
+          "bytes": 447722,
+          "visually_inspected": false
+        },
+        {
+          "file": "matrix-crystal-2026-11-03T10-03-45.611387400Z-matrix-after-one-essentia.png",
+          "sha256": "ef3da9700384a8d549e2776850bdef642823b39e519c9a7e2bb6c488e1b491d9",
+          "bytes": 386166,
+          "visually_inspected": true
+        },
+        {
+          "file": "matrix-crystal-2026-11-03T10-03-45.611387400Z-crystal-clusters-daylight.png",
+          "sha256": "890a183ea65e7b200d41a23fb543e5a14e8eb10081c7062369195f3c331dec42",
+          "bytes": 276782,
+          "visually_inspected": true
+        }
+      ]
+    },
+    {
+      "run_id": "jei-aspect-sources-2026-11-03T10-03-07.571053900Z",
+      "status": "PASS",
+      "fixture": "fresh1.21.1 world, supplied @clay_ball/@dirt and #clay scan markers through the server API, actual JEI and knowledge packets; not survival acquisition",
+      "checks": [
+        {
+          "sources": [],
+          "passed": true,
+          "check": "empty scans hide every source"
+        },
+        {
+          "sources": [
+            {
+              "item": "minecraft:clay_ball",
+              "amount": 1,
+              "aspect": "aqua"
+            }
+          ],
+          "passed": true,
+          "check": "Aqua lookup filters unscanned and non-Aqua items"
+        },
+        {
+          "sources": [
+            {
+              "item": "minecraft:clay",
+              "amount": 3,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:clay_ball",
+              "amount": 1,
+              "aspect": "aqua"
+            }
+          ],
+          "passed": true,
+          "check": "new advanced scan refreshes Aqua sources"
+        },
+        {
+          "sources": [],
+          "passed": true,
+          "check": "forgotten scans hide sources again"
+        }
+      ],
+      "captures": [
+        {
+          "file": "jei-aspect-sources-2026-11-03T10-03-07.571053900Z-aqua-only-scanned-clay-ball.png",
+          "sha256": "cef83d3145e01c43f802e3ea2d5c295e9af343a3168ded55c5acd282e6485bbc",
+          "bytes": 295260,
+          "visually_inspected": false
+        },
+        {
+          "file": "jei-aspect-sources-2026-11-03T10-03-07.571053900Z-aqua-after-studying-clay-block.png",
+          "sha256": "4496a1f57c6bb49201ca84bed6b7223b18fe63006f84ca35a7b6fc6d8f623ae0",
+          "bytes": 290630,
+          "visually_inspected": true
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java": "c132ddaa8e6163dd5d47462e8fe6bdb06a070df1392ae51cd1901c51b5688977",
+    "common/src/main/java/thaumcraft/common/blocks/BlockCrystal.java": "c40865693d61d1ef452d07272dc29eb034b16aeac60f7e380592f91ac3b05eae",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/AspectIngredient.java": "8ad6a254f8ed5a2777c18630715a7dbf2a839bff9091afbb736addf555ac037e",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/AspectSources.java": "c12dcec45ec77fcc1f0ccd9f2a88a157a9bfd738fb532f8f986a251166491c77",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/Categories.java": "d9b5e3f5f19cad8ee28096140d997733407d1e5a422ece19a60d20b31d254fb6",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/ItemSubtypes.java": "1b8e41bab77088374808cbf995377577668ff51a154af80d0bce628f1765c31b",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/Pages.java": "1e8235dbd247deda73013eb3aed5e15eee68b13ac2fe2b8bdbc3362980927b65",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/ThaumcraftCategory.java": "43b7d6fad89d9b03d0b52d6aa52ab9b8e6a65e0c17f77f653845b83132fe3f45",
+    "compat/jei/src/main/java/thaumcraft/compat/jei/ThaumcraftJeiPlugin.java": "4fcb0a2b82a4db03ae70af849cd8f6d347f5d64e4a364ec728ce1e71b24dc230"
+  },
+  "limitations": [
+    "Supplied finite fixtures, not survival acquisition.",
+    "No remote multiplayer or physical NeoForge client acceptance is claimed.",
+    "Images were captured from the real client; selected captures were inspected."
+  ]
+}

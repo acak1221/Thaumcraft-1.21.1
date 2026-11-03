@@ -2789,5 +2789,7 @@
   "tc.research_page.MODERNINFUSION.1": "Your knowledge of infusion can now bind enchantments to tridents, crossbows and maces. Each ritual raises the chosen enchantment by one level. The central item must support that enchantment, and incompatible enchantments cannot be combined. Experience and essentia costs increase with the enchantments already present. The following pages show the components and costs for each ritual.",
   "tc.research_name.DEEPINFUSION": "Secrets of Deep Enchantment",
   "tc.research_text.DEEPINFUSION": "Treasures of the deep and the Nether",
-  "tc.research_page.DEEPINFUSION.1": "Your studies of eldritch knowledge reveal costly rituals for rare enchantments. Wind Burst requires a heavy core, Swift Sneak draws on relics of ancient cities, and Soul Speed consumes materials from the Nether. Each ritual adds one level and consumes its listed components, experience and essentia. The limits and conflicts of the enchantments still apply."
+  "tc.research_page.DEEPINFUSION.1": "Your studies of eldritch knowledge reveal costly rituals for rare enchantments. Wind Burst requires a heavy core, Swift Sneak draws on relics of ancient cities, and Soul Speed consumes materials from the Nether. Each ritual adds one level and consumes its listed components, experience and essentia. The limits and conflicts of the enchantments still apply.",
+  "emi.category.thaumcraft.aspect_sources": "Aspect Sources",
+  "jei.thaumcraft.aspect_sources.contains": "Scanned item"
 }

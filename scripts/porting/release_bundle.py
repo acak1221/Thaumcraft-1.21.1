@@ -16,6 +16,7 @@ ORDER_CASES = (
     'waterUpgradeWidensTheLiveWorkRadiusOfRunningLumberAndHarvestGolems',
     'infusionComponentPredicateSession', 'advancedFurnacePreservesCustodyAcrossRealChunkUnload',
     'embersFlyDamageIgniteAndExpire', 'tailreviewgametests.tailreplantseedcustody',
+    'pechOriginalEntityUsesNativeGameplay',
 )
 
 

@@ -116,7 +116,21 @@ public final class PechRuntimeChecks {
             pech.setTamed(true);neighbor.setTamed(true);pech.hurt(a.level.damageSources().playerAttack(a.player),1);
             a.require(!pech.isTamed()&&!neighbor.isTamed(),"even native invulnerability-window hurt refusal still triggers original group anger");
             pech.setAnger(2);pech.tick();a.require(pech.getAnger()==1,"ordinary native tick decrements saved anger");
-            clear();pech=pech(0,0);ItemEntity marked=new ItemEntity(a.level,pech.getX()+1,pech.getY(),pech.getZ(),new ItemStack(Items.EMERALD),0,0,0);PechDrops.mark(marked);owned.add(marked);a.require(a.level.addFreshEntity(marked),"marked actual item admitted");
+            clear();pech=pech(0,0);
+            // The native selector searches 16 blocks; Actor only owns a narrow
+            // combat lane. A nearby unmarked drop outside that lane is a valid
+            // target, so it cannot serve as the marked-item negative control.
+            var outsideLane=new ItemEntity(a.level,pech.getX()+8,pech.getY(),pech.getZ(),new ItemStack(Items.EMERALD),0,0,0);
+            owned.add(outsideLane);a.require(a.level.addFreshEntity(outsideLane),"owned unmarked item outside the combat lane is admitted");
+            pech.tickCount=5;var wideGoal=new PechItemGoal(pech);
+            a.require(wideGoal.canUse(),"native pickup search legitimately sees unmarked items beyond the narrow combat lane");wideGoal.stop();
+            // canUse only selects a target: no floor or path is needed. Keep
+            // the entire native search box empty, without removing other tests'
+            // entities, then introduce exactly one marked candidate.
+            pech.setPos(pech.getX(),pech.getY()+32,pech.getZ());
+            a.require(a.level.getEntitiesOfClass(ItemEntity.class,pech.getBoundingBox().inflate(16)).isEmpty(),
+                    "marked-item control owns an empty complete native pickup search box");
+            ItemEntity marked=new ItemEntity(a.level,pech.getX()+1,pech.getY(),pech.getZ(),new ItemStack(Items.EMERALD),0,0,0);PechDrops.mark(marked);owned.add(marked);a.require(a.level.addFreshEntity(marked),"marked actual item admitted");
             var goal=new PechItemGoal(pech);pech.tickCount=5;a.require(!goal.canUse(),"real Pech pickup selector excludes persisted PechDrop marker");
             CompoundTag itemState=new CompoundTag();marked.addAdditionalSaveData(itemState);var copy=new ItemEntity(EntityType.ITEM,a.level);copy.readAdditionalSaveData(itemState);a.require(PechDrops.isMarked(copy),"PechDrop survives actual native ItemEntity NBT round trip without changing item components");
             marked.discard();var normal=new ItemEntity(a.level,pech.getX()+1,pech.getY(),pech.getZ(),new ItemStack(Items.EMERALD),0,0,0);owned.add(normal);a.level.addFreshEntity(normal);pech.tickCount=10;a.require(goal.canUse(),"same native nearby unmarked valuable is a valid five-tick pickup target");

@@ -29,6 +29,7 @@ def main():
         "advancedFurnacePreservesCustodyAcrossRealChunkUnload",
         "embersFlyDamageIgniteAndExpire",
         "tailreviewgametests.tailreplantseedcustody",
+        "pechOriginalEntityUsesNativeGameplay",
     ]
     output = root / ".tmp/order-verification"
     output.mkdir(parents=True, exist_ok=True)

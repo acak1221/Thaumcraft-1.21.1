@@ -33,15 +33,20 @@ public final class TailReplantReviewRuntimeChecks {
     public static void replantPaysSeedBeforeNativePlacementObserver(GameTestHelper test) {
         try (var f = new TubeVariantsRuntimeChecks.Fixture(test)) {
             f.open();
-            var held = GolemChunks.hold(f.level, List.of(f.base));
+            // Always cross a chunk boundary, including at negative coordinates.
+            // The nearest x=15 column is at most eight blocks from the owned
+            // fixture; both the home and crop remain inside its drop bounds.
+            BlockPos home = f.base.offset(7 - Math.floorMod(f.base.getX() + 8, 16), 0, 0);
+            var held = GolemChunks.hold(f.level, List.of(home, home.east()));
             try {
-                GameTestChunkAwait.entityTicking(test, f.base);
-                Outcome plain = harvest(test, f, false);
+                GameTestChunkAwait.entityTicking(test, home);
+                GameTestChunkAwait.entityTicking(test, home.east());
+                Outcome plain = harvest(test, f, home, false);
                 test.assertTrue(plain.harvested() && plain.planted() && plain.playerSeeds() == 0 && plain.looseSeeds() == 0
                                 && plain.events() == 1,
                         "ordinary actual Order harvest plants one wart using its one physical seed: " + plain);
                 f.reset();
-                Outcome observed = harvest(test, f, true);
+                Outcome observed = harvest(test, f, home, true);
                 test.assertTrue(observed.harvested() && observed.planted() && observed.events() == 1,
                         "native placement observer is reached during one genuine paid replant: " + observed);
                 test.assertTrue(observed.playerSeeds() == 0 && observed.looseSeeds() == 0,
@@ -53,8 +58,8 @@ public final class TailReplantReviewRuntimeChecks {
 
     private record Outcome(boolean harvested, boolean planted, int playerSeeds, int looseSeeds, int events, int ticks, String workState) {}
 
-    private static Outcome harvest(GameTestHelper test, TubeVariantsRuntimeChecks.Fixture f, boolean pickup) {
-        BlockPos home = f.base, crop = home.east();
+    private static Outcome harvest(GameTestHelper test, TubeVariantsRuntimeChecks.Fixture f, BlockPos home, boolean pickup) {
+        BlockPos crop = home.east();
         test.assertTrue(f.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING), "native golem crop work is enabled");
         f.put(home.below(), Blocks.STONE);
         f.put(crop.below(), Blocks.SOUL_SAND);
@@ -72,6 +77,9 @@ public final class TailReplantReviewRuntimeChecks {
                 new ItemStack(Items.NETHER_WART), 0, 0, 0);
         seed.setNoPickUpDelay(); seed.setNoGravity(true);
         test.assertTrue(f.level.addFreshEntity(golem) && f.level.addFreshEntity(seed), "real configured Order worker and physical seed are admitted");
+        test.assertTrue(Math.floorMod(home.getX(), 16) == 15 && Math.floorMod(crop.getX(), 16) == 0
+                        && golem.loadedNavigationArea(crop),
+                "native navigation ring covers both sides of the home/crop chunk boundary: " + home + " -> " + crop);
         test.assertTrue(golem.canWork() && golem.getUpgradeAmount(GolemUpgrade.ORDER) == 1,
                 "actual configured Harvest worker can work with Order: " + golem.describeWorkState());
         int[] events = {0};

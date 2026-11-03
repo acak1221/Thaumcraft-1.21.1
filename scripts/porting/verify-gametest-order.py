@@ -31,6 +31,7 @@ def main():
         "tailreviewgametests.tailreplantseedcustody",
         "pechOriginalEntityUsesNativeGameplay",
         "champion_promotion_uses_the_original_bonuses",
+        "unknownKnowledgeRevealsHiddenNotesAndRetriesFragments",
     ]
     output = root / ".tmp/order-verification"
     output.mkdir(parents=True, exist_ok=True)

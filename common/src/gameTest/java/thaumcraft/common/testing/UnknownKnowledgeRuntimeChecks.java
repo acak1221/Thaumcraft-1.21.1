@@ -27,6 +27,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftContent;
@@ -50,8 +52,9 @@ public final class UnknownKnowledgeRuntimeChecks {
         boolean oldCreative = player.getAbilities().instabuild;
         List<ItemStack> inventory = new ArrayList<>();
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) inventory.add(player.getInventory().getItem(slot).copy());
-        var pos = test.absolutePos(new BlockPos(3, 3, 3)); var chunk = new ChunkPos(pos);
-        boolean force = !level.getForcedChunks().contains(chunk.toLong());
+        var pos = test.absolutePos(new BlockPos(3, 3, 3));
+        Set<ChunkPos> forced = new HashSet<>();
+        Map<BlockPos, BlockState> floors = new HashMap<>();
         Map<UUID, Integer> fragmentOutputs = new HashMap<>(); ItemEntity[] blocker = {null}; boolean[] closed = {false};
         Runnable cleanup = () -> {
             if (closed[0]) return; closed[0] = true;
@@ -60,10 +63,25 @@ public final class UnknownKnowledgeRuntimeChecks {
             player.getInventory().clearContent();
             for (int slot = 0; slot < inventory.size(); slot++) player.getInventory().setItem(slot, inventory.get(slot));
             player.setGameMode(oldGameType); player.getAbilities().instabuild = oldCreative; player.setPos(oldPosition); knowledge.copyFrom(oldKnowledge);
-            if (force) level.setChunkForced(chunk.x, chunk.z, false);
+            floors.forEach((block, state) -> level.setBlock(block, state, 3));
+            for (var chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
         };
         try {
-            if (force) level.setChunkForced(chunk.x, chunk.z, true);
+            // Each original random-velocity fragment output needs its own solid landing
+            // area. Three blocks can let the stacks merge during flight/landing, erasing
+            // one UUID even though the real queue delivered both outputs correctly.
+            for (int index = 0; index < 2; index++) {
+                BlockPos center = pos.offset(index * 8, 0, 0);
+                for (BlockPos block : BlockPos.betweenClosed(center.offset(-3, -1, -3), center.offset(3, -1, 3))) {
+                    var chunk = new ChunkPos(block);
+                    if (!level.getForcedChunks().contains(chunk.toLong())) {
+                        forced.add(chunk); level.setChunkForced(chunk.x, chunk.z, true);
+                    }
+                    test.assertTrue(level.getBlockEntity(block) == null, "fragment landing cells contain no foreign block entity");
+                    floors.put(block.immutable(), level.getBlockState(block));
+                    level.setBlock(block, Blocks.STONE.defaultBlockState(), 3);
+                }
+            }
             player.getInventory().clearContent(); player.setGameMode(GameType.SURVIVAL); player.setPos(Vec3.atCenterOf(pos));
             recipe(test);
             for (Item variant : List.of(ThaumcraftUnknownKnowledge.UNKNOWN_NOTE.get(), ThaumcraftUnknownKnowledge.UNKNOWN_NOTE_24.get())) {
@@ -124,10 +142,9 @@ public final class UnknownKnowledgeRuntimeChecks {
             int index = 0;
             for (Item variant : List.of(ThaumcraftUnknownKnowledge.UNKNOWN_NOTE.get(), ThaumcraftUnknownKnowledge.UNKNOWN_NOTE_24.get())) {
                 player.setGameMode(index++ == 0 ? GameType.CREATIVE : GameType.SURVIVAL);
-                // Every fragment drops where its actor stands, so the second note is used three
-                // blocks away: two knowledge fragments on the same spot would merge into one stack
-                // and the scenario could not read the original amount of each of them.
-                player.setPos(Vec3.atCenterOf(pos).add(3.0 * (index - 1), 0, 0));
+                // Preserve the real sampled velocity and native item physics, with disjoint
+                // landing areas so the assertion can still identify both original outputs.
+                player.setPos(Vec3.atCenterOf(pos).add(8.0 * (index - 1), 0, 0));
                 var held = new ItemStack(variant, 2); player.setItemInHand(InteractionHand.MAIN_HAND, held);
                 var beforeKnowledge = knowledge.save(); Set<UUID> before = new HashSet<>(pendingIds(test));
                 player.gameMode.useItem(player, level, held, InteractionHand.MAIN_HAND);
@@ -179,7 +196,12 @@ public final class UnknownKnowledgeRuntimeChecks {
                 }
                 if (allDelivered) { cleanup.run(); test.succeed(); }
                 else if (test.getTick() > MAX_WAIT) {
-                    test.fail("native POST retry never delivered every paid fragment result: " + fragmentOutputs);
+                    String detail = "native POST retry never delivered every paid fragment result: " + fragmentOutputs
+                            + " pending=" + pendingIds(test) + " live=" + fragmentOutputs.keySet().stream().map(id -> {
+                                var entity = level.getEntity(id);
+                                return id + ":" + (entity instanceof ItemEntity item ? item.getItem() + "@" + item.position() : entity);
+                            }).toList();
+                    cleanup.run(); test.fail(detail);
                 }
             });
             test.runAfterDelay(MAX_WAIT + 1, () -> {

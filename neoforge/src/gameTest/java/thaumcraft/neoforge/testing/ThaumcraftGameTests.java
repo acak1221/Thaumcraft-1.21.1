@@ -1706,7 +1706,7 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.BrainyZombieRuntimeChecks.run(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "r11_unknown_knowledge")
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 450, batch = "r11_unknown_knowledge")
     public void unknownKnowledgeRevealsHiddenNotesAndRetriesFragments(GameTestHelper test) {
         thaumcraft.common.testing.UnknownKnowledgeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }

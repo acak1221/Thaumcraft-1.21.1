@@ -1,0 +1,9 @@
+# Unknown-note custody fixture follow-up
+
+The main-branch run [41623620288](https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/41623620288) passed its first full Fabric suite, then timed out `unknownKnowledgeRevealsHiddenNotesAndRetriesFragments` in the second full suite at 400 ticks. The release workflow on the same source passed both full Fabric suites and all seven isolated scenarios. This follow-up changes test fixtures only; the alpha.23 production particle fix is unchanged.
+
+The old scene dropped two knowledge-fragment stacks three blocks apart, then required both original UUIDs and amounts to remain present. `UnknownKnowledge.reveal` preserves the original independently sampled horizontal motion in [-0.1, 0.1). The old separation does not exclude native stack merging during flight and landing. The timeout report did not retain the live item positions, so the exact final state of that failed scene is unknown.
+
+The fixture now supplies separate solid landing platforms eight blocks apart, holds their chunks, and restores the previous blocks and force state. It refuses to overwrite foreign block entities. Actual note use, random 7–9 amounts, saved queue state, conflicting UUID admission, native POST delivery, physics and per-output identity assertions are retained. The internal deadline remains 400 ticks; the wrapper allows 450 so the existing 401-tick diagnostic/cleanup can execute before the framework timeout. Failure diagnostics now include pending IDs and live item states. The scenario is also included in future isolated regression runs.
+
+Two local Fabric native runs passed, including the final source with ownership checks and failure cleanup. These used the existing disposable 1.21.1 GameTest world with newly supplied, restored fixture blocks; no fresh-world or survival acquisition claim. The final focused XML contains exactly this one passing scenario. The order-runner and release-guard Python checks also pass.

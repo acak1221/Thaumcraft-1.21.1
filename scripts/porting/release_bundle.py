@@ -18,6 +18,7 @@ ORDER_CASES = (
     'embersFlyDamageIgniteAndExpire', 'tailreviewgametests.tailreplantseedcustody',
     'pechOriginalEntityUsesNativeGameplay',
     'champion_promotion_uses_the_original_bonuses',
+    'unknownKnowledgeRevealsHiddenNotesAndRetriesFragments',
 )
 
 

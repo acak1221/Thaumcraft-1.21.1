@@ -1771,7 +1771,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.BrainyZombieRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r11_unknown_knowledge")
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 450, batch = "r11_unknown_knowledge")
     public void unknownKnowledgeRevealsHiddenNotesAndRetriesFragments(GameTestHelper test) {
         thaumcraft.common.testing.UnknownKnowledgeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }

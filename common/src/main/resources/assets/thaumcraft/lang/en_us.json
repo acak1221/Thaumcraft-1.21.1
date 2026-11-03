@@ -2791,5 +2791,7 @@
   "tc.research_text.DEEPINFUSION": "Treasures of the deep and the Nether",
   "tc.research_page.DEEPINFUSION.1": "Your studies of eldritch knowledge reveal costly rituals for rare enchantments. Wind Burst requires a heavy core, Swift Sneak draws on relics of ancient cities, and Soul Speed consumes materials from the Nether. Each ritual adds one level and consumes its listed components, experience and essentia. The limits and conflicts of the enchantments still apply.",
   "emi.category.thaumcraft.aspect_sources": "Aspect Sources",
-  "jei.thaumcraft.aspect_sources.contains": "Scanned item"
+  "jei.thaumcraft.aspect_sources.contains": "Scanned item",
+  "tc.port.emi.aspect_sources.empty": "No scanned sources yet",
+  "tc.port.emi.aspect_sources.amount": "%s per item"
 }

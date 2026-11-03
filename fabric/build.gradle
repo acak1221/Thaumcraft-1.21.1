@@ -318,6 +318,16 @@ loom.runs {
   vmArg '-Dthaumcraft.jeiAspectSourcesClient=true'
   programArgs '--width', '1280', '--height', '900'
  }
+ emiAspectSourcesClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft scanned aspect sources in EMI'
+  runDir 'run-emi-aspect-sources-client'
+  vmArg '-Xmx1536M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.emiAspectSourcesClient=true'
+  programArgs '--width', '1280', '--height', '900'
+ }
  matrixCrystalClient {
   client()
   source sourceSets.clientTest
@@ -727,7 +737,7 @@ tasks.named('runMultiplayerPeerClient') {
   logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', modernAdaptationsClient: 'clientTest', reviewEmiIdentityClient: 'clientTest', rendererReviewClient: 'clientTest', matrixCrystalClient: 'clientTest', jeiAspectSourcesClient: 'clientTest', taintDripClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', modernAdaptationsClient: 'clientTest', reviewEmiIdentityClient: 'clientTest', rendererReviewClient: 'clientTest', matrixCrystalClient: 'clientTest', jeiAspectSourcesClient: 'clientTest', emiAspectSourcesClient: 'clientTest', taintDripClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
 
 tasks.named('runTaintDripClient') {
  dependsOn tasks.named('clientTestClasses')
@@ -750,6 +760,20 @@ tasks.named('runJeiAspectSourcesClient') {
   def receipt = file('run-jei-aspect-sources-client/jei-aspect-sources-client-result.json')
   if (!receipt.isFile() || new groovy.json.JsonSlurper().parse(receipt, 'UTF-8').status != 'PASS') {
    throw new GradleException('JEI aspect sources client failed; inspect ' + receipt)
+  }
+ }
+}
+
+tasks.named('runEmiAspectSourcesClient') {
+ dependsOn tasks.named('clientTestClasses')
+ doFirst {
+  if (!providers.gradleProperty('withEmi').isPresent()) throw new GradleException('Use -PwithEmi for the real EMI client probe')
+  delete file('run-emi-aspect-sources-client/emi-aspect-sources-client-result.json')
+ }
+ doLast {
+  def receipt = file('run-emi-aspect-sources-client/emi-aspect-sources-client-result.json')
+  if (!receipt.isFile() || new groovy.json.JsonSlurper().parse(receipt, 'UTF-8').status != 'PASS') {
+   throw new GradleException('EMI aspect sources client failed; inspect ' + receipt)
   }
  }
 }

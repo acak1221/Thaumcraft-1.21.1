@@ -130,4 +130,5 @@ fabric/run-review-emi-identity/
 fabric/run-review-renderers/
 fabric/run-matrix-crystal-client/
 fabric/run-jei-aspect-sources-client/
+fabric/run-emi-aspect-sources-client/
 fabric/run-taint-drip-client/

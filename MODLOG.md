@@ -1,3 +1,14 @@
+## 2026-11-04 — scanned aspect sources in EMI and JEI
+
+Selecting an aspect in EMI now lists the current character's scanned item sources
+with their aspect amounts, live knowledge updates and pagination. Unknown item
+sources stay out of recipe metadata; forgetting scans immediately hides their
+slots. JEI's existing equivalent was checked again in the actual client.
+Verified: Fabric build/isolation, 2,895 JUnit passes (five expected oracle skips),
+18 resource tests, two focused dedicated-server GameTests and both focused native
+client runs; all five captures inspected.
+NeoForge was not built or run. See `docs/analysis/2026-11-04-aspect-sources.md`.
+
 ## 2026-11-04 — Thaumatorium recipe navigation
 
 The next-recipe glyph mostly clicked the previous-recipe region, making alternate

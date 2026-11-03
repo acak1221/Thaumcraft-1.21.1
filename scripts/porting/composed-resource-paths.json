@@ -1464,6 +1464,9 @@
     "compat/emi/src/main/java/thaumcraft/compat/emi/EmiAspectCombinationRecipe.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_combination/\"+aspect.getTag())"
     ],
+    "compat/emi/src/main/java/thaumcraft/compat/emi/EmiAspectSourcesRecipe.java": [
+      "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",\"/aspect_sources/\"+aspect.getTag())"
+    ],
     "compat/emi/src/main/java/thaumcraft/compat/emi/ThaumcraftEmiPlugin.java": [
       "ResourceLocation.fromNamespaceAndPath(\"thaumcraft\",path)",
       "ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(),\"/\"+holder.id().getPath())"

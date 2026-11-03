@@ -36,7 +36,7 @@ import thaumcraft.common.crafting.ProgrammaticRecipes;
 import thaumcraft.common.items.wands.WandData;
 
 /**
- * Optional EMI integration: arcane, crucible and infusion recipes and the aspect combinations.
+ * Optional EMI integration: crafting, aspect combinations and scanned aspect sources.
  *
  * <p>TC4 had no recipe viewer of its own; its recipes were only readable in the Thaumonomicon.
  * EMI loads this class itself: on Fabric through the {@code emi} entrypoint of fabric.mod.json,
@@ -60,6 +60,7 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
     static final EmiRecipeCategory ASPECT_COMBINATION = new EmiRecipeCategory(
             ResourceLocation.fromNamespaceAndPath("thaumcraft", "aspect_combination"), new AspectEmiStack(Aspect.MAGIC, 1),
             new AspectEmiStack(Aspect.MAGIC, 1), EmiRecipeSorting.none());
+    static final EmiRecipeCategory ASPECT_SOURCES = category("aspect_sources", EmiStack.of(ThaumcraftContent.THAUMOMETER.get()));
 
     private static EmiRecipeCategory category(String path, EmiStack icon) {
         return new EmiRecipeCategory(ResourceLocation.fromNamespaceAndPath("thaumcraft", path), icon, icon, EmiRecipeSorting.none());
@@ -75,11 +76,13 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
         registry.addCategory(INFUSION);
         registry.addCategory(INFUSION_ENCHANTMENT);
         registry.addCategory(ASPECT_COMBINATION);
+        registry.addCategory(ASPECT_SOURCES);
         registry.addWorkstation(ARCANE, EmiStack.of(ThaumcraftArcane.ARCANE_WORKBENCH_ITEM.get()));
         registry.addWorkstation(CRUCIBLE, EmiStack.of(ThaumcraftAlchemy.CRUCIBLE_ITEM.get()));
         registry.addWorkstation(INFUSION, EmiStack.of(ThaumcraftInfusion.MATRIX_ITEM.get()));
         registry.addWorkstation(INFUSION_ENCHANTMENT, EmiStack.of(ThaumcraftInfusion.MATRIX_ITEM.get()));
         registry.addWorkstation(ASPECT_COMBINATION, EmiStack.of(ThaumcraftContent.RESEARCH_TABLE_ITEM.get()));
+        registry.addWorkstation(ASPECT_SOURCES, EmiStack.of(ThaumcraftContent.THAUMOMETER.get()));
         registry.addRecipeHandler(ThaumcraftArcane.ARCANE_WORKBENCH_MENU.get(), new ArcaneWorkbenchRecipeHandler());
         // A wand is one item whose rod, caps and sceptre flag are components: tell the variants
         // apart, so the recipes of one wand are not buried under every other rod and cap.
@@ -92,9 +95,11 @@ public final class ThaumcraftEmiPlugin implements EmiPlugin {
         registry.setDefaultComparison(ThaumcraftContent.FILLED_PHIAL.get(), Comparison.compareData(
                 stack -> stack.get(ThaumcraftContent.PHIAL_DATA.get())));
 
+        AspectSources sources = new AspectSources();
         for (Aspect aspect : Aspect.aspects.values()) {
             registry.addEmiStack(new AspectEmiStack(aspect, 1));
             if (!aspect.isPrimal() && aspect.getComponents() != null) registry.addRecipe(new EmiAspectCombinationRecipe(aspect));
+            registry.addRecipe(new EmiAspectSourcesRecipe(aspect, sources));
         }
 
         RecipeManager manager = registry.getRecipeManager();

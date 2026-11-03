@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-04",
+  "status": "PASS",
+  "platform": "Fabric",
+  "minecraft": "1.21.1",
+  "emi": "1.1.22+1.21.1",
+  "jei": "19.43.0.398",
+  "common_junit": {
+    "tests": 2900,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 2895,
+    "skipped_suites": [
+      "thaumcraft.eldritch.OrphanMobOracleContractTest"
+    ]
+  },
+  "resource_checks": {
+    "tests_passed": 18,
+    "missing_references": 0
+  },
+  "clients": {
+    "emi": {
+      "status": "PASS",
+      "run_id": "emi-aspect-sources-2026-11-03T19-48-49.283099847Z",
+      "stage": 7,
+      "fixture": "fresh1.21.1 world, supplied @clay_ball/@dirt and #clay scan markers through the server API, actual EMI and knowledge packets; not survival acquisition",
+      "checks": [
+        {
+          "sources": [],
+          "check": "empty scans hide every source",
+          "passed": true
+        },
+        {
+          "sources": [
+            {
+              "amount": 1,
+              "item": "minecraft:clay_ball",
+              "aspect": "aqua"
+            }
+          ],
+          "check": "Aqua lookup filters unscanned and non-Aqua items",
+          "passed": true
+        },
+        {
+          "sources": [
+            {
+              "amount": 3,
+              "item": "minecraft:clay",
+              "aspect": "aqua"
+            },
+            {
+              "amount": 1,
+              "item": "minecraft:clay_ball",
+              "aspect": "aqua"
+            }
+          ],
+          "check": "new advanced scan refreshes Aqua sources",
+          "passed": true
+        },
+        {
+          "sources": [],
+          "check": "forgotten scans hide sources again",
+          "passed": true
+        }
+      ],
+      "captures": [
+        {
+          "label": "aqua-only-scanned-clay-ball",
+          "file": "emi-aspect-sources-2026-11-03T19-48-49.283099847Z-aqua-only-scanned-clay-ball.png",
+          "bytes": 476127,
+          "sha256": "7c89e337344cb278ba1e416b219c06e8800b29040bbfb600524f192fe89db2e2"
+        },
+        {
+          "label": "aqua-after-studying-clay-block",
+          "file": "emi-aspect-sources-2026-11-03T19-48-49.283099847Z-aqua-after-studying-clay-block.png",
+          "bytes": 462410,
+          "sha256": "41b7d3f5c8e32e73d4904ba4c29b5aceea93baccee01c84c471741e3f027a999",
+          "repository_image": "docs/images/aspect-sources/emi-aqua-scanned.png"
+        },
+        {
+          "label": "aqua-no-scanned-sources",
+          "file": "emi-aspect-sources-2026-11-03T19-48-49.283099847Z-aqua-no-scanned-sources.png",
+          "bytes": 454014,
+          "sha256": "42cbce44677ecce094ed12e0e7f17eb5b733737ad2ef2351b04f9aa887859566",
+          "repository_image": "docs/images/aspect-sources/emi-aqua-forgotten.png"
+        }
+      ]
+    },
+    "jei": {
+      "status": "PASS",
+      "run_id": "jei-aspect-sources-2026-11-03T19-50-38.406460285Z",
+      "stage": 6,
+      "fixture": "fresh1.21.1 world, supplied @clay_ball/@dirt and #clay scan markers through the server API, actual JEI and knowledge packets; not survival acquisition",
+      "checks": [
+        {
+          "check": "empty scans hide every source",
+          "passed": true,
+          "sources": []
+        },
+        {
+          "check": "Aqua lookup filters unscanned and non-Aqua items",
+          "passed": true,
+          "sources": [
+            {
+              "item": "minecraft:clay_ball",
+              "aspect": "aqua",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "check": "new advanced scan refreshes Aqua sources",
+          "passed": true,
+          "sources": [
+            {
+              "item": "minecraft:clay",
+              "aspect": "aqua",
+              "amount": 3
+            },
+            {
+              "item": "minecraft:clay_ball",
+              "aspect": "aqua",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "check": "forgotten scans hide sources again",
+          "passed": true,
+          "sources": []
+        }
+      ],
+      "captures": [
+        {
+          "file": "jei-aspect-sources-2026-11-03T19-50-38.406460285Z-aqua-only-scanned-clay-ball.png",
+          "bytes": 306291,
+          "label": "aqua-only-scanned-clay-ball",
+          "sha256": "f8e7b4816ed86f70c20819844a077a880c46c9e73105f55e2490182a044639b1"
+        },
+        {
+          "file": "jei-aspect-sources-2026-11-03T19-50-38.406460285Z-aqua-after-studying-clay-block.png",
+          "bytes": 301666,
+          "label": "aqua-after-studying-clay-block",
+          "sha256": "948cb2f8252b58017fb240a7d61ccb098bf667f041ea2839abb6d9c957de7558",
+          "repository_image": "docs/images/aspect-sources/jei-aqua-scanned.png"
+        }
+      ]
+    }
+  },
+  "artifact": {
+    "file": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.24.jar",
+    "bytes": 16003915,
+    "sha256": "038196eb8ef8c74df76b812a6a11addd47d8155677baccb15ae0f50cb9045584"
+  },
+  "limits": [
+    "Supplied scan knowledge in fresh worlds; no survival acquisition or remote multiplayer.",
+    "NeoForge not built or run for this change.",
+    "Pagination beyond 24 sources was reviewed in code, not exercised by these focused client fixtures."
+  ],
+  "existing_diagnostics": "EMI dev mode reports 48 untranslated existing aspect-family/deepslate tag names; no aspect-source recipe warnings.",
+  "dedicated_server": {
+    "status": "PASS",
+    "tests": 2,
+    "cases": [
+      "thaumcraftgametests.scanapiusesnativenbtandnodelocators",
+      "thaumcraftgametests.scanknowledgeadvancedmarkerssuppressthaumometer"
+    ],
+    "recipe_viewers_loaded": false
+  }
+}

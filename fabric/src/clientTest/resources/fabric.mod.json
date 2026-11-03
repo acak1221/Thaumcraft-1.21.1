@@ -20,7 +20,8 @@
       "thaumcraft.fabric.testing.RendererReviewClientProbe",
       "thaumcraft.fabric.testing.MatrixCrystalClientProbe",
       "thaumcraft.fabric.testing.TaintDripClientProbe",
-      "thaumcraft.fabric.testing.AspectSourcesClientEntrypoint"
+      "thaumcraft.fabric.testing.AspectSourcesClientEntrypoint",
+      "thaumcraft.fabric.testing.EmiAspectSourcesClientEntrypoint"
     ],
     "jei_mod_plugin": ["thaumcraft.compat.jei.AspectSourcesClientProbe$JeiCapture"]
   },

@@ -51,7 +51,7 @@ public final class TailReplantReviewRuntimeChecks {
         test.succeed();
     }
 
-    private record Outcome(boolean harvested, boolean planted, int playerSeeds, int looseSeeds, int events, int ticks) {}
+    private record Outcome(boolean harvested, boolean planted, int playerSeeds, int looseSeeds, int events, int ticks, String workState) {}
 
     private static Outcome harvest(GameTestHelper test, TubeVariantsRuntimeChecks.Fixture f, boolean pickup) {
         BlockPos home = f.base, crop = home.east();
@@ -98,7 +98,8 @@ public final class TailReplantReviewRuntimeChecks {
             int loose = f.drops().stream().filter(drop -> drop.getItem().is(Items.NETHER_WART))
                     .mapToInt(drop -> drop.getItem().getCount()).sum();
             return new Outcome(harvested, f.level.getBlockState(crop).is(Blocks.NETHER_WART),
-                    f.player.getInventory().countItem(Items.NETHER_WART), loose, events[0], ticks);
+                    f.player.getInventory().countItem(Items.NETHER_WART), loose, events[0], ticks,
+                    "area=" + golem.loadedNavigationArea(crop) + " " + golem.describeWorkState());
         } finally {
             registry.unregister(listener);
             golem.discard(); seed.discard(); f.drops();

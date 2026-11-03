@@ -28,6 +28,7 @@ def main():
         "infusionComponentPredicateSession",
         "advancedFurnacePreservesCustodyAcrossRealChunkUnload",
         "embersFlyDamageIgniteAndExpire",
+        "tailreviewgametests.tailreplantseedcustody",
     ]
     output = root / ".tmp/order-verification"
     output.mkdir(parents=True, exist_ok=True)

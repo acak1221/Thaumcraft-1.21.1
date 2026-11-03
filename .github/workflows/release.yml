@@ -1,11 +1,174 @@
-name: Validate 1.21.1 checkpoint manually
+name: Release
 
 on:
+  push:
+    tags: ['v*']
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag; empty builds the selected commit without publishing
+        type: string
+        required: false
+      publish:
+        description: Publish after all checks (requires a tag)
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: false
+        default: ''
+      publish:
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
 
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
-  validate:
-    uses: ./.github/workflows/build.yml
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+      publish: ${{ steps.meta.outputs.publish }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      commit: ${{ steps.meta.outputs.commit }}
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle21
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.sha }}
+          fetch-depth: 0
+
+      - name: Validate release version and tag
+        id: meta
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+          PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
+        run: python3 -B scripts/porting/release_bundle.py metadata --tag "$RELEASE_TAG" --publish "$PUBLISH" --github-output "$GITHUB_OUTPUT"
+
+      - name: Require the release commit to be on main
+        if: steps.meta.outputs.publish == 'true'
+        run: git merge-base --is-ancestor HEAD origin/main
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Validate resources and asset conversion tests
+        run: |
+          python -m pip install 'Pillow>=10,<13'
+          mkdir -p .tmp
+          python -B scripts/porting/record_verification.py --begin-run .tmp/release-inputs.json
+          python -B scripts/porting/convert_assets.py --verify
+          python -B -m unittest discover -s scripts/porting -p 'test_*.py' 2>&1 | tee .tmp/release-assets.log
+
+      - name: Build and test Fabric first
+        run: |
+          ./gradlew --no-daemon --console=plain --max-workers=2 --build-cache \
+            :common:test --rerun :fabric:clientTestClasses :fabric:build :fabric:runGameTest 2>&1 | tee .tmp/release-fabric.log
+
+      - name: Check full-suite and isolated Fabric regressions
+        run: python -B scripts/porting/verify-gametest-order.py
+
+      - name: Build and test NeoForge
+        run: |
+          rm -rf neoforge/run-gametest/world
+          ./gradlew --no-daemon --console=plain --max-workers=2 --build-cache \
+            :neoforge:test --rerun :neoforge:build :neoforge:runGameTest 2>&1 | tee .tmp/release-neoforge.log
+
+      - name: Bind fresh reports and production jars to the checked source
+        run: |
+          cat .tmp/release-fabric.log .tmp/release-neoforge.log > .tmp/release-build.log
+          printf '{"code":0}\n' > .tmp/release-exit.json
+          python -B scripts/porting/record_verification.py --loaders fabric neoforge \
+            --run-snapshot .tmp/release-inputs.json --build-exit-json .tmp/release-exit.json \
+            --build-log .tmp/release-build.log --asset-test-log .tmp/release-assets.log
+          python -B scripts/porting/release_bundle.py prepare
+
+      - name: Upload checked release files
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-bundle
+          path: .tmp/release-files/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Keep reports and logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-test-reports
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            .tmp/release-*.json
+            .tmp/release-*.log
+            .tmp/order-verification/
+            common/build/test-results/test/
+            neoforge/build/test-results/test/
+            fabric/build/gametest-results.xml
+            neoforge/build/gametest-results.xml
+            fabric/run-gametest/logs/
+            neoforge/run-gametest/logs/
+            docs/porting/verification.json
+
+  publish:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-bundle
+          path: release
+      - name: Upload, verify and publish the release
+        working-directory: release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+          SOURCE_COMMIT: ${{ needs.build.outputs.commit }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          sha256sum --check SHA256SUMS.txt
+          actual=$(gh api "repos/$GH_REPO/commits/$RELEASE_TAG" --jq '.sha')
+          test "$actual" = "$SOURCE_COMMIT"
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' > "$RUNNER_TEMP/release-draft.txt" 2>/dev/null; then
+            test "$(cat "$RUNNER_TEMP/release-draft.txt")" = true || { echo 'Release already published; use a new version and tag.' >&2; exit 1; }
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --target "$SOURCE_COMMIT" \
+              --title "Thaumcraft 4 Reload $RELEASE_VERSION" --notes-file RELEASE_NOTES.md
+          fi
+          gh release upload "$RELEASE_TAG" ./*.jar SHA256SUMS.txt BUILD_INFO.json --clobber
+          test "$(gh release view "$RELEASE_TAG" --json assets --jq '.assets | length')" = 6
+          gh release download "$RELEASE_TAG" --pattern '*.jar' --pattern SHA256SUMS.txt --pattern BUILD_INFO.json --dir "$RUNNER_TEMP/release-check"
+          cmp SHA256SUMS.txt "$RUNNER_TEMP/release-check/SHA256SUMS.txt"
+          cmp BUILD_INFO.json "$RUNNER_TEMP/release-check/BUILD_INFO.json"
+          (cd "$RUNNER_TEMP/release-check" && sha256sum --check SHA256SUMS.txt)
+          latest=true
+          if [ "$PRERELEASE" = true ]; then latest=false; fi
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease="$PRERELEASE" --latest="$latest" \
+            --title "Thaumcraft 4 Reload $RELEASE_VERSION" --notes-file RELEASE_NOTES.md

@@ -151,6 +151,24 @@ rm -rf neoforge/run-gametest/world && ./gradlew :neoforge:runGameTest
 with an optional integration. [`docs/HANDOFF.md`](docs/HANDOFF.md) describes the layout of the
 project and the state of every part of the port.
 
+## Automatic releases
+
+Pushing a new tag `v<mod_version>` starts [Release](.github/workflows/release.yml). First commit and push the matching
+`mod_version` in `gradle.properties` and release notes in `docs/RELEASE_NOTES_<version>.md`, then push the version tag.
+The tagged commit must be on `main`. Alpha, beta and release-candidate versions are published as pre-releases.
+
+The workflow validates assets, runs Fabric first (JUnit, GameTests and fresh full/isolated regression runs), then builds
+and tests NeoForge. It checks source fingerprints, required test cases, current attribution and production archive isolation
+before publishing. The release contains both mod jars, both sources jars, `SHA256SUMS.txt` and `BUILD_INFO.json` with exact
+results and the source commit. Only documented original-JAR oracle skips are accepted; these remain visible in the build info.
+
+**Actions → Release → Run workflow** without a tag is a build/test run without publication. To publish an existing tag,
+select it and enable `publish`; the separate **Publish a release after validation** entry uses the same complete checks.
+An interrupted draft can be resumed. Published releases are not overwritten. The built-in `GITHUB_TOKEN` handles publication;
+no personal token is required. Physical client and remote multiplayer acceptance are outside this workflow.
+
+Release automation configured with OpenAI Codex (GPT-6).
+
 ## FAQ
 
 **Is this the official Thaumcraft?** No. Thaumcraft is Azanor's mod; this is a fan port of its

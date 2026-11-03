@@ -1,5 +1,9 @@
 # Scanned aspect sources in EMI and JEI
 
+The subsequent [performance and world-isolation fix](2026-11-04-aspect-source-cache.md)
+replaces the initial 50 ms resolution loop described below with a session-owned
+published source index. This report retains the initial feature's acceptance evidence.
+
 Selecting an aspect in EMI now opens an **Aspect Sources** category listing the
 current character's scanned items that contain it, with the amount per item.
 JEI already provides the same lookup through its dynamic recipe-manager plugin.

@@ -24,6 +24,7 @@ public final class PlayerKnowledge {
     private final Set<String> scannedItems = new LinkedHashSet<>();
     private final Set<String> scannedEntities = new LinkedHashSet<>();
     private final Set<String> scannedPhenomena = new LinkedHashSet<>();
+    private long itemScanRevision;
     private boolean initializedAspects;
     private int warpPerm;
     private int warpSticky;
@@ -127,12 +128,21 @@ public final class PlayerKnowledge {
     public boolean addResearch(String key) { return !isRejected() && addKey(completedResearch, key); }
     public boolean removeResearch(String key) { return !isRejected() && completedResearch.remove(key); }
     public Set<String> getScannedItems() { return snapshot(scannedItems); }
+    /** In-memory cache token; only changes when this owner's item-scan membership changes. */
+    public long itemScanRevision() { return itemScanRevision; }
     public Set<String> getScannedEntities() { return snapshot(scannedEntities); }
     public Set<String> getScannedPhenomena() { return snapshot(scannedPhenomena); }
     public boolean hasScannedItem(String key) { return scannedItems.contains(key); }
     public boolean hasScannedEntity(String key) { return scannedEntities.contains(key); }
     public boolean hasScannedPhenomena(String key) { return scannedPhenomena.contains(key); }
-    public boolean scanItem(String key) { return !isRejected() && addScanKey(scannedItems, key); }
+    public boolean scanItem(String key) {
+        if (isRejected()) return false;
+        int previousSize = scannedItems.size();
+        boolean added = addScanKey(scannedItems, key);
+        // A repeated advanced marker can still remove a previously loaded ordinary marker.
+        if (added || previousSize != scannedItems.size()) itemScanRevision++;
+        return added;
+    }
     public boolean scanEntity(String key) { return !isRejected() && addScanKey(scannedEntities, key); }
     public boolean scanPhenomena(String key) { return !isRejected() && addScanKey(scannedPhenomena, key); }
 
@@ -156,9 +166,14 @@ public final class PlayerKnowledge {
      */
     public void reset() {
         if (isRejected()) return;
+        resetState();
+        replaceItemScans(Set.of());
+    }
+
+    /** Full snapshots replace item scans separately, so unchanged scans keep their cache token. */
+    private void resetState() {
         discoveredAspects.clear();
         completedResearch.clear();
-        scannedItems.clear();
         scannedEntities.clear();
         scannedPhenomena.clear();
         initializedAspects = false;
@@ -180,7 +195,7 @@ public final class PlayerKnowledge {
         discoveredAspects.clear();
         discoveredAspects.putAll(source.discoveredAspects);
         replace(completedResearch, source.completedResearch);
-        replace(scannedItems, source.scannedItems);
+        replaceItemScans(source.scannedItems);
         replace(scannedEntities, source.scannedEntities);
         replace(scannedPhenomena, source.scannedPhenomena);
         initializedAspects = source.initializedAspects;
@@ -225,7 +240,7 @@ public final class PlayerKnowledge {
             return;
         }
         rejected = null;
-        reset();
+        resetState();
         initializedAspects = tag.getBoolean("initializedAspects");
         setWarpPerm(tag.getInt("warpPerm"));
         setWarpSticky(tag.getInt("warpSticky"));
@@ -237,7 +252,9 @@ public final class PlayerKnowledge {
             setAspectPool(entry.getString("key"), entry.getInt("amount"));
         }
         readSet(tag, "researchComplete", completedResearch);
-        readSet(tag, "scannedItems", scannedItems);
+        Set<String> loadedItems = new LinkedHashSet<>();
+        readSet(tag, "scannedItems", loadedItems);
+        replaceItemScans(loadedItems);
         readSet(tag, "scannedEntities", scannedEntities);
         readSet(tag, "scannedPhenomena", scannedPhenomena);
     }
@@ -295,6 +312,11 @@ public final class PlayerKnowledge {
     private static void replace(Set<String> target, Set<String> source) {
         target.clear();
         target.addAll(source);
+    }
+
+    private void replaceItemScans(Set<String> source) {
+        if (!scannedItems.equals(source)) itemScanRevision++;
+        replace(scannedItems, source);
     }
 
     private static Set<String> snapshot(Set<String> source) {

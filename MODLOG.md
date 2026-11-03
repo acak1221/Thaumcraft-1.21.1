@@ -1,3 +1,15 @@
+## 2026-11-04 — aspect-source performance and world isolation
+
+Removed EMI's 50 ms full-source recomputation and JEI's repeated catalogue rebuilds
+caused by fresh ingredient collection wrappers. Published source caches prewarm
+on client ticks, reuse resolved results and permanently retire on disconnect;
+retained first-world widgets/providers cannot bind to the next world. Cold JEI
+lookups show a safe loading placeholder and refresh when ready. Native stress
+checks: 701 EMI/602 JEI scan identities, 1,000 lookups each, zero new resolutions;
+same-client two-world checks passed. Fabric build/isolation, 2,901 JUnit passes
+(five expected skips), three focused server tests and resource verification passed.
+See `docs/analysis/2026-11-04-aspect-source-cache.md`.
+
 ## 2026-11-04 — scanned aspect sources in EMI and JEI
 
 Selecting an aspect in EMI now lists the current character's scanned item sources

@@ -2793,5 +2793,6 @@
   "emi.category.thaumcraft.aspect_sources": "Aspect Sources",
   "jei.thaumcraft.aspect_sources.contains": "Scanned item",
   "tc.port.emi.aspect_sources.empty": "No scanned sources yet",
-  "tc.port.emi.aspect_sources.amount": "%s per item"
+  "tc.port.emi.aspect_sources.amount": "%s per item",
+  "tc.port.aspect_sources.loading": "Loading sources..."
 }

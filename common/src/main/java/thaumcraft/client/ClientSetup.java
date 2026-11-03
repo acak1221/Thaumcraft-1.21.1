@@ -43,6 +43,7 @@ public final class ClientSetup {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        thaumcraft.client.lib.ScannedAspectSources.init();
         thaumcraft.client.ThaumcraftWoodworkClient.init();
         thaumcraft.common.lib.network.RecipeTransferNetworking.initClient(thaumcraft.client.gui.RecipeTransferRequestSender::send);
         thaumcraft.common.lib.network.NodeDrainFxNetworking.initClient(thaumcraft.client.fx.NodeDrainClientEffects::accept);

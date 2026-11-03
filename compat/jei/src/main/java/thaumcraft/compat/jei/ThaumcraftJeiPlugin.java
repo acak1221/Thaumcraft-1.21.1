@@ -72,7 +72,7 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
 
     @Override public void registerAdvanced(IAdvancedRegistration registration) {
         registration.addTypedRecipeManagerPlugin(Categories.SOURCES,
-                new AspectSources(registration.getJeiHelpers().getIngredientManager()));
+                new AspectSources(registration.getJeiHelpers().getIngredientManager(), registration.getJeiHelpers().getFocusFactory()));
     }
 
     @Override public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {

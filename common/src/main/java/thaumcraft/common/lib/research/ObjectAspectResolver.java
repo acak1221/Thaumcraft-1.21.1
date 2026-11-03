@@ -80,6 +80,38 @@ public final class ObjectAspectResolver {
 
     private ObjectAspectResolver() {}
 
+    /** Viewer caches validate mutable addon data once per second, never once per rendered item. */
+    public static Object viewerCacheToken(Level level) {
+        ObjectAspectCatalog.initializePublicTags();
+        var tags = ThaumcraftApi.objectTags;
+        long fingerprint = tags.size();
+        for (var entry : tags.entrySet()) {
+            long key = 1;
+            for (Object part : entry.getKey()) key = 31 * key
+                    + (part instanceof int[] range ? java.util.Arrays.hashCode(range) : java.util.Objects.hashCode(part));
+            long amounts = entry.getValue() == null ? 0 : entry.getValue().aspects.hashCode();
+            fingerprint += key * 0x9e3779b97f4a7c15L ^ amounts;
+        }
+        return new ViewerCacheToken(index(level), tags, fingerprint, inference());
+    }
+
+    private static final class ViewerCacheToken {
+        private final Object recipes, tags;
+        private final long fingerprint;
+        private final boolean inference;
+
+        private ViewerCacheToken(Object recipes, Object tags, long fingerprint, boolean inference) {
+            this.recipes = recipes; this.tags = tags; this.fingerprint = fingerprint; this.inference = inference;
+        }
+
+        @Override public boolean equals(Object value) {
+            return value instanceof ViewerCacheToken other && recipes == other.recipes && tags == other.tags
+                    && fingerprint == other.fingerprint && inference == other.inference;
+        }
+
+        @Override public int hashCode() { return java.util.Objects.hash(System.identityHashCode(recipes), System.identityHashCode(tags), fingerprint, inference); }
+    }
+
     /** Original getObjectTags, per one item: capped base and dynamic wand/potion tags only.
      * No container, equipment or enchantment bonuses and no six-aspect culling; every return is an independent mutable list. */
     public static AspectList baseTags(ItemStack stack, Level level) {

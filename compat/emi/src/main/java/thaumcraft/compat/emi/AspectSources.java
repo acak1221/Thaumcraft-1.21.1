@@ -3,36 +3,39 @@ package thaumcraft.compat.emi;
 import dev.emi.emi.api.EmiApi;
 import dev.emi.emi.api.stack.EmiStack;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
-import thaumcraft.common.lib.capabilities.KnowledgeAccess;
-import thaumcraft.common.lib.research.ObjectAspectResolver;
+import thaumcraft.client.lib.ScannedAspectSources;
 
 /** The live player's scanned item variants; never a recipe index of undiscovered sources. */
 final class AspectSources {
-    private ClientLevel previousLevel;
-    private LocalPlayer previousPlayer;
+    private final ScannedAspectSources sources = new ScannedAspectSources(this::ingredients);
+    private final Map<Aspect, Converted> converted = new IdentityHashMap<>();
     private List<EmiStack> previousIndex;
     private int previousSize;
-    private Set<String> previousScans = Set.of();
-    private List<ItemStack> known = List.of();
+
+    private record Converted(List<ScannedAspectSources.Source> original, List<EmiAspectSourcesRecipe.Source> pages) {}
 
     List<EmiAspectSourcesRecipe.Source> forAspect(Aspect aspect) {
-        List<EmiAspectSourcesRecipe.Source> result = new ArrayList<>();
-        for (ItemStack item : knownItems()) {
-            if (!scanned(item)) continue;
-            var tags = ObjectAspectResolver.get(item, Minecraft.getInstance().level);
-            int amount = tags == null ? 0 : tags.getAmount(aspect);
-            if (amount > 0) result.add(new EmiAspectSourcesRecipe.Source(item.copyWithCount(1), amount));
+        var index = EmiApi.getIndexStacks();
+        if (previousIndex != index || previousSize != index.size()) {
+            previousIndex = index; previousSize = index.size();
+            sources.invalidateIngredients(); converted.clear();
         }
-        return List.copyOf(result);
+        var current = sources.forAspect(aspect);
+        Converted cached = converted.get(aspect);
+        if (cached == null || cached.original() != current) {
+            cached = new Converted(current, current.stream()
+                    .map(source -> new EmiAspectSourcesRecipe.Source(source.item(), source.amount())).toList());
+            converted.put(aspect, cached);
+        }
+        return cached.pages();
     }
 
     static boolean scanned(ItemStack item) {
@@ -41,27 +44,13 @@ final class AspectSources {
                 && ThaumcraftApiHelper.hasScannedItem(client.player, item);
     }
 
-    /** Cache scan membership only. Resolve current object tags separately, retaining component variants. */
-    private List<ItemStack> knownItems() {
-        var client = Minecraft.getInstance();
-        if (client.player == null || client.level == null) {
-            previousLevel = null; previousPlayer = null; previousIndex = null;
-            previousScans = Set.of(); known = List.of();
-            return known;
+    /** Called only when the shared cache refreshes its ingredient catalogue, never from a slot draw. */
+    private Collection<ItemStack> ingredients() {
+        List<ItemStack> result = new ArrayList<>();
+        for (EmiStack stack : EmiApi.getIndexStacks()) {
+            ItemStack item = stack.getItemStack();
+            if (!item.isEmpty()) result.add(item.copyWithCount(1));
         }
-        var index = EmiApi.getIndexStacks();
-        var scans = KnowledgeAccess.get(client.player).getScannedItems();
-        if (previousLevel != client.level || previousPlayer != client.player || previousIndex != index
-                || previousSize != index.size() || !previousScans.equals(scans)) {
-            List<ItemStack> items = new ArrayList<>();
-            for (EmiStack stack : index) {
-                ItemStack item = stack.getItemStack();
-                if (scanned(item)) items.add(item.copyWithCount(1));
-            }
-            items.sort(Comparator.comparing(item -> item.getHoverName().getString()));
-            known = List.copyOf(items); previousLevel = client.level; previousPlayer = client.player;
-            previousIndex = index; previousSize = index.size(); previousScans = Set.copyOf(scans);
-        }
-        return known;
+        return result;
     }
 }

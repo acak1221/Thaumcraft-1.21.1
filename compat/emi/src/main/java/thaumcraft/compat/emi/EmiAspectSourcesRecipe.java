@@ -23,7 +23,9 @@ final class EmiAspectSourcesRecipe extends BasicEmiRecipe {
     private final Aspect aspect;
     private final AspectSources sources;
 
-    record Source(ItemStack item, int amount) {}
+    record Source(ItemStack item, int amount, EmiStack stack) {
+        Source(ItemStack item, int amount) { this(item, amount, EmiStack.of(item)); }
+    }
 
     EmiAspectSourcesRecipe(Aspect aspect, AspectSources sources) {
         super(ThaumcraftEmiPlugin.ASPECT_SOURCES,
@@ -49,8 +51,7 @@ final class EmiAspectSourcesRecipe extends BasicEmiRecipe {
             int offset = i;
             var slot = new SlotWidget(EmiStack.EMPTY, i % COLUMNS * 18, 22 + i / COLUMNS * 27) {
                 @Override public EmiIngredient getStack() {
-                    Source source = view.source(offset);
-                    return source == null ? EmiStack.EMPTY : EmiStack.of(source.item());
+                    return view.stack(offset);
                 }
 
                 @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
@@ -82,21 +83,18 @@ final class EmiAspectSourcesRecipe extends BasicEmiRecipe {
                 graphics.drawCenteredString(Minecraft.getInstance().font, (view.page + 1) + " / " + view.pages(), 56, 0, ThaumcraftEmiRecipe.TEXT));
     }
 
-    /** Resolve once per UI update, shared by every slot/tooltip instead of repeating all object lookups. */
+    /** Read shared results directly; changing pages and drawing slots never resolves object aspects. */
     private final class View {
         private final int pageSize;
         private List<Source> items = List.of();
-        private Object player, level;
-        private long refreshed;
         private int page;
 
         private View(int pageSize) { this.pageSize = pageSize; }
 
         private List<Source> items() {
-            var client = Minecraft.getInstance();
-            long now = System.nanoTime();
-            if (player != client.player || level != client.level || now - refreshed >= 50_000_000L) {
-                items = sources(); player = client.player; level = client.level; refreshed = now;
+            List<Source> current = sources();
+            if (items != current) {
+                items = current;
                 page = Math.min(page, Math.max(0, (items.size() - 1) / pageSize));
             }
             return items;
@@ -105,6 +103,11 @@ final class EmiAspectSourcesRecipe extends BasicEmiRecipe {
         private int pages() { return Math.max(1, (items().size() + pageSize - 1) / pageSize); }
 
         private void scroll(int delta) { page = Math.clamp(page + delta, 0, pages() - 1); }
+
+        private EmiStack stack(int offset) {
+            Source source = source(offset);
+            return source == null ? EmiStack.EMPTY : source.stack();
+        }
 
         private Source source(int offset) {
             List<Source> current = items();

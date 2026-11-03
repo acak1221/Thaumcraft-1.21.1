@@ -2793,5 +2793,6 @@
   "emi.category.thaumcraft.aspect_sources": "Источники аспектов",
   "jei.thaumcraft.aspect_sources.contains": "Изученный предмет",
   "tc.port.emi.aspect_sources.empty": "Нет изученных предметов",
-  "tc.port.emi.aspect_sources.amount": "%s на предмет"
+  "tc.port.emi.aspect_sources.amount": "%s на предмет",
+  "tc.port.aspect_sources.loading": "Загрузка списка..."
 }

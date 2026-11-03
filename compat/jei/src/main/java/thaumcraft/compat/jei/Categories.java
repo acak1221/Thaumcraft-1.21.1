@@ -7,6 +7,7 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.runtime.IRecipesGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -158,12 +159,39 @@ final class Categories {
         Sources(IGuiHelper gui) { super(SOURCES, "aspect_sources", ThaumcraftContent.THAUMOMETER.get(), gui, 118, 42); }
 
         @Override public void setRecipe(IRecipeLayoutBuilder builder, Pages.Source source, IFocusGroup focuses) {
-            builder.addSlot(RecipeIngredientRole.INPUT, 4, 5).setStandardSlotBackground().addItemStack(source.item());
+            if (source.pending() == null) {
+                builder.addSlot(RecipeIngredientRole.INPUT, 4, 5).setStandardSlotBackground().addItemStack(source.item());
+            }
             builder.addSlot(RecipeIngredientRole.OUTPUT, 88, 5).setOutputSlotBackground()
-                    .addIngredient(AspectIngredient.TYPE, new AspectIngredient.Stack(source.aspect(), source.amount()));
+                    .addIngredient(AspectIngredient.TYPE, new AspectIngredient.Stack(source.aspect(), source.pending() == null ? source.amount() : 1));
         }
 
         @Override public void draw(Pages.Source source, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+            Pages.Pending pending = source.pending();
+            if (pending != null) {
+                Minecraft client = Minecraft.getInstance();
+                boolean ready = pending.sources.isReady();
+                String message = ready && pending.sources.forAspect(source.aspect()).isEmpty()
+                        ? "tc.port.emi.aspect_sources.empty" : "tc.port.aspect_sources.loading";
+                graphics.drawString(client.font, trim(Component.translatable(message).getString(), 110), 4, 29, TEXT, false);
+                if (ready && !pending.sources.forAspect(source.aspect()).isEmpty()
+                        && !pending.refreshScheduled && client.screen instanceof IRecipesGui recipes) {
+                    pending.refreshScheduled = true;
+                    var screen = client.screen;
+                    // Queue explicitly: rebuilding the recipe screen during its draw corrupts its layouts.
+                    client.tell(() -> {
+                        if (client.screen == screen && pending.sources.isReady()) {
+                            var completed = pending.sources.forAspect(source.aspect()).stream()
+                                    .map(value -> new Pages.Source(value.item(), value.aspect(), value.amount())).toList();
+                            if (!completed.isEmpty()) {
+                                recipes.showRecipes(this, completed, List.of(pending.focus));
+                                pending.refreshCompleted = true;
+                            } else pending.refreshScheduled = false;
+                        } else pending.refreshScheduled = false;
+                    });
+                }
+                return;
+            }
             gui.getRecipeArrow().draw(graphics, 49, 5);
             var text = Component.translatable("jei.thaumcraft.aspect_sources.contains");
             graphics.drawString(Minecraft.getInstance().font, text, 4, 29, TEXT, false);

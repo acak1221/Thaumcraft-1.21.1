@@ -1,0 +1,353 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-04",
+  "status": "PASS",
+  "platform": "Fabric",
+  "common_junit": {
+    "tests": 2906,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 2901
+  },
+  "dedicated_server": {
+    "passed": 3,
+    "cases": [
+      "thaumcraftgametests.knowledgeapiscansanddiscovery",
+      "thaumcraftgametests.scanapiusesnativenbtandnodelocators",
+      "thaumcraftgametests.scanknowledgeadvancedmarkerssuppressthaumometer"
+    ],
+    "recipe_viewers_loaded": false
+  },
+  "resource_verifier": {
+    "missing_references": 0
+  },
+  "clients": {
+    "emi": {
+      "status": "PASS",
+      "run_id": "emi-aspect-sources-2026-11-03T20-20-56.652918891Z",
+      "stage": 13,
+      "fixture": "two fresh 1.21.1 worlds in the same client; first supplied @clay_ball/@dirt and #clay, then at least 500 indexed item scan signatures through server API; second world starts without supplied scans then receives only @clay_ball to verify retired widgets remain empty; actual EMI and knowledge packets, not survival acquisition",
+      "performance": {
+        "supplied_scan_identities": 701,
+        "stable_warmup_ticks": 40,
+        "aspect_output_queries": 1000,
+        "native_slot_queries": 25000,
+        "source_rows_returned": 25542,
+        "elapsed_ms": 9.111753,
+        "resolver_calls_before": 705,
+        "resolver_calls_after": 705,
+        "new_resolver_calls": 0
+      },
+      "checks": [
+        {
+          "sources": [],
+          "passed": true,
+          "check": "empty scans hide every source"
+        },
+        {
+          "sources": [
+            {
+              "item": "minecraft:clay_ball",
+              "amount": 1,
+              "aspect": "aqua"
+            }
+          ],
+          "passed": true,
+          "check": "Aqua lookup filters unscanned and non-Aqua items"
+        },
+        {
+          "sources": [
+            {
+              "item": "minecraft:clay",
+              "amount": 3,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:clay_ball",
+              "amount": 1,
+              "aspect": "aqua"
+            }
+          ],
+          "passed": true,
+          "check": "new advanced scan refreshes Aqua sources"
+        },
+        {
+          "sources": [],
+          "passed": true,
+          "check": "forgotten scans hide sources again"
+        },
+        {
+          "passed": true,
+          "check": "1000 warmed native queries reuse published source cache"
+        },
+        {
+          "check": "in-place addon object-tag mutation refreshes published sources",
+          "new_amount": 11,
+          "old_amount": 1,
+          "passed": true
+        },
+        {
+          "sources": [
+            {
+              "item": "minecraft:bamboo_block",
+              "amount": 6,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:stripped_bamboo_block",
+              "amount": 6,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:snow_block",
+              "amount": 1,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:clay",
+              "amount": 3,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:muddy_mangrove_roots",
+              "amount": 1,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:mud",
+              "amount": 1,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:pointed_dripstone",
+              "amount": 1,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:clay_ball",
+              "amount": 1,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:mangrove_roots",
+              "amount": 1,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:sea_lantern",
+              "amount": 6,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:dripstone_block",
+              "amount": 3,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:prismarine_brick_slab",
+              "amount": 2,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:dark_prismarine_slab",
+              "amount": 2,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:prismarine",
+              "amount": 3,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:prismarine_wall",
+              "amount": 2,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:prismarine_slab",
+              "amount": 1,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:prismarine_bricks",
+              "amount": 6,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:prismarine_stairs",
+              "amount": 3,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:prismarine_brick_stairs",
+              "amount": 6,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:dark_prismarine_stairs",
+              "amount": 6,
+              "aspect": "aqua"
+            },
+            {
+              "item": "minecraft:dark_prismarine",
+              "amount": 6,
+              "aspect": "aqua"
+            }
+          ],
+          "passed": true,
+          "check": "restored addon tags refresh source amounts before switching worlds"
+        },
+        {
+          "sources": [],
+          "passed": true,
+          "check": "same-client world switch clears source rows and retained native widgets"
+        },
+        {
+          "sources": [
+            {
+              "item": "minecraft:clay_ball",
+              "amount": 1,
+              "aspect": "aqua"
+            }
+          ],
+          "passed": true,
+          "check": "second-world rescan updates current page while first-world widgets remain retired"
+        }
+      ],
+      "captures": [
+        {
+          "bytes": 469212,
+          "file": "emi-aspect-sources-2026-11-03T20-20-56.652918891Z-aqua-only-scanned-clay-ball.png",
+          "label": "aqua-only-scanned-clay-ball",
+          "sha256": "107b931e94d37d8b43f71d2ecd97210f85393398e87d909c2e02ba82180731bc"
+        },
+        {
+          "bytes": 456345,
+          "file": "emi-aspect-sources-2026-11-03T20-20-56.652918891Z-aqua-after-studying-clay-block.png",
+          "label": "aqua-after-studying-clay-block",
+          "sha256": "e979e17b83f7fdb11fe2e4ab4fda83235fa5a8125eef41b8637d4e229e41e5a7"
+        },
+        {
+          "bytes": 446131,
+          "file": "emi-aspect-sources-2026-11-03T20-20-56.652918891Z-aqua-no-scanned-sources.png",
+          "label": "aqua-no-scanned-sources",
+          "sha256": "123b4b3f3d95e679232cbd5db5022e45cea7d309b03a702be3e8b611bb8475b5"
+        },
+        {
+          "bytes": 401056,
+          "file": "emi-aspect-sources-2026-11-03T20-20-56.652918891Z-aqua-second-world-no-inherited-sources.png",
+          "label": "aqua-second-world-no-inherited-sources",
+          "sha256": "f990cb7506334580f02452913a72df7cee621ce40a7cdb5a17ddadb9e8893d7c",
+          "repository_image": "docs/images/aspect-sources/emi-second-world-empty.png"
+        }
+      ]
+    },
+    "jei": {
+      "status": "PASS",
+      "run_id": "jei-aspect-sources-2026-11-03T20-30-35.434923373Z",
+      "stage": 12,
+      "fixture": "two fresh1.21.1 worlds in one client; first receives supplied @clay_ball/@dirt, #clay and at least500 indexed scan identities through the server API; second receives no supplied scans; actual JEI lookups and knowledge packets; not survival acquisition or a measured FPS claim",
+      "checks": [
+        {
+          "sources": [],
+          "check": "empty scans hide every source",
+          "passed": true
+        },
+        {
+          "sources": [
+            {
+              "amount": 1,
+              "item": "minecraft:clay_ball",
+              "aspect": "aqua"
+            }
+          ],
+          "check": "Aqua lookup filters unscanned and non-Aqua items",
+          "passed": true
+        },
+        {
+          "sources": [
+            {
+              "amount": 3,
+              "item": "minecraft:clay",
+              "aspect": "aqua"
+            },
+            {
+              "amount": 1,
+              "item": "minecraft:clay_ball",
+              "aspect": "aqua"
+            }
+          ],
+          "check": "new advanced scan refreshes Aqua sources",
+          "passed": true
+        },
+        {
+          "sources": [],
+          "check": "forgotten scans hide sources again",
+          "passed": true
+        },
+        {
+          "check": "warm JEI lookups reuse resolved source index",
+          "passed": true,
+          "supplied_scan_count": 602,
+          "lookups": 1000,
+          "aspects": 48,
+          "returned_rows": 21083,
+          "elapsed_ns": 6934669,
+          "warm_ticks": 40,
+          "item_resolutions_before": 605,
+          "item_resolutions_after": 605,
+          "additional_item_resolutions": 0
+        },
+        {
+          "loaded_source_rows": 15,
+          "settled_refresh_ticks": 5,
+          "check": "cold JEI placeholder completes its source-page refresh after background loading",
+          "passed": true
+        },
+        {
+          "sources": [],
+          "check": "disconnect and fresh world in same client hide all first-world sources",
+          "passed": true
+        }
+      ],
+      "captures": [
+        {
+          "label": "aqua-only-scanned-clay-ball",
+          "file": "jei-aspect-sources-2026-11-03T20-30-35.434923373Z-aqua-only-scanned-clay-ball.png",
+          "bytes": 279088,
+          "sha256": "b8cd94aa475189778d21b981c4960f2d90bdbe3b6fe9d9af88acbcbcaa5065e5"
+        },
+        {
+          "label": "aqua-after-studying-clay-block",
+          "file": "jei-aspect-sources-2026-11-03T20-30-35.434923373Z-aqua-after-studying-clay-block.png",
+          "bytes": 272899,
+          "sha256": "698240d534ddda61f550439fae71921fc1a26dc4e2d113c092b65169b03d94c7"
+        },
+        {
+          "label": "aqua-large-scan-index",
+          "file": "jei-aspect-sources-2026-11-03T20-30-35.434923373Z-aqua-large-scan-index.png",
+          "bytes": 277095,
+          "sha256": "4faa4cbfa96f887338510ec50a1ef2413321b741e8c1c3bdd039adc202c39603"
+        },
+        {
+          "label": "aqua-after-cold-loading",
+          "file": "jei-aspect-sources-2026-11-03T20-30-35.434923373Z-aqua-after-cold-loading.png",
+          "bytes": 275678,
+          "sha256": "beb08c97d758934f6c7d15f9da2f48148e1bde95d7cf68394ca1f13e22c6d31c",
+          "repository_image": "docs/images/aspect-sources/jei-cold-cache-loaded.png"
+        }
+      ]
+    }
+  },
+  "artifact": {
+    "file": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.24.jar",
+    "bytes": 16021884,
+    "sha256": "b44ceb570cf1736372554da24df87a0b58053512fb621b78212e6cb985c20d90"
+  },
+  "limits": [
+    "Lookup timings are not GPU FPS measurements.",
+    "Supplied scan fixtures in two fresh worlds per viewer; no survival acquisition or remote multiplayer.",
+    "NeoForge was not built or run."
+  ]
+}

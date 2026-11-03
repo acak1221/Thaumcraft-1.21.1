@@ -3,6 +3,7 @@ package thaumcraft.common.tiles;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -99,11 +100,14 @@ public final class TileEldritchAltar extends BlockEntity {
         for (int a = 0; a < 4; a++) {
             int xx = EldritchBlockRules.altarClericOffsetX(a);
             int zz = EldritchBlockRules.altarClericOffsetZ(a);
-            BlockPos spot = new BlockPos(pos.getX() + xx, pos.getY() - 1, pos.getZ() + zz);
-            if (!level.getBlockState(spot).isAir()) continue;
+            // The ritualist stands at the altar's height, above the ring floor.
+            // Testing that floor for air prevented every naturally generated cult altar.
+            BlockPos spot = new BlockPos(pos.getX() + xx, pos.getY(), pos.getZ() + zz);
+            if (!level.getBlockState(spot.below()).isFaceSturdy(level, spot.below(), Direction.UP)) continue;
             Entity entity = type.create(level);
             if (entity == null) continue;
             entity.moveTo(pos.getX() + .5D + xx, pos.getY(), pos.getZ() + .5D + zz, 0.0F, 0.0F);
+            if (!level.isUnobstructed(entity) || !level.noCollision(entity) || level.containsAnyLiquid(entity.getBoundingBox())) continue;
             // Original TileEldritchAltar:180 - the cleric anchors its home at the altar.
             prepare(entity, level, pos, CultistRules.ALTAR_CLERIC_HOME_RADIUS);
             if (!level.addFreshEntity(entity)) continue;

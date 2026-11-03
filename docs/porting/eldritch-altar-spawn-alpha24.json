@@ -1,0 +1,31 @@
+{
+  "version": "0.1.0-alpha.24",
+  "minecraft": "1.21.1",
+  "loader": "Fabric",
+  "java": 21,
+  "baseline": {
+    "commit": "d43d7747b7b9291e9be620d00dfe34783973284d",
+    "failure": "(12396855, -60, 12212954) armed zero-eye altar never spawned four ritualists above its solid floor: 0 spawner=true type=0"
+  },
+  "fixed": {
+    "status": "PASS",
+    "case": "thaumcraftgametests.eldritch_altar_spawns_cultists_on_solid_floor",
+    "command": "./gradlew :fabric:runGameTest -PgameTestFilter=eldritch_altar_spawns_cultists_on_solid_floor :fabric:build",
+    "checks": [
+      "armed altar needs no eyes; flags survive native block-entity codec",
+      "four solid head-space obstructions prevent spawning",
+      "removing head obstructions produces all four ritualists over solid floor",
+      "ritualists keep their eight-block altar home and persistence",
+      "living ritualists permit knight reinforcements",
+      "removing all ritualists stops the spawner"
+    ],
+    "fixture": "Supplied solid floor matching the generated ring geometry, same configureAltar helper as world generation, real native block-entity ticks; existing disposable 1.21.1 GameTest world. Not a natural world-generation or survival acquisition replay."
+  },
+  "source_sha256_lf": {
+    "common/src/main/java/thaumcraft/common/tiles/TileEldritchAltar.java": "4de30ed8cf57149ebfa906f5c79588beda884c0f26ac076833fae46c70226188"
+  },
+  "limitations": [
+    "No client rendering changes; the focused acceptance ran on a native Fabric dedicated GameTest server.",
+    "Unarmed altar variants remain unarmed; existing armed zero-eye cult altars receive the fix on their next spawn tick."
+  ]
+}

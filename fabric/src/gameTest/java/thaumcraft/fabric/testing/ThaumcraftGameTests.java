@@ -2401,6 +2401,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.altarTakesEyesAndSwitchesItsSpawnType(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 800, batch = "eldritch_altar_spawner")
+    public void eldritch_altar_spawns_cultists_on_solid_floor(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchAltarSpawnRuntimeChecks.run(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void eldritch_glyphed_stone_gives_its_experience(GameTestHelper test) {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.glyphedStoneGivesItsExperience(test);

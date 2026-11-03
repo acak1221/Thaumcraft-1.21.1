@@ -32,6 +32,7 @@ def main():
         "pechOriginalEntityUsesNativeGameplay",
         "champion_promotion_uses_the_original_bonuses",
         "unknownKnowledgeRevealsHiddenNotesAndRetriesFragments",
+        "eldritch_altar_spawns_cultists_on_solid_floor",
     ]
     output = root / ".tmp/order-verification"
     output.mkdir(parents=True, exist_ok=True)

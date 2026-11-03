@@ -30,6 +30,7 @@ def main():
         "embersFlyDamageIgniteAndExpire",
         "tailreviewgametests.tailreplantseedcustody",
         "pechOriginalEntityUsesNativeGameplay",
+        "champion_promotion_uses_the_original_bonuses",
     ]
     output = root / ".tmp/order-verification"
     output.mkdir(parents=True, exist_ok=True)

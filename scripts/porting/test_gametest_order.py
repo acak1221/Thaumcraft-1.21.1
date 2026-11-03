@@ -40,11 +40,12 @@ class GameTestOrderRunnerTest(unittest.TestCase):
 
     def test_full_and_each_regression_get_separate_fresh_worlds(self):
         self.invoke()
-        self.assertEqual(7, len(self.calls))
+        self.assertEqual(8, len(self.calls))
         self.assertIsNone(self.calls[0])
         self.assertIn("tailreviewgametests.tailreplantseedcustody", self.calls)
         self.assertIn("pechOriginalEntityUsesNativeGameplay", self.calls)
-        self.assertEqual(7, len(json.loads((self.root / ".tmp/order-verification/summary.json").read_text())))
+        self.assertIn("champion_promotion_uses_the_original_bonuses", self.calls)
+        self.assertEqual(8, len(json.loads((self.root / ".tmp/order-verification/summary.json").read_text())))
 
     def test_all_selects_every_native_case_even_when_manifest_lags(self):
         manifest = self.root / "scripts/porting/required-gametests.json"

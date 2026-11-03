@@ -17,6 +17,7 @@ ORDER_CASES = (
     'infusionComponentPredicateSession', 'advancedFurnacePreservesCustodyAcrossRealChunkUnload',
     'embersFlyDamageIgniteAndExpire', 'tailreviewgametests.tailreplantseedcustody',
     'pechOriginalEntityUsesNativeGameplay',
+    'champion_promotion_uses_the_original_bonuses',
 )
 
 

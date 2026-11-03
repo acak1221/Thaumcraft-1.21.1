@@ -177,13 +177,17 @@ public final class ChampionRuntimeChecks {
             // The original promotion: thirty health, triple damage and the original name.
             var champion = lane.add(EntityType.ZOMBIE.create(level));
             champion.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 2.5D, 0F, 0F);
-            level.addFreshEntity(champion);
+            // Start with an ordinary zombie. A random promotion during addFreshEntity
+            // would already include the same non-stacking bonus in the baseline below.
+            test.assertTrue(ChampionJoinRoll.join(level, champion), "native ordinary promotion fixture admitted");
+            test.assertTrue(ChampionHooks.championId(champion) == ChampionRules.NO_CHAMPION && champion.getMaxHealth() == 20F,
+                    "promotion baseline is an ordinary twenty-health zombie: " + champion.getMaxHealth());
             double baseHealth = champion.getAttributeValue(Attributes.MAX_HEALTH);
             double baseDamage = champion.getAttributeValue(Attributes.ATTACK_DAMAGE);
             double baseSpeed = champion.getAttributeValue(Attributes.MOVEMENT_SPEED);
             ChampionRules.Adapter.promote(champion, ChampionModifier.MIGHTY);
             test.assertTrue(Math.abs(champion.getAttributeValue(Attributes.MAX_HEALTH) - (baseHealth + 30D)) < 1e-6D,
-                    "a champion keeps the original thirty health bonus: " + champion.getAttributeValue(Attributes.MAX_HEALTH));
+                    "a champion keeps the original thirty health bonus: base=" + baseHealth + " promoted=" + champion.getAttributeValue(Attributes.MAX_HEALTH));
             test.assertTrue(Math.abs(champion.getAttributeValue(Attributes.ATTACK_DAMAGE) - baseDamage * 12D) < 1e-6D,
                     "the mighty champion keeps the original operation-two factors three and four: " + champion.getAttributeValue(Attributes.ATTACK_DAMAGE));
             test.assertTrue(champion.getCustomName() != null && champion.getCustomName().getString().startsWith("Mighty"),
@@ -205,7 +209,9 @@ public final class ChampionRuntimeChecks {
             // The bold champion keeps the original thirty percent movement speed.
             var bold = lane.add(EntityType.ZOMBIE.create(level));
             bold.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 3.5D, 0F, 0F);
-            level.addFreshEntity(bold);
+            test.assertTrue(ChampionJoinRoll.join(level, bold), "native ordinary bold fixture admitted");
+            test.assertTrue(ChampionHooks.championId(bold) == ChampionRules.NO_CHAMPION,
+                    "bold speed baseline precedes its original promotion");
             double boldBase = bold.getAttributeValue(Attributes.MOVEMENT_SPEED);
             ChampionRules.Adapter.promote(bold, ChampionModifier.BOLD);
             test.assertTrue(Math.abs(bold.getAttributeValue(Attributes.MOVEMENT_SPEED) - boldBase * 1.3D) < 1e-6D,

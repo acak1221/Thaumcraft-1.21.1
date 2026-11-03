@@ -1,0 +1,96 @@
+{
+  "version": "0.1.0-alpha.21",
+  "minecraft": "1.21.1",
+  "loader": "Fabric",
+  "java": 21,
+  "baseline": {
+    "source_commit": "63f832391b2e2948e547a283d011a7fd347fbfe4",
+    "result": "CRASH_REPRODUCED",
+    "fixture": "fresh 1.21.1 flat world, supplied suspended taint crust and stone floor; original animateTick and particle physics; native resource reload",
+    "exception": "java.lang.NullPointerException: AtlasSet.getAtlas has no particle atlas entry",
+    "stack": [
+      "AtlasSet.getAtlas",
+      "ModelManager.getAtlas",
+      "Minecraft.getTextureAtlas",
+      "TaintDropParticle.frame:24",
+      "TaintDropParticle.<init>:20",
+      "TaintDropParticle.add:22",
+      "BlockTaint.animateTick:116",
+      "ClientLevel.doAnimateTick"
+    ]
+  },
+  "fixed": {
+    "command": "./gradlew :fabric:runTaintDripClient :fabric:build",
+    "run_id": "taint-drip-2026-11-03T10-37-19.198113Z",
+    "status": "PASS",
+    "fixture": "fresh 1.21.1 flat world, supplied suspended taint crust and stone floor; original animateTick and particle physics; native resource reload",
+    "checks": [
+      {
+        "passed": true,
+        "check": "initial load",
+        "sprite": "minecraft:drip_hang"
+      },
+      {
+        "passed": true,
+        "check": "initial load after forty bob ticks",
+        "sprite": "minecraft:drip_hang"
+      },
+      {
+        "passed": true,
+        "check": "initial load",
+        "sprite": "minecraft:drip_fall"
+      },
+      {
+        "passed": true,
+        "check": "initial load",
+        "sprite": "minecraft:drip_land"
+      },
+      {
+        "passed": true,
+        "check": "resource reload",
+        "sprite": "minecraft:drip_hang"
+      },
+      {
+        "passed": true,
+        "check": "resource reload after forty bob ticks",
+        "sprite": "minecraft:drip_hang"
+      },
+      {
+        "passed": true,
+        "check": "resource reload",
+        "sprite": "minecraft:drip_fall"
+      },
+      {
+        "passed": true,
+        "check": "resource reload",
+        "sprite": "minecraft:drip_land"
+      }
+    ],
+    "captures": [
+      {
+        "file": "taint-drip-2026-11-03T10-37-19.198113Z-taint-drips.png",
+        "label": "taint-drips",
+        "bytes": 233224,
+        "sha256": "16c4694a730d308c379845ccbab2fb0d8caf3911b91e34d8fd7c2204abf8fd86",
+        "visually_inspected": true,
+        "inspection": "Native scene remains rendered before and after resource reload; sprite identities and physics verified by the client assertions."
+      },
+      {
+        "file": "taint-drip-2026-11-03T10-37-19.198113Z-taint-drips-after-resource-reload.png",
+        "label": "taint-drips-after-resource-reload",
+        "bytes": 184546,
+        "sha256": "ef86f8baa6974773c5a8ab4c57d768a3031de464386b402eee4b458c46a86c83",
+        "visually_inspected": true,
+        "inspection": "Native scene remains rendered before and after resource reload; sprite identities and physics verified by the client assertions."
+      }
+    ]
+  },
+  "source_sha256_lf": {
+    "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": "07578b9599f69cb83bf715763f165e543ba47506ee3eb40184fe6bf6c8701f08",
+    "fabric/src/clientTest/java/thaumcraft/fabric/testing/TaintDripClientProbe.java": "bae6258ae58525e97a8b9265d64d42a7fcc09cfc1a6d814257823db634c19e14"
+  },
+  "limitations": [
+    "Supplied regression scene, not survival acquisition or a remote multiplayer acceptance.",
+    "Native visual run is Fabric; both release jars share the corrected particle class."
+  ]
+}

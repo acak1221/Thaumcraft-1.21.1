@@ -21,7 +21,12 @@ public final class TaintDropParticle extends TextureSheetParticle {
     }
     public static void add(Level world,Vec3 point){if(world instanceof ClientLevel level)Minecraft.getInstance().particleEngine.add(new TaintDropParticle(level,point));}
     private static boolean jar(BlockState state){return state.is(ThaumcraftContent.JAR.get())||state.is(ThaumcraftContent.VOID_JAR.get());}
-    private void frame(String sprite){setSprite(Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_PARTICLES).apply(ResourceLocation.withDefaultNamespace(sprite)));}
+    private void frame(String sprite){
+        // ParticleEngine registers its atlas directly with TextureManager. The model
+        // manager behind Minecraft.getTextureAtlas does not own the particle atlas.
+        var atlas=(TextureAtlas)Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_PARTICLES);
+        setSprite(atlas.getSprite(ResourceLocation.withDefaultNamespace(sprite)));
+    }
     @Override public void tick(){
         xo=x;yo=y;zo=z;yd-=(double)gravity;
         if(bob-->0){xd*=.02D;yd*=.02D;zd*=.02D;frame("drip_hang");}else frame("drip_fall");

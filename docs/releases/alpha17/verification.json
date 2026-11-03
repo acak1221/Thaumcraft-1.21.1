@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "release": "v0.1.0-alpha.17",
+  "scope": "Previously completed local Fabric checkpoint; publication does not rerun builds or tests.",
+  "source_commit": "7329ba88bf95343a82706357a6f662a7a6e35e0d",
+  "source_input_files": 8475,
+  "inputs_unchanged": true,
+  "artifact": {
+    "path": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.17.jar",
+    "sha256": "575fccdf5776f1529f12d2435b09620214acbb706294e7506e48042d71936bf3",
+    "bytes": 15984509,
+    "classes": 2535,
+    "own_classfile_major": 65,
+    "notices": {
+      "THIRD_PARTY_NOTICES.md": "f1d0d6c9ba41bc95c8627c0fbf45e53018311811d3d30bcf3b3128312df29c95",
+      "LICENSE": "30a4729100eb20a07b11c8683b50a9fb0ac0d6a6a3ff5b30b2bd979756af2798"
+    },
+    "isolation": {
+      "test_classes_absent": true,
+      "test_entrypoints_absent": true,
+      "test_fixtures_absent": true,
+      "production_test_references_absent": true
+    }
+  },
+  "junit": {
+    "tests": 2895,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 2890,
+    "suites": 489,
+    "skipped_cases": [
+      {
+        "class": "thaumcraft.eldritch.OrphanMobOracleContractTest",
+        "case": "watcherIsUnregisteredDeadCodeNotAClientSpawnEffect()"
+      },
+      {
+        "class": "thaumcraft.eldritch.OrphanMobOracleContractTest",
+        "case": "crawlerIsNotAnOriginalTaintSpreadProduct()"
+      },
+      {
+        "class": "thaumcraft.eldritch.OrphanMobOracleContractTest",
+        "case": "seedIsNotAnOriginalTaintSpreadProduct()"
+      },
+      {
+        "class": "thaumcraft.eldritch.OrphanMobOracleContractTest",
+        "case": "greaterPortalIsNotTheOriginalCultistBoss()"
+      },
+      {
+        "class": "thaumcraft.eldritch.OrphanMobOracleContractTest",
+        "case": "primeSeedIsNotAnOriginalTaintSpreadProduct()"
+      }
+    ],
+    "skip_reason": "Original Thaumcraft 1.7.10 JAR absent; five OrphanMobOracleContractTest assumptions. All other cases ran, with zero failures/errors."
+  },
+  "native": {
+    "tests": 656,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "required_cases_passed": 656
+  },
+  "isolated_order": [
+    {
+      "case": "waterUpgradeWidensTheLiveWorkRadiusOfRunningLumberAndHarvestGolems",
+      "exit": 0,
+      "tests": 1,
+      "failures": []
+    },
+    {
+      "case": "infusionComponentPredicateSession",
+      "exit": 0,
+      "tests": 1,
+      "failures": []
+    },
+    {
+      "case": "advancedFurnacePreservesCustodyAcrossRealChunkUnload",
+      "exit": 0,
+      "tests": 1,
+      "failures": []
+    },
+    {
+      "case": "embersFlyDamageIgniteAndExpire",
+      "exit": 0,
+      "tests": 1,
+      "failures": []
+    }
+  ],
+  "client": {
+    "checks": 25,
+    "captures": 6,
+    "frames_inspected": true,
+    "emi_separate_prior_run_checks": 84,
+    "scope": "Native renderer/material/reload probe; separate earlier real EMI registry/reload run. Not survival acquisition or multiplayer acceptance."
+  },
+  "python": {
+    "tests": 180,
+    "initial_skipped": 9,
+    "resolved_oracle_skips": 6,
+    "skipped": 3,
+    "passed": 177
+  },
+  "ordinary_server": {
+    "ready": true,
+    "tick_queries": [
+      92,
+      142
+    ],
+    "normal_stop": true,
+    "exit_code": 0,
+    "normal_ai_banker_profession": "thaumcraft:banker",
+    "banker_grounded_after_real_entity_ticks": true,
+    "mapping_errors": []
+  },
+  "evidence": {
+    "report": "CODE_REVIEW_REPORT.md",
+    "report_sha256": "8b4b964023ad886ea8b92dab97dfba6df16d2339bfd89ae8f2b8264897f82285",
+    "progress": "REVIEW_PROGRESS.md",
+    "progress_sha256": "6d35efa41e759863007e4c1d3196918fa5c95900dd39cba6571f9cd5c885c166",
+    "local_manifest": ".tmp/review/verification-final.json",
+    "local_manifest_sha256": "208a6a4df36d3a3995026459439e7daa14ece6909a0fc4d36b57bd5e2e330022",
+    "fresh_output_count": 504,
+    "ordinary_server_receipt_sha256": "15edcf2f5d25846f6169c70159e67681b23974445d2e59749161e94e7cdee7ec"
+  },
+  "limitations": [
+    "This release contains only the verified Fabric JAR. NeoForge builds/runtime were deferred by AGENTS.md and are not claimed.",
+    "Source commit GitHub CI run 41475260966 was not green: isolated-order verification failed. The local order run separately passed 656 full cases plus four isolated cases; no CI pass is claimed.",
+    "Five JUnit original-JAR oracle cases and three Python original-JAR/MCP mapping cases remain skipped for the exact reasons recorded in CODE_REVIEW_REPORT.md.",
+    "Long survival, multiplayer, and general CVE auditing were not performed. Existing report lists remaining risks."
+  ],
+  "publication_only_paths": [
+    ".github/workflows/publish-verified-fabric.yml",
+    "docs/releases/alpha17/verification.json"
+  ]
+}

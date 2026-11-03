@@ -1,0 +1,228 @@
+name: Publish verified Fabric alpha.17
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing draft release tag
+        required: true
+        type: string
+      release_id:
+        description: Numeric ID of the existing draft release
+        required: true
+        type: string
+      commit:
+        description: Commit covered by the verification report
+        required: true
+        type: string
+      blob:
+        description: Unattached Git blob containing the verified JAR
+        required: true
+        type: string
+      sha256:
+        description: Verified JAR SHA-256
+        required: true
+        type: string
+      proof_path:
+        description: Verification report in the target commit
+        default: docs/releases/alpha17/verification.json
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      RELEASE_ID: ${{ inputs.release_id }}
+      RELEASE_COMMIT: ${{ inputs.commit }}
+      ARTIFACT_BLOB: ${{ inputs.blob }}
+      ARTIFACT_SHA256: ${{ inputs.sha256 }}
+      PROOF_PATH: ${{ inputs.proof_path }}
+    steps:
+      - name: Verify exact artifact, upload, download and publish
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64
+          import hashlib
+          import io
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          import zipfile
+
+          def require(condition, message):
+              if not condition:
+                  raise RuntimeError(message)
+
+          def gh(*arguments):
+              result = subprocess.run(['gh', *arguments], capture_output=True, text=True)
+              require(result.returncode == 0, 'GitHub operation failed: ' + ' '.join(arguments[:2]) + '; credentials and download URLs are not logged')
+              return result.stdout
+
+          def api(path):
+              return json.loads(gh('api', 'repos/' + repo + '/' + path))
+
+          def decode(payload):
+              require(payload.get('encoding') == 'base64', 'Expected a base64 GitHub object')
+              return base64.b64decode(''.join(payload['content'].split()), validate=True)
+
+          def verify_tag_if_present():
+              matches = [ref for ref in api('git/matching-refs/tags/' + tag) if ref['ref'] == 'refs/tags/' + tag]
+              require(len(matches) <= 1, 'Ambiguous release tag')
+              if matches:
+                  target = matches[0]['object']
+                  if target['type'] == 'tag':
+                      target = api('git/tags/' + target['sha'])['object']
+                  require(target['type'] == 'commit' and target['sha'] == commit, 'Existing release tag targets a different commit')
+
+          repo = os.environ['GITHUB_REPOSITORY']
+          tag = os.environ['RELEASE_TAG']
+          release_id = os.environ['RELEASE_ID']
+          commit = os.environ['RELEASE_COMMIT']
+          blob = os.environ['ARTIFACT_BLOB']
+          digest = os.environ['ARTIFACT_SHA256']
+          proof_path = os.environ['PROOF_PATH']
+          require(re.fullmatch(r'v\d+\.\d+\.\d+-alpha\.\d+', tag), 'Expected an alpha version tag')
+          require(re.fullmatch(r'[1-9][0-9]{0,19}', release_id), 'Invalid release ID')
+          require(re.fullmatch(r'[0-9a-f]{40}', commit) and re.fullmatch(r'[0-9a-f]{40}', blob), 'Invalid Git object ID')
+          require(re.fullmatch(r'[0-9a-f]{64}', digest), 'Invalid SHA-256')
+          require(proof_path == 'docs/releases/alpha17/verification.json', 'Unexpected alpha.17 proof path')
+          require(tag == 'v0.1.0-alpha.17', 'This workflow publishes only the audited Fabric alpha.17 checkpoint')
+          require(digest == '575fccdf5776f1529f12d2435b09620214acbb706294e7506e48042d71936bf3', 'Unexpected audited artifact SHA-256')
+          release = api('releases/' + release_id)
+          require(release['tag_name'] == tag, 'Draft release tag does not match')
+          require(release['draft'] and release['prerelease'], 'Only an existing alpha draft can be published')
+          require(release['target_commitish'] == commit, 'Draft release targets a different commit')
+          require(api('commits/' + commit)['sha'] == commit, 'Unknown target commit')
+          verify_tag_if_present()
+          proof = json.loads(decode(api('contents/' + proof_path + '?ref=' + commit)))
+          source_commit = '7329ba88bf95343a82706357a6f662a7a6e35e0d'
+          require(proof['schema_version'] == 1 and proof['release'] == tag
+                  and proof['source_commit'] == source_commit
+                  and proof['inputs_unchanged'] is True and proof['source_input_files'] == 8475,
+                  'Proof is not the audited source snapshot')
+          # Adding publication instructions and their summary cannot change the built gameplay.
+          allowed_paths = {'.github/workflows/publish-verified-fabric.yml', 'docs/releases/alpha17/verification.json'}
+          require(set(proof['publication_only_paths']) == allowed_paths, 'Unexpected publication scope')
+          comparison = api('compare/' + source_commit + '...' + commit)
+          require(comparison['status'] in ('ahead', 'identical')
+                  and comparison['base_commit']['sha'] == source_commit,
+                  'Publication commit does not descend from the verified source')
+          require({item['filename'] for item in comparison['files']}.issubset(allowed_paths)
+                  and all(item['status'] in ('added', 'modified') for item in comparison['files']),
+                  'Gameplay or other files changed after verification')
+          report_bytes = decode(api('contents/CODE_REVIEW_REPORT.md?ref=' + source_commit))
+          require(hashlib.sha256(report_bytes).hexdigest() == proof['evidence']['report_sha256'],
+                  'Source review report does not match evidence')
+          unit = proof['junit']
+          expected_skips = {
+              'watcherIsUnregisteredDeadCodeNotAClientSpawnEffect()',
+              'crawlerIsNotAnOriginalTaintSpreadProduct()',
+              'seedIsNotAnOriginalTaintSpreadProduct()',
+              'greaterPortalIsNotTheOriginalCultistBoss()',
+              'primeSeedIsNotAnOriginalTaintSpreadProduct()'
+          }
+          require(unit['tests'] == 2895 and unit['passed'] == 2890 and unit['suites'] == 489
+                  and unit['failures'] == unit['errors'] == 0 and unit['skipped'] == 5,
+                  'Unexpected JUnit summary')
+          require(len(unit['skipped_cases']) == 5
+                  and {case['case'] for case in unit['skipped_cases']} == expected_skips
+                  and all(case['class'] == 'thaumcraft.eldritch.OrphanMobOracleContractTest'
+                          for case in unit['skipped_cases']), 'Unexpected skipped tests')
+          native = proof['native']
+          require(native['tests'] == native['required_cases_passed'] == 656
+                  and native['failures'] == native['errors'] == native['skipped'] == 0,
+                  'Native cases did not all pass')
+          require(len(proof['isolated_order']) == 4 and all(item['tests'] == 1 and item['exit'] == 0
+                  and not item['failures'] for item in proof['isolated_order']), 'Isolated-order proof incomplete')
+          require(proof['client']['checks'] == 25 and proof['client']['captures'] == 6
+                  and proof['client']['frames_inspected'] is True, 'Client proof incomplete')
+          smoke = proof['ordinary_server']
+          require(smoke['ready'] and smoke['normal_stop'] and smoke['exit_code'] == 0
+                  and smoke['tick_queries'] == [92, 142] and not smoke['mapping_errors']
+                  and smoke['normal_ai_banker_profession'] == 'thaumcraft:banker'
+                  and smoke['banker_grounded_after_real_entity_ticks'], 'Ordinary-server proof incomplete')
+          artifact = proof['artifact']
+          filename = 'Thaumcraft-fabric-' + tag[1:] + '.jar'
+          require(Path(artifact['path']).name == filename and artifact['sha256'] == digest, 'Artifact does not match committed proof')
+          payload = decode(api('git/blobs/' + blob))
+          require(len(payload) == artifact['bytes'] and hashlib.sha256(payload).hexdigest() == digest, 'JAR bytes differ from verified build')
+          git_digest = hashlib.sha1(b'blob ' + str(len(payload)).encode() + b'\0' + payload).hexdigest()
+          require(git_digest == blob, 'Git object integrity check failed')
+          with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+              require(archive.testzip() is None, 'Corrupt JAR')
+              metadata = json.loads(archive.read('fabric.mod.json'))
+              require(metadata['id'] == 'thaumcraft' and metadata['version'] == tag[1:], 'Wrong mod or version')
+              names = archive.namelist()
+              require(len(names) == len(set(names)), 'Duplicate ZIP entries')
+              require(not any(name.endswith('.jar') or name.startswith(('net/minecraft/', 'net/minecraftforge/', 'cpw/mods/'))
+                              for name in names), 'Bundled dependency or legacy classes')
+              require(not any(name.startswith('thaumcraft/') and any(marker in name.lower()
+                      for marker in ('/testing/', '/gametest/', '/clienttest/')) for name in names), 'Bundled test classes')
+              require('fabric-gametest' not in metadata.get('entrypoints', {}), 'Test entrypoint bundled')
+              require(not any(name.startswith(('data/thaumcraft_gametest/', 'assets/thaumcraft_gametest/'))
+                              or name in ('data/thaumcraft/structure/empty.nbt', 'data/thaumcraft/structures/empty.nbt')
+                              for name in names), 'Bundled test fixtures')
+              references = (b'thaumcraft/common/testing/', b'thaumcraft/fabric/testing/', b'thaumcraft/neoforge/testing/',
+                            b'thaumcraft/fabric/clienttest/', b'thaumcraft/neoforge/clienttest/', b'thaumcraft/clienttest/',
+                            b'net/minecraft/gametest/', b'net/fabricmc/fabric/api/gametest/',
+                            b'net/neoforged/neoforge/event/RegisterGameTestsEvent')
+              classes = [name for name in names if name.endswith('.class')]
+              require(len(classes) == artifact['classes'] == 2535, 'Unexpected class count')
+              for name in classes:
+                  if name.startswith('thaumcraft/'):
+                      content = archive.read(name)
+                      require(int.from_bytes(content[6:8], 'big') == 65
+                              and not any(reference in content for reference in references), 'Invalid own class or test reference')
+              for name, notice_digest in artifact['notices'].items():
+                  require(name in ('LICENSE', 'THIRD_PARTY_NOTICES.md')
+                          and hashlib.sha256(archive.read(name)).hexdigest() == notice_digest, 'Notice mismatch')
+              require(set(artifact['notices']) == {'LICENSE', 'THIRD_PARTY_NOTICES.md'}, 'Missing notices')
+              require('thaumcraft/api/crafting/transfer/RecipeTransferTarget.class' in names
+                      and 'thaumcraft/common/lib/network/RecipeTransferNetworking.class' in names,
+                      'Required native recipe-transfer API missing')
+          Path(filename).write_bytes(payload)
+          Path('SHA256SUMS').write_text(digest + '  ' + filename + '\n')
+          expected = {filename: payload, 'SHA256SUMS': Path('SHA256SUMS').read_bytes()}
+          assets = {asset['name']: asset for asset in release['assets']}
+          verified_assets = {}
+          require(set(assets).issubset(expected), 'Draft contains unexpected assets')
+          for name, contents in expected.items():
+              if name not in assets:
+                  gh('release', 'upload', tag, name, '--repo', repo)
+              before_download = {asset['name']: asset for asset in api('releases/' + release_id)['assets']}
+              require(name in before_download and before_download[name]['size'] == len(contents), 'Uploaded asset metadata differs')
+              directory = Path('download-check') / name.replace('.', '_')
+              directory.mkdir(parents=True)
+              gh('release', 'download', tag, '--pattern', name, '--dir', str(directory), '--repo', repo)
+              require((directory / name).read_bytes() == contents, 'Uploaded asset failed its download integrity check')
+              verified_assets[name] = before_download[name]['id']
+          latest = api('releases/' + release_id)
+          require(latest['draft'] and latest['prerelease'] and latest['tag_name'] == tag
+                  and latest['target_commitish'] == commit, 'Release changed during verification')
+          require({asset['name'] for asset in latest['assets']} == set(expected), 'Release asset set changed')
+          require({asset['name']: asset['id'] for asset in latest['assets']} == verified_assets, 'Verified assets were replaced')
+          verify_tag_if_present()
+          gh('release', 'edit', tag, '--draft=false', '--prerelease', '--repo', repo)
+          published = api('releases/' + release_id)
+          require(not published['draft'] and published['prerelease'], 'Release was not published')
+          target = api('git/ref/tags/' + tag)['object']
+          if target['type'] == 'tag':
+              target = api('git/tags/' + target['sha'])['object']
+          require(target['type'] == 'commit' and target['sha'] == commit, 'Published tag targets a different commit')
+          print('Local Fabric proof verified; CI is not claimed green, NeoForge is excluded.')
+          print('Published verified', tag, 'at', commit, 'JAR SHA-256', digest)
+          PY

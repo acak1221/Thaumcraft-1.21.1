@@ -18,6 +18,8 @@ on:
         required: false
         default: ""
   push:
+    # GitHub ignores path filters on tags; mutation requests are branch changes.
+    branches: ['**']
     paths:
       - scripts/mutation/run-request.txt
 

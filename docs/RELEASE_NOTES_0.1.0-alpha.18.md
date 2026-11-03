@@ -2,6 +2,7 @@
 
 - First automatic release with Fabric and NeoForge mod jars, both source archives, SHA-256 checksums and a build report tied to the source commit.
 - Both loaders are built and tested before publication. Fabric also runs a second full GameTest suite and five isolated regressions, including Order golem replant seed custody.
+- Required test lists retain all 656 Fabric cases and pin all 538 NeoForge cases, with Fabric-native transaction/protection fixtures classified under Fabric and NeoForge capabilities/events under NeoForge. This does not establish complete gameplay parity between loaders.
 - Gameplay is unchanged from the alpha.17 source checkpoint. This release adds the automated release process and test diagnostics.
 
 The alpha.17 gameplay checkpoint includes native Thaumonomicon and EMI recipe transfer, the crucible aspect HUD, smoother aura-node wand charging, six deepslate infused ores, modern Minecraft adaptations and the fixes described in `CODE_REVIEW_REPORT.md`.

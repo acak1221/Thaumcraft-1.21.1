@@ -454,3 +454,17 @@ held instrument away from the crop fixture. The final accepted run is
 No fresh survival acquisition, multiplayer or NeoForge acceptance is claimed.
 Exact inputs, all frame hashes and limits: [receipt](../porting/modern-adaptations.json),
 [report and gallery](../analysis/2026-11-02-modern-adaptations.md).
+
+## 18. Focal upgrade point payment — owner request 2026-11-04
+
+Original `TileFocalManipulator.startCraft` charges `rank * 8` whole levels; its
+initial level check also applies in creative. The owner explicitly requested
+experience-point payment. New admissions use fixed 1.21.1 cumulative point prices
+for those original thresholds: **112 / 352 / 828 / 1628 / 2920 XP** for ranks 1–5.
+Thus a higher-level player pays the same points for the same rank. The GUI quotes
+points and the authoritative server verifies the reconstructed level/bar balance;
+the historical `totalExperience` counter is not used for affordability. Native point
+debit preserves vanilla bar/level synchronization. Original creative affordability
+and no-debit rules, vis costs, paid-job persistence and non-refunding cancellation
+are preserved. No other enchantment/infusion payment policy is changed.
+See [implementation and verification](../analysis/2026-11-04-focal-xp-points.md).

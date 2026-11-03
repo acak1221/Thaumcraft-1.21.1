@@ -1,3 +1,19 @@
+## 2026-11-04 — focal upgrades charge fixed experience points
+
+Focal upgrades now cost 112/352/828/1628/2920 XP points for ranks 1–5,
+independent of the player's starting level. These preserve the entry thresholds
+of the former 8/16/24/32/40-level prices under the modern XP curve. Payment and
+GUI affordability use the current XP bar, including saves with a stale total XP
+counter; vis prices, creative's original threshold/debit exemption and paid-job
+reload behavior are preserved.
+
+Core verification: 2,907 JUnit passes (five expected skips), Fabric build/isolation,
+five focused dedicated-server GameTests and zero missing asset references. The
+native client confirmed the same 112-point charge at levels 8 and 30, replay and
+cancellation safety, and the 2920-point rank-five preview. All six final RU frames
+were inspected, including cost/balance tooltips. Final build and client run passed. NeoForge was not run. See
+`docs/analysis/2026-11-04-focal-xp-points.md`.
+
 ## 2026-11-04 — aspect-source performance and world isolation
 
 Removed EMI's 50 ms full-source recomputation and JEI's repeated catalogue rebuilds

@@ -98,6 +98,7 @@ import thaumcraft.common.lib.network.FocalManipulatorAckPayload;
 import thaumcraft.common.lib.network.FocalManipulatorNetworking;
 import thaumcraft.common.lib.network.KnowledgeEvents;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileArcaneWorkbench;
 import thaumcraft.common.tiles.TileFocalManipulator;
@@ -149,18 +150,19 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
             "165-native-focal-manipulator-same-earned-charm-paid-preview-en.png",
             "166-earned-focal-manipulator-empty-original-table-model-en.png",
             "167-native-potency-select-deselect-local-preview-tooltip-en.png",
-            "168-native-eight-level-potency-payment-no-relay-debt-stall-en.png",
+            "168-native-112-xp-point-potency-payment-no-relay-debt-stall-en.png",
             "169-native-earned-relay-real-source-powered-focal-table-en.png",
             "170-native-six-primal-remaining-debt-focal-progress-en.png",
             "171-native-one-rank-potency-focus-completed-history-en.png",
             "172-native-paid-potency-stone-harvest-same-UUID-pickup-en.png",
-            "173-native-rank-two-insufficient-levels-final-retained-stock-en.png");
+            "173-native-rank-two-insufficient-xp-points-final-retained-stock-en.png");
     private static final Map<String,Integer> INITIAL_VIS=Map.of("aer",4600,"aqua",1900,"ignis",2400,"ordo",1200,"perditio",0,"terra",1200),
             POTENCY=Map.of("aer",200,"terra",600,"ignis",400,"aqua",600,"ordo",400,"perditio",200),
             BASE=Map.of("aer",80,"aqua",80,"ignis",80,"ordo",80,"perditio",80,"terra",80);
     private static final List<EquipmentSlot> ARMOR=List.of(EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET);
     private static final AABB SCENE=new AABB(1597,213,365,1643,226,390),OLD_AREA=new AABB(1547,214,373,1557,224,383);
     private static final int HAND=3;
+    private static final int POTENCY_XP=112,INITIAL_SPENDABLE_XP=4;
     public final Map<String,Object> report=new ConcurrentHashMap<>();
     private final Minecraft client;
     private final Consumer<String> capture;
@@ -236,6 +238,8 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
         report.put("scope","Fresh root-owned focal-smoke-UUID COPY of accepted stopped M09b e0a10f37; partial M08 only; no accepted save opened by this harness author");
         report.put("limits",row("SERVER_POST_ticks",9000,"wall_seconds",450,"captures",10,"timeout_autoextension",false));
         report.put("corrected_XP_input",row("XpLevel",0,"XpTotal",11,"XpP",0.5714285969734192,"total_is_not_levels",true));
+        report.put("XP_payment_policy",row("unit","experience points","rank1_cost",POTENCY_XP,"rank2_cost",ExperiencePoints.atLevel(16),
+                "initial_spendable_bar_points",INITIAL_SPENDABLE_XP,"totalExperience_used_for_affordability",false));
         report.put("capture_names",CAPTURES); report.put("declared_initial_fixtures",inputs); report.put("native_actions",actions);
         report.put("EVERY_SERVER_POST",posts); report.put("native_physical_UUID_events",physical); report.put("native_ACKs",acks);
         report.put("actual_source_epochs",epochs); report.put("old1551_actual_native_pruning",oldNodeRows); report.put("capture_events",captures);
@@ -378,7 +382,7 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
                 if(view.xpCredit()<(takeIndex+1)*14L) { if(age%8==0)server(()->approachXp(serverPlayer())); return false; }
                 require(view.xpCredit()==(takeIndex+1)*14L && view.xpMass()==0,"Only this result's actual native orb pickups; merges counted");
                 if(++takeIndex<8)next(Step.TAKE_MOVE); else next(Step.XP_READY); }
-            case XP_READY -> { require(view.xpCredit()==112 && view.level()>=8 && view.level()<9,"112 real XP points earn LEVEL8, never XpTotal-as-level"); next(Step.SOURCE_WAIT); }
+            case XP_READY -> { require(view.xpCredit()==112 && xpPoints(view)==INITIAL_SPENDABLE_XP+112,"112 native furnace XP points add to the saved spendable XP bar"); next(Step.SOURCE_WAIT); }
             case SOURCE_WAIT -> { if(view.source()==null || view.converterCount()!=1000 || view.converterStatus()!=2)return false; next(Step.CRAFT_MOVE); }
             case CRAFT_MOVE -> { server(()->stand(serverPlayer(),1601.5,216,376.6)); next(Step.CRAFT_HAND); }
             case CRAFT_HAND -> { if(!serverDone() || age<10 || !hand(FocalManipulatorClientSequence::payer))return false; next(Step.CRAFT_OPEN); }
@@ -421,11 +425,13 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
             case LOCAL_RESELECT -> { if(age<6)return false; assertCosmetic(); guiClick(64,111); next(Step.LOCAL_VIEW); }
             case LOCAL_VIEW -> { if(age<6)return false; assertCosmetic(); moveMouse((client.screen.width-192)/2+64,(client.screen.height-233)/2+111); shot(3); next(Step.START); }
             case START -> { requestedRevision=focal().selectionRevision(); requestedSession=focal().sessionId();requestedContainer=focal().containerId;
-                beforeLevel=view.level(); beforeTotal=view.totalXp(); beforeProgress=view.xpProgress(); require(beforeLevel>=8 && beforeLevel<9,"Real furnace-earned levels before ONE START");
+                beforeLevel=view.level(); beforeTotal=view.totalXp(); beforeProgress=view.xpProgress();
+                require(ExperiencePoints.atLevel(8)==POTENCY_XP && xpPoints(view)==INITIAL_SPENDABLE_XP+112 && xpPoints(view)>=POTENCY_XP,"Real furnace-earned XP points fund ONE112-point START");
                 require(actualStarts==0,"Publish exactly one thread-visible intent before outbound C2S"); actualStarts=1;
                 guiClick(90,92); expectedPending=BookClientSmoke.field(client.screen,"pending"); require(expectedPending!=null,"Actual GUI captured pending session/revision intent"); next(Step.START_ACK); }
             case START_ACK -> { if(view==null || view.jobSize()!=2400 || acks.isEmpty() || BookClientSmoke.field(client.screen,"pending")!=null)return false;
-                require(view.level()==beforeLevel-8 && view.upgrade()==0 && view.rank()==1,"Native8LEVEL debit and exact actual Potency job"); next(Step.STALL); }
+                require(ExperiencePoints.available(beforeLevel,beforeProgress)-xpPoints(view)==POTENCY_XP
+                        && view.totalXp()==Math.max(0,beforeTotal-POTENCY_XP) && view.upgrade()==0 && view.rank()==1,"Native112-XP-point debit and exact actual Potency job"); next(Step.STALL); }
             case STALL -> { if(view.tick()-paidStartTick<20)return false; require(view.debt().equals(POTENCY) && ledger.totalGrants()==0 && !view.relay(),"Actual fifth-tick debt stall with no relay/grants");
                 next(Step.RELAY_MOVE);shot(4); }
             case RELAY_MOVE -> { client.player.closeContainer();server(()->stand(serverPlayer(),1618.5,218,376.5)); next(Step.RELAY_HAND); }
@@ -465,7 +471,7 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
             case RANK2_OPEN -> { if(!use(MACHINE,Direction.SOUTH,Vec3.atCenterOf(MACHINE).add(0,0,.5)))return false; next(Step.RANK2_INSERT); }
             case RANK2_INSERT -> { if(!(client.screen instanceof GuiFocalManipulator) || age<6)return false; click(playerSlot(find(client.player,s->ItemStack.matches(s,upgradedFocus))),0,ClickType.QUICK_MOVE); next(Step.RANK2_VIEW); }
             case RANK2_VIEW -> { if(!ack(ItemStack.matches(focal().getSlot(0).getItem(),upgradedFocus),"Actual rank1 focus reinserted"))return false; guiClick(64,111); beforeLevel=view.level(); beforeTotal=view.totalXp(); beforeProgress=view.xpProgress(); next(Step.RANK2_REFUSE); }
-            case RANK2_REFUSE -> { if(age<8)return false; require(beforeLevel<16,"Actual insufficient rank2 levels"); guiClick(90,92); require(BookClientSmoke.field(client.screen,"pending")==null,"Disabled native rank2 bar cannot issue another START"); next(Step.RANK2_CAPTURE); }
+            case RANK2_REFUSE -> { if(age<8)return false; require(ExperiencePoints.available(beforeLevel,beforeProgress)<ExperiencePoints.atLevel(16),"Actual insufficient XP points for rank2"); guiClick(90,92); require(BookClientSmoke.field(client.screen,"pending")==null,"Disabled native rank2 bar cannot issue another START"); next(Step.RANK2_CAPTURE); }
             case RANK2_CAPTURE -> { if(age<10)return false; require(view.level()==beforeLevel && view.totalXp()==beforeTotal && view.xpProgress()==beforeProgress && view.jobSize()==0 && actualStarts==1 && acks.size()==1,"Rank2 refusal has no economic mutation or second START/ACK"); shot(9); next(Step.RETURN_FOCUS); }
             case RETURN_FOCUS -> { if(age==1)click(0,0,ClickType.QUICK_MOVE); if(age<8)return false; require(focal().getSlot(0).getItem().isEmpty(),"Final machine physical slot empty"); client.player.closeContainer(); clicks=List.of(); next(Step.RESTORE); }
             case RESTORE -> { if(!restoreSavedSlots())return false; server(()->finish(serverPlayer())); next(Step.FINAL_CHECK); }
@@ -491,6 +497,7 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
         require(p.server.isSameThread() && p.isAlive() && p.gameMode.getGameModeForPlayer()==GameType.SURVIVAL,"Actual saved Survival actor"); owner=p;
         ClientTestServerLifecycle.register(p.server,stopHook); // Snapshot-dispatched failure tail even if initial guards reject the clone.
         require(p.experienceLevel==0 && p.totalExperience==11 && Float.floatToIntBits(p.experienceProgress)==Float.floatToIntBits(.5714285969734192F),"Exact corrected saved XP triplet, never normalized");
+        require(ExperiencePoints.available(p)==INITIAL_SPENDABLE_XP,"Saved bar has4 spendable XP points; historical total11 is retained independently");
         require(p.containerMenu==p.inventoryMenu && p.containerMenu.getCarried().isEmpty() && !p.isUsingItem(),"Saved menu/cursor/channel clear");
         savedPayer=p.getInventory().getItem(10).copy(); savedFocus=p.getInventory().getItem(15).copy(); savedPick=stack(p,s->s.is(Items.WOODEN_PICKAXE)).copy(); savedOffhand=p.getOffhandItem().copy(); savedInvulnerable=p.isInvulnerable();
         require(payer(savedPayer) && WandData.PRIMALS.stream().allMatch(type->ItemWandCasting.data(savedPayer).amount(type)==INITIAL_VIS.get(type)) && FocusData.get(savedPayer).isEmpty(),"Exact UNFOCUSED silverwood/gold10 finite payer; missing zero keys are not normalized");
@@ -567,6 +574,7 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
                         Map<String,Integer> debt,ItemStack focus,long revision,TileNodeEnergized source,long epoch,
                         Map<String,Integer> available,boolean relay,boolean powered,int converterCount,int converterStatus,
                         int normalCount,boolean using) {}
+    private static long xpPoints(View value) { return ExperiencePoints.available(value.level(),value.xpProgress()); }
     private final class Ledger {
         final ServerPlayer player;
         View previous;
@@ -612,11 +620,12 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
             Map<String,Integer> paid=Map.of();
             if(paidStartTick<0 && now.jobSize()>0) {
                 require(actualStarts==1 && now.jobSize()==2400 && now.rank()==1 && now.upgrade()==0 && now.debt().equals(POTENCY),"ONE actual bound rank1 Potency START/full SUM debt");
-                require(previous.level()>=8 && previous.level()<9 && now.level()==previous.level()-8,"Original native8LEVEL upfront debit");
-                require(now.totalXp()==previous.totalXp() && Float.floatToIntBits(now.xpProgress())==Float.floatToIntBits(previous.xpProgress()),"Native nonnegative giveExperienceLevels debit preserves total/progress, never fabricated XP points");
-                require(now.xpCredit()==previous.xpCredit(),"No overlapping XP pickup obscures native level debit");
+                require(xpPoints(previous)>=POTENCY_XP && xpPoints(previous)-xpPoints(now)==POTENCY_XP,"Exactly112 spendable XP points paid upfront");
+                require(now.totalXp()==Math.max(0,previous.totalXp()-POTENCY_XP),"Native XP-point debit updates the historical total with zero clamp");
+                require(now.xpCredit()==previous.xpCredit(),"No overlapping XP pickup obscures native XP-point debit");
                 paidStartTick=now.tick(); xpDebits++;
-                actions.add(row("event","native START material edge","tick",now.tick(),"XpLevel_Total_Progress_before",List.of(previous.level(),previous.totalXp(),previous.xpProgress()),"XpLevel_Total_Progress_after",List.of(now.level(),now.totalXp(),now.xpProgress()),"actual_debt",now.debt(),"actual_revision",now.revision(),"XP_field_writes",0));
+                actions.add(row("event","native112-XP-point START material edge","tick",now.tick(),"XpLevel_Total_Progress_before",List.of(previous.level(),previous.totalXp(),previous.xpProgress()),"XpLevel_Total_Progress_after",List.of(now.level(),now.totalXp(),now.xpProgress()),
+                        "spendable_XP_points_before",xpPoints(previous),"spendable_XP_points_after",xpPoints(now),"actual_XP_points_paid",POTENCY_XP,"actual_debt",now.debt(),"actual_revision",now.revision(),"observer_XP_field_writes",0));
             } else if(paidStartTick>=0 && !completed) {
                 var delta=new LinkedHashMap<String,Integer>();
                 for(String type:WandData.PRIMALS) {
@@ -629,13 +638,14 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
             } else require(now.jobSize()==0,"After completion no extra paid job may exist");
             observeEpoch(previous,now,paid);
             if(paidStartTick<0 || now.tick()!=paidStartTick) {
-                if(now.xpCredit()==previous.xpCredit())require(now.level()==previous.level() && now.totalXp()==previous.totalXp() && now.xpProgress()==previous.xpProgress(),"No XP change without actual mixin pickup or ONE native level debit");
-                else require(now.xpCredit()>previous.xpCredit() && now.totalXp()-previous.totalXp()==now.xpCredit()-previous.xpCredit(),"Actual native XP touch points reconcile player total, not assumed level arithmetic");
+                if(now.xpCredit()==previous.xpCredit())require(now.level()==previous.level() && now.totalXp()==previous.totalXp() && now.xpProgress()==previous.xpProgress(),"No XP change without actual mixin pickup or ONE native112-point debit");
+                else require(now.xpCredit()>previous.xpCredit() && now.totalXp()-previous.totalXp()==now.xpCredit()-previous.xpCredit()
+                        && xpPoints(now)-xpPoints(previous)==now.xpCredit()-previous.xpCredit(),"Actual native orb credits reconcile both spendable bar points and historical player total");
             }
             if(casting && castPayments==0)observeCastProgress(player);
             observeTower(previous,now);observeOldNode(player.serverLevel(),now.tick()); preserve(player,false);
             posts.add(row("POST",++checks,"server_tick",player.server.getTickCount(),"game_tick",now.tick(),"phase",step.name(),
-                    "XpLevel_Total_Progress",List.of(now.level(),now.totalXp(),now.xpProgress()),"actual_XP_credit_mass",List.of(now.xpCredit(),now.xpMass()),
+                    "XpLevel_Total_Progress",List.of(now.level(),now.totalXp(),now.xpProgress()),"spendable_XP_points",xpPoints(now),"actual_XP_credit_mass",List.of(now.xpCredit(),now.xpMass()),
                     "actual_smelts_recipe_edges",List.of(now.smelted(),charms,machines),"actual_payer_CV",now.payerVis(),
                     "actual_job",row("size",now.jobSize(),"rank",now.rank(),"upgrade",now.upgrade(),"remaining",now.debt(),"revision",now.revision(),"native_table_ticks",actualMachine(player.serverLevel())==null?-1:actualMachine(player.serverLevel()).getTickCount()),
                     "actual_source",row("epoch",now.epoch(),"available",now.available(),"THIS_POST_grants",paid,"all_grants",Map.copyOf(grants)),
@@ -1155,6 +1165,7 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
         }
         preserve(p,true); require(ledger.charms==1 && ledger.machines==1 && ledger.smelts==112 && ledger.burnedCoal==16 && ledger.lastCoal==0 && ledger.xpDebits==1 && actualStarts==1 && acks.size()==1,"Two genuine recipes /112actual smelts/16native coal burns/one paid rank1 only");
         require(xp.credits()==112 && xp.post(112)==0 && count(p,Items.GOLD_INGOT)==108 && count(p,Items.COBBLESTONE)==4,"112 native gold/XP;4gold spent;108gold and OLD3plusNEW1cobble retained");
+        require(ExperiencePoints.available(p)==INITIAL_SPENDABLE_XP,"All112 furnace XP points paid once; original4 spendable points retained");
         require(ledger.grants.equals(POTENCY) && castPayments==1 && breakCalls==1 && beforeCalls==1 && afterCalls==1,"All2400 actual six-primal grants and one native protected13terra Potency completion");
         require(ItemStack.matches(p.getInventory().getItem(15),upgradedFocus) && potencyOne(p.getInventory().getItem(15)) && FocusData.get(p.getInventory().getItem(10)).isEmpty(),"Same full upgraded focus returned to15; actual payer10 unequipped");
         require(count(p,basicItem())==0 && count(p,converterItem())==0 && count(p,relayItem())==0 && loadedBE(p.serverLevel(),SOURCE.below()) instanceof TileNodeStabilizer
@@ -1165,7 +1176,7 @@ public final class FocalManipulatorClientSequence implements AutoCloseable {
                 && p.serverLevel().getEntitiesOfClass(ItemEntity.class,OLD_AREA).isEmpty(),"No lost/unpicked physical stock/XP/queue owners");
         require(p.containerMenu==p.inventoryMenu && !p.isUsingItem() && !p.isShiftKeyDown() && !ItemWandCasting.isUsingNode(p),"All native menus/channels/Shift released");
         report.put("final_native_finite_state",row("actual_payer10",snbt(p.getInventory().getItem(10),p),"actual_upgraded_focus15",snbt(upgradedFocus,p),
-                "actual_XpLevel_Total_Progress",List.of(p.experienceLevel,p.totalExperience,p.experienceProgress),"actual_XP_credited",xp.credits(),"native_orb_UUID_credits",xp.creditedUuids(),
+                "actual_XpLevel_Total_Progress",List.of(p.experienceLevel,p.totalExperience,p.experienceProgress),"actual_spendable_XP_points",ExperiencePoints.available(p),"actual_XP_points_paid",POTENCY_XP,"actual_XP_credited",xp.credits(),"native_orb_UUID_credits",xp.creditedUuids(),
                 "gold_retained",108,"actual_OLD_plus_NEW_cobble",count(p,Items.COBBLESTONE),"actual_NEW_cobble",castPayments,"cobble_UUID",cobbleId.toString(),"same_device_UUIDs",deviceDrops.toString(),"actual_all6_CV_grants",Map.copyOf(ledger.grants),
                 "native_pick_damage",List.of(3,5),"actual_SERVER_POSTs",ledger.checks,"tail_continues_to_normal_stop",true)); storyFinal=true;
         // Protection listeners belong to this completed cast, not normal-stop

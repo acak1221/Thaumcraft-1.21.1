@@ -23,6 +23,7 @@ import thaumcraft.api.wands.FocusUpgradeType;
 import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.container.ContainerFocalManipulator;
 import thaumcraft.common.lib.foci.FocalUpgradeCosts;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 import thaumcraft.common.lib.network.FocalManipulatorAckPayload;
 import thaumcraft.common.lib.network.FocalManipulatorNetworking;
 import thaumcraft.common.tiles.TileFocalManipulator;
@@ -131,7 +132,8 @@ public final class GuiFocalManipulator extends ThaumcraftContainerScreen<Contain
 
     private boolean selectable() { return ready && !invalidFocus && !active && pending == null && rank > 0; }
     private boolean startEnabled() {
-        return selectable() && selected >= 0 && preview != null && minecraft.player.experienceLevel >= preview.xpLevels();
+        return selectable() && selected >= 0 && preview != null
+                && ExperiencePoints.canAfford(minecraft.player, preview.xpPoints());
     }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -189,9 +191,17 @@ public final class GuiFocalManipulator extends ThaumcraftContainerScreen<Contain
             if (rank > 0 && selected >= 0 && preview != null && minecraft.player != null) {
                 if (startEnabled()) graphics.blit(BACKGROUND, leftPos + 48, topPos + 88, 8, 240, 96, 8);
                 graphics.blit(BACKGROUND, leftPos + 108, topPos + 59, 200, 16, 16, 16);
-                int xp = rank * 8;
-                graphics.drawString(font, Integer.toString(xp), leftPos + 125, topPos + 64,
-                        0xff000000 | (minecraft.player.experienceLevel < xp ? 16151160 : 10092429), true);
+                int xp = preview.xpPoints();
+                Component price = Component.translatable("tc.port.focal.xp_price", xp);
+                // Point prices have up to four digits; keep localized units inside the original frame.
+                float scale = Math.min(1F, 29F / Math.max(1, font.width(price)));
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(leftPos + 125, topPos + 64 + (1 - scale) * font.lineHeight / 2, 0);
+                    graphics.pose().scale(scale, scale, 1);
+                    graphics.drawString(font, price, 0, 0,
+                            0xff000000 | (ExperiencePoints.canAfford(minecraft.player, xp) ? 10092429 : 16151160), true);
+                } finally { graphics.pose().popPose(); }
                 AspectList remaining = active ? displayTile.getAspects() : preview.aspects();
                 drawAspectAmounts(graphics, remaining);
                 if (active) drawRemainingBar(graphics, remaining);
@@ -306,8 +316,13 @@ public final class GuiFocalManipulator extends ThaumcraftContainerScreen<Contain
             if (inside(mouseX, mouseY, 56 + i * 16, 32, 16, 16)) { upgradeTooltip(graphics, history.get(i)); return; }
         }
         if (selected < 0) return;
+        if (preview != null && minecraft.player != null && inside(mouseX, mouseY, 108, 58, 48, 16)) {
+            graphics.renderComponentTooltip(font, List.of(
+                    Component.translatable("tc.port.focal.xp_cost", preview.xpPoints()),
+                    Component.translatable("tc.port.focal.xp_available", ExperiencePoints.available(minecraft.player))), mouseX, mouseY);
+            return;
+        }
         String key = inside(mouseX, mouseY, 48, 48, 36, 36) ? "wandtable.text1"
-                : inside(mouseX, mouseY, 108, 58, 36, 16) ? "wandtable.text2"
                 : startEnabled() && inside(mouseX, mouseY, 48, 88, 96, 8) ? "wandtable.text3" : null;
         if (key != null) graphics.renderTooltip(font, Component.translatable(key), mouseX, mouseY);
     }

@@ -39,6 +39,7 @@ import thaumcraft.common.container.ContainerFocalManipulator;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.foci.FocalUpgradeCosts;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 
 /** Native single-slot paid job. Source authority: original TileFocalManipulator.
  * Safety deviation: external slot mutations CANCEL before another debit instead
@@ -135,7 +136,7 @@ public final class TileFocalManipulator extends BlockEntity implements WorldlyCo
             short[] before = applied(focus, baseline);
             int nextRank = firstHole(before);
             FocusUpgradeType type = FocusUpgradeType.get(id);
-            if (nextRank > 5 || type == null || player.experienceLevel < nextRank * 8
+            if (nextRank > 5 || type == null || !ExperiencePoints.canAfford(player, FocalUpgradeCosts.xpPoints(nextRank))
                     || !offered(focus, baseline, type, nextRank)
                     || !focus.canApplyUpgrade(baseline.copy(), player, type, nextRank)) return false;
             FocalUpgradeCosts.Plan plan = FocalUpgradeCosts.plan(baseline, type, nextRank);
@@ -143,10 +144,10 @@ public final class TileFocalManipulator extends BlockEntity implements WorldlyCo
             // into the world, so neither the admission nor the item is cached trust.
             if (!mutable() || !menu.authorizesStart(this, player, expectedRevision) || revision != expectedRevision
                     || job != null || !ItemStack.matches(item, baseline) || !ItemStack.matches(observed, baseline)
-                    || !stillValid(player) || player.experienceLevel < plan.xpLevels()) return false;
+                    || !stillValid(player) || !ExperiencePoints.canAfford(player, plan.xpPoints())) return false;
             long nextRevision = revision + 1;
             Job admitted = new Job(UUID.randomUUID(), nextRevision, baseline.copy(), plan.aspects());
-            if (!player.isCreative()) player.giveExperienceLevels(-plan.xpLevels());
+            if (!ExperiencePoints.spend(player, plan.xpPoints())) return false;
             revision = nextRevision; job = admitted; remaining = plan.aspects(); size = plan.initialTotal();
             rank = nextRank; upgrade = type.id; observed = item.copy();
             changed(); play(START, .25F);

@@ -9,7 +9,7 @@ import thaumcraft.common.lib.foci.FocalUpgradeCosts;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FocalUpgradeCostsTest {
-    @Test void literalOriginalCostVectorsAndLevelPrices() {
+    @Test void literalOriginalCostVectorsAndAdaptedPointPrices() {
         vector(Aspect.HUNGER, 1, 800, 200, 200, 0, 200, 0, 200);
         vector(Aspect.WEAPON, 1, 2400, 200, 600, 400, 600, 400, 200);
         vector(Aspect.GREED, 1, 2800, 400, 800, 200, 800, 200, 400);
@@ -21,9 +21,13 @@ class FocalUpgradeCostsTest {
         for (int rank = 1; rank <= 5; rank++) {
             var plan = FocalUpgradeCosts.plan(new AspectList().add(Aspect.AIR, 1), rank);
             assertEquals(rank * 8, plan.xpLevels());
+            assertEquals(new int[]{112, 352, 828, 1628, 2920}[rank - 1], plan.xpPoints());
+            assertEquals(plan.xpPoints(), FocalUpgradeCosts.xpPoints(rank));
             assertEquals(200 << (rank - 1), plan.initialTotal());
             assertEquals(rank, plan.rank());
         }
+        assertThrows(IllegalArgumentException.class, () -> FocalUpgradeCosts.xpPoints(0));
+        assertThrows(IllegalArgumentException.class, () -> FocalUpgradeCosts.xpPoints(6));
     }
 
     @Test void declaredValuesAreIgnoredButDistinctKeysAreSummedAndCopied() {

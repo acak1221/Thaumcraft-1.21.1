@@ -10,6 +10,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.wands.FocusUpgradeType;
 import thaumcraft.api.wands.ItemFocusBasic;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 
 /** Independent native cost policy. Original authority: TileFocalManipulator124-162
  * and ResearchManager466-494 (SUM, never energized-node MAX). */
@@ -32,7 +33,15 @@ public final class FocalUpgradeCosts {
         public int initialTotal() { return total; }
         public int total() { return total; }
         public int rank() { return rank; }
+        /** Original threshold retained for callers; actual payment uses {@link #xpPoints()}. */
         public int xpLevels() { return rank * 8; }
+        public int xpPoints() { return FocalUpgradeCosts.xpPoints(rank); }
+    }
+
+    /** Fixed modern point price: the original rank*8 entry threshold, measured from zero XP. */
+    public static int xpPoints(int rank) {
+        if (rank < 1 || rank > 5) throw invalid("A paid upgrade needs a rank1..5");
+        return Math.toIntExact(ExperiencePoints.atLevel(rank * 8));
     }
 
     public static Plan plan(ItemStack focus, FocusUpgradeType type, int rank) {

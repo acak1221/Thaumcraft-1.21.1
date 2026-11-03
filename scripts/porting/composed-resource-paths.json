@@ -1552,7 +1552,7 @@
     "common/src/main/java/thaumcraft/client/fx/particles/TaintDropParticle.java": "a1d474cff4c3e4dd695fa5aea380ab149c7c90864aa56a75f0f4acd8309ca94e",
     "common/src/main/java/thaumcraft/client/fx/particles/WardHitParticle.java": "13b59286b12f7b99a128c4d46a32447fa38f517f03313e54988dd806f6a28f57",
     "common/src/main/java/thaumcraft/client/fx/particles/WarpSonicParticle.java": "1bf0aa3ec49373508d11e176373f34226d223b22f5e24ddd5e9d050a6d863f19",
-    "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "d1b6e55eeef038d4d8520919576111297848808f3942c8fab08904869e1a5f37",
+    "common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java": "0a2451568c23f221d63be9514d71c8ced50ef7fb7e29d78a4bdaa2c31e8b0c4b",
     "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "a70cb05e8fa4861308e6b0eacd1f668e3c588fa2adf9cdeca7b58b7d923e666a",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "f7816816371cdbd80b80f13fa579988c4376af23f9368ab950ad0150c3f765f8",
     "common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java": "93d14fa2b44a81fc91ca9db2e1c87a49f631e1f1512f332dc0e48237f7c70c8e",

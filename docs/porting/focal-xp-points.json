@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-04",
+  "status": "PASS",
+  "platform": "Fabric",
+  "based_on_commit": "7fa2caa4",
+  "prices_points": [
+    112,
+    352,
+    828,
+    1628,
+    2920
+  ],
+  "price_policy": "Minecraft 1.21.1 cumulative points to reach original rank*8 thresholds from zero; fixed price at every payer level",
+  "common_junit": {
+    "tests": 2912,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 2907
+  },
+  "dedicated_server": {
+    "passed": 5,
+    "cases": [
+      "thaumcraftgametests.focaladmissionandcancellation",
+      "thaumcraftgametests.focalsourcedebitsandreload",
+      "thaumcraftgametests.focaldurabledroprefusal",
+      "thaumcraftgametests.focalrealcharmandmanipulatorpayments",
+      "thaumcraftgametests.focalpostdebitfences"
+    ]
+  },
+  "build": {
+    "fabric": "PASS",
+    "production_test_isolation": "PASS"
+  },
+  "resource_verifier": {
+    "atlas_mipmap_level_guard": 4,
+    "atlas_sprites_available": 518,
+    "checked_atlas_sprite_refs": 4141,
+    "checked_composed_files": 294,
+    "checked_composed_sites": 52,
+    "checked_composed_sprites": 26,
+    "checked_external_model_texture_refs": 3,
+    "checked_literal_client_files": 141,
+    "checked_local_model_refs": 3256,
+    "checked_model_texture_refs": 4144,
+    "checked_sound_event_ids": 66,
+    "checked_sound_event_refs": 0,
+    "checked_sound_refs": 111,
+    "missing_references": 0
+  },
+  "client": {
+    "status": "PASS",
+    "run_id": "focal-xp-2026-11-03T21-17-15.687257195Z",
+    "stage": 19,
+    "fixture": "fresh 1.21.1 flat world; supplied native focal manipulator, two plain Fire foci and one Fire focus with four valid Frugal upgrades for rank-five layout, FOCALMANIPULATION research and explicit server XP baselines 111, level 30 + 17 points, level 8 + 17 points and level 40 + 17 points through native giveExperiencePoints after declared fixture reset. Survival actor, no supplied vis. All tested START/debit/replay/pickup actions use actual GUI or wire; not survival acquisition or full upgrade completion.",
+    "rank1_price_points": 112,
+    "checks": [
+      {
+        "server": {
+          "revision": 1,
+          "rank": 0,
+          "progress": 0.9523808,
+          "points": 111,
+          "level": 7,
+          "total": 111,
+          "job_size": 0,
+          "upgrades": [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1
+          ]
+        },
+        "check": "111 points refuse112 price without debit",
+        "passed": true
+      },
+      {
+        "after_server": {
+          "revision": 2,
+          "rank": 1,
+          "progress": 0.11214954,
+          "points": 1300,
+          "level": 29,
+          "total": 1300,
+          "job_size": 2400,
+          "upgrades": [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1
+          ]
+        },
+        "after_client_points": 1300,
+        "check": "actual GUI START at level30 pays exactly112 native points",
+        "passed": true,
+        "before_points": 1412
+      },
+      {
+        "server": {
+          "revision": 2,
+          "rank": 1,
+          "progress": 0.11214954,
+          "points": 1300,
+          "level": 29,
+          "total": 1300,
+          "job_size": 2400,
+          "upgrades": [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1
+          ]
+        },
+        "check": "pending clicks and replayed original wire intent cannot debit again",
+        "passed": true
+      },
+      {
+        "server": {
+          "revision": 4,
+          "rank": 0,
+          "progress": 0.11214954,
+          "points": 1300,
+          "level": 29,
+          "total": 1300,
+          "job_size": 0,
+          "upgrades": []
+        },
+        "check": "physical slot pickup cancels paid job without extra XP changes",
+        "passed": true
+      },
+      {
+        "after_server": {
+          "revision": 6,
+          "rank": 1,
+          "progress": 0.09090841,
+          "points": 17,
+          "level": 2,
+          "total": 17,
+          "job_size": 2400,
+          "upgrades": [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1
+          ]
+        },
+        "after_client_points": 17,
+        "check": "actual GUI START at level8 also pays exactly112 points",
+        "passed": true,
+        "before_points": 129
+      },
+      {
+        "rank": 5,
+        "price_points": 2920,
+        "fixture": "supplied Fire focus with four valid Frugal upgrades; no rank-five payment or acquisition claim",
+        "check": "actual rank-five preview quotes2920 points for visual price/tooltip inspection",
+        "passed": true,
+        "available_points": 2937
+      }
+    ],
+    "captures": [
+      {
+        "label": "rank1-112-points-disabled-at111",
+        "file": "docs/images/focal-xp-points/rank1-112-points-disabled-at111.png",
+        "render_mouse_local": [
+          134,
+          65
+        ],
+        "bytes": 187674,
+        "language": "ru_ru",
+        "window_active": true,
+        "source_filename": "focal-xp-2026-11-03T21-17-15.687257195Z-rank1-112-points-disabled-at111.png",
+        "sha256": "456094814bdf5b0aade00186f178d752ba40fed0d4ebf7e09a1186daf3638cf2",
+        "visually_inspected": true
+      },
+      {
+        "label": "level30-plus17-ready-112-point-tooltip",
+        "file": "docs/images/focal-xp-points/level30-plus17-ready-112-point-tooltip.png",
+        "render_mouse_local": [
+          134,
+          65
+        ],
+        "bytes": 161337,
+        "language": "ru_ru",
+        "window_active": true,
+        "source_filename": "focal-xp-2026-11-03T21-17-15.687257195Z-level30-plus17-ready-112-point-tooltip.png",
+        "sha256": "489d8a50ab8f651d57274882099f9b9859e28c4d6d9415ba3ea74b2ee35e3e6f",
+        "visually_inspected": true
+      },
+      {
+        "label": "level30-paid112-pending-vis-job",
+        "file": "docs/images/focal-xp-points/level30-paid112-pending-vis-job.png",
+        "render_mouse_local": [
+          134,
+          65
+        ],
+        "bytes": 153248,
+        "language": "ru_ru",
+        "window_active": true,
+        "source_filename": "focal-xp-2026-11-03T21-17-15.687257195Z-level30-paid112-pending-vis-job.png",
+        "sha256": "1e32e00205e6ad41feb62ed539f483d31a7443d209a18d3db3277f3ade6a30ad",
+        "visually_inspected": true
+      },
+      {
+        "label": "level8-plus17-ready-same112-point-tooltip",
+        "file": "docs/images/focal-xp-points/level8-plus17-ready-same112-point-tooltip.png",
+        "render_mouse_local": [
+          134,
+          65
+        ],
+        "bytes": 137670,
+        "language": "ru_ru",
+        "window_active": true,
+        "source_filename": "focal-xp-2026-11-03T21-17-15.687257195Z-level8-plus17-ready-same112-point-tooltip.png",
+        "sha256": "6ba6a4256d16126f2a0d06c7604b2a0763ce9f2820f014d578643e8ead0fff37",
+        "visually_inspected": true
+      },
+      {
+        "label": "level8-paid112-leaves17-points",
+        "file": "docs/images/focal-xp-points/level8-paid112-leaves17-points.png",
+        "render_mouse_local": [
+          134,
+          65
+        ],
+        "bytes": 133470,
+        "language": "ru_ru",
+        "window_active": true,
+        "source_filename": "focal-xp-2026-11-03T21-17-15.687257195Z-level8-paid112-leaves17-points.png",
+        "sha256": "747ee343fdd174783e873791d2d4bb17225a4d451c4fe1c29f8e2c2d0025dbcc",
+        "visually_inspected": true
+      },
+      {
+        "label": "rank5-2920-point-price-and-tooltip",
+        "file": "docs/images/focal-xp-points/rank5-2920-point-price-and-tooltip.png",
+        "render_mouse_local": [
+          134,
+          65
+        ],
+        "bytes": 135226,
+        "language": "ru_ru",
+        "window_active": true,
+        "source_filename": "focal-xp-2026-11-03T21-17-15.687257195Z-rank5-2920-point-price-and-tooltip.png",
+        "sha256": "8b10faccb4175e21d7e8d940dcc5ac7aee5b64090026a7e92c865c27a7316bd8",
+        "visually_inspected": true
+      }
+    ]
+  },
+  "declined_visual_attempt": {
+    "run_id": "focal-xp-2026-11-03T21-14-02.665746592Z",
+    "stage": 2,
+    "status": "FAILED",
+    "reason": "Native cursor hover guard timed out before any capture; superseded by final PASS, no visual acceptance."
+  },
+  "artifact": {
+    "file": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.24.jar",
+    "bytes": 16024220,
+    "sha256": "70283b1cd797afff4f4683445545350ae9b727e580f13d26883a01afcad5b85b"
+  },
+  "limits": [
+    "Supplied survival fixtures; no fresh survival acquisition claim.",
+    "No vis supplied in focused client: paid jobs remain pending; no free completion claim.",
+    "Long historical focal progression assertions adapted but not rerun.",
+    "No remote multiplayer or NeoForge validation for this change."
+  ]
+}

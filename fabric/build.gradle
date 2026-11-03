@@ -298,6 +298,16 @@ def multiplayerAllowPartial = providers.gradleProperty('multiplayerAllowPartial'
 // acceptance processes has to stay small enough to survive the OOM killer.
 def multiplayerHeap = providers.gradleProperty('multiplayerHeap').getOrElse('768M')
 loom.runs {
+ focalXpClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft focal XP-point payment'
+  runDir 'run-focal-xp-client'
+  vmArg '-Xmx1024M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.focalXpClient=true'
+  programArgs '--width', '1280', '--height', '900'
+ }
  taintDripClient {
   client()
   source sourceSets.clientTest
@@ -737,7 +747,33 @@ tasks.named('runMultiplayerPeerClient') {
   logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', modernAdaptationsClient: 'clientTest', reviewEmiIdentityClient: 'clientTest', rendererReviewClient: 'clientTest', matrixCrystalClient: 'clientTest', jeiAspectSourcesClient: 'clientTest', emiAspectSourcesClient: 'clientTest', taintDripClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', recipeTransferClient: 'clientTest', wandCrucibleClient: 'clientTest', deepslateOreClient: 'clientTest', modernAdaptationsClient: 'clientTest', reviewEmiIdentityClient: 'clientTest', rendererReviewClient: 'clientTest', matrixCrystalClient: 'clientTest', jeiAspectSourcesClient: 'clientTest', emiAspectSourcesClient: 'clientTest', taintDripClient: 'clientTest', focalXpClient: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])
+
+tasks.named('runFocalXpClient') {
+ dependsOn tasks.named('clientTestClasses')
+ doFirst {
+  def directory = file('run-focal-xp-client')
+  directory.mkdirs()
+  file('run-focal-xp-client/options.txt').setText('''onboardAccessibility:false
+lang:ru_ru
+guiScale:2
+pauseOnLostFocus:false
+renderDistance:2
+simulationDistance:5
+maxFps:60
+enableVsync:false
+tutorialStep:none
+narrator:0
+''', 'UTF-8')
+  delete file('run-focal-xp-client/focal-xp-client-result.json')
+ }
+ doLast {
+  def receipt = file('run-focal-xp-client/focal-xp-client-result.json')
+  if (!receipt.isFile() || new groovy.json.JsonSlurper().parse(receipt, 'UTF-8').status != 'PASS') {
+   throw new GradleException('Focal XP client failed; inspect ' + receipt)
+  }
+ }
+}
 
 tasks.named('runTaintDripClient') {
  dependsOn tasks.named('clientTestClasses')

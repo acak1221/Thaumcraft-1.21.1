@@ -35,6 +35,7 @@ import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.container.ContainerFocalManipulator;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileFocalManipulator;
 import thaumcraft.common.tiles.TileNode;
@@ -51,24 +52,27 @@ public final class FocalManipulatorRuntimeChecks {
     public static void admissionAndCancellation(GameTestHelper test) {
         try (var f = new Fixture(test)) {
             f.open();
-            var tile = machine(f, f.base); var menu = open(f, tile); levels(f, 7);
+            var tile = machine(f, f.base); var menu = open(f, tile); points(f, 111);
             long revision = menu.selectionRevision(); ItemStack baseline = tile.getItem(0).copy();
             f.check(!menu.requestStart(f.player, menu.sessionId(), revision, FocusUpgradeType.frugal.id)
-                    && f.player.experienceLevel == 7 && tile.getSize() == 0, "rank1 requires EIGHT native levels, not XP points");
-            levels(f, 8);
+                    && hasPoints(f, 111) && tile.getSize() == 0, "one point below rank1's fixed112-point price refuses without payment");
+            points(f, 112);
             f.check(!menu.clickMenuButton(f.player, FocusUpgradeType.frugal.id)
                     && !tile.startCraft(FocusUpgradeType.frugal.id, f.player, revision), "vanilla ID-only button and direct tile entry cannot bypass authenticated session admission");
             for (int id : new int[]{-1, 8, 20, Integer.MAX_VALUE})
                 f.check(!menu.requestStart(f.player, menu.sessionId(), revision, id), "invalid/unimplemented paid branch refused: " + id);
             f.check(!menu.requestStart(f.player, UUID.randomUUID(), revision, FocusUpgradeType.frugal.id)
-                    && !menu.requestStart(f.player, menu.sessionId(), revision + 1, FocusUpgradeType.frugal.id), "forged session and stale selection revision spend nothing");
+                    && !menu.requestStart(f.player, menu.sessionId(), revision + 1, FocusUpgradeType.frugal.id)
+                    && hasPoints(f, 112), "forged session and stale selection revision spend nothing");
             KnowledgeAccess.get(f.player).removeResearch("FOCALMANIPULATION");
             f.check(!menu.requestStart(f.player, menu.sessionId(), revision, FocusUpgradeType.frugal.id), "research checked at authoritative start, not only block opening");
             KnowledgeAccess.get(f.player).addResearch("FOCALMANIPULATION");
             f.check(menu.requestStart(f.player, menu.sessionId(), revision, FocusUpgradeType.frugal.id)
-                    && f.player.experienceLevel == 0 && tile.getSize() == 800 && tile.getRank() == 1
-                    && ItemStack.matches(tile.getItem(0), baseline), "exact threshold deducts eight LEVELS once, defers physical upgrade until paid vis");
-            f.check(!menu.requestStart(f.player, menu.sessionId(), revision, FocusUpgradeType.frugal.id), "same admitted packet cannot replay");
+                    && hasPoints(f, 0) && f.player.experienceLevel == 0
+                    && tile.getSize() == 800 && tile.getRank() == 1
+                    && ItemStack.matches(tile.getItem(0), baseline), "exact112-point threshold is paid once, defers physical upgrade until paid vis");
+            f.check(!menu.requestStart(f.player, menu.sessionId(), revision, FocusUpgradeType.frugal.id)
+                    && hasPoints(f, 0), "same admitted packet cannot replay or charge twice");
             long paidRevision = tile.getSelectionRevision(); var debt = tile.getAspects(); debt.aspects.clear();
             f.player.closeContainer(); ticks(f, tile, 31);
             f.check(tile.getAspects().visSize() == 800 && tile.getSelectionRevision() == paidRevision
@@ -77,14 +81,34 @@ public final class FocalManipulatorRuntimeChecks {
             f.check(tile.getSize() == 0 && tile.getAspects().visSize() == 0 && tile.getSelectionRevision() > paidRevision,
                     "external setter cancels BEFORE a later pulse; original clear-debt/replacement free apply is closed");
             ticks(f, tile, 10);
-            f.check(focus(tile).getUpgradeLevel(tile.getItem(0), FocusUpgradeType.frugal) == 0 && f.player.experienceLevel == 0,
+            f.check(focus(tile).getUpgradeLevel(tile.getItem(0), FocusUpgradeType.frugal) == 0 && hasPoints(f, 0),
                     "replacement never receives old paid upgrade; cancellation never refunds XP");
 
-            f.mode(GameType.CREATIVE); levels(f, 7); menu = open(f, tile);
-            f.check(!start(f, menu, FocusUpgradeType.frugal), "creative STILL needs eight levels");
-            levels(f, 8); f.check(start(f, menu, FocusUpgradeType.frugal) && f.player.experienceLevel == 8, "creative exact threshold starts without level debit");
+            f.mode(GameType.CREATIVE); points(f, 111); menu = open(f, tile);
+            f.check(!start(f, menu, FocusUpgradeType.frugal) && hasPoints(f, 111), "creative STILL needs the fixed112-point threshold");
+            points(f, 112); f.check(start(f, menu, FocusUpgradeType.frugal) && hasPoints(f, 112), "creative exact threshold starts without XP debit");
             tile.removeItem(0, 1); f.check(tile.getSize() == 0, "raw decrement cancels even without a setter follow-up");
             f.mode(GameType.SURVIVAL);
+            for (int[] payment : new int[][]{{129, 8, 17, 2}, {1412, 30, 1300, 29}}) {
+                tile.setItem(0, named("partial-bar-payment-" + payment[1])); points(f, payment[0]); menu = open(f, tile);
+                long beforeRevision = menu.selectionRevision();
+                f.check(f.player.experienceLevel == payment[1] && f.player.experienceProgress > 0,
+                        "native point fixture starts with a partial bar at level" + payment[1]);
+                f.check(menu.requestStart(f.player, menu.sessionId(), beforeRevision, FocusUpgradeType.frugal.id)
+                        && hasPoints(f, payment[2]) && payment[0] - f.player.totalExperience == 112
+                        && f.player.experienceLevel == payment[3] && f.player.experienceProgress > 0,
+                        "rank1 costs exactly112 points at both low and high levels, retains the partial XP bar");
+                f.check(!menu.requestStart(f.player, menu.sessionId(), beforeRevision, FocusUpgradeType.frugal.id)
+                        && hasPoints(f, payment[2]), "partial-bar paid request replay spends no extra XP");
+                tile.clearContent();
+                f.check(hasPoints(f, payment[2]), "cancelling the paid job never restores the fixed112-point charge");
+            }
+            tile.setItem(0, named("stale-total-experience")); points(f, 1412); menu = open(f, tile);
+            f.player.totalExperience = 0;
+            f.check(start(f, menu, FocusUpgradeType.frugal) && ExperiencePoints.available(f.player) == 1300
+                    && f.player.totalExperience == 0,
+                    "prior level-payment save with stale total0 can pay112 from the actual XP bar; native total stays clamped0");
+            tile.clearContent();
             for (int operation = 0; operation < 4; operation++) {
                 tile.setItem(0, named("cancel-" + operation)); levels(f, 64); menu = open(f, tile); f.check(start(f, menu, FocusUpgradeType.frugal), "owned cancellation fixture admitted");
                 switch (operation) {
@@ -94,7 +118,7 @@ public final class FocalManipulatorRuntimeChecks {
                     case 3 -> { tile.getItem(0).set(DataComponents.CUSTOM_NAME, Component.literal("live-reference-mutation")); tile.getSelectionRevision(); }
                     default -> throw new AssertionError(operation);
                 }
-                f.check(tile.getSize() == 0 && tile.getAspects().size() == 0 && f.player.experienceLevel == 56, "each external mutation path cancels without refund: " + operation);
+                f.check(tile.getSize() == 0 && tile.getAspects().size() == 0 && hasPoints(f, 10140), "each external mutation path cancels without refund: " + operation);
             }
             tile.setItem(0, new ItemStack(Items.STICK)); ticks(f, tile, 5);
             f.check(tile.getItem(0).is(Items.STICK) && tile.getSize() == 0, "raw foreign item stays physical but cannot be cast/upgraded/crash completion");
@@ -107,13 +131,13 @@ public final class FocalManipulatorRuntimeChecks {
                     "declared SERVER API fixture has ranks1/3 and an un-compacted hole at2");
             tile.setItem(0, holes); levels(f, 64); menu = open(f, tile);
             f.check(start(f, menu, FocusUpgradeType.frugal) && tile.getRank() == 2 && tile.getSize() == 1600
-                    && f.player.experienceLevel == 48 && holeFocus.getAppliedUpgrades(tile.getItem(0))[2] == FocusUpgradeType.potency.id,
-                    "machine uses FIRST hole2, pays16 levels/400 per key, retains later occupied rank3");
+                    && hasPoints(f, 9900) && holeFocus.getAppliedUpgrades(tile.getItem(0))[2] == FocusUpgradeType.potency.id,
+                    "machine uses FIRST hole2, pays352 points/400 per key, retains later occupied rank3");
             tile.clearContent();
             ItemStack full = named("five-filled-ranks");
             for (int rank = 1; rank <= 5; rank++) f.check(((ItemFocusBasic) full.getItem()).applyUpgrade(full, FocusUpgradeType.frugal, rank), "declared full SERVER fixture rank" + rank);
             tile.setItem(0, full); levels(f, 64); menu = open(f, tile);
-            f.check(!start(f, menu, FocusUpgradeType.frugal) && f.player.experienceLevel == 64 && tile.getSize() == 0,
+            f.check(!start(f, menu, FocusUpgradeType.frugal) && hasPoints(f, 10252) && tile.getSize() == 0,
                     "five occupied ranks safely refuse sixth admission without indexing/charging");
             var buffer = new FriendlyByteBuf(Unpooled.buffer());
             try {
@@ -166,19 +190,20 @@ public final class FocalManipulatorRuntimeChecks {
             var old = tile; var oldMenu = menu;
             tile = NodeTransductionRuntimeChecks.reload(f, tile, saved, TileFocalManipulator.class);
             f.check(!tile.isQuarantined() && tile.getTickCount() == 0 && tile.getAspects().visSize() == 772
-                    && f.player.experienceLevel == 56 && tile.getSelectionRevision() == revision, "real factory reload resumes exact remaining/binding/revision, zero transient phase, NO second XP charge");
+                    && hasPoints(f, 10140) && tile.getSelectionRevision() == revision, "real factory reload resumes exact remaining/binding/revision, zero transient phase, NO second XP charge");
             f.check(!oldMenu.requestStart(f.player, oldMenu.sessionId(), revision, FocusUpgradeType.frugal.id), "old menu cannot act on a same-position replacement BE");
             var beforeStaleDrop = f.pendingRows().size(); old.evacuate();
             f.check(f.pendingRows().size() == beforeStaleDrop, "retired BE cannot evacuate duplicate physical baseline");
             menu = open(f, tile); f.check(!menu.sessionId().equals(oldMenu.sessionId()), "reopen gets a fresh server session UUID despite unchanged persisted revision");
             NodeTransductionRuntimeChecks.sourceTick(f, source); ticks(f, tile, 5);
-            f.check(tile.getAspects().visSize() == 372 && f.player.experienceLevel == 56, "new native source epoch pays exactly100 per owed primal");
+            f.check(tile.getAspects().visSize() == 372 && hasPoints(f, 10140), "new native source epoch pays exactly100 per owed primal");
             NodeTransductionRuntimeChecks.sourceTick(f, source); ticks(f, tile, 5);
             f.check(tile.getSize() == 0 && tile.getRank() == -1 && tile.getUpgrade() == FocusUpgradeType.frugal.id
                     && focus(tile).getUpgradeLevel(tile.getItem(0), FocusUpgradeType.frugal) == 1
-                    && source.getAvailableVis().visSize() == 28, "final pulse pays only93 EACH, upgrades once immediately, retains stale upgrade/transient rank-1");
+                    && source.getAvailableVis().visSize() == 28 && hasPoints(f, 10140), "final pulse pays only93 EACH, upgrades once without further XP charge, retains stale upgrade/transient rank-1");
             ticks(f, tile, 6);
-            f.check(tile.getRank() == 0 && focus(tile).getUpgradeLevel(tile.getItem(0), FocusUpgradeType.frugal) == 1, "next idle tick normalizes rank, later pulses cannot replay completion");
+            f.check(tile.getRank() == 0 && focus(tile).getUpgradeLevel(tile.getItem(0), FocusUpgradeType.frugal) == 1
+                    && hasPoints(f, 10140), "next idle tick normalizes rank, later pulses cannot replay completion or XP charge");
             malformedPersistence(f, tile, saved);
         }
         test.succeed();
@@ -255,7 +280,7 @@ public final class FocalManipulatorRuntimeChecks {
                 TileFocalManipulator live = replacement[0] == null ? tile : replacement[0];
                 f.check(relay.pulses == beforePulses + 1 && source.getAvailableVis().visSize() == 300
                         && live.getSize() == 0 && focus(live).getUpgradeLevel(live.getItem(0), FocusUpgradeType.frugal) == 0
-                        && f.player.experienceLevel == 56, "post-debit identity fence stops credit/next aspect/apply; spent100 is neither refunded nor doubly reused: " + scenario);
+                        && hasPoints(f, 10140), "post-debit identity fence stops credit/next aspect/apply; spent100 is neither refunded nor doubly reused: " + scenario);
                 ticks(f, live, 5);
                 f.check(source.getAvailableVis().visSize() == 300, "cancelled/new owner never drains an extra pulse");
                 live.clearContent();
@@ -276,8 +301,8 @@ public final class FocalManipulatorRuntimeChecks {
             var blockDrops = Block.getDrops(tile.getBlockState(), f.level, f.base, tile);
             f.check(blockDrops.size() == 1 && blockDrops.getFirst().is(ThaumcraftFocalManipulation.FOCAL_MANIPULATOR_ITEM.get()), "ordinary dropped machine carries no paid job/inventory");
             f.check(f.level.destroyBlock(f.base, true, f.player), "actual native break evacuates active physical slot"); f.drops();
-            var rows = f.pendingRows(); f.check(rows.size() == 1 && tile.getItem(0).isEmpty() && tile.getSize() == 0 && f.player.experienceLevel == 56,
-                    "break retires job, keeps level cost spent, enqueues ONE physical focus separate from block loot");
+            var rows = f.pendingRows(); f.check(rows.size() == 1 && tile.getItem(0).isEmpty() && tile.getSize() == 0 && hasPoints(f, 10140),
+                    "break retires job, keeps112 XP points spent, enqueues ONE physical focus separate from block loot");
             UUID id = rows.getFirst().getUUID("Id"); int[] calls = {0}; long[] first = {-1}; Throwable[] unexpected = {null};
             listener[0] = (entity, world) -> {
                 if (world != f.level || !entity.getUUID().equals(id)) return EventResult.pass();
@@ -297,7 +322,7 @@ public final class FocalManipulatorRuntimeChecks {
             test.onEachTick(() -> {
                 if (f.closed) return;
                 try {
-                    f.check(unexpected[0] == null && f.player.experienceLevel == 56, "retry callbacks neither fail silently nor refund paid levels");
+                    f.check(unexpected[0] == null && hasPoints(f, 10140), "retry callbacks neither fail silently nor refund paid XP points");
                     var delivered = f.level.getEntity(id);
                     if (!(delivered instanceof ItemEntity drop)) return;
                     f.check(calls[0] >= 2 && ItemStack.matches(drop.getItem(), physical) && f.pendingRows().isEmpty(), "one exact stable-ID focus delivered after refusal without resurrecting job");
@@ -326,7 +351,15 @@ public final class FocalManipulatorRuntimeChecks {
         return (ContainerFocalManipulator) f.player.containerMenu;
     }
     private static boolean start(Fixture f, ContainerFocalManipulator menu, FocusUpgradeType type) { return menu.requestStart(f.player, menu.sessionId(), menu.selectionRevision(), type.id); }
-    private static void levels(Fixture f, int levels) { f.player.experienceLevel = levels; f.player.experienceProgress = .25F; f.player.totalExperience = 1000; }
+    private static void levels(Fixture f, int levels) { points(f, Math.toIntExact(ExperiencePoints.atLevel(levels))); }
+    private static void points(Fixture f, int points) {
+        f.player.experienceLevel = 0; f.player.experienceProgress = 0; f.player.totalExperience = 0;
+        f.player.giveExperiencePoints(points);
+        f.check(hasPoints(f, points), "declared SERVER fixture receives exact native XP points");
+    }
+    private static boolean hasPoints(Fixture f, int expected) {
+        return ExperiencePoints.available(f.player) == expected && f.player.totalExperience == expected;
+    }
     private static ItemStack named(String name) { var stack = new ItemStack(ThaumcraftFoci.EXCAVATION_FOCUS.get()); stack.set(DataComponents.CUSTOM_NAME, Component.literal(name)); return stack; }
     private static ItemFocusBasic focus(TileFocalManipulator tile) { return (ItemFocusBasic) tile.getItem(0).getItem(); }
     private static void tick(Fixture f, TileFocalManipulator tile) {

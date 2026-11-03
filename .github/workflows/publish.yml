@@ -1,82 +1,19 @@
-name: Publish an existing release draft
+name: Publish a release after validation
 
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing draft release tag
+        description: Existing version tag to build, test and publish
         required: true
         type: string
 
 permissions:
   contents: write
 
-concurrency:
-  group: publish-${{ inputs.tag }}
-  cancel-in-progress: false
-
 jobs:
-  publish:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      RELEASE_TAG: ${{ inputs.tag }}
-      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle21
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: Select the draft's exact main-branch commit
-        shell: bash
-        run: |
-          set -euo pipefail
-          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]]
-          [[ "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" == true ]]
-          source_commit=$(gh release view "$RELEASE_TAG" --json targetCommitish --jq .targetCommitish)
-          [[ "$source_commit" =~ ^[0-9a-f]{40}$ ]]
-          git merge-base --is-ancestor "$source_commit" origin/main
-          git checkout --detach "$source_commit"
-          version=${RELEASE_TAG#v}
-          [[ "$(sed -n 's/^mod_version=//p' gradle.properties)" == "$version" ]]
-          test -f "docs/RELEASE_NOTES_$version.md"
-          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Build and check Fabric first
-        run: ./gradlew --no-daemon --console=plain --build-cache :common:test :fabric:build
-      - name: Build and check NeoForge
-        run: ./gradlew --no-daemon --console=plain --build-cache :neoforge:build
-      - name: Prepare production jars, sources and checksums
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir release-assets
-          for loader in fabric neoforge; do
-            for suffix in '' '-sources'; do
-              cp "$loader/build/libs/Thaumcraft-$loader-$RELEASE_VERSION$suffix.jar" release-assets/
-            done
-          done
-          (cd release-assets && sha256sum *.jar > SHA256SUMS)
-      - name: Upload every asset before publishing
-        shell: bash
-        run: |
-          set -euo pipefail
-          [[ "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" == true ]]
-          gh release upload "$RELEASE_TAG" release-assets/* --clobber
-          gh release view "$RELEASE_TAG" --json assets > release-assets/uploaded.json
-          python - <<'PY'
-          import hashlib, json
-          from pathlib import Path
-          assets = json.loads(Path('release-assets/uploaded.json').read_text())['assets']
-          expected = {p.name: p for p in Path('release-assets').iterdir() if p.suffix == '.jar' or p.name == 'SHA256SUMS'}
-          assert {a['name'] for a in assets} == set(expected)
-          for asset in assets:
-              assert asset['state'] == 'uploaded'
-              assert asset['size'] == expected[asset['name']].stat().st_size
-          PY
-          gh release edit "$RELEASE_TAG" --draft=false
+  release:
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ inputs.tag }}
+      publish: true

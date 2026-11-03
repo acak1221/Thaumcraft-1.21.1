@@ -2,6 +2,8 @@ name: Build and test Fabric 1.21.1
 
 on:
   push:
+    # Version tags have their complete build/test gate in release.yml.
+    branches: ['**']
     paths-ignore: ['docs/**', 'README.md', 'MODLOG.md', 'AGENTS.md']
   pull_request:
     paths-ignore: ['docs/**', 'README.md', 'MODLOG.md', 'AGENTS.md']

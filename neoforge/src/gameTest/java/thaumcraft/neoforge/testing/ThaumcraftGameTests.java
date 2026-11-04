@@ -172,6 +172,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.HandMirrorMenuReviewRuntimeChecks.restrictedSlotsKeepOneFocusAndOneInkwell(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 100, batch = "review_inventory_20261104")
+    public void inventoryInsertionOnlyUsesTheActualDoubleChestPartner(GameTestHelper test) {
+        thaumcraft.common.testing.InventoryUtilityRuntimeChecks.insertionOnlyUsesTheActualDoubleChestPartner(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "review2_equipment")
     public void review2EarthmoverPaysEveryMaterialUnit(GameTestHelper test) {
         thaumcraft.common.testing.SecondReviewEquipmentRuntimeChecks.earthmoverPaysEveryMaterialUnit(test);
@@ -1433,8 +1438,8 @@ public final class ThaumcraftGameTests {
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
     public void originalScribingRecipesAndInkBounds(GameTestHelper test) { ResearchNoteRuntimeChecks.originalScribingRecipesAndInkBounds(test); }
 
-    // Vanilla Fabric mock proves the actual shared handler's state transitions;
-    // negotiated S2C bytes are separately asserted by the NeoForge wrappers.
+    // Real native login proves current-sender admission and the shared handler's
+    // state transitions. Direct calls do not claim C2S transport dispatch.
     @GameTest(template = "empty", templateNamespace = "thaumcraft")
     public void secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(GameTestHelper test) {
         var session = purchaseSession(test);
@@ -1461,6 +1466,11 @@ public final class ThaumcraftGameTests {
         var session = purchaseSession(test);
         ResearchPurchaseRuntimeChecks.secondaryPurchaseWarpAndPlayerPersistence(test, session.player(),
                 (expected, required) -> session.captureKnowledge(test, expected, required));
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "research_sender_authority")
+    public void researchRequestsRejectDeadSpectatorAndRetiredSenders(GameTestHelper test) {
+        thaumcraft.common.testing.ResearchAuthorityRuntimeChecks.run(test);
     }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc_isolated_bookshelf_wand")

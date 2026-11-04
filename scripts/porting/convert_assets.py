@@ -566,12 +566,21 @@ def read_lang(path: Path) -> tuple[dict[str, str], list[str]]:
     return entries, duplicates
 
 
+def reviewed_language_overrides(locale: str) -> dict[str, str]:
+    """Explicit owner-approved changes to original prose, never a blanket exemption."""
+    policy = ROOT / "scripts/porting/language-overrides.json"
+    return json.loads(policy.read_text(encoding="utf-8"))["translations"][locale]
+
+
 def convert_languages(mappings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     reports: list[dict[str, Any]] = []
     for locale in ("en_us", "ru_ru"):
         source = SOURCE / "lang" / f"{locale}.lang"
         entries, duplicates = read_lang(source)
         original_count = len(entries)
+        # Keep modern point-payment prose reproducible without editing the
+        # retained original .lang files or restoring obsolete level prices.
+        entries.update(reviewed_language_overrides(locale))
         subtitles = json.loads((ROOT / "scripts/porting/sound-subtitles.json").read_text(encoding="utf-8"))
         for sound, translations in subtitles.items():
             entries[f"subtitles.thaumcraft.{sound}"] = translations[locale]

@@ -1684,6 +1684,11 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.EnchantmentInfusionRuntimeChecks.run(test);
     }
 
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 240, batch = "m07_enchantment_points")
+    public void enchantmentInfusionUsesFixedPointsAndMigratesSavedDebt(GameTestHelper test) {
+        thaumcraft.common.testing.EnchantmentInfusionRuntimeChecks.runPointPayments(test);
+    }
+
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "m08_trade")
     public void tradeSwapsPayOnceAndRespectArchitectAndProtection(GameTestHelper test) {
         thaumcraft.common.testing.TradeRuntimeChecks.run(test);

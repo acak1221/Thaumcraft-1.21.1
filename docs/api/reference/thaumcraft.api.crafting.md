@@ -256,7 +256,14 @@ The original instability: the enchantments of the item plus the recipe's own ins
 public int calcXP(ItemStack recipeInput)
 ```
 
-The original experience cost of the infusion.
+The original nominal experience cost, in levels, retained for add-on compatibility.
+
+<a id="infusionenchantmentrecipe-calcxppoints"></a>
+```java
+public int calcXPPoints(ItemStack recipeInput)
+```
+
+Fixed point price; calls the virtual nominal cost so existing add-on overrides still apply.
 
 <a id="infusionenchantmentrecipe-getessentiamod"></a>
 ```java

@@ -1,0 +1,13 @@
+{
+  "reason": "Owner-requested fixed XP point payment for enchantment infusion (2026-11-04); docs/audit/KNOWN_DEVIATIONS.md section 23. All other original language entries remain unchanged.",
+  "translations": {
+    "en_us": {
+      "tc.research_page.INFUSIONENCHANTMENT.2": "It also requires life essence in the form of experience points, drawn from a person near the infusion altar.<BR>Each enchantment tier has a fixed experience point price, independent of that person's current experience level. The recipe display shows this point cost. To reach higher enchantment levels, repeat the infusion until its maximum level is reached. Check the displayed cost for each tier; essentia requirements also grow with the target enchantment level.",
+      "tc.research_page.INFUSIONENCHANTMENT.3": "Additional essentia is required if the item already contains enchantments other than the one you are currently performing. This surcharge is usually around 10% per level of enchantment. So adding Fire Aspect I to a sword that already contains Smite III costs 30% more essentia.<BR>Instability also increases as the total number of enchantments on the object increases.<BR>Enchanting items with an infusion altar follows the normal rules for enchantment as it applies to what enchants can combine with others."
+    },
+    "ru_ru": {
+      "tc.research_page.INFUSIONENCHANTMENT.2": "Также требуется жизненная сила в виде очков опыта, которые забираются у человека рядом с алтарём.<BR>У каждого уровня чар фиксированная цена в очках опыта, не зависящая от текущего уровня опыта плательщика. Эта цена указана в рецепте. Чтобы повысить уровень чар, повторяйте наполнение до достижения их максимального уровня. Проверяйте цену каждого уровня: потребность в эссенции также растёт с уровнем накладываемых чар.",
+      "tc.research_page.INFUSIONENCHANTMENT.3": "Дополнительная эссенция требуется, если на предмете уже есть другие чары. Надбавка обычно составляет около 10% за уровень таких чар. Наложение «Аспекта огня I» на меч с «Небесной карой III» потребует на 30% больше эссенции.<BR>Нестабильность также растёт с общим количеством чар на предмете.<BR>Зачаровывание наполнением следует обычным правилам совместимости зачарований."
+    }
+  }
+}

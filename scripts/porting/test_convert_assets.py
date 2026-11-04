@@ -45,9 +45,32 @@ class FoundationAssetsTest(unittest.TestCase):
         for locale in ("en_us", "ru_ru"):
             legacy, _ = converter.read_lang(converter.SOURCE / "lang" / f"{locale}.lang")
             modern = json.loads((converter.ASSETS / "lang" / f"{locale}.json").read_text(encoding="utf-8"))
-            for key, value in legacy.items():
+            expected = legacy | converter.reviewed_language_overrides(locale)
+            for key, value in expected.items():
                 self.assertEqual(value, modern[key], f"{locale}: {key}")
             self.assertTrue(any("<BR>" in value for value in modern.values()))
+
+    def test_reviewed_language_changes_are_limited_to_infusion_point_prose(self) -> None:
+        policy = json.loads((converter.ROOT / "scripts/porting/language-overrides.json").read_text(encoding="utf-8"))
+        self.assertTrue(policy["reason"])
+        self.assertEqual({"en_us", "ru_ru"}, set(policy["translations"]))
+        reviewed = {"tc.research_page.INFUSIONENCHANTMENT.2", "tc.research_page.INFUSIONENCHANTMENT.3"}
+        for locale in ("en_us", "ru_ru"):
+            legacy, _ = converter.read_lang(converter.SOURCE / "lang" / f"{locale}.lang")
+            replacements = converter.reviewed_language_overrides(locale)
+            self.assertEqual(reviewed, set(replacements), "new prose changes require an explicit scope review")
+            for key, value in replacements.items():
+                self.assertNotEqual(legacy[key], value)
+                self.assertEqual(legacy[key].count("<BR>"), value.count("<BR>"), "original page breaks survive")
+
+    def test_language_regeneration_retains_reviewed_point_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory, patch.object(converter, "ASSETS", Path(directory)):
+            converter.convert_languages([])
+            for locale in ("en_us", "ru_ru"):
+                generated = json.loads((Path(directory) / "lang" / f"{locale}.json").read_text(encoding="utf-8"))
+                legacy, _ = converter.read_lang(converter.SOURCE / "lang" / f"{locale}.lang")
+                self.assertEqual(legacy | converter.reviewed_language_overrides(locale),
+                                 {key: generated[key] for key in legacy})
 
     def test_foundation_ids_have_models_and_both_language_names(self) -> None:
         mappings = self.manifest["identity_mappings"]

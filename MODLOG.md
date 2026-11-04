@@ -1,3 +1,20 @@
+## 2026-11-04 — copied-note loss and research sender authority
+
+Hungry Chest now accepts whole copied research-note stacks after native quick-move
+has debited the source, retaining ordinary item limits. Magic Box cannot create or
+erase stock through nonpositive extraction. Research purchases and note issuance
+reject dead, spectator, disconnected or retired senders before payment/delivery;
+the current player after native respawn is admitted normally.
+
+Verified after final changes: 2,907 common JUnit passes (five expected skips),
+Fabric build/isolation, eight focused dedicated GameTests and zero stale scope
+fingerprints. Tests cover actual paid copy1→2, separately declared count128,
+native menu packets, block-entity save/load, and native login/PERFORM_RESPAWN.
+The initial7/8 run is rejected: its fixture bypassed the packet handler's player
+reassignment. Assertions remain, and the final packet-driven fixture passes.
+No new client, survival, remote multiplayer or NeoForge acceptance is claimed.
+Exact evidence: `docs/porting/bug-audit-followup-2026-11-04.json`.
+
 ## 2026-11-04 — chest ownership, scrubber accounting and retained JEI sources
 
 The public insertion helper no longer treats independent adjacent chests as a

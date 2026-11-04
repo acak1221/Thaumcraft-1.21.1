@@ -1458,7 +1458,8 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     // R06 invokes the shared handler/native service; these calls are not C2S dispatch.
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void primaryRequestConsumesPaperAndLastInk(GameTestHelper test) {
-        ResearchNoteIssuanceRuntimeChecks.primaryRequestConsumesPaperAndLastInk(test, test.makeMockServerPlayerInLevel());
+        thaumcraft.common.testing.ResearchAuthorityRuntimeChecks.withActor(test,
+                actor -> ResearchNoteIssuanceRuntimeChecks.primaryRequestConsumesPaperAndLastInk(test, actor));
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -1517,26 +1518,35 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void originalScribingRecipesAndInkBounds(GameTestHelper test) { ResearchNoteRuntimeChecks.originalScribingRecipesAndInkBounds(test); }
 
-    // Vanilla Fabric mock proves the actual shared handler's state transitions;
-    // negotiated S2C bytes are separately asserted by the NeoForge wrappers.
+    // Real native login proves current-sender admission and the shared handler's
+    // state transitions. Direct calls do not claim C2S transport dispatch.
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(GameTestHelper test) {
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(test, test.makeMockServerPlayerInLevel(), null);
+        thaumcraft.common.testing.ResearchAuthorityRuntimeChecks.withActor(test,
+                actor -> ResearchPurchaseRuntimeChecks.secondaryPurchaseSpendsExactlyAndReplayIsIdempotent(test, actor, null));
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void secondaryPurchaseRejectsPartialFundsAtomically(GameTestHelper test) {
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseRejectsPartialFundsAtomically(test, test.makeMockServerPlayerInLevel(), null);
+        thaumcraft.common.testing.ResearchAuthorityRuntimeChecks.withActor(test,
+                actor -> ResearchPurchaseRuntimeChecks.secondaryPurchaseRejectsPartialFundsAtomically(test, actor, null));
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void secondaryPurchaseRequiresClueAndHiddenParents(GameTestHelper test) {
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseRequiresClueAndHiddenParents(test, test.makeMockServerPlayerInLevel(), null);
+        thaumcraft.common.testing.ResearchAuthorityRuntimeChecks.withActor(test,
+                actor -> ResearchPurchaseRuntimeChecks.secondaryPurchaseRequiresClueAndHiddenParents(test, actor, null));
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void secondaryPurchaseWarpAndPlayerPersistence(GameTestHelper test) {
-        ResearchPurchaseRuntimeChecks.secondaryPurchaseWarpAndPlayerPersistence(test, test.makeMockServerPlayerInLevel(), null);
+        thaumcraft.common.testing.ResearchAuthorityRuntimeChecks.withActor(test,
+                actor -> ResearchPurchaseRuntimeChecks.secondaryPurchaseWarpAndPlayerPersistence(test, actor, null));
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "research_sender_authority")
+    public void researchRequestsRejectDeadSpectatorAndRetiredSenders(GameTestHelper test) {
+        thaumcraft.common.testing.ResearchAuthorityRuntimeChecks.run(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc_isolated_bookshelf_wand")

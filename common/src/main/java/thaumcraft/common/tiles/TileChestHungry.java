@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import thaumcraft.common.config.ThaumcraftHungryChest;
+import thaumcraft.common.items.ItemResearchNotes;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /** TC4's public, unsided 27-slot inventory and contact-fed animated lid. */
@@ -63,9 +64,12 @@ public final class TileChestHungry extends BlockEntity implements Container, Men
     }
     @Override public void setItem(int slot, ItemStack stack) {
         if (!validSlot(slot) || stack == null) return;
-        // Native menus/hoppers already respect this limit. Refuse an invalid
-        // overstack instead of truncating and silently deleting its remainder.
-        if (!stack.isEmpty() && stack.getCount() > getMaxStackSize(stack)) return;
+        // Copied research notes are deliberately moved whole by the shared menu
+        // adapter, despite itemmax1. Its source is already debited when this setter
+        // runs, so preserve their paid count just as native chests do. Other items
+        // retain the ordinary overflow guard.
+        if (!stack.isEmpty() && !(stack.getItem() instanceof ItemResearchNotes)
+                && stack.getCount() > getMaxStackSize(stack)) return;
         items.set(slot, stack.isEmpty() ? ItemStack.EMPTY : stack);
         setChanged();
     }

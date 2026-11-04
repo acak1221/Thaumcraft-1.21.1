@@ -44,6 +44,7 @@ public final class DeviceWorldRuntimeChecks {
     }
 
     public static void hungryChest(GameTestHelper test) {
+        CopiedNoteContainerRuntimeChecks.hungryChestTransfers(test);
         BlockPos pos = test.absolutePos(new BlockPos(2, 3, 2));
         isolate(test,pos);
         test.getLevel().setBlockAndUpdate(pos, thaumcraft.common.config.ThaumcraftHungryChest.HUNGRY_CHEST.get().defaultBlockState());

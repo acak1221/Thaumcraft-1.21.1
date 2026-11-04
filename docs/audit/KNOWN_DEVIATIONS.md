@@ -484,3 +484,38 @@ four-charge price and one-in-four conversion chance are unchanged. Both are
 intentional corrections of reproduced original resource defects, covered by the
 actual-BE `flux_scrubber_spends_its_charges` regression. See
 [audit and verification](../analysis/2026-11-04-bug-audit.md).
+
+## 20. Magic Box rejects negative extraction — 2026-11-04
+
+Original `TileMagicBox.java:64–79` passes a negative request to `ItemStack.split`
+at line 72, increasing stored stock; minimum-integer requests can overflow it.
+The native now returns empty without mutation for a nonpositive amount. Actual
+block-entity tests cover item identity/components, NBT, dirty flags, positive
+extraction and save/load conservation. This intentionally corrects an original
+resource defect; ordinary quantities and linked-box ownership are unchanged.
+
+## 21. Copied discoveries survive Hungry Chest insertion — 2026-11-04
+
+Original `TileChestHungry.java:62–67` accepts a copied stack of two despite the
+item's maximum of one, then clamps counts above 64. The native shared menu
+adapter already transfers copied research stacks whole, but the Hungry Chest
+setter rejected them after the player source was debited. Its setter now follows
+the existing native chest exception for `ItemResearchNotes`. Ordinary item limits
+and contact ingestion are unchanged. Counts above 64 follow the port's existing
+whole-stack discovery/codec policy, preserving paid stock instead of reproducing
+the original truncation. Native tests acquire/pay the two-note case and separately
+declare count128 as a codec fixture, then exercise both native menu directions,
+registered block-entity reload and full-chest refusal.
+
+## 22. Research requests require the current live sender — 2026-11-04
+
+Original `PacketPlayerCompleteToServer.java:77–82` resolves the player from the
+world for each request; native queued callbacks instead retained a player object.
+Both research purchase and note request handlers now reject dead, spectator,
+removed, disconnected, replaced or noncanonical senders before payment or
+delivery. The current replacement after an actual respawn is admitted normally.
+The original predates spectator mode; its modern read-only rule is an explicit
+authority adaptation. Prices, prerequisite/creative behavior and the absence of
+a held-book requirement are preserved. Tests use actual login/respawn state and
+retain all previous payment/replay assertions. Evidence for §§20–22:
+[follow-up audit](../analysis/2026-11-04-bug-audit-followup.md).

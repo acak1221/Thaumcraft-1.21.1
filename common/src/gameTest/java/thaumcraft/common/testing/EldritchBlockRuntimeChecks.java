@@ -272,12 +272,46 @@ public final class EldritchBlockRuntimeChecks {
             test.assertTrue(box.getItem(0).is(net.minecraft.world.item.Items.APPLE)
                             && box.getItem(1).is(net.minecraft.world.item.Items.DIAMOND),
                     "the magic box sorts its content by the original name order: " + box.getItem(0) + " " + box.getItem(1));
+            magicBoxExtractionPreservesItsPhysicalStock(test, level, box);
         } catch (RuntimeException | Error failure) {
             lane.clean();
             throw failure;
         }
         lane.clean();
         test.succeed();
+    }
+
+    private static void magicBoxExtractionPreservesItsPhysicalStock(GameTestHelper test, ServerLevel level, TileMagicBox box) {
+        box.clearContent();
+        var stored = new ItemStack(net.minecraft.world.item.Items.DIAMOND, 2);
+        stored.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("owned stock"));
+        box.setItem(0, stored);
+        CompoundTag before = box.saveWithFullMetadata(level.registryAccess());
+        var chunk = level.getChunkAt(box.getBlockPos());
+        boolean wasDirty = chunk.isUnsaved();
+        chunk.setUnsaved(false);
+        try {
+            for (int amount : new int[]{-1, 0, Integer.MIN_VALUE}) {
+                test.assertTrue(box.removeItem(0, amount).isEmpty() && box.getItem(0) == stored && stored.getCount() == 2,
+                        "nonpositive extraction neither creates a magic-box item nor overflows the stored stack");
+                test.assertTrue(before.equals(box.saveWithFullMetadata(level.registryAccess())) && !chunk.isUnsaved(),
+                        "refused magic-box extraction preserves persisted stock and does not dirty the chunk");
+            }
+            var removed = box.removeItem(0, 1);
+            test.assertTrue(removed.getCount() == 1 && box.getItem(0).getCount() == 1
+                            && ItemStack.isSameItemSameComponents(removed, stored) && chunk.isUnsaved(),
+                    "positive extraction transfers exactly one component-bearing item and persists the debit");
+            var restored = new TileMagicBox(box.getBlockPos(), box.getBlockState());
+            restored.loadWithComponents(box.saveWithFullMetadata(level.registryAccess()), level.registryAccess());
+            test.assertTrue(!restored.isDataRejected() && restored.getContents().size() == 1
+                            && restored.getItem(0).getCount() + removed.getCount() == 2
+                            && ItemStack.isSameItemSameComponents(restored.getItem(0), removed),
+                    "save/reload retains precisely the remaining physical item and all its components");
+            test.assertTrue(box.removeItem(0, Integer.MAX_VALUE).getCount() == 1 && box.isEmpty(),
+                    "an oversized positive extraction transfers the last item once and leaves the box empty");
+        } finally {
+            chunk.setUnsaved(wasDirty || chunk.isUnsaved());
+        }
     }
 
     /** The original warding stone pushes the entities away and the banner keeps its aspect. */

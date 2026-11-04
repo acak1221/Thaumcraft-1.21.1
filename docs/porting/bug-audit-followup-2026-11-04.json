@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "date": "2026-11-04",
+  "timezone": "Asia/Qyzylorda",
+  "status": "PASS",
+  "base_commit": "72bbd52b",
+  "source_inputs_sha256": {
+    "common/src/main/java/thaumcraft/common/tiles/TileMagicBox.java": "4cf6fc71665583022158328f06979ef0505c22620f07fad097969e0723a4fed8",
+    "common/src/main/java/thaumcraft/common/tiles/TileChestHungry.java": "10b95290dc4e35e81174e3edf9959a1df52ad6c6e12cc207c564a42d8c97c455",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchPurchaseNetworking.java": "2214695b4b1b2671282cea0e25e926dd2666367ee57857b47c0d729c97c571e8",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchNoteRequestNetworking.java": "88fda95a155528bbffdd2205d8035606879fa29f56bf30e0ce3c3ba45aaa5aa2",
+    "common/src/gameTest/java/thaumcraft/common/testing/EldritchBlockRuntimeChecks.java": "17590f4e857d1b0c2633bf94a85433197e829598db15dffc132de12988b1f51d",
+    "common/src/gameTest/java/thaumcraft/common/testing/DeviceWorldRuntimeChecks.java": "bb9ba87890b3bbc58d34e9e7cccbfc4d5c8ddce075a9dab017fbf748397d4e62",
+    "common/src/gameTest/java/thaumcraft/common/testing/ResearchAuthorityRuntimeChecks.java": "9a5b5bbe53cae73a85381162b0d8d523069ea403624febf89bdbd8f14ad324f6",
+    "common/src/gameTest/java/thaumcraft/common/testing/CopiedNoteContainerRuntimeChecks.java": "9c1d7e862077f5e5f86d49e99905a23e62cd990696a081357a46b24ab7049ebe",
+    "fabric/src/gameTest/java/thaumcraft/fabric/testing/ThaumcraftGameTests.java": "40e39ce10232359b8e53ef2481897054b6a9e95bbeab42e0720780beb46b9fe9"
+  },
+  "junit": {
+    "suites": 492,
+    "tests": 2912,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 2907
+  },
+  "dedicated_gametest": {
+    "status": "PASS",
+    "tests": [
+      "thaumcraftgametests.magic_box_chain_owns_twenty_seven_slots_per_box",
+      "thaumcraftgametests.secondarypurchasespendsexactlyandreplayisidempotent",
+      "thaumcraftgametests.secondarypurchaserejectspartialfundsatomically",
+      "thaumcraftgametests.secondarypurchaserequiresclueandhiddenparents",
+      "thaumcraftgametests.secondarypurchasewarpandplayerpersistence",
+      "thaumcraftgametests.primaryrequestconsumespaperandlastink",
+      "thaumcraftgametests.researchrequestsrejectdeadspectatorandretiredsenders",
+      "thaumcraftgametests.deviceworldhungrychestcollectsphysicalinput"
+    ],
+    "xml_sha256": "9e2590e45d41995e6a93206ae862e39622a420ce09f315ce5d89d5b196d0fbf5",
+    "shutdown": "saved and stopped normally"
+  },
+  "rejected_run": {
+    "accepted": false,
+    "passed": 7,
+    "failed": [
+      "thaumcraftgametests.researchrequestsrejectdeadspectatorandretiredsenders"
+    ],
+    "reason": "Fixture called PlayerList.respawn directly and missed the packet handler connection.player reassignment. Final fixture uses PERFORM_RESPAWN; original assertions remain."
+  },
+  "fixtures": {
+    "hungry_chest": "One real paid discovery copy from one to two, then native container packet handling, registered block-entity reload and quick-move in both directions. Count128 is a separate declared codec-boundary input. Existing physical iron7 contact ingestion remains.",
+    "research_sender": "Connected native player, funded research/note controls, spectator/dead refusal, actual PERFORM_RESPAWN packet handler, old/replacement knowledge and inventory snapshots, then positive requests from replacement. Direct research handler calls do not prove C2S transport dispatch.",
+    "magic_box": "Actual block entity, stock2 with custom components, nonpositive/minimum-integer extraction, NBT/dirty flag conservation, positive extraction/reload and maximum-integer remainder extraction."
+  },
+  "scope": {
+    "mode": "check",
+    "original_units": 859,
+    "legacy_units": 934,
+    "union_rows": 1044,
+    "shared_path": 749,
+    "original_only": 110,
+    "legacy_only": 185,
+    "native_linked_rows": 37,
+    "unique_native_counterparts": 57,
+    "dispositions": {
+      "adapt": 263,
+      "exclude": 163,
+      "port": 291,
+      "replace": 327
+    },
+    "milestone_queue": {
+      "M00": 75,
+      "M01": 57,
+      "M02": 96,
+      "M03": 37,
+      "M04": 20,
+      "M05": 29,
+      "M06": 27,
+      "M07": 14,
+      "M08": 84,
+      "M09": 120,
+      "M10": 69,
+      "M11": 143,
+      "M12": 80,
+      "M13": 68,
+      "M14": 125
+    },
+    "stale_review_fingerprints": 0
+  },
+  "commands": [
+    {
+      "command": ":common:test :fabric:clientTestClasses :fabric:build :fabric:runGameTest -PgameTestFilter=magic_box_chain_owns_twenty_seven_slots_per_box,deviceWorldHungryChestCollectsPhysicalInput,researchRequestsRejectDeadSpectatorAndRetiredSenders,secondaryPurchaseSpendsExactlyAndReplayIsIdempotent,secondaryPurchaseRejectsPartialFundsAtomically,secondaryPurchaseRequiresClueAndHiddenParents,secondaryPurchaseWarpAndPlayerPersistence,primaryRequestConsumesPaperAndLastInk",
+      "accepted": false,
+      "exit_code": 1
+    },
+    {
+      "command": ":common:test :fabric:build :fabric:runGameTest -PgameTestFilter=magic_box_chain_owns_twenty_seven_slots_per_box,deviceWorldHungryChestCollectsPhysicalInput,researchRequestsRejectDeadSpectatorAndRetiredSenders,secondaryPurchaseSpendsExactlyAndReplayIsIdempotent,secondaryPurchaseRejectsPartialFundsAtomically,secondaryPurchaseRequiresClueAndHiddenParents,secondaryPurchaseWarpAndPlayerPersistence,primaryRequestConsumesPaperAndLastInk",
+      "accepted": true,
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -B scripts/porting/update_scope_ledger.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "artifact": {
+    "file": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.24.jar",
+    "bytes": 16027858,
+    "sha256": "e9a9d65027ef3ee911773cd90b5638104a790738f5b80f929f0c5fc2fbcdc5ab"
+  },
+  "limitations": [
+    "Fabric only; no new NeoForge build/runtime verification.",
+    "No new visual/client, survival acquisition, remote multiplayer or packaged production-server acceptance.",
+    "Prior JEI client evidence remains tied to commit72bbd52b and its exact receipt; no new JEI run is inferred."
+  ]
+}

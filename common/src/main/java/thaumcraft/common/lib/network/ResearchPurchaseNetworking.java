@@ -29,6 +29,14 @@ public final class ResearchPurchaseNetworking {
     /** Shared receiver body, also exercised by the real-loader regression tests. */
     public static ResearchPurchase.Result handle(ServerPlayer player, String key) {
         if (!player.server.isSameThread()) throw new IllegalStateException("Research purchase requires the server thread");
+        // A queued intent may outlive death, a mode switch, respawn or logout.
+        // Admission belongs to the current connected actor, before any RP/warp writes.
+        if (!player.isAlive() || player.isSpectator() || player.isRemoved() || player.hasDisconnected()
+                || player.connection == null || player.connection.player != player
+                || player.server.getPlayerList().getPlayer(player.getUUID()) != player
+                || player.server.getLevel(player.serverLevel().dimension()) != player.serverLevel()) {
+            return new ResearchPurchase.Result(ResearchPurchase.Failure.UNAVAILABLE, java.util.Map.of(), java.util.Set.of());
+        }
         var result = ResearchPurchase.purchase(KnowledgeAccess.get(player), key);
         if (result.success()) {
             KnowledgeEvents.sync(player);

@@ -28,6 +28,14 @@ public final class ResearchNoteRequestNetworking {
     /** Also exercised by real-loader tests; a direct call does not prove C2S dispatch. */
     public static ResearchNoteIssuance.Result handle(ServerPlayer player, String key) {
         if (!player.server.isSameThread()) throw new IllegalStateException("Note issuance requires the server thread");
+        // Recheck the queued sender before puzzle RNG, paper/ink payment or delivery.
+        if (!player.isAlive() || player.isSpectator() || player.isRemoved() || player.hasDisconnected()
+                || player.connection == null || player.connection.player != player
+                || player.server.getPlayerList().getPlayer(player.getUUID()) != player
+                || player.server.getLevel(player.serverLevel().dimension()) != player.serverLevel()) {
+            return new ResearchNoteIssuance.Result(ResearchNoteIssuance.Failure.UNAVAILABLE,
+                    key == null ? "" : key, false, false);
+        }
         var result = ResearchNoteIssuance.issue(player, key);
         // Correct stale client inventory even on refusal. No optimistic item,
         // paper or ink changes are accepted from the request.

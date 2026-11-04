@@ -74,7 +74,9 @@ public final class TileMagicBox extends RetainedDataBlockEntity implements Conta
     }
 
     @Override public ItemStack removeItem(int slot, int amount) {
-        if (inventory().isDataRejected()) return ItemStack.EMPTY;
+        // Native split subtracts its argument: a negative extraction would
+        // create stock, and MIN_VALUE can overflow and erase the stored stack.
+        if (amount <= 0 || inventory().isDataRejected()) return ItemStack.EMPTY;
         ArrayList<ItemStack> list = contents();
         if (slot < 0 || slot >= list.size()) return ItemStack.EMPTY;
         ItemStack stack = list.get(slot);

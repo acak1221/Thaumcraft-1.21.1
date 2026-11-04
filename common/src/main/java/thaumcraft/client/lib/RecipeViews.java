@@ -128,7 +128,7 @@ public final class RecipeViews {
         }
         if (centrals.isEmpty()) return Optional.empty();
         List<Component> details = List.of(Enchantment.getFullname(target, 1),
-                Component.translatable("tc.port.book_recipe.xp_levels", recipe.xpLevels(sample, registries)));
+                Component.translatable("tc.port.book_recipe.xp_points", recipe.xpPoints(sample, registries)));
         return Optional.of(new Infusion(id, recipe.research(), Ingredient.of(centrals.stream()), recipe.components(),
                 InfusionEnchantmentRecipe.raise(sample, recipe.enchantment(), registries), costs(recipe.aspectCost(sample, registries)),
                 recipe.calculatedInstability(sample), details));

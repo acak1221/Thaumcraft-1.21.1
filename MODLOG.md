@@ -1,3 +1,20 @@
+## 2026-11-04 — enchantment infusion charges fixed XP points
+
+The matrix now converts each nominal enchantment price to fixed Minecraft 1.21.1
+XP points and collects bounded installments before essentia/components. Partial
+bars contribute, creative remains charged, and payment tempo stays approximately
+the same. New saves persist point debt and installment size; earlier native saves
+convert only unpaid levels once. Invalid/overflowing or missing active-session
+debt is retained and disables processing. Book/EMI/JEI prices use point units;
+nominal API queries and virtual add-on cost overrides remain supported.
+
+Verified: Fabric build/isolation, 2,919 JUnit passes (five existing skips), six
+focused server GameTests, zero missing asset references, and two complete native
+client rituals costing16 points at low/high levels. All six RU/EN book/HUD frames
+were inspected. Recipe-viewer clients, survival acquisition, remote multiplayer
+and NeoForge were not rerun. See `docs/analysis/2026-11-04-infusion-xp-points.md`.
+
+
 ## 2026-11-04 — copied-note loss and research sender authority
 
 Hungry Chest now accepts whole copied research-note stacks after native quick-move

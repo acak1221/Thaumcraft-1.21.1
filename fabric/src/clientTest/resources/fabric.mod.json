@@ -22,7 +22,8 @@
       "thaumcraft.fabric.testing.TaintDripClientProbe",
       "thaumcraft.fabric.testing.AspectSourcesClientEntrypoint",
       "thaumcraft.fabric.testing.EmiAspectSourcesClientEntrypoint",
-      "thaumcraft.fabric.testing.FocalXpClientProbe"
+      "thaumcraft.fabric.testing.FocalXpClientProbe",
+      "thaumcraft.fabric.testing.InfusionXpClientProbe"
     ],
     "jei_mod_plugin": ["thaumcraft.compat.jei.AspectSourcesClientProbe$JeiCapture"]
   },

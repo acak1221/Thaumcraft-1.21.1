@@ -44,6 +44,7 @@ import thaumcraft.common.crafting.ProgrammaticRecipes;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 import thaumcraft.common.tiles.TileArcaneWorkbench;
 import thaumcraft.common.tiles.TileCrucible;
 import thaumcraft.common.tiles.TileInfusionMatrix;
@@ -302,13 +303,18 @@ public final class ProgrammaticRecipeRuntimeChecks {
             var callerIngredients = new ArrayList<>(List.of(ingredient.copy()));
             test.assertTrue(!mutating.matches(callerIngredients, tool, fixture.level, player) && callerIngredients.getFirst().getCount() == 1 && tool.getCount() == 1,
                     "virtual comparators receive original-style copies, never consume caller-owned offered stacks");
-            center.setInfusionStack(tool); component.setInfusionStack(ingredient); player.giveExperienceLevels(10);
-            int beforeLevels = player.experienceLevel;
+            center.setInfusionStack(tool); component.setInfusionStack(ingredient);
+            player.experienceLevel = 0; player.experienceProgress = 0; player.totalExperience = 0;
+            player.giveExperiencePoints(100);
+            long beforePoints = ExperiencePoints.available(player);
             test.assertTrue(matrix.startCrafting(player) && matrix.getRecipeType() == 1, "addInfusionEnchantmentRecipe reaches the actual enchantment ritual");
-            int costLevels = matrix.getRemainingXPLevels();
+            int costPoints = matrix.getRemainingXPPoints();
+            test.assertTrue(costPoints == 7 && beforePoints == 100 && player.totalExperience == 100,
+                    "programmatic one-level declaration converts to seven fixed points without upfront payment");
             tickUntilDone(test, fixture.level, matrix);
             test.assertTrue(center.getItem(0).getEnchantments().getLevel(enchantment) == 1 && component.isEmpty() && source.getAmount() == 1
-                    && player.experienceLevel == beforeLevels - costLevels, "programmatic enchantment output pays declared levels, physical component and finite essentia once");
+                    && ExperiencePoints.available(player) == beforePoints - costPoints && player.totalExperience == beforePoints - costPoints,
+                    "programmatic enchantment output pays declared fixed points, physical component and finite essentia once");
         } finally {
             for (TilePedestal pedestal : pedestals) if (!pedestal.isRemoved()) pedestal.setInfusionStack(ItemStack.EMPTY);
             fixture.close();

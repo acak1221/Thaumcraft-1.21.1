@@ -44,6 +44,7 @@ import thaumcraft.common.lib.events.EssentiaHandler;
 import thaumcraft.common.lib.infusion.InfusionInstability;
 import thaumcraft.common.lib.infusion.InfusionStructure;
 import thaumcraft.common.lib.network.InfusionFxNetworking;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 
 /** Original TC4 matrix session/cycle for stack and enchantment outputs. */
 public final class TileInfusionMatrix extends RetainedDataBlockEntity implements InfusionDemandEndpoint {
@@ -59,6 +60,7 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
     private int recipeInstability;
     private int recipeType;
     private int recipeXP;
+    private int recipeXPPerCycle = 1;
     private ResourceLocation recipeEnchantment;
     private int countDelay = 10;
     private UUID recipePlayer;
@@ -91,7 +93,9 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
     public int getRemainingIngredientCount() { return recipeIngredients.size(); }
     public int getTickCount() { return count; }
     public int getRecipeType() { return recipeType; }
-    public int getRemainingXPLevels() { return recipeXP; }
+    public int getRemainingXPPoints() { return recipeXP; }
+    /** Nominal payment cycles retained for compatibility; currency is {@link #getRemainingXPPoints()}. */
+    @Deprecated public int getRemainingXPLevels() { return (int)((recipeXP + (long)recipeXPPerCycle - 1) / recipeXPPerCycle); }
     public int getCycleDelay() { return countDelay; }
     public ResourceLocation getRecipeEnchantment() { return recipeEnchantment; }
 
@@ -159,6 +163,7 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                 recipeInstability = recipe.instability();
                 recipeType = 0;
                 recipeXP = 0;
+                recipeXPPerCycle = 1;
                 recipeEnchantment = null;
                 recipeEssentia = recipe.aspectCost();
                 recipeCost = recipeEssentia.copy();
@@ -181,7 +186,7 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                 // Original runic recipe is an ordinary prepared STACK output, not an enchantment/XP ritual.
                 recipeInput = central.copy(); recipeIngredients.clear(); recipeIngredients.addAll(recipe.selectedComponents(central));
                 recipeOutput = output.copy(); recipeOutputLabel = ""; recipeInstability = recipe.instability(central);
-                recipeType = 0; recipeXP = 0; recipeEnchantment = null;
+                recipeType = 0; recipeXP = 0; recipeXPPerCycle = 1; recipeEnchantment = null;
                 recipeEssentia = recipe.aspectCost(central); recipeCost = recipeEssentia.copy();
                 recipePlayer = player.getUUID(); recipePlayerName = player.getGameProfile().getName();
                 instability = symmetry + recipeInstability; ingredientTarget = null; crafting = true;
@@ -201,7 +206,8 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                 recipeEnchantment = recipe.enchantment();
                 recipeInstability = recipe.calculatedInstability(central);
                 recipeType = 1;
-                recipeXP = recipe.xpLevels(central, server.registryAccess());
+                recipeXP = recipe.xpPoints(central, server.registryAccess());
+                recipeXPPerCycle = pointPaymentPerCycle(recipeXP);
                 recipeEssentia = recipe.aspectCost(central, server.registryAccess());
                 recipeCost = recipeEssentia.copy();
                 recipePlayer = player.getUUID();
@@ -246,6 +252,7 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
             recipeInstability = prepared.instability();
             recipeType = recipeEnchantment == null ? 0 : 1;
             recipeXP = prepared.xp();
+            recipeXPPerCycle = pointPaymentPerCycle(recipeXP);
             recipeEssentia = prepared.cost().copy();
             recipeCost = recipeEssentia.copy();
             recipePlayer = player.getUUID();
@@ -311,7 +318,7 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
             return;
         }
 
-        // Original M421-451: enchantments first take one entire XP LEVEL from a nearby player per cycle.
+        // Original M421-451 orders XP before other resources. The owner-requested port uses fixed point installments.
         if (recipeType == 1 && recipeXP > 0) {
             ingredientTarget = null;
             takeEnchantmentXP(server);
@@ -391,12 +398,16 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
     private void takeEnchantmentXP(ServerLevel server) {
         var players = server.getEntitiesOfClass(ServerPlayer.class, new AABB(worldPosition).inflate(10));
         for (ServerPlayer target : players) {
-            if (target.isRemoved() || target.experienceLevel <= 0) continue;
-            // Both owners are paid before damage, effects or update callbacks. A later failure never refunds a level.
-            --recipeXP;
+            if (target.isRemoved()) continue;
+            long available = ExperiencePoints.available(target);
+            if (available <= 0) continue;
+            int paid = (int)Math.min(available, Math.min(recipeXP, recipeXPPerCycle));
+            // Pair the point debt and native debit before damage/effects can call back into the world.
+            recipeXP -= paid;
             countDelay = 20;
             server.blockEntityChanged(worldPosition);
-            target.giveExperienceLevels(-1);
+            // The original altar charges creative players too, unlike the focal manipulator.
+            target.giveExperiencePoints(-paid);
             target.hurt(server.damageSources().magic(), server.random.nextInt(2));
             if (!current()) return;
             changed();
@@ -405,7 +416,7 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                     1.0F, 2.0F + server.random.nextFloat() * .4F);
             return;
         }
-        // No players is a plain stall. Present, empty-level players have the original 1/3 shortage roll.
+        // No players is a plain stall. Present, empty-XP players have the original 1/3 shortage roll.
         Aspect[] aspects = recipeEssentia.getAspects();
         if (!players.isEmpty() && aspects.length > 0 && server.random.nextInt(3) == 0) {
             recipeEssentia.add(aspects[server.random.nextInt(aspects.length)], 1);
@@ -427,6 +438,7 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
         recipeOutput = ItemStack.EMPTY;
         recipeEnchantment = null;
         recipeXP = 0;
+        recipeXPPerCycle = 1;
         ingredientTarget = null;
         itemCount = 0;
         server.blockEntityChanged(worldPosition);
@@ -528,6 +540,8 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
         tag.putInt("recipeinst", recipeInstability);
         tag.putInt("recipetype", recipeType);
         tag.putInt("recipexp", recipeXP);
+        tag.putString("RecipeXPUnit", "points");
+        tag.putInt("RecipeXPPerCycle", recipeXPPerCycle);
         tag.putString("recipeplayer", recipePlayerName);
         if (recipePlayer != null) tag.putUUID("RecipePlayerId", recipePlayer);
     }
@@ -558,7 +572,8 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
         recipeOutputLabel = tag.getString("recipeOutputLabel");
         recipeInstability = tag.getInt("recipeinst");
         recipeType = tag.getInt("recipetype");
-        recipeXP = tag.getInt("recipexp");
+        recipeXP = savedXPPoints(tag);
+        recipeXPPerCycle = tag.contains("RecipeXPUnit") ? tag.getInt("RecipeXPPerCycle") : pointPaymentPerCycle(recipeXP);
         recipeEnchantment = tag.contains("RecipeEnchantment", Tag.TAG_STRING)
                 ? ResourceLocation.tryParse(tag.getString("RecipeEnchantment")) : null;
         countDelay = 10; // Original transient delay resets on load, even in the middle of XP payment.
@@ -602,10 +617,11 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
     private static void validateSession(CompoundTag tag, HolderLookup.Provider registries) {
         for (String key:List.of("active","crafting","InfusionRenderState"))
             if (tag.contains(key) && !tag.contains(key,Tag.TAG_BYTE)) throw new IllegalArgumentException(key+" must be byte");
-        for (String key:List.of("instability","recipeinst","recipetype","recipexp"))
+        for (String key:List.of("instability","recipeinst","recipetype","recipexp","RecipeXPPerCycle"))
             if (tag.contains(key) && !tag.contains(key,Tag.TAG_INT)) throw new IllegalArgumentException(key+" must be int");
-        for (String key:List.of("rotype","recipeOutputLabel","recipeplayer","RecipeEnchantment"))
+        for (String key:List.of("rotype","recipeOutputLabel","recipeplayer","RecipeEnchantment","RecipeXPUnit"))
             if (tag.contains(key) && !tag.contains(key,Tag.TAG_STRING)) throw new IllegalArgumentException(key+" must be string");
+        savedXPPoints(tag);
         if (tag.contains("RecipePlayerId") && !tag.hasUUID("RecipePlayerId")) throw new IllegalArgumentException("Invalid RecipePlayerId");
         if (tag.contains("RecipeEnchantment") && ResourceLocation.tryParse(tag.getString("RecipeEnchantment"))==null)
             throw new IllegalArgumentException("Invalid RecipeEnchantment");
@@ -626,6 +642,35 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
                         || !row.contains("amount",Tag.TAG_INT) || row.getInt("amount")<0) throw new IllegalArgumentException(key+": invalid/duplicate aspect debt: "+row);
             }
         }
+    }
+
+    /** Legacy saves contain only the unpaid level count; convert that debt once, without rematching. */
+    private static int savedXPPoints(CompoundTag tag) {
+        if (tag.getBoolean("crafting") && tag.getInt("recipetype") == 1 && !tag.contains("recipexp", Tag.TAG_INT))
+            throw new IllegalArgumentException("Crafting enchantment session has no XP debt");
+        int debt = tag.getInt("recipexp");
+        if (debt < 0) throw new IllegalArgumentException("Negative infusion XP debt");
+        if (tag.contains("RecipeXPUnit")) {
+            if (!tag.getString("RecipeXPUnit").equals("points") || !tag.contains("recipexp", Tag.TAG_INT)
+                    || !tag.contains("RecipeXPPerCycle", Tag.TAG_INT) || tag.getInt("RecipeXPPerCycle") <= 0)
+                throw new IllegalArgumentException("Unknown or incomplete infusion XP payment format");
+            return debt;
+        }
+        if (tag.contains("RecipeXPPerCycle")) throw new IllegalArgumentException("Infusion XP payment unit is missing");
+        return Math.toIntExact(ExperiencePoints.atLevel(debt));
+    }
+
+    /** Fixed point installments keep the old approximate number of one-second payment cycles. */
+    private static int pointPaymentPerCycle(int points) {
+        if (points == 0) return 1;
+        int low = 0, high = points / 7;
+        while (low < high) {
+            int middle = low + (high - low + 1) / 2;
+            if (ExperiencePoints.atLevel(middle) <= points) low = middle;
+            else high = middle - 1;
+        }
+        int steps = Math.max(1, low);
+        return (int)((points + (long)steps - 1) / steps);
     }
 
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) {

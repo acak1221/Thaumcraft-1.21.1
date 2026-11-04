@@ -139,6 +139,7 @@ public final class ProgrammaticRecipes {
         return ordered(manager).byId().get(id);
     }
 
+    /** A frozen ritual plan; {@code xp} is an experience-point price, never a level count. */
     public record PreparedInfusion(ItemStack output, List<InfusionComponentPredicate> components, AspectList cost,
                                    int instability, ResourceLocation enchantment, int xp) {}
 
@@ -162,7 +163,9 @@ public final class ProgrammaticRecipes {
             output = ItemStack.EMPTY;
             enchantment = recipe.enchantmentHolder().unwrapKey().orElseThrow().location();
             instability = recipe.calcInstability(central);
-            xp = recipe.calcXP(central);
+            try {
+                xp = recipe.calcXPPoints(central);
+            } catch (IllegalArgumentException | ArithmeticException invalidCost) { return null; }
             cost = new AspectList();
             AspectList base = recipe.getAspects();
             if (base != null) for (Aspect aspect : base.getAspects()) {

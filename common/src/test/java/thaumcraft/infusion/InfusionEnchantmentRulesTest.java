@@ -13,6 +13,27 @@ class InfusionEnchantmentRulesTest {
         assertEquals(18, InfusionEnchantmentRules.xpLevels(20, 2));
         assertEquals(1, InfusionEnchantmentRules.xpLevels(0, 0));
     }
+    @Test void pointPricesConvertTheNominalCostRatherThanThePayersCurrentLevel() {
+        assertEquals(7, InfusionEnchantmentRules.xpPoints(1, 0));
+        assertEquals(16, InfusionEnchantmentRules.xpPoints(1, 1));
+        assertEquals(216, InfusionEnchantmentRules.xpPoints(20, 1));
+        assertEquals(441, InfusionEnchantmentRules.xpPoints(20, 2));
+        int[] levels = {15, 16, 17, 30, 31, 32};
+        int[] points = {315, 352, 394, 1395, 1507, 1628};
+        for (int i = 0; i < levels.length; i++) {
+            assertEquals(levels[i], InfusionEnchantmentRules.xpLevels(levels[i] * 3, 0));
+            assertEquals(points[i], InfusionEnchantmentRules.xpPoints(levels[i] * 3, 0));
+        }
+    }
+    @Test void pricesRejectTheFirstUnrepresentablePointCostAndNominalOverflow() {
+        assertEquals(2_147_407_943, InfusionEnchantmentRules.xpPoints(21_863 * 3, 0));
+        assertEquals(21_864, InfusionEnchantmentRules.xpLevels(21_864 * 3, 0));
+        assertThrows(ArithmeticException.class, () -> InfusionEnchantmentRules.xpPoints(21_864 * 3, 0));
+        assertThrows(ArithmeticException.class, () -> InfusionEnchantmentRules.xpPoints(Integer.MAX_VALUE, 0));
+        assertThrows(ArithmeticException.class, () -> InfusionEnchantmentRules.xpPoints(Integer.MAX_VALUE, 3));
+        assertThrows(IllegalArgumentException.class, () -> InfusionEnchantmentRules.xpPoints(-1, 0));
+        assertThrows(IllegalArgumentException.class, () -> InfusionEnchantmentRules.xpPoints(1, -1));
+    }
     @Test void everyEnchantmentLevelContributesToInstabilityBeforeIntegerDivision() {
         assertEquals(2, InfusionEnchantmentRules.instability(2, 0));
         assertEquals(2, InfusionEnchantmentRules.instability(2, 1));

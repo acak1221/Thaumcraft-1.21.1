@@ -112,6 +112,10 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
     public int xpLevels(ItemStack central, HolderLookup.Provider registries) {
         return InfusionEnchantmentRules.xpLevels(firstLevelMinimumCost, currentLevel(central, registries));
     }
+    /** Fixed point price of the original nominal level cost, independent of the payer's level. */
+    public int xpPoints(ItemStack central, HolderLookup.Provider registries) {
+        return InfusionEnchantmentRules.xpPoints(firstLevelMinimumCost, currentLevel(central, registries));
+    }
     public AspectList aspectCost(ItemStack central, HolderLookup.Provider registries) {
         Holder<Enchantment> target = enchantment(registries);
         var old = central.getEnchantments();
@@ -129,7 +133,7 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
         try {
             if (!canApply(offered.central(), enchantment(level.registryAccess())) || calculatedInstability(offered.central()) > 24
                     || offered.components().size() != components.size()) return false;
-            xpLevels(offered.central(), level.registryAccess()); // Reject overflowing foreign cost declarations before admission.
+            xpPoints(offered.central(), level.registryAccess()); // Reject unrepresentable point prices before admission.
             AspectList cost = aspectCost(offered.central(), level.registryAccess());
             if (java.util.Arrays.stream(cost.getAspects()).mapToLong(cost::getAmount).sum() > Integer.MAX_VALUE) return false;
         } catch (RuntimeException missingEnchantment) { return false; }

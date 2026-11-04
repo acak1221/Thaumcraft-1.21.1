@@ -1,8 +1,9 @@
 package thaumcraft.common.lib.infusion;
 
 import java.util.List;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 
-/** Original InfusionEnchantmentRecipe arithmetic; the XP unit is a LEVEL, not an experience point. */
+/** Original enchantment costs, with a fixed point price derived from the nominal level cost. */
 public final class InfusionEnchantmentRules {
     private InfusionEnchantmentRules() {}
     public static int instability(int base, int totalLevels) {
@@ -12,6 +13,9 @@ public final class InfusionEnchantmentRules {
     public static int xpLevels(int firstLevelMinimumCost, int currentTargetLevel) {
         if (firstLevelMinimumCost < 0 || currentTargetLevel < 0) throw new IllegalArgumentException("Negative enchantment cost");
         return Math.multiplyExact(Math.max(1, firstLevelMinimumCost / 3), Math.addExact(1, currentTargetLevel));
+    }
+    public static int xpPoints(int firstLevelMinimumCost, int currentTargetLevel) {
+        return Math.toIntExact(ExperiencePoints.atLevel(xpLevels(firstLevelMinimumCost, currentTargetLevel)));
     }
     public static float essentiaModifier(int currentTargetLevel, List<Integer> otherLevels) {
         if (currentTargetLevel < 0 || otherLevels.stream().anyMatch(level -> level < 0)) throw new IllegalArgumentException("Negative enchantment levels");

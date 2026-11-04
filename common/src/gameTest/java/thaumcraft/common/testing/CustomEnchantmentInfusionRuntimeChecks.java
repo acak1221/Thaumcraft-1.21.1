@@ -45,11 +45,12 @@ import thaumcraft.common.config.ThaumcraftInfusion;
 import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.crafting.InfusionRecipeInput;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 import thaumcraft.common.tiles.TileInfusionMatrix;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TilePedestal;
 
-/** Declared formed altar, stabilizers, raw components, levels and finite essence are fixtures. Both custom enchantments must be produced by natural altar ticks. */
+/** Declared formed altar, stabilizers, raw components, XP points and finite essence are fixtures. Both custom enchantments must be produced by natural altar ticks. */
 public final class CustomEnchantmentInfusionRuntimeChecks {
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
     private CustomEnchantmentInfusionRuntimeChecks() {}
@@ -106,7 +107,7 @@ public final class CustomEnchantmentInfusionRuntimeChecks {
         TileJar craft, order, travel, flight;
         void startRepair() {
             level.getServer().getPlayerList().placeNewPlayer(connection, player, CommonListenerCookie.createInitial(player.getGameProfile(), false));
-            player.setGameMode(GameType.SURVIVAL); player.setNoGravity(true); player.setPos(Vec3.atCenterOf(matrixPos).add(0, 0, 2)); player.giveExperienceLevels(16);
+            player.setGameMode(GameType.SURVIVAL); player.setNoGravity(true); player.setPos(Vec3.atCenterOf(matrixPos).add(0, 0, 2)); player.giveExperiencePoints(352);
             player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ThaumcraftContent.WAND.get()));
             useWand(); test.assertTrue(matrix.isActive(), "the actual wand activates the formed custom-infusion altar");
             KnowledgeAccess.get(player).addResearch("INFUSIONENCHANTMENT");
@@ -114,7 +115,7 @@ public final class CustomEnchantmentInfusionRuntimeChecks {
             test.assertTrue(magic.addToContainer(Aspect.MAGIC, 32) == 0, "finite magic essentia for both rituals");
             center.setInfusionStack(new ItemStack(thaumcraft.common.config.ThaumcraftEquipment.THAUMIUM_SWORD.get()));
             first.setInfusionStack(new ItemStack(Items.ANVIL)); second.setInfusionStack(material("salis_mundus"));
-            useWand(); test.assertTrue(matrix.isCrafting() && matrix.getRemainingXPLevels() == 6 && player.experienceLevel == 16, "Repair starts at six real XP levels with no up-front debit");
+            useWand(); test.assertTrue(matrix.isCrafting() && matrix.getRemainingXPPoints() == 72 && ExperiencePoints.available(player) == 352 && player.totalExperience == 352, "Repair starts at 72 fixed XP points with no up-front debit");
             naturalStarted = true;
         }
         void observe() {
@@ -122,29 +123,30 @@ public final class CustomEnchantmentInfusionRuntimeChecks {
             test.onEachTick(() -> {
                 if (finished || !naturalStarted) return;
                 try {
-                    int initialLevels = phase == 0 ? 16 : 10, debt = phase == 0 ? 6 : 5;
-                    test.assertTrue(player.experienceLevel + debt - matrix.getRemainingXPLevels() == initialLevels,
-                            "each custom XP level is paired with exactly one session progress debit");
-                    if (matrix.getRemainingXPLevels() > 0) test.assertTrue(magic.getAmount() == (phase == 0 ? 32 : 24)
+                    int initialPoints = phase == 0 ? 352 : 280, debt = phase == 0 ? 72 : 55;
+                    test.assertTrue(ExperiencePoints.available(player) + debt - matrix.getRemainingXPPoints() == initialPoints
+                            && player.totalExperience == ExperiencePoints.available(player),
+                            "each custom XP point debit is paired with exactly the same session progress");
+                    if (matrix.getRemainingXPPoints() > 0) test.assertTrue(magic.getAmount() == (phase == 0 ? 32 : 24)
                             && first.getItem(0).is(phase == 0 ? Items.ANVIL : material("nitor").getItem()) && !second.isEmpty(),
                             "custom XP is paid completely before any physical essence/component payment");
                     if (matrix.isCrafting()) return;
                     if (phase == 0) {
                         var repair = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(thaumcraft.common.lib.enchantment.EquipmentEnchantments.REPAIR);
                         test.assertTrue(center.getItem(0).is(thaumcraft.common.config.ThaumcraftEquipment.THAUMIUM_SWORD.get())
-                                && center.getItem(0).getEnchantments().getLevel(repair) == 1 && player.experienceLevel == 10
+                                && center.getItem(0).getEnchantments().getLevel(repair) == 1 && ExperiencePoints.available(player) == 280 && player.totalExperience == 280
                                 && magic.getAmount() == 24 && craft.getAmount() == 22 && order.getAmount() == 22 && first.isEmpty() && second.isEmpty(),
-                                "natural Repair infusion adds its real enchantment after six levels, twenty-eight essentia and both actual components");
+                                "natural Repair infusion adds its real enchantment after 72 XP points, twenty-eight essentia and both actual components");
                         player.getInventory().add(center.getItem(0).copy());
                         center.setInfusionStack(new ItemStack(Items.LEATHER_BOOTS)); first.setInfusionStack(material("nitor")); second.setInfusionStack(material("salis_mundus"));
                         phase = 1; useWand();
-                        test.assertTrue(matrix.isCrafting() && matrix.getRemainingXPLevels() == 5, "real wand starts Haste on actual boots");
+                        test.assertTrue(matrix.isCrafting() && matrix.getRemainingXPPoints() == 55, "real wand starts Haste on actual boots");
                     } else {
                         var haste = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(thaumcraft.common.lib.enchantment.EquipmentEnchantments.HASTE);
                         test.assertTrue(center.getItem(0).is(Items.LEATHER_BOOTS) && center.getItem(0).getEnchantments().getLevel(haste) == 1
-                                && player.experienceLevel == 5 && magic.getAmount() == 20 && travel.getAmount() == 24 && flight.getAmount() == 24
+                                && ExperiencePoints.available(player) == 225 && player.totalExperience == 225 && magic.getAmount() == 20 && travel.getAmount() == 24 && flight.getAmount() == 24
                                 && craft.getAmount() == 22 && order.getAmount() == 22 && first.isEmpty() && second.isEmpty(),
-                                "natural Haste infusion adds its real enchantment after five levels, twenty essentia and both actual components");
+                                "natural Haste infusion adds its real enchantment after 55 XP points, twenty essentia and both actual components");
                         finish(); test.succeed();
                     }
                 } catch (RuntimeException | Error failure) { finish(); throw failure; }

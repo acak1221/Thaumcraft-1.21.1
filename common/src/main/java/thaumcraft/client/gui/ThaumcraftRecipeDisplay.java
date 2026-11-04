@@ -1241,7 +1241,7 @@ public final class ThaumcraftRecipeDisplay {
             graphics.pose().scale(scale, scale, 1);
             drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusionenchantment"), 56, 0, 112, 0xFF505050);
             drawCenteredFit(graphics, font, Enchantment.getFullname(target, nextLevel), 56, 24, 112, 0xFF705090);
-            drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.xp_levels", infusion.xpLevels(prior, level.registryAccess())),
+            drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.xp_points", infusion.xpPoints(prior, level.registryAccess())),
                     56, 40, 112, 0xFF508850);
             drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
                     .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability() / 2))), 56, 194, 112, 0xFF505050);

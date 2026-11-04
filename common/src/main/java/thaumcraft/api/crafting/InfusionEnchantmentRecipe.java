@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.crafting.InfusionRecipeInput;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 
 /**
  * The original TC4 enchantment infusion recipe.
@@ -60,7 +61,7 @@ public class InfusionEnchantmentRecipe {
         this.aspects = NativeRecipes.aspects(recipe.aspects());
         this.components = samples(recipe.components());
         this.instability = recipe.instability();
-        this.recipeXP = Math.max(1, this.enchantment.getMinCost(1) / 3);
+        this.recipeXP = Math.max(1, recipe.firstLevelMinimumCost() / 3);
         this.nativeRecipe = recipe;
         this.nativeView = true;
     }
@@ -96,7 +97,10 @@ public class InfusionEnchantmentRecipe {
         if (input == null || central == null) return false;
         if (nativeView) return nativeRecipe.matches(new InfusionRecipeInput(central, input), world);
         if (world == null || !thaumcraft.common.crafting.InfusionEnchantmentRecipe.canApply(central, enchantmentHolder)
-                || calcInstability(central) > 24 || calcXP(central) < 0) return false;
+                || calcInstability(central) > 24) return false;
+        try {
+            if (calcXPPoints(central) < 0) return false;
+        } catch (IllegalArgumentException | ArithmeticException invalidCost) { return false; }
         ArrayList<ItemStack> remaining = new ArrayList<>(input.stream().map(ItemStack::copy).toList());
         for (ItemStack required : components) {
             int match = -1;
@@ -132,9 +136,14 @@ public class InfusionEnchantmentRecipe {
         return total / 2 + this.instability;
     }
 
-    /** The original experience cost of the infusion. */
+    /** The original nominal experience cost, in levels, retained for add-on compatibility. */
     public int calcXP(ItemStack recipeInput) {
-        return this.recipeXP * (1 + recipeInput.getEnchantments().getLevel(enchantmentHolder));
+        return Math.multiplyExact(this.recipeXP, Math.addExact(1, recipeInput.getEnchantments().getLevel(enchantmentHolder)));
+    }
+
+    /** Fixed point price; calls the virtual nominal cost so existing add-on overrides still apply. */
+    public int calcXPPoints(ItemStack recipeInput) {
+        return Math.toIntExact(ExperiencePoints.atLevel(calcXP(recipeInput)));
     }
 
     /** The original essentia modifier of the infusion. */

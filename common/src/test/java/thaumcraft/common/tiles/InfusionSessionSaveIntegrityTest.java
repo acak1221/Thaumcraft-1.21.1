@@ -49,4 +49,37 @@ class InfusionSessionSaveIntegrityTest {
         assertFalse(restored.isDataRejected());
         CompoundTag saved=new CompoundTag(); restored.saveAdditional(saved,registries); assertEquals(tag,saved);
     }
+    @Test void legacyUnpaidLevelsBecomePointsOnceWithoutRematching() {
+        CompoundTag legacy=new CompoundTag(); tile().saveAdditional(legacy,registries);
+        legacy.remove("RecipeXPUnit"); legacy.remove("RecipeXPPerCycle"); legacy.putInt("recipexp",2);
+        var restored=tile(); restored.loadAdditional(legacy,registries);
+        assertFalse(restored.isDataRejected()); assertEquals(16,restored.getRemainingXPPoints());
+        CompoundTag saved=new CompoundTag(); restored.saveAdditional(saved,registries);
+        assertEquals("points",saved.getString("RecipeXPUnit")); assertEquals(8,saved.getInt("RecipeXPPerCycle"));
+        var again=tile(); again.loadAdditional(saved,registries);
+        assertFalse(again.isDataRejected()); assertEquals(16,again.getRemainingXPPoints());
+    }
+    @Test void paidPointProgressAndInstallmentSurviveReloadExactly() {
+        CompoundTag tag=new CompoundTag(); tile().saveAdditional(tag,registries);
+        tag.putInt("recipexp",8); tag.putInt("RecipeXPPerCycle",8);
+        var restored=tile(); restored.loadAdditional(tag,registries);
+        assertFalse(restored.isDataRejected()); assertEquals(8,restored.getRemainingXPPoints());
+        CompoundTag saved=new CompoundTag(); restored.saveAdditional(saved,registries); assertEquals(tag,saved);
+    }
+    @Test void unknownOrIncompletePointFormatsRetainTheirOriginalData() {
+        CompoundTag tag=paidSession(); tag.putString("RecipeXPUnit","future-unit"); check(tag);
+        tag=paidSession(); tag.remove("RecipeXPUnit"); check(tag);
+        tag=paidSession(); tag.remove("RecipeXPPerCycle"); check(tag);
+        tag=paidSession(); tag.putString("RecipeXPPerCycle","8"); check(tag);
+        tag=paidSession(); tag.putInt("RecipeXPPerCycle",0); check(tag);
+        tag=paidSession(); tag.putInt("recipexp",-1); check(tag);
+    }
+    @Test void unrepresentableLegacyLevelDebtIsRetainedRatherThanTruncated() {
+        CompoundTag tag=paidSession(); tag.remove("RecipeXPUnit"); tag.remove("RecipeXPPerCycle");
+        tag.putInt("recipexp",21864); check(tag);
+    }
+    @Test void missingLegacyDebtCannotTurnAnUnpaidRitualIntoAPaidOne() {
+        CompoundTag tag=paidSession(); tag.remove("RecipeXPUnit"); tag.remove("RecipeXPPerCycle"); tag.remove("recipexp");
+        tag.putInt("recipetype",1); check(tag);
+    }
 }

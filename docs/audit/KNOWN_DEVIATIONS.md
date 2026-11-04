@@ -519,3 +519,26 @@ authority adaptation. Prices, prerequisite/creative behavior and the absence of
 a held-book requirement are preserved. Tests use actual login/respawn state and
 retain all previous payment/replay assertions. Evidence for §§20–22:
 [follow-up audit](../analysis/2026-11-04-bug-audit-followup.md).
+
+## 23. Enchantment infusion point payment — owner request 2026-11-04
+
+Original `InfusionEnchantmentRecipe.calcXP` prices the next enchantment tier in
+whole levels, and `TileInfusionMatrix:421–451` removes one level from the first
+nearby player with XP per payment cycle, including creative players. The owner
+requested fixed point payment analogous to the focal adaptation. New rituals
+convert the original nominal level cost into cumulative 1.21.1 XP from zero;
+the same tier therefore costs the same points at every payer level. Native bar
+balance and `giveExperiencePoints` replace level affordability/debit; creative
+remains charged. Fixed point installments preserve approximately the original
+number of payment cycles, with smaller partial contributions allowed.
+
+New sessions persist remaining points plus an explicit `points` unit and fixed
+installment. Earlier native saves convert only their remaining unpaid level debt
+once, without rematching or repricing the full recipe. Invalid/overflowing formats
+retain their original NBT and disable gameplay. Original essentia, components,
+instability, tier progression, research and other crafting costs are unchanged.
+The original nominal API methods remain; new checked point methods preserve
+virtual add-on prices. Fabric build/isolation, 2,919 JUnit passes (five existing skips),
+six focused server GameTests and the native two-ritual RU/EN client pass. All six
+final frames were inspected; recipe-viewer clients and NeoForge were not rerun.
+See [implementation and verification](../analysis/2026-11-04-infusion-xp-points.md).

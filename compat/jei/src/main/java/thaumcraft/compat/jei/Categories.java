@@ -3,6 +3,7 @@ package thaumcraft.compat.jei;
 import java.util.List;
 import java.util.Optional;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
@@ -131,6 +132,16 @@ final class Categories {
                     .append(Component.translatable("tc.inst." + Math.min(5, recipe.instability() / 2)));
             graphics.drawString(font, stability, 0, body(recipe) + 2, TEXT, false);
             super.draw(recipe, slots, graphics, mouseX, mouseY);
+        }
+
+        @Override public void getTooltip(ITooltipBuilder tooltip, RecipeViews.Infusion recipe, IRecipeSlotsView slots, double mouseX, double mouseY) {
+            int right = ring(recipe) + 4;
+            int line = (int) Math.floor((mouseY - detailTop(recipe)) / 10);
+            if (mouseX >= right && mouseX < getWidth() && line >= 0 && line < recipe.details().size()) {
+                Component detail = recipe.details().get(line);
+                if (!trim(detail.getString(), getWidth() - right).equals(detail.getString())) tooltip.add(detail);
+            }
+            super.getTooltip(tooltip, recipe, slots, mouseX, mouseY);
         }
 
         @Override String research(RecipeViews.Infusion recipe) { return recipe.research(); }

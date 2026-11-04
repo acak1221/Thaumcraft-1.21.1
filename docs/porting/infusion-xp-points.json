@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-04",
+  "status": "PASS",
+  "platform": "Fabric",
+  "based_on_commit": "69e35c85",
+  "price_policy": "Fixed Minecraft 1.21.1 cumulative XP points from zero for the original nominal level cost; payer level does not change the price.",
+  "examples": [
+    {
+      "nominal_levels": 1,
+      "points": 7
+    },
+    {
+      "nominal_levels": 2,
+      "points": 16
+    },
+    {
+      "nominal_levels": 5,
+      "points": 55
+    },
+    {
+      "nominal_levels": 6,
+      "points": 72
+    },
+    {
+      "nominal_levels": 12,
+      "points": 216
+    },
+    {
+      "nominal_levels": 20,
+      "points": 550
+    }
+  ],
+  "common_junit": {
+    "tests": 2924,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 2919
+  },
+  "dedicated_server": {
+    "passed": 6,
+    "cases": [
+      "thaumcraftgametests.enchantmentinfusionpayslevelsbeforeessentiaandraisesactualcentre",
+      "thaumcraftgametests.reviewprogrammaticinfusionsandvirtualcomparator",
+      "modernadaptationsgametests.modernenchantmentcompatibilityandlimits",
+      "thaumcraftgametests.enchantmentinfusionusesfixedpointsandmigratessaveddebt",
+      "modernadaptationsgametests.modernenchantmentinfusionpaysallinputs",
+      "thaumcraftgametests.customenchantmentinfusionusesnativeequipmentandpayments"
+    ]
+  },
+  "build": {
+    "fabric": "PASS",
+    "production_test_isolation": "PASS"
+  },
+  "resource_verifier": {
+    "atlas_mipmap_level_guard": 4,
+    "atlas_sprites_available": 518,
+    "checked_atlas_sprite_refs": 4141,
+    "checked_composed_files": 294,
+    "checked_composed_sites": 52,
+    "checked_composed_sprites": 26,
+    "checked_external_model_texture_refs": 3,
+    "checked_literal_client_files": 141,
+    "checked_local_model_refs": 3256,
+    "checked_model_texture_refs": 4144,
+    "checked_sound_event_ids": 66,
+    "checked_sound_event_refs": 0,
+    "checked_sound_refs": 111,
+    "missing_references": 0
+  },
+  "client": {
+    "status": "PASS",
+    "run_id": "infusion-xp-2026-11-04T06-28-06.796792892Z",
+    "stage": 14,
+    "fixture": "Fresh 1.21.1 flat world; supplied complete altar with formed pillars, symmetric skull stabilizers, INFUSION and INFUSIONENCHANTMENT research, native empty wood/iron wand, two Sharpness I iron swords with damage7, two iron sword/salis component sets, exactly8 Praecantatio and16 Telum per ritual, and server XP baselines level3+5points and level30+17points through native giveExperiencePoints after explicit fixture reset. Survival actor. All tested activation/start actions use real client wand useItemOn packets; XP, essentia, component payment and result use natural server ticks. Actual RU/EN canonical research book captures. No survival acquisition, pillar formation or old-world migration claim.",
+    "price_points": 16,
+    "low_before_points": 32,
+    "high_before_points": 1412,
+    "checks": [
+      {
+        "passed": true,
+        "check": "actual native wand packet activates supplied altar without payment",
+        "server": {
+          "points": 32,
+          "level": 3,
+          "total": 32,
+          "progress": 0.38461554,
+          "active": true,
+          "crafting": false,
+          "remaining_xp_points": 0,
+          "sharpness": 1,
+          "damage": 7,
+          "praecantatio": 8,
+          "telum": 16,
+          "components_empty": false,
+          "instability": 0
+        }
+      },
+      {
+        "after_client_points": 16,
+        "after_server": {
+          "points": 16,
+          "level": 2,
+          "total": 16,
+          "progress": 1.1920929e-07,
+          "active": true,
+          "crafting": true,
+          "remaining_xp_points": 0,
+          "sharpness": 1,
+          "damage": 7,
+          "praecantatio": 8,
+          "telum": 16,
+          "components_empty": false,
+          "instability": -4
+        },
+        "before_points": 32,
+        "passed": true,
+        "check": "actual wand-started ritual pays exactly16 fixed points at low level"
+      },
+      {
+        "passed": true,
+        "check": "natural low payer ritual completes with exact finite resources",
+        "server": {
+          "points": 16,
+          "level": 2,
+          "total": 16,
+          "progress": 1.1920929e-07,
+          "active": true,
+          "crafting": false,
+          "remaining_xp_points": 0,
+          "sharpness": 2,
+          "damage": 7,
+          "praecantatio": 0,
+          "telum": 0,
+          "components_empty": true,
+          "instability": 0
+        }
+      },
+      {
+        "after_client_points": 1396,
+        "after_server": {
+          "points": 1396,
+          "level": 30,
+          "total": 1396,
+          "progress": 0.008928612,
+          "active": true,
+          "crafting": true,
+          "remaining_xp_points": 0,
+          "sharpness": 1,
+          "damage": 7,
+          "praecantatio": 8,
+          "telum": 16,
+          "components_empty": false,
+          "instability": -4
+        },
+        "before_points": 1412,
+        "passed": true,
+        "check": "actual wand-started ritual pays exactly16 fixed points at high level"
+      },
+      {
+        "passed": true,
+        "check": "natural high payer ritual completes with exact finite resources",
+        "server": {
+          "points": 1396,
+          "level": 30,
+          "total": 1396,
+          "progress": 0.008928612,
+          "active": true,
+          "crafting": false,
+          "remaining_xp_points": 0,
+          "sharpness": 2,
+          "damage": 7,
+          "praecantatio": 0,
+          "telum": 0,
+          "components_empty": true,
+          "instability": 0
+        }
+      },
+      {
+        "passed": true,
+        "check": "completed ritual remains stable40 ticks with no repeated reward or debit",
+        "server": {
+          "points": 1396,
+          "level": 30,
+          "total": 1396,
+          "progress": 0.008928612,
+          "active": true,
+          "crafting": false,
+          "remaining_xp_points": 0,
+          "sharpness": 2,
+          "damage": 7,
+          "praecantatio": 0,
+          "telum": 0,
+          "components_empty": true,
+          "instability": 0
+        }
+      }
+    ],
+    "captures": [
+      {
+        "price_points": 16,
+        "target_sharpness": 2,
+        "translated_price": "16 очк. опыта",
+        "label": "book-ru-sharpness-II-cost16-points",
+        "file": "docs/images/infusion-xp-points/book-ru-sharpness-II-cost16-points.png",
+        "bytes": 776585,
+        "language": "ru_ru",
+        "source_filename": "infusion-xp-2026-11-04T06-28-06.796792892Z-book-ru-sharpness-II-cost16-points.png",
+        "sha256": "4114931d9a0155d97dd32320b49b8bb186d8a3dbc07d7d29cb861ba0227d9fe6",
+        "visually_inspected": true
+      },
+      {
+        "price_points": 16,
+        "target_sharpness": 2,
+        "translated_price": "16 XP points",
+        "label": "book-en-sharpness-II-cost16-points",
+        "file": "docs/images/infusion-xp-points/book-en-sharpness-II-cost16-points.png",
+        "bytes": 722032,
+        "language": "en_us",
+        "source_filename": "infusion-xp-2026-11-04T06-28-06.796792892Z-book-en-sharpness-II-cost16-points.png",
+        "sha256": "ea327a8637823d2816d1be26a3bae92c41c5ab81762a677e09362fb53e2fffbc",
+        "visually_inspected": true
+      },
+      {
+        "client_level": 2,
+        "client_progress": 1.1920929e-07,
+        "client_points": 16,
+        "label": "level3-paid16-native-level-and-bar",
+        "file": "docs/images/infusion-xp-points/level3-paid16-native-level-and-bar.png",
+        "bytes": 405977,
+        "language": "ru_ru",
+        "source_filename": "infusion-xp-2026-11-04T06-28-06.796792892Z-level3-paid16-native-level-and-bar.png",
+        "sha256": "956a62795210361cb36e568f0c64d61544bf1ce0e3aef580c99c4124473694c0",
+        "visually_inspected": true
+      },
+      {
+        "client_level": 2,
+        "client_progress": 1.1920929e-07,
+        "client_points": 16,
+        "label": "level3-completed-sharpness-II-finite-resources",
+        "file": "docs/images/infusion-xp-points/level3-completed-sharpness-II-finite-resources.png",
+        "bytes": 266636,
+        "language": "ru_ru",
+        "source_filename": "infusion-xp-2026-11-04T06-28-06.796792892Z-level3-completed-sharpness-II-finite-resources.png",
+        "sha256": "9a8814bd7cc79865d6fd3e3dd06565d93c80393cd0a5d253b1b79a9cf4503fee",
+        "visually_inspected": true
+      },
+      {
+        "client_level": 30,
+        "client_progress": 0.008928612,
+        "client_points": 1396,
+        "label": "level30-paid16-native-level-and-bar",
+        "file": "docs/images/infusion-xp-points/level30-paid16-native-level-and-bar.png",
+        "bytes": 259752,
+        "language": "ru_ru",
+        "source_filename": "infusion-xp-2026-11-04T06-28-06.796792892Z-level30-paid16-native-level-and-bar.png",
+        "sha256": "8f4993b713a125f71556027728746db38fba32af2301c1c4aedc1c769203a8bc",
+        "visually_inspected": true
+      },
+      {
+        "client_level": 30,
+        "client_progress": 0.008928612,
+        "client_points": 1396,
+        "label": "level30-completed-sharpness-II-finite-resources",
+        "file": "docs/images/infusion-xp-points/level30-completed-sharpness-II-finite-resources.png",
+        "bytes": 278908,
+        "language": "ru_ru",
+        "source_filename": "infusion-xp-2026-11-04T06-28-06.796792892Z-level30-completed-sharpness-II-finite-resources.png",
+        "sha256": "c34efdc92042ae7b1ed9b93d9a6758c07590a5fb1d53af7851f88763a9de817a",
+        "visually_inspected": true
+      }
+    ]
+  },
+  "artifact": {
+    "file": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.24.jar",
+    "bytes": 16029717,
+    "sha256": "3cc760e2ca30443a23b5c118c30f661d49ca61202096c6ad140511c238752e2b"
+  },
+  "limits": [
+    "Supplied fresh-world Survival fixtures; no survival acquisition or pillar formation replay.",
+    "Actual native client validates two complete rituals and RU/EN book prices. EMI/JEI shared price display and JEI tooltip compile, but recipe-viewer clients were not rerun for this change.",
+    "Custom add-on virtual prices own actual preparation; preexisting native viewer base prices are not newly replaced by virtual overrides.",
+    "Earlier 1.21.1 port session debt migrates; no original 1.7/1.12 world import.",
+    "No remote multiplayer or NeoForge validation for this change."
+  ],
+  "pre_integration_verification": {
+    "status": "PASS",
+    "client_run_id": "infusion-xp-2026-11-04T06-16-26.689755897Z",
+    "artifact": {
+      "file": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.24.jar",
+      "bytes": 16026078,
+      "sha256": "cab574e123b76a915f51a5b415b979ccc7ff11404e6cbf2e577ce176b7946590"
+    },
+    "superseded_by_final_merged_run": true
+  },
+  "ci_catalog_only_integration": {
+    "commit": "69e35c85",
+    "changes": "NeoForge test wrappers and required GameTest catalogue only; no Fabric/common runtime or build input changes."
+  }
+}

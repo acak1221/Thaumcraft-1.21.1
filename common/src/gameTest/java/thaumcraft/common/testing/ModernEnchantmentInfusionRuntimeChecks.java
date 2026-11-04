@@ -39,6 +39,7 @@ import thaumcraft.common.config.ThaumcraftInfusion;
 import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.crafting.InfusionRecipeInput;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
+import thaumcraft.common.lib.utils.ExperiencePoints;
 import thaumcraft.common.tiles.TileInfusionMatrix;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TilePedestal;
@@ -65,8 +66,10 @@ public final class ModernEnchantmentInfusionRuntimeChecks {
             if (target.value().getMaxLevel() > 1) {
                 ItemStack next = central.copy(); next.enchant(target, 1);
                 test.assertTrue(recipe.xpLevels(next, level.registryAccess()) == 2 * recipe.xpLevels(central, level.registryAccess())
+                                && recipe.xpPoints(next, level.registryAccess()) == ExperiencePoints.atLevel(recipe.xpLevels(next, level.registryAccess()))
+                                && recipe.xpPoints(next, level.registryAccess()) > recipe.xpPoints(central, level.registryAccess())
                                 && recipe.aspectCost(next, level.registryAccess()).visSize() == 2 * recipe.aspectCost(central, level.registryAccess()).visSize(),
-                        "later levels pay the existing increasing XP and essentia costs: " + name);
+                        "later levels retain increasing nominal costs, converted fixed XP points and essentia: " + name);
             }
         }
         for (var pair : List.of(List.of("loyalty", "riptide"), List.of("multishot", "piercing"), List.of("density", "breach"))) {
@@ -154,7 +157,9 @@ public final class ModernEnchantmentInfusionRuntimeChecks {
         void run() {
             level.getServer().getPlayerList().placeNewPlayer(connection, actor, CommonListenerCookie.createInitial(actor.getGameProfile(), false));
             actor.setGameMode(GameType.SURVIVAL); actor.setNoGravity(true); actor.setPos(Vec3.atCenterOf(matrixPos).add(0, 0, 2));
-            actor.giveExperienceLevels(100); actor.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ThaumcraftContent.WAND.get()));
+            actor.experienceLevel = 0; actor.experienceProgress = 0; actor.totalExperience = 0;
+            actor.giveExperiencePoints(Math.toIntExact(ExperiencePoints.atLevel(100)));
+            actor.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ThaumcraftContent.WAND.get()));
             var hit = new BlockHitResult(Vec3.atCenterOf(matrixPos), Direction.UP, matrixPos, false);
             test.assertTrue(actor.getMainHandItem().getItem().useOn(new UseOnContext(actor, InteractionHand.MAIN_HAND, hit)).consumesAction()
                     && matrix.isActive(), "real wand forms the native altar for modern rituals");
@@ -169,29 +174,32 @@ public final class ModernEnchantmentInfusionRuntimeChecks {
             center.setItem(0, input);
             for (int i = 0; i < componentPedestals.size(); i++) componentPedestals.get(i).setItem(0,
                     i < recipe.components().size() ? recipe.components().get(i).getItems()[0].copyWithCount(1) : ItemStack.EMPTY);
-            int xp = actor.experienceLevel;
+            long xp = ExperiencePoints.available(actor);
+            int xpPrice = recipe.xpPoints(input, level.registryAccess());
             var cost = recipe.aspectCost(input, level.registryAccess());
             Map<Aspect, Integer> before = new LinkedHashMap<>(); jars.forEach((aspect, jar) -> before.put(aspect, jar.getAmount()));
-            if (!KnowledgeAccess.get(actor).isResearchComplete(research)) test.assertTrue(!matrix.startCrafting(actor) && actor.experienceLevel == xp
+            if (!KnowledgeAccess.get(actor).isResearchComplete(research)) test.assertTrue(!matrix.startCrafting(actor) && ExperiencePoints.available(actor) == xp
+                            && actor.totalExperience == xp
                             && componentPedestals.stream().filter(p -> !p.isEmpty()).count() == recipe.components().size(),
                     "unresearched modern ritual refuses without upfront XP or component payment: " + name);
             KnowledgeAccess.get(actor).addResearch(research);
             test.assertTrue(actor.getMainHandItem().getItem().useOn(new UseOnContext(actor, InteractionHand.MAIN_HAND, hit)).consumesAction()
                             && matrix.isCrafting() && matrix.getRecipeType() == 1,
                     "the actual wand starts the researched modern enchantment ritual: " + name);
-            test.assertTrue(actor.experienceLevel == xp && matrix.getRemainingXPLevels() == recipe.xpLevels(input, level.registryAccess()),
-                    "start records the full planned XP without granting an unpaid result");
+            test.assertTrue(ExperiencePoints.available(actor) == xp && actor.totalExperience == xp && matrix.getRemainingXPPoints() == xpPrice,
+                    "start records the full fixed point price without upfront debit or an unpaid result");
             for (int tick = 0; tick < 10000 && matrix.isCrafting(); tick++) TileInfusionMatrix.tick(level, matrixPos, level.getBlockState(matrixPos), matrix);
             ItemStack result = center.getItem(0);
             test.assertTrue(!matrix.isCrafting() && result.is(input.getItem()) && result.getEnchantments().getLevel(target) == 1
                             && result.getDamageValue() == 7 && result.getHoverName().equals(input.getHoverName()),
                     "paid native ritual adds exactly one enchantment level to the retained item: " + name);
-            test.assertTrue(actor.experienceLevel == xp - recipe.xpLevels(input, level.registryAccess())
-                            && componentPedestals.stream().allMatch(TilePedestal::isEmpty), "exact native XP and every physical ingredient paid once: " + name);
+            test.assertTrue(ExperiencePoints.available(actor) == xp - xpPrice && actor.totalExperience == xp - xpPrice
+                            && componentPedestals.stream().allMatch(TilePedestal::isEmpty), "exact native XP points and every physical ingredient paid once: " + name);
             jars.forEach((aspect, jar) -> test.assertTrue(jar.getAmount() == before.get(aspect) - cost.getAmount(aspect),
                     "physical essence debit remains exact for " + name + "/" + aspect.getTag()));
             for (int tick = 0; tick < 40; tick++) TileInfusionMatrix.tick(level, matrixPos, level.getBlockState(matrixPos), matrix);
-            test.assertTrue(result.getEnchantments().getLevel(target) == 1 && actor.experienceLevel == xp - recipe.xpLevels(input, level.registryAccess()),
+            test.assertTrue(result.getEnchantments().getLevel(target) == 1
+                            && ExperiencePoints.available(actor) == xp - xpPrice && actor.totalExperience == xp - xpPrice,
                     "completed modern rituals never replay their result or debit");
             actor.getInventory().add(center.getItem(0).copy()); center.setItem(0, ItemStack.EMPTY);
         }

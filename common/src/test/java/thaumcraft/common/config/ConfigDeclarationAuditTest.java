@@ -43,7 +43,8 @@ class ConfigDeclarationAuditTest {
             Map.entry("infusion_keeps_item_data", "true"), Map.entry("filled_container_to_hand", "true"),
             Map.entry("research_search", "true"), Map.entry("research_counter", "true"),
             Map.entry("notification_clear_button", "true"), Map.entry("research_remember_page", "true"),
-            Map.entry("research_keyboard", "true"), Map.entry("research_bookmarks", "true"));
+            Map.entry("research_keyboard", "true"), Map.entry("research_bookmarks", "true"),
+            Map.entry("inventory_scanning", "true"));
 
     @Test void everyEditableKeyHasAnExplicitRuntimeParserNotJustAnEditor() throws Exception {
         Path root = Path.of("src/main/java/thaumcraft/common/config");
@@ -64,8 +65,8 @@ class ConfigDeclarationAuditTest {
             assertTrue(keys.add(entry.key()), "duplicate key " + entry.key());
             assertTrue(parsers.toString().contains("\"" + entry.key() + "\""), "no runtime reader: " + entry.key());
         }
-        assertEquals(36, keys.size());
-        assertEquals(54, DEFAULTS.size());
+        assertEquals(37, keys.size());
+        assertEquals(55, DEFAULTS.size());
     }
 
     @Test void editorDefaultsMatchTheOracleAndDoNotSilentlyDisableGlowingTaint(@TempDir Path directory) {
@@ -91,7 +92,7 @@ class ConfigDeclarationAuditTest {
         assertEquals(new thaumcraft.common.lib.runic.RunicSettings(2000, 80, 50),
                 thaumcraft.common.lib.runic.RunicSettings.DEFAULTS);
         assertEquals(ThaumcraftTweaks.DEFAULTS, readTweaks(empty));
-        assertEquals(54, DEFAULTS.size());
+        assertEquals(55, DEFAULTS.size());
     }
 
     private static ThaumcraftTweaks.Values readTweaks(Properties properties) {

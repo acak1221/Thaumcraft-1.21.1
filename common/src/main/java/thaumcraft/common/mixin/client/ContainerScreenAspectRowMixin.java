@@ -37,5 +37,7 @@ public abstract class ContainerScreenAspectRowMixin {
         if (!((Object) this instanceof AbstractContainerScreen<?> screen)) return;
         HoveredSlotAspectRow.render(graphics,
                 ((AbstractContainerScreenAccess) screen).thaumcraft$hoveredSlot(), mouseX, mouseY);
+        // Inventory scanning draws at the same point: the tooltip vanilla hides while the thaumometer is carried, and its label.
+        thaumcraft.client.lib.InventoryScanClient.render(screen, graphics, mouseX, mouseY);
     }
 }

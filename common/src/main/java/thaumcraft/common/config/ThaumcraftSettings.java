@@ -83,7 +83,9 @@ public final class ThaumcraftSettings {
                         + "filled_container_to_hand=true\nresearch_search=true\nresearch_counter=true\n"
                         + "notification_clear_button=true\n"
                         + "# The port's own Thaumonomicon conveniences; false is the original book.\n"
-                        + "research_remember_page=true\nresearch_keyboard=true\nresearch_bookmarks=true\n",
+                        + "research_remember_page=true\nresearch_keyboard=true\nresearch_bookmarks=true\n"
+                        + "# Scanning items in an open inventory with the thaumometer on the cursor (an add-on, not TC4).\n"
+                        + "inventory_scanning=true\n",
                         StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }
             configureServer(ResearchSettings.read(properties));

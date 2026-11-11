@@ -4,6 +4,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
  * The hovered slot of a native container screen.
@@ -24,4 +25,8 @@ public interface AbstractContainerScreenAccess {
 
     @Accessor("topPos")
     int thaumcraft$topPos();
+
+    /** The slot under a point; inventory scanning needs it while an item is carried, when no slot counts as hovered for a tooltip. */
+    @Invoker("findSlot")
+    Slot thaumcraft$findSlot(double x, double y);
 }

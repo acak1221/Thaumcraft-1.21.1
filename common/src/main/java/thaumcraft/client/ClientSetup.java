@@ -84,6 +84,7 @@ public final class ClientSetup {
         thaumcraft.client.ClientStateReset.init();
         thaumcraft.client.lib.PlayerNotifications.init();
         thaumcraft.client.lib.WandDiscountTooltip.init();
+        thaumcraft.client.lib.InventoryScanClient.init();
         thaumcraft.client.ThaumcraftMonsterClient.init();
         thaumcraft.client.ThaumcraftRunicClient.init();
         thaumcraft.client.ThaumcraftBaublesClient.init();

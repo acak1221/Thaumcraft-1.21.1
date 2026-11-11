@@ -110,7 +110,9 @@ public final class ThaumcraftConfigStore {
             new Entry(Category.TWEAKS, "notification_clear_button", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "research_remember_page", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "research_keyboard", true, true, 0, 0, 0),
-            new Entry(Category.TWEAKS, "research_bookmarks", true, true, 0, 0, 0));
+            new Entry(Category.TWEAKS, "research_bookmarks", true, true, 0, 0, 0),
+            // The Thaumic Inventory Scanning add-on, built in; false is TC4, which scans only in the world.
+            new Entry(Category.TWEAKS, "inventory_scanning", true, true, 0, 0, 0));
 
     private ThaumcraftConfigStore() {}
 

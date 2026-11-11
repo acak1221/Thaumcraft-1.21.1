@@ -43,19 +43,22 @@ public final class ThaumcraftTweaks {
      * @param bookKeyboard       the arrow and page keys turn the pages and pan the map, Tab changes the
      *                           category (the port's own)
      * @param bookmarks          research pages can be bookmarked and are listed beside the map (the port's own)
+     * @param inventoryScanning  the thaumometer on the cursor scans the item under it in an open inventory
+     *                           (the Thaumic Inventory Scanning add-on, not TC4)
      */
     public record Values(boolean moreRandomizedLoot, EarthShockTargets earthShock, boolean infusionKeepsData,
                          boolean filledToHand, boolean researchSearch, boolean researchCounter,
-                         boolean clearNotifications, boolean rememberPage, boolean bookKeyboard, boolean bookmarks) {
+                         boolean clearNotifications, boolean rememberPage, boolean bookKeyboard, boolean bookmarks,
+                         boolean inventoryScanning) {
         public Values { Objects.requireNonNull(earthShock, "earth shock"); }
     }
 
     /** The TC4Tweaks defaults, and the port's own book conveniences switched on. */
     public static final Values DEFAULTS = new Values(true, EarthShockTargets.ONLY_LIVING, true, true, true, true, true,
-            true, true, true);
+            true, true, true, true);
     /** Every original TC4 4.2.3.5 rule. */
     public static final Values ORIGINAL = new Values(false, EarthShockTargets.ALL, false, false, false, false, false,
-            false, false, false);
+            false, false, false, false);
 
     private static volatile Values values = DEFAULTS;
 
@@ -72,6 +75,7 @@ public final class ThaumcraftTweaks {
     public static boolean rememberPage() { return values.rememberPage(); }
     public static boolean bookKeyboard() { return values.bookKeyboard(); }
     public static boolean bookmarks() { return values.bookmarks(); }
+    public static boolean inventoryScanning() { return values.inventoryScanning(); }
 
     public static void configure(Values input) { values = Objects.requireNonNull(input); }
 
@@ -87,7 +91,8 @@ public final class ThaumcraftTweaks {
                 flag(properties, "notification_clear_button", DEFAULTS.clearNotifications()),
                 flag(properties, "research_remember_page", DEFAULTS.rememberPage()),
                 flag(properties, "research_keyboard", DEFAULTS.bookKeyboard()),
-                flag(properties, "research_bookmarks", DEFAULTS.bookmarks())));
+                flag(properties, "research_bookmarks", DEFAULTS.bookmarks()),
+                flag(properties, "inventory_scanning", DEFAULTS.inventoryScanning())));
     }
 
     /** Whether earth shock hurts an entity of this kind under the given setting. */

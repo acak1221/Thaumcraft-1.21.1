@@ -73,7 +73,11 @@ enum MachineProvider implements IBlockComponentProvider, IServerDataProvider<Blo
         } else if (entity instanceof TileArcaneFurnace furnace) {
             data.putInt("Cook", furnace.furnaceCookTime);
             data.putInt("Speedy", furnace.speedyTime);
-        } else if (entity instanceof TileInfusionMatrix matrix && matrix.isCrafting()) {
+        } else if (entity instanceof TileInfusionMatrix matrix) {
+            // Stability is the altar's symmetry with the sign turned: 0 is a bare altar, every unpaired
+            // pedestal lowers it, paired stabilisers raise it.
+            data.putInt("Stability", -matrix.surveySymmetry());
+            if (!matrix.isCrafting()) return;
             data.putBoolean("Crafting", true);
             data.putInt("Essentia", matrix.getDemand().visSize());
             data.putInt("Items", matrix.getRemainingIngredientCount());
@@ -116,6 +120,11 @@ enum MachineProvider implements IBlockComponentProvider, IServerDataProvider<Blo
             if (data.getInt("Speedy") > 0) tooltip.add(Component.translatable("tc.port.jade.boosted", seconds(data.getInt("Speedy")))
                     .withStyle(ChatFormatting.GOLD));
         } else if (entity instanceof TileInfusionMatrix) {
+            if (data.contains("Stability")) {
+                int stability = data.getInt("Stability");
+                tooltip.add(Component.translatable("tc.port.jade.stability", (stability > 0 ? "+" : "") + stability)
+                        .withStyle(stability > 0 ? ChatFormatting.GREEN : stability < 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
+            }
             if (!data.getBoolean("Crafting")) return;
             ItemStack output = data.contains("Output") ? ItemStack.parseOptional(accessor.getLevel().registryAccess(), data.getCompound("Output"))
                     : ItemStack.EMPTY;

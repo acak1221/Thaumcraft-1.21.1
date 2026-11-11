@@ -85,6 +85,25 @@ public final class TileInfusionMatrix extends RetainedDataBlockEntity implements
     public boolean isCrafting() { return crafting; }
     public int getInstability() { return instability; }
     public int getSymmetry() { return symmetry; }
+
+    private long surveyTime = Long.MIN_VALUE;
+    private int surveyedSymmetry;
+
+    /**
+     * The symmetry the altar has right now, for display only. The matrix itself measures symmetry when
+     * an infusion starts and while it waits for resources, so {@link #getSymmetry()} can be older than
+     * the pedestals and stabilisers a player has just moved. This reads the world at most once a second
+     * and never changes the infusion's own state.
+     */
+    public int surveySymmetry() {
+        if (!(level instanceof ServerLevel server) || !server.getServer().isSameThread() || !current()) return symmetry;
+        long time = server.getGameTime();
+        if (surveyTime == Long.MIN_VALUE || time < surveyTime || time - surveyTime >= 20) {
+            surveyedSymmetry = InfusionStructure.scan(server, worldPosition).symmetry();
+            surveyTime = time;
+        }
+        return surveyedSymmetry;
+    }
     public int getRecipeInstability() { return recipeInstability; }
     public AspectList getDemand() { return recipeEssentia.copy(); }
     public AspectList getRecipeCost() { return recipeCost.copy(); }

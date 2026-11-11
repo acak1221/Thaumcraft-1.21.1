@@ -2732,6 +2732,7 @@
   "tc.port.jade.heat": "Жар: %s",
   "tc.port.jade.cooking": "Плавка: %s с",
   "tc.port.jade.boosted": "Ускорение огнём: %s с",
+  "tc.port.jade.stability": "Стабильность: %s",
   "tc.port.jade.infusing": "Инфузия: %s",
   "tc.port.jade.infusion_left": "Осталось вытянуть: предметов %s, эссенции %s",
   "tc.port.jade.recipes": "Рецепты: %s / %s",

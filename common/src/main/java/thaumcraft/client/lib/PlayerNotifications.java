@@ -41,28 +41,17 @@ public final class PlayerNotifications {
                 try (var reader = Files.newBufferedReader(file)) { settings.load(reader); }
             } else {
                 Files.createDirectories(file.getParent());
-                Files.writeString(file, "# Original TC4 client notification timing and number of visible rows.\nnotification_delay=5000\nnotification_max=15\n"
-                        + "# The port's own placement. Corner: bottom_right (original), bottom_left, top_right, top_left.\n"
-                        + "# Scale in percent (25-400); offsets in GUI pixels from that corner, right and down positive.\n"
-                        + "notification_corner=bottom_right\nnotification_scale=100\nnotification_offset_x=0\nnotification_offset_y=0\n");
+                Files.writeString(file, "# Original TC4 client notification timing and number of visible rows.\nnotification_delay=5000\nnotification_max=15\n");
             }
             int delay = Integer.parseInt(settings.getProperty("notification_delay", "5000"));
             int rows = Integer.parseInt(settings.getProperty("notification_max", "15"));
             if (rows < 0) throw new IllegalArgumentException("Negative notification count");
-            String corner = settings.getProperty("notification_corner", "bottom_right").strip().toLowerCase(java.util.Locale.ROOT);
-            if (!java.util.Set.of("bottom_right", "bottom_left", "top_right", "top_left").contains(corner))
-                throw new IllegalArgumentException("Unknown notification corner " + corner);
-            int percent = Integer.parseInt(settings.getProperty("notification_scale", "100").strip());
-            if (percent < 25 || percent > 400) throw new IllegalArgumentException("Notification scale outside 25-400");
-            int shiftX = Integer.parseInt(settings.getProperty("notification_offset_x", "0").strip());
-            int shiftY = Integer.parseInt(settings.getProperty("notification_offset_y", "0").strip());
             queue = new NotificationQueue(delay); maximum = rows;
-            left = corner.endsWith("left"); top = corner.startsWith("top"); scale = percent / 100F; offsetX = shiftX; offsetY = shiftY;
         } catch (IOException | IllegalArgumentException failure) {
             Thaumcraft.LOG.error("Cannot read Thaumcraft client notifications at {}; using original defaults", file, failure);
             queue = new NotificationQueue(5000); maximum = 15;
-            left = top = false; scale = 1F; offsetX = offsetY = 0;
         }
+        applyPlacement(thaumcraft.common.config.ThaumcraftConfigStore.read(thaumcraft.common.config.ThaumcraftConfigStore.file()));
         dev.architectury.event.events.client.ClientGuiEvent.INIT_POST.register((screen, access) -> {
             if (screen instanceof net.minecraft.client.gui.screens.ChatScreen && thaumcraft.common.config.ThaumcraftTweaks.clearNotifications())
                 access.addRenderableWidget(new ClearButton(screen));
@@ -71,6 +60,28 @@ public final class PlayerNotifications {
         thaumcraft.common.lib.network.KnowledgeNotificationNetworking.initClient(PlayerNotifications::receivePool,
                 PlayerNotifications::receiveDiscovery, ResearchNotifications::receive);
     }
+    /**
+     * The port's own placement of the stack, from the settings of the configuration screen
+     * ({@code config/thaumcraft.properties}); the screen calls this when it closes, so the stack moves
+     * at once. Corner 0 is the original lower right, then lower left, upper right, upper left; the scale
+     * is in percent and the offsets in GUI pixels, right and down positive. A value that cannot be read
+     * or is out of range keeps its default.
+     */
+    public static void applyPlacement(Properties settings) {
+        int corner = number(settings, "notification_corner", 0, 0, 3);
+        left = corner == 1 || corner == 3; top = corner >= 2;
+        scale = number(settings, "notification_scale", 100, 25, 400) / 100F;
+        offsetX = number(settings, "notification_offset_x", 0, -200, 200);
+        offsetY = number(settings, "notification_offset_y", 0, -200, 200);
+    }
+
+    private static int number(Properties settings, String key, int fallback, int min, int max) {
+        try {
+            int value = Integer.parseInt(settings.getProperty(key, Integer.toString(fallback)).strip());
+            return value < min || value > max ? fallback : value;
+        } catch (NumberFormatException unreadable) { return fallback; }
+    }
+
     public static void reset() { queue.clear(); FLIGHTS.clear(); ResearchNotifications.reset(); level = null; lastSound=0; }
 
     /** The rows the HUD draws now. */

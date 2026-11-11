@@ -34,8 +34,8 @@ class ConfigDeclarationAuditTest {
             Map.entry("runic_recharge_speed", "2000"), Map.entry("runic_recharge_delay", "80"),
             Map.entry("runic_cost", "50"), Map.entry("notification_delay", "5000"),
             Map.entry("notification_max", "15"),
-            // The port's own placement of the notification stack (thaumcraft-client.properties).
-            Map.entry("notification_corner", "bottom_right"), Map.entry("notification_scale", "100"),
+            // The port's own placement of the notification stack (PlayerNotifications.applyPlacement).
+            Map.entry("notification_corner", "0"), Map.entry("notification_scale", "100"),
             Map.entry("notification_offset_x", "0"), Map.entry("notification_offset_y", "0"),
             // The port's own Tweaks category (ThaumcraftTweaks.DEFAULTS), not oracle keys.
             Map.entry("aspect_inference", "true"),
@@ -65,7 +65,7 @@ class ConfigDeclarationAuditTest {
             assertTrue(keys.add(entry.key()), "duplicate key " + entry.key());
             assertTrue(parsers.toString().contains("\"" + entry.key() + "\""), "no runtime reader: " + entry.key());
         }
-        assertEquals(37, keys.size());
+        assertEquals(41, keys.size());
         assertEquals(55, DEFAULTS.size());
     }
 

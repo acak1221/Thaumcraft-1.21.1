@@ -65,9 +65,35 @@ public final class ElementalSwordRuntimeChecks {
         BlockPos origin = test.absolutePos(new BlockPos(3, 64, 3));
         // The sweep happens thirty blocks further along z, so the chunks of the sweep room belong to
         // the fixture as well; a room whose chunk is not loaded does not hold its actors.
-        for (int x = (origin.getX() - 18) >> 4; x <= ((origin.getX() + 18) >> 4); x++) {
-            for (int z = (origin.getZ() - 18) >> 4; z <= ((origin.getZ() + 40) >> 4); z++) level.getChunk(x, z);
+        // Loading a chunk is not enough. The sweep finds its mobs with an entity query, and a chunk's entity
+        // section answers queries only after a later main-thread task makes it visible. The test is built at
+        // a random place on every run, so a room that straddled a chunk border lost the mobs of the chunk
+        // that was not visible yet (seen as a sweep that struck some of them or none). Force the chunks and
+        // wait until each of them ticks entities.
+        List<net.minecraft.world.level.ChunkPos> forced = new java.util.ArrayList<>();
+        try {
+            for (int x = (origin.getX() - 18) >> 4; x <= ((origin.getX() + 18) >> 4); x++) {
+                for (int z = (origin.getZ() - 18) >> 4; z <= ((origin.getZ() + 40) >> 4); z++) {
+                    if (!level.getForcedChunks().contains(net.minecraft.world.level.ChunkPos.asLong(x, z))) {
+                        level.setChunkForced(x, z, true);
+                        forced.add(new net.minecraft.world.level.ChunkPos(x, z));
+                    }
+                    level.getChunk(x, z);
+                }
+            }
+            for (int x = (origin.getX() - 18) >> 4; x <= ((origin.getX() + 18) >> 4); x++) {
+                for (int z = (origin.getZ() - 18) >> 4; z <= ((origin.getZ() + 40) >> 4); z++) {
+                    GameTestChunkAwait.entityTicking(test, new net.minecraft.world.level.ChunkPos(x, z).getMiddleBlockPosition(origin.getY()));
+                }
+            }
+            actors(test, level, origin);
+        } finally {
+            for (var chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
         }
+        test.succeed();
+    }
+
+    private static void actors(GameTestHelper test, ServerLevel level, BlockPos origin) {
         var connection = new Connection(PacketFlow.SERVERBOUND);
         var channel = new EmbeddedChannel(connection);
         var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "zephyr-" + UUID.randomUUID().toString().substring(0, 6)), ClientInformation.createDefault());
@@ -88,7 +114,6 @@ public final class ElementalSwordRuntimeChecks {
                 channel.finishAndReleaseAll();
             }
         }
-        test.succeed();
     }
 
     private static ItemStack sword() { return new ItemStack(ThaumcraftEquipment.ELEMENTAL_SWORD.get()); }

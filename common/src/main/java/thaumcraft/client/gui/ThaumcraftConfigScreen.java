@@ -37,7 +37,7 @@ public final class ThaumcraftConfigScreen extends Screen {
     private static final int HEADER = 52, FOOTER = 44, ROW_HEIGHT = 24;
     private static final int TEXT = 0xFFFFFF, DIM = 0xA0A0A0;
     /** Integer settings whose values are modes with names rather than amounts. */
-    private static final java.util.Set<String> NAMED_VALUES = java.util.Set.of("research_difficulty", "earth_shock_targets");
+    private static final java.util.Set<String> NAMED_VALUES = java.util.Set.of("research_difficulty", "earth_shock_targets", "notification_corner");
     private final Screen parent;
     private final Properties values;
     private ThaumcraftConfigStore.Category category = ThaumcraftConfigStore.Category.GENERAL;
@@ -92,6 +92,8 @@ public final class ThaumcraftConfigScreen extends Screen {
     @Override public void onClose() {
         // The original saved its configuration when the screen closed; the port writes the file.
         ThaumcraftConfigStore.write(ThaumcraftConfigStore.file(), values);
+        // The placement of the notification stack is drawing only, so it does not wait for a restart.
+        thaumcraft.client.lib.PlayerNotifications.applyPlacement(values);
         if (this.parent != null) this.minecraft.setScreen(this.parent);
         else this.minecraft.setScreen(null);
     }

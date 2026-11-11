@@ -28,11 +28,22 @@ public final class InventoryScanning {
     public static final int HEARTBEAT_TIMEOUT = 12;
     private static boolean server, client;
     private static Boolean addon;
+    /** What the connected server said when the player joined; true until it says otherwise and again after a disconnect. */
+    private static volatile boolean serverAdmits = true;
 
     private InventoryScanning() {}
 
     /** The setting is on and the companion add-on is not installed. */
     public static boolean enabled() { return ThaumcraftTweaks.inventoryScanning() && !addonInstalled(); }
+
+    /**
+     * What the client offers: its own setting, and the server's as far as the server told it. A server
+     * that never says (an older build) is taken to admit scanning, and then simply never answers.
+     */
+    public static boolean offeredByClient() { return enabled() && serverAdmits; }
+
+    /** The connected server's answer; client thread. */
+    public static void serverAdmits(boolean admits) { serverAdmits = admits; }
 
     private static boolean addonInstalled() {
         Boolean known = addon;
@@ -53,7 +64,13 @@ public final class InventoryScanning {
                 (payload, context) -> context.queue(() -> {
                     if (context.getPlayer() instanceof ServerPlayer player) InventoryScanServer.receive(player, payload);
                 }));
-        if (Platform.getEnvironment() == Env.SERVER) NetworkManager.registerS2CPayloadType(ScanReply.TYPE, ScanReply.STREAM_CODEC);
+        if (Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerS2CPayloadType(ScanReply.TYPE, ScanReply.STREAM_CODEC);
+            NetworkManager.registerS2CPayloadType(ScanAvailability.TYPE, ScanAvailability.STREAM_CODEC);
+        }
+        PlayerEvent.PLAYER_JOIN.register(player -> {
+            if (NetworkManager.canPlayerReceive(player, ScanAvailability.TYPE)) NetworkManager.sendToPlayer(player, new ScanAvailability(enabled()));
+        });
         // A client without this channel (an older build) simply gets no receipts.
         InventoryScanServer.installTransport((player, reply) -> {
             if (NetworkManager.canPlayerReceive(player, ScanReply.TYPE)) NetworkManager.sendToPlayer(player, reply);
@@ -69,5 +86,9 @@ public final class InventoryScanning {
         client = true;
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, ScanReply.TYPE, ScanReply.STREAM_CODEC,
                 (payload, context) -> context.queue(() -> receive.accept(payload)));
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, ScanAvailability.TYPE, ScanAvailability.STREAM_CODEC,
+                (payload, context) -> context.queue(() -> serverAdmits(payload.enabled())));
+        // The answer belongs to one connection; the next server speaks for itself.
+        dev.architectury.event.events.client.ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> serverAdmits(true));
     }
 }

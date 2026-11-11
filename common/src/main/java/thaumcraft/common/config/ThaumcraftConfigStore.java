@@ -112,7 +112,13 @@ public final class ThaumcraftConfigStore {
             new Entry(Category.TWEAKS, "research_keyboard", true, true, 0, 0, 0),
             new Entry(Category.TWEAKS, "research_bookmarks", true, true, 0, 0, 0),
             // The Thaumic Inventory Scanning add-on, built in; false is TC4, which scans only in the world.
-            new Entry(Category.TWEAKS, "inventory_scanning", true, true, 0, 0, 0));
+            new Entry(Category.TWEAKS, "inventory_scanning", true, true, 0, 0, 0),
+            // The port's own placement of the notification stack (client; PlayerNotifications.applyPlacement).
+            // The defaults are the original lower right corner at full size.
+            new Entry(Category.TWEAKS, "notification_corner", false, false, 0, 0, 3),
+            new Entry(Category.TWEAKS, "notification_scale", false, false, 100, 25, 400),
+            new Entry(Category.TWEAKS, "notification_offset_x", false, false, 0, -200, 200),
+            new Entry(Category.TWEAKS, "notification_offset_y", false, false, 0, -200, 200));
 
     private ThaumcraftConfigStore() {}
 

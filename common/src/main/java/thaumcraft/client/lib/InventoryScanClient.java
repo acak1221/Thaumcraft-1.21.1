@@ -75,7 +75,7 @@ public final class InventoryScanClient {
 
     public static void tick() {
         var minecraft = Minecraft.getInstance();
-        if (!InventoryScanning.enabled()) {
+        if (!InventoryScanning.offeredByClient()) {
             if (target != null) clearTarget();
             return;
         }
@@ -112,7 +112,7 @@ public final class InventoryScanClient {
 
     /** Called by loader-native item-tooltip events, including their asynchronous search-tree callers. */
     public static void appendTooltips(ItemStack stack, List<Component> lines, boolean shift) {
-        if (!(stack.getItem() instanceof ItemThaumometer) || !InventoryScanning.enabled()) return;
+        if (!(stack.getItem() instanceof ItemThaumometer) || !InventoryScanning.offeredByClient()) return;
         lines.add(Component.translatable("tc.port.inventoryscan.thaumometerTooltip").withStyle(ChatFormatting.GOLD));
         if (shift) {
             lines.add(Component.translatable("tc.port.inventoryscan.thaumometerTooltipMore1").withStyle(ChatFormatting.DARK_AQUA));
@@ -122,7 +122,7 @@ public final class InventoryScanClient {
 
     public static void render(Screen screen, GuiGraphics graphics, int mouseX, int mouseY) {
         var minecraft = Minecraft.getInstance();
-        if (!InventoryScanning.enabled()) return;
+        if (!InventoryScanning.offeredByClient()) return;
         if (!(screen instanceof AbstractContainerScreen<?> container) || minecraft.player == null
                 || !(container.getMenu().getCarried().getItem() instanceof ItemThaumometer)) return;
         var visible = ((AbstractContainerScreenAccess) container).thaumcraft$findSlot(mouseX, mouseY);

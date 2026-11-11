@@ -85,7 +85,10 @@ public final class ThaumcraftSettings {
                         + "# The port's own Thaumonomicon conveniences; false is the original book.\n"
                         + "research_remember_page=true\nresearch_keyboard=true\nresearch_bookmarks=true\n"
                         + "# Scanning items in an open inventory with the thaumometer on the cursor (an add-on, not TC4).\n"
-                        + "inventory_scanning=true\n",
+                        + "inventory_scanning=true\n"
+                        + "# Where the notification stack is drawn (client): corner 0 lower right (original), 1 lower left,\n"
+                        + "# 2 upper right, 3 upper left; scale in percent (25-400); offsets in GUI pixels (-200..200).\n"
+                        + "notification_corner=0\nnotification_scale=100\nnotification_offset_x=0\nnotification_offset_y=0\n",
                         StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }
             configureServer(ResearchSettings.read(properties));

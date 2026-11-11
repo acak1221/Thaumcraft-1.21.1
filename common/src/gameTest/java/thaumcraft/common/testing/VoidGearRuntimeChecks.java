@@ -221,12 +221,17 @@ public final class VoidGearRuntimeChecks {
         player.tickCount = 15;
         long start = test.getTick();
         // A player that no network handler ticks does not tick its inventory either; doTick is what the connection calls.
-        test.onEachTick(player::doTick);
+        // The age the inventory tick saw on every tick, for the failure message: the age is advanced by the level's
+        // entity tick and the inventory by doTick, and a mend needs the two to meet on a multiple of twenty.
+        List<Integer> ages = new ArrayList<>();
+        test.onEachTick(() -> { if (ages.size() < 40) ages.add(player.tickCount); player.doTick(); });
         List<Mob> pigs = new ArrayList<>();
         for (int index = 0; index < 5; index++) pigs.add(pig(level, test, index));
         test.runAtTickTime(start + 14, () -> guarded(level, attacker, victim, pvp, pigs, () -> {
             test.assertTrue(player.tickCount >= 20 && player.tickCount < 40, "the player passed tick 20 once: " + player.tickCount);
-            test.assertTrue(mendedTool.getDamageValue() == 49, "a void pickaxe in the pack mended one point: " + mendedTool.getDamageValue());
+            test.assertTrue(mendedTool.getDamageValue() == 49, "a void pickaxe in the pack mended one point: " + mendedTool.getDamageValue()
+                    + "; ages seen by the inventory tick: " + ages + ", entity ticking: " + level.isPositionEntityTicking(player.blockPosition())
+                    + ", creative: " + player.getAbilities().instabuild);
             test.assertTrue(packed.getDamageValue() == 49, "so did void boots in the pack: " + packed.getDamageValue());
             test.assertTrue(worn.getDamageValue() == 48, "a worn void helmet mended two (inventory tick and armor tick): " + worn.getDamageValue());
             test.assertTrue(plain.getDamageValue() == 50, "a Thaumium pickaxe mends nothing: " + plain.getDamageValue());

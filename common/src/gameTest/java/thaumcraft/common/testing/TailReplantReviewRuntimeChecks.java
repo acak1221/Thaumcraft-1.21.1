@@ -97,7 +97,15 @@ public final class TailReplantReviewRuntimeChecks {
         registry.register(listener);
         try {
             int ticks = 0;
+            String lost = "";
             for (; ticks < 650 && f.level.getBlockState(crop).is(Blocks.MELON); ticks++) {
+                // Why the worker stopped being a worker, at the tick it happened: a later summary cannot tell.
+                if (lost.isEmpty() && !golem.isAlive()) {
+                    lost = " lostAtTick=" + ticks + " removal=" + golem.getRemovalReason() + " health=" + golem.getHealth()
+                            + " lastDamage=" + (golem.getLastDamageSource() == null ? "none" : golem.getLastDamageSource().getMsgId())
+                            + " at=" + golem.position() + " feet=" + f.level.getBlockState(golem.blockPosition())
+                            + " entityTicking=" + f.level.isPositionEntityTicking(golem.blockPosition());
+                }
                 golem.setPos(Vec3.atBottomCenterOf(home));
                 golem.setDeltaMovement(Vec3.ZERO); golem.setOnGround(true);
                 f.level.tickNonPassenger(golem);
@@ -107,7 +115,7 @@ public final class TailReplantReviewRuntimeChecks {
                     .mapToInt(drop -> drop.getItem().getCount()).sum();
             return new Outcome(harvested, f.level.getBlockState(crop).is(Blocks.NETHER_WART),
                     f.player.getInventory().countItem(Items.NETHER_WART), loose, events[0], ticks,
-                    "area=" + golem.loadedNavigationArea(crop) + " " + golem.describeWorkState());
+                    "area=" + golem.loadedNavigationArea(crop) + lost + " " + golem.describeWorkState());
         } finally {
             registry.unregister(listener);
             golem.discard(); seed.discard(); f.drops();

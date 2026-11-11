@@ -77,8 +77,9 @@ class ThaumcraftTweaksTest {
     @Test void theScreenOffersEveryTweakWithItsDefault() {
         Properties missing = new Properties();
         var entries = ThaumcraftConfigStore.entries(ThaumcraftConfigStore.Category.TWEAKS);
-        // Eleven ThaumcraftTweaks values and the aspect inference, which ResearchSettings holds.
-        assertEquals(12, entries.size());
+        // Eleven ThaumcraftTweaks values, the aspect inference, which ResearchSettings holds, and the
+        // four placement settings of the notification stack, which PlayerNotifications reads.
+        assertEquals(16, entries.size());
         for (var entry : entries) missing.setProperty(entry.key(), entry.value(new Properties()));
         ThaumcraftTweaks.load(missing);
         assertEquals(ThaumcraftTweaks.DEFAULTS, ThaumcraftTweaks.values());

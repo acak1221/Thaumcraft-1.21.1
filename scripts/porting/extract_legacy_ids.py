@@ -905,8 +905,13 @@ def render_doc(document_: dict) -> str:
         "wildcard of a field with several native ids; `legacyItemIds` lists those ids.",
         "* `getBlock` gives a block row whose state is not the default state and whose item is the block's own "
         "item the `minecraft:block_state` component, so placing the stack gives the original state (a top slab, a "
-        "cosmetic variant). Other components are only described here: an add-on sets them itself (for example "
-        "the aspect of a filled phial).",
+        "cosmetic variant). The block's own item is the item registered under the block's id, not "
+        "`Block.asItem()`: the loaders map a block to the last block item registered for it, which is a variant "
+        "item (`obsidian_tile` for `cosmetic_solid_tough`, `research_table` for `table`). A variant item of its "
+        "own places its state itself and carries no component, so the stack an add-on recipe asks for (Thaumic "
+        "Tinkerer's Osmotic Enchanter takes five `blockCosmeticSolid:1`) is the stack a player crafts. GameTest "
+        "`legacyBlockStacksMatchTheStacksPlayersHold`. Other components are only described here: an add-on sets "
+        "them itself (for example the aspect of a filled phial).",
         "* The `name` column is the original English name from the 1.7.10 language file.",
         "",
         "Evidence: `Class.method:lines` / `Class:line` are source lines of the original class files "

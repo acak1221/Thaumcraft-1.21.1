@@ -2578,6 +2578,13 @@ public final class ThaumcraftGameTests {
         thaumcraft.common.testing.AddonApiRuntimeChecks.effectsOfTheOriginalPacketsAreSent(test);
     }
 
+    // An original field and metadata gives the stack a player holds (Thaumic Tinkerer's Osmotic Enchanter asks for
+    // obsidian tiles as blockCosmeticSolid:1); only the block's own item carries the metadata's state.
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "api_legacy_block_stacks")
+    public void legacyBlockStacksMatchTheStacksPlayersHold(GameTestHelper test) {
+        thaumcraft.common.testing.AddonApiRuntimeChecks.legacyBlockStacksMatchTheStacksPlayersHold(test);
+    }
+
     // The stable keys of the add-on API (effects, entities, armour materials, sounds) resolve to the registered objects.
     @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 200, batch = "api_stable_keys")
     public void stableKeysResolveToTheRegisteredObjects(GameTestHelper test) {

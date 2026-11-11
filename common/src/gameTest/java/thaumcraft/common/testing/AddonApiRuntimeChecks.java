@@ -1,13 +1,22 @@
 package thaumcraft.common.testing;
 
+import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.api.ItemApi;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.ArcaneRecipes;
+import thaumcraft.api.crafting.InfusionRecipe;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 
 /** The add-on lifecycle and the 1.7.10 ore dictionary names of the public API, in a running world. */
 public final class AddonApiRuntimeChecks {
@@ -67,6 +76,59 @@ public final class AddonApiRuntimeChecks {
             if (before == null) ThaumcraftApi.objectTags.remove(key);
             else ThaumcraftApi.objectTags.put(key, before);
         }
+        test.succeed();
+    }
+
+    /**
+     * {@code ItemApi.getBlock(field, meta)} gives the stack a player holds. The block's own item carries the state of
+     * the metadata as {@code minecraft:block_state}; a variant item of its own (the obsidian tile) carries nothing, even
+     * though the loaders map the block to that variant item, the last block item registered for it. Thaumic Tinkerer's
+     * Osmotic Enchanter asks for five {@code blockCosmeticSolid:1}: with the state on the recipe's tile no crafted tile
+     * matched, and the matrix never started.
+     */
+    public static void legacyBlockStacksMatchTheStacksPlayersHold(GameTestHelper test) {
+        ItemStack tile = ItemApi.getBlock("blockCosmeticSolid", 1);
+        ItemStack crafted = new ItemStack(ThaumcraftEldritchBlocks.OBSIDIAN_TILE_ITEM.get());
+        test.assertTrue(tile != null && tile.is(crafted.getItem()), "blockCosmeticSolid:1 is the obsidian tile: " + tile);
+        test.assertTrue(tile.get(DataComponents.BLOCK_STATE) == null,
+                "the obsidian tile places its variant itself and carries no state: " + tile.getComponentsPatch());
+        test.assertTrue(InfusionRecipe.areItemStacksEqual(crafted, tile, true), "a crafted obsidian tile is the one a recipe asks for");
+        InfusionRecipe enchanter = new InfusionRecipe("", new ItemStack(Items.DIAMOND), 0, new AspectList(),
+                new ItemStack(Items.ENCHANTING_TABLE), new ItemStack[] { tile.copy(), tile.copy() });
+        test.assertTrue(enchanter.matches(new ArrayList<>(List.of(crafted.copy(), crafted.copy())), new ItemStack(Items.ENCHANTING_TABLE),
+                test.getLevel(), null), "an add-on infusion of legacy obsidian tiles takes crafted tiles");
+
+        ItemStack charged = ItemApi.getBlock("blockCosmeticSolid", 8);
+        BlockState chargedState = ItemApi.legacyBlockState("blockCosmeticSolid", 8);
+        test.assertTrue(charged != null && charged.is(ThaumcraftEldritchBlocks.COSMETIC_SOLID_TOUGH_ITEM.get()),
+                "blockCosmeticSolid:8 is the totem block's own item: " + charged);
+        BlockItemStateProperties carried = charged.get(DataComponents.BLOCK_STATE);
+        test.assertTrue(carried != null && carried.apply(ThaumcraftEldritchBlocks.COSMETIC_SOLID_TOUGH.get().defaultBlockState()) == chargedState,
+                "the charged totem keeps its variant although the obsidian tile is registered after the totem's own item: " + carried);
+
+        List<String> wrong = new ArrayList<>();
+        for (String field : ItemApi.legacyNames()) {
+            for (int meta : ItemApi.legacyMetadata(field)) {
+                ResourceLocation blockId = ItemApi.legacyBlockId(field, meta);
+                ResourceLocation itemId = ItemApi.legacyItemId(field, meta);
+                if (meta == ItemApi.WILDCARD || blockId == null || itemId == null) continue;
+                ItemStack stack = ItemApi.getBlock(field, meta);
+                if (stack == null) {
+                    wrong.add(field + ":" + meta + " gives no stack");
+                    continue;
+                }
+                BlockItemStateProperties state = stack.get(DataComponents.BLOCK_STATE);
+                if (!itemId.equals(blockId)) {
+                    if (state != null) wrong.add(field + ":" + meta + " variant item " + itemId + " carries " + state);
+                    continue;
+                }
+                BlockState expected = ItemApi.legacyBlockState(field, meta);
+                if (expected == null || !(stack.getItem() instanceof BlockItem own) || expected.getBlock() != own.getBlock()) continue;
+                BlockState placed = state == null ? own.getBlock().defaultBlockState() : state.apply(own.getBlock().defaultBlockState());
+                if (placed != expected) wrong.add(field + ":" + meta + " places " + placed + ", not " + expected);
+            }
+        }
+        test.assertTrue(wrong.isEmpty(), "legacy block stacks that differ from what their metadata names: " + wrong);
         test.succeed();
     }
 }

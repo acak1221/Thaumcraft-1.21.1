@@ -171,8 +171,12 @@ public class ItemApi {
         // The block's own item places its default state; another state of the original metadata (a top slab,
         // a cosmetic variant, an active fetter) travels as minecraft:block_state, which BlockItem applies on
         // placement. A variant item of its own (the obsidian tile, the research table) already places it.
+        // The block's own item is the one registered under the block's id. Block.asItem() cannot tell: the
+        // loaders map a block to the LAST block item registered for it, and a variant item is registered after
+        // the block's own item (obsidian_tile after cosmetic_solid_tough, research_table after table), so
+        // asItem() named the variant item and its stack wrongly carried block_state, which no crafted stack has.
         if (Legacy.BLOCK.equals(kind) && !row.state().isEmpty() && item instanceof BlockItem blockItem
-                && blockItem.getBlock().asItem() == item
+                && itemId.equals(row.id())
                 && row.id() != null && row.id().equals(BuiltInRegistries.BLOCK.getKey(blockItem.getBlock()))) {
             BlockState state = legacyBlockState(field, row.meta());
             if (state != null && state != blockItem.getBlock().defaultBlockState()) {

@@ -22,12 +22,14 @@ final class EmiArcaneRecipe extends ThaumcraftEmiRecipe {
     private final List<AspectEmiStack> vis;
     private final boolean shapeless;
     private final String research;
+    private final Map<String, Integer> visCosts;
 
     EmiArcaneRecipe(ResourceLocation id, String research, List<EmiIngredient> grid, ItemStack result,
                     Map<String, Integer> vis, boolean shapeless) {
         super(ThaumcraftEmiPlugin.ARCANE, id, 118, 0, research);
         this.grid = List.copyOf(grid);
         this.vis = vis(vis);
+        this.visCosts = Map.copyOf(vis);
         this.shapeless = shapeless;
         this.research = research == null ? "" : research;
         // All nine cells, empty ones included: the fill handler maps input i to grid slot i.
@@ -65,6 +67,9 @@ final class EmiArcaneRecipe extends ThaumcraftEmiRecipe {
 
     List<EmiIngredient> grid() { return grid; }
     String research() { return research; }
+
+    /** Whole vis per primal tag, for the fill button's wand check. */
+    Map<String, Integer> visCosts() { return visCosts; }
 
     @Override public void addWidgets(WidgetHolder widgets) {
         for (int i = 0; i < 9; i++) widgets.addSlot(grid.get(i), i % 3 * 18, i / 3 * 18);

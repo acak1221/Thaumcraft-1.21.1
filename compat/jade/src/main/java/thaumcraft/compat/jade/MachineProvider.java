@@ -81,6 +81,8 @@ enum MachineProvider implements IBlockComponentProvider, IServerDataProvider<Blo
             data.putBoolean("Crafting", true);
             data.putInt("Essentia", matrix.getDemand().visSize());
             data.putInt("Items", matrix.getRemainingIngredientCount());
+            data.putInt("Instability", matrix.getInstability());
+            data.put("Demand", EssentiaProvider.write(matrix.getDemand()));
             // The output has no getter; the saved recipe carries it, as the client update tag does.
             CompoundTag saved = matrix.saveWithoutMetadata(accessor.getLevel().registryAccess());
             if (saved.getCompound("recipeout").contains("Stack", Tag.TAG_COMPOUND)) {
@@ -131,6 +133,22 @@ enum MachineProvider implements IBlockComponentProvider, IServerDataProvider<Blo
             tooltip.add(Component.translatable("tc.port.jade.infusing", output.isEmpty() ? Component.literal("?") : output.getHoverName())
                     .withStyle(ChatFormatting.LIGHT_PURPLE));
             tooltip.add(gray("tc.port.jade.infusion_left", data.getInt("Items"), data.getInt("Essentia")));
+            // Original TileInfusionMatrix: the instability of a running infusion is 0..25 and grows while
+            // the matrix waits; every cycle a hazard strikes with a chance of (instability + 1) in 500.
+            int instability = data.getInt("Instability");
+            tooltip.add(Component.translatable("tc.port.jade.instability", instability)
+                    .withStyle(instability <= 0 ? ChatFormatting.GREEN : instability < 10 ? ChatFormatting.YELLOW : ChatFormatting.RED));
+            // The essentia the matrix still waits for is essentia like any other: behind the goggles.
+            if (config.get(EssentiaProvider.GOGGLES) && !EssentiaProvider.wearsGoggles(accessor.getPlayer())) return;
+            var demand = EssentiaProvider.read(data.getList("Demand", Tag.TAG_COMPOUND));
+            var knowledge = thaumcraft.common.lib.capabilities.KnowledgeAccess.get(accessor.getPlayer());
+            java.util.List<snownee.jade.api.ui.IElement> line = new java.util.ArrayList<>();
+            for (var aspect : demand.getAspectsSortedAmount()) {
+                if (demand.getAmount(aspect) <= 0) continue;
+                line.add(new AspectElement(aspect, demand.getAmount(aspect), knowledge.hasDiscoveredAspect(aspect.getTag())));
+                if (line.size() == EssentiaProvider.PER_LINE) { tooltip.add(line); line = new java.util.ArrayList<>(); }
+            }
+            if (!line.isEmpty()) tooltip.add(line);
         } else if (entity instanceof TileCentrifuge centrifuge) {
             if (centrifuge.getInputAspect() != null && data.getInt("Process") > 0) {
                 tooltip.add(gray("tc.port.jade.progress", percent(CENTRIFUGE_TICKS - data.getInt("Process"), CENTRIFUGE_TICKS)));

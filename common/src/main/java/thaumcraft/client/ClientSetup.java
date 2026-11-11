@@ -83,6 +83,7 @@ public final class ClientSetup {
         // that restore, so every loader behaves like the original.
         thaumcraft.client.ClientStateReset.init();
         thaumcraft.client.lib.PlayerNotifications.init();
+        thaumcraft.client.lib.WandDiscountTooltip.init();
         thaumcraft.client.ThaumcraftMonsterClient.init();
         thaumcraft.client.ThaumcraftRunicClient.init();
         thaumcraft.client.ThaumcraftBaublesClient.init();

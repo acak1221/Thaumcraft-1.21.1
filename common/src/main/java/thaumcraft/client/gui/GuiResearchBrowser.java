@@ -486,6 +486,7 @@ public final class GuiResearchBrowser extends Screen {
             lines.add(preview.success()
                     ? Component.translatable("tc.port.note.request").withStyle(ChatFormatting.GREEN)
                     : noteFailureReason(preview.failure()).withStyle(ChatFormatting.RED));
+            if (preview.failure() == ResearchNoteIssuance.Failure.MISSING_PREREQUISITES) missing(research, knowledge.getResearchComplete(), lines);
             return lines;
         }
         var preview = ResearchPurchase.preview(knowledge, research.key());
@@ -522,7 +523,27 @@ public final class GuiResearchBrowser extends Screen {
         lines.add(preview.success()
                 ? Component.translatable("tc.port.research.buy").withStyle(ChatFormatting.GREEN)
                 : failureReason(preview.failure()).withStyle(ChatFormatting.RED));
+        if (preview.failure() == ResearchPurchase.Failure.MISSING_PREREQUISITES) missing(research, knowledge.getResearchComplete(), lines);
         return lines;
+    }
+
+    /**
+     * The port's own addition under "complete the preceding research first": which research that is.
+     * A research the book does not show the player yet is counted, never named.
+     */
+    private static void missing(ResearchDefinition research, Set<String> completed, List<Component> lines) {
+        var missing = ResearchBrowserData.missingPrerequisites(research, completed);
+        for (ResearchDefinition parent : missing.shown()) {
+            var api = thaumcraft.api.research.ResearchCategories.getResearch(parent.key());
+            Component name = api != null && api.definition() == null ? Component.literal(api.getName()) : Component.translatable(parent.nameKey());
+            if (!parent.category().equals(research.category())) {
+                name = Component.translatable("tc.port.research.missing_in", name, Component.translatable("tc.research_category." + parent.category()));
+            }
+            lines.add(Component.translatable("tc.port.research.missing", name).withStyle(ChatFormatting.RED));
+        }
+        if (missing.hidden() > 0) {
+            lines.add(Component.translatable("tc.port.research.missing_hidden", missing.hidden()).withStyle(ChatFormatting.DARK_GRAY));
+        }
     }
 
     private static net.minecraft.network.chat.MutableComponent failureReason(ResearchPurchase.Failure failure) {

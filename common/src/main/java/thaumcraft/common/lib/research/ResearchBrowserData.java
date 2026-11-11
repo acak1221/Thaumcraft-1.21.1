@@ -28,6 +28,34 @@ public final class ResearchBrowserData {
                 && (!research.flags().contains("Concealed") || research.hasPrerequisites(completed));
     }
 
+    /**
+     * The prerequisites a research still lacks, for the tooltip of a locked cell (the port's own; TC4
+     * only darkens the cell).
+     *
+     * @param shown  the lacking research the book shows the player somewhere, in declared order
+     * @param hidden how many more the book does not show yet (hidden, lost, concealed or virtual), so
+     *               the tooltip never names a research the player has not found
+     */
+    public record Missing(List<ResearchDefinition> shown, int hidden) {
+        public Missing { shown = List.copyOf(shown); }
+        public boolean isEmpty() { return shown.isEmpty() && hidden == 0; }
+    }
+
+    public static Missing missingPrerequisites(ResearchDefinition research, Set<String> completed) {
+        List<ResearchDefinition> shown = new java.util.ArrayList<>();
+        Set<String> seen = new java.util.HashSet<>();
+        int hidden = 0;
+        for (List<String> group : List.of(research.parents(), research.parentsHidden())) {
+            for (String key : group) {
+                if (completed.contains(key) || !seen.add(key)) continue;
+                ResearchDefinition parent = ResearchCatalog.get(key);
+                if (isVisible(parent, completed)) shown.add(parent);
+                else ++hidden;
+            }
+        }
+        return new Missing(shown, hidden);
+    }
+
     public static List<ResearchDefinition> entries(String category, Set<String> completed) {
         return ResearchCatalog.all().stream()
                 .filter(research -> research.category().equals(category))

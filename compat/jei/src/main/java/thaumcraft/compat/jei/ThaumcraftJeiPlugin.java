@@ -83,6 +83,18 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(ThaumcraftContent.THAUMOMETER.get(), Categories.SOURCES);
     }
 
+    @Override public void registerRecipeTransferHandlers(mezz.jei.api.registration.IRecipeTransferRegistration registration) {
+        var helper = registration.getTransferHelper();
+        registration.addRecipeTransferHandler(new ArcaneWorkbenchTransfer<>(helper, Categories.ARCANE,
+                Pages.Arcane::id, Pages.Arcane::research, Pages.Arcane::vis), Categories.ARCANE);
+        // The workbench also makes ordinary crafting recipes that fit its grid, without vis.
+        registration.addRecipeTransferHandler(new ArcaneWorkbenchTransfer<>(helper, mezz.jei.api.constants.RecipeTypes.CRAFTING,
+                holder -> holder.value() instanceof net.minecraft.world.item.crafting.ShapedRecipe shaped && shaped.getWidth() <= 3 && shaped.getHeight() <= 3
+                        || holder.value() instanceof net.minecraft.world.item.crafting.ShapelessRecipe shapeless && shapeless.getIngredients().size() <= 9
+                        ? holder.id() : null,
+                holder -> "", holder -> Map.of()), mezz.jei.api.constants.RecipeTypes.CRAFTING);
+    }
+
     @Override public void registerRecipes(IRecipeRegistration registration) {
         List<Pages.Combination> combinations = new ArrayList<>();
         for (Aspect aspect : Aspect.aspects.values()) {

@@ -34,6 +34,9 @@ class ConfigDeclarationAuditTest {
             Map.entry("runic_recharge_speed", "2000"), Map.entry("runic_recharge_delay", "80"),
             Map.entry("runic_cost", "50"), Map.entry("notification_delay", "5000"),
             Map.entry("notification_max", "15"),
+            // The port's own placement of the notification stack (thaumcraft-client.properties).
+            Map.entry("notification_corner", "bottom_right"), Map.entry("notification_scale", "100"),
+            Map.entry("notification_offset_x", "0"), Map.entry("notification_offset_y", "0"),
             // The port's own Tweaks category (ThaumcraftTweaks.DEFAULTS), not oracle keys.
             Map.entry("aspect_inference", "true"),
             Map.entry("more_randomized_loot", "true"), Map.entry("earth_shock_targets", "2"),
@@ -62,7 +65,7 @@ class ConfigDeclarationAuditTest {
             assertTrue(parsers.toString().contains("\"" + entry.key() + "\""), "no runtime reader: " + entry.key());
         }
         assertEquals(36, keys.size());
-        assertEquals(50, DEFAULTS.size());
+        assertEquals(54, DEFAULTS.size());
     }
 
     @Test void editorDefaultsMatchTheOracleAndDoNotSilentlyDisableGlowingTaint(@TempDir Path directory) {
@@ -88,7 +91,7 @@ class ConfigDeclarationAuditTest {
         assertEquals(new thaumcraft.common.lib.runic.RunicSettings(2000, 80, 50),
                 thaumcraft.common.lib.runic.RunicSettings.DEFAULTS);
         assertEquals(ThaumcraftTweaks.DEFAULTS, readTweaks(empty));
-        assertEquals(50, DEFAULTS.size());
+        assertEquals(54, DEFAULTS.size());
     }
 
     private static ThaumcraftTweaks.Values readTweaks(Properties properties) {

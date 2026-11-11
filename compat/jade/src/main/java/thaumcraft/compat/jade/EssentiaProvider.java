@@ -45,7 +45,7 @@ enum EssentiaProvider implements IBlockComponentProvider, IServerDataProvider<Bl
 
     static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath("thaumcraft", "essentia");
     static final ResourceLocation GOGGLES = ResourceLocation.fromNamespaceAndPath("thaumcraft", "essentia_goggles");
-    private static final int PER_LINE = 8;
+    static final int PER_LINE = 8;
 
     @Override public ResourceLocation getUid() { return UID; }
 
@@ -142,7 +142,7 @@ enum EssentiaProvider implements IBlockComponentProvider, IServerDataProvider<Bl
         return head.getItem() instanceof IGoggles goggles && goggles.showIngamePopups(head, player);
     }
 
-    private static ListTag write(AspectList aspects) {
+    static ListTag write(AspectList aspects) {
         ListTag list = new ListTag();
         if (aspects == null) return list;
         for (Aspect aspect : aspects.getAspects()) {
@@ -156,7 +156,7 @@ enum EssentiaProvider implements IBlockComponentProvider, IServerDataProvider<Bl
         return list;
     }
 
-    private static AspectList read(ListTag list) {
+    static AspectList read(ListTag list) {
         AspectList aspects = new AspectList();
         for (int index = 0; index < list.size(); index++) {
             CompoundTag entry = list.getCompound(index);

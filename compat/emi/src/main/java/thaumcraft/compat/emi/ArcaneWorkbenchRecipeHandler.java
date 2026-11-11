@@ -64,7 +64,14 @@ final class ArcaneWorkbenchRecipeHandler implements StandardRecipeHandler<Contai
     @Override public List<ClientTooltipComponent> getTooltip(EmiRecipe recipe, EmiCraftContext<ContainerArcaneWorkbench> context) {
         if (!knownResearch(recipe)) return List.of(ClientTooltipComponent.create(
                 Component.translatable("tc.port.emi.research_unknown").getVisualOrderText()));
-        return StandardRecipeHandler.super.getTooltip(recipe, context);
+        List<ClientTooltipComponent> lines = new java.util.ArrayList<>(StandardRecipeHandler.super.getTooltip(recipe, context));
+        // Filling takes no vis, so a wand that cannot pay is a warning, never a refusal.
+        var player = Minecraft.getInstance().player;
+        if (recipe instanceof EmiArcaneRecipe arcane && player != null && context.getScreenHandler() != null) {
+            context.getScreenHandler().transferWarning(arcane.visCosts(), player)
+                    .ifPresent(line -> lines.add(ClientTooltipComponent.create(line.getVisualOrderText())));
+        }
+        return lines;
     }
 
     private static boolean knownResearch(EmiRecipe recipe) {

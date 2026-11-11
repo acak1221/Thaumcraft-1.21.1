@@ -74,6 +74,37 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu implem
         return index < 0 ? 0 : (prices.get(1 + index * 2) & 0xffff) | ((prices.get(2 + index * 2) & 0xffff) << 16);
     }
 
+    /**
+     * For the recipe viewers' fill buttons: why the wand in the workbench could not pay for a recipe
+     * right now, or empty when it can (or the recipe takes no vis). Read from the synchronized slot, so
+     * it answers on the client; the server still prices and debits the craft itself.
+     *
+     * @param vis whole vis per primal tag, as a recipe page lists it
+     */
+    public java.util.Optional<net.minecraft.network.chat.Component> transferWarning(java.util.Map<String, Integer> vis, Player player) {
+        if (vis == null || vis.values().stream().noneMatch(amount -> amount != null && amount > 0)) return java.util.Optional.empty();
+        ItemStack wand = getSlot(1).getItem();
+        if (!ArcaneVis.isWorkbenchWand(wand)) {
+            return java.util.Optional.of(net.minecraft.network.chat.Component.translatable("tc.port.transfer.no_wand")
+                    .withStyle(net.minecraft.ChatFormatting.GOLD));
+        }
+        java.util.Map<String, Integer> costs;
+        try { costs = ArcaneVis.price(vis, wand, player); }
+        catch (IllegalArgumentException unsupported) { costs = java.util.Map.of(); }
+        if (ArcaneVis.canPay(wand, costs)) return java.util.Optional.empty();
+        WandData state = thaumcraft.common.items.wands.ItemWandCasting.data(wand);
+        java.util.List<String> lacking = new ArrayList<>();
+        for (String tag : WandData.PRIMALS) {
+            int cost = costs.getOrDefault(tag, 0);
+            var aspect = thaumcraft.api.aspects.Aspect.getAspect(tag);
+            if (cost > state.amount(tag) && aspect != null) {
+                lacking.add(aspect.getName() + " " + java.math.BigDecimal.valueOf(cost - state.amount(tag), 2).stripTrailingZeros().toPlainString());
+            }
+        }
+        return java.util.Optional.of(net.minecraft.network.chat.Component.translatable("tc.port.transfer.vis_short", String.join(", ", lacking))
+                .withStyle(net.minecraft.ChatFormatting.GOLD));
+    }
+
     @Override public boolean stillValid(Player player) {
         return player == viewer && player.isAlive() && !player.isSpectator() && (tile == null || tile.stillValid(player));
     }

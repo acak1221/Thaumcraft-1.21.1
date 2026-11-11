@@ -21,6 +21,10 @@ public final class PlayerNotifications {
     private static final SoundEvent WHISPERS = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "whispers"));
     private static NotificationQueue queue = new NotificationQueue(5000);
     private static int maximum = 15;
+    /** The port's own placement of the stack; the defaults are the original lower right corner at full size. */
+    private static boolean left, top;
+    private static float scale = 1F;
+    private static int offsetX, offsetY;
     private static final AspectFlightQueue FLIGHTS = new AspectFlightQueue();
     private static long lastSound;
     private static Object level;
@@ -37,15 +41,27 @@ public final class PlayerNotifications {
                 try (var reader = Files.newBufferedReader(file)) { settings.load(reader); }
             } else {
                 Files.createDirectories(file.getParent());
-                Files.writeString(file, "# Original TC4 client notification timing and number of visible rows.\nnotification_delay=5000\nnotification_max=15\n");
+                Files.writeString(file, "# Original TC4 client notification timing and number of visible rows.\nnotification_delay=5000\nnotification_max=15\n"
+                        + "# The port's own placement. Corner: bottom_right (original), bottom_left, top_right, top_left.\n"
+                        + "# Scale in percent (25-400); offsets in GUI pixels from that corner, right and down positive.\n"
+                        + "notification_corner=bottom_right\nnotification_scale=100\nnotification_offset_x=0\nnotification_offset_y=0\n");
             }
             int delay = Integer.parseInt(settings.getProperty("notification_delay", "5000"));
             int rows = Integer.parseInt(settings.getProperty("notification_max", "15"));
             if (rows < 0) throw new IllegalArgumentException("Negative notification count");
+            String corner = settings.getProperty("notification_corner", "bottom_right").strip().toLowerCase(java.util.Locale.ROOT);
+            if (!java.util.Set.of("bottom_right", "bottom_left", "top_right", "top_left").contains(corner))
+                throw new IllegalArgumentException("Unknown notification corner " + corner);
+            int percent = Integer.parseInt(settings.getProperty("notification_scale", "100").strip());
+            if (percent < 25 || percent > 400) throw new IllegalArgumentException("Notification scale outside 25-400");
+            int shiftX = Integer.parseInt(settings.getProperty("notification_offset_x", "0").strip());
+            int shiftY = Integer.parseInt(settings.getProperty("notification_offset_y", "0").strip());
             queue = new NotificationQueue(delay); maximum = rows;
+            left = corner.endsWith("left"); top = corner.startsWith("top"); scale = percent / 100F; offsetX = shiftX; offsetY = shiftY;
         } catch (IOException | IllegalArgumentException failure) {
             Thaumcraft.LOG.error("Cannot read Thaumcraft client notifications at {}; using original defaults", file, failure);
             queue = new NotificationQueue(5000); maximum = 15;
+            left = top = false; scale = 1F; offsetX = offsetY = 0;
         }
         dev.architectury.event.events.client.ClientGuiEvent.INIT_POST.register((screen, access) -> {
             if (screen instanceof net.minecraft.client.gui.screens.ChatScreen && thaumcraft.common.config.ThaumcraftTweaks.clearNotifications())
@@ -59,6 +75,23 @@ public final class PlayerNotifications {
 
     /** The rows the HUD draws now. */
     public static int visibleRows() { return Math.min(queue.update(now()).size(), maximum); }
+
+    /**
+     * Where the stack is drawn, in GUI pixels: the right and the bottom edge of its box (the point the
+     * original measures every row from) and the top edge. With the defaults the right and bottom edges
+     * are the corner of the screen, as in the original.
+     */
+    private record Box(int right, int bottom, int top) {}
+
+    private static Box box(java.util.List<NotificationQueue.Notification> entries, int screenWidth, int screenHeight) {
+        var font = Minecraft.getInstance().font;
+        int rows = Math.min(entries.size(), maximum), widest = 0;
+        for (int index = 0; index < rows; index++) widest = Math.max(widest, font.width(entries.get(index).text()) / 2);
+        // A row is half-scale text ending twelve pixels left of the edge and an icon beside it; rows are eight apart.
+        int width = Math.round((widest + 14) * scale), height = Math.round((rows * 8 + 8) * scale);
+        int right = (left ? width : screenWidth) + offsetX, bottom = (top ? height : screenHeight) + offsetY;
+        return new Box(right, bottom, bottom - height);
+    }
 
     /** Tweak (TC4Tweaks): the clear button of open chat empties the notification stack. */
     public static void clearStack() { queue.clear(); FLIGHTS.clear(); }
@@ -78,8 +111,10 @@ public final class PlayerNotifications {
 
         @Override protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             int rows = visibleRows();
-            // Above the stack: row i of the HUD sits about twelve plus eight times i above the bottom.
-            setPosition(screen.width - width - 2, Math.max(0, screen.height - 26 - rows * 8));
+            // Beside the stack on the side away from its corner: above it, or below it in a top corner.
+            Box box = box(queue.update(now()), screen.width, screen.height);
+            setPosition(Math.clamp(box.right() - width - 2, 0, Math.max(0, screen.width - width)),
+                    Math.clamp(top ? box.bottom() + 2 : box.top() - 18, 0, Math.max(0, screen.height - height)));
             if (rows > 0) super.renderWidget(graphics, mouseX, mouseY, delta);
         }
 
@@ -162,6 +197,14 @@ public final class PlayerNotifications {
         float[] oldColor = RenderSystem.getShaderColor().clone();
         try {
             graphics.setColor(1,1,1,1);
+            // The rows are drawn exactly as the original draws them from the corner of the screen,
+            // inside a frame moved to the configured corner and scaled around it.
+            Box box = box(entries, screenWidth, screenHeight);
+            final int cornerX = 0, cornerY = 0;
+            graphics.pose().pushPose();
+            graphics.pose().translate(box.right(), box.bottom(), 0);
+            graphics.pose().scale(scale, scale, 1F);
+            try {
             for (int index = 0; index < entries.size() && index < maximum; index++) {
                 var entry = entries.get(index); int size = client.font.width(entry.text()) / 2;
                 int alpha = 255;
@@ -172,14 +215,14 @@ public final class PlayerNotifications {
                 }
                 graphics.pose().pushPose();
                 try {
-                    graphics.pose().translate(screenWidth - size - 10, screenHeight - index * 8 + shift, 0);
+                    graphics.pose().translate(cornerX - size - 10, cornerY - index * 8 + shift, 0);
                     graphics.pose().scale(.5F, .5F, .5F);
                     graphics.drawString(client.font, entry.text(), -4, -8, (alpha / 2 << 24) | 0xFFFFFF, true);
                 } finally { graphics.pose().popPose(); }
                 if (entry.image() != null) {
                     graphics.pose().pushPose();
                     try {
-                        graphics.pose().translate(screenWidth - 9, screenHeight - index * 8 + shift - 6, 0);
+                        graphics.pose().translate(cornerX - 9, cornerY - index * 8 + shift - 6, 0);
                         graphics.setColor((entry.color() >> 16 & 255) / 255F, (entry.color() >> 8 & 255) / 255F, (entry.color() & 255) / 255F, alpha / 511F);
                         graphics.blit(ResourceLocation.parse(entry.image()), 0, 0, 0F, 0F, 8, 8, 8, 8);
                     } finally { graphics.pose().popPose(); graphics.setColor(1, 1, 1, 1); }
@@ -189,13 +232,14 @@ public final class PlayerNotifications {
                 int incomingAlpha = 255 - (int) (scale * 240F);
                 graphics.pose().pushPose();
                 try {
-                    graphics.pose().translate(screenWidth - 5 - 8 * scale - (1 - scale) * (1 - scale) * (1 - scale) * size * 3,
-                            screenHeight - index * 8 + shift - 2 - 8 * scale, 0);
+                    graphics.pose().translate(cornerX - 5 - 8 * scale - (1 - scale) * (1 - scale) * (1 - scale) * size * 3,
+                            cornerY - index * 8 + shift - 2 - 8 * scale, 0);
                     graphics.pose().scale(scale, scale, scale);
                     graphics.setColor(1, 1, 1, .5F - incomingAlpha / 511F);
                     graphics.blit(PARTICLES, 0, 0, 16 * ((client.player.tickCount + index * 3) % 16), 80, 16, 16);
                 } finally { graphics.pose().popPose(); graphics.setColor(1, 1, 1, 1); }
             }
+            } finally { graphics.pose().popPose(); }
             float mainAlpha=0;
             for(var flight:flights) {
                 var frame=AspectFlightQueue.frame(flight,time,scaledWidth,scaledHeight);if(frame==null)continue;

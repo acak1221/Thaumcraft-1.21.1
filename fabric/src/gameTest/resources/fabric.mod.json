@@ -19,7 +19,8 @@
       "thaumcraft.fabric.testing.DeepslateOreGameTests",
       "thaumcraft.fabric.testing.ModernAdaptationsGameTests",
       "thaumcraft.fabric.testing.ComprehensiveReviewGameTests",
-      "thaumcraft.fabric.testing.TailReviewGameTests"
+      "thaumcraft.fabric.testing.TailReviewGameTests",
+      "thaumcraft.fabric.testing.InventoryScanGameTests"
     ]
   },
   "depends": {

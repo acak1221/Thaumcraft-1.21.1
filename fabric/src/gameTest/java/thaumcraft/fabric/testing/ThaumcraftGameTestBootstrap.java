@@ -24,5 +24,7 @@ public final class ThaumcraftGameTestBootstrap implements ModInitializer {
         // The shared harness observes the loader's own block-break phases. Fabric
         // owns the three PlayerBlockBreakEvents; the shared side never names them.
         thaumcraft.common.testing.NativeBreakPhases.Holder.install(FabricBreakPhases::install);
+        // Inventory scanning is checked through a real Fabric connection and channel registration.
+        InventoryScanPlatform.install();
     }
 }

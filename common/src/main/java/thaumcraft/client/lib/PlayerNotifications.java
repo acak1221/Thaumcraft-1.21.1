@@ -83,8 +83,25 @@ public final class PlayerNotifications {
             if (rows > 0) super.renderWidget(graphics, mouseX, mouseY, delta);
         }
 
+        /**
+         * Never reports the click as handled: a handled click makes the screen focus this button, and
+         * the chat box then stops receiving typed characters.
+         */
         @Override public boolean mouseClicked(double x, double y, int button) {
-            return visibleRows() > 0 && super.mouseClicked(x, y, button);
+            if (button == 0 && visibleRows() > 0 && clicked(x, y)) {
+                playDownSound(Minecraft.getInstance().getSoundManager());
+                clearStack();
+            }
+            return false;
+        }
+
+        /**
+         * Out of keyboard navigation: chat uses Tab for completion and the arrows for history, and the
+         * screen would otherwise move focus from the chat box to this button on those keys, also while
+         * the button is hidden.
+         */
+        @Override public net.minecraft.client.gui.ComponentPath nextFocusPath(net.minecraft.client.gui.navigation.FocusNavigationEvent event) {
+            return null;
         }
 
         @Override public boolean isMouseOver(double x, double y) {
